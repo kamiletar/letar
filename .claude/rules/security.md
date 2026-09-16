@@ -1,23 +1,23 @@
 # Правила безопасности
 
-> ⚠️ **Файл намеренно без `paths:`-frontmatter — он должен грузиться всегда.**
-> Path-scoped правила Claude Code инжектит только при **чтении** подходящего файла и **не**
-> инжектит при `Write` ([claude-code#23478](https://github.com/anthropics/claude-code/issues/23478)) —
-> то есть ровно в момент создания нового API-роута/server action правило безопасности было бы
-> недоступно. Не «чини» это добавлением `paths:`.
-> До 2026-08-10 здесь стоял `paths: "**/auth/**", "**/_actions/**", "**/api/**"` — невалидный YAML
-> (список без скобок), который парсился как одна строка и всё равно не матчился ни с чем.
+> ⚠️ **Файл намеренно без `paths:` — он должен грузиться всегда.** Path-scoped правила Claude Code
+> инжектит при **чтении** подходящего файла и **не** инжектит при `Write`
+> ([claude-code#23478](https://github.com/anthropics/claude-code/issues/23478)) — то есть ровно в
+> момент создания нового API-роута или server action правило было бы недоступно. Не «чини» это
+> добавлением `paths:`. До 2026-08-10 здесь стоял невалидный YAML-список путей, который всё равно
+> ни с чем не матчился.
+>
+> Здесь — только проектные требования. Общие практики (экранирование в JSX вместо
+> `dangerouslySetInnerHTML`, ORM вместо сырого SQL) подразумеваются и не перечисляются.
 
 ## Валидация входных данных
 
 ```typescript
-// ✅ Всегда .strip() для удаления лишних полей
-const Schema = z
-  .object({
-    name: z.string().min(2).max(100),
-    email: z.email(),
-  })
-  .strip()
+// ✅ Всегда .strip() — удаляет поля, которых нет в схеме
+const Schema = z.object({
+  name: z.string().min(2).max(100),
+  email: z.email(),
+}).strip()
 
 const parsed = Schema.safeParse(input)
 if (!parsed.success) {
@@ -25,17 +25,14 @@ if (!parsed.success) {
 }
 ```
 
-## Access Control (ZenStack)
+## Access control — политики в схеме, не в коде
 
 ```zmodel
-// schema.zmodel
 model Post {
-  id        String   @id @default(cuid())
-  title     String
-  author    User     @relation(fields: [authorId], references: [id])
-  authorId  String
+  id       String @id @default(cuid())
+  author   User   @relation(fields: [authorId], references: [id])
+  authorId String
 
-  // Политики доступа
   @@allow('read', true)
   @@allow('create', auth() != null)
   @@allow('update', auth() == author)
@@ -44,7 +41,7 @@ model Post {
 ```
 
 ```typescript
-// ZenStack v3: использование getEnhancedPrisma() с сессией
+// ZenStack v3 — enhanced-клиент с сессией, а не сырой prisma
 import { auth } from '@/lib/auth'
 import { getEnhancedPrisma } from '@/lib/db'
 
@@ -54,117 +51,49 @@ export async function getDb() {
 }
 ```
 
-## XSS защита
+⚠️ Три ловушки политик, каждая ломается тихо и не ловится typecheck:
 
-```tsx
-// ❌ Опасно — не использовать
-<div dangerouslySetInnerHTML={{ __html: userInput }} />
+- field-level `@allow` **добавляет** право, а не сужает — сужение только через `@deny`
+  ([разбор](/.claude/docs/zenstack-field-level-allow-does-not-narrow.md));
+- список ролей в `requireRole` шире `@@allow` модели — роль проходит гейт и падает на записи
+  ([разбор](/.claude/docs/role-gate-vs-model-policy-drift.md));
+- политика по relation не видит FK, переставленный в том же `update()`
+  ([разбор](/.claude/docs/zenstack-relation-traversal-fk-repoint-bypass.md)).
 
-// ✅ Безопасно — React экранирует
-<div>{userInput}</div>
+## ⚠️ Генерация паролей и токенов
 
-// ✅ Если нужен HTML — санитизация
-import DOMPurify from 'dompurify'
-<div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(html) }} />
-```
-
-## SQL Injection защита
-
-```typescript
-// ❌ Опасно — сырой SQL
-const user = await db.$queryRaw`SELECT * FROM users WHERE id = ${userId}`
-
-// ✅ Безопасно — Prisma/ZenStack ORM
-const user = await db.user.findUnique({ where: { id: userId } })
-```
-
-## ⚠️ ВАЖНО: Генерация паролей
-
-**НИКОГДА не придумывай пароли самостоятельно** — даже «временные», даже для dev-окружения.
-
-Придуманные вручную пароли (`letar2026`, `changeme`, `admin123` и т.п.) слабы и предсказуемы — подвержены брутфорсу и словарным атакам.
-
-**ВСЕГДА генерируй пароль через инструмент:**
+**НИКОГДА не придумывай пароли сам** — даже «временные», даже для dev. Придуманные вручную
+(`letar2026`, `changeme`, `admin123`) предсказуемы и ложатся под словарную атаку. Это касается
+паролей к NPM, БД, admin-панелям, API-ключей, SMTP, любых учёток.
 
 ```bash
-# OpenSSL (везде доступен)
-openssl rand -base64 32
-
-# Python
+openssl rand -base64 32                                  # везде доступен
 python3 -c "import secrets; print(secrets.token_urlsafe(32))"
-
-# PowerShell
-[System.Web.Security.Membership]::GeneratePassword(32, 8)
-
-# На сервере (если нужно быстро)
-/c/Windows/System32/OpenSSH/ssh.exe -i ~/.ssh/id_rsa user@host "openssl rand -base64 32"
 ```
 
-Это касается: паролей к NPM, БД, admin-панелям, API-ключей, SMTP, любых учёток.
-
-### ⚠️ Токены, которые попадают в URL query-параметр (`DEV_SESSION_TOKEN` и аналоги) — генерируй в base64url-алфавите
-
-Обычный `openssl rand -base64 32` почти всегда содержит `+`/`/`. Если такой токен передаётся как
-query-параметр (`?token=...`), `+` декодируется по правилам `application/x-www-form-urlencoded`
-как пробел ещё до сравнения на сервере — токен, вставленный в адресную строку/curl без ручного
-`%2B`, не совпадёт с ожидаемым (см. разбор —
-[dev-session-token-plus-char-query-corruption.md](/.claude/docs/dev-session-token-plus-char-query-corruption.md)).
-`createDevSessionRoute` (`libs/auth`) нормализует пробел обратно в `+` при сравнении, но для
-**новых** токенов, которые будут передаваться в query, надёжнее не создавать проблему вовсе:
+⚠️ **Токен, который попадёт в query-параметр URL** (`DEV_SESSION_TOKEN` и аналоги), генерируй в
+base64url-алфавите: `+` из обычного base64 декодируется как пробел по правилам
+`application/x-www-form-urlencoded` ещё до сравнения на сервере
+([разбор](/.claude/docs/dev-session-token-plus-char-query-corruption.md)).
 
 ```bash
-# OpenSSL, без +// в алфавите
-openssl rand -base64 32 | tr '+/' '-_'
-
-# Python — сразу base64url
+openssl rand -base64 32 | tr '+/' '-_'                   # без + и / в алфавите
 python3 -c "import secrets; print(secrets.token_urlsafe(32))"
 ```
 
 ## Secrets
 
-```bash
-# .env файлы НИКОГДА не коммитить
-# .gitignore должен содержать:
-.env
-.env.local
-.env.production
-```
-
-```typescript
-// ❌ Хардкод секретов
-const API_KEY = 'sk-1234567890'
-
-// ✅ Переменные окружения
-const API_KEY = process.env.API_KEY
-```
-
-## Аутентификация
-
-```typescript
-// Защита роута
-import { auth } from '@/lib/auth'
-import { redirect } from 'next/navigation'
-
-export default async function AdminPage() {
-  const session = await auth()
-
-  if (!session) {
-    redirect('/login')
-  }
-
-  if (session.user.role !== 'ADMIN') {
-    redirect('/')
-  }
-
-  // ... защищённый контент
-}
-```
+Секреты — только в env-файлах, никогда в коде (`const API_KEY = 'sk-...'`). Какой файл для чего,
+как класть новую переменную на прод и почему `NODE_ENV` не отличает прод от staging —
+[env-files.md](/.claude/rules/env-files.md).
 
 ## Чеклист
 
 - [ ] Валидация всех входных данных (Zod + `.strip()`)
-- [ ] Access control через ZenStack policies
-- [ ] Нет `dangerouslySetInnerHTML` с пользовательским вводом
-- [ ] Secrets только в `.env` файлах
-- [ ] Защита роутов через middleware или `auth()`
-- [ ] HTTPS для production
+- [ ] Access control через ZenStack policies, enhanced-клиент, а не сырой `prisma`
+- [ ] Нет `dangerouslySetInnerHTML` с пользовательским вводом (нужен HTML — `DOMPurify.sanitize`)
+- [ ] Защита роутов через proxy или `auth()` + проверка роли
+- [ ] Secrets только в env-файлах, пароли/токены — из генератора
+- [ ] Загрузка файлов: не `path.join`+`startsWith`
+      ([почему](/.claude/docs/upload-path-traversal.md))
+- [ ] Персональные данные — по [personal-data](/.claude/docs/personal-data.md) (152-ФЗ, РКН, cookie)

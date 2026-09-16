@@ -312,6 +312,7 @@
 
 - [public-repo-hygiene](/.claude/rules/public-repo-hygiene.md) ⭐ что нельзя писать в публичные файлы
 - [time-tracking](/.claude/rules/time-tracking.md) ⚠️ когда стартовать и останавливать таймер studio
+- [time-tracker-drift-incidents](/.claude/docs/time-tracker-drift-incidents.md) ⚠️ четыре способа потерять время; `autoClosedIdle` хуки не ловят
 - [formatting](/.claude/rules/formatting.md) ⚠️ голая `nx format` молча зашита на Prettier
 
 ## Быстрый старт

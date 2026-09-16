@@ -135,6 +135,50 @@ macro_start_session(
 kebab-case именем `<app>-dev`) и сохрани `registration_token` в памяти для будущих сессий, а не
 оставляй сервер генерировать случайное имя молча.
 
+## Токен из памяти не подошёл: как вернуть себе своё имя
+
+Симптом — `Invalid registration_token` (именно неверный токен, не «retired»: на «retired»
+штатный ответ — обычный `unretire_agent` с тем же токеном, это не авария, сервер сам ретирит
+агентов по простою).
+
+⛔ **Не вызывай `register_agent`/`macro_start_session` с тем же именем повторно.** Сервер
+требует доказательство владения даже для уже существующего имени, а отличить «имя свободно» от
+«имя занято, токен устарел» без ответа сервера невозможно. Повторная регистрация — ровно тот
+механизм, из-за которого при одновременном старте нескольких сессий одного приложения
+(`/domwellbes`, `/mandala`, `/studio` — все три столкнулись с этим 2026-08-11…19) выигрывает
+одна, а остальные держат в памяти токен, который сервер больше не признаёт.
+
+**Шаг 1. Выясни, занято имя или это retired-сирота.** Токен не нужен: `ReadMcpResourceTool`
+(`server: "agent-mail"`, `uri: "resource://agents/c-web-letar"`) возвращает и активных, и
+`retired_agents` со всеми полями, кроме токена.
+
+**Шаг 2а. Имя в `retired_agents`, и `inception_ts` ≈ `last_active_ts`** (создана и почти сразу
+ушла в retired, живой сессии за ней не было) — это не чужой владелец, а сирота от гонки при
+создании. Прочитай собственный токен READ-ONLY из своей же инфраструктуры: agent-mail —
+self-hosted Docker на этой машине (`C:\web\letar\infra\agent-mail\mcp_agent_mail`, контейнер
+`mcp_agent_mail-agent-mail-1`, БД `/app/storage.sqlite3`).
+
+```bash
+docker exec mcp_agent_mail-agent-mail-1 python3 -c "
+import sqlite3
+con = sqlite3.connect('file:/app/storage.sqlite3?mode=ro', uri=True)
+cur = con.cursor()
+cur.execute(\"SELECT registration_token FROM agents WHERE name=?\", ('<app>-dev',))
+print(cur.fetchone())
+"
+```
+
+Дальше — обычный `unretire_agent` с этим токеном. Прецедент — `domwellbes-dev`, восстановлена
+так 2026-08-19.
+
+**Шаг 2б. Имя среди активных с недавним `last_active_ts`** — настоящая коллизия с живым
+владельцем, в БД лезть нельзя (сломаешь чужую сессию). Тогда `create_agent_identity` **без**
+`name_hint`: уникальность там по построению, в отличие от `register_agent` с угаданным именем
+(check-then-act). Занеси новое имя в память как «рабочее имя для `<app>`, пока `<app>-dev`
+занята» (образец — `mandala-relay`/`studio-relay`) и сразу выставь `set_contact_policy`
+с `policy: "open"` — временная identity без него виснет на первой заявке контакта так же, как
+постоянная, а про неё забывают быстрее.
+
 ### ⚠️ `send_message` первый раз к незнакомому агенту → `Contact approval required`
 
 Это отдельная история от бага ниже («`to` отклоняет kebab-case имя») — здесь причина не в
