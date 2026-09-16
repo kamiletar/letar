@@ -91,7 +91,7 @@ return h264
 превращается в H.264 **High 10** (`yuv420p10le`), а его Chromium не декодирует вовсе —
 [chromium-video-codec-limits](/.claude/docs/chromium-video-codec-limits.md). Кодирование при этом
 проходит без ошибок. Лечится `-pix_fmt yuv420p` (для HDR-исходника ещё и тонмаппинг). Касалось
-`infra/media-server` на 2026-09-16 — [media-server](/.claude/docs/media-server.md).
+`infra/media-server` до 2026-09-16, там же и исправлено — [media-server](/.claude/docs/media-server.md).
 
 AV1 на сервере без видеокарты не кодировать: программный кодек в разы медленнее, а сервер общий.
 
