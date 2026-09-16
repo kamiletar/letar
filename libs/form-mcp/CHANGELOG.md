@@ -1,5 +1,17 @@
 # Changelog — @letar/form-mcp
 
+## 2.0.0 (2026-09-16)
+
+### Breaking
+
+- Миграция `@modelcontextprotocol/sdk` v1 → v2 (раскол апстрима на отдельные пакеты
+  `@modelcontextprotocol/server`/`client`/`core`). `package.publish.json` теперь требует
+  `@modelcontextprotocol/server@^2.0.0` и `zod@^4.2.0` вместо `@modelcontextprotocol/sdk@^1.29.0`
+  и `zod@^3.24.0` — внешние потребители пакета обязаны обновить обе зависимости синхронно.
+  `.tool()`/`.resource()` внутри сервера переведены на `.registerTool()`/`.registerResource()`
+  (кодмод `@modelcontextprotocol/codemod v1-to-v2`), публичный контракт MCP-инструментов не
+  менялся.
+
 ## 1.2.0 (2026-09-05)
 
 ### Removed (следом за zenstack-form-plugin v4.0.0)

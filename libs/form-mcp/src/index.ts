@@ -1,4 +1,4 @@
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
+import { McpServer } from '@modelcontextprotocol/server'
 import { z } from 'zod'
 
 import { buildDirectiveRegistry, getDirectives } from './data/directive-registry.js'
@@ -29,127 +29,123 @@ export function createFormMcpServer(options: FormMcpServerOptions): McpServer {
 
   // ─── TOOLS ───────────────────────────────────────────────
 
-  server.tool(
-    'list_fields',
-    'List all field types in @letar/forms. Filter by category: text, number, date, select, multi-select, special.',
-    { category: z.string().optional().describe('Category: text, number, date, select, multi-select, special') },
-    async ({ category }) => {
-      const fields = getFields(fieldRegistry, category as FieldCategory | undefined)
+  server.registerTool('list_fields', {
+    description:
+      'List all field types in @letar/forms. Filter by category: text, number, date, select, multi-select, special.',
+    inputSchema: z.object({
+      category: z.string().optional().describe('Category: text, number, date, select, multi-select, special'),
+    }),
+  }, async ({ category }) => {
+    const fields = getFields(fieldRegistry, category as FieldCategory | undefined)
+    return {
+      content: [
+        {
+          type: 'text',
+          text: JSON.stringify(
+            fields.map((f) => ({
+              name: f.name,
+              fullName: f.fullName,
+              description: f.description,
+              category: f.category,
+            })),
+            null,
+            2,
+          ),
+        },
+      ],
+    }
+  })
+
+  server.registerTool('get_field_props', {
+    description: 'Get props, description, and documentation for a specific form field.',
+    inputSchema: z.object({ fieldType: z.string().describe('Field type, e.g.: String, Date, Select, Combobox') }),
+  }, async ({ fieldType }) => {
+    const field = fieldRegistry.get(fieldType.toLowerCase())
+    if (!field) {
       return {
-        content: [
-          {
-            type: 'text',
-            text: JSON.stringify(
-              fields.map((f) => ({
-                name: f.name,
-                fullName: f.fullName,
-                description: f.description,
-                category: f.category,
-              })),
-              null,
-              2,
-            ),
-          },
-        ],
+        content: [{ type: 'text', text: `Field "${fieldType}" not found. Use list_fields to see available fields.` }],
+        isError: true,
       }
-    },
-  )
+    }
+    const result: Record<string, unknown> = {
+      name: field.name,
+      fullName: field.fullName,
+      description: field.description,
+      category: field.category,
+    }
+    if (field.details) {
+      result.details = field.details
+    }
+    return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] }
+  })
 
-  server.tool(
-    'get_field_props',
-    'Get props, description, and documentation for a specific form field.',
-    { fieldType: z.string().describe('Field type, e.g.: String, Date, Select, Combobox') },
-    async ({ fieldType }) => {
-      const field = fieldRegistry.get(fieldType.toLowerCase())
-      if (!field) {
-        return {
-          content: [{ type: 'text', text: `Field "${fieldType}" not found. Use list_fields to see available fields.` }],
-          isError: true,
-        }
-      }
-      const result: Record<string, unknown> = {
-        name: field.name,
-        fullName: field.fullName,
-        description: field.description,
-        category: field.category,
-      }
-      if (field.details) {
-        result.details = field.details
-      }
-      return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] }
-    },
-  )
-
-  server.tool(
-    'get_field_example',
-    'Get a code example for a specific form field.',
-    {
+  server.registerTool('get_field_example', {
+    description: 'Get a code example for a specific form field.',
+    inputSchema: z.object({
       fieldType: z.string().describe('Field type: String, Date, Select, etc.'),
       variant: z.string().optional().describe('Variant: basic, with-validation, in-form'),
-    },
-    async ({ fieldType }) => {
-      const field = fieldRegistry.get(fieldType.toLowerCase())
-      if (!field) {
-        return {
-          content: [{ type: 'text', text: `Field "${fieldType}" not found.` }],
-          isError: true,
-        }
+    }),
+  }, async ({ fieldType }) => {
+    const field = fieldRegistry.get(fieldType.toLowerCase())
+    if (!field) {
+      return {
+        content: [{ type: 'text', text: `Field "${fieldType}" not found.` }],
+        isError: true,
       }
-      // Generate an example based on the field type
-      const example = generateFieldExample(field)
-      return { content: [{ type: 'text', text: example }] }
-    },
-  )
+    }
+    // Generate an example based on the field type
+    const example = generateFieldExample(field)
+    return { content: [{ type: 'text', text: example }] }
+  })
 
-  server.tool(
-    'get_form_pattern',
-    'Get a complete form example for a common scenario: crud-create, crud-edit, multi-step, offline, i18n, from-schema, declarative, server-action.',
-    {
+  server.registerTool('get_form_pattern', {
+    description:
+      'Get a complete form example for a common scenario: crud-create, crud-edit, multi-step, offline, i18n, from-schema, declarative, server-action.',
+    inputSchema: z.object({
       pattern: z
         .string()
         .describe(
           'Pattern name: crud-create, crud-edit, multi-step, offline, i18n, from-schema, declarative, server-action',
         ),
-    },
-    async ({ pattern }) => {
-      const patterns = getPatterns(patternRegistry, pattern)
-      if (patterns.length === 0) {
-        const all = getPatterns(patternRegistry)
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Pattern "${pattern}" not found. Available: ${all.map((p) => p.name).join(', ')}`,
-            },
-          ],
-          isError: true,
-        }
-      }
-      const p = patterns[0]
+    }),
+  }, async ({ pattern }) => {
+    const patterns = getPatterns(patternRegistry, pattern)
+    if (patterns.length === 0) {
+      const all = getPatterns(patternRegistry)
       return {
-        content: [{ type: 'text', text: `# ${p.title}\n\n${p.description}\n\n\`\`\`tsx\n${p.example}\n\`\`\`` }],
+        content: [
+          {
+            type: 'text',
+            text: `Pattern "${pattern}" not found. Available: ${all.map((p) => p.name).join(', ')}`,
+          },
+        ],
+        isError: true,
       }
-    },
-  )
+    }
+    const p = patterns[0]
+    return {
+      content: [{ type: 'text', text: `# ${p.title}\n\n${p.description}\n\n\`\`\`tsx\n${p.example}\n\`\`\`` }],
+    }
+  })
 
-  server.tool(
-    'get_directives',
-    'Get descriptions of form-metadata directives for zenstack-form-plugin (v4.0.0+). The only syntax is the '
+  server.registerTool('get_directives', {
+    description:
+      'Get descriptions of form-metadata directives for zenstack-form-plugin (v4.0.0+). The only syntax is the '
       + '@meta("form.<key>", value) field attribute (see `example`) — the older /// @form.* comment directive '
       + 'was removed in v4.0.0. Without arguments returns all directives.',
-    { directive: z.string().optional().describe('Directive name: @form.title, @form.props, etc.') },
-    async ({ directive }) => {
-      const directives = getDirectives(directiveRegistry, directive)
-      return {
-        content: [{ type: 'text', text: JSON.stringify(directives, null, 2) }],
-      }
-    },
-  )
+    inputSchema: z.object({
+      directive: z.string().optional().describe('Directive name: @form.title, @form.props, etc.'),
+    }),
+  }, async ({ directive }) => {
+    const directives = getDirectives(directiveRegistry, directive)
+    return {
+      content: [{ type: 'text', text: JSON.stringify(directives, null, 2) }],
+    }
+  })
 
-  server.tool(
-    'generate_form',
-    'Generate form code from a field specification.',
-    {
+  server.registerTool('generate_form', {
+    description: 'Generate form code from a field specification.',
+    inputSchema: z.object({
       fields: z
         .array(
           z.object({
@@ -163,12 +159,11 @@ export function createFormMcpServer(options: FormMcpServerOptions): McpServer {
         .describe('Array of field specifications'),
       formName: z.string().optional().describe('Form component name'),
       withSchema: z.boolean().optional().describe('Generate Zod schema'),
-    },
-    async ({ fields, formName = 'MyForm', withSchema = true }) => {
-      const code = generateFormCode(fields, formName, withSchema)
-      return { content: [{ type: 'text', text: code }] }
-    },
-  )
+    }),
+  }, async ({ fields, formName = 'MyForm', withSchema = true }) => {
+    const code = generateFormCode(fields, formName, withSchema)
+    return { content: [{ type: 'text', text: code }] }
+  })
 
   // ─── RESOURCES ───────────────────────────────────────────
 
@@ -197,7 +192,7 @@ export function createFormMcpServer(options: FormMcpServerOptions): McpServer {
   ]
 
   for (const entry of docEntries) {
-    server.resource(
+    server.registerResource(
       entry.name,
       `form-docs://${entry.key}`,
       { description: entry.description, mimeType: 'text/markdown' },
@@ -215,67 +210,61 @@ export function createFormMcpServer(options: FormMcpServerOptions): McpServer {
 
   // ─── PROMPTS ─────────────────────────────────────────────
 
-  server.prompt(
-    'create-form',
-    'Create a CRUD form for a data model',
-    {
+  server.registerPrompt('create-form', {
+    description: 'Create a CRUD form for a data model',
+    argsSchema: z.object({
       modelName: z.string().describe('Model name (e.g.: User, Product, Recipe)'),
       fields: z.string().describe('Comma-separated field list: name:String, email:String, age:Number'),
       withOffline: z.boolean().optional().describe('Add offline support'),
       withI18n: z.boolean().optional().describe('Add i18n support'),
-    },
-    async ({ modelName, fields, withOffline, withI18n }) => ({
-      messages: [
-        {
-          role: 'user',
-          content: {
-            type: 'text',
-            text: buildCreateFormPrompt(modelName, fields, withOffline === true, withI18n === true),
-          },
-        },
-      ],
     }),
-  )
+  }, async ({ modelName, fields, withOffline, withI18n }) => ({
+    messages: [
+      {
+        role: 'user',
+        content: {
+          type: 'text',
+          text: buildCreateFormPrompt(modelName, fields, withOffline === true, withI18n === true),
+        },
+      },
+    ],
+  }))
 
-  server.prompt(
-    'add-field',
-    'Add a field to an existing form',
-    {
+  server.registerPrompt('add-field', {
+    description: 'Add a field to an existing form',
+    argsSchema: z.object({
       fieldType: z.string().describe('Field type: String, Date, Select, Combobox, etc.'),
       fieldName: z.string().describe('Field name in the form'),
       validation: z.string().optional().describe('Validation: required, email, min:3, max:100'),
-    },
-    async ({ fieldType, fieldName, validation }) => ({
-      messages: [
-        {
-          role: 'user',
-          content: {
-            type: 'text',
-            text: buildAddFieldPrompt(fieldType, fieldName, validation),
-          },
-        },
-      ],
     }),
-  )
+  }, async ({ fieldType, fieldName, validation }) => ({
+    messages: [
+      {
+        role: 'user',
+        content: {
+          type: 'text',
+          text: buildAddFieldPrompt(fieldType, fieldName, validation),
+        },
+      },
+    ],
+  }))
 
-  server.prompt(
-    'migrate-form',
-    'Migrate a form from another framework to @letar/forms',
-    {
+  server.registerPrompt('migrate-form', {
+    description: 'Migrate a form from another framework to @letar/forms',
+    argsSchema: z.object({
       sourceFramework: z.string().describe('Source framework: react-hook-form, formik, conform'),
-    },
-    async ({ sourceFramework }) => ({
-      messages: [
-        {
-          role: 'user',
-          content: {
-            type: 'text',
-            text: buildMigratePrompt(sourceFramework),
-          },
-        },
-      ],
     }),
-  )
+  }, async ({ sourceFramework }) => ({
+    messages: [
+      {
+        role: 'user',
+        content: {
+          type: 'text',
+          text: buildMigratePrompt(sourceFramework),
+        },
+      },
+    ],
+  }))
 
   return server
 }
