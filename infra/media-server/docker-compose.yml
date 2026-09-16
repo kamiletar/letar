@@ -35,6 +35,7 @@ services:
       DATA_PATH: ${DATA_PATH}
       MEDIA_KEY_SVOICHUZHIE: ${MEDIA_KEY_SVOICHUZHIE}
       MEDIA_KEY_ANIMATRONA: ${MEDIA_KEY_ANIMATRONA}
+      MEDIA_KEY_DOMWELLBES: ${MEDIA_KEY_DOMWELLBES}
     volumes:
       - /data:/data
     depends_on:
