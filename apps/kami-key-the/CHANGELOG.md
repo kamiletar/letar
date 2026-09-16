@@ -7,6 +7,13 @@
 
 ## [Unreleased]
 
+### Chore
+
+- Прямой `autoUpdater.quitAndInstall(...)` в обход `installAndRelaunchViaScheduler` (см. 1.9.29
+  ниже) теперь ловит semgrep-правило `letar-electron-quitandinstall-bypasses-scheduler` —
+  см. `.claude/docs/electron-monorepo-shared-releases.md`. Поведение приложения не меняется, это
+  гейт против регресса.
+
 ## [1.9.29] - 2026-09-17
 
 ### Chore

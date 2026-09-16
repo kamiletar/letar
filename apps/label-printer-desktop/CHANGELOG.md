@@ -13,7 +13,9 @@
   выбором «для всех/для себя» и папки установки. Тот же баг был найден и исправлен в
   KamiKeyThe 1.9.6 (см. его `CHANGELOG.md`). Перешли на `installAndRelaunchViaScheduler` из
   `@letar/electron-monorepo-updater` — тихая установка через `schtasks`, гарантированный
-  перезапуск по exe-пути.
+  перезапуск по exe-пути. Прямой `autoUpdater.quitAndInstall(...)` в обход этой либы теперь
+  ловит semgrep-правило `letar-electron-quitandinstall-bypasses-scheduler` — см.
+  `.claude/docs/electron-monorepo-shared-releases.md`.
 
 ### Changed
 

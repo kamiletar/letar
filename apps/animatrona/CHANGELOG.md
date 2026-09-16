@@ -14,7 +14,10 @@
   `isForceRunAfter=true` не гарантировал автозапуск даже при этом — тот же `$launchLink`-race,
   что уже был найден и пофиксен в KamiKeyThe (см. его `CHANGELOG.md` 1.9.6–1.9.27). Перешли на
   `installAndRelaunchViaScheduler` из `@letar/electron-monorepo-updater` — тихая установка через
-  `schtasks`, гарантированный перезапуск по exe-пути, минуя NSIS-ярлык.
+  `schtasks`, гарантированный перезапуск по exe-пути, минуя NSIS-ярлык. Прямой
+  `autoUpdater.quitAndInstall(...)` в обход этой либы теперь ловит semgrep-правило
+  `letar-electron-quitandinstall-bypasses-scheduler` — см.
+  `.claude/docs/electron-monorepo-shared-releases.md`.
 - **Легаси-путь `useTranscode` (мастер импорта одного файла) держал свой захардкоженный набор
   NVENC-аргументов** вместо общего `buildNvencEncodeArgs` из v0.56.0 — включая ошибку `-cq` при
   `-rc constqp` (для constqp нужен `-qp`, см. `nvenc-args.ts`). `main/ffmpeg/transcode.ts:

@@ -224,6 +224,38 @@ rules:
       См. .claude/rules/forms.md § «Не делай».
     pattern-regex: '\.Field\.NativeSelect\b'
 
+  # ⚠️ Не запрет quitAndInstall() как такового — все три текущих Electron-приложения легитимно
+  # вызывают его как fallback-ветку ПОСЛЕ installAndRelaunchViaScheduler() (см. образец
+  # apps/kami-key-the/main/updater.ts): планировщик задач не принял задачу → штатная тихая
+  # установка без гарантии автоперезапуска. Правило ловит только вызов, до которого в том же
+  # блоке НЕ было проверки installAndRelaunchViaScheduler(...) — то есть повтор бага версий
+  # 1.9.6–1.9.27 kami-key-the (полный мастер NSIS вместо тихого обновления, либо отсутствие
+  # перезапуска), не задокументированный fallback.
+  - id: letar-electron-quitandinstall-bypasses-scheduler
+    languages: [typescript, javascript]
+    severity: ERROR
+    paths:
+      include:
+        - /apps/*/main/**
+      exclude:
+        - /libs/electron-monorepo-updater/**
+    message: >-
+      Прямой autoUpdater.quitAndInstall(...) в main-процессе Electron-приложения в обход
+      installAndRelaunchViaScheduler() из @letar/electron-monorepo-updater. При
+      `nsis.oneClick: false` (см. electron-builder.yml) это либо показывает пользователю полный
+      мастер NSIS вместо тихой установки, либо не гарантирует перезапуск приложения — баг,
+      найденный и исправленный в kami-key-the версий 1.9.6–1.9.27. Сначала вызови
+      installAndRelaunchViaScheduler({ installerPath, appLabel }), quitAndInstall(true, false)
+      оставляй только как fallback-ветку на его `false`. См.
+      .claude/docs/electron-monorepo-shared-releases.md, образец —
+      apps/kami-key-the/main/updater.ts.
+    patterns:
+      - pattern: $UPDATER.quitAndInstall(...)
+      - pattern-not-inside: |
+          if (installAndRelaunchViaScheduler(...)) { ... }
+          ...
+          $UPDATER.quitAndInstall(...)
+
   - id: letar-dev-session-vars-in-prod-env
     languages: [generic]
     paths:

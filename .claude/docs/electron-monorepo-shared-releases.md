@@ -111,6 +111,28 @@ Releases. Штатный `GithubProvider` из `electron-updater` всегда �
   `autoUpdater.quitAndInstall()`). Обе функции живут в одной библиотеке прагматично — общие
   потребители (`animatrona`, `kami-key-the`), не общая тема. Подробности и почему
   `quitAndInstall()` во всех вариантах не годится — README библиотеки.
+
+## Гейт: `letar-electron-quitandinstall-bypasses-scheduler` (semgrep)
+
+Три приложения (`kami-key-the`, `animatrona`, `label-printer-desktop`) уже наступали на баг
+версий 1.9.6–1.9.27 `kami-key-the` — прямой `autoUpdater.quitAndInstall(...)` при
+`nsis.oneClick: false` либо показывает пользователю полный мастер NSIS, либо не гарантирует
+перезапуск. Все три сейчас переведены на `installAndRelaunchViaScheduler`, но ничего не мешает
+новому Electron-приложению или новому месту в существующих трёх повторить тот же вызов в обход
+shared-либы — typecheck и lint это не ловят, `quitAndInstall` синтаксически валиден.
+
+Правило `.semgrep/letar-rules.yml` (`letar-electron-quitandinstall-bypasses-scheduler`, ERROR)
+ловит `$UPDATER.quitAndInstall(...)` в любом файле `apps/*/main/**`, если в том же блоке ему не
+предшествует `if (installAndRelaunchViaScheduler(...)) { ... }`. Не запрет `quitAndInstall()` —
+документированный fallback (планировщик не принял задачу → штатная тихая установка без гарантии
+автоперезапуска) остаётся легитимным именно потому, что стоит **после** проверки результата
+`installAndRelaunchViaScheduler`, по образцу `apps/kami-key-the/main/updater.ts`. `paths.exclude`
+на `libs/electron-monorepo-updater/**` документирует это явно, хотя фактически избыточен —
+библиотека физически не лежит под `apps/*/main/**`.
+
+Проверено эмпирически (2026-09-17): все три существующих fallback-вызова проходят чисто,
+scratch-файл с голым `autoUpdater.quitAndInstall()` без предшествующей проверки ловится.
+
 - `apps/animatrona/main/updater.ts`, `apps/kami-key-the/main/updater.ts`,
   `apps/label-printer-desktop/main/services/updater.service.ts` — потребители (последний — только
   `installAndRelaunchViaScheduler`, у него нет коллизии релизов: отдельный репозиторий
