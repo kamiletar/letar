@@ -11,7 +11,9 @@
  */
 
 import { spawn } from 'node:child_process'
-import { basename } from 'node:path'
+import { writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { basename, join } from 'node:path'
 
 import { pointFeedAtOwnRelease } from '@letar/electron-monorepo-updater'
 import { app, dialog, net } from 'electron'
@@ -58,18 +60,32 @@ function scheduleRelaunchAfterSilentInstall(): void {
   // меняет содержимое, но требует эксклюзивного доступа и падает с ошибкой, пока хендл занят.
   // `copy /y file file` для этой же цели не годится — cmd отказывает с «файл не может быть
   // скопирован сам в себя» независимо от блокировки, что проверено отдельно перед этим фиксом.
-  const script = [
-    'for /L %i in (1,1,20) do (',
-    `  (ren "${exePath}" "${basename(exePath)}" >nul 2>&1) && (`,
+  //
+  // Файл `.bat` вместо однострочной команды через `spawn(..., [script])` — первая версия на
+  // `.join(' & ')` собирала синтаксически битую команду («& was unexpected at this time»,
+  // найдено живым тестом 1.9.11→1.9.12: apps.exe файл обновился, релонча не было, `stdio:
+  // 'ignore'` скрыл ошибку cmd молча). `.bat`-файл проверяем целиком перед запуском, а не
+  // полагаемся на аккуратную склейку строк через разделитель.
+  const batPath = join(tmpdir(), `kamikeythe-relaunch-${Date.now()}.bat`)
+  const batContent = [
+    '@echo off',
+    'setlocal',
+    'for /L %%i in (1,1,20) do (',
+    `  ren "${exePath}" "${basename(exePath)}" >nul 2>&1`,
+    '  if not errorlevel 1 (',
     '    timeout /t 2 /nobreak >nul',
     `    start "" "${exePath}"`,
-    '    exit /b 0',
+    '    goto :done',
     '  )',
     '  timeout /t 1 /nobreak >nul',
     ')',
-  ].join(' & ')
+    ':done',
+    'del "%~f0" >nul 2>&1',
+    '',
+  ].join('\r\n')
+  writeFileSync(batPath, batContent, 'utf8')
 
-  const relauncher = spawn('cmd.exe', ['/d', '/c', script], {
+  const relauncher = spawn('cmd.exe', ['/d', '/c', batPath], {
     detached: true,
     stdio: 'ignore',
     windowsHide: true,
