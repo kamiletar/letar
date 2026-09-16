@@ -2,6 +2,14 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [3.39.19] - 2026-09-16
+
+### Changed
+
+- `vitest.config.mts`: убран избыточный alias `@letar/image-upload` (база) — пакет уже прямая
+  зависимость, симлинк bun резолвит его без alias. Подпуть `/server` оставлен — не резолвится
+  без alias несмотря на объявленный `exports`.
+
 ## [3.39.18] - 2026-09-10
 
 ### Fixed
