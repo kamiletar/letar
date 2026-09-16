@@ -17,6 +17,19 @@
 
 ---
 
+## `installAndRelaunchViaScheduler` вынесена в `@letar/electron-monorepo-updater` (2026-09-17, v1.9.29)
+
+Аудит автообновлений остальных Electron-приложений монорепо (по прямой просьбе) нашёл тот же
+класс бага в `animatrona` (`quitAndInstall(false, true)`) и `label-printer-desktop`
+(`quitAndInstall()` без аргументов) — обе комбинации при `nsis.oneClick: false` не дают надёжной
+тихой установки с гарантированным перезапуском, ровно то, что здесь чинили пять версий подряд
+(1.9.6–1.9.27, разделы ниже). Локальная копия схемы из `main/updater.ts` перенесена в
+`libs/electron-monorepo-updater/src/lib/install-and-relaunch-via-scheduler.ts` как параметризованная
+`installAndRelaunchViaScheduler({ installerPath, appLabel, installerArgs?, exePath?, pid? })`, с
+`buildRelaunchBatScript` отдельно для юнит-тестов (14 тестов на генерацию `.bat`, без реального
+`schtasks`). `animatrona` и `label-printer-desktop` переведены на ту же функцию. Поведение
+KamiKeyThe не изменилось — только источник кода. Разбор — `.claude/docs/electron-monorepo-shared-releases.md`.
+
 ## Перезапуск после тихого автообновления — закрыто, релизы 1.9.27–1.9.28 (2026-09-17)
 
 Длинная цепочка 1.9.8–1.9.26 угадывала момент конца установки. Сессия заменила угадывание

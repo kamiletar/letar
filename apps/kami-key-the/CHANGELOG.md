@@ -7,6 +7,16 @@
 
 ## [Unreleased]
 
+## [1.9.29] - 2026-09-17
+
+### Chore
+
+- `installAndRelaunchViaScheduler` (`main/updater.ts`, схема из 1.9.27) вынесена в
+  `@letar/electron-monorepo-updater` — тот же баг класса «`quitAndInstall()` показывает мастер
+  NSIS вместо тихого обновления при `nsis.oneClick: false`» нашёлся в `animatrona` и
+  `label-printer-desktop`; переизобретать заново живыми тестами не было смысла. Поведение
+  KamiKeyThe не меняется — только источник функции.
+
 ## [1.9.28] - 2026-09-16
 
 ### Chore
