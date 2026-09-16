@@ -34,14 +34,19 @@
 - [nx-playwright-plugin-project-graph-race](/.claude/docs/nx-playwright-plugin-project-graph-race.md) ⚠️ гонка ESM-загрузчика, лечится повтором запуска
 - [nx-e2e-implicit-deps-public-repo-private-app-exception](/.claude/docs/nx-e2e-implicit-deps-public-repo-private-app-exception.md) ⚠️ часть e2e намеренно без `implicitDependencies`
 - [nx-cache-directory-env-not-isolated-by-cachedirectory](/.claude/docs/nx-cache-directory-env-not-isolated-by-cachedirectory.md) ⚠️ изоляция кеша требует и `NX_WORKSPACE_DATA_DIRECTORY`
+- [nx-affected-source-based-inference](/.claude/docs/nx-affected-source-based-inference.md) `nx affected` видит импорты `@letar/*` и без `dependencies`
 - [tsgo-stray-declarations](/.claude/docs/tsgo-stray-declarations.md) ⚠️ `.d.ts` рядом с исходником вместо `outDir`
 - [tsgo-generic-default-param-inference](/.claude/docs/tsgo-generic-default-param-inference.md) ⚠️ generic-обёртка выводит `TArgs` как `unknown[]`
 - [tsgo-excessive-stack-depth-zenstack](/.claude/docs/tsgo-excessive-stack-depth-zenstack.md) ⚠️ TS2321 на вложенных ZenStack-типах, три фикса
+- [tsgo-tsc-stale-project-reference-redirect](/.claude/docs/tsgo-tsc-stale-project-reference-redirect.md) ⚠️ project-reference уводит на устаревший `.d.ts`
+- [tsconfig-preset-rootdir-outdir-cascade](/.claude/docs/tsconfig-preset-rootdir-outdir-cascade.md) ⚠️ удаление `references` с унаследованным `outDir` — три побочных эффекта
+- [vitest-setup-file-tsconfig-graph-gap](/.claude/docs/vitest-setup-file-tsconfig-graph-gap.md) ⚠️ `vitest.setup.ts` вне графа `references` валит все тесты либы разом
 - [bun-lockfile-private-submodules](/.claude/docs/bun-lockfile-private-submodules.md) ⚠️ `--frozen-lockfile` падает без выкачанных submodule
 - [bun-lock-drift-unpushed-commits-blocks-all-deploys](/.claude/docs/bun-lock-drift-unpushed-commits-blocks-all-deploys.md) ⚠️ незапушенный bump версии роняет ЛЮБОЙ деплой
 - [bun-server-version-lockfile-format-incompatibility](/.claude/docs/bun-server-version-lockfile-format-incompatibility.md) ⚠️ старый bun на сервере блокирует все деплои разом
 - [bun-install-stale-isolated-cache](/.claude/docs/bun-install-stale-isolated-cache.md) ⚠️ несколько версий в `.bun` — норма, чинит `--force`
 - [bun-isolated-linker-alias-shared-bucket-collision](/.claude/docs/bun-isolated-linker-alias-shared-bucket-collision.md) ⚠️ npm-alias двух версий пакета резолвится в один bucket
+- [bun-isolated-linker-shared-zod-bucket-drift](/.claude/docs/bun-isolated-linker-shared-zod-bucket-drift.md) ⚠️ обычный `bun update` развёл zod на два экземпляра
 - [zod-per-package-pin-drift](/.claude/docs/zod-per-package-pin-drift.md) ⚠️ caret не дедупает с точным корневым пином
 - [root-pin-peer-drift](/.claude/docs/root-pin-peer-drift.md) ⚠️ пин в корне тихо перебивается; намеренные пины — в `intentional-pins.json`
 - [nested-package-resolution-under-bun-isolated-installs](/.claude/docs/nested-package-resolution-under-bun-isolated-installs.md) ⚠️ импорт транзитивной зависимости из `scripts/` — только через `createRequire`
@@ -167,6 +172,7 @@
 - [chakra-strict-tokens-global-typegen](/.claude/docs/chakra-strict-tokens-global-typegen.md) ⚠️ `strictTokens` пишет типы в `node_modules` — не per-app флаг
 - [chakra-hover-condition-already-media-gated](/.claude/docs/chakra-hover-condition-already-media-gated.md) ⚠️ `_hover` уже в `@media (hover: hover)`, своя обёртка даёт 28 ошибок TS
 - [interactive-press-feedback](/.claude/docs/interactive-press-feedback.md) ⚠️ `_active` со сжатием на 1% — состояние есть, глазу его нет
+- [press-scale-audit-task](/.claude/docs/press-scale-audit-task.md) общая формулировка задачи аудита `pressScale` — подключать ссылкой из `PLAN.md`
 - [chakra-layer-style-property-allowlist](/.claude/docs/chakra-layer-style-property-allowlist.md) ⚠️ `LayerStyleProperty` — закрытый список, TS2322 на каждой строке блока
 - [chakra-recipe-variant-property-override](/.claude/docs/chakra-recipe-variant-property-override.md) ⚠️ порядок ключей в JS ≠ каскад CSS
 - [chakra-slot-recipe-array-merge-truncation](/.claude/docs/chakra-slot-recipe-array-merge-truncation.md) ⚠️ `slots` мержатся по индексу — короткий список вычёркивает слоты anatomy
@@ -230,9 +236,12 @@
 - [docker-network-endpoint-corruption-diskfull](/.claude/docs/docker-network-endpoint-corruption-diskfull.md) ⚠️ полный диск рвёт endpoint: рестарт БД строго до приложения
 - [docker-prune-cold-layer-network-flake](/.claude/docs/docker-prune-cold-layer-network-flake.md) ⚠️ ночной prune → первый деплой после 04:00 идёт в сеть
 - [deploy-affected-cache-invalidation](/.claude/docs/deploy-affected-cache-invalidation.md) три причины холодного деплоя
+- [deploy-affected-premigrate-dump-wrong-container](/.claude/docs/deploy-affected-premigrate-dump-wrong-container.md) ⚠️ pre-migrate dump резолвил не тот контейнер
 - [deploy-engine-rollout-proxy-kind-autodetect](/.claude/docs/deploy-engine-rollout-proxy-kind-autodetect.md) ⚠️ per-app label не поспевает за сменой прокси
 - [dotenvx-stdout-migration-pollution](/.claude/docs/dotenvx-stdout-migration-pollution.md) P3018
 - [external-services-blocked-from-s2](/.claude/docs/external-services-blocked-from-s2.md) что недоступно с s2
+- [node-env-not-production-signal](/.claude/docs/node-env-not-production-signal.md) ⚠️ `NODE_ENV=production` не отличает прод от staging
+- [s3-staging-host-memory-pressure](/.claude/docs/s3-staging-host-memory-pressure.md) ⚠️ узкое место s3 — RAM, не CPU
 - [dashboard-agent-alert-debounce-patterns](/.claude/docs/dashboard-agent-alert-debounce-patterns.md) дебаунс алертов
 - [server-provision](/.claude/docs/server-provision.md) · [server-recovery](/.claude/docs/server-recovery.md) · [server-migration-letar](/.claude/docs/server-migration-letar.md) архив переезда
 - [firewall](/.claude/docs/firewall.md) ⚠️ `ufw` не фильтрует порты Docker
