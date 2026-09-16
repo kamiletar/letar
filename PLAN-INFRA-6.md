@@ -1,4 +1,4 @@
-# PLAN-INFRA-6 — §115–§183
+# PLAN-INFRA-6 — §115–§187
 
 > Продолжение [PLAN-INFRA-5.md](/PLAN-INFRA-5.md) — часть журнала `PLAN-INFRA.md`, отрезанная от
 > неё 2026-09-03 (см. [plan-decomposition-pattern.md](/.claude/docs/plan-decomposition-pattern.md)).
@@ -4201,3 +4201,29 @@ update --recursive` в `deploy-affected.sh` падает с `upload-pack: not ou
 искалась). Если повторится — смотреть, не пропускает ли `pre-push` хук (`scripts/hooks/
 install.sh`) свою проверку в каких-то сессиях, или коммиты делались агентами без установленных
 хуков.
+
+## §187 (2026-09-16) media-server: 8-битный H.264 и тонмаппинг HDR — ✅ код, ⏳ деплой
+
+**Проблема.** Воркер `infra/media-server` кодировал 320p/720p/1080p через `libx264` без
+`-pix_fmt`. libx264 сохраняет битность исходника: 10-битный мастер (обычная запись iPhone —
+HEVC 10 бит HLG) давал **H.264 High 10**, который Chromium не декодирует вовсе. Воспроизведено
+локально точными аргументами воркера, затем тестом в прод-образе (alpine, ffmpeg 6.1.2).
+
+- [x] Общие аргументы рендишенов и постера — `src/transcode.ts`: `-profile:v high -pix_fmt
+      yuv420p`, теги BT.709, `setparams` в конце цепочки (ffmpeg 7+ иначе перетирает теги
+      свойствами кадра).
+- [x] HDR (PQ/HLG) → `zscale` + `tonemap=mobius:param=0.7` при `npl=203`. Рецепт с `hable`
+      отвергнут замером: темнее на 30–60 из 255. BT.2020 SDR → пересчёт гаммы цветов, SD без
+      тега → BT.601.
+- [x] Постер: BT.601 полного диапазона (JPEG), кадр не дальше середины короткого ролика.
+- [x] AV1: в alpine-ffmpeg есть `libdav1d`. `check-ffmpeg.sh` роняет сборку образа без
+      `zscale`/`tonemap`/`libdav1d`.
+- [x] Регрессия: `test/transcode.test.ts` (22 теста), стадия `test` в `Dockerfile`
+      (`docker build --target test infra/media-server`), compose собирает `target: runtime`.
+- [x] Документация: [media-server](/.claude/docs/media-server.md#цвет-и-формат-пикселей).
+- [ ] Деплой на s3 — `deploy-request` к `deploy-agent-dev` после одобрения push владельцем.
+- [ ] Уже загруженные High 10 рендишены не перекодированы: исходники `raw/` удаляются после
+      транскода, пересобрать можно только из 1080p с потерей качества или повторной загрузкой.
+
+Вне объёма, отмечено отдельно: в `docker-compose.yml` в `environment:` у `media-api` проброшены
+не все `MEDIA_KEY_*`, перечисленные в доке как зарегистрированные.
