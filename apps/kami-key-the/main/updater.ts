@@ -13,11 +13,11 @@
 import { spawnSync } from 'node:child_process'
 import { appendFileSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { basename, join } from 'node:path'
+import { join } from 'node:path'
 
 import { pointFeedAtOwnRelease } from '@letar/electron-monorepo-updater'
 import { app, dialog, net } from 'electron'
-import { autoUpdater, type UpdateInfo } from 'electron-updater'
+import { autoUpdater, type UpdateDownloadedEvent, type UpdateInfo } from 'electron-updater'
 
 const REPO_OWNER = 'kamiletar'
 const REPO_NAME = 'letar'
@@ -35,163 +35,87 @@ function configureLogger(): void {
 }
 
 /**
- * Планирует перезапуск приложения после тихой установки — в обход `quitAndInstall(true, true)`.
+ * Тихо ставит скачанное обновление и перезапускает приложение — вместо
+ * `autoUpdater.quitAndInstall()`. Запускать инсталлятор должен НЕ наш процесс, а внешний `.bat`,
+ * который дожидается его завершения и только потом поднимает приложение.
  *
- * `isForceRunAfter=true` доверяет NSIS-скрипту электрон-билдера самому перезапустить приложение
- * (`doStartApp` в `installSection.nsh` при `${isForceRun} ${andIf} ${Silent}`), но тот запускает
- * не `$INSTDIR\...exe` напрямую, а ярлык из Пуск (`$launchLink` = `$newStartMenuLink`, если
- * `${FileExists}` на момент создания секции вернул true) — тот самый `.lnk`, для которого мы уже
- * ловили гонку «не удаётся найти KamiKeyThe.lnk» на финише обычной (не-тихой) установки: файл
- * попадает в проверку `FileExists`, но не успевает стать физически запускаемым к моменту
- * `ExecShellAsUser`. В тихом режиме та же гонка не показывает диалог об ошибке — просто ничего
- * не запускается. Подтверждено живым тестом 1.9.8→1.9.9: после `quitAndInstall(true, true)`
- * процесс не поднимался 10+ секунд.
+ * Почему не `quitAndInstall(true, true)`: NSIS-шаблон electron-builder перезапускает приложение
+ * через ярлык из Пуск (`$launchLink`), который в тихом режиме не успевает стать запускаемым —
+ * процесс просто не поднимается (живой тест 1.9.8→1.9.9).
  *
- * Вместо переопределения NSIS-шаблона (он приходит из `node_modules`, наш собственный
- * `.nsh`-инклюд для electron-builder усложнил бы конфиг ради обхода стороннего бага) сами
- * планируем перезапуск через detached `cmd.exe`, который переживёт `app.quit()`: ждёт, пока
- * инсталлятор допишет `${exePath}` (тот же путь, откуда сейчас запущен этот процесс — обновление
- * ставится в ту же директорию), и запускает его напрямую, без Start Menu ярлыка.
+ * Почему не `quitAndInstall(true, false)` + свой релончер (1.9.10–1.9.26): electron-updater
+ * запускает инсталлятор отвязанным процессом и не сообщает ни момент его завершения, ни код
+ * выхода. Релончеру приходилось угадывать конец установки — пробой `ren` на exe (exe занят лишь
+ * ~2с в середине установки) и опросом `tasklist`. Запустишь приложение раньше времени — NSIS
+ * (`CHECK_APP_RUNNING` в `allowOnlyOneInstallerInstance.nsh`, ищет любой процесс из `$INSTDIR`)
+ * убивает его как «не закрывшийся старый» либо, не сумев закрыть, в тихом режиме молча делает
+ * `Quit` без установки (код 2). Проверка из 1.9.25 к тому же не работала вовсе: табличный
+ * `tasklist` обрезает имя образа до 25 символов, и `KamiKeyThe-Setup-1.9.26.exe` не находился
+ * никогда. Живой тест 1.9.25→1.9.26 прошёл только за счёт удачного тайминга: exe записан в
+ * 22:55:27.8, релонч — в 22:55:30, пока инсталлятор, возможно, ещё работал.
  *
- * @param installerVersion версия из `UpdateInfo.version` — имя файла инсталлятора
- * (`KamiKeyThe-Setup-<version>.exe`) для ожидания его полного завершения перед релончем, см.
- * комментарий про `allowOnlyOneInstallerInstance.nsh` ниже.
+ * Теперь `.bat` сам: 1) ждёт выхода нашего процесса по PID; 2) синхронно запускает инсталлятор
+ * и пишет в лог его код выхода — cmd в batch-режиме ждёт и GUI-процесс (проверено: 19с ожидания,
+ * `errorlevel=0`, exe пересоздан до выхода инсталлятора); 3) только после этого запускает
+ * приложение. Если установка упала — запускает старую версию, чтобы пользователь не остался без
+ * приложения; при следующем старте проверка обновлений предложит его снова.
+ *
+ * Запуск `.bat` — через планировщик задач (`schtasks /create` + `/run`), не `spawn(detached)`:
+ * Node на Windows не выставляет `CREATE_BREAKAWAY_FROM_JOB`, и потомок остаётся в job-дереве
+ * Electron (живые тесты 1.9.10–1.9.15: процесс умирал вместе с приложением). Процесс сервиса
+ * Task Scheduler создаётся вне этого дерева в принципе.
+ *
+ * @returns `false`, если планировщик не принял задачу — вызывающий откатывается на штатный
+ * `quitAndInstall`, чтобы обновление хотя бы установилось, пусть и без перезапуска.
  */
-function scheduleRelaunchAfterSilentInstall(installerVersion: string): void {
+function installAndRelaunchViaScheduler(installerPath: string): boolean {
   const exePath = process.execPath
-  // До 20 попыток по 1с ждём, пока файл освободится (инсталлятор держит его открытым на запись,
-  // пока не допишет) — проверяем через `ren <файл> <то же имя>`: переименование в то же имя не
-  // меняет содержимое, но требует эксклюзивного доступа и падает с ошибкой, пока хендл занят.
-  // `copy /y file file` для этой же цели не годится — cmd отказывает с «файл не может быть
-  // скопирован сам в себя» независимо от блокировки, что проверено отдельно перед этим фиксом.
-  //
-  // Файл `.bat` вместо однострочной команды через `spawn(..., [script])` — первая версия на
-  // `.join(' & ')` собирала синтаксически битую команду («& was unexpected at this time»,
-  // найдено живым тестом 1.9.11→1.9.12: apps.exe файл обновился, релонча не было, `stdio:
-  // 'ignore'` скрыл ошибку cmd молча). `.bat`-файл проверяем целиком перед запуском, а не
-  // полагаемся на аккуратную склейку строк через разделитель.
-  const batPath = join(tmpdir(), `kamikeythe-relaunch-${Date.now()}.bat`)
+  const pid = process.pid
+  const stamp = Date.now()
+  const batPath = join(tmpdir(), `kamikeythe-update-${stamp}.bat`)
   const debugLogPath = join(tmpdir(), 'kamikeythe-relauncher-debug.log')
   const appOutputLogPath = join(tmpdir(), 'kamikeythe-app-output.log')
-  // ⚠️ Настоящая причина «релонч работает 3-12с, потом процесс бесследно пропадает» (1.9.20,
-  // 1.9.21) — не в нашем `.bat`, а в самом NSIS-шаблоне electron-builder. `installSection.nsh`
-  // (перед копированием файлов) и — для update-флоу — вызываемый им же синхронно (`ExecWait`)
-  // старый uninstaller (`installUtil.nsh`) оба проходят через `CHECK_APP_RUNNING`
-  // (`allowOnlyOneInstallerInstance.nsh`): ретрай-цикл `FIND_PROCESS`/`KILL_PROCESS`, который
-  // ищет ЛЮБОЙ процесс с именем `${APP_EXECUTABLE_FILENAME}`, запущенный из `$INSTDIR`, и
-  // принудительно убивает его (`taskkill /F`), пока не перестанет находить совпадения. Наш `ren`
-  // -проба доказывает только то, что файл `.exe` в данный момент не заблокирован — не то, что
-  // процесс самого инсталлятора уже полностью завершился. Если мы запускаем новый инстанс, пока
-  // инсталлятор ещё внутри этого ретрай-цикла (например, дожидается процесса из синхронного
-  // `ExecWait` над стар. uninstaller'ом), NSIS находит НАШ свежезапущенный процесс — тот же образ,
-  // тот же `$INSTDIR` — принимает его за не до конца завершившийся старый и убивает. Фикс: ждём
-  // исчезновения процесса САМОГО инсталлятора (`KamiKeyThe-Setup-<version>.exe`, имя из
-  // `UpdateInfo.version`) из `tasklist`, и только потом запускаем `exePath` — раз инсталлятор
-  // синхронно (`ExecWait`) блокируется на любых своих дочерних шагах, его собственное исчезновение
-  // из `tasklist` гарантирует, что весь его kill-цикл (и цикл вложенного uninstaller) уже позади.
-  const installerImageName = `KamiKeyThe-Setup-${installerVersion}.exe`
+  const log = (text: string): string => `echo [%date% %time%] ${text} >> "${debugLogPath}"`
+  // Внутри блоков `( ... )` `%var%` раскрывается при разборе всего блока — там нужны `!var!`
+  const logInBlock = (text: string): string => `echo [!date! !time!] ${text} >> "${debugLogPath}"`
+
   const batContent = [
     '@echo off',
+    // Файл пишется в UTF-8, cmd по умолчанию читает его в OEM-кодировке — кириллица в пути
+    // профиля (`C:\Users\Имя\...`) превратилась бы в мусор
+    'chcp 65001 >nul',
     'setlocal enabledelayedexpansion',
-    `echo [%date% %time%] relauncher started, exe="${exePath}" >> "${debugLogPath}"`,
-    // ⚠️ Живой тест 1.9.23→1.9.24 показал, что одной только проверки «инсталлятор отсутствует»
-    // недостаточно: наш `.bat` (запущенный через `schtasks` синхронно, ещё в той же секунде, что
-    // и вызов `scheduleRelaunchAfterSilentInstall`) успевает сделать первую проверку РАНЬШЕ, чем
-    // `autoUpdater.quitAndInstall()` вообще успевает породить дочерний процесс инсталлятора —
-    // лог показал «installer process gone after 1 checks» спустя 0.4с, то есть инсталлятор
-    // на тот момент ещё не СТАРТОВАЛ, а не уже завершился. Наша проверка дала ложноположительный
-    // результат, мы запустили приложение, а инсталлятор запустился и убил его уже ПОСЛЕ этого. В
-    // 1.9.25 проверка двухфазная: сначала ждём, пока инсталлятор ПОЯВИТСЯ в `tasklist`
-    // (подтверждает, что он реально стартовал), и только потом ждём, пока он оттуда исчезнет.
-    `echo [%date% %time%] waiting for installer process "${installerImageName}" to appear >> "${debugLogPath}"`,
-    'for /L %%k in (1,1,10) do (',
-    `  tasklist /fi "imagename eq ${installerImageName}" | findstr /I "${installerImageName}" >nul 2>&1`,
-    '  if not errorlevel 1 (',
-    `    echo [!date! !time!] installer process observed after %%k checks >> "${debugLogPath}"`,
-    '    goto :installer_seen',
-    '  )',
-    '  timeout /t 1 /nobreak >nul',
-    ')',
-    `echo [%date% %time%] installer process never observed after 10 checks — proceeding to wait-for-exit anyway >> "${debugLogPath}"`,
-    ':installer_seen',
-    `echo [%date% %time%] waiting for installer process "${installerImageName}" to exit >> "${debugLogPath}"`,
-    'for /L %%j in (1,1,60) do (',
-    `  tasklist /fi "imagename eq ${installerImageName}" | findstr /I "${installerImageName}" >nul 2>&1`,
+    log(`updater started, pid=${pid}, installer="${installerPath}", exe="${exePath}"`),
+    // 1. Ждём выхода текущего процесса. Потолок 30с — дальше NSIS закроет его сам (`isUpdated`
+    //    ветка `CHECK_APP_RUNNING`), ожидание здесь лишь избавляет от его kill-цикла.
+    //    В CSV PID стоит в кавычках отдельным полем — ищем вместе с кавычками.
+    'for /L %%i in (1,1,30) do (',
+    `  tasklist /fi "PID eq ${pid}" /fo csv /nh | findstr /C:"\\"${pid}\\"" >nul 2>&1`,
     '  if errorlevel 1 (',
-    `    echo [!date! !time!] installer process gone after %%j checks >> "${debugLogPath}"`,
-    '    goto :installer_gone',
+    `    ${logInBlock('app process exited after %%i checks')}`,
+    '    goto :app_exited',
     '  )',
     '  timeout /t 1 /nobreak >nul',
     ')',
-    `echo [%date% %time%] installer process still present after 60 checks — proceeding anyway >> "${debugLogPath}"`,
-    ':installer_gone',
-    'for /L %%i in (1,1,20) do (',
-    `  ren "${exePath}" "${basename(exePath)}" >nul 2>&1`,
-    `  echo [!date! !time!] attempt %%i ren errorlevel=!errorlevel! >> "${debugLogPath}"`,
-    '  if not errorlevel 1 (',
-    '    timeout /t 2 /nobreak >nul',
-    `    echo [!date! !time!] starting "${exePath}" >> "${debugLogPath}"`,
-    // ⚠️ 1.9.20 доказал, что запуск сам по себе работает (schtasks успешно вырывает из job) —
-    // новый процесс жил минимум 3с (подтверждено tasklist), но пропадал бесследно ещё до
-    // следующей ручной проверки (1-2 мин спустя), без записи в Event Log (чистый выход, не краш).
-    // 1.9.21 попробовал `start "" /B "exe" >> log 2>&1` — файл `app-output.log` не появился
-    // вообще, ни пустым, ни с содержимым: `start /B` с редиректом для GUI-процесса (Windows
-    // subsystem, без консоли) на практике не создаёт файл через cmd-редирект надёжно. В 1.9.22
-    // убираем `start` целиком — вызываем `exePath` напрямую как последнюю команду `.bat`: cmd
-    // создаёт файловые хендлы для `>>`/`2>&1` и передаёт их дочернему процессу через
-    // STARTUPINFO при `CreateProcess`, независимо от GUI/консольного subsystem — тем же
-    // механизмом, каким `Start-Process -RedirectStandardOutput` уже ловил `[Updater]`-сообщения
-    // на ручных тестах. Без `start` эта строка синхронно блокирует `.bat`, пока `exePath` не
-    // завершится — не проблема, `.bat` и так уже запущен независимо через `schtasks`, никто не
-    // ждёт его завершения. Взамен получаем точный exit-код и момент выхода вместо периодических
-    // проверок `tasklist`.
-    `    "${exePath}" >> "${appOutputLogPath}" 2>&1`,
-    `    echo [!date! !time!] app process exited, errorlevel=!errorlevel! >> "${debugLogPath}"`,
-    '    goto :done',
-    '  )',
-    '  timeout /t 1 /nobreak >nul',
-    ')',
-    `echo [%date% %time%] loop exhausted without success >> "${debugLogPath}"`,
-    ':done',
-    `echo [%date% %time%] relauncher finished >> "${debugLogPath}"`,
+    log('app process still running after 30 checks, installer will close it'),
+    ':app_exited',
+    // 2. Синхронная тихая установка — те же аргументы, что передаёт `NsisUpdater.doInstall`
+    log('installer starting'),
+    `"${installerPath}" --updated /S`,
+    'set "INSTALL_RESULT=%errorlevel%"',
+    log('installer exited, errorlevel=%INSTALL_RESULT%'),
+    // 3. Запуск приложения — напрямую, последней командой, с выводом в лог: cmd передаёт хендлы
+    //    `>>`/`2>&1` через STARTUPINFO и GUI-процессу (`start /B` с редиректом файл не создавал,
+    //    1.9.21). Строка блокирует `.bat` до выхода приложения — это нормально, его никто не ждёт.
+    log('starting app'),
+    `"${exePath}" >> "${appOutputLogPath}" 2>&1`,
+    log('app process exited, errorlevel=%errorlevel%'),
     'del "%~f0" >nul 2>&1',
     '',
   ].join('\r\n')
   writeFileSync(batPath, batContent, 'utf8')
 
-  // ⚠️ Живые тесты 1.9.10–1.9.15 показали, что сам `.bat` (ren-retry + start) логически верен —
-  // отладочный лог из 1.9.15 (живой тест 1.9.15→1.9.16) зафиксировал успешный `ren` с первой
-  // попытки и `start` с errorlevel=0, но процесс `KamiKeyThe.exe` при этом не выживал ни секунды.
-  // Причина — Job Object: Electron/Chromium оборачивает свой процесс в job с
-  // `JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE`, а `child_process.spawn(..., { detached: true })` на
-  // Windows НЕ выставляет `CREATE_BREAKAWAY_FROM_JOB` — потомки (наш `cmd.exe`, а через него и
-  // перезапущенный `KamiKeyThe.exe`) остаются в этой job и умирают вместе с ней в момент
-  // `app.quit()`/закрытия последнего хендла, ДО того как относящийся к ним `.bat` успевает
-  // написать хотя бы первую строку лога. Подтверждено изолированным воспроизведением: процесс
-  // текущей PowerShell-сессии искусственно приписывался к killer-job через
-  // `AssignProcessToJobObject`, затем спавнился detached `cmd.exe` без breakaway — после выхода
-  // из killer-job-процесса ни `cmd.exe`, ни запущенный им `KamiKeyThe.exe` не переживали ни
-  // секунды, лог оставался пустым. Node не даёт способа передать `CREATE_BREAKAWAY_FROM_JOB`
-  // напрямую — обходим это, отдавая запуск `.bat` планировщику задач (`schtasks`): процесс,
-  // запущенный сервисом Task Scheduler, создаётся вне job-дерева вызывающего процесса в принципе,
-  // не только вне нашего конкретного job. Проверено тем же искусственным killer-job-тестом — с
-  // `schtasks /create` + `/run` `KamiKeyThe.exe` пережил закрытие job-процесса и остался работать.
-  const taskName = `KamiKeyThe-Relaunch-${Date.now()}`
-  const scheduledTime = new Date(Date.now() + 60_000)
-  const startTime = `${String(scheduledTime.getHours()).padStart(2, '0')}:${
-    String(scheduledTime.getMinutes()).padStart(2, '0')
-  }`
-  // ⚠️ Живой тест 1.9.17→1.9.18 (после фикса на schtasks) снова не перезапустил приложение,
-  // хотя тот же `.bat` через тот же `schtasks /create`+`/run`+`/delete`, вызванный вручную из
-  // PowerShell (в том числе с искусственной killer-job симуляцией), стабильно срабатывал.
-  // Разница — вызов из САМОГО Electron-процесса через `spawnSync`, а не интерактивно. Логируем
-  // exit-код и вывод каждого вызова `schtasks`, чтобы увидеть, чем реальный вызов отличается
-  // (напр. код возврата say "Access is denied", отличие Run As User, и т.п.) — диагностика
-  // добавлена в 1.9.19 вместо очередной слепой попытки исправить.
-  const logSchtasksResult = (
-    label: string,
-    result: ReturnType<typeof spawnSync>,
-  ): void => {
+  const logSchtasksResult = (label: string, result: ReturnType<typeof spawnSync>): void => {
     appendFileSync(
       debugLogPath,
       `[${new Date().toISOString()}] schtasks ${label}: status=${result.status} error=${String(result.error)} stdout=${
@@ -200,6 +124,12 @@ function scheduleRelaunchAfterSilentInstall(installerVersion: string): void {
       'utf8',
     )
   }
+  const taskName = `KamiKeyThe-Update-${stamp}`
+  // `/st` обязателен для `/sc once`, но время не наступит: задачу сразу запускаем через `/run`
+  const scheduledTime = new Date(stamp + 60_000)
+  const startTime = `${String(scheduledTime.getHours()).padStart(2, '0')}:${
+    String(scheduledTime.getMinutes()).padStart(2, '0')
+  }`
   const createResult = spawnSync('schtasks', [
     '/create',
     '/tn',
@@ -213,12 +143,15 @@ function scheduleRelaunchAfterSilentInstall(installerVersion: string): void {
     '/f',
   ])
   logSchtasksResult('create', createResult)
+  if (createResult.status !== 0) {
+    return false
+  }
   const runResult = spawnSync('schtasks', ['/run', '/tn', taskName])
   logSchtasksResult('run', runResult)
-  // Запись задачи планировщика после однократного /run больше не нужна — удаляем сразу, не дожидаясь
-  // истечения /st (которое всё равно не наступит: задача уже отработала через /run).
+  // Запись задачи после однократного /run не нужна — уже запущенный процесс это не затрагивает
   const deleteResult = spawnSync('schtasks', ['/delete', '/tn', taskName, '/f'])
   logSchtasksResult('delete', deleteResult)
+  return runResult.status === 0
 }
 
 /** Направить electron-updater на релиз конкретно KamiKeyThe (не repo-wide "latest") */
@@ -269,26 +202,32 @@ export function initAutoUpdater(): void {
       })
   })
 
-  autoUpdater.on('update-downloaded', (info: UpdateInfo) => {
+  autoUpdater.on('update-downloaded', (event: UpdateDownloadedEvent) => {
     void dialog
       .showMessageBox({
         type: 'info',
         title: 'Обновление готово',
-        message: `Версия ${info.version} скачана`,
+        message: `Версия ${event.version} скачана`,
         detail: 'Перезапустить приложение для установки?',
         buttons: ['Перезапустить', 'Позже'],
         defaultId: 0,
         cancelId: 1,
       })
       .then((result) => {
-        if (result.response === 0) {
-          // isSilent=true — иначе NSIS-инсталлятор (oneClick: false в electron-builder.yml)
-          // показывает полный мастер установки вместо тихого обновления. isForceRunAfter здесь
-          // НЕ используем (передаём false) — перезапуск после силентной установки берём на себя
-          // через scheduleRelaunchAfterSilentInstall, см. её комментарий про гонку с .lnk.
-          scheduleRelaunchAfterSilentInstall(info.version)
-          autoUpdater.quitAndInstall(true, false)
+        if (result.response !== 0) {
+          return
         }
+        if (installAndRelaunchViaScheduler(event.downloadedFile)) {
+          // Инсталлятор запустит `.bat` — отключаем штатную установку при выходе, иначе
+          // electron-updater запустит второй экземпляр инсталлятора из своего quit-обработчика
+          autoUpdater.autoInstallOnAppQuit = false
+          app.quit()
+          return
+        }
+        // Планировщик недоступен — ставим штатно (isSilent=true: иначе NSIS с `oneClick: false`
+        // покажет полный мастер). Перезапуска не будет, но версия обновится.
+        console.error('[Updater] Планировщик задач не принял задачу — штатная установка без перезапуска')
+        autoUpdater.quitAndInstall(true, false)
       })
   })
 
