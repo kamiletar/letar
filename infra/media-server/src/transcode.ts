@@ -29,7 +29,9 @@ export interface SourceVideoInfo {
 }
 
 export interface Rendition {
-  /** Имя файла — совпадает с `videoUrls()` в storage.ts */
+  /** Ключ в объекте, который отдаёт `videoUrls()` в storage.ts — публичный контракт вебхука video.ready */
+  key: '320p' | '720p' | '1080p'
+  /** Имя файла на диске */
   file: string
   height: number
   crf: number
@@ -37,9 +39,9 @@ export interface Rendition {
 }
 
 export const RENDITIONS: readonly Rendition[] = [
-  { file: '320p.mp4', height: 320, crf: 26, audioBitrate: '64k' },
-  { file: '720p.mp4', height: 720, crf: 23, audioBitrate: '128k' },
-  { file: '1080p.mp4', height: 1080, crf: 22, audioBitrate: '192k' },
+  { key: '320p', file: '320p.mp4', height: 320, crf: 26, audioBitrate: '64k' },
+  { key: '720p', file: '720p.mp4', height: 720, crf: 23, audioBitrate: '128k' },
+  { key: '1080p', file: '1080p.mp4', height: 1080, crf: 22, audioBitrate: '192k' },
 ]
 
 export const POSTER_FILE = 'poster.jpg'
