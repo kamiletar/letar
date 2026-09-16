@@ -11,7 +11,7 @@
  */
 
 import { spawnSync } from 'node:child_process'
-import { writeFileSync } from 'node:fs'
+import { appendFileSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { basename, join } from 'node:path'
 
@@ -80,6 +80,8 @@ function scheduleRelaunchAfterSilentInstall(): void {
     `    echo [!date! !time!] starting "${exePath}" >> "${debugLogPath}"`,
     `    start "" "${exePath}"`,
     `    echo [!date! !time!] start command issued, errorlevel=!errorlevel! >> "${debugLogPath}"`,
+    '    timeout /t 3 /nobreak >nul',
+    `    tasklist /fi "imagename eq ${basename(exePath)}" >> "${debugLogPath}"`,
     '    goto :done',
     '  )',
     '  timeout /t 1 /nobreak >nul',
@@ -114,7 +116,26 @@ function scheduleRelaunchAfterSilentInstall(): void {
   const startTime = `${String(scheduledTime.getHours()).padStart(2, '0')}:${
     String(scheduledTime.getMinutes()).padStart(2, '0')
   }`
-  spawnSync('schtasks', [
+  // ⚠️ Живой тест 1.9.17→1.9.18 (после фикса на schtasks) снова не перезапустил приложение,
+  // хотя тот же `.bat` через тот же `schtasks /create`+`/run`+`/delete`, вызванный вручную из
+  // PowerShell (в том числе с искусственной killer-job симуляцией), стабильно срабатывал.
+  // Разница — вызов из САМОГО Electron-процесса через `spawnSync`, а не интерактивно. Логируем
+  // exit-код и вывод каждого вызова `schtasks`, чтобы увидеть, чем реальный вызов отличается
+  // (напр. код возврата say "Access is denied", отличие Run As User, и т.п.) — диагностика
+  // добавлена в 1.9.19 вместо очередной слепой попытки исправить.
+  const logSchtasksResult = (
+    label: string,
+    result: ReturnType<typeof spawnSync>,
+  ): void => {
+    appendFileSync(
+      debugLogPath,
+      `[${new Date().toISOString()}] schtasks ${label}: status=${result.status} error=${String(result.error)} stdout=${
+        JSON.stringify(result.stdout?.toString())
+      } stderr=${JSON.stringify(result.stderr?.toString())}\n`,
+      'utf8',
+    )
+  }
+  const createResult = spawnSync('schtasks', [
     '/create',
     '/tn',
     taskName,
@@ -126,10 +147,13 @@ function scheduleRelaunchAfterSilentInstall(): void {
     startTime,
     '/f',
   ])
-  spawnSync('schtasks', ['/run', '/tn', taskName])
+  logSchtasksResult('create', createResult)
+  const runResult = spawnSync('schtasks', ['/run', '/tn', taskName])
+  logSchtasksResult('run', runResult)
   // Запись задачи планировщика после однократного /run больше не нужна — удаляем сразу, не дожидаясь
   // истечения /st (которое всё равно не наступит: задача уже отработала через /run).
-  spawnSync('schtasks', ['/delete', '/tn', taskName, '/f'])
+  const deleteResult = spawnSync('schtasks', ['/delete', '/tn', taskName, '/f'])
+  logSchtasksResult('delete', deleteResult)
 }
 
 /** Направить electron-updater на релиз конкретно KamiKeyThe (не repo-wide "latest") */
