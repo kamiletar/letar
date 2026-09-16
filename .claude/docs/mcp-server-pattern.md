@@ -1,5 +1,12 @@
 # Паттерн «тонкий локальный MCP-сервер по stdio»
 
+⚠️ **2026-09-16: обновлено под `@modelcontextprotocol/{server,client}` v2** (миграция с
+раскола `@modelcontextprotocol/sdk` v1, PLAN-INFRA-6.md §184). `server.tool()`/`.resource()`
+удалены из API — только `server.registerTool()`/`.registerResource()`. Ниже везде актуальные
+имена пакетов и метод; исторические детали конкретных версий (`1.29.0`, `4.6.2` и т.п.) в
+разделах про пины оставлены как иллюстрация механизма — актуальную версию смотри в
+`scripts/intentional-pins.json`, не здесь.
+
 Четыре библиотеки в монорепо реализуют один и тот же архитектурный паттерн: `libs/deploy-mcp`
 (эталон, деплой через dashboard-agent API), `libs/form-mcp` (справочник по полям/формам),
 `libs/studio-time-mcp` (тайм-трекер studio), `libs/studio-mcp` (админка studio — клиенты,
@@ -38,7 +45,7 @@
 ```
 libs/<name>-mcp/src/
 ├── cli.ts       # stdio entry point — создаёт сервер, коннектит StdioServerTransport
-├── server.ts    # McpServer + server.tool(...) на каждый инструмент
+├── server.ts    # McpServer + server.registerTool(...) на каждый инструмент
 ├── client.ts    # тонкий HTTP-клиент к целевому приложению/сервису
 ├── config.ts    # чтение токена/URL/портов из env, .env.docker, SOPS
 └── index.ts     # экспорт createXxxMcpServer для тестов
@@ -48,7 +55,7 @@ libs/<name>-mcp/src/
 
 ```typescript
 #!/usr/bin/env node
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
+import { StdioServerTransport } from '@modelcontextprotocol/server/stdio'
 import { createDeployMcpServer } from './server.js'
 
 const server = createDeployMcpServer()
@@ -58,7 +65,8 @@ await server.connect(transport)
 
 ### server.ts
 
-Один `server.tool(name, description, zodShape, handler)` на инструмент. `client.ts` инкапсулирует
+Один `server.registerTool(name, { description, inputSchema: z.object(zodShape) }, handler)` на
+инструмент. `client.ts` инкапсулирует
 транспорт до целевого сервиса (у `deploy-mcp` — SSH-туннель + Bearer-токен к dashboard-agent),
 `server.ts` только валидирует вход через zod и форматирует ответ. См. полный пример —
 [libs/deploy-mcp/src/server.ts](/libs/deploy-mcp/src/server.ts).
@@ -81,12 +89,16 @@ await server.connect(transport)
      "type": "module",
      "dependencies": {
        "@letar/mcp-server-kit": "workspace:*",
-       "@modelcontextprotocol/sdk": "1.29.0",
-       "zod": "4.3.6"
+       "@modelcontextprotocol/server": "2.0.0",
+       "zod": "4.6.5"
      }
    }
    ```
-   (актуальную версию `zod` смотри в уже существующей MCP-либе — должна совпадать во всех трёх).
+   (актуальную версию обоих пинов смотри в уже существующей MCP-либе или в
+   `scripts/intentional-pins.json` — должна совпадать во всех потребителях). Добавь
+   `@modelcontextprotocol/client` в `devDependencies` (той же точной версией) только если
+   `server.spec.ts` импортирует `Client`/`InMemoryTransport` для тестов через
+   `@letar/mcp-test-kit` — иначе он не нужен.
    `@letar/mcp-server-kit` даёт `parseDotEnv`/`text`/`errorText`/`pretty`/`createSecretHttpClient`
    — не копируй их заново в `config.ts`/`client.ts`/`server.ts` новой библиотеки, импортируй.
 3. Донастрой `project.json`:
@@ -109,81 +121,67 @@ await server.connect(transport)
    ```
 5. `bun install`, перезапусти Claude Code, чтобы новый MCP-сервер подхватился.
 
-## ⚠️ Критичная ловушка — версия `@modelcontextprotocol/sdk` должна быть точным пином
+## ⚠️ Критичная ловушка — версия `@modelcontextprotocol/{server,client}` должна быть точным пином
 
-`deploy-mcp` и `form-mcp` изначально были заведены с `"@modelcontextprotocol/sdk": "^1.29.0"`
-(диапазон). Диапазон разрешает `bun install` выделить **отдельную свежую копию** SDK
-(например 1.30.0) вместо переиспользования уже установленной в монорепо версии — а внутренняя
-резолюция `zod` у этой копии SDK расходится с `zod`, который использует сама библиотека. Это
-ломает перегрузки `server.tool()` с непонятной ошибкой:
+Диапазон (`^2.0.0`) разрешает `bun install` выделить **отдельную свежую копию** пакета вместо
+переиспользования уже установленной в монорепо версии — а внутренняя резолюция `zod` у этой
+копии расходится с `zod`, который использует сама библиотека. Это ломает перегрузки
+`server.registerTool()` с непонятной ошибкой:
 
 ```
 No overload matches this call.
 Argument of type 'string' is not assignable to parameter of type 'ZodRawShapeCompat'.
 ```
 
-Ошибка указывает на **описание тула** (второй аргумент `server.tool(...)`), что сбивает с
-толку — реальная причина не в схеме и не в тексте описания, а в расхождении версий SDK/zod
-между копиями.
+Ошибка указывает на **описание тула**, что сбивает с толку — реальная причина не в схеме и не в
+тексте описания, а в расхождении версий пакета/zod между копиями. Тот же класс проблемы (тогда —
+у `@modelcontextprotocol/sdk` v1) был найден и вылечен ровно так же 2026-08-06.
 
-**Лечится точным пином без `^`:**
+**Лечится точным пином без `^`** — во всех MCP-либах монорепо (`deploy-mcp`, `form-mcp`,
+`glitchtip-mcp`, `mcp-test-kit`, `studio-mcp`, `studio-time-mcp`, `umami-mcp`) и в двух
+приложениях, использующих пакет напрямую без обёртки-либы (`synth`, `domwellbes`):
 
 ```json
-"@modelcontextprotocol/sdk": "1.29.0"
+"@modelcontextprotocol/server": "2.0.0"
 ```
 
-Актуальную версию смотри в уже работающей библиотеке (`libs/deploy-mcp/package.json`) или через
-`grep`:
+Актуальную версию смотри в `scripts/intentional-pins.json` или через `grep`:
 
 ```bash
 grep -n '"@letar/deploy-mcp"' -A3 bun.lock | grep modelcontextprotocol
 ```
 
-Затем `bun install` заново. Все семь MCP-либ (`deploy-mcp`, `form-mcp`, `glitchtip-mcp`,
-`mcp-test-kit`, `studio-mcp`, `studio-time-mcp`, `umami-mcp`) держат точный пин SDK (на
-2026-09-11 — `1.30.0`, синхронно с корневым `^1.30.0`) — `form-mcp` был последним с диапазоном,
-починен 2026-08-06 (диагностировано через `nx typecheck @letar/form-mcp`: `No overload matches
-this call ... ZodRawShapeCompat` на каждом `server.tool()`/`server.prompt()`; после точного пина
-и `bun install` — зелёный). `@letar/mcp-server-kit` от этой ловушки не зависит — сам SDK не
-импортирует, версию `@modelcontextprotocol/sdk` не резолвит.
+Затем `bun install` заново. `@letar/mcp-server-kit` от этой ловушки не зависит — сам пакет не
+импортирует, версию `@modelcontextprotocol/*` не резолвит.
 
-### ⚠️ 2026-09-11: пина SDK недостаточно — нужен ещё пин `zod` под саму SDK
+### Пина `@modelcontextprotocol/*` недостаточно — нужен синхронный пин `zod`
 
-Точный пин `@modelcontextprotocol/sdk` (выше) решает только расхождение версий **самого SDK**
-между копиями. Он не защищает от второго, независимого источника той же по симптомам ошибки:
-`bun update` в корне поднял `better-auth` до версии, которая сама требует `zod: "^4.5.4"` —
-диапазон уже, чем текущий корневой пин `zod@4.4.3` (§134,
-[root-pin-peer-drift.md](/.claude/docs/root-pin-peer-drift.md)). Это заставило bun выделить
-**отдельную вложенную копию** `zod` персонально для `@modelcontextprotocol/sdk` (её видно как
-`"@modelcontextprotocol/sdk/zod"` в `bun.lock`), даже когда версия самого SDK у всех копий
-синхронна. `z.string()`/`z.enum()` и т.п. из лишь БЛИЗКОЙ, но другой физической копии `zod`
-(взятой из корневого пина или из собственного `"zod"` поля либы) не совпадают по типу с
-`AnySchema`/`ZodTypeAny`, которые ждёт SDK — та же by-symptom ошибка `TS2322: Type 'ZodString' is
-not assignable to type 'AnySchema'` на каждом `server.tool()`.
+Точный пин выше решает только расхождение версий **самого пакета** между копиями. Он не
+защищает от второго, независимого источника той же по симптомам ошибки: любой сторонний
+потребитель `zod` с более узким диапазоном (`better-auth`, `@zenstackhq/*` и т.п.) заставляет bun
+выделить **отдельную вложенную копию** `zod` персонально для `@modelcontextprotocol/*` (её видно
+как `"@modelcontextprotocol/server/zod"` в `bun.lock`), даже когда версия самого пакета у всех
+копий синхронна. `z.string()`/`z.enum()` и т.п. из лишь БЛИЗКОЙ, но другой физической копии `zod`
+не совпадают по типу с `AnySchema`/`ZodTypeAny`, которые ждёт пакет — та же by-symptom ошибка
+`TS2322: Type 'ZodString' is not assignable to type 'AnySchema'` на каждом `registerTool()`.
 
-**Лечится вторым точным пином — `"zod"` в самой либе, версией, которая совпадает с тем, что
-резолвится под SDK:**
+**Лечится вторым точным пином — `"zod"` в самой либе, версией, которая совпадает с корневой**
+(на 2026-09-16 — `4.6.5`, см. запись `zod` в `scripts/intentional-pins.json`):
 
 ```bash
-grep -n '"@modelcontextprotocol/sdk/zod"' bun.lock
-# "@modelcontextprotocol/sdk/zod": ["zod@4.6.2", ...]  ← вот эту версию и пинуй
+grep -n '"@modelcontextprotocol/server/zod"' bun.lock
+# должно быть пусто при совпадении версий — если непусто, вот эту версию и пинуй
 ```
 
 ```json
-"zod": "4.6.2"
+"zod": "4.6.5"
 ```
 
-Затронуты все семь MCP-либ разом (все использовали общий корневой пин `zod@4.4.3`, ни один из
-семи не переживёт следующего чужого апдейта `better-auth`/`@zenstackhq/*`/другого потребителя
-`zod` без повторной сверки). Плюс два приложения, использующих SDK напрямую без обёртки-либы
-(`domwellbes`, `synth` — `src/mcp/server.ts`) — им нужен собственный явный `"zod"` в
-`dependencies` того же значения, иначе они наследуют корневой `zod@4.4.3` и ловят ту же ошибку.
-
-Эта развязка zod/SDK хрупкая по конструкции: она зависит не от версии самого SDK, а от того, что
-требует zod-diапазон САМЫЙ строгий из ВСЕХ потребителей zod в графе на момент установки — при
-следующем `bun update` версия под `@modelcontextprotocol/sdk/zod` может снова сдвинуться, и пин
-опять разъедется. Проверять этой же командой (`grep '"@modelcontextprotocol/sdk/zod"' bun.lock`)
-при каждом `infra:deps-update`, если он трогает `better-auth`/`zod`/сам SDK.
+Эта развязка zod/пакета хрупкая по конструкции: она зависит не от версии самого пакета, а от
+того, что требует zod-диапазон САМЫЙ строгий из ВСЕХ потребителей zod в графе на момент
+установки — при следующем `bun update` версия под `@modelcontextprotocol/server/zod` может
+снова сдвинуться, и пин опять разъедется. Проверять этой же командой при каждом
+`infra:deps-update`, если он трогает `better-auth`/`zod`/сам пакет.
 
 ## Формат ответа тула — `@letar/mcp-server-kit`
 
@@ -202,8 +200,8 @@ import { errorText, parseDotEnv, pretty, text } from '@letar/mcp-server-kit'
 
 ````typescript
 // Обе функции возвращают ОДНУ и ту же форму (с полем isError) БЕЗ аннотации типа —
-// так вывод типов SDK-колбэка работает. Аннотация или union из двух разных форм
-// ломает overload-резолюцию tool() (ZodRawShapeCompat).
+// так вывод типов колбэка работает. Аннотация или union из двух разных форм
+// ломает overload-резолюцию registerTool() (ZodRawShape/StandardSchemaWithJSON).
 
 export function text(body: string) {
   return { content: [{ type: 'text' as const, text: body }], isError: false as boolean }
@@ -219,8 +217,8 @@ export function pretty(data: unknown): string {
 ````
 
 Причина — если явно аннотировать возвращаемый тип обработчика (или если `text`/`errorText`
-возвращают структурно разные формы), TypeScript не может вывести перегрузку `server.tool()` и
-падает с той же TS2769. Обе функции обязаны возвращать **одинаковую по форме** структуру
+возвращают структурно разные формы), TypeScript не может вывести перегрузку
+`server.registerTool()` и падает с той же TS2769. Обе функции обязаны возвращать **одинаковую по форме** структуру
 (`content` + `isError`), и тип должен выводиться, а не задаваться явно — это верно и для новых
 хелперов, если когда-нибудь понадобится расширить `@letar/mcp-server-kit`.
 
@@ -290,7 +288,7 @@ MCP-сервер, запущенный как отдельный stdio-проц�
 
 Если новый инструмент падает с `No overload matches this call ... ZodRawShapeCompat`:
 
-1. **Сначала** проверь версию SDK в lockfile, а не структуру схемы:
+1. **Сначала** проверь версию `@modelcontextprotocol/server` в lockfile, а не структуру схемы:
    ```bash
    grep -n '"@letar/<name>-mcp"' -A3 bun.lock | grep modelcontextprotocol
    ```
