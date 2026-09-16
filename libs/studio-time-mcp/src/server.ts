@@ -8,7 +8,7 @@
  */
 
 import { errorText, pretty, text } from '@letar/mcp-server-kit'
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
+import { McpServer } from '@modelcontextprotocol/server'
 import { randomUUID } from 'node:crypto'
 import { z } from 'zod'
 import { studioTimeRequest } from './client.js'
@@ -30,14 +30,13 @@ export function createStudioTimeMcpServer(): McpServer {
   const server = new McpServer({ name: '@letar/studio-time-mcp', version: '0.1.0' }, { capabilities: { tools: {} } })
 
   // ─── time_start ──────────────────────────────────────────────────────────────
-  server.tool(
-    'time_start',
-    [
+  server.registerTool('time_start', {
+    description: [
       'Стартует таймер по приложению (проект резолвится через Project.repoSlug в studio).',
       'Останавливает предыдущий активный таймер, если он был — эквивалент time_switch.',
       'Записи всегда идут черновиком (status: DRAFT) — владелец утверждает их в studio перед выставлением клиенту.',
     ].join('\n'),
-    {
+    inputSchema: z.object({
       app: z
         .string()
         .min(1)
@@ -69,61 +68,58 @@ export function createStudioTimeMcpServer(): McpServer {
           'Название этапа проекта — резолвится среди открытых этапов проекта или заводится новый. '
             + 'Запись времени привяжется к нему. Закрыть этап — time_stage_close',
         ),
-    },
-    async ({ app, description, kind, idempotencyKey, sessionRef, stage }) => {
-      const key = idempotencyKey ?? randomUUID()
-      try {
-        const res = await studioTimeRequest({
-          method: 'POST',
-          path: '/api/mcp/time/start',
-          body: { app, description, kind, idempotencyKey: key, sessionRef: sessionRef ?? defaultSessionRef(), stage },
-        })
-        if (!res.ok) {
-          return errorText(`❌ time_start(${app}): ${pretty(res.json)}`)
-        }
-        const warningLine = res.json.warning ? `\n⚠️ ${res.json.warning}\n` : ''
-        return text(`⏱ Таймер запущен: **${app}** — ${description}${warningLine}\n${pretty(res.json.data)}`)
-      } catch (err) {
-        return errorText(`❌ time_start(${app}): ${err instanceof Error ? err.message : String(err)}`)
+    }),
+  }, async ({ app, description, kind, idempotencyKey, sessionRef, stage }) => {
+    const key = idempotencyKey ?? randomUUID()
+    try {
+      const res = await studioTimeRequest({
+        method: 'POST',
+        path: '/api/mcp/time/start',
+        body: { app, description, kind, idempotencyKey: key, sessionRef: sessionRef ?? defaultSessionRef(), stage },
+      })
+      if (!res.ok) {
+        return errorText(`❌ time_start(${app}): ${pretty(res.json)}`)
       }
-    },
-  )
+      const warningLine = res.json.warning ? `\n⚠️ ${res.json.warning}\n` : ''
+      return text(`⏱ Таймер запущен: **${app}** — ${description}${warningLine}\n${pretty(res.json.data)}`)
+    } catch (err) {
+      return errorText(`❌ time_start(${app}): ${err instanceof Error ? err.message : String(err)}`)
+    }
+  })
 
   // ─── time_switch ─────────────────────────────────────────────────────────────
-  server.tool(
-    'time_switch',
-    [
+  server.registerTool('time_switch', {
+    description: [
       'Смена контекста работы — ОБЯЗАТЕЛЬНЫЙ механизм при переходе к другому проекту/приложению',
       '(сессия ≠ проект: одна рабочая сессия часто затрагивает несколько проектов подряд).',
       'Технически идентичен time_start (тот сам останавливает предыдущую запись и стартует новую)',
       '— отдельный тул только ради явной семантики для тебя самого, не ради разного поведения.',
     ].join('\n'),
-    {
+    inputSchema: z.object({
       app: z.string().min(1).describe('repoSlug приложения, на которое переключаешься'),
       description: z.string().min(1).max(2000).describe('Чем занимаешься теперь — видит клиент'),
       kind: TIME_KIND.optional().describe('Тип активности: WORK (по умолчанию) / MEETING / TRAVEL / ADMIN'),
       idempotencyKey: z.string().optional().describe('Ключ идемпотентности — см. time_start'),
       sessionRef: z.string().optional().describe('Идентификатор сессии — см. time_start'),
       stage: z.string().optional().describe('Название этапа проекта — см. time_start'),
-    },
-    async ({ app, description, kind, idempotencyKey, sessionRef, stage }) => {
-      const key = idempotencyKey ?? randomUUID()
-      try {
-        const res = await studioTimeRequest({
-          method: 'POST',
-          path: '/api/mcp/time/switch',
-          body: { app, description, kind, idempotencyKey: key, sessionRef: sessionRef ?? defaultSessionRef(), stage },
-        })
-        if (!res.ok) {
-          return errorText(`❌ time_switch(${app}): ${pretty(res.json)}`)
-        }
-        const warningLine = res.json.warning ? `\n⚠️ ${res.json.warning}\n` : ''
-        return text(`🔀 Переключено на: **${app}** — ${description}${warningLine}\n${pretty(res.json.data)}`)
-      } catch (err) {
-        return errorText(`❌ time_switch(${app}): ${err instanceof Error ? err.message : String(err)}`)
+    }),
+  }, async ({ app, description, kind, idempotencyKey, sessionRef, stage }) => {
+    const key = idempotencyKey ?? randomUUID()
+    try {
+      const res = await studioTimeRequest({
+        method: 'POST',
+        path: '/api/mcp/time/switch',
+        body: { app, description, kind, idempotencyKey: key, sessionRef: sessionRef ?? defaultSessionRef(), stage },
+      })
+      if (!res.ok) {
+        return errorText(`❌ time_switch(${app}): ${pretty(res.json)}`)
       }
-    },
-  )
+      const warningLine = res.json.warning ? `\n⚠️ ${res.json.warning}\n` : ''
+      return text(`🔀 Переключено на: **${app}** — ${description}${warningLine}\n${pretty(res.json.data)}`)
+    } catch (err) {
+      return errorText(`❌ time_switch(${app}): ${err instanceof Error ? err.message : String(err)}`)
+    }
+  })
 
   const sessionRefField = z
     .string()
@@ -134,173 +130,161 @@ export function createStudioTimeMcpServer(): McpServer {
     )
 
   // ─── time_stop ───────────────────────────────────────────────────────────────
-  server.tool(
-    'time_stop',
-    'Останавливает активный таймер ЭТОЙ сессии, если он есть.',
-    { sessionRef: sessionRefField },
-    async ({ sessionRef }) => {
-      try {
-        const res = await studioTimeRequest({
-          method: 'POST',
-          path: '/api/mcp/time/stop',
-          body: { sessionRef: sessionRef ?? defaultSessionRef() },
-        })
-        if (!res.ok) {
-          return errorText(`❌ time_stop: ${pretty(res.json)}`)
-        }
-        if (!res.json.data) {
-          return text('ℹ️ Активного таймера не было.')
-        }
-        return text(`⏹ Таймер остановлен.\n\n${pretty(res.json.data)}`)
-      } catch (err) {
-        return errorText(`❌ time_stop: ${err instanceof Error ? err.message : String(err)}`)
+  server.registerTool('time_stop', {
+    description: 'Останавливает активный таймер ЭТОЙ сессии, если он есть.',
+    inputSchema: z.object({ sessionRef: sessionRefField }),
+  }, async ({ sessionRef }) => {
+    try {
+      const res = await studioTimeRequest({
+        method: 'POST',
+        path: '/api/mcp/time/stop',
+        body: { sessionRef: sessionRef ?? defaultSessionRef() },
+      })
+      if (!res.ok) {
+        return errorText(`❌ time_stop: ${pretty(res.json)}`)
       }
-    },
-  )
+      if (!res.json.data) {
+        return text('ℹ️ Активного таймера не было.')
+      }
+      return text(`⏹ Таймер остановлен.\n\n${pretty(res.json.data)}`)
+    } catch (err) {
+      return errorText(`❌ time_stop: ${err instanceof Error ? err.message : String(err)}`)
+    }
+  })
 
   // ─── time_pause ──────────────────────────────────────────────────────────────
-  server.tool(
-    'time_pause',
-    [
+  server.registerTool('time_pause', {
+    description: [
       'Ставит активный таймер ЭТОЙ сессии на паузу: запись остаётся открытой, но время перестаёт капать.',
       'Возобновить — time_resume. Зови, когда владелец говорит «пауза» или отвлекается на другое;',
       'на следующем его сообщении сразу вызывай time_resume.',
       'Это НЕ остановка: чтобы закрыть запись, нужен time_stop, а чтобы закрыть небиллируемой — time_discard.',
     ].join('\n'),
-    { sessionRef: sessionRefField },
-    async ({ sessionRef }) => {
-      try {
-        const res = await studioTimeRequest({
-          method: 'POST',
-          path: '/api/mcp/time/pause',
-          body: { sessionRef: sessionRef ?? defaultSessionRef() },
-        })
-        if (!res.ok) {
-          return errorText(`❌ time_pause: ${pretty(res.json)}`)
-        }
-        if (!res.json.data) {
-          return text('ℹ️ Активного таймера не было.')
-        }
-        return text(`⏸ Таймер на паузе — время не идёт. Возобновить: time_resume.\n\n${pretty(res.json.data)}`)
-      } catch (err) {
-        return errorText(`❌ time_pause: ${err instanceof Error ? err.message : String(err)}`)
+    inputSchema: z.object({ sessionRef: sessionRefField }),
+  }, async ({ sessionRef }) => {
+    try {
+      const res = await studioTimeRequest({
+        method: 'POST',
+        path: '/api/mcp/time/pause',
+        body: { sessionRef: sessionRef ?? defaultSessionRef() },
+      })
+      if (!res.ok) {
+        return errorText(`❌ time_pause: ${pretty(res.json)}`)
       }
-    },
-  )
+      if (!res.json.data) {
+        return text('ℹ️ Активного таймера не было.')
+      }
+      return text(`⏸ Таймер на паузе — время не идёт. Возобновить: time_resume.\n\n${pretty(res.json.data)}`)
+    } catch (err) {
+      return errorText(`❌ time_pause: ${err instanceof Error ? err.message : String(err)}`)
+    }
+  })
 
   // ─── time_resume ─────────────────────────────────────────────────────────────
-  server.tool(
-    'time_resume',
-    [
+  server.registerTool('time_resume', {
+    description: [
       'Снимает паузу с активного таймера ЭТОЙ сессии — время снова идёт.',
       'Вызывай сразу, как владелец продолжил взаимодействие после «паузы», не дожидаясь отдельной просьбы.',
     ].join('\n'),
-    { sessionRef: sessionRefField },
-    async ({ sessionRef }) => {
-      try {
-        const res = await studioTimeRequest({
-          method: 'POST',
-          path: '/api/mcp/time/resume',
-          body: { sessionRef: sessionRef ?? defaultSessionRef() },
-        })
-        if (!res.ok) {
-          return errorText(`❌ time_resume: ${pretty(res.json)}`)
-        }
-        if (!res.json.data) {
-          return text('ℹ️ Активного таймера не было.')
-        }
-        return text(`▶️ Таймер продолжен.\n\n${pretty(res.json.data)}`)
-      } catch (err) {
-        return errorText(`❌ time_resume: ${err instanceof Error ? err.message : String(err)}`)
+    inputSchema: z.object({ sessionRef: sessionRefField }),
+  }, async ({ sessionRef }) => {
+    try {
+      const res = await studioTimeRequest({
+        method: 'POST',
+        path: '/api/mcp/time/resume',
+        body: { sessionRef: sessionRef ?? defaultSessionRef() },
+      })
+      if (!res.ok) {
+        return errorText(`❌ time_resume: ${pretty(res.json)}`)
       }
-    },
-  )
+      if (!res.json.data) {
+        return text('ℹ️ Активного таймера не было.')
+      }
+      return text(`▶️ Таймер продолжен.\n\n${pretty(res.json.data)}`)
+    } catch (err) {
+      return errorText(`❌ time_resume: ${err instanceof Error ? err.message : String(err)}`)
+    }
+  })
 
   // ─── time_discard ────────────────────────────────────────────────────────────
-  server.tool(
-    'time_discard',
-    [
+  server.registerTool('time_discard', {
+    description: [
       'Выключатель: останавливает активный таймер ЭТОЙ сессии и помечает запись небиллируемой',
       '(billable: false, nonBillReason: INTERNAL). Используй, когда копаешься в проекте из',
       'любопытства или пробуешь подход, который не пойдёт в работу — не оставляй это как обычный time_stop,',
       'иначе владельцу придётся вручную чистить черновик от небиллируемого времени.',
       'Раньше этот инструмент назывался time_pause, хотя ничего не приостанавливал.',
     ].join('\n'),
-    { sessionRef: sessionRefField },
-    async ({ sessionRef }) => {
-      try {
-        const res = await studioTimeRequest({
-          method: 'POST',
-          path: '/api/mcp/time/discard',
-          body: { sessionRef: sessionRef ?? defaultSessionRef() },
-        })
-        if (!res.ok) {
-          return errorText(`❌ time_discard: ${pretty(res.json)}`)
-        }
-        if (!res.json.data) {
-          return text('ℹ️ Активного таймера не было.')
-        }
-        return text(`🚫 Таймер остановлен, запись помечена небиллируемой (INTERNAL).\n\n${pretty(res.json.data)}`)
-      } catch (err) {
-        return errorText(`❌ time_discard: ${err instanceof Error ? err.message : String(err)}`)
+    inputSchema: z.object({ sessionRef: sessionRefField }),
+  }, async ({ sessionRef }) => {
+    try {
+      const res = await studioTimeRequest({
+        method: 'POST',
+        path: '/api/mcp/time/discard',
+        body: { sessionRef: sessionRef ?? defaultSessionRef() },
+      })
+      if (!res.ok) {
+        return errorText(`❌ time_discard: ${pretty(res.json)}`)
       }
-    },
-  )
+      if (!res.json.data) {
+        return text('ℹ️ Активного таймера не было.')
+      }
+      return text(`🚫 Таймер остановлен, запись помечена небиллируемой (INTERNAL).\n\n${pretty(res.json.data)}`)
+    } catch (err) {
+      return errorText(`❌ time_discard: ${err instanceof Error ? err.message : String(err)}`)
+    }
+  })
 
   // ─── time_note ───────────────────────────────────────────────────────────────
-  server.tool(
-    'time_note',
-    'Уточняет описание активной записи ЭТОЙ сессии без остановки таймера.',
-    {
+  server.registerTool('time_note', {
+    description: 'Уточняет описание активной записи ЭТОЙ сессии без остановки таймера.',
+    inputSchema: z.object({
       description: z.string().min(1).max(2000).describe('Новое описание — видит клиент'),
       sessionRef: sessionRefField,
-    },
-    async ({ description, sessionRef }) => {
-      try {
-        const res = await studioTimeRequest({
-          method: 'POST',
-          path: '/api/mcp/time/note',
-          body: { description, sessionRef: sessionRef ?? defaultSessionRef() },
-        })
-        if (!res.ok) {
-          return errorText(`❌ time_note: ${pretty(res.json)}`)
-        }
-        return text(`📝 Описание обновлено.\n\n${pretty(res.json.data)}`)
-      } catch (err) {
-        return errorText(`❌ time_note: ${err instanceof Error ? err.message : String(err)}`)
+    }),
+  }, async ({ description, sessionRef }) => {
+    try {
+      const res = await studioTimeRequest({
+        method: 'POST',
+        path: '/api/mcp/time/note',
+        body: { description, sessionRef: sessionRef ?? defaultSessionRef() },
+      })
+      if (!res.ok) {
+        return errorText(`❌ time_note: ${pretty(res.json)}`)
       }
-    },
-  )
+      return text(`📝 Описание обновлено.\n\n${pretty(res.json.data)}`)
+    } catch (err) {
+      return errorText(`❌ time_note: ${err instanceof Error ? err.message : String(err)}`)
+    }
+  })
 
   // ─── time_status ─────────────────────────────────────────────────────────────
-  server.tool(
-    'time_status',
-    'Что идёт сейчас у ЭТОЙ сессии: активный проект, описание, с какого времени.',
-    { sessionRef: sessionRefField },
-    async ({ sessionRef }) => {
-      try {
-        const res = await studioTimeRequest({
-          path: '/api/mcp/time/status',
-          query: { sessionRef: sessionRef ?? defaultSessionRef() },
-        })
-        if (!res.ok) {
-          return errorText(`❌ time_status: ${pretty(res.json)}`)
-        }
-        if (!res.json.data) {
-          return text('ℹ️ Таймер сейчас не идёт.')
-        }
-        return text(`⏱ Идёт таймер:\n\n${pretty(res.json.data)}`)
-      } catch (err) {
-        return errorText(`❌ time_status: ${err instanceof Error ? err.message : String(err)}`)
+  server.registerTool('time_status', {
+    description: 'Что идёт сейчас у ЭТОЙ сессии: активный проект, описание, с какого времени.',
+    inputSchema: z.object({ sessionRef: sessionRefField }),
+  }, async ({ sessionRef }) => {
+    try {
+      const res = await studioTimeRequest({
+        path: '/api/mcp/time/status',
+        query: { sessionRef: sessionRef ?? defaultSessionRef() },
+      })
+      if (!res.ok) {
+        return errorText(`❌ time_status: ${pretty(res.json)}`)
       }
-    },
-  )
+      if (!res.json.data) {
+        return text('ℹ️ Таймер сейчас не идёт.')
+      }
+      return text(`⏱ Идёт таймер:\n\n${pretty(res.json.data)}`)
+    } catch (err) {
+      return errorText(`❌ time_status: ${err instanceof Error ? err.message : String(err)}`)
+    }
+  })
 
   // ─── time_log ────────────────────────────────────────────────────────────────
-  server.tool(
-    'time_log',
-    'Записывает время задним числом — не трогает активный таймер (например созвон/дорогу, которые не отследил в моменте таймером).',
-    {
+  server.registerTool('time_log', {
+    description:
+      'Записывает время задним числом — не трогает активный таймер (например созвон/дорогу, которые не отследил в моменте таймером).',
+    inputSchema: z.object({
       app: z.string().min(1).describe('repoSlug приложения'),
       minutes: z
         .number()
@@ -310,78 +294,73 @@ export function createStudioTimeMcpServer(): McpServer {
       description: z.string().min(1).max(2000).describe('Чем занимался — видит клиент'),
       kind: TIME_KIND.optional().describe('Тип активности: WORK (по умолчанию) / MEETING / TRAVEL / ADMIN'),
       idempotencyKey: z.string().optional().describe('Ключ идемпотентности — см. time_start'),
-    },
-    async ({ app, minutes, description, kind, idempotencyKey }) => {
-      const key = idempotencyKey ?? randomUUID()
-      try {
-        const res = await studioTimeRequest({
-          method: 'POST',
-          path: '/api/mcp/time/log',
-          body: { app, minutes, description, kind, idempotencyKey: key },
-        })
-        if (!res.ok) {
-          return errorText(`❌ time_log(${app}): ${pretty(res.json)}`)
-        }
-        return text(
-          `📋 Записано задним числом: **${app}**, ${minutes} мин — ${description}\n\n${pretty(res.json.data)}`,
-        )
-      } catch (err) {
-        return errorText(`❌ time_log(${app}): ${err instanceof Error ? err.message : String(err)}`)
+    }),
+  }, async ({ app, minutes, description, kind, idempotencyKey }) => {
+    const key = idempotencyKey ?? randomUUID()
+    try {
+      const res = await studioTimeRequest({
+        method: 'POST',
+        path: '/api/mcp/time/log',
+        body: { app, minutes, description, kind, idempotencyKey: key },
+      })
+      if (!res.ok) {
+        return errorText(`❌ time_log(${app}): ${pretty(res.json)}`)
       }
-    },
-  )
+      return text(
+        `📋 Записано задним числом: **${app}**, ${minutes} мин — ${description}\n\n${pretty(res.json.data)}`,
+      )
+    } catch (err) {
+      return errorText(`❌ time_log(${app}): ${err instanceof Error ? err.message : String(err)}`)
+    }
+  })
 
   // ─── time_stage_close ────────────────────────────────────────────────────────
-  server.tool(
-    'time_stage_close',
-    [
+  server.registerTool('time_stage_close', {
+    description: [
       'Закрывает этап проекта (ProjectStage.isDone = true) по названию — этап должен быть',
       'открытым (заведён через параметр stage у time_start/time_switch либо вручную в studio).',
       'Не трогает активный таймер: закрытие этапа и остановка записи времени по нему независимы.',
     ].join('\n'),
-    {
+    inputSchema: z.object({
       app: z.string().min(1).describe('repoSlug приложения'),
       stage: z.string().min(1).max(300).describe('Название открытого этапа — должно совпадать с тем, что при создании'),
-    },
-    async ({ app, stage }) => {
-      try {
-        const res = await studioTimeRequest({
-          method: 'POST',
-          path: '/api/mcp/time/stage/close',
-          body: { app, stage },
-        })
-        if (!res.ok) {
-          return errorText(`❌ time_stage_close(${app}, ${stage}): ${pretty(res.json)}`)
-        }
-        return text(`✅ Этап закрыт: **${stage}** (${app}).\n\n${pretty(res.json.data)}`)
-      } catch (err) {
-        return errorText(`❌ time_stage_close(${app}, ${stage}): ${err instanceof Error ? err.message : String(err)}`)
+    }),
+  }, async ({ app, stage }) => {
+    try {
+      const res = await studioTimeRequest({
+        method: 'POST',
+        path: '/api/mcp/time/stage/close',
+        body: { app, stage },
+      })
+      if (!res.ok) {
+        return errorText(`❌ time_stage_close(${app}, ${stage}): ${pretty(res.json)}`)
       }
-    },
-  )
+      return text(`✅ Этап закрыт: **${stage}** (${app}).\n\n${pretty(res.json.data)}`)
+    } catch (err) {
+      return errorText(`❌ time_stage_close(${app}, ${stage}): ${err instanceof Error ? err.message : String(err)}`)
+    }
+  })
 
   // ─── time_fix_internal_billable ─────────────────────────────────────────────
-  server.tool(
-    'time_fix_internal_billable',
-    [
+  server.registerTool('time_fix_internal_billable', {
+    description: [
       'Административная правка: помечает небиллируемыми (INTERNAL) все ещё не выставленные в',
       'счёт записи времени по некоммерческим проектам (Project.isCommercial = false) — у таких',
       'проектов нет клиента, платить некому. Не трогает записи, уже вошедшие в выставленный счёт.',
       'Идемпотентен: повторный вызов, когда чинить нечего, вернёт нулевой результат.',
     ].join('\n'),
-    {},
-    async () => {
-      try {
-        const res = await studioTimeRequest({ method: 'POST', path: '/api/mcp/time/fix-internal-billable' })
-        if (!res.ok) {
-          return errorText(`❌ time_fix_internal_billable: ${pretty(res.json)}`)
-        }
-        return text(`🔧 Правка billable-статуса выполнена.\n\n${pretty(res.json.data)}`)
-      } catch (err) {
-        return errorText(`❌ time_fix_internal_billable: ${err instanceof Error ? err.message : String(err)}`)
+    inputSchema: z.object({}),
+  }, async () => {
+    try {
+      const res = await studioTimeRequest({ method: 'POST', path: '/api/mcp/time/fix-internal-billable' })
+      if (!res.ok) {
+        return errorText(`❌ time_fix_internal_billable: ${pretty(res.json)}`)
       }
-    },
-  )
+      return text(`🔧 Правка billable-статуса выполнена.\n\n${pretty(res.json.data)}`)
+    } catch (err) {
+      return errorText(`❌ time_fix_internal_billable: ${err instanceof Error ? err.message : String(err)}`)
+    }
+  })
 
   return server
 }
