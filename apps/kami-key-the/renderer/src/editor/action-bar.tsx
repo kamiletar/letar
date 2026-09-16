@@ -23,20 +23,23 @@ export function ActionBar({ isDirty, canUndo, canRedo, onSave, onReset, onUndo, 
   return (
     <Flex
       align="center"
+      wrap="wrap"
       gap="3"
-      h="56px"
+      rowGap="2"
+      minH="56px"
+      py="2"
       px="5"
       flexShrink={0}
       bg="bg.subtle"
       borderTopWidth="1px"
       borderColor="border.subtle"
     >
-      <Flex align="center" gap="2" flex="1" minW="0">
+      <Flex align="center" gap="2" flex="1" minW="120px">
         {isDirty
           ? (
             <>
               <chakra.span w="8px" h="8px" rounded="full" bg="fg.warning" flexShrink={0} />
-              <Text fontSize="sm" color="fg.warning">
+              <Text fontSize="sm" color="fg.warning" truncate>
                 Есть несохранённые изменения
               </Text>
             </>
@@ -44,7 +47,7 @@ export function ActionBar({ isDirty, canUndo, canRedo, onSave, onReset, onUndo, 
           : (
             <>
               <LuCircleCheck size={16} color="var(--chakra-colors-fg-subtle)" />
-              <Text fontSize="sm" color="fg.subtle">
+              <Text fontSize="sm" color="fg.subtle" truncate>
                 Все изменения сохранены
               </Text>
             </>
@@ -72,6 +75,7 @@ export function ActionBar({ isDirty, canUndo, canRedo, onSave, onReset, onUndo, 
         rounded="l2"
         fontSize="sm"
         color="fg.muted"
+        flexShrink={0}
         _hover={{ bg: 'bg.muted' }}
         _disabled={{ opacity: 0.4, cursor: 'default' }}
         disabled={!isDirty}
@@ -93,6 +97,7 @@ export function ActionBar({ isDirty, canUndo, canRedo, onSave, onReset, onUndo, 
         fontWeight="600"
         bg="brand.solid"
         color="brand.contrast"
+        flexShrink={0}
         _hover={{ bg: 'brand.emphasized' }}
         _disabled={{ opacity: 0.5, cursor: 'default' }}
         disabled={!isDirty}
