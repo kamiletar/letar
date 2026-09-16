@@ -38,18 +38,26 @@ const SUPERSCRIPT_TWO = `
         stroke-linecap="round" stroke-linejoin="round" />
 `
 
-function buildSvg(extras) {
+// Кластер K+акут+степень визуально смещён вправо (диагонали K и «2» тянутся к правому краю
+// сильнее, чем стебель — к левому), поэтому весь кластер сдвинут влево на 34px для баланса
+// полей от скруглённого квадрата.
+const GLYPH_SHIFT_X = -34
+
+// Рендерим SVG сразу под целевой пиксельный размер (width/height = size, viewBox неизменен),
+// а не растеризуем один раз в 256 и затем sharp .resize() вниз — ресайз растрового PNG даёт
+// мутную кайму на скруглённых углах (полупрозрачные пиксели скругления ресемплятся отдельно
+// от непрозрачной заливки). Прямая растеризация librsvg под каждый размер даёт чистый край.
+function buildSvg(extras, size) {
   return `
-<svg xmlns="http://www.w3.org/2000/svg" width="${ICON_SIZE}" height="${ICON_SIZE}" viewBox="0 0 256 256">
+<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 256 256">
   <rect width="256" height="256" rx="44" fill="${BG}" />
-  ${K_GLYPH}
-  ${extras}
+  <g transform="translate(${GLYPH_SHIFT_X},0)">
+    ${K_GLYPH}
+    ${extras}
+  </g>
 </svg>
 `.trim()
 }
-
-const SVG_FULL = buildSvg(ACUTE_ACCENT + SUPERSCRIPT_TWO)
-const SVG_ACCENT_ONLY = buildSvg(ACUTE_ACCENT)
 
 async function main() {
   const resourcesDir = join(APP_DIR, 'resources')
@@ -57,14 +65,14 @@ async function main() {
   await mkdir(resourcesDir, { recursive: true })
   await mkdir(publicDir, { recursive: true })
 
-  const pngBuffer = await sharp(Buffer.from(SVG_FULL)).png().toBuffer()
+  const pngBuffer = await sharp(Buffer.from(buildSvg(ACUTE_ACCENT + SUPERSCRIPT_TWO, ICON_SIZE))).png().toBuffer()
   await writeFile(join(resourcesDir, 'icon.png'), pngBuffer)
 
   const icoSizes = [16, 24, 32, 48, 64, 128, 256]
   const resizedBuffers = await Promise.all(
     icoSizes.map((size) => {
-      const svg = size < 48 ? SVG_ACCENT_ONLY : SVG_FULL
-      return sharp(Buffer.from(svg)).resize(size, size).png().toBuffer()
+      const extras = size < 48 ? ACUTE_ACCENT : ACUTE_ACCENT + SUPERSCRIPT_TWO
+      return sharp(Buffer.from(buildSvg(extras, size))).png().toBuffer()
     }),
   )
   const icoBuffer = await pngToIco(resizedBuffers)
