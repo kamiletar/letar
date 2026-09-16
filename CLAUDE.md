@@ -292,6 +292,7 @@
 - [electron-shared-runtime-and-settings-patterns](/.claude/docs/electron-shared-runtime-and-settings-patterns.md) `shared/`-рантайм и единый объект настроек — общий паттерн Electron-приложений
 - [electron-window-controls-overlay-pattern](/.claude/docs/electron-window-controls-overlay-pattern.md) `titleBarOverlay` вместо `frame: false`
 - [native-win32-ui-verification-screenshot](/.claude/docs/native-win32-ui-verification-screenshot.md) проверка UI вне Browser pane; ⚠️ двоение — чужая прод-копия
+- [windows-user-away-detection](/.claude/docs/windows-user-away-detection.md) ⚠️ «пользователь отошёл»: флаг экрана без админа, служба не видит ввод
 - [vite-dev-letar-ui-barrel-process-undefined](/.claude/docs/vite-dev-letar-ui-barrel-process-undefined.md) ⚠️ баррель `@letar/ui` тянет `next/*`, `process` не определён
 - [react-native-087-breaking-changes](/.claude/docs/react-native-087-breaking-changes.md) ⚠️ миграция RN 0.85→0.87, тихое ломание declaration merging
 - [android-agp9-windows-toolchain-pitfalls](/.claude/docs/android-agp9-windows-toolchain-pitfalls.md) ⚠️ AGP 9 + Kotlin, лимит путей Windows
