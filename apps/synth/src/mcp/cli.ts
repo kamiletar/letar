@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
+import { StdioServerTransport } from '@modelcontextprotocol/server/stdio'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { createSynthMcpServer } from './server.js'

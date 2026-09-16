@@ -3,10 +3,10 @@
   "version": "0.22.6",
   "private": true,
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.30.0",
     "zod": "4.6.5",
     "@letar/format-utils": "workspace:*",
-    "@letar/hooks": "workspace:*"
+    "@letar/hooks": "workspace:*",
+    "@modelcontextprotocol/server": "2.0.0"
   },
   "nx": {
     "name": "synth",

@@ -1,4 +1,4 @@
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
+import { McpServer } from '@modelcontextprotocol/server'
 import { readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { z } from 'zod/v4'
@@ -67,10 +67,10 @@ export function createSynthMcpServer(options: SynthMcpServerOptions): McpServer 
     {
       description:
         'Подсвечивает золотом ручку/параметр студии и показывает всплывающую подсказку с физической метафорой. Используй, когда объясняешь конкретный параметр в чате.',
-      inputSchema: {
+      inputSchema: z.object({
         name: z.string().min(1).describe('Название параметра, как его видит владелец, напр. "Cutoff"'),
         message: z.string().min(1).describe('Короткое объяснение метафорой — 1-2 фразы'),
-      },
+      }),
     },
     async ({ name: paramName, message }) => {
       await mentor.emit({ kind: 'highlight_param', name: paramName, message })
@@ -80,7 +80,10 @@ export function createSynthMcpServer(options: SynthMcpServerOptions): McpServer 
 
   server.registerTool(
     'dim_all',
-    { description: 'Гасит все подсветки и фокусы ментора в студии — сброс в нейтральное состояние.', inputSchema: {} },
+    {
+      description: 'Гасит все подсветки и фокусы ментора в студии — сброс в нейтральное состояние.',
+      inputSchema: z.object({}),
+    },
     async () => {
       await mentor.emit({ kind: 'dim_all' })
       return { content: [{ type: 'text', text: 'Подсветки погашены.' }] }
@@ -92,7 +95,7 @@ export function createSynthMcpServer(options: SynthMcpServerOptions): McpServer 
     {
       description:
         'Выделяет золотой рамкой и скроллит к целому блоку студии: engine (панель параметров текущего движка), hardware (зеркало SMK-37), performance (клавиатура/пэды), midi (статус MIDI и монитор).',
-      inputSchema: { section: z.enum(['engine', 'hardware', 'performance', 'midi']) },
+      inputSchema: z.object({ section: z.enum(['engine', 'hardware', 'performance', 'midi']) }),
     },
     async ({ section }) => {
       await mentor.emit({ kind: 'focus_section', section })
@@ -108,7 +111,7 @@ export function createSynthMcpServer(options: SynthMcpServerOptions): McpServer 
           ', ',
         )
       }.`,
-      inputSchema: { patchId: z.enum(listDemoPatchIds() as [string, ...string[]]) },
+      inputSchema: z.object({ patchId: z.enum(listDemoPatchIds() as [string, ...string[]]) }),
     },
     async ({ patchId }) => {
       await playDemoSequence(mentor, patchId)
@@ -123,7 +126,7 @@ export function createSynthMcpServer(options: SynthMcpServerOptions): McpServer 
     {
       description:
         'Загружает произвольный патч (JSON модели патча synth — type: fm|subtractive|drumkit) в студию, переключая движок при необходимости.',
-      inputSchema: { patch: PatchSchema },
+      inputSchema: z.object({ patch: PatchSchema }),
     },
     async ({ patch }) => {
       await mentor.emit({ kind: 'load_patch', patch })
@@ -136,7 +139,7 @@ export function createSynthMcpServer(options: SynthMcpServerOptions): McpServer 
     {
       description:
         'Проигрывает произвольную MIDI-последовательность нот прямо в студии (нужен запущенный звук — кнопка ▶ в браузере).',
-      inputSchema: { notes: z.array(MidiNoteInputSchema).min(1).max(256) },
+      inputSchema: z.object({ notes: z.array(MidiNoteInputSchema).min(1).max(256) }),
     },
     async ({ notes }) => {
       await mentor.emit({ kind: 'midi_sequence', notes })
@@ -152,14 +155,14 @@ export function createSynthMcpServer(options: SynthMcpServerOptions): McpServer 
           ', ',
         )
       }. Стили: ${CHORD_STYLES.join(', ')}.`,
-      inputSchema: {
+      inputSchema: z.object({
         root: z.number().int().min(0).max(127).describe('MIDI-нота корня, напр. 60 = C4'),
         chordType: z.enum(CHORD_TYPES),
         style: z.enum(CHORD_STYLES),
         arpeggioStepMs: z.number().min(20).max(2000).optional(),
         noteDurationMs: z.number().min(50).max(10000).optional(),
         velocity: z.number().int().min(1).max(127).optional(),
-      },
+      }),
     },
     async (params) => {
       const notes = generateChordPattern(params)
@@ -177,7 +180,7 @@ export function createSynthMcpServer(options: SynthMcpServerOptions): McpServer 
 
   // ─── РЕСУРСЫ ─────────────────────────────────────────────
 
-  server.resource(
+  server.registerResource(
     'Текущий патч (сводка)',
     'synth://current-patch',
     {
@@ -199,7 +202,7 @@ export function createSynthMcpServer(options: SynthMcpServerOptions): McpServer 
     },
   )
 
-  server.resource(
+  server.registerResource(
     'Опубликованные патчи',
     'synth://patches',
     {
@@ -214,7 +217,7 @@ export function createSynthMcpServer(options: SynthMcpServerOptions): McpServer 
     },
   )
 
-  server.resource(
+  server.registerResource(
     'Текущее состояние DAW',
     'daw://current-state',
     {
