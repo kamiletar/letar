@@ -253,6 +253,50 @@ await expect(async () => {
 }).toPass({ timeout: 15000 })
 ```
 
+### Гонка навигации: `page.goto()`/`page.reload()` против собственного `router.refresh()` страницы
+
+Другой класс гонки, чем «Гонка гидратации» выше — там элемент виден, но обработчик ещё не
+подключён. Здесь навигация теста сталкивается с навигацией, которую уже начала сама страница:
+`useServerActionForm` (и любой другой код, дёргающий `router.refresh()` после успешного server
+action) может остаться на том же URL, но запустить собственный переход браузера. Если тест в этот
+момент вызывает `page.goto(url)` или `page.reload()`, обе навигации спорят за один и тот же
+таб — и обычно проигрывает та, что моложе.
+
+Симптом браузероспецифичный и не похож на обычный таймаут:
+
+- **Firefox** рвёт переход с `NS_BINDING_ABORTED`;
+- **WebKit** даёт явную ошибку `Navigation to X is interrupted by another navigation to Y`;
+- **Chromium** чаще всего гонку не проявляет — если тест зелёный только на chromium и падает на
+  firefox/webkit сразу после клика по кнопке, которая вызывает server action, это кандидат именно
+  на эту гонку, а не на гонку гидратации из раздела выше.
+
+Гонка одноразовая — ретраить сам `goto`/`reload` внутри `toPass()` достаточно, без изменений в
+приложении:
+
+```typescript
+// apps/domwellbes-e2e/src/helpers/chakra-tabs-select.helpers.ts
+export async function gotoStable(page: Page, url: string): Promise<void> {
+  await expect(async () => {
+    await page.goto(url)
+  }).toPass({ timeout: 20000 })
+}
+
+export async function reloadStable(page: Page): Promise<void> {
+  await expect(async () => {
+    await page.reload()
+  }).toPass({ timeout: 20000 })
+}
+```
+
+Используй `gotoStable`/`reloadStable` вместо голых `page.goto()`/`page.reload()` в любом тесте,
+где переход или релоад следуют сразу за успешным server action на той же admin-странице —
+паттерн не привязан к конкретному приложению, переносится в `apps/<app>-e2e` без изменений.
+
+Прецеденты (2026-09-16): `sales-funnel-proposal-link-security.spec.ts` (Firefox/WebKit падали на
+`page.goto()` к публичной ссылке сразу после «Выпустить публичную ссылку»),
+`project-gantt-interactive.spec.ts` (Firefox падал на `page.reload()` сразу после сохранения
+черновика Ганта).
+
 ### ⛔ `nx e2e <app>-e2e` зависает намертво в dev-режиме Next.js / игнорирует staging BASE_URL
 
 Если у `apps/<app>-e2e` **нет собственного `project.json`**, таргет `e2e` собирается через
