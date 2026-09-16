@@ -1,6 +1,7 @@
 // Обе функции возвращают ОДНУ и ту же форму (с полем isError) без аннотации типа —
 // так вывод типов SDK-колбэка работает. Аннотация или union из двух разных форм
-// ломает overload-резолюцию tool() (ZodRawShapeCompat) в @modelcontextprotocol/sdk.
+// ломает overload-резолюцию registerTool() (ZodRawShape/StandardSchemaWithJSON) в
+// @modelcontextprotocol/server v2 — тот же класс проблемы, что был у .tool() в v1.
 
 /** Оборачивает результат в MCP text-content. */
 export function text(body: string) {

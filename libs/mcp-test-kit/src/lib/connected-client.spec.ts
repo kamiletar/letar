@@ -1,4 +1,4 @@
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
+import { McpServer } from '@modelcontextprotocol/server'
 import { describe, expect, it } from 'vitest'
 import { z } from 'zod'
 
@@ -6,7 +6,7 @@ import { connectedClient, expectValidationError, textOf } from './connected-clie
 
 function createDummyServer() {
   const server = new McpServer({ name: 'dummy', version: '0.0.0' })
-  server.tool('echo', { text: z.string() }, async ({ text }) => ({
+  server.registerTool('echo', { inputSchema: z.object({ text: z.string() }) }, async ({ text }) => ({
     content: [{ type: 'text', text }],
   }))
   return server

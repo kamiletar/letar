@@ -8,7 +8,7 @@ export default defineConfig({
   target: 'es2022',
   splitting: false,
   clean: true,
-  // MCP SDK — peer dependency (устанавливается пользователем через npx)
+  // MCP SDK v2 — peer dependency (устанавливается пользователем через npx)
   // zod — peer dependency MCP SDK, бандлить не нужно
-  external: ['@modelcontextprotocol/sdk', 'zod'],
+  external: ['@modelcontextprotocol/server', 'zod'],
 })
