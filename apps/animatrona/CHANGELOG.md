@@ -6,6 +6,15 @@
 
 ### Fixed
 
+- **Автообновление ставилось не тихо, как обещал `UpdateDrawer`** — `installUpdate()`
+  (`main/updater.ts`) вызывал `autoUpdater.quitAndInstall(false, true)`, а
+  `electron-builder.yml` собирает NSIS с `oneClick: false`: `isSilent=false` показывал
+  пользователю полный мастер установки (выбор «для всех/для себя», папки установки) вместо
+  текста Drawer'а «Приложение будет перезапущено для установки обновления», а
+  `isForceRunAfter=true` не гарантировал автозапуск даже при этом — тот же `$launchLink`-race,
+  что уже был найден и пофиксен в KamiKeyThe (см. его `CHANGELOG.md` 1.9.6–1.9.27). Перешли на
+  `installAndRelaunchViaScheduler` из `@letar/electron-monorepo-updater` — тихая установка через
+  `schtasks`, гарантированный перезапуск по exe-пути, минуя NSIS-ярлык.
 - **Легаси-путь `useTranscode` (мастер импорта одного файла) держал свой захардкоженный набор
   NVENC-аргументов** вместо общего `buildNvencEncodeArgs` из v0.56.0 — включая ошибку `-cq` при
   `-rc constqp` (для constqp нужен `-qp`, см. `nvenc-args.ts`). `main/ffmpeg/transcode.ts:

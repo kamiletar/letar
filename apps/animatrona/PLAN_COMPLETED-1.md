@@ -3,6 +3,25 @@
 > Точка входа и карта всех частей — [PLAN_COMPLETED.md](./PLAN_COMPLETED.md).
 > Диапазон: 2026-09-04 — 2026-09-16.
 
+## Автообновление ставилось не тихо, вопреки тексту `UpdateDrawer` (2026-09-17, v0.56.2)
+
+`installUpdate()` (`main/updater.ts`) вызывал `autoUpdater.quitAndInstall(false, true)`.
+`electron-builder.yml` собирает NSIS с `oneClick: false`, поэтому `isSilent=false` показывал
+пользователю полный мастер установки (выбор «для всех/для себя», папка установки) — вместо
+текста, который `UpdateDrawer.tsx` показывает при статусе `downloaded`: «Приложение будет
+перезапущено для установки обновления». `isForceRunAfter=true` при этом не гарантировал
+автозапуск даже в этом режиме — тот же `$launchLink`-race с Start Menu-ярлыком, что нашли и
+пофиксили в KamiKeyThe (его `CHANGELOG.md`, версии 1.9.6–1.9.27). Найдено сессией-аудитом всех
+Electron-приложений монорепо, не собственным тестом animatrona.
+
+Перешли на `installAndRelaunchViaScheduler` из `@letar/electron-monorepo-updater` (та же схема,
+что уже проверена живыми тестами в KamiKeyThe): путь скачанного инсталлятора теперь сохраняется
+из обработчика `update-downloaded` в модульную переменную, `installUpdate()` вызывает scheduler с
+откатом на `quitAndInstall(true, false)`, если планировщик недоступен. Живой тест на этом
+приложении не проводился в этой сессии — следующий реальный цикл обновления animatrona стоит
+проверить по стартовому баннеру (не по реестру, см.
+`.claude/docs/claude-desktop-msix-container-virtualization.md`).
+
 ## Чистка legacy NVENC-путей после унификации (2026-09-16, v0.56.1)
 
 Хвост задачи «NVENC: временной фильтр, lookahead и 10 бит» ниже — два оставшихся пункта из

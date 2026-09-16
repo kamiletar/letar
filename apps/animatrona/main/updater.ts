@@ -13,7 +13,7 @@
  * (`.claude/docs/electron-monorepo-shared-releases.md`).
  */
 
-import { pointFeedAtOwnRelease } from '@letar/electron-monorepo-updater'
+import { installAndRelaunchViaScheduler, pointFeedAtOwnRelease } from '@letar/electron-monorepo-updater'
 import type { BrowserWindow } from 'electron'
 import { app, net } from 'electron'
 import { autoUpdater, type ProgressInfo, type UpdateDownloadedEvent, type UpdateInfo } from 'electron-updater'
@@ -25,6 +25,7 @@ const log = createModuleLogger('Updater')
 const REPO_OWNER = 'kamiletar'
 const REPO_NAME = 'letar'
 const TAG_PREFIX = 'animatrona-v'
+const APP_LABEL = 'Animatrona'
 
 /** Направить electron-updater на релиз конкретно Animatrona (не repo-wide "latest") */
 function pointOwnFeed(): Promise<boolean> {
@@ -86,6 +87,9 @@ let changelogCache: { version: string; changelog: string } | null = null
 
 // Флаг: пока качали старую версию — появилась новее, нужно перекачать после завершения
 let newerVersionFoundDuringDownload = false
+
+// Путь до скачанного инсталлятора — нужен `installUpdate()`, вызываемому позже отдельным IPC
+let downloadedInstallerPath: string | null = null
 
 /**
  * Форматирует ошибку electron-updater в понятное сообщение
@@ -362,6 +366,7 @@ export function initAutoUpdater(mainWindow: BrowserWindow): void {
       return
     }
 
+    downloadedInstallerPath = info.downloadedFile
     updateStatus = {
       ...updateStatus,
       status: 'downloaded',
@@ -416,8 +421,27 @@ export async function downloadUpdate(): Promise<void> {
 }
 
 /**
- * Установить скачанное обновление и перезапустить
+ * Установить скачанное обновление и перезапустить.
+ *
+ * ⚠️ НЕ `autoUpdater.quitAndInstall(false, true)` — при `nsis.oneClick: false`
+ * (`electron-builder.yml`) `isSilent=false` показывает пользователю полный мастер NSIS вместо
+ * обещанного `UpdateDrawer`-текстом («Приложение будет перезапущено для установки обновления»)
+ * прозрачного рестарта, а `isForceRunAfter=true` не гарантирует автозапуск даже в этом режиме —
+ * тот же `$launchLink`-race, что и у `quitAndInstall(true, true)` в kami-key-the (см.
+ * `@letar/electron-monorepo-updater`). Используем ту же проверенную живыми тестами схему.
  */
 export function installUpdate(): void {
-  autoUpdater.quitAndInstall(false, true)
+  if (!downloadedInstallerPath) {
+    log.error('installUpdate() вызван без скачанного инсталлятора — установка пропущена')
+    return
+  }
+  if (installAndRelaunchViaScheduler({ installerPath: downloadedInstallerPath, appLabel: APP_LABEL })) {
+    // Инсталлятор запустит `.bat` — отключаем штатную установку при выходе, иначе
+    // electron-updater запустит второй экземпляр инсталлятора из своего quit-обработчика
+    autoUpdater.autoInstallOnAppQuit = false
+    app.quit()
+    return
+  }
+  log.error('Планировщик задач не принял задачу — штатная установка без перезапуска')
+  autoUpdater.quitAndInstall(true, false)
 }

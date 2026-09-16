@@ -622,6 +622,14 @@ creator-only: `EncodingProfilesCard`, `TranscodingSettingsCard`, `QBittorrentSet
 
 ## Открытые задачи
 
+- [ ] ⚠️ **Открытый вопрос: переход `installUpdate()` на `installAndRelaunchViaScheduler`
+      (2026-09-17, v0.56.2) не проверен живым циклом обновления.** Найдено и исправлено
+      сессией-аудитом (`quitAndInstall(false, true)` при `nsis.oneClick: false` показывал бы
+      мастер вместо тихого рестарта, обещанного `UpdateDrawer`), но реальный цикл «скачать →
+      установить → перезапустить» на этом приложении не прогонялся — только typecheck/lint.
+      Нужен живой тест перед следующим релизом, версию проверять по стартовому баннеру, не по
+      реестру ([claude-desktop-msix-container-virtualization.md](/.claude/docs/claude-desktop-msix-container-virtualization.md)).
+
 - [ ] ⚠️ **Открытый вопрос: новый `release-animatrona.yml` (2026-09-13, прямая публикация в
       `kamiletar/letar` вместо зеркала `kamiletar/animatrona`) не проверен реальным релизом.**
       Синтаксис подтверждён только `python3 -c "import yaml"` и визуальной сверкой с рабочим
