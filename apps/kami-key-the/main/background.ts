@@ -36,6 +36,20 @@ import { registerAllHandlers } from './ipc'
 import { checkForUpdatesManually, initAutoUpdater } from './updater'
 import { editorWindowOptions, watchNativeTheme } from './window-chrome'
 
+// Приложение живёт в трее и активно пишет в консоль (console.log при старте, хоткеях,
+// апдейтере). Если stdout/stderr перенаправлены в pipe, который читатель закрыл раньше
+// приложения (автоматизированный/отладочный запуск, не обычный запуск из Explorer/ярлыка),
+// следующий console.log бросает EPIPE — необработанное исключение в main-процессе роняет
+// всё приложение целиком, хотя сама запись в лог не критична для работы. Игнорируем именно
+// EPIPE на этих двух потоках, не глушим прочие ошибки.
+for (const stream of [process.stdout, process.stderr]) {
+  stream.on('error', (err: NodeJS.ErrnoException) => {
+    if (err.code !== 'EPIPE') {
+      throw err
+    }
+  })
+}
+
 /** Текущий конфиг (мутабельный — обновляется при cycleLayout / save) */
 let config: KeymapConfig
 
