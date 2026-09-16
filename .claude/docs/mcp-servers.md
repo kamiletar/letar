@@ -325,3 +325,28 @@ bun .claude/mcp/smoke.ts letar-db
 ```bash
 bun .claude/mcp/smoke-call.ts letar-db sql '{"db":"domwellbes","sql":"select 1"}'
 ```
+
+## ⚠️ typecheck — отдельный скрипт, не `nx run-many` {#typecheck}
+
+`.claude/mcp/*.ts` — вне графа Nx (нет `project.json`), поэтому `nx run-many -t typecheck:tsgo`
+их не видит и никогда не видел. Найдено при миграции `@modelcontextprotocol/sdk` v1→v2
+(PLAN-INFRA-6.md §184): годами копившееся расхождение типов, скрытое тем, что смоук-проверка
+выше гоняет реальный процесс и типы не проверяет — `letar.ts` возвращал `Promise<unknown>` из
+хендлеров `tools/call`/`resources/read`/`prompts/get` вместо строго типизированного
+`CallToolResult`/`ReadResourceResult`/`GetPromptResult`, `letar-db.ts` падал `TS2769` на
+`registerTool('dbs', ...)` — оба функционально работали (Bun выполняет `.ts` без проверки типов),
+но без сети безопасности.
+
+Гейт — `bun scripts/check-mcp-typecheck.mjs` (зарегистрирован в `scripts/check-all.mjs` как
+`mcp-typecheck`, `severity: gate`), вызывает `tsgo --noEmit -p .claude/mcp/tsconfig.json`. Этот
+`tsconfig.json` — отдельный от `tsconfig.base.json` файл именно для этой папки: `rootDir` поднят
+до корня репозитория (`"../.."`) — иначе `TS6059`, потому что `letar-db.ts` импортирует
+`libs/pg-url/src/lib/feature.ts` относительным путём с расширением `.ts` (нужным Bun для
+разрешения ESM-спецификатора), для чего конфигу нужен `allowImportingTsExtensions: true`
+(безопасно только вместе с `noEmit: true`, который здесь и так стоит).
+
+Правишь хендлер `setRequestHandler`/`registerTool` в этих файлах — аннотируй явный возвращаемый
+тип (`Promise<CallToolResult>` и т.п. из `@modelcontextprotocol/server`). Без явной аннотации
+TS расширяет литералы (`type: 'text'` → `string`) до того, как успевает подобрать нужную
+перегрузку — тот же механизм, что в разделе [«Диагностика TS2769 в новом туле»](/.claude/docs/mcp-server-pattern.md#диагностика-ts2769-в-новом-туле) выше по
+экосистеме `libs/*-mcp`, только здесь это не сама либа, а её потребитель-агрегатор.

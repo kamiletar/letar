@@ -18,7 +18,18 @@
  * Запуск: bun .claude/mcp/letar.ts (см. .mcp.json), cwd — корень репозитория.
  */
 import { Client } from '@modelcontextprotocol/client'
-import { InMemoryTransport, type McpServer, Server } from '@modelcontextprotocol/server'
+import {
+  type CallToolResult,
+  type GetPromptResult,
+  InMemoryTransport,
+  type ListPromptsResult,
+  type ListResourcesResult,
+  type ListResourceTemplatesResult,
+  type ListToolsResult,
+  type McpServer,
+  type ReadResourceResult,
+  Server,
+} from '@modelcontextprotocol/server'
 import { StdioServerTransport } from '@modelcontextprotocol/server/stdio'
 import { existsSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
@@ -38,19 +49,18 @@ async function connectInMemory(server: McpServer): Promise<Client> {
 
 // ─── Глобальные таблицы маршрутизации, наполняются mountPart/mountAssist на старте ───
 
-interface ToolEntry {
-  name: string
-  description?: string
-  inputSchema: unknown
-}
+type ToolDef = ListToolsResult['tools'][number]
+type ResourceDef = ListResourcesResult['resources'][number]
+type ResourceTemplateDef = ListResourceTemplatesResult['resourceTemplates'][number]
+type PromptDef = ListPromptsResult['prompts'][number]
 
-const toolDefs = new Map<string, ToolEntry>()
-const toolDispatch = new Map<string, (args: Record<string, unknown> | undefined) => Promise<unknown>>()
-const resourceDefs: unknown[] = []
-const resourceTemplateDefs: unknown[] = []
-const resourceDispatch = new Map<string, (uri: string) => Promise<unknown>>()
-const promptDefs = new Map<string, unknown>()
-const promptDispatch = new Map<string, (args: Record<string, unknown> | undefined) => Promise<unknown>>()
+const toolDefs = new Map<string, ToolDef>()
+const toolDispatch = new Map<string, (args: Record<string, unknown> | undefined) => Promise<CallToolResult>>()
+const resourceDefs: ResourceDef[] = []
+const resourceTemplateDefs: ResourceTemplateDef[] = []
+const resourceDispatch = new Map<string, (uri: string) => Promise<ReadResourceResult>>()
+const promptDefs = new Map<string, PromptDef>()
+const promptDispatch = new Map<string, (args: Record<string, unknown> | undefined) => Promise<GetPromptResult>>()
 
 /** Подключает часть без переименований (studio-time/studio/umami/glitchtip/form) либо с точечным rename. */
 async function mountPart(id: string, client: Client, rename: Record<string, string> = {}): Promise<void> {
@@ -62,7 +72,7 @@ async function mountPart(id: string, client: Client, rename: Record<string, stri
         console.error(`[letar] дубликат имени инструмента "${externalName}" из части "${id}" — пропущен`)
         continue
       }
-      toolDefs.set(externalName, { name: externalName, description: t.description, inputSchema: t.inputSchema })
+      toolDefs.set(externalName, { ...t, name: externalName })
       toolDispatch.set(externalName, (args) => client.callTool({ name: t.name, arguments: args }))
     }
   } catch (err) {
@@ -149,7 +159,11 @@ async function mountAssist(devClient: Client | undefined, prodClient: Client | u
         },
       },
     }
-    toolDefs.set(externalName, { name: externalName, description: t.description, inputSchema: schema })
+    toolDefs.set(externalName, {
+      name: externalName,
+      description: t.description,
+      inputSchema: schema as ToolDef['inputSchema'],
+    })
     toolDispatch.set(externalName, (args) => {
       const { target, ...rest } = args ?? {}
       const chosen = target === 'prod' ? prodClient : devClient
@@ -316,11 +330,11 @@ async function main(): Promise<void> {
     { capabilities: { tools: {}, resources: {}, prompts: {} } },
   )
 
-  server.setRequestHandler('tools/list', async () => ({
+  server.setRequestHandler('tools/list', async (): Promise<ListToolsResult> => ({
     tools: [...toolDefs.values()],
   }))
 
-  server.setRequestHandler('tools/call', async (request) => {
+  server.setRequestHandler('tools/call', async (request): Promise<CallToolResult> => {
     const dispatch = toolDispatch.get(request.params.name)
     if (!dispatch) {
       return { content: [{ type: 'text', text: `Неизвестный инструмент "${request.params.name}"` }], isError: true }
@@ -332,11 +346,13 @@ async function main(): Promise<void> {
     }
   })
 
-  server.setRequestHandler('resources/list', async () => ({ resources: resourceDefs }))
-  server.setRequestHandler('resources/templates/list', async () => ({
+  server.setRequestHandler('resources/list', async (): Promise<ListResourcesResult> => ({
+    resources: resourceDefs,
+  }))
+  server.setRequestHandler('resources/templates/list', async (): Promise<ListResourceTemplatesResult> => ({
     resourceTemplates: resourceTemplateDefs,
   }))
-  server.setRequestHandler('resources/read', async (request) => {
+  server.setRequestHandler('resources/read', async (request): Promise<ReadResourceResult> => {
     const dispatch = resourceDispatch.get(request.params.uri)
     if (!dispatch) {
       throw new Error(`Неизвестный ресурс "${request.params.uri}"`)
@@ -344,8 +360,10 @@ async function main(): Promise<void> {
     return dispatch(request.params.uri)
   })
 
-  server.setRequestHandler('prompts/list', async () => ({ prompts: [...promptDefs.values()] }))
-  server.setRequestHandler('prompts/get', async (request) => {
+  server.setRequestHandler('prompts/list', async (): Promise<ListPromptsResult> => ({
+    prompts: [...promptDefs.values()],
+  }))
+  server.setRequestHandler('prompts/get', async (request): Promise<GetPromptResult> => {
     const dispatch = promptDispatch.get(request.params.name)
     if (!dispatch) {
       throw new Error(`Неизвестный промпт "${request.params.name}"`)

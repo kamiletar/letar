@@ -12,7 +12,7 @@
  *
  * Запуск: bun .claude/mcp/letar-db.ts (см. .mcp.json), cwd — корень репозитория.
  */
-import { McpServer } from '@modelcontextprotocol/server'
+import { type CallToolResult, McpServer } from '@modelcontextprotocol/server'
 import { StdioServerTransport } from '@modelcontextprotocol/server/stdio'
 import { spawn } from 'node:child_process'
 import { readFileSync } from 'node:fs'
@@ -243,7 +243,7 @@ server.registerTool(
     description: 'Список зарегистрированных Postgres-баз: имя, режим (rw/ro), поднят ли туннель.',
     inputSchema: {},
   },
-  async () => {
+  async (): Promise<CallToolResult> => {
     const registry = loadRegistry()
     const rows = await Promise.all(
       registry.map(async (cfg) => ({
@@ -271,7 +271,7 @@ server.registerTool(
       timeoutMs: z.number().int().min(1000).max(120_000).default(30_000).describe('statement_timeout'),
     },
   },
-  async ({ db, sql, timeoutMs }) => {
+  async ({ db, sql, timeoutMs }): Promise<CallToolResult> => {
     let cfg: DbConfig
     try {
       cfg = findDbConfig(db)
@@ -296,7 +296,7 @@ server.registerTool(
       table: z.string().min(1).optional().describe('Имя таблицы — без него вернётся список всех таблиц'),
     },
   },
-  async ({ db, table }) => {
+  async ({ db, table }): Promise<CallToolResult> => {
     let cfg: DbConfig
     try {
       cfg = findDbConfig(db)

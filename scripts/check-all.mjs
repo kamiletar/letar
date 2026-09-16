@@ -241,6 +241,19 @@ const CHECKS = [
     doc: '.claude/docs/zenstack-shared-fragments-across-apps.md',
   },
   {
+    id: 'mcp-typecheck',
+    group: 'tsconfig',
+    title: 'typecheck .claude/mcp/*.ts (агрегаторы letar/letar-db — вне графа Nx)',
+    run: ['bun', ['scripts/check-mcp-typecheck.mjs']],
+    // gate: letar.ts/letar-db.ts — реально используемые root-level MCP-серверы (см. .mcp.json),
+    // но без project.json они вне графа Nx и `nx run-many -t typecheck:tsgo` их не видит —
+    // обнаружено при миграции @modelcontextprotocol/sdk v1→v2 (PLAN-INFRA-6.md §184), вскрыло
+    // реальные несовпадения типов, годами копившиеся без единой проверки.
+    severity: 'gate',
+    ci: 'full',
+    doc: '.claude/docs/mcp-servers.md#typecheck',
+  },
+  {
     id: 'submodule-gitignore',
     group: 'submodule',
     title: 'шаблоны .gitignore во всех submodule',

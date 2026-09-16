@@ -1,0 +1,21 @@
+{
+  "//": "typecheck для root-level MCP-агрегаторов — вне графа Nx (нет project.json), поэтому",
+  "//1": "nx run-many -t typecheck:tsgo их не видит. Запуск: bun scripts/check-mcp-typecheck.mjs",
+  "//2": "(вызывает tsgo --noEmit -p .claude/mcp/tsconfig.json из корня), либо руками из этой папки:",
+  "//3": "tsgo --noEmit. rootDir поднят до корня репо — иначе TS6059 на импортах из libs/*.",
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node"],
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "emitDeclarationOnly": false,
+    "rootDir": "../..",
+    "outDir": "../../dist/out-tsc/claude-mcp",
+    "tsBuildInfoFile": "../../dist/out-tsc/claude-mcp/tsconfig.tsbuildinfo",
+    "resolveJsonModule": true
+  },
+  "include": ["*.ts"]
+}
