@@ -46,8 +46,12 @@ CONFIGS=()
 [[ -f "$RULES" ]] && CONFIGS+=(--config "$RULES")
 CONFIGS+=(--config "p/secrets")
 
-mapfile -t FILES < <(git diff --cached --name-only --diff-filter=ACM \
-  | grep -Ei '\.(ts|tsx|js|jsx|mjs|cjs)$|\.env\.docker$|\.env\.production$' || true)
+# -z вместо голого --name-only: при core.quotepath=true (дефолт) не-ASCII пути выводятся в
+# кавычках с восьмеричными escape-последовательностями, `[[ -f ]]` ниже такой "путь" не находит,
+# и файл молча выпадает из security-скана (тот же баг — pre-commit-scope-guard.sh, воспроизведён
+# 2026-09-16 в apps/domwellbes). grep-фильтр по расширению применяем к NUL-разделённому потоку.
+mapfile -d '' FILES < <(git diff --cached --name-only -z --diff-filter=ACM \
+  | grep -Ezi '\.(ts|tsx|js|jsx|mjs|cjs)$|\.env\.docker$|\.env\.production$' || true)
 
 if [[ ${#FILES[@]} -eq 0 ]]; then
   exit 0

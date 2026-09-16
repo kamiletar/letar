@@ -28,7 +28,13 @@
 
 set -euo pipefail
 
-mapfile -t FILES < <(git diff --cached --name-only --diff-filter=ACMRTUXB)
+# -z + `mapfile -d ''` вместо голого --name-only: без этого git при core.quotepath=true
+# (дефолт) выводит пути с не-ASCII байтами в кавычках с восьмеричными escape-последовательностями
+# (например `"docs/architect-guide/DomWellbes_\320\220...pdf"`), и `cut -d/ -f1` берёт `"docs`
+# вместо `docs` — файл считается отдельным scope, хотя лежит в том же каталоге, что и остальные
+# застейдженные файлы. -z отдаёт пути через NUL без кавычек и escape вне зависимости от
+# core.quotepath. Воспроизведено 2026-09-16 в apps/domwellbes на переименовании PDF с кириллицей.
+mapfile -d '' FILES < <(git diff --cached --name-only -z --diff-filter=ACMRTUXB)
 
 [[ ${#FILES[@]} -eq 0 ]] && exit 0
 

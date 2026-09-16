@@ -16,10 +16,17 @@
 
 set -uo pipefail
 
-STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM -- \
+# -z вместо голого --name-only: при core.quotepath=true (дефолт) git выводит пути с не-ASCII
+# байтами в кавычках с восьмеричными escape-последовательностями — `[[ -f "$f" ]]` ниже такому
+# "пути" не соответствует ни одному реальному файлу, и файл молча выпадает из проверки формата
+# (см. тот же баг в pre-commit-scope-guard.sh, воспроизведён 2026-09-16 в apps/domwellbes).
+STAGED_FILES=()
+while IFS= read -r -d '' f; do
+  STAGED_FILES+=("$f")
+done < <(git diff --cached --name-only -z --diff-filter=ACM -- \
   '*.ts' '*.tsx' '*.js' '*.jsx' '*.json' '*.md' 2>/dev/null)
 
-if [[ -z "$STAGED_FILES" ]]; then
+if [[ ${#STAGED_FILES[@]} -eq 0 ]]; then
   exit 0
 fi
 
@@ -54,9 +61,9 @@ DPRINT_BIN="$(resolve_dprint)" || {
 
 # Файлы, которые ещё не существуют в рабочем дереве (staged rename/delete edge-кейсы), пропускаем.
 EXISTING_FILES=()
-while IFS= read -r f; do
+for f in "${STAGED_FILES[@]}"; do
   [[ -f "$f" ]] && EXISTING_FILES+=("$f")
-done <<<"$STAGED_FILES"
+done
 
 if [[ ${#EXISTING_FILES[@]} -eq 0 ]]; then
   exit 0
