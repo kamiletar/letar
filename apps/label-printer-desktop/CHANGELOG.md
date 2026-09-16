@@ -4,6 +4,11 @@
 
 ## [Unreleased]
 
+### Changed
+
+- `vitest.config.mts`: убран избыточный alias `@letar/label-printer-core` — пакет уже прямая
+  зависимость, симлинк bun резолвит его без alias.
+
 ## [0.5.15] - 2026-09-15
 
 ### Fixed
