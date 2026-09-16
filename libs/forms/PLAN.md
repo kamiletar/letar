@@ -6,6 +6,55 @@
 
 ## Backlog (запросы от агентов)
 
+### [2026-09-17] `useFormUrlSync` — Select-поле не подхватывает URL-параметр при полной перезагрузке (от studio-dev)
+
+- **Запросил:** studio-dev (`apps/studio/src/app/(owner)/owner/time/_components/time-entries-infinite-table.tsx`,
+  фильтр `billable`/`status`/`kind` через `StudioForm.UrlSync`).
+- **Приоритет:** high
+- **Воспроизведение:** живой Playwright-прогон против `nx dev studio`, полная навигация (не SPA)
+  на `/owner/time?billable=billable` — комбобокс на первом кадре показывает дефолт «Все записи»,
+  а не «Только в счёт», хотя `window.location.search` уже корректен. Значение **само
+  исправляется** через ~500–700мс без участия пользователя (см. root cause).
+- **Root cause:** `readUrlValues` (`use-form-url-sync.ts`) читает `window.location.search`.
+  На SSR-рендере `window` не определён → функция возвращает `defaults` — это баланс верный сам по
+  себе. Но `useFormUrlSync` вызывает `readUrlValues` СИНХРОННО на каждом рендере, включая самый
+  первый клиентский (гидратационный) — а на клиенте `window` уже определён и URL уже настоящий,
+  поэтому первый клиентский рендер вычисляет ПРАВИЛЬНОЕ значение, которое расходится с
+  SSR-разметкой («Все записи»). Из-за этого расхождения текста внутри `<Suspense fallback={<Spinner
+  />}>` (`(tabs)/page.tsx`) React квалифицирует это как recoverable hydration error и
+  ПЕРЕПЛАНИРУЕТ полный клиентский ре-рендер этого Suspense-поддерева асинхронно — именно этот
+  отложенный ре-рендер и «чинит» значение через полсекунды-секунду. Самоисправление НЕ
+  гарантировано: зависит от того, что компонент вообще обёрнут в Suspense, от таймингов
+  React-scheduler, и вероятно ведёт себя иначе в prod-сборке (владелец сообщал, что в реальности
+  комбобокс визуально остаётся неверным, а не мигает).
+- **Механизм починки значения, когда он всё-таки срабатывает:** `FormSimple` создаёт форму через
+  `useAppForm({ defaultValues: initialValue, ... })`; `initialValue` — новый объектный литерал на
+  КАЖДОМ рендере (в хуке нет `useMemo`, комментарий «без useMemo чтобы оставаться тестируемым»).
+  TanStack Form синхронизирует `state.values` с новым `defaultValues`, если форма не touched (тот
+  же механизм задокументирован в `use-post-submit-reset-guard.ts`) — так отложенный ре-рендер с
+  верным `initialValue` и долетает до поля.
+- **Предлагаемый фикс:** сделать первый клиентский рендер детерминированно совпадающим с SSR
+  (вернуть `defaults`, не читать `window` синхронно в рендере), а реальные URL-значения применять
+  через `useEffect` после маунта (гарантированно клиентский, без гонки с hydration-recovery):
+  ```tsx
+  export function useFormUrlSync(options) {
+    const { fields, defaults } = options
+    const [initialValue, setInitialValue] = useState(defaults)
+    useEffect(() => {
+      setInitialValue(readUrlValues(fields, defaults))
+      // eslint-disable-next-line react-hooks/exhaustive-deps -- один раз на маунт
+    }, [])
+    return { initialValue }
+  }
+  ```
+  Даёт короткую (доли кадра) вспышку дефолта вместо неопределённо долгого/невоспроизводимого
+  зависания на нём. `readUrlValues` (чистая функция) не трогать — регрессия тестируется отдельно.
+- **Затронутые приложения:** все потребители `useFormUrlSync` с полями `Select`/`Combobox` внутри
+  SSR-страниц (не только studio) — баг системный, не app-specific.
+- **Статус:** ожидание — делегировано `forms-coordinator-dev` (`agent-mail`, thread
+  `form-url-sync-hydration-mismatch-20260917`), не патчится в `apps/studio` напрямую по
+  `.claude/rules/form-delegation.md`.
+
 ### ✅ [2026-09-15] `Field.FileUpload` — дефолтные тексты были захардкожены по-английски (от domwellbes-dev)
 
 - **Запросил:** domwellbes-dev (`house-drawings-section.tsx` показывал «Upload file» в
