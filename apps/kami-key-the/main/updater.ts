@@ -10,6 +10,9 @@
  * label-printer-desktop: у KamiKeyThe нет постоянно открытого окна (приложение живёт в трее).
  */
 
+import { spawn } from 'node:child_process'
+import { basename } from 'node:path'
+
 import { pointFeedAtOwnRelease } from '@letar/electron-monorepo-updater'
 import { app, dialog, net } from 'electron'
 import { autoUpdater, type UpdateInfo } from 'electron-updater'
@@ -27,6 +30,51 @@ function configureLogger(): void {
     error: (message: string) => console.error(`[Updater] ${message}`),
     debug: (message: string) => console.log(`[Updater:debug] ${message}`),
   }
+}
+
+/**
+ * Планирует перезапуск приложения после тихой установки — в обход `quitAndInstall(true, true)`.
+ *
+ * `isForceRunAfter=true` доверяет NSIS-скрипту электрон-билдера самому перезапустить приложение
+ * (`doStartApp` в `installSection.nsh` при `${isForceRun} ${andIf} ${Silent}`), но тот запускает
+ * не `$INSTDIR\...exe` напрямую, а ярлык из Пуск (`$launchLink` = `$newStartMenuLink`, если
+ * `${FileExists}` на момент создания секции вернул true) — тот самый `.lnk`, для которого мы уже
+ * ловили гонку «не удаётся найти KamiKeyThe.lnk» на финише обычной (не-тихой) установки: файл
+ * попадает в проверку `FileExists`, но не успевает стать физически запускаемым к моменту
+ * `ExecShellAsUser`. В тихом режиме та же гонка не показывает диалог об ошибке — просто ничего
+ * не запускается. Подтверждено живым тестом 1.9.8→1.9.9: после `quitAndInstall(true, true)`
+ * процесс не поднимался 10+ секунд.
+ *
+ * Вместо переопределения NSIS-шаблона (он приходит из `node_modules`, наш собственный
+ * `.nsh`-инклюд для electron-builder усложнил бы конфиг ради обхода стороннего бага) сами
+ * планируем перезапуск через detached `cmd.exe`, который переживёт `app.quit()`: ждёт, пока
+ * инсталлятор допишет `${exePath}` (тот же путь, откуда сейчас запущен этот процесс — обновление
+ * ставится в ту же директорию), и запускает его напрямую, без Start Menu ярлыка.
+ */
+function scheduleRelaunchAfterSilentInstall(): void {
+  const exePath = process.execPath
+  // До 20 попыток по 1с ждём, пока файл освободится (инсталлятор держит его открытым на запись,
+  // пока не допишет) — проверяем через `ren <файл> <то же имя>`: переименование в то же имя не
+  // меняет содержимое, но требует эксклюзивного доступа и падает с ошибкой, пока хендл занят.
+  // `copy /y file file` для этой же цели не годится — cmd отказывает с «файл не может быть
+  // скопирован сам в себя» независимо от блокировки, что проверено отдельно перед этим фиксом.
+  const script = [
+    'for /L %i in (1,1,20) do (',
+    `  (ren "${exePath}" "${basename(exePath)}" >nul 2>&1) && (`,
+    '    timeout /t 2 /nobreak >nul',
+    `    start "" "${exePath}"`,
+    '    exit /b 0',
+    '  )',
+    '  timeout /t 1 /nobreak >nul',
+    ')',
+  ].join(' & ')
+
+  const relauncher = spawn('cmd.exe', ['/d', '/c', script], {
+    detached: true,
+    stdio: 'ignore',
+    windowsHide: true,
+  })
+  relauncher.unref()
 }
 
 /** Направить electron-updater на релиз конкретно KamiKeyThe (не repo-wide "latest") */
@@ -91,9 +139,11 @@ export function initAutoUpdater(): void {
       .then((result) => {
         if (result.response === 0) {
           // isSilent=true — иначе NSIS-инсталлятор (oneClick: false в electron-builder.yml)
-          // показывает полный мастер установки вместо тихого обновления; isForceRunAfter=true —
-          // перезапустить приложение сразу после установки, не оставлять пользователя без трея.
-          autoUpdater.quitAndInstall(true, true)
+          // показывает полный мастер установки вместо тихого обновления. isForceRunAfter здесь
+          // НЕ используем (передаём false) — перезапуск после силентной установки берём на себя
+          // через scheduleRelaunchAfterSilentInstall, см. её комментарий про гонку с .lnk.
+          scheduleRelaunchAfterSilentInstall()
+          autoUpdater.quitAndInstall(true, false)
         }
       })
   })
