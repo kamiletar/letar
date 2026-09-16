@@ -1,4 +1,4 @@
-# PLAN-INFRA-6 — §115–§159
+# PLAN-INFRA-6 — §115–§181
 
 > Продолжение [PLAN-INFRA-5.md](/PLAN-INFRA-5.md) — часть журнала `PLAN-INFRA.md`, отрезанная от
 > неё 2026-09-03 (см. [plan-decomposition-pattern.md](/.claude/docs/plan-decomposition-pattern.md)).
