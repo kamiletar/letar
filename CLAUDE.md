@@ -321,7 +321,10 @@
 
 ### Структура репо
 
-`letar` — **публичный** монорепо. 10 приватных приложений/lib подключены через **git submodules** (aboi, driving-school + db + e2e, premium-rosstil + e2e, imot + e2e, dsperevod). Подробнее: [repo-structure](/.claude/docs/repo-structure.md).
+`letar` — **публичный** монорепо. Приватное подключено **git submodules**; актуальный список
+всегда `git config -f .gitmodules --get-regexp path`, не по памяти — на 2026-09-16 их 14
+(приложения и их `-e2e`, `libs/driving-school-db`, `.claude/private`). Подробнее:
+[repo-structure](/.claude/docs/repo-structure.md).
 
 **Клонирование с приватными:** `git clone --recurse-submodules git@github.com:kamiletar/letar.git`
 
@@ -401,39 +404,17 @@ tsconfig приватных приложений. Раннер печатает 
 
 **Перед коммитом:** `nx run-many -t format --projects=<твои проекты>` → `nx lint` → `nx typecheck:tsgo`
 
-⚠️ **`nx run-many -t format` без `--projects` заходит внутрь семи приватных submodule-приложений**
-(aboi, aprel8008, domwellbes, driving-school, dsperevod, studio, svoichuzhie — 2089 файлов).
-Их таргет `format` запускает dprint с `cwd` внутри submodule, а `excludes` корневого
-`dprint.json` в таком запуске не применяются — они сопоставляются относительно каталога конфига,
-а обход идёт от `cwd`. С 2026-08-06 у каждого submodule свой `dprint.json` с теми же правилами,
-поэтому прогон даёт **ноль изменений** — но файлы он всё равно трогает. Поэтому голая форма без
-`--projects`/`--exclude` **блокируется хуком** `.claude/hooks/validate-bash.js`; там же блокируется
-встроенная команда Nx для форматирования (она запускает Prettier мимо dprint). Список проектов с
-таргетом — `nx show projects --with-target format`. Прогон по всему публичному репо, если
-действительно нужен, — `dprint fmt` из корня: у него `cwd` в корне, поэтому `excludes` работают.
-Замер и разбор — [dprint-worktree-submodule-scope](/.claude/docs/dprint-worktree-submodule-scope.md).
+⚠️ **`--projects` обязателен.** Голая `nx run-many -t format` заходит внутрь семи приватных
+submodule (2089 файлов) и трогает чужие файлы, даже когда правок ноль; форма без
+`--projects`/`--exclude` блокируется хуком `.claude/hooks/validate-bash.js`. Нужен прогон по
+всему публичному репо — `dprint fmt` из корня (у него `cwd` в корне, `excludes` работают).
+Разбор — [dprint-worktree-submodule-scope](/.claude/docs/dprint-worktree-submodule-scope.md).
 
-⚠️ Это НЕ то же самое, что голое `nx format` (без `run-many -t`) — та встроенная команда Nx
-запускает Prettier, конфликтующий с dprint (правки друг друга откатывают, ломает markdown в
-плановых файлах). Названия таргета `format` и встроенной команды `nx format` совпадают случайно —
-не перепутай синтаксис. dprint — единственный форматтер репозитория (PLAN-INFRA.md §32, закрыт
-2026-08-06; переопределения таргета на Prettier дочищены 2026-08-06, см. там же).
-
-⚠️ **Утверждение «dprint — единственный форматтер» держится на содержимом `targets.format` в
-каждом `project.json`, а не на `nx.json`.** `targetDefaults` в Nx **дополняет** уже объявленный
-таргет и **не создаёт** его — поэтому проект со своим блоком `targets.format` может запускать что
-угодно, и `nx run-many -t format` это послушно выполнит. Прецедент: три библиотеки (`forms`, `ui`,
-`zenstack-form-plugin`) держали там `prettier --write` и при первом же прогоне переписали 480
-файлов из dprint-стиля в Prettier-стиль. Собственного `.prettierrc` у них не было — Prettier
-работал на дефолтах, поэтому расхождение было максимальным.
-
-Отсюда два следствия:
-
-- **Заводишь проекту свой `targets.format` — команда только `dprint fmt`** (конвенция: `cwd` =
-  корень проекта, `cache: false`). Удалить блок «чтобы подхватился `targetDefaults`» нельзя —
-  таргет исчезнет из проекта совсем.
-- **Проверка «форматтер один» — грепом по `project.json`, а не прогоном `dprint check`.** Файлы
-  могут быть зелёными просто потому, что чужой таргет давно не запускали.
+⚠️ **Голая `nx format` (без `run-many -t`) — другая команда, она запускает Prettier мимо dprint**
+и тоже блокируется хуком. Имена совпали случайно, не перепутай синтаксис. Второй канал той же
+порчи — свой `targets.format` в `project.json` с `prettier --write` (480 файлов за один прогон):
+[prettier-dprint-conflict-root-cause](/.claude/docs/prettier-dprint-conflict-root-cause.md),
+запрет — [formatting.md](/.claude/rules/formatting.md).
 
 ⚠️ `lint` автоматически запускает oxlint первым (fast-fail), затем ESLint. `typecheck:tsgo` в 9-38x быстрее обычного typecheck.
 
@@ -444,22 +425,12 @@ domwellbes-assist в один процесс), **letar-db** (все Postgres-б�
 agent-mail. Документация внешних библиотек — desktop-расширение Context7, не проектный сервер.
 Подробнее: [MCP серверы](/.claude/docs/mcp-servers.md)
 
-⚠️ **Ревизия 2026-09-14: 22 записи в `.mcp.json` → 4.** 9 наших TS-серверов слиты в `letar`,
-8 Postgres-серверов — в `letar-db` (без Python — Pro-инструменты вызывались ~9 раз за всю
-историю и регулярно не укладывались в 30-секундный таймаут). `chakra-ui`, `next-devtools` и
-проектный `context7` удалены (25/17/39 вызовов за 1779 сессий; next-devtools к тому же регулярно
-падал на старте из-за гонки распаковки `bunx @latest`, не из-за выключенного Next). Прежде чем
-возвращать что-то из этого списка — проверь, что инструмент будет вызываться, а не просто
-числиться. Браузерная работа идёт через встроенный Claude Browser, семантический поиск — через
-Grep и субагента Explore. Подробный разбор — [mcp-servers.md](/.claude/docs/mcp-servers.md).
-
-⚠️ **`nx-mcp` запускается с `--minimal false`.** По умолчанию флаг `--minimal` у сервера равен
-`true`, и он прячет ровно те инструменты, ради которых его ставят: `nx_workspace`,
-`nx_project_details`, `nx_workspace_path`, `nx_generators`, `nx_generator_schema`,
-`nx_available_plugins` — остаются только `nx_docs` и три `ci_*`. Именно поэтому за 487 сессий
-`nx_workspace` не был вызван ни разу: инструмента просто не было в списке, хотя инструкция его
-требовала. Если увидишь, что workspace-инструменты снова пропали, — проверь этот флаг, а не
-инструкцию.
+⚠️ **Ревизия 2026-09-14: 22 записи в `.mcp.json` → 4.** Прежде чем возвращать в список что-то
+удалённое — проверь, что инструмент будет вызываться, а не просто числиться (у выброшенных было
+25–39 вызовов за 1779 сессий). Браузерная работа идёт через встроенный Claude Browser,
+семантический поиск — через Grep и субагента Explore. Что с чем слито и почему, а также почему
+`nx-mcp` обязан запускаться с `--minimal false` (иначе `nx_workspace` просто нет в списке
+инструментов) — [mcp-servers.md](/.claude/docs/mcp-servers.md).
 
 **⚠️ WebFetch заблокирован context-mode:** хук `pretooluse.mjs` блокирует `WebFetch` и перенаправляет на `mcp__context-mode__fetch_and_index(url, source)` + `mcp__context-mode__search(queries)`. Используй именно эти инструменты для загрузки внешних URL.
 
@@ -502,7 +473,7 @@ import { getEnhancedPrisma } from '@/lib/db'
 
 ---
 
-**Обновлено:** 2026-09-03 | **Nx** 23.2 | **Next.js** 16.2 | **React** 19 | **Chakra** 3.34 | **Zod** 4.3 | **ZenStack** 3.5 | **Prisma** 7.6 | **Scope:** `@letar/*`
+**Обновлено:** 2026-09-16 | **Nx** 23.2 | **Next.js** 16.2 | **React** 19 | **Chakra** 3.34 | **Zod** 4.3 | **ZenStack** 3.5 | **Prisma** 7.6 | **Scope:** `@letar/*`
 
 <!-- nx configuration start-->
 <!-- Leave the start & end comments to automatically receive updates. -->
