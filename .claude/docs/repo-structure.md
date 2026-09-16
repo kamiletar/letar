@@ -7,19 +7,38 @@
 ```
 letar/ (public)
 ├── apps/
-│   ├── aboi/                  → submodule (private: letar-private-aboi)
-│   ├── aboi-e2e/              → submodule (private: letar-private-aboi-e2e)
-│   ├── driving-school/        → submodule (private: letar-private-driving-school)
-│   ├── driving-school-e2e/    → submodule (private)
+│   ├── aboi/                          → submodule (private: letar-private-aboi)
+│   ├── aboi-e2e/                      → submodule (private: letar-private-aboi-e2e)
+│   ├── aprel8008/                     → submodule (private)
+│   ├── domwellbes/                    → submodule (private)
+│   ├── domwellbes-e2e/                → submodule (private)
+│   ├── driving-school/                → submodule (private: letar-private-driving-school)
+│   ├── driving-school-e2e/            → submodule (private)
+│   ├── dsperevod/                     → submodule (private)
+│   ├── poster-microtext-desktop/      → submodule (private)
+│   ├── studio/                        → submodule (private)
+│   ├── studio-e2e/                    → submodule (private)
+│   ├── svoichuzhie/                   → submodule (private)
 │   └── (остальные публичные: animatrona, dashboard, kami, и т.д.)
-└── libs/
-    ├── driving-school-db/     → submodule (private: letar-private-driving-school-db)
-    └── (остальные публичные: forms, ui, auth, и т.д.)
+├── libs/
+│   ├── driving-school-db/             → submodule (private: letar-private-driving-school-db)
+│   └── (остальные публичные: forms, ui, auth, и т.д.)
+└── .claude/
+    └── private/                       → submodule (private: letar-private-docs)
 ```
 
-Приватных submodule — по одному на каждый Nx-проект (Вариант A: 1 submodule = 1 Nx project).
-Актуальный список и число — в корневом `.gitmodules`, не дублируем его здесь во избежание
-рассинхрона.
+Приватных submodule — по одному на каждый Nx-проект (Вариант A: 1 submodule = 1 Nx project),
+за исключением `.claude/private` (доки, не Nx-проект).
+
+⚠️ **Список выше — снимок на 2026-09-16 (14 submodule).** Единственный достоверный источник —
+
+```bash
+git config -f .gitmodules --get-regexp path
+```
+
+не память и не этот файл: список уже расходился с реальностью (устаревшая версия называла 10
+модулей и включала удалённые `premium-rosstil`/`imot`, не бывшие submodule вовсе). Не
+дублировать здесь число без сверки командой.
 
 ## Клонирование
 
