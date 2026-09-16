@@ -127,6 +127,12 @@
       "port": 3025
     },
     {
+      "name": "artifacts-static",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "4599", "--directory", ".claude/artifacts"],
+      "port": 4599
+    },
+    {
       "name": "form-develop-app",
       "runtimeExecutable": "nx",
       "runtimeArgs": ["dev", "form-develop-app"],
