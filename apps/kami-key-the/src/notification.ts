@@ -45,6 +45,7 @@ const NOTIFY_DURATION = 1000 // автоскрытие через 1000мс
 // Цвета (COLORREF = 0x00BBGGRR)
 const COLOR_BG = 0x003b3b3b // #3B3B3B тёмный фон
 const COLOR_TEXT = 0x00ffffff // #FFFFFF белый текст
+const COLOR_BG_WARNING = 0x002828c6 // #C62828 тревожный красный — несовместимая раскладка
 
 // --- Win32 структуры ---
 
@@ -121,9 +122,12 @@ const GetModuleHandleW = kernel32.func('void* GetModuleHandleW(const char16_t*)'
 
 let notifyHwnd: unknown = null
 let bgBrush: unknown = null
+let bgBrushWarning: unknown = null
 let textFont: unknown = null
+let textFontWarning: unknown = null
 let hideTimer: ReturnType<typeof setTimeout> | null = null
 let currentText = ''
+let currentVariant: NotificationVariant = 'default'
 // Текущий размер окна — по умолчанию NOTIFY_WIDTH/HEIGHT, но showNotification может временно
 // показать более широкое/долгоживущее уведомление (см. opts) для более длинного текста
 let currentWidth = NOTIFY_WIDTH
@@ -147,12 +151,12 @@ function paintNotification(hwnd: unknown): void {
   tmpRect.top = 0
   tmpRect.right = currentWidth
   tmpRect.bottom = currentHeight
-  FillRect(hdc, tmpRect, bgBrush)
+  FillRect(hdc, tmpRect, currentVariant === 'warning' ? bgBrushWarning : bgBrush)
 
   // Текст по центру
   SetBkMode(hdc, TRANSPARENT_BK)
   SetTextColor(hdc, COLOR_TEXT)
-  SelectObject(hdc, textFont)
+  SelectObject(hdc, currentVariant === 'warning' ? textFontWarning : textFont)
   DrawTextW(hdc, currentText, -1, tmpRect, DT_CENTER | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX)
 
   EndPaint(hwnd, ps)
@@ -177,7 +181,9 @@ const wndProcCb = koffi.register(notifyWndProc, koffi.pointer(WNDPROC_N))
 export function initNotification(): boolean {
   try {
     bgBrush = CreateSolidBrush(COLOR_BG)
+    bgBrushWarning = CreateSolidBrush(COLOR_BG_WARNING)
     textFont = CreateFontW(-18, 0, 0, 0, FW_BOLD, 0, 0, 0, 1, 0, 0, 5, 0, 'Segoe UI')
+    textFontWarning = CreateFontW(-22, 0, 0, 0, FW_BOLD, 0, 0, 0, 1, 0, 0, 5, 0, 'Segoe UI')
 
     const hInstance = GetModuleHandleW(null)
     const hCursor = LoadCursorW(null, IDC_ARROW)
@@ -239,6 +245,8 @@ export function initNotification(): boolean {
   }
 }
 
+export type NotificationVariant = 'default' | 'warning'
+
 export interface NotificationOptions {
   /** Ширина окна, px (по умолчанию NOTIFY_WIDTH=300) — шире для более длинного текста */
   width?: number
@@ -246,6 +254,8 @@ export interface NotificationOptions {
   height?: number
   /** Автоскрытие через N мс (по умолчанию NOTIFY_DURATION=1000) — дольше для важных предупреждений */
   durationMs?: number
+  /** Стиль: 'warning' — красный фон + крупнее шрифт, для критичных предупреждений */
+  variant?: NotificationVariant
 }
 
 /** Показать уведомление с текстом, автоскрытие через `opts.durationMs` (по умолчанию 1000мс) */
@@ -255,6 +265,7 @@ export function showNotification(text: string, opts?: NotificationOptions): void
   }
 
   currentText = text
+  currentVariant = opts?.variant ?? 'default'
   currentWidth = opts?.width ?? NOTIFY_WIDTH
   currentHeight = opts?.height ?? NOTIFY_HEIGHT
   const duration = opts?.durationMs ?? NOTIFY_DURATION
@@ -294,8 +305,16 @@ export function destroyNotification(): void {
     DeleteObject(bgBrush)
     bgBrush = null
   }
+  if (bgBrushWarning) {
+    DeleteObject(bgBrushWarning)
+    bgBrushWarning = null
+  }
   if (textFont) {
     DeleteObject(textFont)
     textFont = null
+  }
+  if (textFontWarning) {
+    DeleteObject(textFontWarning)
+    textFontWarning = null
   }
 }

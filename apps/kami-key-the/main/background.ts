@@ -304,9 +304,11 @@ app.whenReady().then(() => {
     // «Сигнализация о несовместимой раскладке»: US English физически не синтезирует AltGr
     const layout = getCurrentLayout()
     if (!layout.hasAltGr) {
-      showNotification(`AltGr не работает — раскладка ${layout.name}`, {
+      showNotification(`⚠ AltGr не работает — раскладка ${layout.name}`, {
         width: 480,
-        durationMs: 2500,
+        height: 76,
+        durationMs: 3500,
+        variant: 'warning',
       })
     }
   }, hideOverlay)
