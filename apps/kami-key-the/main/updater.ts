@@ -94,6 +94,26 @@ function scheduleRelaunchAfterSilentInstall(installerVersion: string): void {
     '@echo off',
     'setlocal enabledelayedexpansion',
     `echo [%date% %time%] relauncher started, exe="${exePath}" >> "${debugLogPath}"`,
+    // ⚠️ Живой тест 1.9.23→1.9.24 показал, что одной только проверки «инсталлятор отсутствует»
+    // недостаточно: наш `.bat` (запущенный через `schtasks` синхронно, ещё в той же секунде, что
+    // и вызов `scheduleRelaunchAfterSilentInstall`) успевает сделать первую проверку РАНЬШЕ, чем
+    // `autoUpdater.quitAndInstall()` вообще успевает породить дочерний процесс инсталлятора —
+    // лог показал «installer process gone after 1 checks» спустя 0.4с, то есть инсталлятор
+    // на тот момент ещё не СТАРТОВАЛ, а не уже завершился. Наша проверка дала ложноположительный
+    // результат, мы запустили приложение, а инсталлятор запустился и убил его уже ПОСЛЕ этого. В
+    // 1.9.25 проверка двухфазная: сначала ждём, пока инсталлятор ПОЯВИТСЯ в `tasklist`
+    // (подтверждает, что он реально стартовал), и только потом ждём, пока он оттуда исчезнет.
+    `echo [%date% %time%] waiting for installer process "${installerImageName}" to appear >> "${debugLogPath}"`,
+    'for /L %%k in (1,1,10) do (',
+    `  tasklist /fi "imagename eq ${installerImageName}" | findstr /I "${installerImageName}" >nul 2>&1`,
+    '  if not errorlevel 1 (',
+    `    echo [!date! !time!] installer process observed after %%k checks >> "${debugLogPath}"`,
+    '    goto :installer_seen',
+    '  )',
+    '  timeout /t 1 /nobreak >nul',
+    ')',
+    `echo [%date% %time%] installer process never observed after 10 checks — proceeding to wait-for-exit anyway >> "${debugLogPath}"`,
+    ':installer_seen',
     `echo [%date% %time%] waiting for installer process "${installerImageName}" to exit >> "${debugLogPath}"`,
     'for /L %%j in (1,1,60) do (',
     `  tasklist /fi "imagename eq ${installerImageName}" | findstr /I "${installerImageName}" >nul 2>&1`,
