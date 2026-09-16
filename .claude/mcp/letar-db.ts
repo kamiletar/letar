@@ -12,8 +12,8 @@
  *
  * Запуск: bun .claude/mcp/letar-db.ts (см. .mcp.json), cwd — корень репозитория.
  */
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
+import { McpServer } from '@modelcontextprotocol/server'
+import { StdioServerTransport } from '@modelcontextprotocol/server/stdio'
 import { spawn } from 'node:child_process'
 import { readFileSync } from 'node:fs'
 import { createConnection } from 'node:net'

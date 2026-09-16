@@ -17,20 +17,9 @@
  *
  * Запуск: bun .claude/mcp/letar.ts (см. .mcp.json), cwd — корень репозитория.
  */
-import { Client } from '@modelcontextprotocol/sdk/client/index.js'
-import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js'
-import { Server } from '@modelcontextprotocol/sdk/server/index.js'
-import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
-import {
-  CallToolRequestSchema,
-  GetPromptRequestSchema,
-  ListPromptsRequestSchema,
-  ListResourcesRequestSchema,
-  ListResourceTemplatesRequestSchema,
-  ListToolsRequestSchema,
-  ReadResourceRequestSchema,
-} from '@modelcontextprotocol/sdk/types.js'
+import { Client } from '@modelcontextprotocol/client'
+import { InMemoryTransport, type McpServer, Server } from '@modelcontextprotocol/server'
+import { StdioServerTransport } from '@modelcontextprotocol/server/stdio'
 import { existsSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
@@ -327,11 +316,11 @@ async function main(): Promise<void> {
     { capabilities: { tools: {}, resources: {}, prompts: {} } },
   )
 
-  server.setRequestHandler(ListToolsRequestSchema, async () => ({
+  server.setRequestHandler('tools/list', async () => ({
     tools: [...toolDefs.values()],
   }))
 
-  server.setRequestHandler(CallToolRequestSchema, async (request) => {
+  server.setRequestHandler('tools/call', async (request) => {
     const dispatch = toolDispatch.get(request.params.name)
     if (!dispatch) {
       return { content: [{ type: 'text', text: `Неизвестный инструмент "${request.params.name}"` }], isError: true }
@@ -343,11 +332,11 @@ async function main(): Promise<void> {
     }
   })
 
-  server.setRequestHandler(ListResourcesRequestSchema, async () => ({ resources: resourceDefs }))
-  server.setRequestHandler(ListResourceTemplatesRequestSchema, async () => ({
+  server.setRequestHandler('resources/list', async () => ({ resources: resourceDefs }))
+  server.setRequestHandler('resources/templates/list', async () => ({
     resourceTemplates: resourceTemplateDefs,
   }))
-  server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
+  server.setRequestHandler('resources/read', async (request) => {
     const dispatch = resourceDispatch.get(request.params.uri)
     if (!dispatch) {
       throw new Error(`Неизвестный ресурс "${request.params.uri}"`)
@@ -355,8 +344,8 @@ async function main(): Promise<void> {
     return dispatch(request.params.uri)
   })
 
-  server.setRequestHandler(ListPromptsRequestSchema, async () => ({ prompts: [...promptDefs.values()] }))
-  server.setRequestHandler(GetPromptRequestSchema, async (request) => {
+  server.setRequestHandler('prompts/list', async () => ({ prompts: [...promptDefs.values()] }))
+  server.setRequestHandler('prompts/get', async (request) => {
     const dispatch = promptDispatch.get(request.params.name)
     if (!dispatch) {
       throw new Error(`Неизвестный промпт "${request.params.name}"`)

@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /** Разовый вызов инструмента через реальный stdio-процесс. Usage: bun smoke-call.ts <file> <tool> [argsJson] */
-import { Client } from '@modelcontextprotocol/sdk/client/index.js'
-import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
+import { Client } from '@modelcontextprotocol/client'
+import { StdioClientTransport } from '@modelcontextprotocol/client/stdio'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 

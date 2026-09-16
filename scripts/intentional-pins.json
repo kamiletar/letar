@@ -40,6 +40,26 @@
       "unpinWhen": "Не относится — пин снимается только заменой на новую точную версию (обычный bump), не на диапазон."
     },
     {
+      "package": "@modelcontextprotocol/server",
+      "version": "2.0.0",
+      "field": "dependencies",
+      "since": "2026-09-16",
+      "commit": "TBD — миграция @modelcontextprotocol/sdk v1→v2",
+      "reason": "Точная версия, не caret — та же причина, что у каждого `@letar/*` MCP-пакета (deploy-mcp, form-mcp, glitchtip-mcp, mcp-test-kit, studio-mcp, studio-time-mcp, umami-mcp, synth, domwellbes): bun isolated linker дедуплицирует бакет только при буквальном совпадении строки версии, не по совместимости semver-диапазона. Корневая копия используется `.claude/mcp/letar.ts`/`letar-db.ts` (низкоуровневый Server + McpServer, вне графа Nx — свой package.json тут не заведёшь).",
+      "doc": "PLAN-INFRA-*.md — сессия миграции @modelcontextprotocol/sdk v1→v2, 2026-09-16",
+      "unpinWhen": "Если ВСЕ `@letar/*` MCP-пакеты когда-нибудь перейдут на caret-диапазон (а не точный пин) для этого пакета и продолжат резолвиться в одну копию — тогда можно ослабить и корневой пин. До этого — бампать синхронно с каждым потребителем."
+    },
+    {
+      "package": "@modelcontextprotocol/client",
+      "version": "2.0.0",
+      "field": "dependencies",
+      "since": "2026-09-16",
+      "commit": "TBD — миграция @modelcontextprotocol/sdk v1→v2",
+      "reason": "Тот же механизм и та же причина, что у @modelcontextprotocol/server выше — используется `.claude/mcp/letar.ts`/`smoke.ts`/`smoke-call.ts` (внутренний in-memory клиент + смоук-проверка реального stdio-процесса).",
+      "doc": "PLAN-INFRA-*.md — сессия миграции @modelcontextprotocol/sdk v1→v2, 2026-09-16",
+      "unpinWhen": "См. unpinWhen у @modelcontextprotocol/server — оба пина снимаются синхронно."
+    },
+    {
       "package": "zod",
       "version": "4.6.5",
       "field": "dependencies",
