@@ -67,19 +67,32 @@ function scheduleRelaunchAfterSilentInstall(): void {
   // 'ignore'` скрыл ошибку cmd молча). `.bat`-файл проверяем целиком перед запуском, а не
   // полагаемся на аккуратную склейку строк через разделитель.
   const batPath = join(tmpdir(), `kamikeythe-relaunch-${Date.now()}.bat`)
+  // Отладочный лог НЕ самоудаляется (в отличие от .bat) — живой тест 1.9.13→1.9.14 показал,
+  // что после успешного quitAndInstall сам relaunch не происходит, а .bat к моменту проверки уже
+  // не существует ни при успехе, ни при провале (`:done` — общая метка после цикла, достигается
+  // и по исчерпании попыток). Без лога внутри самого cmd-процесса невозможно понять, где именно
+  // рвётся цепочка: `ren` не освобождается, либо `start` не поднимает процесс в этом detached
+  // (`stdio: 'ignore'`, без консоли) контексте.
+  const debugLogPath = join(tmpdir(), 'kamikeythe-relauncher-debug.log')
   const batContent = [
     '@echo off',
-    'setlocal',
+    'setlocal enabledelayedexpansion',
+    `echo [%date% %time%] relauncher started, exe="${exePath}" >> "${debugLogPath}"`,
     'for /L %%i in (1,1,20) do (',
     `  ren "${exePath}" "${basename(exePath)}" >nul 2>&1`,
+    `  echo [!date! !time!] attempt %%i ren errorlevel=!errorlevel! >> "${debugLogPath}"`,
     '  if not errorlevel 1 (',
     '    timeout /t 2 /nobreak >nul',
+    `    echo [!date! !time!] starting "${exePath}" >> "${debugLogPath}"`,
     `    start "" "${exePath}"`,
+    `    echo [!date! !time!] start command issued, errorlevel=!errorlevel! >> "${debugLogPath}"`,
     '    goto :done',
     '  )',
     '  timeout /t 1 /nobreak >nul',
     ')',
+    `echo [%date% %time%] loop exhausted without success >> "${debugLogPath}"`,
     ':done',
+    `echo [%date% %time%] relauncher finished >> "${debugLogPath}"`,
     'del "%~f0" >nul 2>&1',
     '',
   ].join('\r\n')
