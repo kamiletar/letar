@@ -108,6 +108,21 @@ MEDIA_KEY_{APPID}=<сгенерированный_ключ>
 sops --encrypt --output infra/media-server/.env.docker.enc infra/media-server/.env.docker
 ```
 
+⚠️ **Значения в `.env.docker.enc` мало.** `--env-file` даёт `docker compose` только
+интерполяцию `${VAR}` в самом compose-файле — в контейнер `media-api` попадает исключительно то,
+что явно перечислено в его `environment:` ([env-files.md](/.claude/rules/env-files.md)). Новый
+`MEDIA_KEY_{APPID}` обязателен в **обоих** местах: `.env.docker.enc` (значение) и
+`environment:` сервиса `media-api` в `infra/media-server/docker-compose.yml` (строка
+`MEDIA_KEY_{APPID}: ${MEDIA_KEY_{APPID}}`). Пропуск второго не роняет деплой — контейнер
+поднимается здоровым, но `validateApiKey` для этого `appId` всегда возвращает `false`: 401 на
+`request-upload`, и это легко принять за проблему на стороне приложения. Прецедент — `domwellbes`
+2026-09-16: ключ был в `.env.docker.enc`, но не в `environment:`.
+
+```yaml
+# infra/media-server/docker-compose.yml, services.media-api.environment
+MEDIA_KEY_{APPID}: ${MEDIA_KEY_{APPID}}
+```
+
 ### 3. Добавить в `.env.docker` приложения
 
 ```env
