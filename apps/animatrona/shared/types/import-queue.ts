@@ -147,6 +147,13 @@ export interface ImportQueueEncodingProfile {
   gopSize: number | null
   bRefMode: string | null
   bFrames: number | null
+  /**
+   * Принудительно 10-bit. Опционально — элементы, добавленные в очередь до v0.56.0, его не
+   * содержат, и VMAF-сэмплы для них кодируются без него
+   */
+  force10Bit?: boolean
+  /** Временный фильтр NVENC (Blackwell). Опционально по той же причине, что force10Bit */
+  temporalFilter?: boolean
   /** Принудительно использовать CPU кодирование */
   preferCpu?: boolean
 }

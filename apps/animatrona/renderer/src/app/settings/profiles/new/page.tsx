@@ -14,6 +14,12 @@ import {
 import { Header } from '@/components/layout'
 import { useCreateEncodingProfile } from '@/lib/hooks'
 
+import {
+  NVENC_LOOKAHEAD_HELPER_TEXT,
+  NVENC_LOOKAHEAD_UI_MAX,
+  NVENC_TEMPORAL_FILTER_HELPER_TEXT,
+} from '../../../../../../shared/nvenc-limits'
+
 // Отключаем статическую генерацию
 export const dynamic = 'force-dynamic'
 
@@ -168,7 +174,8 @@ export default function NewProfilePage() {
                         label="Lookahead"
                         placeholder="Авто"
                         min={0}
-                        max={32}
+                        max={NVENC_LOOKAHEAD_UI_MAX}
+                        helperText={NVENC_LOOKAHEAD_HELPER_TEXT}
                       />
                     </Box>
                     <Box flex={1}>
@@ -194,7 +201,7 @@ export default function NewProfilePage() {
                   <AnimatronaForm.Field.Switch
                     name="temporalFilter"
                     label="Temporal Filter"
-                    helperText="Blackwell: +4-5% качества, немного медленнее"
+                    helperText={NVENC_TEMPORAL_FILTER_HELPER_TEXT}
                   />
 
                   <AnimatronaForm.Field.Switch

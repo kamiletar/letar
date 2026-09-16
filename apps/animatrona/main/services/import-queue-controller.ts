@@ -1359,6 +1359,9 @@ export class ImportQueueController extends EventEmitter {
       gopSize: profile.gopSize ?? undefined,
       bRefMode: profile.bRefMode as 'DISABLED' | 'EACH' | 'MIDDLE' | undefined,
       bFrames: profile.bFrames ?? undefined,
+      // Сэмплы кодируются теми же аргументами, что и финальный файл — фильтр и 10-bit меняют размер
+      force10Bit: profile.force10Bit ?? false,
+      temporalFilter: profile.temporalFilter ?? false,
     }
 
     // Anime4K VMAF: строим фильтр для упскейла сэмплов (480p → 1080p lossless эталон)

@@ -222,7 +222,7 @@ model EncodingProfile {
 
   // === Lookahead ===
 
-  lookahead       Int? @meta("form.title", "Lookahead Frames") @meta("form.fieldType", "slider") @meta("form.props.min", 0) @meta("form.props.max", 250) @meta("form.props.showValue", true) @meta("form.description", "Количество кадров для анализа (0 = авто)")
+  lookahead       Int? @meta("form.title", "Lookahead Frames") @meta("form.fieldType", "slider") @meta("form.props.min", 0) @meta("form.props.max", 58) @meta("form.props.showValue", true) @meta("form.description", "Количество кадров для анализа (0 = авто). ffmpeg применяет не больше 51–58: предел зависит от числа B-кадров")
 
   lookaheadLevel  Int? @meta("form.title", "Lookahead Level") @meta("form.fieldType", "slider") @meta("form.props.min", 0) @meta("form.props.max", 3) @meta("form.props.showValue", true)
 
@@ -238,7 +238,7 @@ model EncodingProfile {
 
   // === Blackwell-специфичные ===
 
-  temporalFilter  Boolean      @default(false) @meta("form.title", "Temporal Filter") @meta("form.fieldType", "switch") @meta("form.description", "Blackwell+ только: +4-5% качества при движении")
+  temporalFilter  Boolean      @default(false) @meta("form.title", "Temporal Filter") @meta("form.fieldType", "switch") @meta("form.description", "Только Blackwell (RTX 50): файл на 5–13% меньше при том же CQ, VMAF почти не меняется")
 
   // === CPU Fallback ===
 

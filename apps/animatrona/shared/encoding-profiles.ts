@@ -4,6 +4,7 @@
  * Используется в main process (seed при старте) и renderer (reset профиля).
  */
 
+import { NVENC_BUILT_IN_LOOKAHEAD } from './nvenc-limits'
 import type { GpuGeneration } from './types'
 
 /** Тип для определения встроенного профиля */
@@ -49,14 +50,20 @@ const BASE = {
 /** Поля для качественного GPU профиля (multipass + lookahead) */
 const GPU_HQ = {
   multipass: 'FULLRES' as const,
-  lookahead: 250,
+  // Не 250: ffmpeg всё равно обрезал до 51–55 (см. shared/nvenc-limits.ts), а форма
+  // показывала обещание, которое не выполнялось
+  lookahead: NVENC_BUILT_IN_LOOKAHEAD,
   lookaheadLevel: 3,
   bRefMode: 'MIDDLE' as const,
 }
 
 // === Профили по поколениям GPU ===
 
-/** Blackwell (RTX 50xx) — полный набор с UHQ и Temporal Filter */
+/**
+ * Blackwell (RTX 50xx) — полный набор с UHQ и Temporal Filter.
+ * Фильтр включён только здесь: на Ada и старше ffmpeg отвечает «Temporal filtering not
+ * supported by the device», а кодирование повторяется без него (см. main/ffmpeg/nvenc-args.ts)
+ */
 function blackwellProfiles(): BuiltInProfile[] {
   return [
     {

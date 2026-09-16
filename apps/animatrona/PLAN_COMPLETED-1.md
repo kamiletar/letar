@@ -1,7 +1,35 @@
 # Animatrona — Выполненные задачи (Часть 1)
 
 > Точка входа и карта всех частей — [PLAN_COMPLETED.md](./PLAN_COMPLETED.md).
-> Диапазон: 2026-09-04 — 2026-09-15.
+> Диапазон: 2026-09-04 — 2026-09-16.
+
+## NVENC: временной фильтр, lookahead и 10 бит (2026-09-16, v0.56.0)
+
+Что сделано и замеры — в разделе «NVENC» [PLAN.md](./PLAN.md). Здесь — как это устроено.
+
+- **Один источник аргументов.** `buildNvencEncodeArgs()` в `main/ffmpeg/nvenc-args.ts` —
+  бывший приватный `buildNvencArgs` из VideoPool. Его же зовёт `buildEncodingArgs()` в
+  `main/src/ffmpeg/sample.ts`, поэтому CQ-поиск и финальное кодирование больше не расходятся.
+  Тест `sample.spec.ts` сравнивает оба набора побайтно.
+  CUDA-путь (`NvencEncoderStrategy`) берёт оттуда только `buildNvencTemporalFilterArgs()` и
+  `supportsNvenc10BitOutput()`. Остальные его аргументы отличаются намеренно: `-highbitdepth`
+  вместо `-pix_fmt`, декодирование сразу в память видеокарты.
+- **Поддержку фильтра определяет** `getGpuCapability().supportsTemporalFilter` — это
+  закешированный вывод `nvidia-smi`, true только для Blackwell. CUDA-стратегия получает его в
+  конструкторе (`EncoderCapabilities`), VideoPool и сэмплы — перед сборкой аргументов.
+- **Откат без фильтра, если ffmpeg отказал.** Отказ распознаёт `isNvencTemporalFilterError()`
+  по stderr.
+  - VideoPool ставит `task.temporalFilterDisabled` и возвращает задачу в начало очереди.
+    Повтор один: флаг остаётся, второй отказ уходит в обычную ошибку.
+  - `transcodeVideoWithProfile` и `encodeSample` бросают `NvencTemporalFilterError`. Обёртка
+    `withTemporalFilterFallback` ловит её и повторяет кодирование с `temporalFilter: false`.
+  - Отказ проверяется по каждому куску stderr, и результат запоминается в флаге. Хвост буфера
+    для этого не годится: к закрытию процесса строку ошибки из него уже вытесняет прогресс. В
+    `transcode.ts` куски перекрываются на 128 символов, чтобы строка не порвалась на стыке.
+  - В VMAF-поиске пробный сэмпл при таком отказе сначала повторяется на GPU без фильтра и
+    только потом уходит на CPU.
+- **Попутно:** `encodeSamplesParallelWithFallback` пускал на GPU только AV1, HEVC и H.264
+  сэмплились на CPU. Теперь условие — `useGpu && !preferCpu`.
 
 ## Фикс прод-краша main-процесса: `concatenateModules` ломает electron-updater (2026-09-15, v0.55.74)
 

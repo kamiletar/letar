@@ -476,6 +476,8 @@ export function ImportWizardDialog({
           gopSize: importSettings.selectedProfile.gopSize,
           bRefMode: importSettings.selectedProfile.bRefMode,
           bFrames: null, // Not in schema, use null
+          force10Bit: importSettings.selectedProfile.force10Bit,
+          temporalFilter: importSettings.selectedProfile.temporalFilter,
           preferCpu: importSettings.selectedProfile.preferCpu ?? false,
         }
         : undefined,

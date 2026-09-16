@@ -38,6 +38,8 @@ export function buildVideoOptions(encodingProfile: EncodingProfile | null, effec
       aqStrength: encodingProfile.aqStrength ?? undefined,
       gopSize: encodingProfile.gopSize ?? undefined,
       lookahead: encodingProfile.lookahead ?? undefined,
+      // Без этого поля `-lookahead_level` профиля не доходил до реального кодирования
+      lookaheadLevel: encodingProfile.lookaheadLevel ?? undefined,
       bRefMode: encodingProfile.bRefMode || undefined,
       force10Bit: encodingProfile.force10Bit ?? false,
       temporalFilter: encodingProfile.temporalFilter ?? false,

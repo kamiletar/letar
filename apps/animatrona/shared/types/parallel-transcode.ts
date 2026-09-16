@@ -55,6 +55,11 @@ export interface VideoPoolTask {
    */
   preferCpu?: boolean
   /**
+   * Временный фильтр NVENC отключён: ffmpeg отказал в нём при первой попытке
+   * (GPU старше Blackwell или меньше 4 B-кадров), задача повторяется без фильтра
+   */
+  temporalFilterDisabled?: boolean
+  /**
    * Время начала кодирования (Date.now())
    * Используется для расчёта elapsed time в UI
    */

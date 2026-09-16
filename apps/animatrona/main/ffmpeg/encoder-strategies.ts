@@ -2,6 +2,7 @@
  * Стратегии кодирования — OCP: добавление нового энкодера = новый класс без изменения transcode.ts
  */
 
+import { buildNvencTemporalFilterArgs, type NvencCodec, supportsNvenc10BitOutput } from './nvenc-args'
 import type { EncodingProfileOptions } from './types'
 
 /** Опции для сборки цепочки видеофильтров (`-vf`) */
@@ -10,6 +11,18 @@ export interface VideoFilterChainOptions {
   deband: boolean
   /** Готовая строка `crop=W:H:X:Y` из cropdetect (см. cropdetect.ts), либо не задана */
   cropFilter?: string
+  /**
+   * Битность источника. GPU-конвейеру нужна для `hwdownload`: кадры 10-bit источника лежат
+   * в VRAM как p010le, и `format=nv12` после `hwdownload` падает с
+   * «Invalid output format nv12 for hwframe download». По умолчанию 8.
+   */
+  sourceBitDepth?: number
+}
+
+/** Возможности GPU, которые влияют на аргументы кодирования */
+export interface EncoderCapabilities {
+  /** GPU умеет временный фильтр NVENC (Blackwell) */
+  temporalFilterSupported: boolean
 }
 
 /** Интерфейс стратегии кодирования */
@@ -33,6 +46,9 @@ const NVENC_CODECS: Record<string, string> = {
   H264: 'h264_nvenc',
 }
 
+/** Параметры deband: 0.02 — мягкие, не вызывают артефактов */
+const DEBAND_FILTER = 'deband=1thr=0.02:2thr=0.02:3thr=0.02:4thr=0.02'
+
 /** Маппинг кодеков CPU */
 const CPU_CODECS: Record<string, string> = {
   AV1: 'libsvtav1',
@@ -48,8 +64,11 @@ const CPU_CODECS: Record<string, string> = {
  * - Adaptive Quantization (spatial/temporal AQ)
  * - Lookahead и B-Ref Mode
  * - Tune и Multipass
+ * - Temporal Filter (Blackwell) и принудительный 10-bit через -highbitdepth
  */
 export class NvencEncoderStrategy implements EncoderStrategy {
+  constructor(private readonly capabilities: EncoderCapabilities) {}
+
   /** Аргументы hwaccel для GPU — всегда перед -i */
   buildHwaccelArgs(): string[] {
     return ['-hwaccel', 'cuda', '-hwaccel_output_format', 'cuda']
@@ -59,18 +78,16 @@ export class NvencEncoderStrategy implements EncoderStrategy {
    * Цепочка CPU-фильтров для GPU-конвейера:
    * hwdownload → [crop] → [deband] → hwupload_cuda
    * hwdownload переносит данные из VRAM в RAM для CPU-фильтров (crop, deband),
-   * format=nv12 обеспечивает совместимость между GPU и CPU,
+   * format=<формат кадров в VRAM> обеспечивает совместимость между GPU и CPU,
    * hwupload_cuda возвращает данные обратно в VRAM для NVENC.
    */
-  buildVideoFilterChain({ deband, cropFilter }: VideoFilterChainOptions): string | undefined {
+  buildVideoFilterChain({ deband, cropFilter, sourceBitDepth = 8 }: VideoFilterChainOptions): string | undefined {
     if (!deband && !cropFilter) {
       return undefined
     }
-    const parts = [
-      cropFilter,
-      deband ? 'deband=1thr=0.02:2thr=0.02:3thr=0.02:4thr=0.02' : undefined,
-    ].filter(Boolean)
-    return `hwdownload,format=nv12,${parts.join(',')},format=nv12,hwupload_cuda`
+    const parts = [cropFilter, deband ? DEBAND_FILTER : undefined].filter(Boolean)
+    const swFormat = sourceBitDepth >= 10 ? 'p010le' : 'nv12'
+    return `hwdownload,format=${swFormat},${parts.join(',')},format=${swFormat},hwupload_cuda`
   }
 
   /** Построить аргументы кодирования NVENC (без hwaccel — они добавляются отдельно) */
@@ -130,20 +147,24 @@ export class NvencEncoderStrategy implements EncoderStrategy {
       args.push('-b_ref_mode', profile.bRefMode.toLowerCase())
     }
 
-    // 10-bit output — только если НЕ используем hwaccel cuda
-    // При -hwaccel_output_format cuda формат пикселей управляется GPU автоматически
-    // и -pix_fmt вызывает конфликт "Invalid argument"
-    // NVENC автоматически сохраняет битность источника
-    // Примечание: если нужен принудительный 10-bit без hwaccel,
-    // используйте profile.force10Bit с useGpu=false
+    const codec = profile.codec.toLowerCase() as NvencCodec
 
-    // Temporal Filter (Blackwell+)
-    // ПРИМЕЧАНИЕ: tf_level пока не поддерживается драйвером 572.90 на RTX 5080
-    // FFmpeg выдаёт "Invalid temporal filtering level" для любых значений кроме 0
-    // TODO: Включить когда NVIDIA выпустит драйвер с поддержкой Temporal Filter
-    // if (profile.temporalFilter) {
-    //   args.push('-tf_level', '1')
-    // }
+    // Temporal Filter (Blackwell). Уровень только 4 — см. NVENC_TEMPORAL_FILTER_LEVEL
+    args.push(
+      ...buildNvencTemporalFilterArgs({
+        enabled: profile.temporalFilter,
+        codec,
+        tune: profile.tune,
+        supported: this.capabilities.temporalFilterSupported,
+      }),
+    )
+
+    // 10-bit output. Кадры остаются в VRAM (-hwaccel_output_format cuda), и -pix_fmt p010le
+    // тут не работает («Impossible to convert between the formats»). -highbitdepth — родной
+    // способ NVENC: 8-bit на входе, 10-bit на выходе. 10-bit источник NVENC и так кодирует в 10-bit.
+    if (profile.force10Bit && supportsNvenc10BitOutput(codec)) {
+      args.push('-highbitdepth', '1')
+    }
 
     return args
   }
@@ -168,10 +189,7 @@ export class CpuEncoderStrategy implements EncoderStrategy {
     if (!deband && !cropFilter) {
       return undefined
     }
-    const parts = [
-      cropFilter,
-      deband ? 'deband=1thr=0.02:2thr=0.02:3thr=0.02:4thr=0.02' : undefined,
-    ].filter(Boolean)
+    const parts = [cropFilter, deband ? DEBAND_FILTER : undefined].filter(Boolean)
     return parts.join(',')
   }
 
@@ -204,10 +222,11 @@ export class CpuEncoderStrategy implements EncoderStrategy {
  * Фабрика стратегий кодирования
  *
  * @param useGpu true — NVENC (GPU), false — CPU (libsvtav1/libx265/libx264)
+ * @param capabilities Возможности GPU (см. getGpuCapability в utils/hardware-info.ts)
  * @returns Экземпляр соответствующей стратегии
  */
-export function getEncoderStrategy(useGpu: boolean): EncoderStrategy {
-  return useGpu ? new NvencEncoderStrategy() : new CpuEncoderStrategy()
+export function getEncoderStrategy(useGpu: boolean, capabilities: EncoderCapabilities): EncoderStrategy {
+  return useGpu ? new NvencEncoderStrategy(capabilities) : new CpuEncoderStrategy()
 }
 
 /**

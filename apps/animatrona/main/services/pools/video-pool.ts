@@ -12,11 +12,13 @@
 import type { TranscodeProgressExtended } from '../../../shared/types'
 import type { VideoPoolTask } from '../../../shared/types/parallel-transcode'
 import { buildAnime4KFilter } from '../../ffmpeg/anime4k'
+import { buildNvencEncodeArgs, isNvencTemporalFilterError } from '../../ffmpeg/nvenc-args'
 import { getVideoInfo } from '../../ffmpeg/probe'
 import { parseTimeToSeconds } from '../../ffmpeg/progress-parser'
 import { prisma } from '../../utils/db'
 import { getFFmpegPath } from '../../utils/ffmpeg-installer'
 import { spawnFFmpeg } from '../../utils/ffmpeg-spawn'
+import { getGpuCapability } from '../../utils/hardware-info'
 import { createModuleLogger } from '../../utils/logger'
 import { BasePool } from './base-pool'
 
@@ -707,7 +709,8 @@ export class VideoPool extends BasePool<VideoPoolTask> {
         return
       }
 
-      const args = this.buildFFmpegArgs(task, duration)
+      const { supportsTemporalFilter } = await getGpuCapability()
+      const args = this.buildFFmpegArgs(task, duration, supportsTemporalFilter)
 
       // Сохраняем полную FFmpeg команду для отображения в UI
       const ffmpegPath = getFFmpegPath()
@@ -719,6 +722,8 @@ export class VideoPool extends BasePool<VideoPoolTask> {
       this.updateTaskProcess(task.id, ff)
 
       let stderrBuffer = ''
+      // ffmpeg отказал во временном фильтре NVENC (старый GPU или мало B-кадров)
+      let temporalFilterRejected = false
 
       ff.stderr.on('data', (data: Buffer) => {
         const chunk = data.toString()
@@ -731,6 +736,9 @@ export class VideoPool extends BasePool<VideoPoolTask> {
         for (const line of lines) {
           // Добавляем строку в лог-буфер (если не пустая и не progress update)
           const trimmedLine = line.trim()
+          if (isNvencTemporalFilterError(trimmedLine)) {
+            temporalFilterRejected = true
+          }
           if (trimmedLine && !trimmedLine.startsWith('frame=')) {
             const level = parseLogLevel(trimmedLine)
             this.logBuffer.push({
@@ -864,6 +872,26 @@ export class VideoPool extends BasePool<VideoPoolTask> {
           return
         }
 
+        // === Отказ временного фильтра NVENC → повтор на GPU без фильтра ===
+        // Фильтр — улучшение, а не требование профиля: из-за него задача падать не должна
+        const canRetryWithoutTemporalFilter = code !== 0
+          && (temporalFilterRejected || isNvencTemporalFilterError(stderrBuffer))
+          && !task.temporalFilterDisabled
+          && task.status !== 'cancelled'
+
+        if (canRetryWithoutTemporalFilter) {
+          log.warn('NVENC отказал во временном фильтре — повтор без него', { taskId: task.id, code })
+          task.temporalFilterDisabled = true
+          task.status = 'queued'
+          task.error = undefined
+          task.progress = null
+
+          this.queue.unshift(task)
+          this.emit('taskRetry', task)
+          this.processQueue()
+          return
+        }
+
         if (code === 0) {
           // Вычисляем время транскодирования и количество активных воркеров
           if (task.startedAt) {
@@ -888,10 +916,13 @@ export class VideoPool extends BasePool<VideoPoolTask> {
     }
   }
 
-  /** Построить аргументы FFmpeg */
-  private buildFFmpegArgs(task: VideoPoolTask, _duration: number): string[] {
+  /**
+   * Построить аргументы FFmpeg
+   *
+   * @param temporalFilterSupported GPU умеет временный фильтр NVENC (Blackwell)
+   */
+  private buildFFmpegArgs(task: VideoPoolTask, _duration: number, temporalFilterSupported: boolean): string[] {
     const { options, inputPath, outputPath } = task
-    const codec = options.codec || 'av1'
 
     const args: string[] = ['-y', '-hide_banner']
 
@@ -952,8 +983,12 @@ export class VideoPool extends BasePool<VideoPoolTask> {
       // === CPU кодирование (libsvtav1) ===
       this.buildSvtAv1Args(args, task)
     } else {
-      // === GPU кодирование (NVENC) ===
-      this.buildNvencArgs(args, task, codec)
+      // === GPU кодирование (NVENC) — те же аргументы, что у VMAF-сэмплов ===
+      args.push(
+        ...buildNvencEncodeArgs(options, {
+          temporalFilterSupported: temporalFilterSupported && !task.temporalFilterDisabled,
+        }),
+      )
     }
 
     // Без аудио (аудио обрабатывается отдельно в AudioPool)
@@ -1003,92 +1038,5 @@ export class VideoPool extends BasePool<VideoPoolTask> {
     args.push('-g', '240') // GOP size
     args.push('-svtav1-params', SVT_AV1_PARAMS)
     args.push('-pix_fmt', 'yuv420p10le') // 10-bit обязательно
-  }
-
-  /**
-   * Построить аргументы для NVENC (GPU кодирование)
-   */
-  private buildNvencArgs(args: string[], task: VideoPoolTask, codec: string): void {
-    const { options } = task
-
-    // NVIDIA NVENC кодеки
-    const nvencCodecs: Record<string, string> = {
-      av1: 'av1_nvenc',
-      hevc: 'hevc_nvenc',
-      h264: 'h264_nvenc',
-    }
-
-    args.push('-c:v', nvencCodecs[codec])
-
-    // Rate control и качество
-    // ВАЖНО: -cq работает только с VBR, для constqp нужен -qp!
-    const rateControl = options.rateControl ?? 'CONSTQP'
-    if (rateControl === 'VBR') {
-      args.push('-rc', 'vbr')
-      args.push('-cq', options.cq.toString())
-      if (options.maxBitrate) {
-        args.push('-maxrate', `${options.maxBitrate}M`)
-        args.push('-bufsize', `${options.maxBitrate * 2}M`)
-      }
-    } else {
-      args.push('-rc', 'constqp')
-      args.push('-qp', options.cq.toString()) // -qp для constqp, не -cq!
-    }
-
-    // Preset
-    args.push('-preset', options.preset)
-
-    // Tune (hq, uhq, ll, ull)
-    const tune = options.tune ?? 'HQ'
-    if (tune !== 'NONE') {
-      args.push('-tune', tune.toLowerCase())
-    }
-
-    // Multipass
-    const multipass = options.multipass ?? 'DISABLED'
-    if (multipass === 'QRES') {
-      args.push('-multipass', 'qres')
-    } else if (multipass === 'FULLRES') {
-      args.push('-multipass', 'fullres')
-    }
-
-    // GOP Size
-    const gopSize = options.gopSize ?? 240
-    args.push('-g', gopSize.toString())
-
-    // Adaptive Quantization
-    const spatialAq = options.spatialAq ?? true
-    const temporalAq = options.temporalAq ?? true
-    const aqStrength = options.aqStrength ?? 8
-    args.push('-spatial-aq', spatialAq ? '1' : '0')
-    args.push('-temporal-aq', temporalAq ? '1' : '0')
-    args.push('-aq-strength', aqStrength.toString())
-
-    // Lookahead (если указан)
-    if (options.lookahead && options.lookahead > 0) {
-      args.push('-rc-lookahead', options.lookahead.toString())
-      if (options.lookaheadLevel && options.lookaheadLevel > 0) {
-        args.push('-lookahead_level', options.lookaheadLevel.toString())
-      }
-    }
-
-    // B-Ref Mode
-    const bRefMode = options.bRefMode ?? 'DISABLED'
-    if (bRefMode === 'EACH') {
-      args.push('-b_ref_mode', 'each')
-    } else if (bRefMode === 'MIDDLE') {
-      args.push('-b_ref_mode', 'middle')
-    }
-
-    // 10-bit вывод
-    if (options.force10Bit) {
-      args.push('-pix_fmt', 'p010le')
-    }
-
-    // Temporal Filter (Blackwell+ / требует новую версию FFmpeg 7.1+)
-    // ОТКЛЮЧЕНО: вызывает "Invalid temporal filtering level" на старых версиях
-    // if (options.temporalFilter) {
-    //   args.push('-tf_level', '1')
-    // }
   }
 }

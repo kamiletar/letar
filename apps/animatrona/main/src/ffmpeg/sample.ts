@@ -6,9 +6,15 @@ import * as fs from 'fs'
 import * as path from 'path'
 import type { SampleConfig } from '../../../shared/types/vmaf'
 import { DEFAULT_SAMPLE_CONFIG } from '../../../shared/types/vmaf'
+import { mapToCpuPreset } from '../../ffmpeg/encoder-strategies'
+import { buildNvencEncodeArgs, isNvencTemporalFilterError, NvencTemporalFilterError } from '../../ffmpeg/nvenc-args'
 import { spawnFFmpeg } from '../../utils/ffmpeg-spawn'
+import { getGpuCapability } from '../../utils/hardware-info'
+import { createModuleLogger } from '../../utils/logger'
 import { getVideoDuration } from './probe'
 import type { VideoTranscodeOptions } from './types'
+
+const log = createModuleLogger('VmafSample')
 
 /** Результат кодирования сэмпла */
 export interface EncodedSample {
@@ -51,6 +57,9 @@ const _SVT_AV1_PARAMS = [
   'enable-tf=0', // Отключить temporal filtering — резкость линий
   'enable-qm=1', // Quantization matrices — лучше сжатие
 ].join(':')
+
+/** GOP сэмплов при CPU-кодировании (NVENC берёт GOP профиля, как финальный файл) */
+const CPU_SAMPLE_GOP = '120'
 
 /** SVT-AV1 параметры для VMAF сэмплов — оптимизированы для низкого потребления RAM */
 const SVT_AV1_VMAF_PARAMS = [
@@ -178,10 +187,12 @@ export async function encodeSamplesParallel(
     fs.mkdirSync(outputDir, { recursive: true })
   }
 
+  const { supportsTemporalFilter } = await getGpuCapability()
+
   // Запускаем все кодирования параллельно (4 NVENC потока)
   const promises = samples.map(async (samplePath, index) => {
     const outputPath = path.join(outputDir, `encoded_${index}.mkv`)
-    return encodeSample(samplePath, outputPath, options, false)
+    return encodeSample(samplePath, outputPath, options, false, supportsTemporalFilter)
   })
 
   return Promise.all(promises)
@@ -214,25 +225,38 @@ export async function encodeSamplesParallelWithFallback(
     fs.mkdirSync(outputDir, { recursive: true })
   }
 
-  const codec = (options.codec || 'av1').toLowerCase()
-
-  // Для AV1: если preferCpu или !useGpu — сразу CPU
-  // Для других кодеков: GPU работает стабильно, используем как обычно
-  const shouldTryGpu = codec === 'av1' && options.useGpu && !preferCpu
+  // preferCpu или !useGpu — сразу CPU, иначе GPU для любого кодека.
+  // До 2026-09-16 GPU пробовался только для AV1: HEVC/H.264 уходили в libx265/libx264 с
+  // NVENC-пресетом p1–p7, который x26x отвергает («Error setting preset/tune p7»)
+  const shouldTryGpu = options.useGpu && !preferCpu
 
   if (shouldTryGpu && samples.length > 0) {
     // Сначала тестируем GPU на ОДНОМ сэмпле
     const testSamplePath = samples[0]
     const testOutputPath = path.join(outputDir, 'encoded_0.mkv')
+    let { supportsTemporalFilter: temporalFilterSupported } = await getGpuCapability()
 
     try {
-      const testResult = await encodeSample(testSamplePath, testOutputPath, options, false)
+      let testResult: EncodedSample
+      try {
+        testResult = await encodeSample(testSamplePath, testOutputPath, options, false, temporalFilterSupported)
+      } catch (error) {
+        // Отказ временного фильтра — не повод уходить на CPU: повторяем на GPU без фильтра.
+        // Финальное кодирование (VideoPool) делает такой же повтор, так что сэмплы остаются
+        // сопоставимы с реальным файлом
+        if (!(error instanceof NvencTemporalFilterError)) {
+          throw error
+        }
+        log.warn('NVENC отказал во временном фильтре на VMAF-сэмпле — повтор без него')
+        temporalFilterSupported = false
+        testResult = await encodeSample(testSamplePath, testOutputPath, options, false, temporalFilterSupported)
+      }
 
       // GPU работает — кодируем остальные сэмплы параллельно
       if (samples.length > 1) {
         const remainingPromises = samples.slice(1).map(async (samplePath, index) => {
           const outputPath = path.join(outputDir, `encoded_${index + 1}.mkv`)
-          return encodeSample(samplePath, outputPath, options, false)
+          return encodeSample(samplePath, outputPath, options, false, temporalFilterSupported)
         })
 
         const remainingResults = await Promise.all(remainingPromises)
@@ -267,7 +291,7 @@ export async function encodeSamplesParallelWithFallback(
   for (let index = 0; index < samples.length; index++) {
     const samplePath = samples[index]
     const outputPath = path.join(outputDir, `encoded_${index}.mkv`)
-    const result = await encodeSample(samplePath, outputPath, options, true)
+    const result = await encodeSample(samplePath, outputPath, options, true, false)
     results.push(result)
   }
 
@@ -284,17 +308,20 @@ export async function encodeSamplesParallelWithFallback(
  * @param outputPath Путь для выходного файла
  * @param options Настройки кодирования
  * @param forceCpu Использовать CPU кодирование (libsvtav1)
+ * @param temporalFilterSupported GPU умеет временный фильтр NVENC
+ * @throws NvencTemporalFilterError если ffmpeg отказал во временном фильтре
  */
 async function encodeSample(
   inputPath: string,
   outputPath: string,
   options: VideoTranscodeOptions,
   forceCpu: boolean,
+  temporalFilterSupported: boolean,
 ): Promise<EncodedSample> {
   const startTime = Date.now()
   const duration = await getVideoDuration(inputPath)
 
-  const args = buildEncodingArgs(inputPath, outputPath, options, forceCpu)
+  const args = buildEncodingArgs(inputPath, outputPath, options, forceCpu, temporalFilterSupported)
 
   await new Promise<void>((resolve, reject) => {
     const ff = spawnFFmpeg(args)
@@ -309,7 +336,9 @@ async function encodeSample(
         resolve()
       } else {
         const lastLines = stderrOutput.split('\n').slice(-10).join('\n')
-        reject(new Error(`Failed to encode sample: exit code ${code}\n${lastLines}`))
+        const message = `Failed to encode sample: exit code ${code}\n${lastLines}`
+        // Проверяем весь stderr: строка об отказе фильтра идёт в начале, до хвоста ошибок
+        reject(isNvencTemporalFilterError(stderrOutput) ? new NvencTemporalFilterError(message) : new Error(message))
       }
     })
 
@@ -346,12 +375,14 @@ async function encodeSample(
  * @param outputPath Путь для выходного файла
  * @param options Настройки кодирования
  * @param forceCpu Принудительно использовать CPU кодирование (libsvtav1 для AV1)
+ * @param temporalFilterSupported GPU умеет временный фильтр NVENC и он не отключён после отказа
  */
-function buildEncodingArgs(
+export function buildEncodingArgs(
   inputPath: string,
   outputPath: string,
   options: VideoTranscodeOptions,
   forceCpu: boolean,
+  temporalFilterSupported: boolean,
 ): string[] {
   // Начинаем с -y (overwrite)
   const args = ['-y']
@@ -361,7 +392,7 @@ function buildEncodingArgs(
   // Deband добавляется только при финальном кодировании (transcode.ts).
 
   // Нормализуем codec к нижнему регистру (БД хранит AV1, HEVC, H264)
-  const codec = (options.codec || 'av1').toLowerCase()
+  const codec = (options.codec || 'av1').toLowerCase() as VideoTranscodeOptions['codec']
   const useNvenc = options.useGpu && !forceCpu
 
   // === INPUT OPTIONS (до -i) ===
@@ -375,50 +406,23 @@ function buildEncodingArgs(
 
   // === OUTPUT OPTIONS (после -i) ===
 
-  // GOP для VMAF сэмплов
-  const gop = '120'
+  if (useNvenc) {
+    // NVENC — ровно те же аргументы, что у VideoPool при финальном кодировании: иначе CQ,
+    // подобранный по сэмплам, не соответствует реальному файлу (до 2026-09-16 сэмплы шли
+    // с tune hq, aq-strength 15, без lookahead/multipass/временного фильтра и всегда в 10-bit)
+    args.push(...buildNvencEncodeArgs({ ...options, codec }, { temporalFilterSupported }))
+  } else if (codec === 'av1') {
+    // libsvtav1 — быстрый и надёжный CPU encoder для AV1
+    // Используется при crash NVENC или preferCpu
+    // Используем более агрессивный preset (8) для скорости — это тестовые сэмплы
+    const svtPreset = 8 // Быстрый preset для VMAF тестов
 
-  if (codec === 'av1') {
-    if (forceCpu || !options.useGpu) {
-      // libsvtav1 — быстрый и надёжный CPU encoder для AV1
-      // Используется при crash NVENC или preferCpu
-      // Используем более агрессивный preset (8) для скорости — это тестовые сэмплы
-      const svtPreset = 8 // Быстрый preset для VMAF тестов
-
-      args.push('-c:v', 'libsvtav1')
-      args.push('-crf', options.cq.toString())
-      args.push('-preset', svtPreset.toString())
-      args.push('-g', gop)
-      args.push('-svtav1-params', SVT_AV1_VMAF_PARAMS) // Оптимизировано для RAM
-      args.push('-pix_fmt', 'yuv420p10le') // 10-bit обязательно
-    } else {
-      // av1_nvenc — NVIDIA GPU encoder
-      // Может crash на некоторых BlurayRemux файлах
-      args.push('-c:v', 'av1_nvenc')
-      args.push('-cq', options.cq.toString())
-      args.push('-preset', options.preset)
-      args.push('-g', gop)
-      args.push('-pix_fmt', 'p010le') // 10-bit для NVENC
-      args.push('-tune', 'hq')
-      args.push('-spatial-aq', '1')
-      args.push('-temporal-aq', '1')
-      args.push('-aq-strength', '15')
-    }
-  } else if (options.useGpu && !forceCpu) {
-    // NVIDIA NVENC для H264/HEVC (работают стабильно)
-    const nvencCodecs: Record<string, string> = {
-      hevc: 'hevc_nvenc',
-      h264: 'h264_nvenc',
-    }
-
-    // Pixel format: p010le для 10-bit
-    args.push('-pix_fmt', 'p010le')
-
-    // -cq работает с VBR rate control
-    args.push('-c:v', nvencCodecs[codec], '-cq', options.cq.toString(), '-preset', options.preset, '-g', gop)
-
-    // H264/HEVC: включаем AQ для лучшего качества
-    args.push('-tune', 'hq', '-spatial-aq', '1', '-temporal-aq', '1', '-aq-strength', '15')
+    args.push('-c:v', 'libsvtav1')
+    args.push('-crf', options.cq.toString())
+    args.push('-preset', svtPreset.toString())
+    args.push('-g', CPU_SAMPLE_GOP)
+    args.push('-svtav1-params', SVT_AV1_VMAF_PARAMS) // Оптимизировано для RAM
+    args.push('-pix_fmt', 'yuv420p10le') // 10-bit обязательно
   } else {
     // CPU кодеки (fallback если GPU недоступен)
     const cpuCodecs: Record<string, string> = {
@@ -426,7 +430,9 @@ function buildEncodingArgs(
       h264: 'libx264',
     }
 
-    args.push('-c:v', cpuCodecs[codec], '-crf', options.cq.toString(), '-preset', options.preset, '-g', gop)
+    // Пресет профиля — NVENC-формат (p1–p7), x26x его не понимает
+    const cpuPreset = mapToCpuPreset(options.preset, codec.toUpperCase())
+    args.push('-c:v', cpuCodecs[codec], '-crf', options.cq.toString(), '-preset', cpuPreset, '-g', CPU_SAMPLE_GOP)
   }
 
   // Без аудио

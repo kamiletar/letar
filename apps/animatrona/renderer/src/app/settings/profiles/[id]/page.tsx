@@ -17,6 +17,12 @@ import { duplicateEncodingProfile, resetBuiltInProfile } from '@/app/_actions/en
 import { Header } from '@/components/layout'
 import { useDeleteEncodingProfile, useFindUniqueEncodingProfile, useUpdateEncodingProfile } from '@/lib/hooks'
 
+import {
+  NVENC_LOOKAHEAD_HELPER_TEXT,
+  NVENC_LOOKAHEAD_UI_MAX,
+  NVENC_TEMPORAL_FILTER_HELPER_TEXT,
+} from '../../../../../../shared/nvenc-limits'
+
 // Отключаем статическую генерацию
 export const dynamic = 'force-dynamic'
 
@@ -343,7 +349,8 @@ export default function ProfileEditorPage() {
                         label="Lookahead"
                         placeholder="Авто"
                         min={0}
-                        max={250}
+                        max={NVENC_LOOKAHEAD_UI_MAX}
+                        helperText={NVENC_LOOKAHEAD_HELPER_TEXT}
                         disabled={isReadOnly}
                       />
                     </Box>
@@ -377,7 +384,7 @@ export default function ProfileEditorPage() {
                   <AnimatronaForm.Field.Switch
                     name="temporalFilter"
                     label="Temporal Filter"
-                    helperText="Blackwell: +4-5% качества, немного медленнее"
+                    helperText={NVENC_TEMPORAL_FILTER_HELPER_TEXT}
                     disabled={isReadOnly}
                   />
 

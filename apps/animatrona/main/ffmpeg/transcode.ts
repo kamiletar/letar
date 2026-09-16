@@ -3,7 +3,10 @@
  */
 
 import { spawnFFmpeg } from '../utils/ffmpeg-spawn'
-import { getEncoderStrategy, mapToCpuPreset } from './encoder-strategies'
+import { getGpuCapability } from '../utils/hardware-info'
+import { createModuleLogger } from '../utils/logger'
+import { type EncoderCapabilities, getEncoderStrategy, mapToCpuPreset } from './encoder-strategies'
+import { isNvencTemporalFilterError, NvencTemporalFilterError } from './nvenc-args'
 import { getVideoDuration } from './probe'
 import type {
   AudioTranscodeOptions,
@@ -13,6 +16,8 @@ import type {
   VideoTranscodeOptions,
 } from './types'
 import { parseTimeToSeconds } from './utils'
+
+const log = createModuleLogger('Transcode')
 
 /**
  * Транскодирование видео в AV1
@@ -292,6 +297,44 @@ export const defaultAudioVBROptions: AudioTranscodeVBROptions = {
 }
 
 /**
+ * Сколько символов предыдущего чанка stderr приклеивать к следующему: строка об отказе
+ * временного фильтра может разорваться на границе чанков
+ */
+const STDERR_CHUNK_OVERLAP = 128
+
+/**
+ * Возможности GPU для стратегии кодирования. CPU-профилю nvidia-smi не нужен
+ */
+async function resolveEncoderCapabilities(useGpu: boolean): Promise<EncoderCapabilities> {
+  if (!useGpu) {
+    return { temporalFilterSupported: false }
+  }
+  const { supportsTemporalFilter } = await getGpuCapability()
+  return { temporalFilterSupported: supportsTemporalFilter }
+}
+
+/**
+ * Запуск кодирования по профилю с повтором без временного фильтра NVENC.
+ *
+ * Фильтр — улучшение, а не требование профиля: отказ ffmpeg (GPU старше Blackwell, меньше
+ * 4 B-кадров) не должен ронять задачу.
+ */
+async function withTemporalFilterFallback<T>(
+  profile: EncodingProfileOptions,
+  run: (effectiveProfile: EncodingProfileOptions) => Promise<T>,
+): Promise<T> {
+  try {
+    return await run(profile)
+  } catch (error) {
+    if (!(error instanceof NvencTemporalFilterError) || !profile.temporalFilter) {
+      throw error
+    }
+    log.warn('NVENC отказал во временном фильтре — повтор без него', { profile: profile.name })
+    return run({ ...profile, temporalFilter: false })
+  }
+}
+
+/**
  * Транскодирование видео с использованием профиля
  *
  * @param inputPath Путь к исходному видео
@@ -310,71 +353,86 @@ export async function transcodeVideoWithProfile(
   cropFilter?: string,
 ): Promise<void> {
   const duration = await getVideoDuration(inputPath)
+  const capabilities = await resolveEncoderCapabilities(profile.useGpu)
 
-  // Коррекция: -hwaccel и -hwaccel_output_format должны быть до -i
-  // Перестраиваем аргументы правильно
-  const finalArgs: string[] = ['-y']
+  const run = (effectiveProfile: EncodingProfileOptions): Promise<void> => {
+    // Коррекция: -hwaccel и -hwaccel_output_format должны быть до -i
+    // Перестраиваем аргументы правильно
+    const finalArgs: string[] = ['-y']
 
-  // Стратегия кодирования определяет hwaccel и цепочку видеофильтров
-  const strategy = getEncoderStrategy(profile.useGpu)
+    // Стратегия кодирования определяет hwaccel и цепочку видеофильтров
+    const strategy = getEncoderStrategy(effectiveProfile.useGpu, capabilities)
 
-  // Сначала hwaccel опции (если есть) — они должны идти до -i
-  finalArgs.push(...strategy.buildHwaccelArgs())
+    // Сначала hwaccel опции (если есть) — они должны идти до -i
+    finalArgs.push(...strategy.buildHwaccelArgs())
 
-  // Затем input
-  finalArgs.push('-i', inputPath)
+    // Затем input
+    finalArgs.push('-i', inputPath)
 
-  // Crop (обрезка чёрных полос, см. cropdetect.ts) + deband для аниме контента (убирает
-  // banding в градиентах, параметры 0.02 — мягкие, не вызывают артефактов). Deband опционально
-  // отключается через profile.deband для тяжёлых файлов.
-  const videoFilter = strategy.buildVideoFilterChain({ deband: profile.deband !== false, cropFilter })
-  if (videoFilter) {
-    finalArgs.push('-vf', videoFilter)
+    // Crop (обрезка чёрных полос, см. cropdetect.ts) + deband для аниме контента (убирает
+    // banding в градиентах). Deband опционально отключается через profile.deband для тяжёлых файлов.
+    const videoFilter = strategy.buildVideoFilterChain({
+      deband: effectiveProfile.deband !== false,
+      cropFilter,
+      sourceBitDepth,
+    })
+    if (videoFilter) {
+      finalArgs.push('-vf', videoFilter)
+    }
+
+    // Затем все аргументы кодирования (без hwaccel — они уже добавлены выше)
+    finalArgs.push(...strategy.buildArgs(effectiveProfile, sourceBitDepth))
+
+    // Без аудио
+    finalArgs.push('-an')
+
+    // Output
+    finalArgs.push(outputPath)
+
+    return new Promise((resolve, reject) => {
+      const startTime = Date.now()
+      const ff = spawnFFmpeg(finalArgs)
+      // Весь stderr длинного кодирования не храним: флаг + перекрытие на стыке чанков
+      let temporalFilterRejected = false
+      let chunkOverlap = ''
+
+      ff.stderr.on('data', (data) => {
+        const str = data.toString()
+        if (!temporalFilterRejected && isNvencTemporalFilterError(chunkOverlap + str)) {
+          temporalFilterRejected = true
+        }
+        chunkOverlap = str.slice(-STDERR_CHUNK_OVERLAP)
+        const currentTime = parseTimeToSeconds(str)
+
+        if (currentTime !== null && onProgress) {
+          const percent = Math.min(100, (currentTime / duration) * 100)
+          const elapsed = (Date.now() - startTime) / 1000
+          const eta = elapsed > 0 ? (elapsed / percent) * (100 - percent) : 0
+
+          onProgress({
+            percent,
+            currentTime,
+            totalDuration: duration,
+            eta,
+            stage: 'video',
+          })
+        }
+      })
+
+      ff.on('close', (code) => {
+        if (code === 0) {
+          resolve()
+        } else {
+          const message = `ffmpeg video transcode with profile "${effectiveProfile.name}" exited with code ${code}`
+          reject(temporalFilterRejected ? new NvencTemporalFilterError(message) : new Error(message))
+        }
+      })
+
+      ff.on('error', reject)
+    })
   }
 
-  // Затем все аргументы кодирования (без hwaccel — они уже добавлены выше)
-  const encodingArgs = strategy.buildArgs(profile, sourceBitDepth)
-  finalArgs.push(...encodingArgs)
-
-  // Без аудио
-  finalArgs.push('-an')
-
-  // Output
-  finalArgs.push(outputPath)
-
-  return new Promise((resolve, reject) => {
-    const startTime = Date.now()
-    const ff = spawnFFmpeg(finalArgs)
-
-    ff.stderr.on('data', (data) => {
-      const str = data.toString()
-      const currentTime = parseTimeToSeconds(str)
-
-      if (currentTime !== null && onProgress) {
-        const percent = Math.min(100, (currentTime / duration) * 100)
-        const elapsed = (Date.now() - startTime) / 1000
-        const eta = elapsed > 0 ? (elapsed / percent) * (100 - percent) : 0
-
-        onProgress({
-          percent,
-          currentTime,
-          totalDuration: duration,
-          eta,
-          stage: 'video',
-        })
-      }
-    })
-
-    ff.on('close', (code) => {
-      if (code === 0) {
-        resolve()
-      } else {
-        reject(new Error(`ffmpeg video transcode with profile "${profile.name}" exited with code ${code}`))
-      }
-    })
-
-    ff.on('error', reject)
-  })
+  return withTemporalFilterFallback(profile, run)
 }
 
 /**
@@ -397,100 +455,109 @@ export async function encodeSample(
   sourceBitDepth = 8,
   onProgress?: (progress: TranscodeProgress) => void,
 ): Promise<{ success: boolean; outputPath: string; encodingTime: number; outputSize: number }> {
-  // Стратегия кодирования определяет hwaccel и цепочку видеофильтров
-  const strategy = getEncoderStrategy(profile.useGpu)
-  const encodingArgs = strategy.buildArgs(profile, sourceBitDepth)
+  const capabilities = await resolveEncoderCapabilities(profile.useGpu)
 
-  const args: string[] = ['-y']
+  const run = (
+    effectiveProfile: EncodingProfileOptions,
+  ): Promise<{ success: boolean; outputPath: string; encodingTime: number; outputSize: number }> => {
+    // Стратегия кодирования определяет hwaccel и цепочку видеофильтров
+    const strategy = getEncoderStrategy(effectiveProfile.useGpu, capabilities)
+    const encodingArgs = strategy.buildArgs(effectiveProfile, sourceBitDepth)
 
-  // Hardware acceleration — должна идти до -i
-  args.push(...strategy.buildHwaccelArgs())
+    const args: string[] = ['-y']
 
-  // Seek to start (до -i для быстрого seek'а)
-  args.push('-ss', startTime.toString())
+    // Hardware acceleration — должна идти до -i
+    args.push(...strategy.buildHwaccelArgs())
 
-  // Duration
-  args.push('-t', duration.toString())
+    // Seek to start (до -i для быстрого seek'а)
+    args.push('-ss', startTime.toString())
 
-  // Input
-  args.push('-i', inputPath)
+    // Duration
+    args.push('-t', duration.toString())
 
-  // Deband фильтр для аниме контента (опционально). Без crop — сэмпл только для оценки
-  // качества/скорости профиля, не для финального транскода.
-  const sampleVideoFilter = strategy.buildVideoFilterChain({ deband: profile.deband !== false })
-  if (sampleVideoFilter) {
-    args.push('-vf', sampleVideoFilter)
+    // Input
+    args.push('-i', inputPath)
+
+    // Deband фильтр для аниме контента (опционально). Без crop — сэмпл только для оценки
+    // качества/скорости профиля, не для финального транскода.
+    const sampleVideoFilter = strategy.buildVideoFilterChain({
+      deband: effectiveProfile.deband !== false,
+      sourceBitDepth,
+    })
+    if (sampleVideoFilter) {
+      args.push('-vf', sampleVideoFilter)
+    }
+
+    // Encoding args
+    args.push(...encodingArgs)
+
+    // Без аудио для теста
+    args.push('-an')
+
+    // Output
+    args.push(outputPath)
+
+    const encodingStartTime = Date.now()
+
+    return new Promise((resolve, reject) => {
+      const ff = spawnFFmpeg(args)
+      let stderrBuffer = '' // Буфер для сбора stderr
+
+      ff.stderr.on('data', (data) => {
+        const str = data.toString()
+        stderrBuffer += str // Собираем весь stderr
+        const currentTime = parseTimeToSeconds(str)
+
+        if (currentTime !== null && onProgress) {
+          const percent = Math.min(100, (currentTime / duration) * 100)
+          const elapsed = (Date.now() - encodingStartTime) / 1000
+          const eta = elapsed > 0 && percent > 0 ? (elapsed / percent) * (100 - percent) : 0
+
+          onProgress({
+            percent,
+            currentTime,
+            totalDuration: duration,
+            eta,
+            stage: 'video',
+          })
+        }
+      })
+
+      ff.on('error', (err) => {
+        // Обработка ошибки spawn (ENOENT, etc)
+        reject(new Error(`FFmpeg spawn error: ${err.message}`))
+      })
+
+      ff.on('close', async (code) => {
+        const encodingTime = (Date.now() - encodingStartTime) / 1000
+
+        if (code === 0) {
+          // Получаем размер выходного файла
+          const fs = await import('fs')
+          let outputSize = 0
+          try {
+            const stats = fs.statSync(outputPath)
+            outputSize = stats.size
+          } catch {
+            // Игнорируем ошибки
+          }
+
+          resolve({
+            success: true,
+            outputPath,
+            encodingTime,
+            outputSize,
+          })
+        } else {
+          // Последние 500 символов stderr для диагностики
+          const stderrTail = stderrBuffer.slice(-500)
+          const message =
+            `ffmpeg sample encode with profile "${effectiveProfile.name}" exited with code ${code}\nStderr: ${stderrTail}`
+          reject(isNvencTemporalFilterError(stderrBuffer) ? new NvencTemporalFilterError(message) : new Error(message))
+        }
+      })
+    })
   }
 
-  // Encoding args
-  args.push(...encodingArgs)
-
-  // Без аудио для теста
-  args.push('-an')
-
-  // Output
-  args.push(outputPath)
-
-  const encodingStartTime = Date.now()
-
-  return new Promise((resolve, reject) => {
-    const ff = spawnFFmpeg(args)
-    let stderrBuffer = '' // Буфер для сбора stderr
-
-    ff.stderr.on('data', (data) => {
-      const str = data.toString()
-      stderrBuffer += str // Собираем весь stderr
-      const currentTime = parseTimeToSeconds(str)
-
-      if (currentTime !== null && onProgress) {
-        const percent = Math.min(100, (currentTime / duration) * 100)
-        const elapsed = (Date.now() - encodingStartTime) / 1000
-        const eta = elapsed > 0 && percent > 0 ? (elapsed / percent) * (100 - percent) : 0
-
-        onProgress({
-          percent,
-          currentTime,
-          totalDuration: duration,
-          eta,
-          stage: 'video',
-        })
-      }
-    })
-
-    ff.on('error', (err) => {
-      // Обработка ошибки spawn (ENOENT, etc)
-      reject(new Error(`FFmpeg spawn error: ${err.message}`))
-    })
-
-    ff.on('close', async (code) => {
-      const encodingTime = (Date.now() - encodingStartTime) / 1000
-
-      if (code === 0) {
-        // Получаем размер выходного файла
-        const fs = await import('fs')
-        let outputSize = 0
-        try {
-          const stats = fs.statSync(outputPath)
-          outputSize = stats.size
-        } catch {
-          // Игнорируем ошибки
-        }
-
-        resolve({
-          success: true,
-          outputPath,
-          encodingTime,
-          outputSize,
-        })
-      } else {
-        // Последние 500 символов stderr для диагностики
-        const stderrTail = stderrBuffer.slice(-500)
-        reject(
-          new Error(
-            `ffmpeg sample encode with profile "${profile.name}" exited with code ${code}\nStderr: ${stderrTail}`,
-          ),
-        )
-      }
-    })
-  })
+  return withTemporalFilterFallback(profile, run)
 }
