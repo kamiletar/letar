@@ -4,17 +4,14 @@
  */
 
 import { installAndRelaunchViaScheduler } from '@letar/electron-monorepo-updater'
-import { Logger } from '@letar/label-printer-core'
 import type { BrowserWindow } from 'electron'
 import { app, dialog, ipcMain } from 'electron'
 import type { UpdateDownloadedEvent, UpdateInfo } from 'electron-updater'
 import { autoUpdater } from 'electron-updater'
+import { getLogger } from '../utils/logger-helper'
 import { settingsService } from './settings.service'
 
 const APP_LABEL = 'LabelPrinterDesktop'
-
-/** Ленивое получение логгера */
-const getLogger = () => Logger.getInstance()
 
 /**
  * Тихо ставит скачанное обновление и перезапускает приложение через `@letar/electron-monorepo-updater`.

@@ -13,7 +13,6 @@ import {
   InvalidCodeFormatError,
   InvalidGTINError,
   type IPrinterService,
-  Logger,
   retry,
   type RetryOptions,
 } from '@letar/label-printer-core'
@@ -22,9 +21,7 @@ import { ipcMain } from 'electron'
 import { readFileSync } from 'fs'
 import type { ValidationResult } from '../../shared/types'
 import { settingsService } from '../services/settings.service'
-
-/** Ленивое получение логгера (после инициализации в background.ts) */
-const getLogger = () => Logger.getInstance()
+import { getLogger } from '../utils/logger-helper'
 
 /** Опции retry для печати */
 const PRINT_RETRY_OPTIONS: RetryOptions = {
@@ -218,11 +215,6 @@ export function registerPrintHandlers(): void {
 
       // Конвертируем base64 в Buffer
       const imageBuffer = Buffer.from(base64Png, 'base64')
-
-      // DEBUG: Сохраняем PNG для отладки
-      const debugPath = `C:\\web\\lena\\debug_label_${Date.now()}.png`
-      require('fs').writeFileSync(debugPath, imageBuffer)
-      getLogger().info('DEBUG: Saved label image', { path: debugPath, size: imageBuffer.length })
 
       // Используем printDirect — печать готового изображения без перегенерации
       let result

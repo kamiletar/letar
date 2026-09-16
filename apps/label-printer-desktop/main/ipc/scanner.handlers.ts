@@ -1,12 +1,10 @@
 /**
  * IPC handlers для сканера штрих-кодов
  */
-import { Logger } from '@letar/label-printer-core'
 import { ipcMain } from 'electron'
 import { scannerService } from '../services/scanner.service'
 import { settingsService } from '../services/settings.service'
-
-const getLogger = () => Logger.getInstance()
+import { getLogger } from '../utils/logger-helper'
 
 /** Результат операции сканера */
 interface ScannerResult<T = unknown> {

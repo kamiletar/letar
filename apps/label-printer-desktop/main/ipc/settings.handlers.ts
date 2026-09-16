@@ -2,12 +2,10 @@
  * IPC handlers для настроек приложения
  * Использует SettingsService для работы с SQLite БД
  */
-import { Logger } from '@letar/label-printer-core'
 import { ipcMain } from 'electron'
 import type { AppSettings } from '../../shared/types'
 import { settingsService } from '../services/settings.service'
-
-const getLogger = () => Logger.getInstance()
+import { getLogger } from '../utils/logger-helper'
 
 /**
  * IPC handlers для настроек

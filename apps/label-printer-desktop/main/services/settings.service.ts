@@ -5,13 +5,11 @@
  * Архитектура:
  * Main Process → HTTP → Next.js API → Prisma → SQLite
  */
-import { type LabelConfig, Logger, type PrinterConfig } from '@letar/label-printer-core'
+import { type LabelConfig, type PrinterConfig } from '@letar/label-printer-core'
 import { join } from 'path'
 import { getApiBaseUrl } from '../background'
+import { getLogger } from '../utils/logger-helper'
 import { getTemplatesPath } from '../utils/paths'
-
-/** Ленивое получение логгера (после инициализации в background.ts) */
-const getLogger = () => Logger.getInstance()
 
 /** ZenStack API возвращает `{ data: {...} }` либо сам объект напрямую */
 type ApiWrapped<T> = T & { data?: T }

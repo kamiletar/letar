@@ -6,6 +6,16 @@
 
 ### Fixed
 
+- **Удалён debug-дамп PNG с захардкоженным путём в `print:printImage`** —
+  `main/ipc/print.handlers.ts` писал каждое напечатанное изображение в
+  `C:\web\lena\debug_label_*.png` (наследие переименования репозитория `lena` → `letar`, путь
+  не подчищен при ребрендинге). На любой машине, кроме исходной, каталог не существует, и
+  `writeFileSync` бросает исключение — ломается fallback-ветка предпросмотра (используется,
+  когда у `IPrinterService.printDirect` нет реализации, например `MockPrinterService`).
+  Дамп был безусловным, не за debug-флагом, и использовал `require('fs')` вместо импорта `fs`
+  наверху файла. `MockPrinterService.printDirect` уже сохраняет изображение в свой
+  `outputDir` — отдельный дамп был избыточен, поэтому удалён целиком, а не переведён на
+  `app.getPath('temp')`.
 - **`main/` (Electron main-процесс) никогда не типизировался** — корневой `tsconfig.json`
   явно исключает `main/` (не должен попадать в Next.js typecheck рендерера), а
   `typecheck:tsgo` гонял `tsgo` только по этому корневому конфигу; `tsconfig.spec.json`
@@ -54,6 +64,13 @@
 
 - `vitest.config.mts`: убран избыточный alias `@letar/label-printer-core` — пакет уже прямая
   зависимость, симлинк bun резолвит его без alias.
+- Устранено дублирование `const getLogger = () => Logger.getInstance()` — 10 файлов `main/`
+  (`background.ts`, `services/{settings,scanner,updater,database}.ts`,
+  `ipc/{print,printer,scanner,settings,pdf}.handlers.ts`) переведены на импорт из
+  `utils/logger-helper.ts`, единственного источника `getLogger`/`logger`. В `printer.handlers.ts`
+  локальный `const logger = Logger.getInstance()` внутри `registerPrinterHandlers()` заменён на
+  импорт готового `logger`-прокси. В `background.ts` порядок сохранён: `Logger.initialize(...)`
+  по-прежнему вызывается до первого использования лениво импортированного `getLogger()`.
 
 ## [0.5.15] - 2026-09-15
 

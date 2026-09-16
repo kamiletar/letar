@@ -7,6 +7,7 @@ import { getDatabasePath, initializeDatabase } from './services/database'
 import { scannerService } from './services/scanner.service'
 import { settingsService } from './services/settings.service'
 import { initAutoUpdater, registerUpdaterHandlers } from './services/updater.service'
+import { getLogger } from './utils/logger-helper'
 import { getAvailablePort } from './utils/port-finder'
 
 // Инициализируем логгер
@@ -17,9 +18,6 @@ Logger.initialize({
   maxSize: '10m',
   maxFiles: 5,
 })
-
-/** Ленивое получение логгера */
-const getLogger = () => Logger.getInstance()
 
 // === Глобальная обработка ошибок ===
 

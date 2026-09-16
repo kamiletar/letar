@@ -8,7 +8,6 @@ import {
   GS1Parser,
   ImageGeneratorService,
   type IPrinterService,
-  Logger,
   retry,
   type RetryOptions,
   WindowsPrinterService,
@@ -19,6 +18,7 @@ import { readdirSync, readFileSync } from 'fs'
 import { promisify } from 'util'
 import type { PrinterStatus, PrintResult, TemplateInfo } from '../../shared/types'
 import { settingsService } from '../services/settings.service'
+import { logger } from '../utils/logger-helper'
 import { getTemplatesPath } from '../utils/paths'
 
 const execAsync = promisify(execCb)
@@ -59,8 +59,6 @@ export function resetTestPrinterService(): void {
  * IPC handlers для работы с принтером
  */
 export function registerPrinterHandlers(): void {
-  const logger = Logger.getInstance()
-
   // Статус принтера
   ipcMain.handle('printer:status', async (): Promise<PrinterStatus> => {
     try {

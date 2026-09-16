@@ -8,16 +8,14 @@
  * - При обновлениях применяет Prisma миграции
  */
 
-import { Logger } from '@letar/label-printer-core'
 import crypto from 'crypto'
 import { app } from 'electron'
 import fs from 'fs'
 import path from 'path'
+import { getLogger } from '../utils/logger-helper'
 
 // Объявляем __non_webpack_require__ для обхода Webpack bundling
 declare const __non_webpack_require__: NodeRequire
-
-const getLogger = () => Logger.getInstance()
 
 /** Проверка production режима */
 const isProd = app.isPackaged || process.env.NODE_ENV === 'production'

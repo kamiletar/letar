@@ -2,12 +2,10 @@
  * IPC handlers для работы с PDF файлами
  * Извлечение DataMatrix кодов из PDF документов
  */
-import { isPDFBuffer, Logger, parsePDF, type PDFParseResult } from '@letar/label-printer-core'
+import { isPDFBuffer, parsePDF, type PDFParseResult } from '@letar/label-printer-core'
 import { ipcMain } from 'electron'
 import { readFileSync } from 'fs'
-
-/** Ленивое получение логгера (после инициализации в background.ts) */
-const getLogger = () => Logger.getInstance()
+import { getLogger } from '../utils/logger-helper'
 
 /** Результат парсинга PDF для renderer */
 export interface PDFParseResponse {

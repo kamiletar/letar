@@ -5,12 +5,9 @@
  * - COM-порт (RS-232): Использует serialport для чтения данных
  * - USB HID (клавиатура): Данные приходят через события клавиатуры в renderer
  */
-import { Logger } from '@letar/label-printer-core'
 import type { BrowserWindow } from 'electron'
 import { SerialPort } from 'serialport'
-
-/** Ленивое получение логгера */
-const getLogger = () => Logger.getInstance()
+import { getLogger } from '../utils/logger-helper'
 
 export interface ScannerConfig {
   port: string // COM5, COM3, etc.
