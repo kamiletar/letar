@@ -4138,3 +4138,41 @@ v2-пины (см. корневой diff), отдельного шага не п
 `git push` — не выполнялся, требует отдельного одобрения пользователя.
 
 Небиллируемая внутренняя инфраструктурная сессия (`time_discard`), не клиентский проект.
+
+---
+
+## §185 (2026-09-16) `.claude/mcp/*.ts` — закрыт пробел typecheck, отмеченный в §184
+
+Прямое продолжение §184: там же зафиксировано, что «typecheck такого не покрывает вообще (файл
+вне графа Nx, без своего `project.json`)» — единственной проверкой `letar.ts`/`letar-db.ts`
+оставался смоук-тест реального stdio-процесса. Отдельная некоммерческая сессия закрыла именно
+этот пробел, не трогая сам SDK/бизнес-логику серверов.
+
+**Сделано:**
+
+- [.claude/mcp/tsconfig.json](/.claude/mcp/tsconfig.json) — новый, `extends`
+  `tsconfig.base.json`, `rootDir` поднят до корня репо (`"../.."`, иначе `TS6059` на импорте
+  `letar-db.ts` из `libs/pg-url/src/lib/feature.ts`), `allowImportingTsExtensions: true` (нужно
+  для relative `.ts`-импорта, который сам Bun требует для резолва ESM-спецификатора).
+- [scripts/check-mcp-typecheck.mjs](/scripts/check-mcp-typecheck.mjs) — новый, вызывает
+  `tsgo --noEmit -p .claude/mcp/tsconfig.json`; зарегистрирован в `scripts/check-all.mjs` как
+  `mcp-typecheck` (`severity: gate`, `ci: full` — оба файла публичные, приватных submodule не
+  затрагивает).
+- Ad hoc-прогон вскрыл реальные несовпадения типов с `@modelcontextprotocol/server` v2 (не
+  придуманные, не гипотетические): все хендлеры `setRequestHandler` в `letar.ts`
+  (`tools/list`/`tools/call`/`resources/*`/`prompts/*`) возвращали `Promise<unknown>`/литералы
+  без контекстной типизации вместо строгих `ListToolsResult`/`CallToolResult`/
+  `ReadResourceResult`/`GetPromptResult` и т.п.; `letar-db.ts` падал `TS2769` на
+  `registerTool('dbs', ...)` по той же причине (без явной аннотации возвращаемого типа TS
+  расширяет `type: 'text'` до `string` раньше, чем успевает подобрать перегрузку). Оба файла
+  функционально работали и до фикса — Bun не проверяет типы при запуске `.ts` — но без единой
+  сети безопасности на будущие правки. Поправлено явными аннотациями `Promise<CallToolResult>`
+  и т.п., без изменения поведения.
+- Подробный разбор ловушки и где смотреть при следующей правке —
+  [.claude/docs/mcp-servers.md#typecheck](/.claude/docs/mcp-servers.md#typecheck).
+
+**Верификация:** `bun scripts/check-all.mjs --only=mcp-typecheck` и `--group=tsconfig` — зелёные;
+`bun .claude/mcp/smoke.ts letar`/`letar-db` — тот же состав инструментов/ресурсов/промптов, что
+и до правки (73/10/3 и 3 соответственно); `smoke-call.ts letar-db dbs` — тот же ответ.
+
+`git push` не выполнялся. Небиллируемая сессия (`time_discard`).
