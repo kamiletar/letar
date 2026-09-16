@@ -289,6 +289,8 @@
 - [electron-version-drift](/.claude/docs/electron-version-drift.md) точная версия electron расходится без ошибок сборки
 - [electron-net-fetch-tun-vpn](/.claude/docs/electron-net-fetch-tun-vpn.md) ⚠️ `net.fetch` падает под TUN-VPN
 - [electron-sqlite](/.claude/docs/electron-sqlite.md) SQLite в Electron
+- [electron-main-typecheck-tsgo-gap](/.claude/docs/electron-main-typecheck-tsgo-gap.md) ⚠️ `main/` в exclude — `typecheck:tsgo` зелёный, но не проверяет его вовсе
+- [electron-main-fetch-json-unknown-type](/.claude/docs/electron-main-fetch-json-unknown-type.md) ⚠️ `response.json()` в main/ без DOM lib — `unknown`, не `any`
 - [electron-shared-runtime-and-settings-patterns](/.claude/docs/electron-shared-runtime-and-settings-patterns.md) `shared/`-рантайм и единый объект настроек — общий паттерн Electron-приложений
 - [electron-window-controls-overlay-pattern](/.claude/docs/electron-window-controls-overlay-pattern.md) `titleBarOverlay` вместо `frame: false`
 - [native-win32-ui-verification-screenshot](/.claude/docs/native-win32-ui-verification-screenshot.md) проверка UI вне Browser pane; ⚠️ двоение — чужая прод-копия
