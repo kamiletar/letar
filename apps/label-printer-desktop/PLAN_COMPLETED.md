@@ -2,6 +2,24 @@
 
 Детальное описание всех реализованных фич Label Printer Desktop.
 
+## Удалён debug-дамп PNG с захардкоженным путём в `print:printImage` (2026-09-17, v0.5.19)
+
+`main/ipc/print.handlers.ts` в fallback-ветке `print:printImage` (используется, когда у
+`IPrinterService.printDirect` нет реализации) безусловно писал каждое напечатанное изображение в
+`C:\web\lena\debug_label_${Date.now()}.png` через `require('fs').writeFileSync`. Путь — наследие
+переименования репозитория `lena` → `letar` (см. `69fdf2ea9 chore: initial commit (fresh start
+from lena, @lena → @letar scope rename applied)`), не подчищенное при ребрендинге. На любой
+машине, кроме исходной, каталога не существует — `writeFileSync` бросает исключение, ломая
+fallback-путь предпросмотра ещё до попытки напечатать.
+
+Проверено, что и `WindowsPrinterService`, и `MockPrinterService` (`libs/label-printer-core`)
+реализуют `printDirect` — сама fallback-ветка (`printer.print(imageBuffer, dummyCode)`) сейчас не
+достижима ни при одной из двух реальных реализаций сервиса принтера, оставлена только потому, что
+`printDirect` в интерфейсе `IPrinterService` объявлен опциональным. `MockPrinterService.printDirect`
+уже сохраняет изображение в свой `outputDir` — отдельный debug-дамп был избыточен и не стоял за
+debug-флагом, поэтому удалён целиком (а не переведён на `app.getPath('temp')`), вместе с ставшим
+ненужным импортом `Logger`.
+
 ## Устранено дублирование `getLogger()` в `main/` (2026-09-17, v0.5.19)
 
 Ad-hoc чистка по запросу: 10 файлов `main/` (`background.ts`, `services/{settings,scanner,
