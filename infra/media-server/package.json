@@ -1,13 +1,14 @@
 {
   "name": "@letar/media-server",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "type": "module",
   "scripts": {
     "dev:api": "bun run --watch src/server.ts",
     "dev:worker": "bun run --watch src/worker.ts",
     "start:api": "bun run src/server.ts",
-    "start:worker": "bun run src/worker.ts"
+    "start:worker": "bun run src/worker.ts",
+    "test": "bun test"
   },
   "dependencies": {
     "@fastify/cors": "^11.2.0",

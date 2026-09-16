@@ -20,7 +20,10 @@
 
 services:
   media-api:
-    build: .
+    build:
+      context: .
+      # Последняя стадия Dockerfile — регрессионные тесты; в образ идёт runtime
+      target: runtime
     image: media-server:latest
     container_name: media-api
     ports:
