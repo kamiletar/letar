@@ -7,7 +7,6 @@ export default defineConfig({
   resolve: {
     alias: {
       '@shared': path.resolve(__dirname, 'shared'),
-      '@letar/folder-scan': path.resolve(__dirname, '../../libs/folder-scan/src'),
     },
   },
   test: {
