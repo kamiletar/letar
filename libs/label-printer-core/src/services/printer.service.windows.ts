@@ -96,11 +96,7 @@ export class WindowsPrinterService {
   private labelConfig: LabelConfig
   private printerConfig: PrinterConfig
 
-  constructor(
-    printerConfig: PrinterConfig,
-    labelConfig: LabelConfig,
-    _behaviorConfig: { retryAttempts: number; retryDelay: number; autoReconnectPrinter: boolean },
-  ) {
+  constructor(printerConfig: PrinterConfig, labelConfig: LabelConfig) {
     this.printerConfig = printerConfig
     this.labelConfig = labelConfig
     this.printerName = printerConfig.name

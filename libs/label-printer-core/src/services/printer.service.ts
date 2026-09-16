@@ -106,17 +106,13 @@ export interface IPrinterService {
  * Поддерживает только 'windows' (Windows API) и 'mock' режимы
  * Serial port поддержка удалена для совместимости с Electron
  */
-export function createPrinterService(
-  config: PrinterConfig,
-  labelConfig: LabelConfig,
-  behaviorConfig: { retryAttempts: number; retryDelay: number; autoReconnectPrinter: boolean },
-): IPrinterService {
+export function createPrinterService(config: PrinterConfig, labelConfig: LabelConfig): IPrinterService {
   const logger = Logger.getInstance()
 
   if (config.mode === 'real') {
     // Всегда используем Windows API для реальной печати
     logger.info('Creating Windows printer service', { name: config.name })
-    return new WindowsPrinterService(config, labelConfig, behaviorConfig)
+    return new WindowsPrinterService(config, labelConfig)
   } else {
     logger.info('Creating mock printer service')
     return new MockPrinterService()
