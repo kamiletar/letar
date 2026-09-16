@@ -24,10 +24,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': resolve(import.meta.dirname, './src'),
-      // Подпуть объявляем раньше корня: иначе '@letar/image-upload' совпадёт первым
-      // и '/server' приклеится к пути основной точки входа.
       '@letar/image-upload/server': resolve(import.meta.dirname, '../../libs/image-upload/src/server'),
-      '@letar/image-upload': resolve(import.meta.dirname, '../../libs/image-upload/src'),
     },
   },
 })
