@@ -4,6 +4,11 @@
 
 ## [Unreleased]
 
+### Changed
+
+- `vitest.config.mts`: убран избыточный alias `@letar/folder-scan` — пакет уже прямая
+  зависимость, симлинк bun резолвит его без alias.
+
 ### Fixed
 
 - `package.json`: `@letar/chakra-provider` не был объявлен ни в `dependencies`, ни в
