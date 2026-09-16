@@ -593,6 +593,10 @@ as="строка-тега"`) — четыре сессии независимо 
 alias матчится по префиксу ·
 [vitest-unlinked-workspace-lib-imports](/.claude/docs/vitest-unlinked-workspace-lib-imports.md) ⚠️
 `@letar/*`-либа только в `implicitDependencies` (без bun-симлинка) не резолвится под vitest ·
+[vitest-alias-redundant-vs-transitive](/.claude/docs/vitest-alias-redundant-vs-transitive.md)
+избыточный `resolve.alias`, дублирующий symlink прямой зависимости, — как проверить и когда
+alias всё же обязателен (транзитивный импорт без symlink); ⚠️ подпуть `@letar/image-upload/server`
+не резолвится без alias даже при прямой зависимости и объявленном `exports` ·
 [vitest-shared-singleton-row-race](/.claude/docs/vitest-shared-singleton-row-race.md) ⚠️ общая
 singleton-строка настроек (`ShopSettings` и аналоги) — редкий флак под полным прогоном из-за
 файлового параллелизма vitest на общей dev-БД, не внутри одного файла ·
