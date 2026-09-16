@@ -10,7 +10,7 @@
  * label-printer-desktop: у KamiKeyThe нет постоянно открытого окна (приложение живёт в трее).
  */
 
-import { spawn } from 'node:child_process'
+import { spawnSync } from 'node:child_process'
 import { writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { basename, join } from 'node:path'
@@ -67,12 +67,6 @@ function scheduleRelaunchAfterSilentInstall(): void {
   // 'ignore'` скрыл ошибку cmd молча). `.bat`-файл проверяем целиком перед запуском, а не
   // полагаемся на аккуратную склейку строк через разделитель.
   const batPath = join(tmpdir(), `kamikeythe-relaunch-${Date.now()}.bat`)
-  // Отладочный лог НЕ самоудаляется (в отличие от .bat) — живой тест 1.9.13→1.9.14 показал,
-  // что после успешного quitAndInstall сам relaunch не происходит, а .bat к моменту проверки уже
-  // не существует ни при успехе, ни при провале (`:done` — общая метка после цикла, достигается
-  // и по исчерпании попыток). Без лога внутри самого cmd-процесса невозможно понять, где именно
-  // рвётся цепочка: `ren` не освобождается, либо `start` не поднимает процесс в этом detached
-  // (`stdio: 'ignore'`, без консоли) контексте.
   const debugLogPath = join(tmpdir(), 'kamikeythe-relauncher-debug.log')
   const batContent = [
     '@echo off',
@@ -98,12 +92,44 @@ function scheduleRelaunchAfterSilentInstall(): void {
   ].join('\r\n')
   writeFileSync(batPath, batContent, 'utf8')
 
-  const relauncher = spawn('cmd.exe', ['/d', '/c', batPath], {
-    detached: true,
-    stdio: 'ignore',
-    windowsHide: true,
-  })
-  relauncher.unref()
+  // ⚠️ Живые тесты 1.9.10–1.9.15 показали, что сам `.bat` (ren-retry + start) логически верен —
+  // отладочный лог из 1.9.15 (живой тест 1.9.15→1.9.16) зафиксировал успешный `ren` с первой
+  // попытки и `start` с errorlevel=0, но процесс `KamiKeyThe.exe` при этом не выживал ни секунды.
+  // Причина — Job Object: Electron/Chromium оборачивает свой процесс в job с
+  // `JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE`, а `child_process.spawn(..., { detached: true })` на
+  // Windows НЕ выставляет `CREATE_BREAKAWAY_FROM_JOB` — потомки (наш `cmd.exe`, а через него и
+  // перезапущенный `KamiKeyThe.exe`) остаются в этой job и умирают вместе с ней в момент
+  // `app.quit()`/закрытия последнего хендла, ДО того как относящийся к ним `.bat` успевает
+  // написать хотя бы первую строку лога. Подтверждено изолированным воспроизведением: процесс
+  // текущей PowerShell-сессии искусственно приписывался к killer-job через
+  // `AssignProcessToJobObject`, затем спавнился detached `cmd.exe` без breakaway — после выхода
+  // из killer-job-процесса ни `cmd.exe`, ни запущенный им `KamiKeyThe.exe` не переживали ни
+  // секунды, лог оставался пустым. Node не даёт способа передать `CREATE_BREAKAWAY_FROM_JOB`
+  // напрямую — обходим это, отдавая запуск `.bat` планировщику задач (`schtasks`): процесс,
+  // запущенный сервисом Task Scheduler, создаётся вне job-дерева вызывающего процесса в принципе,
+  // не только вне нашего конкретного job. Проверено тем же искусственным killer-job-тестом — с
+  // `schtasks /create` + `/run` `KamiKeyThe.exe` пережил закрытие job-процесса и остался работать.
+  const taskName = `KamiKeyThe-Relaunch-${Date.now()}`
+  const scheduledTime = new Date(Date.now() + 60_000)
+  const startTime = `${String(scheduledTime.getHours()).padStart(2, '0')}:${
+    String(scheduledTime.getMinutes()).padStart(2, '0')
+  }`
+  spawnSync('schtasks', [
+    '/create',
+    '/tn',
+    taskName,
+    '/tr',
+    `cmd.exe /d /c "${batPath}"`,
+    '/sc',
+    'once',
+    '/st',
+    startTime,
+    '/f',
+  ])
+  spawnSync('schtasks', ['/run', '/tn', taskName])
+  // Запись задачи планировщика после однократного /run больше не нужна — удаляем сразу, не дожидаясь
+  // истечения /st (которое всё равно не наступит: задача уже отработала через /run).
+  spawnSync('schtasks', ['/delete', '/tn', taskName, '/f'])
 }
 
 /** Направить electron-updater на релиз конкретно KamiKeyThe (не repo-wide "latest") */
