@@ -594,6 +594,17 @@ creator-only: `EncodingProfilesCard`, `TranscodingSettingsCard`, `QBittorrentSet
       `main/src/ffmpeg/index.ts`, но ни `transcodeVideo`/`transcodeAudio`/`defaultVideoOptions`/
       `defaultAudioOptions` никто не импортировал (только `findOptimalCQ`/VMAF-функции из того же
       барреля). Файл и экспорт из `index.ts` удалены целиком.
+- [x] **Оценка дедупа stderr-watch NVENC-фильтра между тремя циклами spawn ffmpeg — решено не
+      выносить общий хелпер.** `transcodeVideoWithProfile` (sticky-флаг + 128-символьное
+      перекрытие чанков, ограничено по памяти для долгих транскодов), `encodeSample` (оба —
+      `main/ffmpeg/transcode.ts` и `main/src/ffmpeg/sample.ts`, копят весь stderr сэмпла целиком,
+      он же режется на хвост для текста ошибки — детекция и диагностика делят один буфер) и
+      `VideoPool.runTask` (построчный разбор, уже существующий ради прогресса и лог-буфера UI, флаг
+      фильтра — одна строка внутри чужого цикла) решают разные задачи разными по памяти стратегиями
+      осознанно, а не случайно разошлись. Общая часть уже вынесена туда, куда надо —
+      `isNvencTemporalFilterError()` в `nvenc-args.ts`. Хелпер вокруг неё подошёл бы только первому
+      месту и не сократил бы код во втором и третьем (им всё равно нужен свой буфер под текст
+      ошибки) — решено не добавлять.
 - [x] **`transcodeVideo` в `main/ffmpeg/transcode.ts` (легаси-путь `useTranscode`) переведён на
       `buildNvencEncodeArgs`.** Живой путь: `useTranscode.ts` → `api.ffmpeg.transcodeVideo` →
       IPC-канал `ffmpeg:transcodeVideo` (`ffmpeg.handlers.ts`) → эта функция. Раньше держал свой
