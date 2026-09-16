@@ -305,7 +305,7 @@ app.whenReady().then(() => {
     const layout = getCurrentLayout()
     if (!layout.hasAltGr) {
       showNotification(`⚠ AltGr не работает — раскладка ${layout.name}`, {
-        width: 480,
+        width: 530,
         height: 76,
         durationMs: 3500,
         variant: 'warning',

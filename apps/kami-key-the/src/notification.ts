@@ -45,7 +45,8 @@ const NOTIFY_DURATION = 1000 // автоскрытие через 1000мс
 // Цвета (COLORREF = 0x00BBGGRR)
 const COLOR_BG = 0x003b3b3b // #3B3B3B тёмный фон
 const COLOR_TEXT = 0x00ffffff // #FFFFFF белый текст
-const COLOR_BG_WARNING = 0x002828c6 // #C62828 тревожный красный — несовместимая раскладка
+const COLOR_BG_WARNING = 0x000054d3 // #D35400 тревожный оранжевый — несовместимая раскладка
+const TEXT_PADDING_X = 20 // горизонтальный отступ текста от краёв окна, px
 
 // --- Win32 структуры ---
 
@@ -153,7 +154,9 @@ function paintNotification(hwnd: unknown): void {
   tmpRect.bottom = currentHeight
   FillRect(hdc, tmpRect, currentVariant === 'warning' ? bgBrushWarning : bgBrush)
 
-  // Текст по центру
+  // Текст по центру, с горизонтальным отступом от краёв окна
+  tmpRect.left += TEXT_PADDING_X
+  tmpRect.right -= TEXT_PADDING_X
   SetBkMode(hdc, TRANSPARENT_BK)
   SetTextColor(hdc, COLOR_TEXT)
   SelectObject(hdc, currentVariant === 'warning' ? textFontWarning : textFont)
