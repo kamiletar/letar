@@ -52,8 +52,12 @@ function configureLogger(): void {
  * планируем перезапуск через detached `cmd.exe`, который переживёт `app.quit()`: ждёт, пока
  * инсталлятор допишет `${exePath}` (тот же путь, откуда сейчас запущен этот процесс — обновление
  * ставится в ту же директорию), и запускает его напрямую, без Start Menu ярлыка.
+ *
+ * @param installerVersion версия из `UpdateInfo.version` — имя файла инсталлятора
+ * (`KamiKeyThe-Setup-<version>.exe`) для ожидания его полного завершения перед релончем, см.
+ * комментарий про `allowOnlyOneInstallerInstance.nsh` ниже.
  */
-function scheduleRelaunchAfterSilentInstall(): void {
+function scheduleRelaunchAfterSilentInstall(installerVersion: string): void {
   const exePath = process.execPath
   // До 20 попыток по 1с ждём, пока файл освободится (инсталлятор держит его открытым на запись,
   // пока не допишет) — проверяем через `ren <файл> <то же имя>`: переименование в то же имя не
@@ -69,10 +73,38 @@ function scheduleRelaunchAfterSilentInstall(): void {
   const batPath = join(tmpdir(), `kamikeythe-relaunch-${Date.now()}.bat`)
   const debugLogPath = join(tmpdir(), 'kamikeythe-relauncher-debug.log')
   const appOutputLogPath = join(tmpdir(), 'kamikeythe-app-output.log')
+  // ⚠️ Настоящая причина «релонч работает 3-12с, потом процесс бесследно пропадает» (1.9.20,
+  // 1.9.21) — не в нашем `.bat`, а в самом NSIS-шаблоне electron-builder. `installSection.nsh`
+  // (перед копированием файлов) и — для update-флоу — вызываемый им же синхронно (`ExecWait`)
+  // старый uninstaller (`installUtil.nsh`) оба проходят через `CHECK_APP_RUNNING`
+  // (`allowOnlyOneInstallerInstance.nsh`): ретрай-цикл `FIND_PROCESS`/`KILL_PROCESS`, который
+  // ищет ЛЮБОЙ процесс с именем `${APP_EXECUTABLE_FILENAME}`, запущенный из `$INSTDIR`, и
+  // принудительно убивает его (`taskkill /F`), пока не перестанет находить совпадения. Наш `ren`
+  // -проба доказывает только то, что файл `.exe` в данный момент не заблокирован — не то, что
+  // процесс самого инсталлятора уже полностью завершился. Если мы запускаем новый инстанс, пока
+  // инсталлятор ещё внутри этого ретрай-цикла (например, дожидается процесса из синхронного
+  // `ExecWait` над стар. uninstaller'ом), NSIS находит НАШ свежезапущенный процесс — тот же образ,
+  // тот же `$INSTDIR` — принимает его за не до конца завершившийся старый и убивает. Фикс: ждём
+  // исчезновения процесса САМОГО инсталлятора (`KamiKeyThe-Setup-<version>.exe`, имя из
+  // `UpdateInfo.version`) из `tasklist`, и только потом запускаем `exePath` — раз инсталлятор
+  // синхронно (`ExecWait`) блокируется на любых своих дочерних шагах, его собственное исчезновение
+  // из `tasklist` гарантирует, что весь его kill-цикл (и цикл вложенного uninstaller) уже позади.
+  const installerImageName = `KamiKeyThe-Setup-${installerVersion}.exe`
   const batContent = [
     '@echo off',
     'setlocal enabledelayedexpansion',
     `echo [%date% %time%] relauncher started, exe="${exePath}" >> "${debugLogPath}"`,
+    `echo [%date% %time%] waiting for installer process "${installerImageName}" to exit >> "${debugLogPath}"`,
+    'for /L %%j in (1,1,60) do (',
+    `  tasklist /fi "imagename eq ${installerImageName}" | findstr /I "${installerImageName}" >nul 2>&1`,
+    '  if errorlevel 1 (',
+    `    echo [!date! !time!] installer process gone after %%j checks >> "${debugLogPath}"`,
+    '    goto :installer_gone',
+    '  )',
+    '  timeout /t 1 /nobreak >nul',
+    ')',
+    `echo [%date% %time%] installer process still present after 60 checks — proceeding anyway >> "${debugLogPath}"`,
+    ':installer_gone',
     'for /L %%i in (1,1,20) do (',
     `  ren "${exePath}" "${basename(exePath)}" >nul 2>&1`,
     `  echo [!date! !time!] attempt %%i ren errorlevel=!errorlevel! >> "${debugLogPath}"`,
@@ -234,7 +266,7 @@ export function initAutoUpdater(): void {
           // показывает полный мастер установки вместо тихого обновления. isForceRunAfter здесь
           // НЕ используем (передаём false) — перезапуск после силентной установки берём на себя
           // через scheduleRelaunchAfterSilentInstall, см. её комментарий про гонку с .lnk.
-          scheduleRelaunchAfterSilentInstall()
+          scheduleRelaunchAfterSilentInstall(info.version)
           autoUpdater.quitAndInstall(true, false)
         }
       })
