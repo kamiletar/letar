@@ -614,7 +614,7 @@
     },
     "apps/domwellbes": {
       "name": "@letar/domwellbes",
-      "version": "0.258.0",
+      "version": "0.260.0",
       "dependencies": {
         "@gltf-transform/core": "^4.5.0",
         "@gltf-transform/extensions": "^4.5.0",
@@ -841,6 +841,7 @@
       "version": "0.5.16",
       "dependencies": {
         "@letar/chakra-provider": "workspace:*",
+        "@letar/electron-monorepo-updater": "workspace:*",
         "@letar/forms": "workspace:*",
         "@letar/hooks": "workspace:*",
         "@letar/icon-generator": "workspace:*",
@@ -886,7 +887,7 @@
     },
     "apps/poster-microtext-desktop": {
       "name": "@letar/poster-microtext-desktop",
-      "version": "0.19.3",
+      "version": "0.19.4",
       "dependencies": {
         "@letar/chakra-provider": "workspace:*",
         "@letar/icon-generator": "workspace:*",
@@ -916,7 +917,7 @@
     },
     "apps/studio": {
       "name": "@letar/studio",
-      "version": "0.69.16",
+      "version": "0.69.18",
       "dependencies": {
         "@letar/admin-ui": "workspace:*",
         "@letar/consent": "workspace:*",
@@ -1173,7 +1174,7 @@
     },
     "libs/electron-monorepo-updater": {
       "name": "@letar/electron-monorepo-updater",
-      "version": "0.1.1",
+      "version": "0.2.0",
     },
     "libs/electron-storage": {
       "name": "@letar/electron-storage",

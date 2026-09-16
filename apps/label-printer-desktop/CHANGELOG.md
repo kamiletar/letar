@@ -4,6 +4,17 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- **Автообновление показывало полный мастер NSIS вместо тихой установки** —
+  `main/services/updater.service.ts` вызывал `autoUpdater.quitAndInstall()` без аргументов
+  (`isSilent=false` по умолчанию), а `electron-builder.yml` собирает NSIS с `oneClick: false`:
+  вместо перезапуска, обещанного диалогом «Обновление готово», пользователь видел мастер с
+  выбором «для всех/для себя» и папки установки. Тот же баг был найден и исправлен в
+  KamiKeyThe 1.9.6 (см. его `CHANGELOG.md`). Перешли на `installAndRelaunchViaScheduler` из
+  `@letar/electron-monorepo-updater` — тихая установка через `schtasks`, гарантированный
+  перезапуск по exe-пути.
+
 ### Changed
 
 - `vitest.config.mts`: убран избыточный alias `@letar/label-printer-core` — пакет уже прямая

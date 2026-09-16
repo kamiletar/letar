@@ -2,6 +2,29 @@
 
 Детальное описание всех реализованных фич Label Printer Desktop.
 
+## Автообновление показывало мастер NSIS вместо тихой установки (2026-09-17, v0.5.17)
+
+Найдено сессией-аудитом автообновлений всех Electron-приложений монорепо (по прямой просьбе, не
+собственным тестом этого приложения). `main/services/updater.service.ts` вызывал
+`autoUpdater.quitAndInstall()` без аргументов в двух местах — обработчике `update-downloaded` и
+IPC `updater:install`. По умолчанию `isSilent=false`, а `electron-builder.yml` собирает NSIS с
+`oneClick: false` — вместо перезапуска, обещанного диалогом «Обновление готово», пользователь
+видел бы полный мастер с выбором «для всех/для себя» и папки установки. Тот же баг был найден и
+исправлен в KamiKeyThe 1.9.6 (см. его `CHANGELOG.md`).
+
+Перешли на `installAndRelaunchViaScheduler` из `@letar/electron-monorepo-updater` (общая либа,
+уже используемая `animatrona`/`kami-key-the` для другой задачи — коллизии GitHub Releases; у
+label-printer-desktop её нет, свой репозиторий `lena/label-printer-desktop`, поэтому подключена
+только эта функция). Путь скачанного инсталлятора сохраняется в модульную переменную из
+`update-downloaded`, оба места установки теперь идут через `installAndRelaunch()` с откатом на
+`quitAndInstall(true, false)`, если планировщик задач недоступен. Добавлена зависимость
+`@letar/electron-monorepo-updater` в `package.json`. Живой тест не проводился в этой сессии.
+
+⚠️ Заодно подтверждено: `main/` не покрыт typecheck-таргетом (`tsconfig.json` его исключает,
+`tsconfig.spec.json` покрывает только для нужд oxc/vitest, но `references` не собираются
+`tsgo --noEmit`) — правка main-кода в этом приложении проверяется только `lint` + смоук-сборкой
+через `bun build`, не полноценным typecheck. Существующий, не мой пробел; не трогал.
+
 ## Фикс composite tsconfig, ломавшего `next build` (2026-09-15)
 
 Открытая проблема из предыдущей сессии (краш electron-updater/js-yaml) — `cd renderer && next

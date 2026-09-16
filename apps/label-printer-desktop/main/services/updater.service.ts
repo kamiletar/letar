@@ -3,15 +3,39 @@
  * Использует electron-updater для проверки и установки обновлений с GitHub Releases
  */
 
+import { installAndRelaunchViaScheduler } from '@letar/electron-monorepo-updater'
 import { Logger } from '@letar/label-printer-core'
 import type { BrowserWindow } from 'electron'
 import { app, dialog, ipcMain } from 'electron'
-import type { UpdateInfo } from 'electron-updater'
+import type { UpdateDownloadedEvent, UpdateInfo } from 'electron-updater'
 import { autoUpdater } from 'electron-updater'
 import { settingsService } from './settings.service'
 
+const APP_LABEL = 'LabelPrinterDesktop'
+
 /** Ленивое получение логгера */
 const getLogger = () => Logger.getInstance()
+
+/**
+ * Тихо ставит скачанное обновление и перезапускает приложение через `@letar/electron-monorepo-updater`.
+ *
+ * ⚠️ НЕ `autoUpdater.quitAndInstall()` — при `nsis.oneClick: false` (`electron-builder.yml`)
+ * `isSilent` по умолчанию `false`, и вместо перезапуска, обещанного диалогом «Обновление готово»,
+ * пользователь увидел бы полный мастер NSIS с выбором «для всех/для себя» и папки установки.
+ * Тот же баг был найден и исправлен в KamiKeyThe (см. его `CHANGELOG.md`, версии 1.9.6–1.9.27) —
+ * там же разбор, почему `quitAndInstall(true, true)` тоже не подходит (гонка с Start Menu-ярлыком).
+ */
+function installAndRelaunch(installerPath: string): void {
+  if (installAndRelaunchViaScheduler({ installerPath, appLabel: APP_LABEL })) {
+    // Инсталлятор запустит `.bat` — отключаем штатную установку при выходе, иначе
+    // electron-updater запустит второй экземпляр инсталлятора из своего quit-обработчика
+    autoUpdater.autoInstallOnAppQuit = false
+    app.quit()
+    return
+  }
+  getLogger().error('[Updater] Планировщик задач не принял задачу — штатная установка без перезапуска')
+  autoUpdater.quitAndInstall(true, false)
+}
 
 // Состояние обновления
 export interface UpdateStatus {
@@ -34,6 +58,9 @@ let updateStatus: UpdateStatus = {
   releaseNotes: null,
   progress: null,
 }
+
+// Путь до скачанного инсталлятора — нужен обработчику IPC `updater:install`
+let downloadedInstallerPath: string | null = null
 
 /**
  * Инициализация сервиса автообновления
@@ -107,8 +134,9 @@ export function initAutoUpdater(mainWindow: BrowserWindow | null): void {
     notifyRenderer(mainWindow, 'update-status', updateStatus)
   })
 
-  autoUpdater.on('update-downloaded', (info: UpdateInfo) => {
+  autoUpdater.on('update-downloaded', (info: UpdateDownloadedEvent) => {
     getLogger().info(`[Updater] Update downloaded: ${info.version}`)
+    downloadedInstallerPath = info.downloadedFile
     updateStatus = { ...updateStatus, downloaded: true, progress: 100 }
     notifyRenderer(mainWindow, 'update-status', updateStatus)
 
@@ -125,7 +153,7 @@ export function initAutoUpdater(mainWindow: BrowserWindow | null): void {
       })
       .then((result) => {
         if (result.response === 0) {
-          autoUpdater.quitAndInstall()
+          installAndRelaunch(info.downloadedFile)
         }
       })
   })
@@ -198,7 +226,10 @@ export function registerUpdaterHandlers(): void {
 
   // Установить обновление (перезапуск)
   ipcMain.handle('updater:install', () => {
-    autoUpdater.quitAndInstall()
+    if (!downloadedInstallerPath) {
+      return { success: false, error: 'Обновление ещё не скачано' }
+    }
+    installAndRelaunch(downloadedInstallerPath)
     return { success: true }
   })
 
