@@ -2,6 +2,72 @@
 
 Детальное описание всех реализованных фич Label Printer Desktop.
 
+## `main/` никогда не типизировался — добавлен `typecheck:main` (2026-09-17, v0.5.18)
+
+Ровно тот пробел, который предыдущая сессия зафиксировала как «существующий, не мой» в записи
+ниже. Причина: корневой `tsconfig.json` явно исключает `main/` (Electron main-процесс не должен
+попадать в Next.js typecheck рендерера), а `typecheck:tsgo` гоняет `tsgo --noEmit` только по
+этому корневому конфигу. `tsconfig.spec.json` включает `main/**/*.ts` в свой `include`, но это не
+помогает: `tsc/tsgo --noEmit` не читает `references` — их собирает только режим `--build`, а его
+здесь ни один таргет не вызывает. Итог — `main/` не проверялся ни в разработке, ни в CI.
+
+Образец решения — `apps/animatrona/main/tsconfig.json` + таргет `typecheck:main` в его
+`project.json` (тот же паттерн Nextron: main-процесс Electron отдельно от Next.js renderer).
+Завели `main/tsconfig.json` (standalone, без `extends`/`composite` — не участвует ни в каком
+`references`, поэтому TS6305-ловушка из записи выше здесь не действует) с `paths` только на
+реально используемые в `main/` пакеты (`@letar/label-printer-core`,
+`@letar/electron-storage`, `@letar/electron-monorepo-updater`) и `include: ["**/*.ts",
+"../shared/**/*.ts"]`. Добавлен таргет `typecheck:main` (`apps/label-printer-desktop/project.json`),
+подключённый как `dependsOn` у `typecheck:tsgo`.
+
+**Первый прогон нашёл 26 реальных ошибок типов** — main/ действительно никогда не проверялся.
+Все исправлены (без изменения поведения, кроме одного места, см. ниже):
+
+- `logger` из `utils/logger-helper.ts` был типизирован как класс `Logger` (только статические
+  `initialize`/`getInstance`, без инстанс-методов) — `logger.error(...)` не проходил typecheck на
+  14 вызовах в `database.handlers.ts`/`export.handlers.ts`/`profiles.handlers.ts`, хотя в рантайме
+  прокси корректно делегировал в `getInstance().error(...)`. Файл уже нёс комментарий,
+  диагностирующий ровно эту проблему для соседнего `jsonStoreLogger`, но не для самого `logger`.
+  Перетипизирован в локальный интерфейс `LoggerMethods`.
+- `createPrinterService()` (`@letar/label-printer-core`) и конструктор `WindowsPrinterService`
+  принимали третий параметр `behaviorConfig: { retryAttempts, retryDelay, autoReconnectPrinter }`,
+  а оба реальных вызова в `print.handlers.ts`/`printer.handlers.ts` передавали
+  `{ allowDuplicates }` — не подходит ни по одному полю. Внутри `WindowsPrinterService` параметр
+  был помечен `_behaviorConfig` (осознанно неиспользуемый), `MockPrinterService` его не принимает
+  вовсе — параметр был мёртвым с обеих сторон. Удалён целиком из `libs/label-printer-core`
+  (`printer.service.ts`, `printer.service.windows.ts`) и из обоих вызовов — единственный
+  потребитель библиотеки в репозитории (проверено грепом, `apps/label-printer` не существует).
+  Проверка допустимости повторной печати уже и так живёт на уровне рендерера
+  (`renderer/app/home/page.tsx`, `isDuplicate`/`allowDuplicates` state).
+- `main/ipc/scanner.handlers.ts`: `scanner:list-ports` был объявлен как `ScannerResult<PortInfo[]>`
+  (с полями `manufacturer`/`serialNumber`/...), а `scannerService.getAvailablePorts()` реально
+  возвращает `Promise<string[]>` — только пути COM-портов, `SerialPort.list()` фильтруется до
+  `p.path`. `scanner:reconnect` использовал результат `scannerService.connect()` (`boolean`) как
+  `ScannerStatus`, обращаясь к несуществующему `result.connected`. В обоих случаях тип приведён к
+  фактическому поведению (`string[]`, `boolean`) — поведение не менялось, `PortInfo` удалён как
+  неиспользуемый.
+- `shared/types.ts`: `AppSettings.templateId` был объявлен как `string`, хотя в `schema.zmodel`
+  (`templateId String?`) и в `main/services/settings.service.ts` (`SettingsData.templateId:
+  string | null`) поле нативно нулевое — шаблон не выбран по умолчанию (`DEFAULT_SETTINGS.
+  templateId = null`). Расширен до `string | null` — чистое ослабление типа, поведение не менялось.
+- `main/services/settings.service.ts`: `await response.json()` под `lib: ["ES2022"]` (main/
+  собирается без DOM lib) резолвится в типы `@types/node`/undici, где `Response.json()` возвращает
+  `Promise<unknown>`, а не `Promise<any>` как в DOM lib — доступ к `result.data` не проходил
+  typecheck. Добавлен явный тип `ApiWrapped<T> = T & { data?: T }` для двух мест, где ZenStack API
+  может вернуть либо `{ data: {...} }`, либо сам объект.
+- `main/ipc/settings.handlers.spec.ts`: фикстура `mockSettings` отстала от актуальной формы
+  `SettingsData` — не хватало `labelPrintMode`/`autoUpdate`/`scannerPort`/`scannerBaudRate`/
+  `scannerEnabled` (добавлены в схему позже, тест не обновили), был лишний `updatedAt` (поля нет в
+  `SettingsData`), `updateSettings` мокался как `mockResolvedValue(undefined)` при реальной
+  сигнатуре `Promise<SettingsData>`.
+
+Все правки провалидированы связкой `nx run label-printer-desktop:typecheck:main` →
+`nx run label-printer-desktop:typecheck:tsgo` (полная цепочка с новым `dependsOn`) →
+`nx test label-printer-desktop` (11/11 зелёных) → `nx lint label-printer-desktop`/
+`nx lint label-printer-core` — оба чистые. Что таргет реально ловит ошибки, а не просто зелёный
+по недосмотру, проверено синтетической ошибкой типа во `main/utils/port-finder.ts` (откачена
+после подтверждения).
+
 ## Автообновление показывало мастер NSIS вместо тихой установки (2026-09-17, v0.5.17)
 
 Найдено сессией-аудитом автообновлений всех Electron-приложений монорепо (по прямой просьбе, не

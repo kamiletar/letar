@@ -6,6 +6,39 @@
 
 ### Fixed
 
+- **`main/` (Electron main-процесс) никогда не типизировался** — корневой `tsconfig.json`
+  явно исключает `main/` (не должен попадать в Next.js typecheck рендерера), а
+  `typecheck:tsgo` гонял `tsgo` только по этому корневому конфигу; `tsconfig.spec.json`
+  включает `main/**/*.ts`, но `tsc/tsgo --noEmit` не читает `references` (их собирает только
+  режим `--build`, который ни один таргет здесь не вызывает). Завели отдельный
+  `main/tsconfig.json` (по образцу `apps/animatrona/main/tsconfig.json`) и таргет
+  `typecheck:main`, подключённый как `dependsOn` у `typecheck:tsgo` — как в `animatrona`.
+  Первый прогон нашёл 26 реальных ошибок типов в `main/`, все исправлены:
+  - `logger` из `utils/logger-helper.ts` был типизирован как статический класс `Logger`
+    (без инстанс-методов) — `logger.error(...)` не проходил typecheck на 14 вызовах, хотя
+    в рантайме прокси корректно делегировал в `getInstance().error(...)`. Перетипизирован в
+    `LoggerMethods`.
+  - `createPrinterService()`/`WindowsPrinterService` принимали `behaviorConfig` с
+    `allowDuplicates`, которого не было в объявленном типе параметра — сам параметр нигде не
+    читался (`_behaviorConfig` в `WindowsPrinterService`, `MockPrinterService` его не
+    принимает вовсе). Удалён как мёртвый — дубликация проверки допустимости повторов уже
+    живёт на уровне рендерера (`renderer/app/home/page.tsx`).
+  - `scanner.handlers.ts`: `scanner:list-ports` объявлял `PortInfo[]`, а
+    `scannerService.getAvailablePorts()` реально возвращает `string[]` (только пути портов);
+    `scanner:reconnect` использовал результат `connect()` (`boolean`) как `ScannerStatus`.
+    Типы приведены к фактическому поведению.
+  - `AppSettings.templateId` в `shared/types.ts` был объявлен как `string`, хотя в схеме
+    (`templateId String?`) и в `SettingsData` поле нативно нулевое (шаблон не выбран по
+    умолчанию) — расширен до `string | null`.
+  - `settings.service.ts`: `response.json()` под `lib: ["ES2022"]` (main/ без DOM lib)
+    типизируется как `unknown` (undici-типы из `@types/node`), а не `any` — добавлен явный
+    тип обёртки ZenStack-ответа (`{ data?: T } & T`).
+  - Тестовый фикстур `settings.handlers.spec.ts` (`mockSettings`) отстал от актуальной формы
+    `SettingsData` — не хватало `labelPrintMode`/`autoUpdate`/`scannerPort`/`scannerBaudRate`/
+    `scannerEnabled`, был лишний `updatedAt`, `mockResolvedValue(undefined)` не соответствовал
+    сигнатуре `updateSettings(): Promise<SettingsData>`.
+
+  Разбор — `PLAN_COMPLETED.md`.
 - **Автообновление показывало полный мастер NSIS вместо тихой установки** —
   `main/services/updater.service.ts` вызывал `autoUpdater.quitAndInstall()` без аргументов
   (`isSilent=false` по умолчанию), а `electron-builder.yml` собирает NSIS с `oneClick: false`:

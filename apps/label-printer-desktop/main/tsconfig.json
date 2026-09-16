@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "declaration": false,
+    "noEmit": true,
+    "types": ["node"],
+    "paths": {
+      "@letar/label-printer-core": ["../../../libs/label-printer-core/src/index.ts"],
+      "@letar/electron-storage": ["../../../libs/electron-storage/src/index.ts"],
+      "@letar/electron-monorepo-updater": ["../../../libs/electron-monorepo-updater/src/index.ts"]
+    },
+    "noUncheckedSideEffectImports": false,
+    "ignoreDeprecations": "6.0"
+  },
+  "include": [
+    "**/*.ts",
+    "../shared/**/*.ts"
+  ],
+  "exclude": ["node_modules", "dist"]
+}

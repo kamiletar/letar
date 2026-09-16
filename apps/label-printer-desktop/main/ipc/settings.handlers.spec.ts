@@ -31,14 +31,16 @@ vi.mock('@letar/label-printer-core', () => ({
 }))
 
 import { ipcMain } from 'electron'
+import type { SettingsData } from '../services/settings.service'
 import { settingsService } from '../services/settings.service'
 import { registerSettingsHandlers } from './settings.handlers'
 
 // Тестовые настройки
-const mockSettings = {
+const mockSettings: SettingsData = {
   id: 'default',
   printerName: 'TSC_TE300',
   printerMode: 'REAL',
+  labelPrintMode: 'BITMAP',
   printerSpeed: 4,
   printerDensity: 8,
   copies: 1,
@@ -53,7 +55,10 @@ const mockSettings = {
   allowDuplicates: false,
   autoReconnect: true,
   retryAttempts: 3,
-  updatedAt: new Date(),
+  autoUpdate: false,
+  scannerPort: 'COM5',
+  scannerBaudRate: 9600,
+  scannerEnabled: true,
 }
 
 describe('settings.handlers', () => {
@@ -61,7 +66,7 @@ describe('settings.handlers', () => {
     vi.clearAllMocks()
     // Настраиваем моки в beforeEach
     vi.mocked(settingsService.getSettings).mockResolvedValue(mockSettings)
-    vi.mocked(settingsService.updateSettings).mockResolvedValue(undefined)
+    vi.mocked(settingsService.updateSettings).mockResolvedValue(mockSettings)
   })
 
   describe('registerSettingsHandlers', () => {

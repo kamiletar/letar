@@ -92,9 +92,13 @@
     },
     "typecheck:tsgo": {
       "dependsOn": [
-        "zenstack:generate"
+        "zenstack:generate",
+        "typecheck:main"
       ],
       "command": "tsgo --project apps/label-printer-desktop/tsconfig.json --noEmit"
+    },
+    "typecheck:main": {
+      "command": "tsgo --project apps/label-printer-desktop/main/tsconfig.json --noEmit"
     },
     "format": {
       "executor": "nx:run-commands",

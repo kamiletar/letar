@@ -13,6 +13,9 @@ import { getTemplatesPath } from '../utils/paths'
 /** Ленивое получение логгера (после инициализации в background.ts) */
 const getLogger = () => Logger.getInstance()
 
+/** ZenStack API возвращает `{ data: {...} }` либо сам объект напрямую */
+type ApiWrapped<T> = T & { data?: T }
+
 /**
  * Режим печати этикетки
  */
@@ -113,9 +116,7 @@ export class SettingsService {
         return this.ensureDefaults()
       }
 
-      const result = await response.json()
-
-      // ZenStack API возвращает { data: {...} }
+      const result = (await response.json()) as ApiWrapped<Partial<SettingsData>>
       const data = result.data || result
 
       if (!data || !data.printerName) {
@@ -163,12 +164,12 @@ export class SettingsService {
       })
 
       if (response.ok) {
-        const result = await response.json()
-        const settings = result.data || result
-        this.cache = { ...DEFAULT_SETTINGS, ...settings }
+        const result = (await response.json()) as ApiWrapped<Partial<SettingsData>>
+        const settings: SettingsData = { ...DEFAULT_SETTINGS, ...(result.data || result) }
+        this.cache = settings
         this.cacheExpiry = Date.now() + this.CACHE_TTL_MS
         getLogger().info('[SettingsService] Created default settings in DB')
-        return this.cache
+        return settings
       } else {
         const errorText = await response.text()
         getLogger().warn('[SettingsService] Failed to create defaults:', { status: response.status, body: errorText })

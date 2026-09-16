@@ -22,23 +22,12 @@ interface ScannerStatus {
   mode: 'COM' | 'USB_HID' | 'DISABLED'
 }
 
-/** Информация о COM-порте */
-interface PortInfo {
-  path: string
-  manufacturer?: string
-  serialNumber?: string
-  pnpId?: string
-  locationId?: string
-  vendorId?: string
-  productId?: string
-}
-
 /**
  * Регистрация IPC handlers для сканера
  */
 export function registerScannerHandlers(): void {
   // Получить список доступных COM-портов
-  ipcMain.handle('scanner:list-ports', async (): Promise<ScannerResult<PortInfo[]>> => {
+  ipcMain.handle('scanner:list-ports', async (): Promise<ScannerResult<string[]>> => {
     try {
       const ports = await scannerService.getAvailablePorts()
       getLogger().debug('[ScannerIPC] list-ports', `Found ${ports.length} ports`)
@@ -67,13 +56,13 @@ export function registerScannerHandlers(): void {
   })
 
   // Переподключить сканер с новыми настройками
-  ipcMain.handle('scanner:reconnect', async (): Promise<ScannerResult<ScannerStatus>> => {
+  ipcMain.handle('scanner:reconnect', async (): Promise<ScannerResult<boolean>> => {
     try {
       getLogger().info('[ScannerIPC] reconnect', 'Reconnecting scanner...')
       const config = await settingsService.getScannerConfig()
       await scannerService.disconnect()
       const result = await scannerService.connect(config)
-      getLogger().info('[ScannerIPC] reconnect', `Reconnect result: ${result.connected ? 'success' : 'failed'}`)
+      getLogger().info('[ScannerIPC] reconnect', `Reconnect result: ${result ? 'success' : 'failed'}`)
       return { success: true, data: result }
     } catch (error) {
       getLogger().error('[ScannerIPC] reconnect failed', error)

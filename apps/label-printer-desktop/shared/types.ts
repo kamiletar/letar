@@ -160,7 +160,7 @@ export interface AppSettings {
   printerSpeed: number
   printerDensity: number
   copies: number
-  templateId: string
+  templateId: string | null
   datamatrixX: number
   datamatrixY: number
   datamatrixSize: number

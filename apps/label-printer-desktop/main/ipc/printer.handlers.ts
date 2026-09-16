@@ -186,10 +186,10 @@ export function registerPrinterHandlers(): void {
         const labelConfig = await settingsService.getLabelConfig()
         logger.info('Settings loaded', { printerName: printerConfig.name, templatePath: labelConfig.templatePath })
 
-        // Инициализируем сервис принтера (с allowDuplicates = true для теста)
+        // Инициализируем сервис принтера
         if (!testPrinterService) {
           logger.info('Creating test printer service...')
-          testPrinterService = createPrinterService(printerConfig, labelConfig, { allowDuplicates: true })
+          testPrinterService = createPrinterService(printerConfig, labelConfig)
           await testPrinterService.connect()
           logger.info('Test printer service connected')
         }

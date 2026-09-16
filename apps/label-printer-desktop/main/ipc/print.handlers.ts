@@ -51,9 +51,8 @@ async function initPrinterService(): Promise<IPrinterService> {
   if (!printerService) {
     const printerConfig = await settingsService.getPrinterConfig()
     const labelConfig = await settingsService.getLabelConfig()
-    const allowDuplicates = await settingsService.isAllowDuplicates()
 
-    printerService = createPrinterService(printerConfig, labelConfig, { allowDuplicates })
+    printerService = createPrinterService(printerConfig, labelConfig)
     await printerService.connect()
   }
   return printerService
@@ -231,7 +230,7 @@ export function registerPrintHandlers(): void {
         result = await printer.printDirect(imageBuffer)
       } else {
         // Fallback для MockPrinterService без printDirect
-        const dummyCode = { gtin: 'preview', fullCode: '', serialNumber: '', cryptoCode: '', additionalData: {} }
+        const dummyCode = { gtin: 'preview', fullCode: '', serialNumber: '', cryptoCode: '' }
         result = await printer.print(imageBuffer, dummyCode)
       }
 
