@@ -50,9 +50,6 @@
     "@libsql/isomorphic-ws": {
       "ws": "^8.21.3"
     },
-    "@modelcontextprotocol/sdk": {
-      "zod": "4.4.3"
-    },
     "@zenstackhq/cli": {
       "zod": "4.4.3"
     }
@@ -259,7 +256,7 @@
     "ws": "^8.21.3",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
     "yet-another-react-lightbox": "^3.32.2",
-    "zod": "4.4.3",
+    "zod": "4.6.5",
     "zustand": "^5.0.15"
   },
   "devDependencies": {

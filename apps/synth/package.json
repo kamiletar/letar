@@ -4,7 +4,7 @@
   "private": true,
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.30.0",
-    "zod": "4.4.3",
+    "zod": "4.6.5",
     "@letar/format-utils": "workspace:*",
     "@letar/hooks": "workspace:*"
   },
