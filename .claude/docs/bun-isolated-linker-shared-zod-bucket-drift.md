@@ -4,6 +4,18 @@
 рамках существующих caret-диапазонов, без снятия пина `zod@4.4.3` —
 [root-pin-peer-drift.md](root-pin-peer-drift.md)).
 
+⚠️ **Статус на конец того же дня (после полной миграции
+`@modelcontextprotocol/sdk` v1 → v2, см. §182 в PLAN-INFRA-6.md): override ниже
+СНЯТ.** `@modelcontextprotocol/sdk` больше не существует в дереве зависимостей —
+раскол на `@modelcontextprotocol/{server,client,core}` v2 требует `zod ^4.2.0`,
+и корневой пин был поднят с `4.4.3` до `4.6.5` (та же версия, на которую и так
+уже сходятся `better-auth`/`@better-auth/*`/`@angular/forms` — см. запись `zod`
+в `scripts/intentional-pins.json`). При СОВПАДЕНИИ буквальной строки версии bun
+isolated linker дедуплицирует бакет сам — scoped override для v2-пакетов не
+понадобился вовсе. Оставшийся override `@zenstackhq/cli` (см. «Фикс» ниже) —
+не трогали, это отдельный несвязанный пакет. Текст ниже описывает состояние ДО
+миграции — оставлен как разбор механизма, не как текущая конфигурация.
+
 ## Симптом
 
 После `bun update` typecheck упал в проектах, где раньше был зелёным:

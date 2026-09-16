@@ -4073,4 +4073,68 @@ letar) + changelog/version bump по чек-листу `app-workflow.md` + но�
 `forms.md` (162 строки/11.6 КБ) и `database.md` (173/10.4 КБ) — третий приоритет задачи
 («по остаточному принципу») — не тронуты, кандидаты на отдельную сессию.
 
+## §184 (2026-09-16) Миграция `@modelcontextprotocol/sdk` v1 → v2 на всех 9 MCP-серверах — завершена
+
+Плановая некоммерческая инфраструктурная задача (`time_discard`, не биллилась). Апстрим раскололся
+на отдельные пакеты `@modelcontextprotocol/{server,client,core}` вместо выпуска sdk v2.0.0 — сам
+`@modelcontextprotocol/sdk` остаётся на `1.30.0` и не deprecated. Мигрировали кодмодом
+(`@modelcontextprotocol/codemod v1-to-v2`) + ручной правкой по каждой директории отдельно.
+
+**Порядок (от периферии к ядру), все шаги с зелёными gate-проверками между собой:**
+
+1. Пилот — `libs/glitchtip-mcp`, `libs/umami-mcp`.
+2. Общая инфраструктура — `libs/mcp-test-kit` (`connectedClient`), `libs/mcp-server-kit`
+   (`tool-response.ts` — комментарий про overload-ловушку `.tool()`/`ZodRawShapeCompat`
+   обновлён на `.registerTool()`/v2-терминологию, сама ловушка актуальна и в v2).
+3. Остальные lib — `libs/deploy-mcp`, `libs/studio-mcp`, `libs/studio-time-mcp`,
+   `libs/form-mcp` (+ отдельно `package.publish.json`, major-бамп `1.2.0` → `2.0.0` с явной
+   формулировкой «Breaking» в CHANGELOG — фактический `nx release`/npm publish **отложен**,
+   не входил в scope этой сессии).
+4. Приложения — `apps/synth` (публичный, чисто), `apps/domwellbes` (приватный submodule —
+   коммит внутри submodule + отдельный коммит bump SHA в letar; в процессе — живая коллизия
+   с параллельной сессией на `package.json`, разрешена без потери чужого WIP, разбор — уже
+   существующий [git-multi-agent-incidents.md](/.claude/docs/git-multi-agent-incidents.md)).
+5. **Последними** — `.claude/mcp/letar.ts` (низкоуровневый `Server`, namespace-схемы
+   `CallToolRequestSchema` и т.д. + `setRequestHandler(Schema, handler)` — секция гайда
+   «Namespace schema access», единственное по-настоящему ручное место) и проще устроенный
+   `letar-db.ts`. v2 заменил схему на строковое имя метода:
+   `setRequestHandler('tools/call', (request, ctx) => ...)` — `request`/возврат типизированы
+   тем же образом, что раньше через Schema, поменялось только как передаётся метод. Тип и
+   расположение классов подтверждены чтением реальных `.d.mts` установленного пакета (та же
+   методика, что для `.resource()` → `.registerResource()` в `form-mcp`), не документацией.
+6. `smoke.ts`/`smoke-call.ts` (Client-скрипты сквозной проверки) мигрированы тем же способом.
+
+**Найдены и починены дополнительно** (`git grep @modelcontextprotocol/sdk` по всему репо после
+основных коммитов): `libs/mcp-test-kit/src/lib/connected-client.spec.ts` (забытый `.tool()` в
+тестовом дефолт-сервере), `libs/form-mcp/tsup.config.ts` (`external` в сборке CLI).
+
+**Верификация:**
+
+- `bun .claude/mcp/smoke.ts letar` / `letar-db` — реальный дочерний stdio-процесс: `letar` отдаёт
+  73 инструмента / 10 ресурсов / 3 промпта без потерь (совпадает с составом до миграции),
+  `letar-db` — 3 инструмента. Это единственная проверка, которая реально доказывает, что
+  ручная правка namespace-схем в `letar.ts` рабочая — typecheck такого не покрывает вообще
+  (файл вне графа Nx, без своего `project.json`).
+- `nx run-many -t typecheck:tsgo` + `test` по всем 9 мигрированным пакетам
+  (`synth`, `deploy-mcp`, `form-mcp`, `glitchtip-mcp`, `studio-mcp`, `studio-time-mcp`,
+  `umami-mcp`, `mcp-test-kit`, `mcp-server-kit`) и по `domwellbes` отдельно — зелёные.
+- `bun scripts/check-all.mjs --group=deps` — зелёный, новые точные пины
+  `@modelcontextprotocol/{server,client}@2.0.0` зарегистрированы в `scripts/intentional-pins.json`
+  (та же причина точного пина, что у каждого `@letar/*` MCP-пакета — дедуп bucket'а bun isolated
+  linker только по буквальному совпадению строки версии).
+
+**Судьба zod-override** (закрыто ЕЩЁ ДО начала этой сессии, в непосредственно предшествующей
+`/infra:deps-update` — см. §179): scoped override `@modelcontextprotocol/sdk.zod` снят вместе с
+самим пакетом, корневой пин `zod` поднят `4.4.3` → `4.6.5` — при совпадении версии bun isolated
+linker дедуплицирует бакет сам, override для v2-пакетов не понадобился вовсе. Разбор механизма —
+[bun-isolated-linker-shared-zod-bucket-drift.md](/.claude/docs/bun-isolated-linker-shared-zod-bucket-drift.md)
+(дописан пометкой актуального статуса).
+
+**Осталось за скобками этой сессии** (явно, не тихо): фактическая npm-публикация
+`@letar/form-mcp@2.0.0` (`nx release` не запускался); удаление старого
+`@modelcontextprotocol/sdk` из root `package.json` — уже сделано тем же коммитом, что добавил
+v2-пины (см. корневой diff), отдельного шага не потребовалось.
+
+`git push` — не выполнялся, требует отдельного одобрения пользователя.
+
 Небиллируемая внутренняя инфраструктурная сессия (`time_discard`), не клиентский проект.
