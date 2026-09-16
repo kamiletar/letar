@@ -25,7 +25,6 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': resolve(import.meta.dirname, './src'),
-      '@letar/hooks': resolve(import.meta.dirname, '../../libs/hooks/src'),
       '@letar/chakra-provider': resolve(import.meta.dirname, '../../libs/chakra-provider/src'),
     },
   },
