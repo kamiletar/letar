@@ -12,7 +12,8 @@ media-api (Fastify, :3100)
   │  BullMQ job
   ▼
 media-worker (BullMQ Worker)
-  │  ffmpeg → 320p / 720p / 1080p + poster.jpg
+  │  ffprobe → ветка цвета (SDR / BT.2020 / HDR)
+  │  ffmpeg → 320p / 720p / 1080p (H.264 High, 8 бит, BT.709) + poster.jpg
   ▼
 /data/processed/{appId}/{videoId}/
   │  webhook { event:"video.ready", urls }
@@ -27,17 +28,21 @@ media.letar.best → s3:3101
 
 ```
 infra/media-server/
-├── Dockerfile                       # oven/bun:1-alpine + ffmpeg
-├── docker-compose.production.yml    # media-api + media-worker + redis + nginx
-├── nginx.conf                       # HTTP Range + кэш + Referer-защита
-├── .env.docker.enc                  # SOPS+age шифрование
-└── src/
-    ├── config.ts    # env, API-ключи per appId
-    ├── ffmpeg.ts    # spawnFfmpeg()
-    ├── queue.ts     # BullMQ Queue + TranscodeJob
-    ├── storage.ts   # пути /data/raw/ и /data/processed/, videoUrls()
-    ├── server.ts    # Fastify API
-    └── worker.ts    # BullMQ Worker
+├── Dockerfile                # oven/bun:1-alpine + ffmpeg; стадии runtime и test
+├── check-ffmpeg.sh           # роняет сборку, если в ffmpeg нет zscale/tonemap/libdav1d
+├── docker-compose.yml        # media-api + media-worker + redis + nginx (target: runtime)
+├── nginx.conf                # HTTP Range + кэш + Referer-защита
+├── .env.docker.enc           # SOPS+age шифрование
+├── src/
+│   ├── config.ts     # env, API-ключи per appId
+│   ├── ffmpeg.ts     # spawnFfmpeg(), runFfprobe()
+│   ├── queue.ts      # BullMQ Queue + TranscodeJob
+│   ├── storage.ts    # пути /data/raw/ и /data/processed/, videoUrls()
+│   ├── server.ts     # Fastify API
+│   ├── transcode.ts  # рендишены, постер, цепочки фильтров цвета
+│   └── worker.ts     # BullMQ Worker: транскод → удалить raw → webhook
+└── test/
+    └── transcode.test.ts  # юнит + интеграция на настоящем ffmpeg
 ```
 
 ## URL-схема
@@ -198,11 +203,94 @@ enum VideoStatus {
   backups/                               # Resilio → offsite
 ```
 
+## Цвет и формат пикселей
+
+Все рендишены — **H.264 High, `yuv420p`, теги BT.709, ограниченный диапазон**, что бы ни пришло
+на вход. Аргументы собираются в одном месте (`renditionArgs()` в `src/transcode.ts`), три вызова
+разойтись не могут.
+
+⚠️ **`libx264` без `-pix_fmt yuv420p` сохраняет битность и субдискретизацию исходника.** До
+2026-09-16 рендишены так и кодировались: 10-битный мастер (обычная запись iPhone — HEVC 10 бит
+HLG/Dolby Vision) превращался в **H.264 High 10**, 4:2:2 с камеры — в High 4:2:2, RGB-запись экрана —
+в High 4:4:4 Predictive. Chromium (Chrome, Edge, Android) такие профили не декодирует вовсе
+([chromium-video-codec-limits](/.claude/docs/chromium-video-codec-limits.md)). Ошибки нет ни при
+кодировании, ни в логах — видео просто не играет в браузере.
+
+⚠️ **Смены `pix_fmt` мало для HDR.** 8-битный кадр с HLG/PQ-значениями в BT.2020 без тонмаппинга
+выглядит блёклым, а ffmpeg ещё и переносит теги `arib-std-b67`/`bt2020` в выходной H.264. Поэтому
+`buildVideoFilter()` выбирает одну из трёх веток по ffprobe исходника:
+
+- **HDR** (`color_transfer` = `smpte2084` или `arib-std-b67`): `scale` →
+  `zscale=tin/pin/min/rin:t=linear:npl=203` → `format=gbrpf32le` → `zscale=p=bt709` →
+  `tonemap=tonemap=mobius:param=0.7:desat=0` → `zscale=t=bt709:m=bt709:r=tv`. Входные параметры
+  zscale передаются явно и только из белого списка — метаданные файла пишет тот, кто загружает.
+- **BT.2020 без HDR** (`color_primaries=bt2020`): `scale` → `zscale=…:t=bt709:p=bt709:m=bt709:r=tv`,
+  без тонмаппинга.
+- **Всё остальное:** один `scale` с явными `in_color_matrix`/`in_range` → `bt709`/`tv`. SD без
+  тега матрицы считается BT.601 (как у mpv).
+
+В конце каждой цепочки стоят `format=yuv420p` и `setparams` с итоговыми тегами.
+
+### Выбор параметров тонмаппинга
+
+Замер: однотонный кадр SDR → HLG-мастер с белым на 203 нит (опорный белый HDR по BT.2408) →
+цепочка → RGB центрального пикселя. В таблице — сумма максимальных отклонений канала (из 255) по
+восьми цветам: насыщенные, серые 25/50/88%, белый, жёлтый.
+
+| вариант                            | ошибка | что видно                                              |
+| ---------------------------------- | ------ | ------------------------------------------------------ |
+| `npl=203`, `mobius:param=0.7`      | **21** | до 70% линейной яркости — ноль, белый −16, света сжаты |
+| `npl=100`, `reinhard`              | 122    | насыщенные точно, серые подняты на 25–30               |
+| `npl=100`, `mobius`                | 153    | всё светлее, серый 50% +42                             |
+| `npl=100`, `hable` (частый рецепт) | 293    | всё темнее, белый −63                                  |
+| `npl=203`, `clip`                  | 1      | точно только без светов выше белого — их срезает       |
+
+`npl=203` ставит опорный белый HDR в 1.0 линейного света, `mobius` с коленом 0.7 не трогает всё,
+что ниже, и плавно сжимает света к пику. Наивная конверсия без тонмаппинга на том же кадре
+отклоняется примерно на 50.
+
+### Прочие грабли
+
+- ⚠️ **ffmpeg 7+ пишет в поток свойства кадра поверх `-color_primaries`/`-color_trc`.** `swscale`
+  меняет в кадре только матрицу и диапазон, поэтому SD-исходник уезжал с тегами `smpte170m` при
+  явном `-color_primaries bt709`. Лечит `setparams` в конце цепочки. Поймано тестом на ffmpeg 8,
+  в образе пока 6.1.
+- ⚠️ **Постер JPEG браузер декодирует как BT.601 полного диапазона.** ffmpeg сам матрицу не
+  меняет, и постер из BT.709-видео выходил со сдвигом цвета ~20 на насыщенном зелёном. Цель `jpeg`
+  в `buildVideoFilter()` пересчитывает в BT.601/`pc`.
+- ⚠️ **`-ss 1` на ролике короче секунды:** ffmpeg завершается с кодом 0 и не пишет файл. Кадр
+  берётся не дальше середины ролика, при неизвестной длительности — повтор с нуля.
+- **AV1:** alpine-ffmpeg собран с `libdav1d` и выбирает его первым. `libaom` из других сборок
+  падает на части файлов с «No sequence header»
+  ([nvenc-web-video-codec-ladder](/.claude/docs/nvenc-web-video-codec-ladder.md)).
+- **Проверка сборки:** версия Alpine приезжает с плавающим тегом `oven/bun:1-alpine`, поэтому
+  `check-ffmpeg.sh` роняет сборку образа без `zscale`, `tonemap`, `setparams`, `libdav1d`. Старый
+  воркер при этом продолжает работать. `libplacebo` в сборке есть, но без GPU на s3 бесполезен;
+  `tonemap_opencl` нет.
+- **Не покрыто:** Dolby Vision profile 5 (без совместимого базового слоя) — для него нужен
+  libplacebo. iPhone пишет profile 8.4 с HLG-базой, он идёт веткой HLG. Мелкий исходник
+  по-прежнему растягивается до 1080p, вертикальное видео масштабируется по высоте.
+
+### Тесты
+
+```bash
+docker build --target test infra/media-server   # на ffmpeg прод-образа
+cd infra/media-server && bun test                # на локальном ffmpeg; AV1 — если есть энкодер
+```
+
+Интеграционные тесты кодируют 2-секундные однотонные клипы: SDR 10 бит, HLG, PQ, BT.601, 4:2:2
+полного диапазона, AV1 10 бит, ролик короче секунды. Для каждого рендишена проверяются профиль,
+`pix_fmt`, теги и цвет центрального пикселя с допуском 8 из 255; для постера — цвет. У
+`infra/media-server` нет Nx-проекта, в CI тесты не запускаются.
+
 ## Деплой
 
 Через `deploy-mcp` (`deploy_infra({ service: "media-server", server: "s3" })`) — как и остальные
 `infra/*`-сервисы. Файл называется `docker-compose.yml` (без `.production`/`.<server>` в имени)
 именно затем, чтобы совпадать с дефолтной конвенцией `scripts/deploy-infra.sh`.
+
+У `media-api` в compose стоит `build.target: runtime`: последняя стадия `Dockerfile` — тесты, и
+без `target` compose собирал бы и прогонял их при каждом деплое.
 
 ⚠️ **История 2026-09-08, оба пункта уже закрыты в `scripts/deploy-infra.sh`, оставлено как
 предупреждение при следующей правке скрипта:**
