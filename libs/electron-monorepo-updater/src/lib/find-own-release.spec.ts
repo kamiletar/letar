@@ -18,11 +18,27 @@ describe('findOwnLatestTag', () => {
     userAgent: 'test-client',
   }
 
-  it('находит первый релиз с нужным префиксом тега', async () => {
+  it('находит релиз с нужным префиксом тега и максимальным semver', async () => {
     const fetchFn = mockFetch([
       { tag_name: 'kami-key-the-v1.7.4', draft: false, prerelease: false },
       { tag_name: 'animatrona-v0.55.72', draft: false, prerelease: false },
       { tag_name: 'animatrona-v0.55.71', draft: false, prerelease: false },
+    ])
+
+    const tag = await findOwnLatestTag({ ...baseOptions, fetchFn })
+
+    expect(tag).toBe('animatrona-v0.55.72')
+  })
+
+  it('выбирает максимальный semver, даже если API вернул его не первым', async () => {
+    // Порядок ответа GitHub `/releases` не гарантирует «свежие первыми» на практике — вживую
+    // только что созданный релиз может провисеть не на первой позиции долго. Проверяем, что
+    // выбор идёт по значению версии, а не по индексу в массиве.
+    const fetchFn = mockFetch([
+      { tag_name: 'animatrona-v0.55.71', draft: false, prerelease: false },
+      { tag_name: 'animatrona-v0.55.70', draft: false, prerelease: false },
+      { tag_name: 'animatrona-v0.55.72', draft: false, prerelease: false },
+      { tag_name: 'animatrona-v0.55.9', draft: false, prerelease: false },
     ])
 
     const tag = await findOwnLatestTag({ ...baseOptions, fetchFn })

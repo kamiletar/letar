@@ -41,6 +41,22 @@ export interface FindOwnLatestTagOptions {
   perPage?: number
 }
 
+/**
+ * Сравнивает два semver вида `X.Y.Z` (без суффиксов пререлиза — им тут взяться неоткуда, `draft`
+ * и `prerelease` уже отфильтрованы выше). Возвращает > 0, если `a` новее `b`.
+ */
+function compareSemver(a: string, b: string): number {
+  const pa = a.split('.').map(Number)
+  const pb = b.split('.').map(Number)
+  for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+    const diff = (pa[i] ?? 0) - (pb[i] ?? 0)
+    if (diff !== 0) {
+      return diff
+    }
+  }
+  return 0
+}
+
 /** Найти тег последнего (не draft, не prerelease) релиза с заданным префиксом тега */
 export async function findOwnLatestTag(options: FindOwnLatestTagOptions): Promise<string | null> {
   const { fetchFn, owner, repo, tagPrefix, userAgent, perPage = 50 } = options
@@ -52,8 +68,21 @@ export async function findOwnLatestTag(options: FindOwnLatestTagOptions): Promis
     throw new Error(`GitHub API вернул ${response.status}`)
   }
 
-  // GitHub возвращает релизы отсортированными по дате публикации (свежие первыми)
+  // ⚠️ Порядок ответа GitHub API НЕ считаем надёжным индикатором «свежести» — в общем репозитории
+  // с частыми релизами десятков приложений список `/releases` эмпирически может держать
+  // только что созданный релиз не на первой позиции продолжительное время (не секунды —
+  // проверено вживую, 1.9.10 не поднимался в топ 30+ минут при `per_page=100` и всего 9
+  // релизах в ответе). Поэтому среди всех совпадений по префиксу тега выбираем максимальный
+  // semver сами, а не полагаемся на `.find()` по порядку ответа.
   const releases = (await response.json()) as GithubReleaseSummary[]
-  const own = releases.find((r) => !r.draft && !r.prerelease && r.tag_name.startsWith(tagPrefix))
-  return own?.tag_name ?? null
+  const own = releases.filter((r) => !r.draft && !r.prerelease && r.tag_name.startsWith(tagPrefix))
+  if (own.length === 0) {
+    return null
+  }
+  const latest = own.reduce((best, current) =>
+    compareSemver(current.tag_name.slice(tagPrefix.length), best.tag_name.slice(tagPrefix.length)) > 0
+      ? current
+      : best
+  )
+  return latest.tag_name
 }
