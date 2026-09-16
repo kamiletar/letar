@@ -306,6 +306,7 @@
 - [web-push](/.claude/docs/web-push.md) push-уведомления
 - [offlineaudiocontext-suspend-render-race](/.claude/docs/offlineaudiocontext-suspend-render-race.md) гонка `suspend`/`render`
 - [chromium-video-codec-limits](/.claude/docs/chromium-video-codec-limits.md) ⚠️ H.264 Hi10P не декодируется, обход через WASM+WebCodecs
+- [nvenc-web-video-codec-ladder](/.claude/docs/nvenc-web-video-codec-ladder.md) ⚠️ AV1→HEVC→H.264 по `powerEfficient`; `tf_level` только 0/4, `libx264` без `pix_fmt` даёт High 10
 - [ifc-gltf-web-pipeline-pitfalls](/.claude/docs/ifc-gltf-web-pipeline-pitfalls.md) ⚠️ IFC → GLB → three.js: склейка материалов, утечка метаданных автора
 - [playwright-html-to-pdf-page-margin-boxes](/.claude/docs/playwright-html-to-pdf-page-margin-boxes.md) ⚠️ колонтитулы PDF — CSS page margin boxes, не `displayHeaderFooter`
 
