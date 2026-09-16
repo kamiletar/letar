@@ -6,12 +6,24 @@
 
 ### Fixed
 
+- **Легаси-путь `useTranscode` (мастер импорта одного файла) держал свой захардкоженный набор
+  NVENC-аргументов** вместо общего `buildNvencEncodeArgs` из v0.56.0 — включая ошибку `-cq` при
+  `-rc constqp` (для constqp нужен `-qp`, см. `nvenc-args.ts`). `main/ffmpeg/transcode.ts:
+  transcodeVideo` переведён на `buildNvencEncodeArgs` с `getGpuCapability().supportsTemporalFilter`,
+  как VideoPool и VMAF-сэмплы.
 - **`nx typecheck:tsgo animatrona-renderer` давал 76 ложных `TS6305`** под
   `.next/types/app/**` — устаревший локальный `.next` (гитигнорится, пережил обновление версии
   `next` в рамках `/infra:deps-update`) рассинхронизировался со сгенерированными
   type-check-хелперами. Не код-баг: `rm -rf .next tsconfig.tsbuildinfo` (оба в `.gitignore`) —
   typecheck зелёный без единой правки исходников. Разбор —
   [.claude/docs/nextjs-stale-dotnext-types-tsgo-ts6305.md](/.claude/docs/nextjs-stale-dotnext-types-tsgo-ts6305.md).
+
+### Removed
+
+- **Мёртвый код: `transcodeVideo`/`transcodeAudio` в `main/src/ffmpeg/transcode.ts`.** Функции
+  экспортировались через баррель `main/src/ffmpeg/index.ts`, но нигде в приложении не
+  импортировались — подтверждено грепом по `main`/`renderer`/`preload`/IPC. Файл и экспорт
+  удалены.
 
 ## [0.56.0] - 2026-09-16
 

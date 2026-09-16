@@ -6,7 +6,7 @@ import { spawnFFmpeg } from '../utils/ffmpeg-spawn'
 import { getGpuCapability } from '../utils/hardware-info'
 import { createModuleLogger } from '../utils/logger'
 import { type EncoderCapabilities, getEncoderStrategy, mapToCpuPreset } from './encoder-strategies'
-import { isNvencTemporalFilterError, NvencTemporalFilterError } from './nvenc-args'
+import { buildNvencEncodeArgs, isNvencTemporalFilterError, NvencTemporalFilterError } from './nvenc-args'
 import { getVideoDuration } from './probe'
 import type {
   AudioTranscodeOptions,
@@ -41,32 +41,9 @@ export async function transcodeVideo(
   const codec = options.codec || 'av1'
 
   if (options.useGpu) {
-    // NVIDIA NVENC кодеки
-    const nvencCodecs = {
-      av1: 'av1_nvenc',
-      hevc: 'hevc_nvenc',
-      h264: 'h264_nvenc',
-    }
-    args.push(
-      '-c:v',
-      nvencCodecs[codec],
-      '-cq',
-      options.cq.toString(),
-      '-preset',
-      options.preset,
-      '-tune',
-      'hq',
-      '-rc',
-      'constqp',
-      '-g',
-      '360',
-      '-spatial-aq',
-      '1',
-      '-temporal-aq',
-      '1',
-      '-aq-strength',
-      '15',
-    )
+    // Те же аргументы NVENC, что у VideoPool и VMAF-сэмплов (nvenc-args.ts)
+    const { supportsTemporalFilter } = await getGpuCapability()
+    args.push(...buildNvencEncodeArgs({ ...options, codec }, { temporalFilterSupported: supportsTemporalFilter }))
   } else {
     // CPU кодеки
     const cpuCodecs = {

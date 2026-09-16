@@ -8,9 +8,6 @@ export * from './types'
 // Probe (анализ файлов)
 export { getAudioTracks, getVideoDuration, getVideoTracks, probeFile } from './probe'
 
-// Транскодирование
-export { defaultAudioOptions, defaultVideoOptions, transcodeAudio, transcodeVideo } from './transcode'
-
 // Мерж
 export { mergeMKV } from './merge'
 

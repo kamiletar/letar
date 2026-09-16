@@ -589,11 +589,20 @@ creator-only: `EncodingProfilesCard`, `TranscodingSettingsCard`, `QBittorrentSet
 - [ ] VMAF-фоллбэк на шумных источниках (ниже): фильтр снижает битрейт именно там. Стоит
       повторить оценку `estimatedSavings` на старых мастерах уже с `-tf_level 4`, прежде чем
       городить повтор на VMAF 92.
-- [ ] Мёртвый код: `transcodeVideo` в `main/src/ffmpeg/transcode.ts` нигде не вызывается.
-      `transcodeVideo` в `main/ffmpeg/transcode.ts` (путь `useTranscode`) держит свой
-      захардкоженный набор NVENC-аргументов и в этой задаче не менялся.
+- [x] **Мёртвый код `transcodeVideo` в `main/src/ffmpeg/transcode.ts` удалён** — грепом по всему
+      `apps/animatrona` (main/renderer/preload/IPC) подтверждено: файл экспортировался через
+      `main/src/ffmpeg/index.ts`, но ни `transcodeVideo`/`transcodeAudio`/`defaultVideoOptions`/
+      `defaultAudioOptions` никто не импортировал (только `findOptimalCQ`/VMAF-функции из того же
+      барреля). Файл и экспорт из `index.ts` удалены целиком.
+- [x] **`transcodeVideo` в `main/ffmpeg/transcode.ts` (легаси-путь `useTranscode`) переведён на
+      `buildNvencEncodeArgs`.** Живой путь: `useTranscode.ts` → `api.ffmpeg.transcodeVideo` →
+      IPC-канал `ffmpeg:transcodeVideo` (`ffmpeg.handlers.ts`) → эта функция. Раньше держал свой
+      захардкоженный набор (`-cq` + `-rc constqp` — на деле для constqp нужен `-qp`, см. комментарий
+      в `nvenc-args.ts`, `-tune hq`, GOP 360, AQ 15 без lookahead/multipass/фильтра). Теперь берёт
+      аргументы из `buildNvencEncodeArgs(options, { temporalFilterSupported })` с
+      `getGpuCapability()`, как VideoPool и VMAF-сэмплы.
 - [ ] CPU-фоллбэк VideoPool после краша NVENC всегда кодирует в `libsvtav1`, даже если профиль
-      HEVC или H.264.
+      HEVC или H.264 — **не трогать без решения владельца**, см. разбор ниже.
 
 ## Открытые задачи
 
