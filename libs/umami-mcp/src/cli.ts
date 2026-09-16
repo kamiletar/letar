@@ -4,8 +4,7 @@
  * Запускается через stdio (Claude Code → MCP), из корня репозитория:
  *   bunx tsx libs/umami-mcp/src/cli.ts
  */
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
-
+import { StdioServerTransport } from '@modelcontextprotocol/server/stdio'
 import { createUmamiMcpServer } from './server.js'
 
 const server = createUmamiMcpServer()

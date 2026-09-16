@@ -1,5 +1,5 @@
 import { connectedClient as connectMcp, expectValidationError, textOf } from '@letar/mcp-test-kit'
-import type { Client } from '@modelcontextprotocol/sdk/client/index.js'
+import type { Client } from '@modelcontextprotocol/client'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const { listWebsitesMock, findWebsiteByDomainMock, getWebsiteStatsMock, createWebsiteMock } = vi.hoisted(() => ({
