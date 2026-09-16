@@ -90,7 +90,10 @@ export function initAutoUpdater(): void {
       })
       .then((result) => {
         if (result.response === 0) {
-          autoUpdater.quitAndInstall()
+          // isSilent=true — иначе NSIS-инсталлятор (oneClick: false в electron-builder.yml)
+          // показывает полный мастер установки вместо тихого обновления; isForceRunAfter=true —
+          // перезапустить приложение сразу после установки, не оставлять пользователя без трея.
+          autoUpdater.quitAndInstall(true, true)
         }
       })
   })
