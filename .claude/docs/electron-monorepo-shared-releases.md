@@ -105,8 +105,16 @@ Releases. Штатный `GithubProvider` из `electron-updater` всегда �
 
 ## Файлы
 
-- `libs/electron-monorepo-updater/` — общая рантайм-либа.
-- `apps/animatrona/main/updater.ts`, `apps/kami-key-the/main/updater.ts` — потребители.
+- `libs/electron-monorepo-updater/` — общая рантайм-либа. С 2026-09-17 несёт вторую,
+  не связанную с коллизией релизов функцию — `installAndRelaunchViaScheduler` (тихая установка
+  NSIS-инсталлятора с `oneClick: false` и гарантированный перезапуск, замена
+  `autoUpdater.quitAndInstall()`). Обе функции живут в одной библиотеке прагматично — общие
+  потребители (`animatrona`, `kami-key-the`), не общая тема. Подробности и почему
+  `quitAndInstall()` во всех вариантах не годится — README библиотеки.
+- `apps/animatrona/main/updater.ts`, `apps/kami-key-the/main/updater.ts`,
+  `apps/label-printer-desktop/main/services/updater.service.ts` — потребители (последний — только
+  `installAndRelaunchViaScheduler`, у него нет коллизии релизов: отдельный репозиторий
+  `lena/label-printer-desktop`).
 - `.github/workflows/release-animatrona-folder-player.yml` — эталонный CI-шаблон.
 - `.github/workflows/release-animatrona.yml` — переписан под эту схему 2026-09-13 (было —
   зеркалирование в `kamiletar/animatrona`).
