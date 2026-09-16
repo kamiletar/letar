@@ -49,11 +49,11 @@
 - [bun-isolated-linker-shared-zod-bucket-drift](/.claude/docs/bun-isolated-linker-shared-zod-bucket-drift.md) ⚠️ обычный `bun update` развёл zod на два экземпляра
 - [zod-per-package-pin-drift](/.claude/docs/zod-per-package-pin-drift.md) ⚠️ caret не дедупает с точным корневым пином
 - [root-pin-peer-drift](/.claude/docs/root-pin-peer-drift.md) ⚠️ пин в корне тихо перебивается; намеренные пины — в `intentional-pins.json`
-- [nested-package-resolution-under-bun-isolated-installs](/.claude/docs/nested-package-resolution-under-bun-isolated-installs.md) ⚠️ импорт транзитивной зависимости из `scripts/` — только через `createRequire`
+- [nested-package-resolution-under-bun-isolated-installs](/.claude/docs/nested-package-resolution-under-bun-isolated-installs.md) ⚠️ импорт из `scripts/` — только через `createRequire`
 - [shared-get-client-ip-consolidation](/.claude/docs/shared-get-client-ip-consolidation.md) `getClientIpFromHeaders`, третья копия оставлена намеренно
 - [lib-consumer-missing-lib-dom](/.claude/docs/lib-consumer-missing-lib-dom.md) ⚠️ баррель либы тянет чужие `window`-файлы в typecheck потребителя
 - [webpack-emscripten-runtime-wasm-not-emitted](/.claude/docs/webpack-emscripten-runtime-wasm-not-emitted.md) ⚠️ `.wasm` не копируется, падает на пререндере
-- [webpack-concatenatemodules-electron-updater-jsyaml-crash](/.claude/docs/webpack-concatenatemodules-electron-updater-jsyaml-crash.md) ⚠️ scope hoisting ломает `electron-updater` только в prod-инсталляторе
+- [webpack-concatenatemodules-electron-updater-jsyaml-crash](/.claude/docs/webpack-concatenatemodules-electron-updater-jsyaml-crash.md) ⚠️ scope hoisting ломает `electron-updater`
 
 ### MCP-серверы
 
@@ -226,7 +226,7 @@
 ### Деплой и инфраструктура
 
 - [deployment](/.claude/docs/deployment.md) ⭐ как устроен деплой
-- [verification-pitfalls](/.claude/docs/verification-pitfalls.md) ⭐ проверки, которые врут в успокаивающую сторону: `getComputedStyle` при скрытой панели, заголовки HTML vs статика, состояние в процессе, `grep` по `.claude/worktrees` (врёт в тревожную сторону) и `git grep` мимо submodule (в успокаивающую)
+- [verification-pitfalls](/.claude/docs/verification-pitfalls.md) ⭐ проверки, которые врут в успокаивающую (и одна — в тревожную) сторону
 - [dev-session-screenshot-bypass](/.claude/docs/dev-session-screenshot-bypass.md) живая проверка за admin-гейтом через Playwright-скрипт
 - [docker-bind-mount-pitfalls](/.claude/docs/docker-bind-mount-pitfalls.md) ⚠️ `compose up -d` не перечитывает смонтированный конфиг
 - [nextjs-standalone-bind-mount-wrong-cwd](/.claude/docs/nextjs-standalone-bind-mount-wrong-cwd.md) ⚠️ `process.chdir()` — байты уходят в writable-слой мимо хоста
