@@ -2,6 +2,34 @@
 
 Детальное описание всех реализованных фич Label Printer Desktop.
 
+## Устранено дублирование `getLogger()` в `main/` (2026-09-17, v0.5.19)
+
+Ad-hoc чистка по запросу: 10 файлов `main/` (`background.ts`, `services/{settings,scanner,
+updater,database}.ts`, `ipc/{print,printer,scanner,settings,pdf}.handlers.ts`) определяли свой
+локальный `const getLogger = () => Logger.getInstance()` вместо импорта из уже существующего
+`utils/logger-helper.ts` — единственного места, которое должно быть источником `getLogger`/
+`logger`. В `printer.handlers.ts` был отдельный вариант того же дублирования — локальный
+`const logger = Logger.getInstance()` внутри `registerPrinterHandlers()`; заменён на импорт
+готового `logger`-прокси, тело функции не менялось (имя переменной совпало).
+
+В `background.ts` порядок важен: `Logger.initialize(...)` вызывается в начале модуля и должен
+отработать раньше первого реального обращения к логгеру. Импортированный `getLogger` из
+`logger-helper.ts` ленивый (вызывает `Logger.getInstance()` только при вызове, не при импорте),
+поэтому порядок не нарушен.
+
+Проверено: `typecheck:main`, `lint`, `test` (11/11, включая спеки, мокающие `Logger` напрямую) —
+все зелёные. Грепом подтверждено, что паттерн не повторяется в других Electron-приложениях
+монорепо (`animatrona`, `poster-microtext-desktop`, `kami-key-the` и т.д.).
+
+⚠️ При коммите (`git commit -- <файлы>`) в `print.handlers.ts` вместе с этой правкой попала
+**чужая незакоммиченная правка** — удаление debug-дампа PNG с захардкоженным путём
+`C:\web\lena\debug_label_*.png` (наследие переименования репозитория `lena` → `letar`). Классика
+[git-pathspec-commit-worktree-not-index](/.claude/docs/git-pathspec-commit-worktree-not-index.md):
+`commit -- <pathspec>` берёт содержимое рабочего дерева на момент коммита, а не то, что читалось
+раньше в сессии. Правка сама по себе корректная и уже была задокументирована в CHANGELOG другой
+стороной, typecheck/lint/test прошли уже с ней — оставлена как есть, разделение коммита задним
+числом сочли более рискованным, чем аккуратное смешение.
+
 ## `main/` никогда не типизировался — добавлен `typecheck:main` (2026-09-17, v0.5.18)
 
 Ровно тот пробел, который предыдущая сессия зафиксировала как «существующий, не мой» в записи
