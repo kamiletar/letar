@@ -7,6 +7,11 @@
 
 ## [Unreleased]
 
+### Changed
+
+- `vitest.config.mts`: убран избыточный alias `@letar/hooks` — пакет уже прямая зависимость,
+  симлинк bun резолвит его без alias.
+
 ## [1.9.6] - 2026-09-10
 
 ### Fixed
