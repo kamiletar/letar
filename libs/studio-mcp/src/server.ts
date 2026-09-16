@@ -7,7 +7,7 @@
  */
 
 import { errorText, pretty, text } from '@letar/mcp-server-kit'
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
+import { McpServer } from '@modelcontextprotocol/server'
 import { z } from 'zod'
 import { studioAdminRequest } from './client.js'
 import { rubToKopecks } from './money.js'
@@ -23,31 +23,27 @@ export function createStudioAdminMcpServer(): McpServer {
 
   // ─── Клиенты ─────────────────────────────────────────────────────────────────
 
-  server.tool(
-    'studio_client_list',
-    'Список клиентов студии, с числом проектов и счетов.',
-    { search: z.string().optional().describe('Поиск по имени/email') },
-    async ({ search }) => {
-      const res = await studioAdminRequest({ path: '/api/mcp/admin/clients', query: { search } })
-      if (!res.ok) {
-        return errorText(`❌ studio_client_list: ${pretty(res.json)}`)
-      }
-      return text(pretty(res.json.data))
-    },
-  )
+  server.registerTool('studio_client_list', {
+    description: 'Список клиентов студии, с числом проектов и счетов.',
+    inputSchema: z.object({ search: z.string().optional().describe('Поиск по имени/email') }),
+  }, async ({ search }) => {
+    const res = await studioAdminRequest({ path: '/api/mcp/admin/clients', query: { search } })
+    if (!res.ok) {
+      return errorText(`❌ studio_client_list: ${pretty(res.json)}`)
+    }
+    return text(pretty(res.json.data))
+  })
 
-  server.tool(
-    'studio_client_get',
-    'Карточка клиента: реквизиты, проекты, счётчики счетов/абонентки.',
-    { id: z.string().min(1) },
-    async ({ id }) => {
-      const res = await studioAdminRequest({ path: `/api/mcp/admin/clients/${id}` })
-      if (!res.ok) {
-        return errorText(`❌ studio_client_get(${id}): ${pretty(res.json)}`)
-      }
-      return text(pretty(res.json.data))
-    },
-  )
+  server.registerTool('studio_client_get', {
+    description: 'Карточка клиента: реквизиты, проекты, счётчики счетов/абонентки.',
+    inputSchema: z.object({ id: z.string().min(1) }),
+  }, async ({ id }) => {
+    const res = await studioAdminRequest({ path: `/api/mcp/admin/clients/${id}` })
+    if (!res.ok) {
+      return errorText(`❌ studio_client_get(${id}): ${pretty(res.json)}`)
+    }
+    return text(pretty(res.json.data))
+  })
 
   const clientFields = {
     type: CLIENT_TYPE.describe('COMPANY (ООО/АО) / SOLE_PROP (ИП) / INDIVIDUAL (физлицо)'),
@@ -62,59 +58,51 @@ export function createStudioAdminMcpServer(): McpServer {
     notes: z.string().max(2000).optional(),
   }
 
-  server.tool(
-    'studio_client_create',
-    'Создаёт нового клиента студии.',
-    clientFields,
-    async (input) => {
-      const res = await studioAdminRequest({ method: 'POST', path: '/api/mcp/admin/clients', body: input })
-      if (!res.ok) {
-        return errorText(`❌ studio_client_create: ${pretty(res.json)}`)
-      }
-      return text(`✅ Клиент создан.\n\n${pretty(res.json.data)}`)
-    },
-  )
+  server.registerTool('studio_client_create', {
+    description: 'Создаёт нового клиента студии.',
+    inputSchema: z.object(clientFields),
+  }, async (input) => {
+    const res = await studioAdminRequest({ method: 'POST', path: '/api/mcp/admin/clients', body: input })
+    if (!res.ok) {
+      return errorText(`❌ studio_client_create: ${pretty(res.json)}`)
+    }
+    return text(`✅ Клиент создан.\n\n${pretty(res.json.data)}`)
+  })
 
-  server.tool(
-    'studio_client_update',
-    'Обновляет клиента (полная замена реквизитов — как форма редактирования, не патч отдельных полей).',
-    { id: z.string().min(1), ...clientFields },
-    async ({ id, ...input }) => {
-      const res = await studioAdminRequest({ method: 'PATCH', path: `/api/mcp/admin/clients/${id}`, body: input })
-      if (!res.ok) {
-        return errorText(`❌ studio_client_update(${id}): ${pretty(res.json)}`)
-      }
-      return text(`✅ Клиент обновлён.\n\n${pretty(res.json.data)}`)
-    },
-  )
+  server.registerTool('studio_client_update', {
+    description: 'Обновляет клиента (полная замена реквизитов — как форма редактирования, не патч отдельных полей).',
+    inputSchema: z.object({ id: z.string().min(1), ...clientFields }),
+  }, async ({ id, ...input }) => {
+    const res = await studioAdminRequest({ method: 'PATCH', path: `/api/mcp/admin/clients/${id}`, body: input })
+    if (!res.ok) {
+      return errorText(`❌ studio_client_update(${id}): ${pretty(res.json)}`)
+    }
+    return text(`✅ Клиент обновлён.\n\n${pretty(res.json.data)}`)
+  })
 
   // ─── Проекты ─────────────────────────────────────────────────────────────────
 
-  server.tool(
-    'studio_project_list',
-    'Список проектов, опционально по клиенту/статусу.',
-    { clientId: z.string().optional(), status: PROJECT_STATUS.optional() },
-    async ({ clientId, status }) => {
-      const res = await studioAdminRequest({ path: '/api/mcp/admin/projects', query: { clientId, status } })
-      if (!res.ok) {
-        return errorText(`❌ studio_project_list: ${pretty(res.json)}`)
-      }
-      return text(pretty(res.json.data))
-    },
-  )
+  server.registerTool('studio_project_list', {
+    description: 'Список проектов, опционально по клиенту/статусу.',
+    inputSchema: z.object({ clientId: z.string().optional(), status: PROJECT_STATUS.optional() }),
+  }, async ({ clientId, status }) => {
+    const res = await studioAdminRequest({ path: '/api/mcp/admin/projects', query: { clientId, status } })
+    if (!res.ok) {
+      return errorText(`❌ studio_project_list: ${pretty(res.json)}`)
+    }
+    return text(pretty(res.json.data))
+  })
 
-  server.tool(
-    'studio_project_get',
-    'Карточка проекта: этапы, счётчики счетов/абонентки/учтённого времени.',
-    { id: z.string().min(1) },
-    async ({ id }) => {
-      const res = await studioAdminRequest({ path: `/api/mcp/admin/projects/${id}` })
-      if (!res.ok) {
-        return errorText(`❌ studio_project_get(${id}): ${pretty(res.json)}`)
-      }
-      return text(pretty(res.json.data))
-    },
-  )
+  server.registerTool('studio_project_get', {
+    description: 'Карточка проекта: этапы, счётчики счетов/абонентки/учтённого времени.',
+    inputSchema: z.object({ id: z.string().min(1) }),
+  }, async ({ id }) => {
+    const res = await studioAdminRequest({ path: `/api/mcp/admin/projects/${id}` })
+    if (!res.ok) {
+      return errorText(`❌ studio_project_get(${id}): ${pretty(res.json)}`)
+    }
+    return text(pretty(res.json.data))
+  })
 
   const projectFields = {
     clientId: z.string().min(1),
@@ -141,132 +129,121 @@ export function createStudioAdminMcpServer(): McpServer {
     return { ...rest, budget: rubToKopecks(budgetRub), rateKopecks: rateKopecksPerHour ?? null }
   }
 
-  server.tool(
-    'studio_project_create',
-    'Создаёт проект у клиента.',
-    projectFields,
-    async (input) => {
-      const res = await studioAdminRequest({
-        method: 'POST',
-        path: '/api/mcp/admin/projects',
-        body: toProjectApiBody(input),
-      })
-      if (!res.ok) {
-        return errorText(`❌ studio_project_create: ${pretty(res.json)}`)
-      }
-      return text(`✅ Проект создан.\n\n${pretty(res.json.data)}`)
-    },
-  )
+  server.registerTool('studio_project_create', {
+    description: 'Создаёт проект у клиента.',
+    inputSchema: z.object(projectFields),
+  }, async (input) => {
+    const res = await studioAdminRequest({
+      method: 'POST',
+      path: '/api/mcp/admin/projects',
+      body: toProjectApiBody(input),
+    })
+    if (!res.ok) {
+      return errorText(`❌ studio_project_create: ${pretty(res.json)}`)
+    }
+    return text(`✅ Проект создан.\n\n${pretty(res.json.data)}`)
+  })
 
-  server.tool(
-    'studio_project_update',
-    'Обновляет проект (полная замена — как форма редактирования).',
-    { id: z.string().min(1), ...projectFields },
-    async ({ id, ...input }) => {
-      const res = await studioAdminRequest({
-        method: 'PATCH',
-        path: `/api/mcp/admin/projects/${id}`,
-        body: toProjectApiBody(input),
-      })
-      if (!res.ok) {
-        return errorText(`❌ studio_project_update(${id}): ${pretty(res.json)}`)
-      }
-      return text(`✅ Проект обновлён.\n\n${pretty(res.json.data)}`)
-    },
-  )
+  server.registerTool('studio_project_update', {
+    description: 'Обновляет проект (полная замена — как форма редактирования).',
+    inputSchema: z.object({ id: z.string().min(1), ...projectFields }),
+  }, async ({ id, ...input }) => {
+    const res = await studioAdminRequest({
+      method: 'PATCH',
+      path: `/api/mcp/admin/projects/${id}`,
+      body: toProjectApiBody(input),
+    })
+    if (!res.ok) {
+      return errorText(`❌ studio_project_update(${id}): ${pretty(res.json)}`)
+    }
+    return text(`✅ Проект обновлён.\n\n${pretty(res.json.data)}`)
+  })
 
-  server.tool(
-    'studio_project_set_status',
-    'Меняет только статус проекта, не трогая остальные поля.',
-    { id: z.string().min(1), status: PROJECT_STATUS },
-    async ({ id, status }) => {
-      const res = await studioAdminRequest({
-        method: 'PATCH',
-        path: `/api/mcp/admin/projects/${id}/status`,
-        body: { status },
-      })
-      if (!res.ok) {
-        return errorText(`❌ studio_project_set_status(${id}): ${pretty(res.json)}`)
-      }
-      return text(`✅ Статус проекта: ${status}`)
-    },
-  )
+  server.registerTool('studio_project_set_status', {
+    description: 'Меняет только статус проекта, не трогая остальные поля.',
+    inputSchema: z.object({ id: z.string().min(1), status: PROJECT_STATUS }),
+  }, async ({ id, status }) => {
+    const res = await studioAdminRequest({
+      method: 'PATCH',
+      path: `/api/mcp/admin/projects/${id}/status`,
+      body: { status },
+    })
+    if (!res.ok) {
+      return errorText(`❌ studio_project_set_status(${id}): ${pretty(res.json)}`)
+    }
+    return text(`✅ Статус проекта: ${status}`)
+  })
 
   const TIME_STATUS = z.enum(['DRAFT', 'APPROVED', 'INVOICED'])
 
-  server.tool(
-    'studio_project_time_entries',
-    [
+  server.registerTool('studio_project_time_entries', {
+    description: [
       'Записи времени проекта — для аудита ПЕРЕД переключением billingMode на HOURLY или ручной',
       'корректировкой банка включённых часов: проверить, нет ли среди APPROVED-записей старых часов,',
       'уже оплаченных по фикс-прайсу (billable должен быть false — иначе они уйдут в следующий',
       'почасовой счёт). Список неограничен по размеру — на больших проектах фильтруй status/billable.',
     ].join(' '),
-    {
+    inputSchema: z.object({
       id: z.string().min(1),
       status: TIME_STATUS.optional(),
       billable: z.boolean().optional(),
-    },
-    async ({ id, status, billable }) => {
-      const res = await studioAdminRequest({
-        path: `/api/mcp/admin/projects/${id}/time-entries`,
-        query: { status, billable: billable === undefined ? undefined : String(billable) },
-      })
-      if (!res.ok) {
-        return errorText(`❌ studio_project_time_entries(${id}): ${pretty(res.json)}`)
-      }
-      return text(pretty(res.json.data))
-    },
-  )
+    }),
+  }, async ({ id, status, billable }) => {
+    const res = await studioAdminRequest({
+      path: `/api/mcp/admin/projects/${id}/time-entries`,
+      query: { status, billable: billable === undefined ? undefined : String(billable) },
+    })
+    if (!res.ok) {
+      return errorText(`❌ studio_project_time_entries(${id}): ${pretty(res.json)}`)
+    }
+    return text(pretty(res.json.data))
+  })
 
-  server.tool(
-    'studio_project_set_included_hours',
-    [
+  server.registerTool('studio_project_set_included_hours', {
+    description: [
       'Разовая ручная корректировка банка включённых часов проекта (§11.19) — НЕ штатное пополнение',
       '(это делает крон абонентки на каждый цикл). Используй при переводе проекта на HOURLY после того,',
       'как банк уже накопился по старым правилам, или чтобы вручную вернуть/списать часы клиенту.',
     ].join(' '),
-    { id: z.string().min(1), hours: z.number().min(0).describe('Новый остаток банка в часах (заменяет текущий)') },
-    async ({ id, hours }) => {
-      const res = await studioAdminRequest({
-        method: 'PATCH',
-        path: `/api/mcp/admin/projects/${id}/included-hours`,
-        body: { balanceSec: Math.round(hours * 3600) },
-      })
-      if (!res.ok) {
-        return errorText(`❌ studio_project_set_included_hours(${id}): ${pretty(res.json)}`)
-      }
-      return text(`✅ Банк включённых часов обновлён.\n\n${pretty(res.json.data)}`)
-    },
-  )
+    inputSchema: z.object({
+      id: z.string().min(1),
+      hours: z.number().min(0).describe('Новый остаток банка в часах (заменяет текущий)'),
+    }),
+  }, async ({ id, hours }) => {
+    const res = await studioAdminRequest({
+      method: 'PATCH',
+      path: `/api/mcp/admin/projects/${id}/included-hours`,
+      body: { balanceSec: Math.round(hours * 3600) },
+    })
+    if (!res.ok) {
+      return errorText(`❌ studio_project_set_included_hours(${id}): ${pretty(res.json)}`)
+    }
+    return text(`✅ Банк включённых часов обновлён.\n\n${pretty(res.json.data)}`)
+  })
 
   // ─── Абонентки (RecurringInvoice) ───────────────────────────────────────────
 
-  server.tool(
-    'studio_recurring_list',
-    'Список абонентских правил (автовыставление счёта — поддержка/подписка), опционально по клиенту.',
-    { clientId: z.string().optional() },
-    async ({ clientId }) => {
-      const res = await studioAdminRequest({ path: '/api/mcp/admin/recurring', query: { clientId } })
-      if (!res.ok) {
-        return errorText(`❌ studio_recurring_list: ${pretty(res.json)}`)
-      }
-      return text(pretty(res.json.data))
-    },
-  )
+  server.registerTool('studio_recurring_list', {
+    description: 'Список абонентских правил (автовыставление счёта — поддержка/подписка), опционально по клиенту.',
+    inputSchema: z.object({ clientId: z.string().optional() }),
+  }, async ({ clientId }) => {
+    const res = await studioAdminRequest({ path: '/api/mcp/admin/recurring', query: { clientId } })
+    if (!res.ok) {
+      return errorText(`❌ studio_recurring_list: ${pretty(res.json)}`)
+    }
+    return text(pretty(res.json.data))
+  })
 
-  server.tool(
-    'studio_recurring_get',
-    'Карточка абонентского правила.',
-    { id: z.string().min(1) },
-    async ({ id }) => {
-      const res = await studioAdminRequest({ path: `/api/mcp/admin/recurring/${id}` })
-      if (!res.ok) {
-        return errorText(`❌ studio_recurring_get(${id}): ${pretty(res.json)}`)
-      }
-      return text(pretty(res.json.data))
-    },
-  )
+  server.registerTool('studio_recurring_get', {
+    description: 'Карточка абонентского правила.',
+    inputSchema: z.object({ id: z.string().min(1) }),
+  }, async ({ id }) => {
+    const res = await studioAdminRequest({ path: `/api/mcp/admin/recurring/${id}` })
+    if (!res.ok) {
+      return errorText(`❌ studio_recurring_get(${id}): ${pretty(res.json)}`)
+    }
+    return text(pretty(res.json.data))
+  })
 
   const recurringFields = {
     clientId: z.string().min(1),
@@ -302,73 +279,65 @@ export function createStudioAdminMcpServer(): McpServer {
     }
   }
 
-  server.tool(
-    'studio_recurring_create',
-    [
+  server.registerTool('studio_recurring_create', {
+    description: [
       'Создаёт абонентское правило — крон сам будет выставлять и ОТПРАВЛЯТЬ клиенту счёт на nextRunAt',
       'и каждые intervalMonths после. ВАЖНО: если nextRunAt в прошлом или сегодня — первый счёт уйдёт',
       'клиенту письмом при ближайшем прогоне крона, не после подтверждения.',
     ].join(' '),
-    recurringFields,
-    async (input) => {
-      const res = await studioAdminRequest({
-        method: 'POST',
-        path: '/api/mcp/admin/recurring',
-        body: toRecurringApiBody(input),
-      })
-      if (!res.ok) {
-        return errorText(`❌ studio_recurring_create: ${pretty(res.json)}`)
-      }
-      return text(`✅ Абонентка создана.\n\n${pretty(res.json.data)}`)
-    },
-  )
+    inputSchema: z.object(recurringFields),
+  }, async (input) => {
+    const res = await studioAdminRequest({
+      method: 'POST',
+      path: '/api/mcp/admin/recurring',
+      body: toRecurringApiBody(input),
+    })
+    if (!res.ok) {
+      return errorText(`❌ studio_recurring_create: ${pretty(res.json)}`)
+    }
+    return text(`✅ Абонентка создана.\n\n${pretty(res.json.data)}`)
+  })
 
-  server.tool(
-    'studio_recurring_update',
-    'Обновляет абонентское правило (полная замена).',
-    { id: z.string().min(1), ...recurringFields },
-    async ({ id, ...input }) => {
-      const res = await studioAdminRequest({
-        method: 'PATCH',
-        path: `/api/mcp/admin/recurring/${id}`,
-        body: toRecurringApiBody(input),
-      })
-      if (!res.ok) {
-        return errorText(`❌ studio_recurring_update(${id}): ${pretty(res.json)}`)
-      }
-      return text(`✅ Абонентка обновлена.\n\n${pretty(res.json.data)}`)
-    },
-  )
+  server.registerTool('studio_recurring_update', {
+    description: 'Обновляет абонентское правило (полная замена).',
+    inputSchema: z.object({ id: z.string().min(1), ...recurringFields }),
+  }, async ({ id, ...input }) => {
+    const res = await studioAdminRequest({
+      method: 'PATCH',
+      path: `/api/mcp/admin/recurring/${id}`,
+      body: toRecurringApiBody(input),
+    })
+    if (!res.ok) {
+      return errorText(`❌ studio_recurring_update(${id}): ${pretty(res.json)}`)
+    }
+    return text(`✅ Абонентка обновлена.\n\n${pretty(res.json.data)}`)
+  })
 
-  server.tool(
-    'studio_recurring_toggle',
-    'Включает/выключает абонентку без изменения остальных полей — выключенная не выставляет счета.',
-    { id: z.string().min(1), active: z.boolean() },
-    async ({ id, active }) => {
-      const res = await studioAdminRequest({
-        method: 'PATCH',
-        path: `/api/mcp/admin/recurring/${id}/toggle`,
-        body: { active },
-      })
-      if (!res.ok) {
-        return errorText(`❌ studio_recurring_toggle(${id}): ${pretty(res.json)}`)
-      }
-      return text(`✅ Абонентка ${active ? 'включена' : 'выключена'}.`)
-    },
-  )
+  server.registerTool('studio_recurring_toggle', {
+    description: 'Включает/выключает абонентку без изменения остальных полей — выключенная не выставляет счета.',
+    inputSchema: z.object({ id: z.string().min(1), active: z.boolean() }),
+  }, async ({ id, active }) => {
+    const res = await studioAdminRequest({
+      method: 'PATCH',
+      path: `/api/mcp/admin/recurring/${id}/toggle`,
+      body: { active },
+    })
+    if (!res.ok) {
+      return errorText(`❌ studio_recurring_toggle(${id}): ${pretty(res.json)}`)
+    }
+    return text(`✅ Абонентка ${active ? 'включена' : 'выключена'}.`)
+  })
 
-  server.tool(
-    'studio_recurring_delete',
-    'Удаляет абонентское правило безвозвратно (уже выставленные по нему счета не трогает).',
-    { id: z.string().min(1) },
-    async ({ id }) => {
-      const res = await studioAdminRequest({ method: 'DELETE', path: `/api/mcp/admin/recurring/${id}` })
-      if (!res.ok) {
-        return errorText(`❌ studio_recurring_delete(${id}): ${pretty(res.json)}`)
-      }
-      return text('✅ Абонентка удалена.')
-    },
-  )
+  server.registerTool('studio_recurring_delete', {
+    description: 'Удаляет абонентское правило безвозвратно (уже выставленные по нему счета не трогает).',
+    inputSchema: z.object({ id: z.string().min(1) }),
+  }, async ({ id }) => {
+    const res = await studioAdminRequest({ method: 'DELETE', path: `/api/mcp/admin/recurring/${id}` })
+    if (!res.ok) {
+      return errorText(`❌ studio_recurring_delete(${id}): ${pretty(res.json)}`)
+    }
+    return text('✅ Абонентка удалена.')
+  })
 
   // ─── Счета ───────────────────────────────────────────────────────────────────
 
@@ -379,36 +348,32 @@ export function createStudioAdminMcpServer(): McpServer {
     unitPriceRub: z.number().describe('Цена за единицу, в рублях (может быть отрицательной — скидка/погашение аванса)'),
   })
 
-  server.tool(
-    'studio_invoice_list',
-    'Список счетов, опционально по клиенту/статусу.',
-    { clientId: z.string().optional(), status: INVOICE_STATUS.optional() },
-    async ({ clientId, status }) => {
-      const res = await studioAdminRequest({ path: '/api/mcp/admin/invoices', query: { clientId, status } })
-      if (!res.ok) {
-        return errorText(`❌ studio_invoice_list: ${pretty(res.json)}`)
-      }
-      return text(pretty(res.json.data))
-    },
-  )
+  server.registerTool('studio_invoice_list', {
+    description: 'Список счетов, опционально по клиенту/статусу.',
+    inputSchema: z.object({ clientId: z.string().optional(), status: INVOICE_STATUS.optional() }),
+  }, async ({ clientId, status }) => {
+    const res = await studioAdminRequest({ path: '/api/mcp/admin/invoices', query: { clientId, status } })
+    if (!res.ok) {
+      return errorText(`❌ studio_invoice_list: ${pretty(res.json)}`)
+    }
+    return text(pretty(res.json.data))
+  })
 
-  server.tool(
-    'studio_invoice_get',
-    'Карточка счёта: позиции, платежи.',
-    { id: z.string().min(1) },
-    async ({ id }) => {
-      const res = await studioAdminRequest({ path: `/api/mcp/admin/invoices/${id}` })
-      if (!res.ok) {
-        return errorText(`❌ studio_invoice_get(${id}): ${pretty(res.json)}`)
-      }
-      return text(pretty(res.json.data))
-    },
-  )
+  server.registerTool('studio_invoice_get', {
+    description: 'Карточка счёта: позиции, платежи.',
+    inputSchema: z.object({ id: z.string().min(1) }),
+  }, async ({ id }) => {
+    const res = await studioAdminRequest({ path: `/api/mcp/admin/invoices/${id}` })
+    if (!res.ok) {
+      return errorText(`❌ studio_invoice_get(${id}): ${pretty(res.json)}`)
+    }
+    return text(pretty(res.json.data))
+  })
 
-  server.tool(
-    'studio_invoice_create',
-    'Создаёт счёт в статусе DRAFT (черновик, клиент его ещё не видит) — для отправки см. studio_invoice_send.',
-    {
+  server.registerTool('studio_invoice_create', {
+    description:
+      'Создаёт счёт в статусе DRAFT (черновик, клиент его ещё не видит) — для отправки см. studio_invoice_send.',
+    inputSchema: z.object({
       clientId: z.string().min(1),
       projectId: z.string().optional(),
       paymentMethod: PAYMENT_METHOD.default('BANK_TRANSFER'),
@@ -417,72 +382,67 @@ export function createStudioAdminMcpServer(): McpServer {
       servicePeriodEnd: z.iso.date().optional(),
       comment: z.string().max(2000).optional(),
       items: z.array(invoiceItemField).min(1),
-    },
-    async ({ items, ...rest }) => {
-      const apiItems = items.map((item) => {
-        const unitPrice = rubToKopecks(item.unitPriceRub)
-        return {
-          name: item.name,
-          unit: item.unit,
-          quantity: item.quantity,
-          unitPrice,
-          amount: unitPrice * item.quantity,
-        }
-      })
-      const res = await studioAdminRequest({
-        method: 'POST',
-        path: '/api/mcp/admin/invoices',
-        body: { ...rest, items: apiItems },
-      })
-      if (!res.ok) {
-        return errorText(`❌ studio_invoice_create: ${pretty(res.json)}`)
+    }),
+  }, async ({ items, ...rest }) => {
+    const apiItems = items.map((item) => {
+      const unitPrice = rubToKopecks(item.unitPriceRub)
+      return {
+        name: item.name,
+        unit: item.unit,
+        quantity: item.quantity,
+        unitPrice,
+        amount: unitPrice * item.quantity,
       }
-      return text(`✅ Черновик счёта создан — клиент его ещё не видит.\n\n${pretty(res.json.data)}`)
-    },
-  )
+    })
+    const res = await studioAdminRequest({
+      method: 'POST',
+      path: '/api/mcp/admin/invoices',
+      body: { ...rest, items: apiItems },
+    })
+    if (!res.ok) {
+      return errorText(`❌ studio_invoice_create: ${pretty(res.json)}`)
+    }
+    return text(`✅ Черновик счёта создан — клиент его ещё не видит.\n\n${pretty(res.json.data)}`)
+  })
 
-  server.tool(
-    'studio_invoice_send',
-    'Переводит черновик в SENT и ОТПРАВЛЯЕТ клиенту письмо со счётом (если у клиента указан email) — необратимо видимое клиенту действие.',
-    { id: z.string().min(1) },
-    async ({ id }) => {
-      const res = await studioAdminRequest({ method: 'POST', path: `/api/mcp/admin/invoices/${id}/send` })
-      if (!res.ok) {
-        return errorText(`❌ studio_invoice_send(${id}): ${pretty(res.json)}`)
-      }
-      return text('✅ Счёт отправлен клиенту.')
-    },
-  )
+  server.registerTool('studio_invoice_send', {
+    description:
+      'Переводит черновик в SENT и ОТПРАВЛЯЕТ клиенту письмо со счётом (если у клиента указан email) — необратимо видимое клиенту действие.',
+    inputSchema: z.object({ id: z.string().min(1) }),
+  }, async ({ id }) => {
+    const res = await studioAdminRequest({ method: 'POST', path: `/api/mcp/admin/invoices/${id}/send` })
+    if (!res.ok) {
+      return errorText(`❌ studio_invoice_send(${id}): ${pretty(res.json)}`)
+    }
+    return text('✅ Счёт отправлен клиенту.')
+  })
 
-  server.tool(
-    'studio_invoice_mark_paid',
-    'Регистрирует ручную оплату счёта (банковский перевод/наличные вне вебхука эквайринга) — создаёт Payment и переводит счёт в PAID/PARTIALLY_PAID.',
-    { id: z.string().min(1), amountKopecks: z.number().int().positive().optional() },
-    async ({ id, amountKopecks }) => {
-      const res = await studioAdminRequest({
-        method: 'POST',
-        path: `/api/mcp/admin/invoices/${id}/mark-paid`,
-        body: amountKopecks !== undefined ? { amountKopecks } : {},
-      })
-      if (!res.ok) {
-        return errorText(`❌ studio_invoice_mark_paid(${id}): ${pretty(res.json)}`)
-      }
-      return text(`✅ Оплата зарегистрирована.\n\n${pretty(res.json.data)}`)
-    },
-  )
+  server.registerTool('studio_invoice_mark_paid', {
+    description:
+      'Регистрирует ручную оплату счёта (банковский перевод/наличные вне вебхука эквайринга) — создаёт Payment и переводит счёт в PAID/PARTIALLY_PAID.',
+    inputSchema: z.object({ id: z.string().min(1), amountKopecks: z.number().int().positive().optional() }),
+  }, async ({ id, amountKopecks }) => {
+    const res = await studioAdminRequest({
+      method: 'POST',
+      path: `/api/mcp/admin/invoices/${id}/mark-paid`,
+      body: amountKopecks !== undefined ? { amountKopecks } : {},
+    })
+    if (!res.ok) {
+      return errorText(`❌ studio_invoice_mark_paid(${id}): ${pretty(res.json)}`)
+    }
+    return text(`✅ Оплата зарегистрирована.\n\n${pretty(res.json.data)}`)
+  })
 
-  server.tool(
-    'studio_invoice_cancel',
-    'Отменяет неоплаченный счёт (PAID отменить нельзя).',
-    { id: z.string().min(1) },
-    async ({ id }) => {
-      const res = await studioAdminRequest({ method: 'POST', path: `/api/mcp/admin/invoices/${id}/cancel` })
-      if (!res.ok) {
-        return errorText(`❌ studio_invoice_cancel(${id}): ${pretty(res.json)}`)
-      }
-      return text('✅ Счёт отменён.')
-    },
-  )
+  server.registerTool('studio_invoice_cancel', {
+    description: 'Отменяет неоплаченный счёт (PAID отменить нельзя).',
+    inputSchema: z.object({ id: z.string().min(1) }),
+  }, async ({ id }) => {
+    const res = await studioAdminRequest({ method: 'POST', path: `/api/mcp/admin/invoices/${id}/cancel` })
+    if (!res.ok) {
+      return errorText(`❌ studio_invoice_cancel(${id}): ${pretty(res.json)}`)
+    }
+    return text('✅ Счёт отменён.')
+  })
 
   return server
 }
