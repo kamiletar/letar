@@ -319,6 +319,7 @@
 - [web-push](/.claude/docs/web-push.md)
 - [offlineaudiocontext-suspend-render-race](/.claude/docs/offlineaudiocontext-suspend-render-race.md)
 - [chromium-video-codec-limits](/.claude/docs/chromium-video-codec-limits.md) ⚠️ Chromium/Electron не декодирует H.264 Hi10P (запрет профиля, не пробел ffmpeg) — обход через WASM+WebCodecs (`@libmedia/avplayer`), не через патч рантайма или встраивание mpv в окно
+- [playwright-html-to-pdf-page-margin-boxes](/.claude/docs/playwright-html-to-pdf-page-margin-boxes.md) ⚠️ `page.pdf({ displayHeaderFooter, footerTemplate })` рисует колонтитул на КАЖДОЙ странице без исключений — на обложке (`@page :first { margin: 0 }`, картинка во весь лист) он ложится поверх, а `footerTemplate` не видит номер страницы, чтобы себя отключить условно; рабочий приём — колонтитулы через CSS page margin boxes (Chromium 131+, `@page { @bottom-left {...} @bottom-right { content: counter(page) ... } }`), на странице с нулевыми полями margin boxes физически не рисуются; `page.pdf` тогда без `displayHeaderFooter`, с `preferCSSPageSize: true` и `printBackground: true`; рядом — `document.fonts.ready` перед рендером для Google Fonts, `waitUntil: 'networkidle'`, `createRequire` для playwright из скрипта вне корня монорепо под изолированной установкой bun, `.steps > li` вместо `.steps li` против наследования CSS-счётчика вложенным списком, и проверка вёрстки рендером страниц PDF в PNG + склейкой в обзорный лист вместо визуальной проверки HTML в браузере
 
 ## Продукт и контент
 

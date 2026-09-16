@@ -305,6 +305,7 @@
 - [web-push](/.claude/docs/web-push.md) push-уведомления
 - [offlineaudiocontext-suspend-render-race](/.claude/docs/offlineaudiocontext-suspend-render-race.md) гонка `suspend`/`render`
 - [chromium-video-codec-limits](/.claude/docs/chromium-video-codec-limits.md) ⚠️ H.264 Hi10P не декодируется, обход через WASM+WebCodecs
+- [playwright-html-to-pdf-page-margin-boxes](/.claude/docs/playwright-html-to-pdf-page-margin-boxes.md) ⚠️ колонтитулы PDF — CSS page margin boxes, не `displayHeaderFooter`
 
 ### Продукт и контент
 
