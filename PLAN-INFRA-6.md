@@ -3927,3 +3927,44 @@ poster-microtext-desktop), `c7ea6108f` (bump SHA). Push не делал, ждё�
 Небиллируемая внутренняя инфраструктурная сессия (`bun scripts/check-all.mjs --group=deps`
 все gate зелёные), не клиентский проект. Таймер studio не запускался (сессия начата напрямую
 `/infra:deps-update`, без `/​<app>`-обёртки).
+
+## §180 (2026-09-16) Аудит избыточных vitest resolve.alias @letar/* — 15 приложений, продолжение находки из `domwellbes`
+
+Продолжение находки из сессии по `domwellbes` (2026-09-16): `resolve.alias` на `@letar/<pkg>` в
+`vitest.config.mts` может дублировать symlink, который bun isolated linker уже кладёт по записи
+в `dependencies` (`workspace:*`) — тогда alias лишний.
+
+Проверены все 22 приложения репо на предмет `@letar/*` в `resolve.alias`. У 15 такие алиасы
+были; у 7 — либо алиасов не было вовсе, либо (`animatrona-mobile`/`animatrona-tv`) grep дал
+ложное совпадение по `name:`, не по alias.
+
+**Убраны избыточные алиасы (проверено полным `nx test <app>` на каждом):**
+`animatrona-folder-player` (`folder-scan`), `aprel8008` (`image-upload/server/versioned-upload-url`),
+`driving-school` (11 из 13 — `driving-school-db/*`, `forms-core/phone`, `validation-utils`,
+`email`, `ui`), `dsperevod` (`analytics`), `grandslamcup` (только база `image-upload`),
+`label-printer-desktop` (`label-printer-core`), `pravda` (`hooks`), `studio` (`email`,
+`consent`), `aboi` (6 из 8 — `image-upload` база, `analytics`, `seo`, `cdek`, `email`,
+`format-utils`).
+
+**Оставлены как есть** — либо alias транзитивный без symlink (`kami`/`mandala` `image-upload`,
+`synth`/`time` `seo`, `driving-school` `format-utils`+`api-server`, `pravda` `chakra-provider`,
+`aboi` `ui`), либо алиасов вообще нет (`aira-web`, `animatrona`, `animatrona-tracker`,
+`archetest`, `auth-hub`, `form-develop-app-shadcn`, `svoichuzhie`).
+
+**⚠️ Новая ловушка, не описанная в исходной находке `domwellbes`:** подпуть
+`@letar/image-upload/server` не резолвится без alias даже при прямой зависимости и корректно
+объявленном `exports` в package.json пакета — воспроизведено одинаково в `grandslamcup` и
+`aboi` (полный прогон теста, `Failed to resolve import`). Базовый импорт `@letar/image-upload`
+при этом резолвится нормально. Причина не выяснена; практическое правило — для этого пакета
+подпуть `/server` alias оставлять всегда, полагаться на `exports`-карту как на доказательство
+недостаточно, нужен реальный прогон тестов. Разбор —
+[vitest-alias-redundant-vs-transitive.md](/.claude/docs/vitest-alias-redundant-vs-transitive.md).
+
+Коммиты: по одному на каждое затронутое приложение (submodule — коммит внутри + bump SHA в
+letar) + changelog/version bump по чек-листу `app-workflow.md` + новый доковый файл. Submodule
+(`aboi`, `aprel8008`, `driving-school`, `dsperevod`, `studio`) запушены с одобрения пользователя.
+Пуш `letar` заблокирован pre-push хуком из-за **чужих** незапушенных submodule
+(`domwellbes`, `domwellbes-e2e`, `poster-microtext-desktop`) — не форсил, ждёт, пока параллельная
+сессия их запушит.
+
+Небиллируемая внутренняя инфраструктурная сессия (`time_discard`), не клиентский проект.
