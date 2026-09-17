@@ -216,6 +216,7 @@
 - [playwright-testmatch-absolute-path-regex-anchor](/.claude/docs/playwright-testmatch-absolute-path-regex-anchor.md) ⚠️ якорный `RegExp` (`^`) в `testMatch`/`testIgnore` матчится против абсолютного пути файла, не относительно `testDir` — никогда не совпадает, чинится glob-строкой
 - [unit-testing](/.claude/docs/unit-testing.md) ⚠️ обязательный `tsconfig.spec.json`
 - [vitest-jsdom-formdata-request-hang](/.claude/docs/vitest-jsdom-formdata-request-hang.md) ⚠️ Route Handler-тест с `Request`+`FormData` под глобальным `environment: 'jsdom'` — `await request.formData()` зависает до таймаута вместо ошибки, фикс — `@vitest-environment node` в docblock файла
+- [vitest-server-only-mock-pattern](/.claude/docs/vitest-server-only-mock-pattern.md) ⚠️ `import 'server-only'` бросает исключение под vitest даже когда тест мокает соседний модуль, а не сам server-only-файл — мок ставить глобально в `vitest.setup`, не точечно в одном тесте
 - [dprint-worktree-submodule-scope](/.claude/docs/dprint-worktree-submodule-scope.md) ⚠️ dprint не видит границ worktree/submodule
 - [dprint-format-project-scope-not-file-scope](/.claude/docs/dprint-format-project-scope-not-file-scope.md) ⚠️ `--projects` не даёт файловой гранулярности — `format` внутри проекта задевает весь submodule, включая чужие незакоммиченные правки
 - [dprint-windows-bin-shim-missing](/.claude/docs/dprint-windows-bin-shim-missing.md) ⚠️ пропавший `node_modules/.bin/dprint.exe` при целом пакете — чинит `bun install`; резолвер pre-commit-хука не видел `.exe`-shim на Windows

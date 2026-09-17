@@ -213,6 +213,7 @@
 - [playwright-testmatch-absolute-path-regex-anchor](/.claude/docs/playwright-testmatch-absolute-path-regex-anchor.md) ⚠️ якорный `^` в `testMatch` никогда не совпадает
 - [unit-testing](/.claude/docs/unit-testing.md) ⚠️ обязательный `tsconfig.spec.json`
 - [vitest-jsdom-formdata-request-hang](/.claude/docs/vitest-jsdom-formdata-request-hang.md) ⚠️ `request.formData()` зависает под jsdom
+- [vitest-server-only-mock-pattern](/.claude/docs/vitest-server-only-mock-pattern.md) ⚠️ `import 'server-only'` падает под vitest — мок глобально в `vitest.setup`
 - [dprint-worktree-submodule-scope](/.claude/docs/dprint-worktree-submodule-scope.md) ⚠️ dprint не видит границ worktree/submodule
 - [dprint-format-project-scope-not-file-scope](/.claude/docs/dprint-format-project-scope-not-file-scope.md) ⚠️ `--projects` задевает весь submodule с чужим WIP
 - [dprint-windows-bin-shim-missing](/.claude/docs/dprint-windows-bin-shim-missing.md) ⚠️ пропавший `.exe`-shim при целом пакете
