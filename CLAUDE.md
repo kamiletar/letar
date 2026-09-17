@@ -237,6 +237,7 @@
 - [docker-network-endpoint-corruption-diskfull](/.claude/docs/docker-network-endpoint-corruption-diskfull.md) ⚠️ полный диск рвёт endpoint: рестарт БД строго до приложения
 - [docker-prune-cold-layer-network-flake](/.claude/docs/docker-prune-cold-layer-network-flake.md) ⚠️ ночной prune → первый деплой после 04:00 идёт в сеть
 - [deploy-affected-cache-invalidation](/.claude/docs/deploy-affected-cache-invalidation.md) три причины холодного деплоя
+- [deploy-infra-no-git-pull-stale-checkout](/.claude/docs/deploy-infra-no-git-pull-stale-checkout.md) ⚠️ `deploy_infra` не пуллит git, ложный успех на устаревшем checkout
 - [deploy-affected-premigrate-dump-wrong-container](/.claude/docs/deploy-affected-premigrate-dump-wrong-container.md) ⚠️ pre-migrate dump резолвил не тот контейнер
 - [deploy-engine-rollout-proxy-kind-autodetect](/.claude/docs/deploy-engine-rollout-proxy-kind-autodetect.md) ⚠️ per-app label не поспевает за сменой прокси
 - [dotenvx-stdout-migration-pollution](/.claude/docs/dotenvx-stdout-migration-pollution.md) P3018
