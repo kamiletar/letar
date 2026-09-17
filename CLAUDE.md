@@ -110,6 +110,7 @@
 - [font-cmap-coverage-verification](/.claude/docs/font-cmap-coverage-verification.md) покрытие символов — разбором `cmap`, не описанием шрифта
 - [sharp-raw-composite-alpha-pitfall](/.claude/docs/sharp-raw-composite-alpha-pitfall.md) ⚠️ `composite()` тихо добавляет alpha-канал
 - [sharp-svg-textpath-not-rendered](/.claude/docs/sharp-svg-textpath-not-rendered.md) ⚠️ `<textPath>` не рендерится вовсе, без ошибки
+- [sharp-svg-font-family-ignored](/.claude/docs/sharp-svg-font-family-ignored.md) ⚠️ `font-family`/`@font-face` не влияют на растр — нужны контуры глифов
 - [gallery-pattern](/.claude/docs/gallery-pattern.md) Dropzone + SortablePhotoGrid
 - [period-navigation-pattern](/.claude/docs/period-navigation-pattern.md) навигация по периоду без JS
 - [data-flag-driving-ui](/.claude/docs/data-flag-driving-ui.md) ⚠️ `isDemo`/`isDraft` в условии рендера — контент не виден никогда
