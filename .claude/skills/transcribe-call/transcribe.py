@@ -70,7 +70,9 @@ def parse_timed_line(line: str):
 
 
 def part_paths(audio: Path, start_sec: float):
-    suffix = f".from{int(start_sec)}" if start_sec else ""
+    # Суффикс нужен и для старта с 0: иначе часть совпадает с итоговым файлом, и merge_parts
+    # обнуляет её открытием на запись раньше, чем прочитает
+    suffix = f".from{int(start_sec)}"
     return audio.with_suffix(f"{suffix}.timed.txt"), audio.with_suffix(f"{suffix}.txt")
 
 
@@ -175,11 +177,7 @@ def merge_parts(audio: Path, part_starts: list[float]) -> None:
                     marked = mark_hallucinations(text)
                     timed_out.write(f"[{fmt(s)} -> {fmt(e)}] {marked}\n")
                     plain_out.write(marked + "\n")
-    # Части, кроме первой (start_sec=0, совпадает с финальным файлом при отсутствии докрутки),
-    # больше не нужны — итог уже в final_timed/final_plain
     for start_sec in part_starts:
-        if start_sec == 0:
-            continue
         timed_path, plain_path = part_paths(audio, start_sec)
         timed_path.unlink(missing_ok=True)
         plain_path.unlink(missing_ok=True)
