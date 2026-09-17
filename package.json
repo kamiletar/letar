@@ -171,6 +171,7 @@
     "electron-updater": "^6.8.9",
     "fastify": "^5.12.4",
     "fetch-blob": "^4.0.0",
+    "fontkit": "^2.0.4",
     "formdata-polyfill": "^4.0.10",
     "framer-motion": "^13.3.0",
     "fts5-sql-bundle": "^1.0.2",
