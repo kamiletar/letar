@@ -98,6 +98,16 @@ export function Dropzone({
     }
   }, [disabled])
 
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLDivElement>) => {
+      if ((e.key === 'Enter' || e.key === ' ') && !disabled) {
+        e.preventDefault()
+        inputRef.current?.click()
+      }
+    },
+    [disabled],
+  )
+
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const { files } = e.target
@@ -130,10 +140,15 @@ export function Dropzone({
           borderColor: 'colorPalette.emphasized',
           bg: 'colorPalette.subtle',
         }}
+      role="button"
+      tabIndex={disabled ? -1 : 0}
+      aria-disabled={disabled}
+      _focusVisible={{ outline: '2px solid', outlineColor: 'colorPalette.solid', outlineOffset: '2px' }}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
       onClick={handleClick}
+      onKeyDown={handleKeyDown}
       {...boxProps}
     >
       <input
@@ -142,6 +157,7 @@ export function Dropzone({
         accept={accept}
         multiple={multiple}
         onChange={handleInputChange}
+        onClick={(e) => e.stopPropagation()}
         style={{ display: 'none' }}
         disabled={disabled}
       />
