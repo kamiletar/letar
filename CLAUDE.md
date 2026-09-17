@@ -31,6 +31,7 @@
 - [nx-vitest-plugin-worker-oom-shared-machine](/.claude/docs/nx-vitest-plugin-worker-oom-shared-machine.md) ⚠️ «Plugin worker exited» — это OOM, лечится `--max-old-space-size`
 - [nextjs-build-worker-count-oom-shared-host](/.claude/docs/nextjs-build-worker-count-oom-shared-host.md) ⚠️ OOM на «Collecting page data», фикс — `experimental.cpus`
 - [turbopack-build-filesystem-cache-oom](/.claude/docs/turbopack-build-filesystem-cache-oom.md) ⚠️ OOM на компиляции: сброшенный кеш Turbopack раздувает сборку кратно
+- [turbopack-dev-stale-parse-error-next-cache](/.claude/docs/turbopack-dev-stale-parse-error-next-cache.md) ⚠️ фантомная ошибка парсинга переживает рестарт `next dev`, лечит `rm -rf .next`
 - [nx-playwright-plugin-project-graph-race](/.claude/docs/nx-playwright-plugin-project-graph-race.md) ⚠️ гонка ESM-загрузчика, лечится повтором запуска
 - [nx-e2e-implicit-deps-public-repo-private-app-exception](/.claude/docs/nx-e2e-implicit-deps-public-repo-private-app-exception.md) ⚠️ часть e2e намеренно без `implicitDependencies`
 - [nx-cache-directory-env-not-isolated-by-cachedirectory](/.claude/docs/nx-cache-directory-env-not-isolated-by-cachedirectory.md) ⚠️ изоляция кеша требует и `NX_WORKSPACE_DATA_DIRECTORY`
