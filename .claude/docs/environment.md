@@ -81,7 +81,14 @@ cd C:\web\letar && nx lint driving-school
 - **Drag & Drop:** dnd-kit (core, sortable, utilities)
 - **Лайтбокс:** yet-another-react-lightbox 3.28.0
 - **Обрезка изображений:** react-easy-crop (для загрузки аватаров)
-- **DaData:** Автодополнение адресов для российских адресов
+- **DaData:** Автодополнение адресов для российских адресов. Публичный ключ **один на все
+  приложения**: `NEXT_PUBLIC_DADATA_TOKEN` (у `driving-school` исторически `NEXT_PUBLIC_DADATA_API_KEY`
+  с тем же значением). Новому приложению — скопировать значение из любого соседнего
+  `.env.docker`, не заводить свой. Правила как у любой `NEXT_PUBLIC_*`: в `.env.docker(.enc)`
+  **до сборки** и строкой в `docker-compose.production.yml` ([env-files](/.claude/rules/env-files.md)).
+  В форме — `<AppForm.Field.Address name="…" token={process.env.NEXT_PUBLIC_DADATA_TOKEN} valueOnly />`:
+  `valueOnly` отдаёт строку, поэтому поле ложится в обычную `String?`-колонку; без него значение —
+  объект `{ value, data }`.
 - **Виртуализация:** @tanstack/react-virtual 3.13.18 (эффективный рендеринг больших списков)
 
 ### Тестирование и качество
