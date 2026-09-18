@@ -57,12 +57,12 @@ export const PINNER3_PEER_ID = '12D3KooWP5hrqw8HHXUGaepSSRhsa8isoTAbcnRnKkjgHhWR
 export const PINNER3_ADDR = '/ip4/188.127.235.38/tcp/4001'
 
 /**
- * Pinner4 / Gateway (s3 188.127.235.141) — четвёртый пин-сервер + gateway.letar.best
+ * Pinner4 / Gateway (s3 185.130.251.234, с 2026-09-19; старый 188.127.235.141 отключён) — четвёртый пин-сервер + gateway.letar.best
  * Роль: долгосрочное хранение + IPFS gateway (CNAME gateway.letar.best → s3.letar.best)
  * Docker: /opt/pin-queue/, стандартные порты (4001 Swarm, 5001 API, 8080 Gateway)
  */
 export const PINNER4_PEER_ID = '12D3KooWM7KtRLjqRmJzva7Qy5KZzfaLES4Fk8GgnjabbWoo8A52'
-export const PINNER4_ADDR = '/ip4/188.127.235.141/tcp/4001'
+export const PINNER4_ADDR = '/ip4/185.130.251.234/tcp/4001'
 
 /**
  * Порты для embedded Kubo
@@ -233,7 +233,7 @@ export const KUBO_CONFIG = {
       // Pinner4 (s3) — gateway.letar.best + четвёртый пин-сервер
       {
         ID: PINNER4_PEER_ID,
-        Addrs: [PINNER4_ADDR, '/ip4/188.127.235.141/udp/4001/quic-v1'],
+        Addrs: [PINNER4_ADDR, '/ip4/185.130.251.234/udp/4001/quic-v1'],
       },
     ],
   },
