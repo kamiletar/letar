@@ -127,6 +127,16 @@ decrypt_glitchtip_sourcemaps_token() {
   [ -n "$GLITCHTIP_SOURCEMAPS_AUTH_TOKEN" ]
 }
 
+# Удаляет .js.map из .next/static, если их не удалось (или нельзя) выгрузить в GlitchTip.
+# ⚠️ Без этого карты уезжают в образ и отдаются сайтом публично (`/_next/static/**/*.js.map`,
+# 200 с исходниками): скрипт glitchtip-upload-sourcemaps.mjs чистит их только после УСПЕШНОЙ
+# загрузки. Найдено 2026-09-18 на domwellbes при недоступном GlitchTip.
+strip_public_sourcemaps() {
+  local removed
+  removed=$(find "$APP_DIR/.next/static" -name '*.js.map' -print -delete 2>/dev/null | wc -l)
+  echo -e "${YELLOW}🧹 Удалено .js.map из .next/static (не должны попасть в образ): ${removed}${NC}"
+}
+
 # Configuration
 BASE_BRANCH="main"
 WORKSPACE_ROOT=$(pwd)
@@ -1236,9 +1246,11 @@ for app in $AFFECTED_APPS; do
         echo -e "${GREEN}✅ Sourcemaps загружены${NC}"
       else
         echo -e "${YELLOW}⚠️  Загрузка sourcemaps не удалась — деплой продолжается без них${NC}"
+        strip_public_sourcemaps
       fi
     else
       echo -e "${YELLOW}⚠️  GLITCHTIP_SOURCEMAPS_AUTH_TOKEN недоступен — пропускаю загрузку sourcemaps${NC}"
+      strip_public_sourcemaps
     fi
   fi
 
