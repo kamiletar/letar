@@ -616,7 +616,7 @@
     },
     "apps/domwellbes": {
       "name": "@letar/domwellbes",
-      "version": "0.289.1",
+      "version": "0.290.0",
       "dependencies": {
         "@gltf-transform/core": "^4.5.0",
         "@gltf-transform/extensions": "^4.5.0",
@@ -754,7 +754,7 @@
     },
     "apps/form-docs": {
       "name": "form-docs",
-      "version": "0.6.11",
+      "version": "0.6.12",
       "dependencies": {
         "@letar/forms-core": "workspace:*",
         "@letar/glitchtip": "workspace:*",
@@ -1261,7 +1261,7 @@
     },
     "libs/forms": {
       "name": "@letar/forms",
-      "version": "2.14.20",
+      "version": "2.14.21",
       "dependencies": {
         "@letar/format-utils": "workspace:*",
         "@tanstack/react-table": "^9.2.4",
