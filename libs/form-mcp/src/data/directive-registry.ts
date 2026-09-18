@@ -74,6 +74,19 @@ const KNOWN_DIRECTIVES: DirectiveInfo[] = [
     output: '.meta({ ui: { fieldType: "combobox", relation: { labelField: "name", searchable: true } } })',
   },
   {
+    name: '@form.tooltip',
+    metaKey: 'form.tooltip.<title|description|impact|example>',
+    description:
+      '(?)-подсказка рядом с лейблом поля → ui.tooltip (то же, что поля читают из .meta({ ui: { tooltip } })). '
+      + 'Отдельно от form.description (та — текст под полем). Только плоский dot-path, по одному @meta на ключ. '
+      + 'description ОБЯЗАТЕЛЕН: без него подсказка не генерируется (предупреждение при zenstack generate), '
+      + 'как и неизвестный подключ (опечатка).',
+    example: '@meta("form.tooltip.title", "Цена") @meta("form.tooltip.description", "Цена в каталоге") '
+      + '@meta("form.tooltip.impact", "Влияет на сортировку и фильтр по цене")',
+    output: '.meta({ ui: { tooltip: { title: "Цена", description: "Цена в каталоге", '
+      + 'impact: "Влияет на сортировку и фильтр по цене" } } })',
+  },
+  {
     name: '@form.exclude',
     metaKey: 'form.exclude',
     description: 'Exclude field from generated form schemas',

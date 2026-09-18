@@ -6,9 +6,17 @@ import type { DocSection } from './loader.js'
 describe('buildDirectiveRegistry', () => {
   it('содержит все известные директивы без дополнительных секций', () => {
     const registry = buildDirectiveRegistry([])
-    expect(registry.size).toBe(7)
+    expect(registry.size).toBe(8)
     expect(registry.has('@form.title')).toBe(true)
+    expect(registry.has('@form.tooltip')).toBe(true)
     expect(registry.has('@form.exclude')).toBe(true)
+  })
+
+  it('form.tooltip описан с плоским dot-path и примером с обязательным description', () => {
+    const [tooltip] = getDirectives(buildDirectiveRegistry([]), 'tooltip')
+    expect(tooltip.metaKey).toBe('form.tooltip.<title|description|impact|example>')
+    expect(tooltip.example).toContain('@meta("form.tooltip.description"')
+    expect(tooltip.output).toContain('ui: { tooltip:')
   })
 
   it('дополняет описание известной директивы первой строкой секции документации', () => {
@@ -31,7 +39,7 @@ describe('buildDirectiveRegistry', () => {
     }
     const registry = buildDirectiveRegistry([section])
     expect(registry.has('@form.unknowndirective')).toBe(false)
-    expect(registry.size).toBe(7)
+    expect(registry.size).toBe(8)
   })
 
   it('секция без "@form." в заголовке не переопределяет описание', () => {
@@ -46,7 +54,7 @@ describe('buildDirectiveRegistry', () => {
 describe('getDirectives', () => {
   it('без имени возвращает все директивы', () => {
     const registry = buildDirectiveRegistry([])
-    expect(getDirectives(registry)).toHaveLength(7)
+    expect(getDirectives(registry)).toHaveLength(8)
   })
 
   it('находит директиву по полному имени с префиксом @form.', () => {

@@ -1,5 +1,12 @@
 # Changelog — @letar/form-mcp
 
+## 2.1.0 (2026-09-19)
+
+### Added
+
+- `get_directives`: директива `@form.tooltip` (`form.tooltip.<title|description|impact|example>`) —
+  (?)-подсказка поля → `ui.tooltip`, синхронно с `@letar/zenstack-form-plugin` 4.1.0.
+
 ## 2.0.0 (2026-09-16)
 
 ### Breaking
