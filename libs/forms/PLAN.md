@@ -53,7 +53,7 @@
 - **Заодно проверить:** `@meta("form.props.minorUnitScale", 100)` для `Field.Currency` в копейках
   доходит до поля в сгенерированной схеме.
 
-### [2026-09-19] `useUrlPrefill` — тот же дефект: `window.location` читается в `useMemo` (найдено при закрытии пункта ниже)
+### ✅ [2026-09-19] `useUrlPrefill` — тот же дефект: `window.location` читается в `useMemo` (закрыт v2.14.21, запросил forms-coordinator-dev по решению владельца)
 
 - **Запросил:** forms-dev (побочная находка, не запрос приложения).
 - **Приоритет:** normal — потребителей в репо только демо (`form-docs`, `form-example` `/url-prefill`).
@@ -62,7 +62,9 @@
   серверной разметкой (тот же механизм, что у `useFormUrlSync`, разбор в
   `.claude/docs/letar-forms-urlsync-window-read-in-render-hydration.md`). Другая семантика
   (prefill из маркетинговых ссылок, `cleanUrl`, валидация схемой), поэтому в фикс `useFormUrlSync` не вошёл.
-- **Статус:** ожидание — сначала выяснить, есть ли реальные SSR-потребители вне демо.
+- **Решение:** SSR и гидратация — `{}`, чтение URL один раз в `useEffect`; явный `searchParams` — синхронно.
+  Демо `form-docs`/`form-example` `/url-prefill` проверены вживую (в т.ч. `cleanUrl: true`).
+- **Статус:** ✅ закрыт (2.14.21).
 
 ### ✅ [2026-09-17] `useFormUrlSync` — Select-поле не подхватывает URL-параметр при полной перезагрузке (закрыт v2.14.20, от studio-dev)
 
@@ -2785,7 +2787,7 @@ inline-редактирование текста. Если `ReplaceValue` ока
         отдельная задача, требует UI-обвязки (страница-пример с рабочим server action для
         демонстрации reveal/replace), не покрывается точечной правкой.
 
-### [2026-08-20] Баг: Form.Field.TableEditor застревает в нераскрытом Suspense-boundary (от form-example)
+### ✅ [2026-08-20] Баг: Form.Field.TableEditor застревает в нераскрытом Suspense-boundary (закрыт v2.7.1, от form-example)
 
 - **Запросил:** repo-dev
 - **Приоритет:** high
@@ -2822,7 +2824,7 @@ inline-редактирование текста. Если `ReplaceValue` ока
   `@letar/forms-react` 0.3.0 → 0.3.1. `typecheck:tsgo`/`lint`/`test` зелёные на всех трёх
   пакетах (722 теста).
 
-### [2026-08-19] UX: NumberInput не очищал ведущий 0 при фокусе — исправлено
+### ✅ [2026-08-19] UX: NumberInput не очищал ведущий 0 при фокусе (закрыт v2.5.3, select-on-focus в `field-number*.tsx`)
 
 - **Запросил:** владелец монорепо (Kami), обнаружено вручную в форме тарифа перевозчика
   domwellbes (`create-carrier-tariff-form.tsx`, поле «Минимальный заказ»).
@@ -2837,7 +2839,7 @@ inline-редактирование текста. Если `ReplaceValue` ока
   Тесты на новое поведение добавлены в `field-number.spec.tsx` и `field-number-input.spec.tsx`.
 - **Статус:** ✅ исправлено напрямую (тривиальный локальный фикс, без делегации).
 
-### [2026-08-19] Баг: Field.Date отдаёт string в onSubmit даже при z.coerce.date() (от domwellbes)
+### ✅ [2026-08-19] Баг: Field.Date отдаёт string в onSubmit даже при z.coerce.date() (закрыт v2.6.0, уточнён v2.14.17, от domwellbes)
 
 - **Запросил:** domwellbes-relay
 - **Приоритет:** high
@@ -2854,6 +2856,9 @@ inline-редактирование текста. Если `ReplaceValue` ока
 - **Статус:** ✅ исправлено 2026-08-19 (v2.6.0). `onChange` теперь коммитит `new Date(raw)`
   (или `undefined` при пустом значении) вместо сырой строки из `<input type=date>` — рантайм
   синхронизирован с выведенным TS-типом (`Date`). Уведомление `domwellbes-relay` отправлено.
+  **Уточнение (v2.14.17, проверено по коду 2026-09-19):** `Date` коммитится только когда схема реально
+  требует его (`constraints.schemaType === 'date'`, флаг `requiresDateValue` в `field-date.tsx`),
+  иначе строка `YYYY-MM-DD` — иначе ломались схемы без `z.date()`.
 
 ### [2026-08-19] Баг: пост-сабмит reset(dataToSubmit) перетирает поле stale initialValue (от domwellbes)
 

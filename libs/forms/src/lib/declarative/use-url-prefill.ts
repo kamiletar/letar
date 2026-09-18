@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 /**
  * Опции для useUrlPrefill
@@ -23,6 +23,10 @@ export interface UrlPrefillOptions {
  *
  * Безопасность: работает ТОЛЬКО с whitelist полей.
  * Без указания `fields` — не извлечёт ни одного параметра.
+ *
+ * SSR-безопасность: при чтении из `window.location` первый рендер (сервер и гидратация)
+ * возвращает `{}`, значения из URL появляются после маунта — иначе первый клиентский рендер
+ * расходится с SSR-разметкой. С явным `options.searchParams` значения считаются синхронно.
  *
  * @returns Partial объект с извлечёнными значениями
  *
@@ -50,16 +54,37 @@ export interface UrlPrefillOptions {
 export function useUrlPrefill(options: UrlPrefillOptions): Record<string, unknown> {
   const { fields, mapping, cleanUrl, schema, searchParams: customSearchParams } = options
 
-  const result = useMemo(() => {
-    const params = customSearchParams ?? getSearchParams()
-    if (!params) {
-      return {}
+  // Явный `searchParams` не зависит от window — считаем синхронно, лишний ре-рендер не нужен
+  const explicitResult = useMemo(
+    () => (customSearchParams ? extractParams(customSearchParams, fields, mapping, schema) : null),
+    [fields, mapping, schema, customSearchParams],
+  )
+
+  // Значения из window.location: SSR и первый клиентский (гидратационный) рендер отдают {},
+  // чтение URL — в эффекте после маунта. Читать window в рендере нельзя: разметка расходится
+  // с SSR (recoverable hydration error). Читаем один раз: inline `fields` меняется на каждом
+  // рендере, а при `cleanUrl` параметры из URL к тому моменту уже удалены.
+  const [urlResult, setUrlResult] = useState<Record<string, unknown>>({})
+
+  useEffect(() => {
+    if (customSearchParams) {
+      return
     }
+    const params = getSearchParams()
+    if (!params) {
+      return
+    }
+    const extracted = extractParams(params, fields, mapping, schema)
+    if (Object.keys(extracted).length > 0) {
+      setUrlResult(extracted)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
-    return extractParams(params, fields, mapping, schema)
-  }, [fields, mapping, schema, customSearchParams])
+  const result = explicitResult ?? urlResult
 
-  // Очистка URL
+  // Очистка URL — срабатывает на рендере, где result уже применён, поэтому раньше чтения
+  // (эффект выше) параметры не стираются
   useEffect(() => {
     if (cleanUrl && typeof window !== 'undefined' && Object.keys(result).length > 0) {
       const url = new URL(window.location.href)
