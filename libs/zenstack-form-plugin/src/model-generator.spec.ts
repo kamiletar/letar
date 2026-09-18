@@ -944,6 +944,17 @@ describe('generateModelCode', () => {
     expect(code).toMatch(/name: z\.string\(\)(?!\.min)/)
   })
 
+  it('экранирует апостроф в строковом default-значении', () => {
+    const modelInfo: ModelInfo = {
+      name: 'Product',
+      excludedFields: [],
+      fields: [field({ name: 'label', type: 'String', defaultValue: `d'or` })],
+    }
+
+    const code = generateModelCode(modelInfo, new Set())
+    expect(code).toContain(`label: z.string().default('d\\'or')`)
+  })
+
   it('генерирует default-значения разных типов', () => {
     const modelInfo: ModelInfo = {
       name: 'Product',
@@ -993,6 +1004,25 @@ describe('generateModelCode', () => {
     expect(code).toContain(`placeholder: 'Введите'`)
     expect(code).toContain(`description: 'Помощь'`)
     expect(code).toContain(`fieldType: 'text'`)
+  })
+
+  it('экранирует апостроф, обратный слэш и перевод строки в title/placeholder/description', () => {
+    const modelInfo: ModelInfo = {
+      name: 'Product',
+      excludedFields: [],
+      fields: [
+        field({
+          name: 'name',
+          type: 'String',
+          formMeta: { title: `Prix d'or`, placeholder: 'C:\\temp', description: 'Строка 1\nСтрока 2' },
+        }),
+      ],
+    }
+
+    const code = generateModelCode(modelInfo, new Set())
+    expect(code).toContain(`title: 'Prix d\\'or'`)
+    expect(code).toContain(`placeholder: 'C:\\\\temp'`)
+    expect(code).toContain(`description: 'Строка 1\\nСтрока 2'`)
   })
 
   it('не добавляет .meta() блок, если formMeta пуст', () => {

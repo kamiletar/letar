@@ -60,6 +60,12 @@ describe('generateEnumCode', () => {
     expect(code).not.toContain('i18nKey')
   })
 
+  it('экранирует апостроф и обратный слэш в label', () => {
+    const code = generateEnumCode({ name: 'Status', values: [{ name: 'WONT_FIX', label: `Won't fix \\ later` }] })
+    expect(code).toContain(`label: 'Won\\'t fix \\\\ later'`)
+    expect(code).toContain(`WONT_FIX: 'Won\\'t fix \\\\ later'`)
+  })
+
   it('добавляет i18nKey в options, когда i18n включён', () => {
     const i18nConfig: I18nConfig = {
       enabled: true,

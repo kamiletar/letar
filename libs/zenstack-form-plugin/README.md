@@ -592,5 +592,5 @@ MCP сервер [`@letar/form-mcp`](../form-mcp/README.md) предоставл
 
 ## Версия
 
-Текущая версия — **4.1.0** (`form.tooltip.*`; синтаксис `@meta("form.*", value)` — единственный с
+Текущая версия — **4.1.1** (`form.tooltip.*`; синтаксис `@meta("form.*", value)` — единственный с
 v4.0.0). Полная история — в [package.json](package.json) и [CHANGELOG.md](CHANGELOG.md).

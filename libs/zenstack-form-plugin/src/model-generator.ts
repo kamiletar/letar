@@ -7,6 +7,7 @@ import type {
   TypeDef,
 } from '@zenstackhq/language/ast'
 import { findUnknownMetaFormPaths, parseMetaAttributes } from './parser.js'
+import { quoteTsString } from './ts-literal.js'
 import type {
   FormFieldMeta,
   I18nConfig,
@@ -871,7 +872,7 @@ function generateZodType(field: ModelFieldInfo, _enumNames: Set<string>): string
   if (field.defaultValue !== undefined) {
     let defaultStr: string
     if (typeof field.defaultValue === 'string') {
-      defaultStr = `'${field.defaultValue}'`
+      defaultStr = quoteTsString(field.defaultValue)
     } else if (typeof field.defaultValue === 'boolean') {
       defaultStr = String(field.defaultValue)
     } else if (typeof field.defaultValue === 'number') {
@@ -908,13 +909,13 @@ function generateUIMeta(params: GenerateUIMetaParams): string | null {
   const parts: string[] = []
 
   if (formMeta.title) {
-    parts.push(`title: '${formMeta.title}'`)
+    parts.push(`title: ${quoteTsString(formMeta.title)}`)
   }
   if (formMeta.placeholder) {
-    parts.push(`placeholder: '${formMeta.placeholder}'`)
+    parts.push(`placeholder: ${quoteTsString(formMeta.placeholder)}`)
   }
   if (formMeta.description) {
-    parts.push(`description: '${formMeta.description}'`)
+    parts.push(`description: ${quoteTsString(formMeta.description)}`)
   }
   if (formMeta.fieldType) {
     parts.push(`fieldType: '${formMeta.fieldType}'`)
