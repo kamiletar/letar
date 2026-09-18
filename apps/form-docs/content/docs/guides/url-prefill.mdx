@@ -87,6 +87,8 @@ const url = generatePrefillUrl('/contact', {
 | `schema`       | `ZodSchema`              | —        | Validate extracted values                |
 | `searchParams` | `URLSearchParams`        | auto     | Custom source (default: window.location) |
 
+When reading from `window.location`, the first render (server and hydration) returns `{}` and the URL values appear right after mount, so the client tree matches the server markup. With an explicit `searchParams` the values are computed synchronously.
+
 ---
 
 ## Live Example

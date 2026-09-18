@@ -2,6 +2,14 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.6.12] - 2026-09-19
+
+### Changed
+
+- Гайд `url-prefill` (en/ru): оговорка про SSR — при чтении из `window.location` первый рендер
+  возвращает `{}`, значения из URL применяются после маунта (`@letar/forms` 2.14.21); с явным
+  `searchParams` считаются синхронно. Демо `/demo/url-prefill` проверено вживую (`cleanUrl: true`).
+
 ## [0.6.11] - 2026-09-19
 
 ### Fixed
