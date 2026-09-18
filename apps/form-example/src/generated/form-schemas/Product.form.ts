@@ -27,7 +27,7 @@ export const ProductCreateFormSchema = z.object({
     }),
   price: z.number().min(0)
     .meta({
-      ui: { title: 'Price', fieldType: 'currency' }
+      ui: { title: 'Price', fieldType: 'currency', tooltip: {"title":"Price","description":"Price in the store catalog, shown to customers.","impact":"Affects sorting and the price filter."} }
     }),
   status: StatusFormSchema
     .meta({

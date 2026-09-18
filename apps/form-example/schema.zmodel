@@ -56,7 +56,7 @@ model Product {
 
   description String? @meta("form.title", "Description") @meta("form.fieldType", "textarea") @meta("form.placeholder", "Product description...")
 
-  price       Float @meta("form.title", "Price") @meta("form.fieldType", "currency") @meta("form.props.min", 0)
+  price       Float @meta("form.title", "Price") @meta("form.fieldType", "currency") @meta("form.props.min", 0) @meta("form.tooltip.title", "Price") @meta("form.tooltip.description", "Price in the store catalog, shown to customers.") @meta("form.tooltip.impact", "Affects sorting and the price filter.")
 
   status      Status   @default(DRAFT) @meta("form.title", "Status")
 

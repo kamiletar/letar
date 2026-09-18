@@ -2,6 +2,13 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.1.22] - 2026-09-19
+
+### Added
+
+- `examples/zenstack`: поле «Price» получило `@meta("form.tooltip.*")` в `schema.zmodel` — (?)-подсказка
+  из сгенерированной схемы (`@letar/zenstack-form-plugin` 4.1.0), пересобран `Product.form.ts`.
+
 ## [0.1.21] - 2026-09-14
 
 ### Added

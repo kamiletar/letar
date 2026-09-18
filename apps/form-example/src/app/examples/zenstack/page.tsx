@@ -14,7 +14,8 @@ export default function ZenstackPage() {
         <Text color="fg.muted">
           Schemas generated from <Code>schema.zmodel</Code> with{' '}
           <Code>@letar/zenstack-form-plugin</Code>. Both forms below are built entirely from generated code — not a
-          single line of hand-written Zod.
+          single line of hand-written Zod. The (?) icon next to “Price” comes from
+          <Code>@meta(&quot;form.tooltip.*&quot;)</Code> in the schema.
         </Text>
       </div>
 
