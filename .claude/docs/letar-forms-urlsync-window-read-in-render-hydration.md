@@ -1,7 +1,7 @@
-# `useFormUrlSync`: чтение `window.location` в рендере расходится с SSR
+# `useFormUrlSync` и `useUrlPrefill`: чтение `window.location` в рендере расходится с SSR
 
 Найдено 2026-09-17 на `apps/studio` (фильтры `billable`/`status`/`kind` через `StudioForm.UrlSync`),
-исправлено в `@letar/forms` 2.14.20.
+исправлено в `@letar/forms` 2.14.20 (`useFormUrlSync`) и 2.14.21 (`useUrlPrefill`).
 
 ## Симптом
 
@@ -69,9 +69,21 @@ const initialValue = urlOverrides ? { ...defaults, ...urlOverrides } : defaults
 - [letar-forms-urlsync-missing-router-no-rsc-refetch](/.claude/docs/letar-forms-urlsync-missing-router-no-rsc-refetch.md) —
   `UrlSync` без `router` меняет URL, но не перезапрашивает RSC-данные.
 
-## ⚠️ Не исправлено: `useUrlPrefill` — тот же дефект
+## Второй хук: `useUrlPrefill` (2.14.21)
 
-`useUrlPrefill` (`libs/forms/src/lib/declarative/use-url-prefill.ts`) читает `window.location.search`
-внутри `useMemo` — та же ловушка на SSR-странице. Другой хук с другой семантикой (prefill из
-маркетинговых ссылок, `cleanUrl`), в запрос studio не входил — вынесено отдельным пунктом в
-`libs/forms/PLAN.md`. Потребители в репо: демо `form-docs` и `form-example`.
+Тот же дефект: `getSearchParams()` читал `window.location.search` внутри `useMemo`. Фикс по тому же
+образцу, но с двумя отличиями от `useFormUrlSync`:
+
+- **Явный `options.searchParams` считается синхронно** (`useMemo`, без эффекта): он не зависит от
+  `window`, гидратация не расходится, лишний ре-рендер не нужен.
+- **URL читается ровно один раз** (`useEffect(..., [])`). У хука есть `cleanUrl`, который удаляет
+  извлечённые параметры из адреса, а потребители передают `fields` литералом — повторное чтение по
+  меняющейся идентичности массива нашло бы уже очищенный URL и затёрло бы значение пустым `{}`.
+
+Порядок эффектов при `cleanUrl`: эффект чтения объявлен раньше эффекта очистки. На первом коммите
+очистка видит пустой результат и ничего не делает; параметры удаляются на следующем рендере, когда
+результат уже применён, — раньше, чем прочитаны, они стереться не могут.
+
+Проверено живьём: `form-example` `/examples/url-prefill?name=…&email=…` и `form-docs`
+`/demo/url-prefill?name=…&email=…&keep=1` (`cleanUrl: true` убрал `name`/`email`, оставил `keep`,
+значения в полях на месте, hydration-ошибок нет).
