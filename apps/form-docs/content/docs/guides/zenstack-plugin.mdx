@@ -71,7 +71,7 @@ literals are rejected.
 
 `form.tooltip.<title|description|impact|example>` puts a (?) icon next to the label — the same `ui.tooltip` the fields already read. It is separate from `form.description`, which renders as text under the field.
 
-```zmodel
+```prisma
 price Int
   @meta("form.title", "Price")
   @meta("form.tooltip.description", "Price in the store catalog")

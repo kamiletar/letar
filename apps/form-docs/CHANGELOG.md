@@ -2,6 +2,14 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.6.11] - 2026-09-19
+
+### Fixed
+
+- `zenstack-plugin.mdx`/`.ru.mdx`: блок схемы с `form.tooltip.*` был помечен `` ```zmodel ``, а Shiki
+  этого языка не знает — `nx build` падал с `ShikiError: Language zmodel not found`. Заменён на
+  `` ```prisma ``, как остальные схемы страницы (правка 0.6.10).
+
 ## [0.6.10] - 2026-09-19
 
 ### Added
