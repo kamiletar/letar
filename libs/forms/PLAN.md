@@ -6,6 +6,19 @@
 
 ## Backlog (запросы от агентов)
 
+### [2026-09-19] Директивы подсказки поля `@meta("form.tooltip.*")` в `zenstack-form-plugin` (от domwellbes-dev)
+
+- **Запросил:** `domwellbes-dev` (через файл: `forms-coordinator-dev` сейчас retired, письмо не доставлено).
+- **Приоритет:** high — блокирует переход приложения с ручных Zod-схем на схемы из `schema.zmodel`.
+- **Что нужно:** плоские ключи `form.tooltip.title` / `form.tooltip.description` / `form.tooltip.impact`,
+  результат в схеме — `.meta({ ui: { tooltip: { title, description, impact } } })` (то же `ui.tooltip`,
+  что поля читают сегодня).
+- **Зачем:** в приложении ~50 ручных `_schemas/*.schema.ts` держат `tooltip` у каждого поля («на что
+  влияет»). `get_directives` его не знает — при переходе на генерацию приходится терять подсказку или
+  ужимать до `form.description` (так сделан справочник поставщиков — пилот).
+- **Заодно проверить:** `@meta("form.props.minorUnitScale", 100)` для `Field.Currency` в копейках
+  доходит до поля в сгенерированной схеме.
+
 ### [2026-09-17] `useFormUrlSync` — Select-поле не подхватывает URL-параметр при полной перезагрузке (от studio-dev)
 
 - **Запросил:** studio-dev (`apps/studio/src/app/(owner)/owner/time/_components/time-entries-infinite-table.tsx`,
