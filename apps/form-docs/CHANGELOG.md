@@ -2,6 +2,13 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.6.9] - 2026-09-19
+
+### Changed
+
+- `guides/filters-state` (ru/en): оговорка, что `useFormUrlSync` применяет значения из URL после
+  маунта, а первый рендер отдаёт `defaults` (`@letar/forms` 2.14.20).
+
 ## [0.6.8] - 2026-09-09
 
 ### Added

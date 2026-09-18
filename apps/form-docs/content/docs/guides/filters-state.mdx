@@ -127,6 +127,13 @@ Filters should survive page reload and be shareable via link.
 
 ### Read from URL on mount
 
+> **URL values are applied after mount.** `useFormUrlSync` (the companion of `Form.UrlSync`)
+> always returns `defaults` on the first render — both the server one and the hydration one — and
+> applies URL values in a `useEffect` (`@letar/forms` 2.14.20+). Otherwise the client markup
+> diverges from SSR and a Select/Combobox stays on the wrong value. A full page load may show a
+> brief (sub-frame) flash of the default. Don't read `window.location` during render next to a
+> form — only inside `useEffect`.
+
 ```tsx
 import { useUrlPrefill } from '@letar/forms'
 
