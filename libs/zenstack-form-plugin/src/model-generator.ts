@@ -792,13 +792,13 @@ function generateConstraints(constraints: ZodConstraints | undefined, prismaType
     // нативного атрибута тем же ключом): собственно нативные @startsWith/.../@upper идут через
     // ZodUtils.* в generateZodType, здесь дублируются только вручную заданные в @form.props.
     if (constraints.startsWith !== undefined) {
-      parts.push(`.startsWith('${constraints.startsWith}')`)
+      parts.push(`.startsWith(${quoteTsString(constraints.startsWith)})`)
     }
     if (constraints.endsWith !== undefined) {
-      parts.push(`.endsWith('${constraints.endsWith}')`)
+      parts.push(`.endsWith(${quoteTsString(constraints.endsWith)})`)
     }
     if (constraints.contains !== undefined) {
-      parts.push(`.includes('${constraints.contains}')`)
+      parts.push(`.includes(${quoteTsString(constraints.contains)})`)
     }
     if (constraints.datetime) {
       parts.push('.datetime()')
@@ -918,7 +918,7 @@ function generateUIMeta(params: GenerateUIMetaParams): string | null {
     parts.push(`description: ${quoteTsString(formMeta.description)}`)
   }
   if (formMeta.fieldType) {
-    parts.push(`fieldType: '${formMeta.fieldType}'`)
+    parts.push(`fieldType: ${quoteTsString(formMeta.fieldType)}`)
   }
   if (formMeta.props) {
     parts.push(`fieldProps: ${JSON.stringify(formMeta.props)}`)

@@ -1025,6 +1025,55 @@ describe('generateModelCode', () => {
     expect(code).toContain(`description: 'Строка 1\\nСтрока 2'`)
   })
 
+  it('экранирует апостроф и обратный слэш в constraints startsWith/endsWith/contains', () => {
+    const modelInfo: ModelInfo = {
+      name: 'Product',
+      excludedFields: [],
+      fields: [
+        field({
+          name: 'name',
+          type: 'String',
+          formMeta: { constraints: { startsWith: `d'or`, endsWith: 'C:\\', contains: 'a\nb' } },
+        }),
+      ],
+    }
+
+    const code = generateModelCode(modelInfo, new Set())
+    expect(code).toContain(`.startsWith('d\\'or')`)
+    expect(code).toContain(`.endsWith('C:\\\\')`)
+    expect(code).toContain(`.includes('a\\nb')`)
+  })
+
+  it('обычный текст в constraints startsWith/endsWith/contains остаётся как был', () => {
+    const modelInfo: ModelInfo = {
+      name: 'Product',
+      excludedFields: [],
+      fields: [
+        field({
+          name: 'name',
+          type: 'String',
+          formMeta: { constraints: { startsWith: 'usr-', endsWith: '.pdf', contains: 'привет' } },
+        }),
+      ],
+    }
+
+    const code = generateModelCode(modelInfo, new Set())
+    expect(code).toContain(`.startsWith('usr-')`)
+    expect(code).toContain(`.endsWith('.pdf')`)
+    expect(code).toContain(`.includes('привет')`)
+  })
+
+  it('экранирует апостроф в fieldType', () => {
+    const modelInfo: ModelInfo = {
+      name: 'Product',
+      excludedFields: [],
+      fields: [field({ name: 'name', type: 'String', formMeta: { fieldType: `it's` } })],
+    }
+
+    const code = generateModelCode(modelInfo, new Set())
+    expect(code).toContain(`fieldType: 'it\\'s'`)
+  })
+
   it('не добавляет .meta() блок, если formMeta пуст', () => {
     const modelInfo: ModelInfo = {
       name: 'Product',
