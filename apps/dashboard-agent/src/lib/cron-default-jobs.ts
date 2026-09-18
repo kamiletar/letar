@@ -356,7 +356,7 @@ export const DEFAULT_CRON_JOBS: CronJob[] = [
     // Официальная рекомендация Docker — не пушить в registry во время garbage-collect (race с
     // конкурентным push), окно низкой нагрузки закрывает и это (см. scripts/registry-gc.sh).
     schedule: '50 4 * * *',
-    description: 'Удаляет SHA-теги registry.s3.letar.best старше REGISTRY_GC_KEEP_TAGS (по умолчанию 3) '
+    description: 'Удаляет SHA-теги registry.s1.letar.best старше REGISTRY_GC_KEEP_TAGS (по умолчанию 3) '
       + 'через registry API, затем `garbage-collect` внутри контейнера registry — TS-порт '
       + 'scripts/registry-gc.sh (infra/registry/README.md § «Ретеншн тегов», PLAN-INFRA-6.md §157)',
     enabled: true,

@@ -29,7 +29,7 @@ services:
       # Маршрут описан здесь, а не в SQLite внутри NPM, — ради этого и затевался §48.
       traefik.enable: 'true'
       traefik.docker.network: 'traefik-network'
-      traefik.http.routers.pravda-stage.rule: 'Host(`pravda-stage.s3.letar.best`)'
+      traefik.http.routers.pravda-stage.rule: 'Host(`pravda-stage.s1.letar.best`)'
       traefik.http.routers.pravda-stage.entrypoints: 'websecure'
       # ⛔ Без `certresolver` — сертификат уже выпущен (wildcard `*.s3.letar.best`), роутер его
       # только использует. Свой резолвер здесь заказал бы точечный сертификат на это имя и

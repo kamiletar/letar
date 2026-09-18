@@ -4,7 +4,7 @@ import type { MetadataRoute } from 'next'
 const PRODUCTION_URL = 'https://time.letar.best'
 
 export default function robots(): MetadataRoute.Robots {
-  // На staging (time-stage.s3.letar.best) и в dev — закрываем индексацию полностью
+  // На staging (time-stage.s1.letar.best) и в dev — закрываем индексацию полностью
   if (!isProductionDomain(PRODUCTION_URL)) {
     return {
       rules: { userAgent: '*', disallow: '/' },

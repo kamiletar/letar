@@ -39,16 +39,16 @@ docker logs registry --tail 30
 
 ```bash
 # С машины с доступом к паролю (KeePassXC → "letar registry basic-auth" или где сохранён):
-docker login registry.s3.letar.best -u admin
+docker login registry.s1.letar.best -u admin
 # пуш тестового образа
 docker pull hello-world
-docker tag hello-world registry.s3.letar.best/hello-world:smoke
-docker push registry.s3.letar.best/hello-world:smoke
-docker pull registry.s3.letar.best/hello-world:smoke
+docker tag hello-world registry.s1.letar.best/hello-world:smoke
+docker push registry.s1.letar.best/hello-world:smoke
+docker pull registry.s1.letar.best/hello-world:smoke
 ```
 
 Без basic-auth ожидаемо `401 Unauthorized` на `docker login` без `-u`/пароля и на прямой
-`curl https://registry.s3.letar.best/v2/_catalog` без `-u`.
+`curl https://registry.s1.letar.best/v2/_catalog` без `-u`.
 
 ## Ретеншн тегов
 

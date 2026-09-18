@@ -138,5 +138,5 @@ POST-тело — `{accept, scope?, claims?, oauth_query}` (не `{consent_code,
 
 Полная цепочка `authorize → consent → token → userinfo` проверена дважды:
 локально (dev-сервер auth-hub, throwaway OIDC-клиент, `access_token`/`refresh_token`/`id_token`
-выпущены корректно) и на проде (owner вошёл в `studio-stage.s3.letar.best` через Ключницу
+выпущены корректно) и на проде (owner вошёл в `studio-stage.s1.letar.best` через Ключницу
 впервые с момента миграции `a8efcc72`).

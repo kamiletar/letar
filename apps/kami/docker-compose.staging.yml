@@ -51,7 +51,7 @@ services:
       # ⚠️ Реальный публичный домен, не localhost — kami/auth.ts (createAuth mode: 'hub-client')
       # не задаёт свой trustedOrigins, Better Auth по умолчанию доверяет только Origin,
       # совпадающему с baseURL; тот же класс бага, что на mandala/aboi (PLAN.md §18.7).
-      BETTER_AUTH_URL: https://kami-stage.s3.letar.best
+      BETTER_AUTH_URL: https://kami-stage.s1.letar.best
     volumes:
       - ./uploads:/app/apps/kami/uploads
     depends_on:
@@ -63,7 +63,7 @@ services:
     labels:
       traefik.enable: 'true'
       traefik.docker.network: 'traefik-network'
-      traefik.http.routers.kami-stage.rule: 'Host(`kami-stage.s3.letar.best`)'
+      traefik.http.routers.kami-stage.rule: 'Host(`kami-stage.s1.letar.best`)'
       traefik.http.routers.kami-stage.entrypoints: 'websecure'
       # ⛔ Без `certresolver` — сертификат уже выпущен (wildcard `*.s3.letar.best`), роутер его
       # только использует.

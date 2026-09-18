@@ -32,7 +32,7 @@
 
 set -euo pipefail
 
-REGISTRY_URL="${REGISTRY_URL:-https://registry.s3.letar.best}"
+REGISTRY_URL="${REGISTRY_URL:-https://registry.s1.letar.best}"
 REGISTRY_USER="${REGISTRY_USER:?REGISTRY_USER не задан}"
 REGISTRY_PASS="${REGISTRY_PASS:?REGISTRY_PASS не задан}"
 KEEP_TAGS="${KEEP_TAGS:-3}"

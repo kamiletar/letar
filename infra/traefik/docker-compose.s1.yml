@@ -1,15 +1,18 @@
 # Traefik — прокси для s1 (сборочный сервер: staging-контейнеры, registry, e2e).
 #
 # s1 — новый сервер (185.56.162.213, тот же хостер, что и s2). Появился при разносе старого s3
-# 2026-09-19: `*.s3.letar.best` (staging-домены и registry) переехал сюда, а сам `s3.letar.best`
-# остался хранилищем + media + IPFS на другом сервере (docker-compose.yml рядом).
+# 2026-09-19: staging-домены и registry переименованы из `*.s3.letar.best` в `*.s1.letar.best` и
+# живут здесь, а `s3.letar.best` (включая `errors.s3`, `pin1.s3`) остался хранилищем + media + IPFS
+# на другом сервере (docker-compose.yml рядом).
 #
 # Отличия от docker-compose.yml (s3):
 #   * нет сети `letar-ipfs_default` — kubo здесь нет;
+#   * `./traefik.s1.yml` вместо общего `traefik.yml`: домен wildcard — `*.s1.letar.best`;
 #   * `./dynamic/s1` вместо `./dynamic`: маршрутов ipfs/pin1 тут быть не должно, иначе этот
 #     сервер тоже начнёт заказывать сертификат `ipfs.letar.best` (лишний ключ на сервере, где
 #     ему делать нечего);
-#   * в `/home/deploy/lego` кладём ТОЛЬКО ключ `s3.letar.best` — per-name аккаунты `media` и
+#   * в `/home/deploy/lego` кладём ТОЛЬКО ключ `s1.letar.best` (тот же acme-dns аккаунт, что у `s3.letar.best`: CNAME
+#     `_acme-challenge.s1` указывает на тот же fulldomain) — per-name аккаунты `media` и
 #     `ipfs` остаются на s3 (README, «Учётные данные acme-dns»).
 #
 # Запуск: DEPLOY_SERVER_NAME=s1 scripts/deploy-infra.sh traefik (hostname s1 не совпадает с
@@ -31,7 +34,7 @@ services:
       ACME_DNS_STORAGE_PATH: '/acme-data/acme-dns-accounts.json'
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./traefik.yml:/etc/traefik/traefik.yml:ro
+      - ./traefik.s1.yml:/etc/traefik/traefik.yml:ro
       - ./dynamic/s1:/etc/traefik/dynamic:ro
       - ./auth:/etc/traefik/auth:ro # basicAuth дашборда и registry, не в git
       - ./acme:/acme # acme.json с приватными ключами, не в git

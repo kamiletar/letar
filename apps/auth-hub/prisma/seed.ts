@@ -63,8 +63,8 @@ const clients = [
       // Staging (PLAN.md §18.7 Тираж M) — тот же клиент, отдельного staging-инстанса Ключницы
       // нет, только дополнительный redirect URI. Один лейбл (time-stage), под wildcard
       // `*.s3 CNAME s3.letar.best`.
-      'https://time-stage.s3.letar.best/api/auth/callback/letar-auth',
-      'https://time-stage.s3.letar.best/',
+      'https://time-stage.s1.letar.best/api/auth/callback/letar-auth',
+      'https://time-stage.s1.letar.best/',
     ].join(','),
   },
   {
@@ -81,8 +81,8 @@ const clients = [
       // Staging на s3 (PLAN.md §18 Сессия D) — реальный HTTPS-домен, максимально близко к проду.
       // Один лейбл (grandslamcup-stage), не два (grandslamcup.stage) — попадает под существующий
       // DNS-wildcard `*.s3 CNAME s3.letar.best`, новая DNS-запись не нужна.
-      'https://grandslamcup-stage.s3.letar.best/api/auth/callback/letar-auth',
-      'https://grandslamcup-stage.s3.letar.best/sign-in',
+      'https://grandslamcup-stage.s1.letar.best/api/auth/callback/letar-auth',
+      'https://grandslamcup-stage.s1.letar.best/sign-in',
     ].join(','),
   },
   {
@@ -143,8 +143,8 @@ const clients = [
       'http://localhost:3024/sign-in',
       // Staging на s3 — тот же клиент, отдельного staging-инстанса Ключницы нет, только
       // дополнительный redirect URI (образец — time-prod/aprel8008-prod выше).
-      'https://studio-stage.s3.letar.best/api/auth/callback/letar-auth',
-      'https://studio-stage.s3.letar.best/sign-in',
+      'https://studio-stage.s1.letar.best/api/auth/callback/letar-auth',
+      'https://studio-stage.s1.letar.best/sign-in',
     ].join(','),
   },
   {
@@ -174,8 +174,8 @@ const clients = [
       // Staging (PLAN.md §18.7 Тираж M1) — тот же клиент, отдельного staging-инстанса Ключницы
       // нет, только дополнительный redirect URI. Один лейбл (aprel8008-stage), под wildcard
       // `*.s3 CNAME s3.letar.best`.
-      'https://aprel8008-stage.s3.letar.best/api/auth/callback/letar-auth',
-      'https://aprel8008-stage.s3.letar.best/sign-in',
+      'https://aprel8008-stage.s1.letar.best/api/auth/callback/letar-auth',
+      'https://aprel8008-stage.s1.letar.best/sign-in',
     ].join(','),
   },
 ]

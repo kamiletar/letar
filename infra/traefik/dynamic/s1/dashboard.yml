@@ -10,7 +10,7 @@
 http:
   routers:
     dashboard:
-      rule: 'Host(`traefik.s3.letar.best`)'
+      rule: 'Host(`traefik.s1.letar.best`)'
       entryPoints:
         - websecure
       service: 'api@internal'
@@ -19,9 +19,9 @@ http:
       # ⚠️ `domains` обязателен, и это ГЛАВНОЕ здесь.
       #
       # Опасно не само наличие `certResolver`, а его наличие БЕЗ `domains`: тогда роутер
-      # заказывает сертификат ровно на своё правило Host — на `traefik.s3.letar.best`.
+      # заказывает сертификат ровно на своё правило Host — на `traefik.s1.letar.best`.
       # Провайдер acme-dns не найдёт в хранилище ключа под это точечное имя (там только
-      # `s3.letar.best`), полезет регистрировать новый аккаунт и получит `404` — регистрация
+      # `s1.letar.best`), полезет регистрировать новый аккаунт и получит `404` — регистрация
       # закрыта, и правильно закрыта.
       #
       # Пустой `tls: {}` в расчёте на наследование `entryPoints.websecure.http.tls.domains`
@@ -29,16 +29,16 @@ http:
       # wildcard ни при старте, ни по реальному TLS-handshake с нужным SNI (отдавал
       # self-signed по умолчанию, в логе — ни одной попытки ACME).
       #
-      # ⚠️ Этот роутер — единственный заказчик wildcard на s3. Роутеры приложений его только
+      # ⚠️ Этот роутер — единственный заказчик wildcard `*.s1.letar.best` на s1. Роутеры приложений его только
       # используют (`tls: 'true'`, без своего резолвера). Удалить дашборд, не перенеся
       # `domains` на другой роутер, — значит остановить продление сертификата всех
       # staging-доменов. См. README, раздел «Как подключить приложение».
       tls:
         certResolver: dns
         domains:
-          - main: 's3.letar.best'
+          - main: 's1.letar.best'
             sans:
-              - '*.s3.letar.best'
+              - '*.s1.letar.best'
 
   middlewares:
     dashboard-auth:

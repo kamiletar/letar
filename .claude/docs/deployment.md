@@ -63,7 +63,7 @@ cd /home/deploy/letar
 deploy_app({ app, target: "staging" })                                  → s3: образ <app>:staging,
                                                                             контейнер на своём хостовом
                                                                             порту (docker-compose.staging.yml)
-run_e2e({ app, baseUrl: "https://<app>-stage.s3.letar.best" })          → s3: nx e2e <app>-e2e против baseUrl
+run_e2e({ app, baseUrl: "https://<app>-stage.s1.letar.best" })          → s3: nx e2e <app>-e2e против baseUrl
                                                                             (BASE_URL — конвенция всех
                                                                             playwright.config.ts)
                                                                             → пишет .last-e2e-status/<app>.json
@@ -83,7 +83,7 @@ deploy_app({ app })                                                      → tar
   не запускается вообще, ни на шаг.
 
 `baseUrl` передаётся явно в `run_e2e` — намеренно, максимально близко к прод-окружению: **реальный
-HTTPS-домен** `<app>-stage.s3.letar.best`, не `localhost`. Cookie/CORS/OIDC-редиректы на `localhost`
+HTTPS-домен** `<app>-stage.s1.letar.best`, не `localhost`. Cookie/CORS/OIDC-редиректы на `localhost`
 живут в другом security-контексте браузера (нет `Secure`-cookie, нет настоящего cross-origin между
 staging-приложением и `auth.letar.best`) — тестирование против `localhost` не проверяет именно то,
 что чаще всего ломается при релизе. Домен — **один лейбл** (`<app>-stage`, дефис, не точка) —

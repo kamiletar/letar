@@ -8,7 +8,7 @@
  *
  * baseUrl передаётся явно из POST body (не хардкодится) — все playwright.config.ts
  * в монорепо читают `process.env.BASE_URL` (единая конвенция, см. любой apps/*-e2e).
- * baseUrl ВСЕГДА реальный публичный HTTPS-домен `https://<app>-stage.s3.letar.best`,
+ * baseUrl ВСЕГДА реальный публичный HTTPS-домен `https://<app>-stage.s1.letar.best`,
  * НЕ `http://localhost:<port>` — иначе Playwright молча поднимает свой dev-сервер
  * (webServer.reuseExistingServer в playwright.config.ts) и прогон становится ложным
  * (PLAN.md §18.7, aboi 2026-07-19 — ложный localhost-прогон дал совсем другой набор
@@ -193,7 +193,7 @@ export async function e2eRoutes(fastify: FastifyInstance): Promise<void> {
   /**
    * POST /api/e2e/run — запускает `nx e2e <app>-e2e` против staging-контейнера
    * Body: { app: string; baseUrl: string; project?: string; grep?: string; workers?: number }
-   * baseUrl — куда бить: ВСЕГДА реальный публичный HTTPS-домен `https://<app>-stage.s3.letar.best`,
+   * baseUrl — куда бить: ВСЕГДА реальный публичный HTTPS-домен `https://<app>-stage.s1.letar.best`,
    * НЕ `http://localhost:<port>` — localhost не годится для проверки cookie/CORS/OIDC-редиректов,
    * а если он окажется недостижим, Playwright молча поднимет свой dev-сервер и результат прогона
    * будет ложным (PLAN.md §18.7, aboi 2026-07-19). Клиент (libs/deploy-mcp) уже блокирует

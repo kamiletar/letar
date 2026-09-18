@@ -139,7 +139,7 @@ async function runGarbageCollect(): Promise<void> {
 
 export async function runRegistryGc(): Promise<RegistryGcResult> {
   const checkedAt = new Date().toISOString()
-  const registryUrl = process.env['REGISTRY_URL'] || 'https://registry.s3.letar.best'
+  const registryUrl = process.env['REGISTRY_URL'] || 'https://registry.s1.letar.best'
   const registryUser = process.env['REGISTRY_USER']
   const registryPass = process.env['REGISTRY_PASS']
   const keepTags = Number(process.env['REGISTRY_GC_KEEP_TAGS'] ?? 3)

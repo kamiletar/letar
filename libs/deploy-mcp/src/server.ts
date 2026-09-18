@@ -318,7 +318,7 @@ export function createDeployMcpServer(): McpServer {
           ...gate.reasons.map((r) => `- ${r}`),
           '',
           'Чтобы снять блок: deploy_app({ app, target: "staging" }) → run_e2e({ app, baseUrl: '
-          + `"https://${app}-stage.s3.letar.best" }) → дождаться passed:true на текущем коммите → повторить deploy_app.`,
+          + `"https://${app}-stage.s1.letar.best" }) → дождаться passed:true на текущем коммите → повторить deploy_app.`,
         ].join('\n'),
       )
     }
@@ -410,7 +410,7 @@ export function createDeployMcpServer(): McpServer {
     description: [
       'Запускает Playwright e2e-прогон на s3 (POST /api/e2e/run) против staging-контейнера приложения.',
       'Приложение должно быть уже задеплоено на staging (deploy_app target:"staging"). baseUrl — куда бить',
-      '⚠️ ВСЕГДА реальный публичный HTTPS-домен `https://<app>-stage.s3.letar.best`, НИКОГДА',
+      '⚠️ ВСЕГДА реальный публичный HTTPS-домен `https://<app>-stage.s1.letar.best`, НИКОГДА',
       '`http://localhost:<port>` — localhost не годится для проверки cookie/CORS/OIDC-редиректов, а',
       'если baseUrl случайно окажется недостижим/не тем, Playwright молча поднимет свой локальный',
       'dev-сервер (webServer.reuseExistingServer в playwright.config.ts) и результат прогона будет',
@@ -432,9 +432,9 @@ export function createDeployMcpServer(): McpServer {
         .url()
         .refine((v) => !/^https?:\/\/localhost(:|\/|$)/.test(v) && !/^https?:\/\/127\.0\.0\.1(:|\/|$)/.test(v), {
           message: 'baseUrl не должен быть localhost/127.0.0.1 — используй реальный публичный домен '
-            + 'https://<app>-stage.s3.letar.best (иначе Playwright поднимет свой dev-сервер и прогон будет ложным)',
+            + 'https://<app>-stage.s1.letar.best (иначе Playwright поднимет свой dev-сервер и прогон будет ложным)',
         })
-        .describe('Публичный HTTPS-домен staging на s3, например https://aboi-stage.s3.letar.best (НЕ localhost)'),
+        .describe('Публичный HTTPS-домен staging на s3, например https://aboi-stage.s1.letar.best (НЕ localhost)'),
       project: z.string().optional().describe('Playwright project (chromium/firefox/webkit/shard-*); по умолчанию все'),
       grep: z
         .string()

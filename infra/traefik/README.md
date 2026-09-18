@@ -1,5 +1,16 @@
 ## s2 (M3) ✅ ЗАВЕРШЕНО — NPM снят, боевые 80/443 у Traefik (2026-08-31)
 
+> ⚠️ **С 2026-09-19 два сервера, два Traefik** (разнос старого s3 188.127.235.141, отключён):
+>
+> - **s1** (`185.56.162.213`, сборочный): `docker-compose.s1.yml` + `traefik.s1.yml` + `dynamic/s1/` —
+>   staging-домены, registry и дашборд под **`*.s1.letar.best`** (`<app>-stage.s1…`, `registry.s1…`, `traefik.s1…`).
+> - **s3** (`185.130.251.234`, хранилище): `docker-compose.yml` + `traefik.yml` + `dynamic/` — `media`, `ipfs`,
+>   `errors.s3`, `pin1.s3` и `*.s3.letar.best` (wildcard остаётся ради `errors.s3`).
+>
+> Ниже описание написано под единственный s3 — читай `s3` в разделах про staging как `s1`. Аккаунт acme-dns
+> для `s1.letar.best` — тот же fulldomain, что у `s3.letar.best` (CNAME `_acme-challenge.s1` на него же).
+
+
 Конфигурация написана 2026-08-25, развёрнута и переведена на боевые порты 2026-08-31
 (`PLAN-INFRA-2.md` §48, шаг 6). Файлы: `docker-compose.s2.yml`, `traefik.s2.yml`,
 `dynamic/s2/`, `secrets/deploy.s2.conf`. `scripts/deploy-infra.sh traefik` подхватывает их на

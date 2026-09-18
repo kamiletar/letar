@@ -53,8 +53,8 @@ services:
       # Если e2e начнёт покрывать логин — заводить отдельный oauthApplication
       # "archetest-staging" в auth-hub с redirect_uri на этот домен (не переиспользовать
       # archetest-prod — редирект не совпадёт).
-      BETTER_AUTH_URL: https://archetest-stage.s3.letar.best
-      NEXT_PUBLIC_APP_URL: https://archetest-stage.s3.letar.best
+      BETTER_AUTH_URL: https://archetest-stage.s1.letar.best
+      NEXT_PUBLIC_APP_URL: https://archetest-stage.s1.letar.best
     depends_on:
       db:
         condition: service_healthy
@@ -65,7 +65,7 @@ services:
       # Маршрут описан здесь, а не в SQLite внутри NPM, — ради этого и затевался §48.
       traefik.enable: 'true'
       traefik.docker.network: 'traefik-network'
-      traefik.http.routers.archetest-stage.rule: 'Host(`archetest-stage.s3.letar.best`)'
+      traefik.http.routers.archetest-stage.rule: 'Host(`archetest-stage.s1.letar.best`)'
       traefik.http.routers.archetest-stage.entrypoints: 'websecure'
       # ⛔ Без `certresolver` — сертификат уже выпущен (wildcard `*.s3.letar.best`), роутер его
       # только использует. Свой резолвер здесь заказал бы точечный сертификат на это имя и

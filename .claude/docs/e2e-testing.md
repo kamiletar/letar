@@ -1106,6 +1106,9 @@ nx e2e animatrona-e2e -- --grep "Import"
 
 ## E2E-ранер на s3 (188.127.235.141)
 
+> ⚠️ С 2026-09-19 раннер и staging живут на **s1 (185.56.162.213)**, домены — `<app>-stage.s1.letar.best`.
+> Старый s3 (188.127.235.141) отключён; новый s3 — хранилище/media/IPFS/GlitchTip. Ниже `s3` читать как `s1`.
+
 Все E2E-прогоны переезжают с локальной машины на выделенный сервер s3.
 
 ### Инфраструктура
@@ -1133,11 +1136,11 @@ default-deny в `DOCKER-USER`/`INPUT` (см. [firewall.md](/.claude/docs/firewal
 ### Запуск — через `run_e2e`, а не по SSH
 
 Прогон запускает `dashboard-agent` на s3 (`POST /api/e2e/run`, обёртка — `run_e2e` в `deploy-mcp`).
-Он передаёт `BASE_URL=https://<app>-stage.s3.letar.best`, и Playwright бьёт **в поднятый
+Он передаёт `BASE_URL=https://<app>-stage.s1.letar.best`, и Playwright бьёт **в поднятый
 staging-контейнер приложения**, а не в локально стартующий `nx dev`.
 
 ```
-run_e2e({ app: "<app>", baseUrl: "https://<app>-stage.s3.letar.best" })
+run_e2e({ app: "<app>", baseUrl: "https://<app>-stage.s1.letar.best" })
 ```
 
 Держится это на `webServer.reuseExistingServer: true` в каждом `playwright.config.ts` (есть у всех
@@ -1169,7 +1172,7 @@ webServer: { command: 'bun nx dev auth-hub', url: baseURL, reuseExistingServer: 
 **Как отличить за одну команду** — прежде чем лезть в конфиг Playwright:
 
 ```bash
-curl -sS -o /dev/null -w '%{http_code}\n' https://<app>-stage.s3.letar.best/
+curl -sS -o /dev/null -w '%{http_code}\n' https://<app>-stage.s1.letar.best/
 ```
 
 Побочный эффект: после такого падения на хосте остаётся осиротевший `next dev`, и следующий прогон

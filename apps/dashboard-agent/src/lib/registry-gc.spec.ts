@@ -103,7 +103,7 @@ describe('runRegistryGc', () => {
     vi.unstubAllEnvs()
     vi.stubEnv('REGISTRY_USER', 'admin')
     vi.stubEnv('REGISTRY_PASS', 'secret')
-    vi.stubEnv('REGISTRY_URL', 'https://registry.s3.letar.best')
+    vi.stubEnv('REGISTRY_URL', 'https://registry.s1.letar.best')
     execStart.mockClear()
     execInspect.mockClear()
     containerExec.mockClear()

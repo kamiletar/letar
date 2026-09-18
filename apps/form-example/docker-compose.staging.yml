@@ -51,7 +51,7 @@ services:
     labels:
       traefik.enable: 'true'
       traefik.docker.network: 'traefik-network'
-      traefik.http.routers.form-example-stage.rule: 'Host(`form-example-stage.s3.letar.best`)'
+      traefik.http.routers.form-example-stage.rule: 'Host(`form-example-stage.s1.letar.best`)'
       traefik.http.routers.form-example-stage.entrypoints: 'websecure'
       # ⛔ Без `certresolver` — сертификат уже выпущен (wildcard `*.s3.letar.best`), роутер его
       # только использует.
