@@ -6,8 +6,39 @@
 
 ## Backlog (запросы от агентов)
 
-### [2026-09-19] Директивы подсказки поля `@meta("form.tooltip.*")` в `zenstack-form-plugin` (от domwellbes-dev)
+### [2026-09-19] `zenstack-form-plugin` — `title`/`placeholder`/`description` вставляются в код без экранирования (найдено при tooltip)
 
+- **Запросил:** forms-dev (побочная находка, не запрос приложения).
+- **Приоритет:** normal — на практике всплывёт только на тексте с апострофом.
+- **Описание:** `generateUIMeta` (`model-generator.ts`) собирает `title: '${formMeta.title}'` в
+  одинарных кавычках без экранирования. `@meta("form.title", "Цена d'or")` даст невалидный TS в
+  сгенерированном файле. `tooltip` от этого защищён (`JSON.stringify`), три старых ключа — нет.
+- **Как чинить:** тот же `JSON.stringify` для трёх ключей. Осторожно: тесты и сгенерированные
+  файлы во всех приложениях (`git diff` по `src/generated/`) сейчас с одинарными кавычками — смена
+  стиля кавычек шумит диффом, поэтому либо экранировать только при наличии `'`/`\`, либо принять
+  разовый диф.
+- **Статус:** ожидание.
+
+### ✅ [2026-09-19] Директивы подсказки поля `@meta("form.tooltip.*")` в `zenstack-form-plugin` (закрыт plugin v4.1.0/form-mcp v2.1.0, от domwellbes-dev)
+
+- **Решение:** `form.tooltip.<title|description|impact|example>` → `.meta({ ui: { tooltip } })`.
+  Сверх запроса добавлен `example` (он есть в `FieldTooltipMeta`). `description` обязателен, как в
+  `FieldTooltipMeta`: без него подсказка не генерируется и печатается warning (иначе литерал не
+  прошёл бы typecheck). Неизвестный подключ (`form.tooltip.impakt`) — warning от
+  `findUnknownMetaFormPaths`. Значение сериализуется `JSON.stringify`.
+  Ограничение: тултип не попадает в файлы переводов i18n-режима (там только
+  title/placeholder/description).
+- **`minorUnitScale`:** проверено на реальном `zenstack generate` (`apps/form-example`, временно): в
+  сгенерированной схеме `fieldProps: {"minorUnitScale":100}`, тест в `parser.spec.ts`/
+  `model-generator.spec.ts`. Доходит до типизированных тегов через `useResolvedFieldProps`
+  (forms-react v0.7.0).
+- **Тесты:** parser (сборка tooltip, только impact, отличие от `form.description`, не-строка,
+  неизвестный подключ, `minorUnitScale`), детектор опечаток, генератор (tooltip, кавычки, без
+  description → warning, tooltip рядом с `fieldProps`), form-mcp (директива в реестре).
+- **Демо/доки:** `form-develop-app` `/meta-syntax-demo`, `form-docs` guides/zenstack-plugin (ru/en),
+  `form-example` (`Product.price`, проверено вживую: тултип показывает title/description/impact),
+  README плагина, скилл `zenstack-helper`.
+- **Первоначальный запрос (для истории):**
 - **Запросил:** `domwellbes-dev` (через файл: `forms-coordinator-dev` сейчас retired, письмо не доставлено).
 - **Приоритет:** high — блокирует переход приложения с ручных Zod-схем на схемы из `schema.zmodel`.
 - **Что нужно:** плоские ключи `form.tooltip.title` / `form.tooltip.description` / `form.tooltip.impact`,
