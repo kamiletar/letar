@@ -64,7 +64,23 @@ ZenStack, не нашего плагина. Поэтому `form.props` и `form
 | `@meta("form.fieldType", "...")`           | Тип компонента            | `@meta("form.fieldType", "tags")`              |
 | `@meta("form.props.<dotpath>", ...)`       | Constraints + UI props    | `@meta("form.props.min", 1)`                   |
 | `@meta("form.relation.<dotpath>", ...)`    | Настройки relation        | `@meta("form.relation.labelField", "name")`    |
+| `@meta("form.tooltip.<key>", "...")`       | (?)-подсказка у лейбла    | `@meta("form.tooltip.impact", "Влияет на сортировку")` |
 | `@meta("form.exclude", true)`              | Исключить из формы        | `@meta("form.exclude", true)`                  |
+
+### Подсказка поля: `form.tooltip.*`
+
+`form.tooltip.<title|description|impact|example>` добавляет (?)-иконку рядом с лейблом — тот же `ui.tooltip`, который поля уже читают. Не путать с `form.description`: та выводится текстом под полем.
+
+```zmodel
+price Int
+  @meta("form.title", "Цена")
+  @meta("form.tooltip.description", "Цена в каталоге магазина")
+  @meta("form.tooltip.impact", "Влияет на сортировку и фильтр по цене")
+```
+
+- `form.tooltip.description` **обязателен** — без него подсказка не генерируется, а `zenstack generate` печатает warning (так же, как на неизвестный подключ вроде `form.tooltip.impakt`).
+- Только строки и плоский dot-path (объектный литерал ломает `zenstack generate`). Кавычки и апострофы в тексте безопасны.
+- Подсказка не попадает в файлы переводов i18n — остаётся на языке схемы.
 
 ## Генерируемый код
 

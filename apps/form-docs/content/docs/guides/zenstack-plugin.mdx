@@ -64,7 +64,23 @@ literals are rejected.
 | `@meta("form.fieldType", "...")`         | Component type            | `@meta("form.fieldType", "tags")`             |
 | `@meta("form.props.<dotpath>", ...)`     | Constraints + UI props    | `@meta("form.props.min", 1)`                  |
 | `@meta("form.relation.<dotpath>", ...)`  | Relation select config    | `@meta("form.relation.labelField", "name")`   |
+| `@meta("form.tooltip.<key>", "...")`     | (?) hint next to the label | `@meta("form.tooltip.impact", "Affects sorting")` |
 | `@meta("form.exclude", true)`            | Exclude from form         | `@meta("form.exclude", true)`                 |
+
+### Field tooltip: `form.tooltip.*`
+
+`form.tooltip.<title|description|impact|example>` puts a (?) icon next to the label — the same `ui.tooltip` the fields already read. It is separate from `form.description`, which renders as text under the field.
+
+```zmodel
+price Int
+  @meta("form.title", "Price")
+  @meta("form.tooltip.description", "Price in the store catalog")
+  @meta("form.tooltip.impact", "Affects sorting and the price filter")
+```
+
+- `form.tooltip.description` is **required** — without it the tooltip is not generated and `zenstack generate` prints a warning (as it does for an unknown sub-key like `form.tooltip.impakt`).
+- Plain strings only, flat dot-path (an object literal breaks `zenstack generate`). Quotes and apostrophes in the text are safe.
+- The tooltip is not part of the i18n translation files — it stays in the schema language.
 
 ## Generated Output
 

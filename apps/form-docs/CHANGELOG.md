@@ -2,6 +2,13 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.6.10] - 2026-09-19
+
+### Added
+
+- `guides/zenstack-plugin` (ru/en): директива `form.tooltip.*` — таблица и раздел «Подсказка поля»
+  (`@letar/zenstack-form-plugin` 4.1.0).
+
 ## [0.6.9] - 2026-09-19
 
 ### Changed
