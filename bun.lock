@@ -733,7 +733,7 @@
     },
     "apps/form-develop-app": {
       "name": "form-develop-app",
-      "version": "0.1.17",
+      "version": "0.1.18",
       "dependencies": {
         "@letar/env-load": "workspace:*",
         "@letar/forms-core": "workspace:*",
@@ -754,7 +754,7 @@
     },
     "apps/form-docs": {
       "name": "form-docs",
-      "version": "0.6.8",
+      "version": "0.6.9",
       "dependencies": {
         "@letar/forms-core": "workspace:*",
         "@letar/glitchtip": "workspace:*",
@@ -1261,7 +1261,7 @@
     },
     "libs/forms": {
       "name": "@letar/forms",
-      "version": "2.14.19",
+      "version": "2.14.20",
       "dependencies": {
         "@letar/format-utils": "workspace:*",
         "@tanstack/react-table": "^9.2.4",
