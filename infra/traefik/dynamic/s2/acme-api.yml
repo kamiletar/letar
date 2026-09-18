@@ -36,7 +36,10 @@ http:
     acme-api-allowlist:
       ipAllowList:
         sourceRange:
-          - '188.127.235.141/32' # s3 — единственный легитимный клиент этого маршрута
+          # Клиенты — Traefik серверов, у которых есть wildcard/per-name сертификаты через acme-dns.
+          # С 2026-09-19 (разнос старого s3 188.127.235.141, отключён) их два:
+          - '185.56.162.213/32' # s1 — сборочный сервер, wildcard *.s3.letar.best
+          - '185.130.251.234/32' # s3 — хранилище, media/ipfs и тот же wildcard для errors.s3
 
   services:
     acme-dns:

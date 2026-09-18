@@ -1,0 +1,44 @@
+# Traefik — прокси для s1 (сборочный сервер: staging-контейнеры, registry, e2e).
+#
+# s1 — новый сервер (185.56.162.213, тот же хостер, что и s2). Появился при разносе старого s3
+# 2026-09-19: `*.s3.letar.best` (staging-домены и registry) переехал сюда, а сам `s3.letar.best`
+# остался хранилищем + media + IPFS на другом сервере (docker-compose.yml рядом).
+#
+# Отличия от docker-compose.yml (s3):
+#   * нет сети `letar-ipfs_default` — kubo здесь нет;
+#   * `./dynamic/s1` вместо `./dynamic`: маршрутов ipfs/pin1 тут быть не должно, иначе этот
+#     сервер тоже начнёт заказывать сертификат `ipfs.letar.best` (лишний ключ на сервере, где
+#     ему делать нечего);
+#   * в `/home/deploy/lego` кладём ТОЛЬКО ключ `s3.letar.best` — per-name аккаунты `media` и
+#     `ipfs` остаются на s3 (README, «Учётные данные acme-dns»).
+#
+# Запуск: DEPLOY_SERVER_NAME=s1 scripts/deploy-infra.sh traefik (hostname s1 не совпадает с
+# `*.letar.best`, поэтому имя сервера задаётся переменной).
+
+services:
+  traefik:
+    image: 'traefik:v3.6.25'
+    container_name: traefik
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '443:443/tcp'
+      - '443:443/udp'
+    environment:
+      # acme-dns живёт на s2 и наружу не смотрит — ходим через acme-api.letar.best
+      # (маршрут dynamic/s2/acme-api.yml с allowlist по IP; IP этого сервера там обязан стоять).
+      ACME_DNS_API_BASE: 'https://acme-api.letar.best'
+      ACME_DNS_STORAGE_PATH: '/acme-data/acme-dns-accounts.json'
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik.yml:/etc/traefik/traefik.yml:ro
+      - ./dynamic/s1:/etc/traefik/dynamic:ro
+      - ./auth:/etc/traefik/auth:ro # basicAuth дашборда и registry, не в git
+      - ./acme:/acme # acme.json с приватными ключами, не в git
+      - /home/deploy/lego:/acme-data:ro # учётные данные acme-dns, не в git
+    networks:
+      - traefik-network
+
+networks:
+  traefik-network:
+    external: true
