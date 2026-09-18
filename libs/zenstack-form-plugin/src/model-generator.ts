@@ -621,7 +621,7 @@ function warnUnknownFormDirectives(modelName: string, fieldName: string, metaPat
     console.warn(
       `[zenstack-form-plugin] ${modelName}.${fieldName}: неизвестный @meta("form.${path}", …) — `
         + `молча проигнорирован (опечатка?). Поддерживаемые ключи: title, placeholder, `
-        + `description, fieldType, props.*, relation.*, exclude.`,
+        + `description, fieldType, props.*, relation.*, tooltip.<title|description|impact|example>, exclude.`,
     )
   }
 }
@@ -924,6 +924,19 @@ function generateUIMeta(params: GenerateUIMetaParams): string | null {
   }
   if (formMeta.relation) {
     parts.push(`fieldProps: { relation: ${JSON.stringify(formMeta.relation)} }`)
+  }
+  if (formMeta.tooltip) {
+    if (formMeta.tooltip.description) {
+      // JSON.stringify, а не '…' как у title/placeholder: тултип — длинная проза, в ней чаще
+      // встречаются кавычки и апострофы, а литерал должен остаться валидным TS
+      parts.push(`tooltip: ${JSON.stringify(formMeta.tooltip)}`)
+    } else {
+      // `description` обязателен в FieldTooltipMeta — без него литерал не проходит typecheck
+      console.warn(
+        `[zenstack-form-plugin] ${modelName}.${fieldName}: @meta("form.tooltip.*") без `
+          + `@meta("form.tooltip.description", …) — подсказка не сгенерирована (description обязателен).`,
+      )
+    }
   }
 
   // Add i18nKey when i18n is enabled

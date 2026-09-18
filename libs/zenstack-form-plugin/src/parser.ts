@@ -105,7 +105,19 @@ const KNOWN_FORM_DIRECTIVE_KEYS = new Set([
   'props',
   'relation',
   'exclude',
+  'tooltip',
 ])
+
+/**
+ * Подключи `@meta("form.tooltip.<key>", "…")` в порядке, в котором они попадают в `ui.tooltip`
+ * (порядок ключей сгенерированного литерала должен быть стабильным — иначе шумят диффы).
+ */
+const TOOLTIP_KEYS = ['title', 'description', 'impact', 'example'] as const
+type TooltipKey = (typeof TOOLTIP_KEYS)[number]
+
+function isTooltipKey(key: string): key is TooltipKey {
+  return (TOOLTIP_KEYS as readonly string[]).includes(key)
+}
 
 /**
  * Преобразовать AST-выражение `@meta(…)`-аргумента в plain JS-значение.
@@ -162,11 +174,14 @@ function setDeep(target: Record<string, unknown>, dotPath: string, value: unknow
  *   вложенным путём (`"form.props.grid.cols"`) — собирается в объект перед разбором на
  *   constraints/uiProps через {@link applyPropsSplit}
  * - `@meta("form.relation.<key>", …)` — аналогично для `{ model?, labelField }`
+ * - `@meta("form.tooltip.<title|description|impact|example>", "…")` — (?)-подсказка рядом с
+ *   лейблом → `ui.tooltip`. Отдельно от `form.description` (та — текст под полем)
  */
 export function parseMetaAttributes(attributes: readonly DataFieldAttribute[]): FormFieldMeta {
   const meta: FormFieldMeta = {}
   const propsAcc: Record<string, unknown> = {}
   const relationAcc: Record<string, unknown> = {}
+  const tooltipAcc: Partial<Record<TooltipKey, string>> = {}
   let hasProps = false
   let hasRelation = false
 
@@ -197,6 +212,11 @@ export function parseMetaAttributes(attributes: readonly DataFieldAttribute[]): 
     } else if (path.startsWith('relation.')) {
       hasRelation = true
       setDeep(relationAcc, path.slice('relation.'.length), value)
+    } else if (path.startsWith('tooltip.')) {
+      const key = path.slice('tooltip.'.length)
+      if (isTooltipKey(key) && typeof value === 'string') {
+        tooltipAcc[key] = value
+      }
     }
   }
 
@@ -205,6 +225,16 @@ export function parseMetaAttributes(attributes: readonly DataFieldAttribute[]): 
   }
   if (hasRelation) {
     meta.relation = relationAcc as FormFieldMeta['relation']
+  }
+  const tooltip: NonNullable<FormFieldMeta['tooltip']> = {}
+  for (const key of TOOLTIP_KEYS) {
+    const text = tooltipAcc[key]
+    if (text !== undefined) {
+      tooltip[key] = text
+    }
+  }
+  if (Object.keys(tooltip).length > 0) {
+    meta.tooltip = tooltip
   }
 
   return meta
@@ -229,8 +259,11 @@ export function findUnknownMetaFormPaths(attributes: readonly DataFieldAttribute
       continue
     }
     const path = keyArg.value.slice('form.'.length)
-    const topLevelKey = path.split('.')[0]
+    const [topLevelKey, ...rest] = path.split('.')
     if (!KNOWN_FORM_DIRECTIVE_KEYS.has(topLevelKey)) {
+      found.add(path)
+    } else if (topLevelKey === 'tooltip' && !isTooltipKey(rest.join('.'))) {
+      // Подключи тултипа — закрытый набор: `form.tooltip.impakt` иначе молча пропадёт
       found.add(path)
     }
   }

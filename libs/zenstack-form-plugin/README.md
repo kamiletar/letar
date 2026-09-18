@@ -177,6 +177,7 @@ export type RecipeUpdateForm = z.infer<typeof RecipeUpdateFormSchema>
 | `form.fieldType`              | Тип компонента                           | `@meta("form.fieldType", "tags")`           |
 | `form.props.<dotpath>`        | UI-пропсы + escape hatch для constraints | `@meta("form.props.showValue", true)`       |
 | `form.relation.<dotpath>`     | Настройки relation                       | `@meta("form.relation.labelField", "name")` |
+| `form.tooltip.<key>`          | (?)-подсказка рядом с лейблом (v4.1.0)   | `@meta("form.tooltip.impact", "…")`         |
 | `form.exclude`                | Исключить из формы                       | `@meta("form.exclude", true)`               |
 
 ⚠️ **Объектный литерал в `@meta` ломает `zenstack generate` целиком** (`Unhandled error:
@@ -385,10 +386,49 @@ v4.0.0 `/// @form.*`-парсер, и не входил в ту миграцию
 Единственный синтаксис `@meta("form.*", value)` — контракт для директив уровня поля/модели, не
 для меток значений enum.
 
+### Подсказка поля: `form.tooltip.*` (v4.1.0)
+
+`form.tooltip.<key>` кладёт (?)-иконку рядом с лейблом — тот же `ui.tooltip`, который поля читают
+из `.meta({ ui: { tooltip } })`. **Не путать с `form.description`** — та выводится текстом под
+полем, а тултип открывается по наведению.
+
+```zmodel
+price Int
+  @meta("form.title", "Цена")
+  @meta("form.tooltip.title", "Цена «от»")
+  @meta("form.tooltip.description", "Минимальная цена в каталоге")
+  @meta("form.tooltip.impact", "Влияет на сортировку и фильтр по цене")
+```
+
+→ `.meta({ ui: { title: 'Цена', tooltip: {"title":"Цена «от»","description":"…","impact":"…"} } })`
+
+| Ключ                       | Смысл                                                |
+| -------------------------- | ---------------------------------------------------- |
+| `form.tooltip.title`       | Заголовок подсказки                                  |
+| `form.tooltip.description` | Основной текст — **обязателен**                      |
+| `form.tooltip.impact`      | На что влияет («Больше категорий — больше учеников») |
+| `form.tooltip.example`     | Пример хорошего ввода                                |
+
+- Только строки, только плоский dot-path (объектный литерал ломает `zenstack generate`).
+- **Без `form.tooltip.description` подсказка не генерируется** — `description` обязателен в
+  `FieldTooltipMeta`, литерал без него не прошёл бы typecheck. Вместо молчаливого пропуска
+  `zenstack generate` печатает warning с моделью и полем.
+- Неизвестный подключ (`form.tooltip.impakt`) — тоже warning, а не молчаливая потеря.
+- Значение сериализуется через `JSON.stringify`, поэтому кавычки и апострофы в тексте безопасны.
+- ⚠️ Тултип **не попадает в файлы переводов** i18n-режима (там только `title`/`placeholder`/
+  `description`) — в мультиязычных приложениях он остаётся на языке схемы.
+
+### `form.props.minorUnitScale` — цена в копейках
+
+`@meta("form.props.minorUnitScale", 100)` уходит в `ui.fieldProps` (не в constraints) и с
+`@letar/forms-react` v0.7.0 доходит до `Field.Currency`/`Field.Percentage` и в явных типизированных
+тегах, не только через `Form.Field.Auto`. Проверено на реальном `zenstack generate`
+(`apps/form-example`): в сгенерированной схеме `fieldProps: {"minorUnitScale":100}`.
+
 ### Warning на неизвестную директиву (v3.2.0)
 
 `@meta("form.<key>", …)` молча игнорирует любой `<key>`, не входящий в распознаваемый набор
-(`title`/`placeholder`/`description`/`fieldType`/`props`/`relation`/`exclude`) — опечатка или
+(`title`/`placeholder`/`description`/`fieldType`/`props`/`relation`/`tooltip`/`exclude`) — опечатка или
 несуществующая директива (`@form.options`, `@form.widget`) не даёт ошибки ни на этапе
 `zenstack generate`, ни при типизации: поле просто остаётся без нужных метаданных. С v3.2.0
 `nx zenstack:generate` печатает `console.warn` для каждого такого случая — с именем модели/поля,
@@ -552,5 +592,5 @@ MCP сервер [`@letar/form-mcp`](../form-mcp/README.md) предоставл
 
 ## Версия
 
-Текущая версия — **3.0.0** (Фаза 3: `@meta("form.*", value)` как основной синтаксис). Полная
-история — в [package.json](package.json) и [CHANGELOG.md](CHANGELOG.md).
+Текущая версия — **4.1.0** (`form.tooltip.*`; синтаксис `@meta("form.*", value)` — единственный с
+v4.0.0). Полная история — в [package.json](package.json) и [CHANGELOG.md](CHANGELOG.md).

@@ -1,5 +1,32 @@
 # Changelog
 
+## [4.1.0] - 2026-09-19
+
+### Added
+
+- **`@meta("form.tooltip.<title|description|impact|example>", "…")` — подсказка поля.**
+  Плоские ключи собираются в `.meta({ ui: { tooltip: { … } } })` — то же `ui.tooltip`
+  (`FieldTooltipMeta` из `@letar/forms-core`), которое поля читают сегодня. Запросил
+  domwellbes-dev: ~50 ручных `_schemas/*.schema.ts` держат `tooltip` («на что влияет») у каждого
+  поля, без директивы переход на схемы из `schema.zmodel` терял подсказку или ужимал её до
+  `form.description`.
+  - `description` обязателен (как в `FieldTooltipMeta`): без него подсказка не генерируется,
+    `zenstack generate` печатает warning с моделью и полем.
+  - Неизвестный подключ (`form.tooltip.impakt`) — warning от детектора опечаток
+    (`findUnknownMetaFormPaths`), не молчаливая потеря.
+  - Значение сериализуется `JSON.stringify` (в отличие от `title`/`placeholder`, которые
+    вставляются в одинарных кавычках): тултип — проза, кавычки и апострофы не ломают литерал.
+  - Не попадает в файлы переводов i18n-режима — там по-прежнему `title`/`placeholder`/`description`.
+- Тест на `form.props.minorUnitScale`: ключ уходит в `meta.props` (не в constraints) и в
+  `fieldProps` сгенерированной схемы. Проверено и на реальном `zenstack generate`
+  (`apps/form-example`).
+
+### ⚠️ Известное, не исправлено
+
+- `title`/`placeholder`/`description` по-прежнему вставляются в сгенерированный код в одинарных
+  кавычках без экранирования: значение с апострофом (`d'or`) даст невалидный TS. `tooltip` от этого
+  защищён, старые три ключа — нет. Вынесено отдельным пунктом в `libs/forms/PLAN.md`.
+
 ## [4.0.2] - 2026-09-14
 
 ### Docs

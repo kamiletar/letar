@@ -1039,6 +1039,78 @@ describe('generateModelCode', () => {
     expect(code).toContain(`fieldProps: { relation: {"model":"User","labelField":"name"} }`)
   })
 
+  it('кладёт tooltip в ui-мету (то же ui.tooltip, что читают поля)', () => {
+    const modelInfo: ModelInfo = {
+      name: 'Product',
+      excludedFields: [],
+      fields: [
+        field({
+          name: 'price',
+          type: 'Int',
+          formMeta: {
+            tooltip: { title: 'Цена «от»', description: 'Минимальная цена', impact: 'Влияет на сортировку' },
+          },
+        }),
+      ],
+    }
+
+    const code = generateModelCode(modelInfo, new Set())
+    expect(code).toContain(
+      `tooltip: {"title":"Цена «от»","description":"Минимальная цена","impact":"Влияет на сортировку"}`,
+    )
+  })
+
+  it('tooltip с апострофом и кавычками не ломает сгенерированный код', () => {
+    const modelInfo: ModelInfo = {
+      name: 'Product',
+      excludedFields: [],
+      fields: [
+        field({
+          name: 'price',
+          type: 'Int',
+          formMeta: { tooltip: { description: `Цена "от" и d'or — без НДС` } },
+        }),
+      ],
+    }
+
+    const code = generateModelCode(modelInfo, new Set())
+    expect(code).toContain(`tooltip: {"description":"Цена \\"от\\" и d'or — без НДС"}`)
+  })
+
+  it('tooltip без description не генерируется и даёт предупреждение (description обязателен в FieldTooltipMeta)', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+    const modelInfo: ModelInfo = {
+      name: 'Product',
+      excludedFields: [],
+      fields: [field({ name: 'price', type: 'Int', formMeta: { tooltip: { impact: 'Влияет на цену' } } })],
+    }
+
+    const code = generateModelCode(modelInfo, new Set())
+
+    expect(code).not.toContain('tooltip')
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('Product.price'))
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('form.tooltip.description'))
+    warn.mockRestore()
+  })
+
+  it('tooltip рядом с fieldProps: оба попадают в ui-мету', () => {
+    const modelInfo: ModelInfo = {
+      name: 'Product',
+      excludedFields: [],
+      fields: [
+        field({
+          name: 'price',
+          type: 'Int',
+          formMeta: { props: { minorUnitScale: 100 }, tooltip: { description: 'Цена в копейках' } },
+        }),
+      ],
+    }
+
+    const code = generateModelCode(modelInfo, new Set())
+    expect(code).toContain(`fieldProps: {"minorUnitScale":100}`)
+    expect(code).toContain(`tooltip: {"description":"Цена в копейках"}`)
+  })
+
   it('генерирует Create/Update схемы, ExcludedFields и типы', () => {
     const modelInfo: ModelInfo = {
       name: 'Product',

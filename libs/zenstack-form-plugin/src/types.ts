@@ -63,6 +63,22 @@ export interface NativeAttributeApplication {
 }
 
 /**
+ * Подсказка поля из `@meta("form.tooltip.<key>", "…")` — (?)-иконка рядом с лейблом.
+ * Форма совпадает с `FieldTooltipMeta` из `@letar/forms-core` (`ui.tooltip`), которую читают поля;
+ * там `description` обязателен, поэтому без него генератор подсказку не выпускает.
+ */
+export interface FormFieldTooltip {
+  /** Заголовок подсказки */
+  title?: string
+  /** Основной текст (обязателен для генерации) */
+  description?: string
+  /** На что влияет («Больше категорий — больше учеников») */
+  impact?: string
+  /** Пример хорошего ввода */
+  example?: string
+}
+
+/**
  * Form field metadata extracted from @form.* directives.
  */
 export interface FormFieldMeta {
@@ -88,6 +104,8 @@ export interface FormFieldMeta {
   props?: Record<string, unknown>
   /** Relation configuration */
   relation?: { model?: string; labelField: string }
+  /** (?)-подсказка рядом с лейблом → `ui.tooltip` (`@meta("form.tooltip.*", …)`) */
+  tooltip?: FormFieldTooltip
   /** Exclude field from form */
   exclude?: boolean
 }

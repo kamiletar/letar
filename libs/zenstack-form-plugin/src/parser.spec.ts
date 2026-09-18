@@ -148,6 +148,55 @@ describe('parseMetaAttributes (Фаза 3, v3.0.0)', () => {
     expect(parseMetaAttributes(attrs).relation).toEqual({ model: 'Category', labelField: 'name' })
   })
 
+  it('form.tooltip.<key> собирается в meta.tooltip (title/description/impact/example)', () => {
+    const attrs = [
+      metaAttr('form.tooltip.title', strLit('Цена «от»')),
+      metaAttr('form.tooltip.description', strLit('Минимальная цена в каталоге')),
+      metaAttr('form.tooltip.impact', strLit('Влияет на сортировку и фильтр по цене')),
+      metaAttr('form.tooltip.example', strLit('5 000 000')),
+    ]
+    expect(parseMetaAttributes(attrs).tooltip).toEqual({
+      title: 'Цена «от»',
+      description: 'Минимальная цена в каталоге',
+      impact: 'Влияет на сортировку и фильтр по цене',
+      example: '5 000 000',
+    })
+  })
+
+  it('form.tooltip: только impact — description остаётся незаданным (решает генератор)', () => {
+    const meta = parseMetaAttributes([metaAttr('form.tooltip.impact', strLit('Влияет на цену'))])
+    expect(meta.tooltip).toEqual({ impact: 'Влияет на цену' })
+  })
+
+  it('form.tooltip.* не задевает form.description (это разные вещи: подсказка под полем vs (?)-тултип)', () => {
+    const attrs = [
+      metaAttr('form.description', strLit('Текст под полем')),
+      metaAttr('form.tooltip.description', strLit('Текст в тултипе')),
+    ]
+    const meta = parseMetaAttributes(attrs)
+    expect(meta.description).toBe('Текст под полем')
+    expect(meta.tooltip).toEqual({ description: 'Текст в тултипе' })
+  })
+
+  it('form.tooltip.<key> с не-строковым значением игнорируется', () => {
+    const meta = parseMetaAttributes([metaAttr('form.tooltip.impact', numLit(5))])
+    expect(meta.tooltip).toBeUndefined()
+  })
+
+  it('form.tooltip.<неизвестный ключ> не попадает в meta.tooltip', () => {
+    const meta = parseMetaAttributes([
+      metaAttr('form.tooltip.impakt', strLit('опечатка')),
+      metaAttr('form.tooltip.description', strLit('ok')),
+    ])
+    expect(meta.tooltip).toEqual({ description: 'ok' })
+  })
+
+  it('form.props.minorUnitScale уходит в meta.props (не в constraints) — доходит до fieldProps поля', () => {
+    const meta = parseMetaAttributes([metaAttr('form.props.minorUnitScale', numLit(100))])
+    expect(meta.props).toEqual({ minorUnitScale: 100 })
+    expect(meta.constraints).toBeUndefined()
+  })
+
   it('первый аргумент не StringLiteral — атрибут игнорируется (не @meta("form.*", ...))', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const attrs = [{ $type: 'DataFieldAttribute', decl: { $refText: '@meta' }, args: [{ value: numLit(1) }] } as any]
@@ -167,6 +216,21 @@ describe('findUnknownMetaFormPaths (детектор опечаток в @meta("
       metaAttr('form.relation.model', strLit('Category')),
     ]
     expect(findUnknownMetaFormPaths(attrs)).toEqual([])
+  })
+
+  it('form.tooltip.<известный ключ> — не опечатка', () => {
+    const attrs = [
+      metaAttr('form.tooltip.title', strLit('X')),
+      metaAttr('form.tooltip.description', strLit('X')),
+      metaAttr('form.tooltip.impact', strLit('X')),
+      metaAttr('form.tooltip.example', strLit('X')),
+    ]
+    expect(findUnknownMetaFormPaths(attrs)).toEqual([])
+  })
+
+  it('form.tooltip.<неизвестный ключ> — опечатка в подключе тултипа попадает в результат', () => {
+    const attrs = [metaAttr('form.tooltip.impakt', strLit('X'))]
+    expect(findUnknownMetaFormPaths(attrs)).toEqual(['tooltip.impakt'])
   })
 
   it('@meta("form.options", …) — неизвестный top-level ключ, попадает в результат', () => {
