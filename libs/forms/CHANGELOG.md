@@ -4,6 +4,23 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.14.20] - 2026-09-19
+
+### Fixed
+
+- **`useFormUrlSync` — первый клиентский рендер расходился с SSR.** Хук читал
+  `window.location.search` синхронно в рендере: SSR отдавал `defaults`, а гидратационный рендер
+  уже значения из URL. Результат — recoverable hydration error, а значение Select/Combobox на
+  полной навигации (`/page?billable=billable`) «чинилось» лишь отложенным ре-рендером (на prod
+  могло не починиться вовсе). Теперь первый рендер всегда отдаёт `defaults`, значения из URL
+  применяются `useEffect` после маунта. В state хранятся только переопределения из URL, поэтому
+  изменение `defaults` между рендерами по-прежнему подхватывается; без фильтров в URL лишнего
+  ре-рендера нет. Цена — короткая (доли кадра) вспышка дефолта на полной навигации. `readUrlValues`
+  и `Form.UrlSync` не менялись. Найдено на `apps/studio` (studio-dev). Разбор —
+  `.claude/docs/letar-forms-urlsync-window-read-in-render-hydration.md`.
+  Тесты: согласованность с SSR (`renderToString` + `hydrateRoot`), UrlSync не стирает параметр,
+  подхват изменённых `defaults`.
+
 ## [2.14.19] - 2026-09-15
 
 ### Fixed

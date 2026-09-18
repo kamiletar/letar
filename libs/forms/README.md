@@ -358,6 +358,12 @@ function FiltersPage() {
 }
 ```
 
+> ⚠️ **Значения из URL применяются после маунта (v2.14.20).** Первый рендер `useFormUrlSync`
+> (и серверный, и гидратационный) всегда отдаёт `defaults` — иначе разметка клиента расходится с
+> SSR и Select/Combobox остаётся на неверном значении. На полной навигации
+> (`/page?category=sale`) возможна короткая (доли кадра) вспышка дефолта перед применением URL.
+> Не читай `window.location` сам в рендере рядом с формой — только в `useEffect`.
+
 `getActiveUrlSyncFields(values, fields, defaults)` — список полей, чьё значение отличается от
 дефолта (с тем же диффом, что `Form.UrlSync` использует для записи в URL). Для одного числа —
 `useActiveFiltersCount(defaults)`.

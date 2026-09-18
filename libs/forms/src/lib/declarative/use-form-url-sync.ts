@@ -2,7 +2,7 @@
 
 import { isKeyOrAncestorOfSensitivePath } from '@letar/forms-core/security'
 import { useSensitiveFieldPaths } from '@letar/forms-react'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useDeclarativeForm } from './form-context'
 import { generatePrefillUrl } from './use-url-prefill'
 
@@ -71,8 +71,34 @@ export interface FormUrlSyncOptions<TData extends object> {
  */
 export function useFormUrlSync<TData extends object>(options: FormUrlSyncOptions<TData>): { initialValue: TData } {
   const { fields, defaults } = options
-  // Однократное чтение при маунте — без useMemo чтобы оставаться тестируемым
-  const initialValue = readUrlValues(fields, defaults)
+  // Переопределения из URL — только после маунта. Первый рендер (и SSR, и гидратационный)
+  // обязан отдать defaults: иначе разметка клиента расходится с серверной, React делает
+  // recoverable hydration error, а значение Select/Combobox «чинится» лишь отложенным
+  // ре-рендером (в prod может не починиться вовсе).
+  // Храним именно переопределения, а не готовый объект: тогда изменение `defaults`
+  // между рендерами подхватывается, а не залипает на значениях первого рендера.
+  const [urlOverrides, setUrlOverrides] = useState<Partial<TData> | null>(null)
+
+  useEffect(() => {
+    const fromUrl = readUrlValues(fields, defaults)
+    const overrides: Partial<TData> = {}
+    let hasOverrides = false
+    for (const field of fields) {
+      if (!isDefaultValue(fromUrl[field], defaults[field])) {
+        overrides[field] = fromUrl[field]
+        hasOverrides = true
+      }
+    }
+    // Без фильтров в URL состояние не трогаем — лишний ре-рендер не нужен
+    if (hasOverrides) {
+      setUrlOverrides(overrides)
+    }
+    // Однократно при маунте: дальнейшую синхронизацию значений в URL ведёт <Form.UrlSync>
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Новый объект на каждый рендер — как и раньше: TanStack Form сравнивает defaultValues по значению
+  const initialValue = urlOverrides ? { ...defaults, ...urlOverrides } : defaults
   return { initialValue }
 }
 

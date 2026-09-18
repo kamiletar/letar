@@ -19,7 +19,18 @@
 - **Заодно проверить:** `@meta("form.props.minorUnitScale", 100)` для `Field.Currency` в копейках
   доходит до поля в сгенерированной схеме.
 
-### [2026-09-17] `useFormUrlSync` — Select-поле не подхватывает URL-параметр при полной перезагрузке (от studio-dev)
+### [2026-09-19] `useUrlPrefill` — тот же дефект: `window.location` читается в `useMemo` (найдено при закрытии пункта ниже)
+
+- **Запросил:** forms-dev (побочная находка, не запрос приложения).
+- **Приоритет:** normal — потребителей в репо только демо (`form-docs`, `form-example` `/url-prefill`).
+- **Описание:** `useUrlPrefill` (`use-url-prefill.ts`) считает результат в `useMemo`, читая
+  `window.location.search` в рендере — на SSR-странице первый клиентский рендер расходится с
+  серверной разметкой (тот же механизм, что у `useFormUrlSync`, разбор в
+  `.claude/docs/letar-forms-urlsync-window-read-in-render-hydration.md`). Другая семантика
+  (prefill из маркетинговых ссылок, `cleanUrl`, валидация схемой), поэтому в фикс `useFormUrlSync` не вошёл.
+- **Статус:** ожидание — сначала выяснить, есть ли реальные SSR-потребители вне демо.
+
+### ✅ [2026-09-17] `useFormUrlSync` — Select-поле не подхватывает URL-параметр при полной перезагрузке (закрыт v2.14.20, от studio-dev)
 
 - **Запросил:** studio-dev (`apps/studio/src/app/(owner)/owner/time/_components/time-entries-infinite-table.tsx`,
   фильтр `billable`/`status`/`kind` через `StudioForm.UrlSync`).
@@ -64,9 +75,15 @@
   зависания на нём. `readUrlValues` (чистая функция) не трогать — регрессия тестируется отдельно.
 - **Затронутые приложения:** все потребители `useFormUrlSync` с полями `Select`/`Combobox` внутри
   SSR-страниц (не только studio) — баг системный, не app-specific.
-- **Статус:** ожидание — делегировано `forms-coordinator-dev` (`agent-mail`, thread
-  `form-url-sync-hydration-mismatch-20260917`), не патчится в `apps/studio` напрямую по
-  `.claude/rules/form-delegation.md`.
+- **Решение:** реализовано ровно как предложено (`useState` + `useEffect`), с одним уточнением: в
+  state хранятся не готовый `initialValue`, а переопределения из URL — готовый объект залипал бы на
+  `defaults` первого рендера. Без фильтров в URL лишнего ре-рендера нет. `readUrlValues` и
+  `Form.UrlSync` не менялись. Тесты (`use-form-url-sync.spec.tsx`): первый рендер = defaults;
+  `renderToString` + `hydrateRoot` без hydration-ошибок; внутри `<Form>` поле получает значение, а
+  `UrlSync` не стирает параметр; изменение `defaults` подхватывается.
+  Разбор — `.claude/docs/letar-forms-urlsync-window-read-in-render-hydration.md`.
+- **Статус:** закрыто, `@letar/forms` 2.14.19 → 2.14.20 (thread
+  `form-url-sync-hydration-mismatch-20260917`).
 
 ### ✅ [2026-09-15] `Field.FileUpload` — дефолтные тексты были захардкожены по-английски (от domwellbes-dev)
 
