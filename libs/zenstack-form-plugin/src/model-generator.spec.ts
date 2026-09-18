@@ -913,6 +913,55 @@ describe('generateModelCode', () => {
     expect(code).toContain('email: z.string().min(5).max(100).email()')
   })
 
+  it('pattern: обычный паттерн вставляется в regex-литерал как есть', () => {
+    const modelInfo: ModelInfo = {
+      name: 'User',
+      excludedFields: [],
+      fields: [
+        field({ name: 'code', type: 'String', formMeta: { constraints: { pattern: '^[A-Z]{2}\\d+\\/x$' } } }),
+      ],
+    }
+
+    const code = generateModelCode(modelInfo, new Set())
+    expect(code).toContain('.regex(/^[A-Z]{2}\\d+\\/x$/)')
+  })
+
+  it('pattern: экранирует «/» и перевод строки, парный обратный слэш не «съедает» следующий символ', () => {
+    const modelInfo: ModelInfo = {
+      name: 'User',
+      excludedFields: [],
+      fields: [
+        field({ name: 'path', type: 'String', formMeta: { constraints: { pattern: '^https?://[a-z/]+\\\\/\n$' } } }),
+      ],
+    }
+
+    const code = generateModelCode(modelInfo, new Set())
+    // `//` → `\/\/`; `/` в классе `[a-z/]` тоже экранируется (безопасно); `\\/` — парный
+    // обратный слэш, поэтому `/` за ним экранируется отдельно
+    expect(code).toContain('.regex(/^https?:\\/\\/[a-z\\/]+\\\\\\/\\n$/)')
+  })
+
+  it('pattern: в теле regex-литерала не остаётся неэкранированного «/»', () => {
+    const pattern = '^a/b|c\\/d[/]$'
+    const modelInfo: ModelInfo = {
+      name: 'User',
+      excludedFields: [],
+      fields: [field({ name: 'code', type: 'String', formMeta: { constraints: { pattern } } })],
+    }
+
+    const code = generateModelCode(modelInfo, new Set())
+    // Тело — всё между `.regex(/` и `/)`; парные `\x` вычёркиваем, оставшийся `/` завершил бы литерал
+    const body = code.match(/\.regex\(\/(.*)\/\)/)?.[1]
+    expect(body).toBeDefined()
+    expect((body as string).replace(/\\./g, '')).not.toContain('/')
+    // Экранирование не меняет смысл паттерна
+    const generated = new RegExp(body as string)
+    const original = new RegExp(pattern)
+    for (const sample of ['a/b', 'c/d', 'x/', 'a/bx', '/']) {
+      expect(generated.test(sample)).toBe(original.test(sample))
+    }
+  })
+
   it('применяет exclusiveMin/exclusiveMax через .gt()/.lt() (наследование @gt/@lt)', () => {
     const modelInfo: ModelInfo = {
       name: 'Product',

@@ -7,7 +7,7 @@ import type {
   TypeDef,
 } from '@zenstackhq/language/ast'
 import { findUnknownMetaFormPaths, parseMetaAttributes } from './parser.js'
-import { quoteTsString } from './ts-literal.js'
+import { quoteRegexLiteral, quoteTsString } from './ts-literal.js'
 import type {
   FormFieldMeta,
   I18nConfig,
@@ -777,7 +777,7 @@ function generateConstraints(constraints: ZodConstraints | undefined, prismaType
       parts.push(`.max(${constraints.maxLength})`)
     }
     if (constraints.pattern) {
-      parts.push(`.regex(/${constraints.pattern}/)`)
+      parts.push(`.regex(${quoteRegexLiteral(constraints.pattern)})`)
     }
     if (constraints.email) {
       parts.push('.email()')
