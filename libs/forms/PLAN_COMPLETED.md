@@ -19,6 +19,11 @@
 4. **Экранирование строк генератора (`zenstack-form-plugin` 4.1.1)** — `quoteTsString`: `title`/
    `placeholder`/`description`, `label` enum, строковый `@default`. Обычный текст не меняется, дифа
    `src/generated` нет.
+   **Докрыто позже той же датой (4.1.2, 4.1.3):** `constraints.startsWith`/`endsWith`/`contains` и
+   `fieldType` — через `quoteTsString`; `constraints.pattern` — новый `quoteRegexLiteral`
+   (экранирует `/`, переводы строки; пары с обратным слэшем не трогает). TDD, дифа
+   `apps/form-example/src/generated` нет (у `form-develop-app` `src/generated` не под git — проверка
+   там пустая). Остальные `'${…}'` в плагине — идентификаторы.
 5. **Ревизия PLAN:** TableEditor/NumberInput/Field.Date закрыты ✅ по коду; ⏸️ `ActiveFilterChips`
    подтверждён; 🟡 `EditIntentValue<T>` — открыт parity vue/angular.
 6. **Находка при сборке:** язык `zmodel` в MDX ломал `nx build form-docs` (`ShikiError`) — заменён на

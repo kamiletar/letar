@@ -29,7 +29,11 @@
 - **Решение:** `quoteTsString` (`ts-literal.ts`) экранирует `\`, `'`, переводы строк и U+2028/2029 и
   применяется также к `label` значений enum и строковому `@default`. Обычный текст остаётся
   байт-в-байт прежним: `zenstack generate` на `form-example`/`form-develop-app` дифа не даёт.
-- **Статус:** ✅ закрыт (plugin 4.1.1).
+- **Доработка (plugin 4.1.2, 4.1.3):** остались вставки `'${…}'` из пользовательского текста —
+  `constraints.startsWith`/`endsWith`/`contains`, `fieldType` (4.1.2) и `constraints.pattern` в
+  regex-литерале `/…/` (4.1.3, `quoteRegexLiteral`: экранирует `/` и переводы строки). Остальные
+  `'${…}'` в плагине — идентификаторы (модели, поля, enum-значения, ключи i18n), оставлены как есть.
+- **Статус:** ✅ закрыт (plugin 4.1.1, докрыт 4.1.2 и 4.1.3).
 
 ### ✅ [2026-09-19] Директивы подсказки поля `@meta("form.tooltip.*")` в `zenstack-form-plugin` (закрыт plugin v4.1.0/form-mcp v2.1.0, от domwellbes-dev)
 
