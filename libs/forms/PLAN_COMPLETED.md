@@ -1,5 +1,33 @@
 # Выполненные задачи — @letar/forms
 
+## 2026-09-19 (сессия 8, forms-dev) — SSR-гидратация URL-хуков, `form.tooltip.*`, экранирование строк генератора
+
+**Контекст:** `/forms-dev`, две задачи `forms-coordinator-dev` + побочные находки по решению владельца.
+
+**Сделано:**
+
+1. **`useFormUrlSync` (2.14.20)** — первый клиентский рендер расходился с SSR (`window.location` в
+   рендере). Первый рендер = `defaults`, URL читается в `useEffect`; в state только переопределения
+   из URL, поэтому изменение `defaults` не залипает. Тесты `renderToString` + `hydrateRoot`.
+2. **`useUrlPrefill` (2.14.21)** — тот же дефект в `useMemo`. SSR/первый рендер = `{}`, URL читается
+   один раз в `useEffect` (при `cleanUrl` повторное чтение нашло бы очищенный адрес); явный
+   `searchParams` — синхронно. Порядок эффектов сохраняет параметры до чтения. Проверено вживую на
+   `form-example` и `form-docs` (`cleanUrl: true`). Док-ловушка — теперь про два хука.
+3. **`@meta("form.tooltip.<title|description|impact|example>")`** в `zenstack-form-plugin` 4.1.0 +
+   `form-mcp` 2.1.0 (`get_directives`); `description` обязателен, неизвестный подключ ловит детектор
+   опечаток; `form.props.minorUnitScale` проверен до сгенерированной схемы.
+4. **Экранирование строк генератора (`zenstack-form-plugin` 4.1.1)** — `quoteTsString`: `title`/
+   `placeholder`/`description`, `label` enum, строковый `@default`. Обычный текст не меняется, дифа
+   `src/generated` нет.
+5. **Ревизия PLAN:** TableEditor/NumberInput/Field.Date закрыты ✅ по коду; ⏸️ `ActiveFilterChips`
+   подтверждён; 🟡 `EditIntentValue<T>` — открыт parity vue/angular.
+6. **Находка при сборке:** язык `zmodel` в MDX ломал `nx build form-docs` (`ShikiError`) — заменён на
+   `prisma` (form-docs 0.6.11).
+7. Запушено всё (`3564baa57`), включая submodule `domwellbes`; `deploy-agent-dev` снят с retired.
+
+**Не завершено:** деплой `form-docs`/`form-example` — запросы 1736/1737 (agent-mail) деплой-агентом не
+подтверждены, на s2 всё ещё чужой коммит `9bf212525`.
+
 ## 2026-09-15 (сессия 7, forms-coordinator-dev) — разбор накопившегося inbox координатора
 
 **Контекст:** сессия `/forms-coordinator` — не разработка новой фичи, а разбор очереди накопленных
