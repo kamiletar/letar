@@ -2,6 +2,14 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.1.18] - 2026-09-19
+
+### Changed
+
+- `filters-state-demo`: комментарий у `useFormUrlSync` — значения из URL применяются после маунта
+  (`@letar/forms` 2.14.20), первый рендер отдаёт `defaults` и совпадает с SSR. Проверка руками:
+  открыть `/filters-state-demo?category=…` полной навигацией — гидратационных ошибок в консоли нет.
+
 ## [0.1.17] - 2026-09-15
 
 ### Added

@@ -271,6 +271,15 @@ toaster, successMessage })` — обёртка над уже существую�
 
 ---
 
+## useFormUrlSync + SSR-гидратация (исправлено, @letar/forms v2.14.20)
+
+`/filters-state-demo` — эталонная страница для проверки: `useFormUrlSync` больше не читает
+`window.location` в рендере, первый клиентский рендер совпадает с SSR, значения из URL применяются
+`useEffect` после маунта. Разбор — `.claude/docs/letar-forms-urlsync-window-read-in-render-hydration.md`,
+`libs/forms/PLAN.md` Backlog.
+
+---
+
 ## E2E Тесты
 
 ### Покрытие тестами (22 файла)

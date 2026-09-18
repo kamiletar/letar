@@ -297,7 +297,8 @@ function ExternalControls({ formRef }: { formRef: ReturnType<typeof useFormRef<F
 // --- Главная страница ---
 
 export default function FiltersStateDemoPage() {
-  // useFormUrlSync читает начальные значения из URL
+  // useFormUrlSync применяет значения из URL после маунта: первый рендер (SSR и гидратация)
+  // отдаёт defaults, чтобы разметка совпала с серверной — короткая вспышка дефолта ожидаема
   const { initialValue } = useFormUrlSync({
     fields: ['search', 'category', 'minRating', 'onlyFavorites', 'since'],
     defaults: defaultFilters,
