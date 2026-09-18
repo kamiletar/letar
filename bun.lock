@@ -733,7 +733,7 @@
     },
     "apps/form-develop-app": {
       "name": "form-develop-app",
-      "version": "0.1.18",
+      "version": "0.1.19",
       "dependencies": {
         "@letar/env-load": "workspace:*",
         "@letar/forms-core": "workspace:*",
@@ -754,7 +754,7 @@
     },
     "apps/form-docs": {
       "name": "form-docs",
-      "version": "0.6.9",
+      "version": "0.6.10",
       "dependencies": {
         "@letar/forms-core": "workspace:*",
         "@letar/glitchtip": "workspace:*",
@@ -766,7 +766,7 @@
     },
     "apps/form-example": {
       "name": "form-example",
-      "version": "0.1.21",
+      "version": "0.1.22",
       "dependencies": {
         "@letar/demo-protection": "workspace:*",
         "@letar/forms-core": "workspace:*",
@@ -1246,7 +1246,7 @@
     },
     "libs/form-mcp": {
       "name": "@letar/form-mcp",
-      "version": "2.0.0",
+      "version": "2.1.0",
       "dependencies": {
         "@modelcontextprotocol/server": "2.0.0",
         "zod": "4.6.5",
@@ -1725,7 +1725,7 @@
     },
     "libs/zenstack-form-plugin": {
       "name": "@letar/zenstack-form-plugin",
-      "version": "4.0.2",
+      "version": "4.1.0",
       "peerDependencies": {
         "@zenstackhq/sdk": ">=3.0.0",
         "@zenstackhq/zod": ">=3.0.0",
