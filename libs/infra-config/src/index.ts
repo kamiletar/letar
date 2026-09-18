@@ -58,9 +58,15 @@ export const SERVERS: Record<InfraServer, ServerInfo> = {
     role: 'production',
   },
   s3: {
-    // 188.127.235.141 — e2e-раннер + staging. host:3100 занят media-api (media-server),
-    // поэтому dashboard-agent опубликован на 127.0.0.1:13103 (loopback — только SSH-туннель).
-    host: 's3.letar.best',
+    // ⚠️ Ключ `s3` здесь — РОЛЬ «staging + e2e-раннер», а не сервер `s3.letar.best`. С 2026-09-19
+    // (разнос старого s3 188.127.235.141) роль переехала на новый сервер s1 (185.56.162.213,
+    // сборочный), а настоящий s3 (185.130.251.234) — теперь хранилище + media + IPFS + GlitchTip
+    // без dashboard-agent. Переименование ключа в `s1` — отдельная задача (enum серверов в
+    // deploy-mcp, серверный guard dashboard-agent, docker-compose.s3.yml): пока имя роли
+    // историческое, а `host` — уже новый сервер. `deploy_infra(server: 's3')` поэтому попадает
+    // на s1, не на хранилище: media-server/kubo/GlitchTip там обновляются вручную по SSH.
+    // host:3100 на s1 свободен, но порт 13103 оставлен как был (compose и туннель не меняем).
+    host: 's1.letar.best',
     sshUser: 'deploy',
     agentPort: 3100,
     hostPort: 13103,
