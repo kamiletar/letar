@@ -43,6 +43,10 @@ export default function MetaSyntaxDemoPage() {
             <Code fontSize="xs" mt={1}>
               @meta("form.title", "Имя") @meta("form.placeholder", "Как вас зовут")
             </Code>
+            <Code fontSize="xs" mt={1} display="block">
+              @meta("form.tooltip.title", "Имя") @meta("form.tooltip.description", "…") @meta("form.tooltip.impact",
+              "…") — (?) у лейбла (v4.1.0)
+            </Code>
           </Box>
 
           <Box>

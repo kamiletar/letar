@@ -271,6 +271,14 @@ toaster, successMessage })` — обёртка над уже существую�
 
 ---
 
+## form.tooltip.* в zenstack-form-plugin (реализовано, plugin v4.1.0)
+
+`/meta-syntax-demo`: поле «Имя» объявлено с `@meta("form.tooltip.title|description|impact")` в
+`schema.zmodel` — генератор кладёт их в `ui.tooltip`, поле рисует (?)-иконку у лейбла. Подробности —
+`libs/forms/PLAN.md` Backlog, `libs/zenstack-form-plugin/README.md`.
+
+---
+
 ## useFormUrlSync + SSR-гидратация (исправлено, @letar/forms v2.14.20)
 
 `/filters-state-demo` — эталонная страница для проверки: `useFormUrlSync` больше не читает

@@ -2,6 +2,13 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.1.19] - 2026-09-19
+
+### Added
+
+- `meta-syntax-demo`: поле «Имя» получило `@meta("form.tooltip.*")` в `schema.zmodel` — (?)-подсказка
+  рядом с лейблом, сгенерированная `@letar/zenstack-form-plugin` 4.1.0 (`ui.tooltip`).
+
 ## [0.1.18] - 2026-09-19
 
 ### Changed

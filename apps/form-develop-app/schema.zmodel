@@ -219,6 +219,8 @@ model MetaSyntaxDemo {
 
   /// @meta вместо @form.title/@form.placeholder — оба текстовых атрибута
   name        String @meta("form.title", "Имя") @meta("form.placeholder", "Как вас зовут")
+    @meta("form.tooltip.title", "Имя") @meta("form.tooltip.description", "Как к вам обращаться в письмах")
+    @meta("form.tooltip.impact", "Попадёт в приветствие и в подпись заказа")
 
   /// `@meta("form.props.*", …)` — плоский путь вместо объектного литерала `@form.props({...})`:
   /// объектные литералы в `@meta` роняют `zenstack generate` целиком (`ObjectExpr`
