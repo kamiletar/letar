@@ -35,15 +35,16 @@ portions Int @meta("form.props.min", 1) @meta("form.props.max", 100)
 
 ## Поддерживаемые ключи
 
-| Ключ `@meta("form.<key>", …)` | Описание                                 | Пример                                      |
-| ----------------------------- | ---------------------------------------- | ------------------------------------------- |
-| `form.title`                  | Заголовок поля                           | `@meta("form.title", "Название")`           |
-| `form.placeholder`            | Placeholder                              | `@meta("form.placeholder", "Введите...")`   |
-| `form.description`            | Описание поля                            | `@meta("form.description", "Подсказка")`    |
-| `form.fieldType`              | Тип компонента                           | `@meta("form.fieldType", "tags")`           |
-| `form.props.<dotpath>`        | UI-пропсы + escape hatch для constraints | `@meta("form.props.showValue", true)`       |
-| `form.relation.<dotpath>`     | Настройки relation                       | `@meta("form.relation.labelField", "name")` |
-| `form.exclude`                | Исключить из формы                       | `@meta("form.exclude", true)`               |
+| Ключ `@meta("form.<key>", …)` | Описание                                                                 | Пример                                      |
+| ----------------------------- | ------------------------------------------------------------------------ | ------------------------------------------- |
+| `form.title`                  | Заголовок поля                                                           | `@meta("form.title", "Название")`           |
+| `form.placeholder`            | Placeholder                                                              | `@meta("form.placeholder", "Введите...")`   |
+| `form.description`            | Описание поля                                                            | `@meta("form.description", "Подсказка")`    |
+| `form.fieldType`              | Тип компонента                                                           | `@meta("form.fieldType", "tags")`           |
+| `form.props.<dotpath>`        | UI-пропсы + escape hatch для constraints                                 | `@meta("form.props.showValue", true)`       |
+| `form.relation.<dotpath>`     | Настройки relation                                                       | `@meta("form.relation.labelField", "name")` |
+| `form.tooltip.<key>`          | (?)-подсказка: title/description/impact/example (description обязателен) | `@meta("form.tooltip.impact", "…")`         |
+| `form.exclude`                | Исключить из формы                                                       | `@meta("form.exclude", true)`               |
 
 ⚠️ **Ограничения валидации (`min`/`max`/`minLength`/`pattern`/`email` и т.п.) задавай нативными
 атрибутами ZModel (`@gte`/`@lte`/`@length`/`@regex`/`@email`), не через `form.props`** — см.
