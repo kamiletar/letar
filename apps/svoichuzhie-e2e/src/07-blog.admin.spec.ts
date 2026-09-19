@@ -1,4 +1,5 @@
 import { expect, type Page, test } from '@playwright/test'
+import { gotoHydrated } from './helpers/hydration'
 
 /**
  * Открывает первую статью блога, у которой есть секция-галерея с заголовком `sectionTitle`
@@ -101,7 +102,7 @@ test.describe('07 — Blog: галереи и admin-редактор (7.4/8.9)',
   })
 
   test('/admin/articles/new — slug автогенерируется из заголовка', async ({ page }) => {
-    await page.goto('/admin/articles/new')
+    await gotoHydrated(page, '/admin/articles/new')
     await expect(page).not.toHaveURL(/\/login/)
 
     const titleInput = page.locator('input[placeholder*="Название"], input[name="title"]').first()
@@ -118,7 +119,8 @@ test.describe('07 — Blog: галереи и admin-редактор (7.4/8.9)',
   })
 
   test('/admin/articles/[id] — редактирование существующей статьи', async ({ page }) => {
-    await page.goto('/admin/articles')
+    // gotoHydrated, не goto: клик до конца гидратации шапки теряется (helpers/hydration.ts)
+    await gotoHydrated(page, '/admin/articles')
     await expect(page).not.toHaveURL(/\/login/)
 
     // ⚠️ Не `a[href*="/admin/articles/"]` — под эту подстроку попадает и «+ Добавить»
@@ -131,13 +133,9 @@ test.describe('07 — Blog: галереи и admin-редактор (7.4/8.9)',
 
     const editHref = await editLink.getAttribute('href')
     await editLink.click()
-    // networkidle не гарантирует, что успела произойти именно эта клиентская навигация —
-    // в dev-режиме клик иногда теряется из-за нестабильного порядка className при Fast Refresh
-    // (.claude/docs/nextjs16-turbopack-default-emotion-hydration.md), поэтому ждём смены URL явно.
-    // Таймаут 30 с, не 10: /admin/articles/[id] на холодном сервере рендерится дольше 10 с
-    // (компиляция маршрута в dev; на staging — серверные запросы статьи и списков фото/видео
-    // для пикеров под конкуренцией за CPU). В прогретом состоянии переход занимает ~150 мс,
-    // так что длинный таймаут не маскирует потерянный клик — тот всё равно упадёт.
+    // Смену URL ждём явно: networkidle не гарантирует, что успела пройти именно эта клиентская
+    // навигация. Таймаут 30 с, не 10: /admin/articles/[id] на холодном сервере рендерится дольше
+    // (серверные запросы статьи и списков фото/видео для пикеров под конкуренцией за CPU).
     if (editHref) {
       await page.waitForURL((url) => url.pathname === editHref, { timeout: 30_000 })
     }
