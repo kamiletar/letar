@@ -4268,25 +4268,29 @@ animatrona — NVENC-раздел `nvenc-web-video-codec-ladder.md`, строк�
       её сама); wildcard-CNAME `*.s1` перехватывает ненастроенные имена; публичные резолверы держат
       старый ответ ~TTL (300 с), Traefik пишет `dns01: time limit exceeded` — кеш истёк сам, сброс
       у Cloudflare/Google закрыт капчей.
-- [ ] Редеплой staging на s1 (метки `-stage.s1`), затем staging + `run_e2e` для приложений с жёстким
-      e2e-гейтом — их staging-БД на s1 пусты.
-- [ ] Запросы forms-dev на form-docs и form-example (agent-mail 1736/1737) — не исполнены.
-- [ ] `*-stage.s3` redirect URI в prod-БД auth-hub — появятся новые после деплоя auth-hub.
+- [x] Редеплой staging на s1 (метки `-stage.s1`), затем staging + `run_e2e` для приложений с жёстким
+      e2e-гейтом (2026-09-19): auth-hub, archetest, dsperevod (20/24), aboi (49), svoichuzhie (59),
+      aprel8008 (3), studio (31) — все зелёные. Ловушки пустых staging-БД, `chown` статус-каталога,
+      гейта по локальному HEAD — [e2e-testing](/.claude/docs/e2e-testing.md).
+- [x] Запросы forms-dev на form-docs и form-example (agent-mail 1736/1737/1738/1743) исполнены:
+      form-docs 0.6.12, form-example 0.1.22 (2026-09-19).
+- [x] `*-stage.s3` redirect URI в prod-БД auth-hub → `*-stage.s1` (прод-деплой auth-hub с
+      `seed:true`, проверено psql на s2, 2026-09-19).
 - [ ] Релиз Electron-приложения с новым `PINNER4_ADDR`; до него клиент ходит на мёртвый адрес.
 - [x] Живые упоминания IP старого s3 в доках/комментариях актуализированы (2026-09-19):
       `architecture`, `e2e-testing`, `deployment`, `firewall`, `deploy-coordination`,
       `alpine-cdn-unreachable-s3`, `infra/traefik`, `infra/glitchtip`, `infra/animatrona-pinner3`,
-      комментарии `server-config.ts` и двух `Dockerfile.production`. `firewall.md` — только пометка:
-      состояние firewall на новых s1/s3 не проверено.
+      комментарии `server-config.ts` и двух `Dockerfile.production`. `firewall.md`: внешняя проба
+      новых s1/s3 сделана с s2 (2026-09-19), правила `ufw`/`docker-user-firewall.sh` на самих
+      серверах не смотрели — у `deploy` нет `sudo`.
 - [x] Переименовать ключ роли `s3` → `s1` — код и доки (2026-09-19, коммит `931198126`,
       dashboard-agent `0.17.0`). `'s3'` из реестра убран, `deploy_*`/`run_e2e` на него отвечают
       явной ошибкой (решение владельца: путаницы нигде не оставлять — без тихого алиаса и без
       переходного чтения `AGENT_TOKEN_S3`). id cron-задач `*-s3` → `*-s1`, старые в
       `RETIRED_JOB_IDS`. `AGENT_TOKEN_S3` → `AGENT_TOKEN_S1` в `.env.docker.enc` (значение то же).
-  - [ ] ⚠️ Открытый вопрос: **push** коммитов `931198126`/`a56f83c52` ждёт одобрения владельца;
-        заявка `deploy-agent-dev` отправлена (agent-mail #1746, тред
-        `deploy-dashboard-agent-s3-to-s1-rename`), но до push деплой не стартует.
-  - [ ] **Выкат на s1** (только через `deploy-agent-dev`): 1) на сервере переименовать
+  - [x] **push** коммитов `931198126`/`a56f83c52` одобрен и выполнен (2026-09-19).
+  - [x] **Выкат на s1** (2026-09-19; dashboard-agent 0.17.0 на s1 и s2, `deploy_list_servers` →
+        `s1`, `deploy_agent_health(s1)` ok): 1) на сервере переименовать
         `.env.s3-e2e.local` → `.env.s1-e2e.local`, если файл есть (`required: false` при его
         отсутствии молча не прокинет `DEV_SESSION_TOKEN` в e2e-раннер); 2) код и
         `docker-compose.s1.yml` — одним деплоем: старый контейнер идёт со
@@ -4309,6 +4313,40 @@ animatrona — NVENC-раздел `nvenc-web-video-codec-ladder.md`, строк�
 - [ ] ⚠️ Открытый вопрос: 24 ч оплаты старого s3 истекают; доедет ли до нового s3 всё нужное
       (раздачи IPFS осознанно не переносили; GlitchTip: события между дампом 00:35 и переключением
       DNS потеряны).
+
+**Итоги дня 2026-09-19 (deploy-agent, сессия после разноса):**
+
+- [x] Прод по обычному процессу (staging → e2e → production): aboi 0.83.19, svoichuzhie 0.10.68,
+      auth-hub (с сидом), form-docs/form-example, domwellbes 0.290.0. По прямому слову владельца
+      **в обход e2e-гейта** ушли aboi 0.83.18 и svoichuzhie 0.10.65 (MCP обхода не имеет — через
+      `deploy-affected.sh` по SSH; гейт красный из-за устаревших селекторов, не из-за приложений).
+- [x] Причина красного гейта: перенос auth-форм приложений на `@letar/forms` (svoichuzhie
+      `b2276c3`, aboi `cb17c9d`) убрал ручные `id` полей, e2e-селекторы `#email`/`#login-email`
+      не обновили. **Не регрессия `@letar/forms`** (первая гипотеза была неверной). Починено:
+      `4eaa8108c`, `f292948a0`, aboi-e2e `b518644`.
+- [x] Найдено и исправлено: svoichuzhie `/merch/checkout` отдавал 500 на проде (Leaflet в SSR
+      через `@letar/cdek/client`, → `pvz-map-lazy.tsx`, `9f8c0db39`); better-auth 1.7 требует
+      колонки `twoFactor.failedVerificationCount/lockedUntil` (миграция
+      `20260919100000_add_twofactor_lockout`, сделал svoichuzhie-dev); флак e2e правки статьи
+      (`6e0d6cd96`); hydration #418 в `Header` svoichuzhie (`b6a1e1a`, 0.10.68).
+- [x] Порт `3101` (`media-nginx`) на s3 закрыт — `127.0.0.1:3101:80` (`937e2d9bf`).
+- [ ] ⚠️ Открытый вопрос: hydration #418 в `Header` svoichuzhie **вживую не воспроизведён** — фикс
+      защитный (unit-тест красный→зелёный). Если #418 вернётся в GlitchTip, причина не в `Header`.
+- [ ] ⚠️ Открытый вопрос: `libs/auth/src/client/assert-auth-ok.ts` бросает серверный текст
+      («Invalid email or password») раньше русского запасного — пользователь `/login` svoichuzhie
+      видит английскую ошибку; вероятно то же на других страницах с `assertAuthOk`.
+- [ ] ⚠️ Открытый вопрос: staging-сборка aboi на пустой БД падает на гонке
+      `prisma.appSettings.upsert` при пререндере `/admin/settings` (P2002 `AppSettings_pkey`);
+      на проде строка есть. Обход — повторный деплой.
+- [ ] ⚠️ Открытый вопрос: e2e-гейт сравнивает e2e-коммит с **локальным** `HEAD` чекаута
+      deploy-агента, а не с `origin/main`/s1 — чужой непушнутый bump даёт «e2e на X, деплоится Y»
+      при зелёном e2e. Кроме того `run_e2e` игнорирует `extraArgs`.
+- [ ] ⚠️ Открытый вопрос: `forms-coordinator-dev`, `dsperevod-dev`, `svoichuzhie-dev` ретированы в
+      Agent Mail — `send_message` им падает (`reply_message` в существующий тред работает); токенов
+      deploy-агент не имеет.
+- [ ] ⚠️ Открытый вопрос: firewall/`ufw` на новых s1/s3 изнутри не проверены (нет `sudo` у
+      `deploy`); staging-Postgres/redis на s1 публикуются на `0.0.0.0` (снаружи закрыты чем-то на
+      уровне сети/хоста — чем именно, не выяснено).
 
 ⚠️ Порт `55555` на s2 снаружи закрыт (firewall-скрипт задаёт только порты, без привязки к
 источнику), реплика работает через релей Resilio. Прямое соединение s3 → s2 не нужно.
