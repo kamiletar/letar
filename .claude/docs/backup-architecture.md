@@ -220,7 +220,9 @@ Resilio Sync синхронизирует uploads и бэкапы на лока�
 Windows владельца (папка переименована из `lena` в `letar` — таблица ниже это отражает). Второй
 offsite-получатель не заведён — трек на восстановление см.
 [PLAN-INFRA-5.md §90](/PLAN-INFRA-5.md).
-`s3` не подходит на замену «как есть»: там `resilio-sync` не установлен вовсе, а «пиннер», который
+⚠️ **Актуально с 2026-09-19:** на новом `s3` (185.130.251.234) `resilio-sync` установлен и работает как второй
+получатель — см. «Headless-запуск Resilio на новом сервере» ниже. Ниже про «не установлен вовсе» — история до
+разноса s3. `s3` не подходил на замену «как есть»: там `resilio-sync` не был установлен, а «пиннер», который
 там есть, — это `infra/animatrona-pinner3` (IPFS/Kubo для контента Animatrona), не Resilio и не
 имеет отношения к бэкапам этого раздела. Спутать легко из-за совпадения слова «пиннер» в двух
 разных системах.
@@ -254,6 +256,36 @@ offsite-получатель не заведён — трек на восста�
 Лог:    /var/lib/resilio-sync/sync.log
 Пользователь: deploy (override в /etc/systemd/system/resilio-sync.service.d/deploy-user.conf)
 ```
+
+### Headless-запуск Resilio на новом сервере (найдено 2026-09-19)
+
+⚠️ **Копия `config.json` с работающего сервера сама не заработает.** Служба стартует, порт `55555`
+слушается, а лог раз в минуту пишет `SF[…]: Stop synchronization` — и ни одной строки про трекер.
+На старом s3 реплика так пролежала пустой с 2026-09-02: офсайт-копии фактически не было.
+
+Механизм: Resilio 3.x без **идентичности** и **лицензии** держит все папки на паузе
+(`LC: LoadLicenses: there is no pro license`, `stop transfers 2`, `MD: there is no valid license`).
+Без идентичности он даже не ходит к трекеру. WebUI в config-режиме не поднимается (ни `listen`, ни
+`allow_empty_password` не помогают), пароль заводить не нужно.
+
+Порядок, который сработал (лицензия — та же, что на s2, это личная лицензия владельца):
+
+1. `systemctl stop resilio-sync`, состояние очистить (`sync.dat*`, `storage.db*`, `<hash>.*`,
+   `.SyncUser*`, `<dir>/.sync`) — если до этого был неудачный запуск.
+2. Идентичность CLI-командой, **от пользователя службы**, при остановленной службе:
+   `runuser -u deploy -- rslsync --storage /var/lib/resilio-sync --identity <имя>`; процесс
+   не завершается сам — снять `pkill -x rslsync`. Появляется `.SyncUser<число>/identity.dat`.
+3. Лицензию положить файлом: `<SyncUser>/licenses/<hash>/info.dat` скопировать с s2
+   (`/var/lib/resilio-sync/.SyncUser*/licenses/*/info.dat`, 3048 байт), владелец `deploy`.
+   Опция `rslsync --license <файл.btskey>` для личной лицензии **не подходит** —
+   `Failed to apply owner license file` (это формат owner-лицензии).
+4. `systemctl start resilio-sync`; через 1–2 минуты в логе `Got id message from peer …`,
+   каталог растёт. Признак успеха — исчезновение `Stop synchronization`.
+
+Ловушки по дороге: `.sync/ID file is broken` — остаток от первого запуска, лечится очисткой из п. 1;
+удаление одного `.sync` без сброса состояния даёт `ID file is missing` (шара уже записана в
+`sync.dat`, ID заново не создаётся). Два процесса `rslsync` одновременно дают `database is locked`
+и `Database error` на папке — перед любой CLI-командой убедись `pgrep -x rslsync` пусто.
 
 ### Синхронизируемые папки
 
