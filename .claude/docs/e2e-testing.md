@@ -1260,3 +1260,25 @@ ELECTRON_SKIP_BINARY_DOWNLOAD=1 bun install --frozen-lockfile
 # /etc/cron.d/e2e-runner
 0 2 * * * deploy cd /home/deploy/letar && nx run-many --target=e2e --parallel=3
 ```
+
+### Ловушки свежего s1 (2026-09-19, после разноса s3)
+
+⚠️ **Staging-БД на новом сервере пусты.** `run_e2e` без предшествующего `deploy_app(staging, seed:true)`
+даёт десятки «элемент не найден» (пример: archetest — 15 падений `quiz-option`), хотя приложение
+живо. Порядок перед первым прогоном на чистом сервере: `deploy_app(staging, seed: true)` → `run_e2e`.
+
+⚠️ **`.last-e2e-status/reports/` должен принадлежать `deploy`.** Агент пишет статус от root, Playwright —
+от `deploy`; после первого запуска на чистом сервере отчёт падает с `EACCES` при том, что тесты
+зелёные. Лечение: `chown -R deploy:deploy /home/deploy/letar/.last-e2e-status`.
+
+⚠️ **Пробу `pgrep -f "nx e2e"` внутри своей `ssh`-команды не писать** — `pgrep` находит командную
+строку самого `sh -c` и вечно отвечает «идёт». Смотри `ps -eo args | grep -E "playwright.* test"` или
+итоговый `.last-e2e-status/<app>.json`.
+
+⚠️ **Гейт сравнивает e2e-коммит с локальным `HEAD` чекаута deploy-агента**, а не с `origin/main`.
+Чужой непушнутый коммит (например, bump submodule) даёт «e2e прогонялся на X, деплоится Y», хотя
+на s1 всё зелёное. Дождись, пока автор запушит, и повтори staging + e2e.
+
+⚠️ **Красный e2e после переноса форм на `@letar/forms`** — почти всегда устаревшие селекторы:
+автосгенерированные id (`_R_…`) вместо ручных `#email`/`#login-email`. Библиотека не виновата.
+Искать поля по `autocomplete`/`type`/`getByLabel`, не по id.
