@@ -4283,6 +4283,9 @@ animatrona — NVENC-раздел `nvenc-web-video-codec-ladder.md`, строк�
       явной ошибкой (решение владельца: путаницы нигде не оставлять — без тихого алиаса и без
       переходного чтения `AGENT_TOKEN_S3`). id cron-задач `*-s3` → `*-s1`, старые в
       `RETIRED_JOB_IDS`. `AGENT_TOKEN_S3` → `AGENT_TOKEN_S1` в `.env.docker.enc` (значение то же).
+  - [ ] ⚠️ Открытый вопрос: **push** коммитов `931198126`/`a56f83c52` ждёт одобрения владельца;
+        заявка `deploy-agent-dev` отправлена (agent-mail #1746, тред
+        `deploy-dashboard-agent-s3-to-s1-rename`), но до push деплой не стартует.
   - [ ] **Выкат на s1** (только через `deploy-agent-dev`): 1) на сервере переименовать
         `.env.s3-e2e.local` → `.env.s1-e2e.local`, если файл есть (`required: false` при его
         отсутствии молча не прокинет `DEV_SESSION_TOKEN` в e2e-раннер); 2) код и
