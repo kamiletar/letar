@@ -40,18 +40,31 @@ cd /home/deploy/letar
 
 ### Распределение приложений по серверам
 
-| Сервер            | Приложения                                                                                                                                                                                                                                                                                     |
-| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ~~s1.letar.best~~ | ~~выведен из эксплуатации~~                                                                                                                                                                                                                                                                    |
-| **s2.letar.best** | dashboard, dashboard-agent, driving-school, auth-hub, archetest, time, form-docs, form-example, grandslamcup, aira-web, mandala, kami, pravda, umami, animatrona-landing, animatrona-tracker, kami-key-the-landing, letar-landing, dsperevod, aboi, svoichuzhie, aprel8008, studio, domwellbes |
+| Сервер                        | Приложения                                                                                                                                                                                                                                                                                     |
+| ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ~~старый s1 (до 2026-06-20)~~ | ~~выведен из эксплуатации~~                                                                                                                                                                                                                                                                    |
+| **s1.letar.best**             | staging-контур (с 2026-09-19, `185.56.162.213`): staging-инстансы всех приложений `<app>-stage.s1.letar.best`, e2e-раннер, Docker registry, staging-инстанс dashboard-agent. Production-приложений нет                                                                                         |
+| **s3.letar.best**             | хранилище (с 2026-09-19, `185.130.251.234`): media-server, IPFS kubo, animatrona-pin-queue, GlitchTip. Приложения и dashboard-agent не деплоятся, `deploy_*` на него не ходят                                                                                                                  |
+| **s2.letar.best**             | dashboard, dashboard-agent, driving-school, auth-hub, archetest, time, form-docs, form-example, grandslamcup, aira-web, mandala, kami, pravda, umami, animatrona-landing, animatrona-tracker, kami-key-the-landing, letar-landing, dsperevod, aboi, svoichuzhie, aprel8008, studio, domwellbes |
 
 ⚠️ **ВАЖНО:** При деплое убедись, что подключаешься к правильному серверу!
 
-> **Каноничный источник:** `deploy-affected.sh` → массивы `S1_APPS` / `S2_APPS` / `S3_APPS`. Таблица
+> **Каноничный источник:** `deploy-affected.sh` → массивы `S1_APPS` (пустой: на s1 разрешены все приложения — только staging и dashboard-agent) / `S2_APPS`. Массива `S3_APPS` больше нет. Таблица
 > выше — снимок с 2026-08-12 (сверена построчно с живым `S2_APPS`, до этого держала
 > `premium-rosstil`/`imot`, удалённые из монорепо 2026-07-05, и несуществующий пункт
 > `animatrona-web`, при этом не зная про 7 приложений, добавленных позже) — при расхождении верь
 > скрипту, не таблице.
+
+⚠️ **`git fetch` на сервере падает `upload-pack: not our ref <sha>` из-за промежуточного bump submodule.**
+`deploy-affected.sh` начинает с `git fetch origin`, а тот по умолчанию докачивает и submodule-коммиты,
+на которые ссылаются **все** новые коммиты letar, а не только итоговый. Если в середине диапазона лежит
+bump на SHA, которого нет в origin submodule (закоммитили внутри submodule, не запушили, потом
+перебили — 2026-09-19 `3d989166c` → `d13de0244` у domwellbes), fetch падает, а деплой любого приложения
+на этом сервере останавливается до `git submodule update`. Итоговое состояние при этом синхронно, и
+`check-submodule-push-state.sh` зелёный: он смотрит только на HEAD. Обход — один раз на сервере
+`git fetch origin --recurse-submodules=no` (конфиг не трогать), затем обычный деплой: `git pull` уже
+ничего не докачивает и в submodule не лезет. Профилактика: пушить submodule раньше bump, см.
+[git.md](/.claude/rules/git.md) («Порядок push нерушим»).
 
 ## E2E-ранер и деплой — staging-gated пайплайн (PLAN.md §18)
 
