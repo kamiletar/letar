@@ -237,8 +237,8 @@ docker compose pull && docker compose up -d
 | `deploy_status`       | Статус деплоя + инкрементальные логи по курсору `sinceLine`; включает `phases[]`/`stalled`                              |
 | `deploy_wait`         | Long-poll вместо ручного поллинга — отпускает раньше `waitSeconds` (≤120с) при смене фазы/терминале (PLAN-INFRA.md §38) |
 | `deploy_cancel`       | Отмена текущего деплоя (SIGTERM)                                                                                        |
-| `deploy_app`          | Запуск деплоя (`target`: `production`\|`staging`; staging → s3) + e2e-gate                                              |
-| `run_e2e`             | Playwright e2e на s3 против staging-контейнера (Фаза 2)                                                                 |
+| `deploy_app`          | Запуск деплоя (`target`: `production`\|`staging`; staging → s1) + e2e-gate                                              |
+| `run_e2e`             | Playwright e2e на s1 против staging-контейнера (Фаза 2)                                                                 |
 | `e2e_status`          | Статус e2e-прогона + персистентный `lastStatus` (что читает gate)                                                       |
 
 ### Соединение и секреты

@@ -137,7 +137,7 @@ gate на уровне MCP-инструмента `deploy_app`.
 независимы, `grandslamcup` в `HARD_GATED_APPS` не входит.
 
 Полная инфраструктура e2e-ранера (контейнеры, порты, настройка нового приложения, обновление
-репозитория на s1) — [e2e-testing.md § «E2E-ранер на s3»](/.claude/docs/e2e-testing.md#e2e-ранер-на-s3-188127235141).
+репозитория на s1) — [e2e-testing.md § «E2E-ранер на s1»](/.claude/docs/e2e-testing.md#e2e-ранер-на-s1-18556162213).
 API-роут `/api/e2e/run` + `/api/e2e/status` — `apps/dashboard-agent/src/routes/e2e.ts`,
 MCP-инструменты `run_e2e`/`e2e_status` — `libs/deploy-mcp/README.md`.
 

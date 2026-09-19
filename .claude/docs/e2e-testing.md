@@ -479,7 +479,7 @@ Drawer-теста, условный Tab-блок для skip-link-теста), �
 того, как три разных падения на staging (`waitForURL`, `confirmAddToCart`, `leaflet-container`)
 оказались не холодной Turbopack-компиляцией (staging собирается production-билдом `next build`,
 там нет постраничной компиляции по первому запросу), а конкуренцией трёх параллельных browser
-project (chromium/firefox/webkit) за CPU ограниченного staging-контейнера на s3 — chromium
+project (chromium/firefox/webkit) за CPU ограниченного staging-контейнера на s1 — chromium
 стабильно проходил, firefox/webkit стабильно проигрывали гонку. Разбор — `apps/aboi/
 PLAN_COMPLETED.md` § «workers: 1 вместо третьего бампа таймаута».
 
@@ -1104,12 +1104,14 @@ nx e2e animatrona-e2e -- --grep "Import"
 
 ---
 
-## E2E-ранер на s3 (188.127.235.141)
+## E2E-ранер на s1 (185.56.162.213)
 
-> ⚠️ С 2026-09-19 раннер и staging живут на **s1 (185.56.162.213)**, домены — `<app>-stage.s1.letar.best`.
-> Старый s3 (188.127.235.141) отключён; новый s3 — хранилище/media/IPFS/GlitchTip. Ниже `s3` читать как `s1`.
+> ⚠️ До 2026-09-19 раннер и staging жили на старом s3 (188.127.235.141) — он отключён. Теперь они на
+> **s1**, домены — `<app>-stage.s1.letar.best`. Новый s3 (185.130.251.234) — хранилище/media/IPFS/
+> GlitchTip, e2e там нет. Ключ роли `s3` в коде (`libs/infra-config`, deploy-mcp,
+> dashboard-agent) переименовывается в `s1` — PLAN-INFRA-6.md §188.
 
-Все E2E-прогоны переезжают с локальной машины на выделенный сервер s3.
+Все E2E-прогоны переезжают с локальной машины на выделенный сервер s1.
 
 ### Инфраструктура
 
@@ -1130,12 +1132,12 @@ Compose-файл: `/opt/e2e-infra/docker-compose.yml`.
 Беспарольный `redis://172.17.0.1:6380` не сработает.
 
 ⚠️ **Не переводи `e2e-redis` на `127.0.0.1`.** Staging-контейнеры ходят в него через хост-гейтвей
-`172.17.0.1`, loopback-привязка их отрежет. На s3 этот приём вообще неприменим — защиту держит
+`172.17.0.1`, loopback-привязка их отрежет. На s1 этот приём вообще неприменим — защиту держит
 default-deny в `DOCKER-USER`/`INPUT` (см. [firewall.md](/.claude/docs/firewall.md), PLAN-INFRA §49).
 
 ### Запуск — через `run_e2e`, а не по SSH
 
-Прогон запускает `dashboard-agent` на s3 (`POST /api/e2e/run`, обёртка — `run_e2e` в `deploy-mcp`).
+Прогон запускает `dashboard-agent` на s1 (`POST /api/e2e/run`, обёртка — `run_e2e` в `deploy-mcp`).
 Он передаёт `BASE_URL=https://<app>-stage.s1.letar.best`, и Playwright бьёт **в поднятый
 staging-контейнер приложения**, а не в локально стартующий `nx dev`.
 
@@ -1191,12 +1193,12 @@ curl -sS -o /dev/null -w '%{http_code}\n' https://<app>-stage.s1.letar.best/
 nx g @letar/generators:e2e-suite <app>
 ```
 
-Дальше приложению нужен **свой staging-контур на s3** — `docker-compose.staging.yml` с собственной
+Дальше приложению нужен **свой staging-контур на s1** — `docker-compose.staging.yml` с собственной
 БД (порты 5454+) и `.env.staging`. Образец — любое уже подключённое приложение, например
 `apps/archetest/docker-compose.staging.yml`.
 
 ⛔ **Схема «одна общая e2e-БД на 5499 + `.env.local`» больше не применяется.** Так было до перехода
-на staging-контур: приложение поднималось на s3 через `nx dev` и ходило в общий `e2e-postgres`.
+на staging-контур: приложение поднималось на раннере через `nx dev` и ходило в общий `e2e-postgres`.
 Схема плоха тем, что тестировала dev-сборку вместо той, что поедет в прод, и делила состояние между
 приложениями. Сам `e2e-postgres` остановлен 2026-08-07 (PLAN-INFRA §53) — 24 дня без единого
 обращения. Если увидишь в `.env.local` строку вида `postgresql://e2e:e2e@localhost:5499/...` — это
@@ -1205,7 +1207,7 @@ nx g @letar/generators:e2e-suite <app>
 > `DEV_SESSION_TOKEN` при этом **общий для всех приложений**, а не свой на каждое — см. раздел ниже,
 > это отдельная и до сих пор актуальная грабля.
 
-### Особенности s3-ранера
+### Особенности s1-ранера
 
 - `ELECTRON_SKIP_BINARY_DOWNLOAD=1` — обязателен при `bun install` (Electron не нужен на сервере)
 - `bun` симлинкован через `/root/.bun/` — `/root` должен быть доступен для deploy (`chmod o+x /root`)
@@ -1213,7 +1215,7 @@ nx g @letar/generators:e2e-suite <app>
 
 ### `DEV_SESSION_TOKEN` — общий секрет для ВСЕХ приложений, не per-app
 
-**Не генерируй свой `DEV_SESSION_TOKEN` для нового приложения** — `dashboard-agent` на s3
+**Не генерируй свой `DEV_SESSION_TOKEN` для нового приложения** — `dashboard-agent` на s1
 передаёт в `nx e2e <app>-e2e` через `POST /api/e2e/run` **один и тот же** токен из **своего
 собственного окружения** (`--preserve-env=BASE_URL,DEV_SESSION_TOKEN`), а не читает
 `.env.staging`/`.env.local` конкретного приложения. Если сгенерировать уникальный токен per-app
@@ -1222,7 +1224,7 @@ nx g @letar/generators:e2e-suite <app>
 отклонит с 403 — тест упадёт на `dev-session не установил cookie`.
 
 **Правильно:** взять уже существующее значение `DEV_SESSION_TOKEN` из окружения `dashboard-agent`
-на s3 (тот же токен, что и у всех остальных приложений с dev-session e2e — например
+на s1 (тот же токен, что и у всех остальных приложений с dev-session e2e — например
 `grandslamcup`) и прописать его в `.env.staging` нового приложения. Менять общий токен — только
 синхронно во всех `.env.staging` + в самом окружении `dashboard-agent`, никогда по отдельности.
 

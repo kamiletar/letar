@@ -250,7 +250,7 @@
 - [dotenvx-stdout-migration-pollution](/.claude/docs/dotenvx-stdout-migration-pollution.md) P3018
 - [external-services-blocked-from-s2](/.claude/docs/external-services-blocked-from-s2.md)
 - [node-env-not-production-signal](/.claude/docs/node-env-not-production-signal.md) ⚠️ `NODE_ENV === 'production'` не отличает прод от staging и от локальной прод-сборки — `next build`/`next start` всегда выставляют это значение; три реальных случая, где решение (индексация, дев-бэкдоры, debug-панели, verbose-логи) должно смотреть на явный домен/URL, а не на `NODE_ENV`; правило и причина коротко — `.claude/rules/env-files.md`
-- [s3-staging-host-memory-pressure](/.claude/docs/s3-staging-host-memory-pressure.md) ⚠️ узкое место staging/e2e-хоста s3 — RAM, не CPU (найдено 2026-08-27/28 на долгих и нестабильных сборках, dsperevod: 1м22с локально → 4.8 мин на s3 → 14.4 мин на s3 под пиком); до переезда на сервер с большим RAM (~2026-09-20) медленные сборки — осознанно принятое ограничение, не блокер
+- [s3-staging-host-memory-pressure](/.claude/docs/s3-staging-host-memory-pressure.md) ⚠️ узкое место staging/e2e-хоста s3 — RAM, не CPU (найдено 2026-08-27/28 на долгих и нестабильных сборках, dsperevod: 1м22с локально → 4.8 мин на s3 → 14.4 мин на s3 под пиком); цифры — про старый s3 (отключён 2026-09-19, staging/e2e теперь на s1, замер там не делался)
 - [dashboard-agent-alert-debounce-patterns](/.claude/docs/dashboard-agent-alert-debounce-patterns.md)
 - [server-provision](/.claude/docs/server-provision.md)
 - [server-recovery](/.claude/docs/server-recovery.md)

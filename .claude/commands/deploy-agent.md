@@ -145,7 +145,7 @@ send_message(
    deploy_status({ server: "s2", deployId, sinceLine: 0 })  # поллинг; sinceLine = totalLines из прошлого ответа
    ```
 
-   - `target: "staging"` → s3 (образ `<app>:staging`). `agent_health({ server })` — если агент не отвечает.
+   - `target: "staging"` → s1 (образ `<app>:staging`). `agent_health({ server })` — если агент не отвечает.
    - Подробнее: [libs/deploy-mcp/README.md](/libs/deploy-mcp/README.md).
 
    **Резервный канал (сырой SSH)** — если deploy-mcp/агент недоступен, или для того, что агент не покрывает (первичная настройка приложения, provision):
@@ -211,12 +211,12 @@ Subject: Re: deploy-request: <app-name>
 
 ## Маппинг серверов
 
-**s1 выведен из эксплуатации.** Все production-приложения на s2. s3 — staging/e2e-раннер, не production.
+**прежний s1 выведен из эксплуатации 2026-06-20; с 2026-09-19 `s1` — новый сервер (`185.56.162.213`): staging/e2e-раннер/registry, не production.** Все production-приложения на s2. s3 (`185.130.251.234`) — хранилище (media, IPFS, GlitchTip), dashboard-agent и deploy-инструменты на него не ходят.
 
 | Сервер | Приложения                                                                                                                                                                                                                                                                             |
 | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | s2     | dashboard, dashboard-agent, driving-school, auth-hub, archetest, grandslamcup, time, form-docs, form-example, aira-web, mandala, kami, pravda, umami, animatrona-landing, animatrona-tracker, kami-key-the-landing, letar-landing, dsperevod, aboi, premium-rosstil, imot, svoichuzhie |
-| s3     | staging-инстанс dashboard-agent (`docker-compose.s3.yml`, loopback `127.0.0.1:13103:3100`, отдельный `AGENT_TOKEN_S3`) + Playwright e2e-раннер против staging-контейнеров (`run_e2e`/`e2e_status`)                                                                                     |
+| s1     | staging-инстанс dashboard-agent (`docker-compose.s3.yml` — имя файла пока историческое, loopback `127.0.0.1:13103:3100`, отдельный токен, пока `AGENT_TOKEN_S3`) + Playwright e2e-раннер против staging-контейнеров (`run_e2e`/`e2e_status`)                                           |
 
 ## Агрегация запросов
 
