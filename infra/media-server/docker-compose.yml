@@ -116,9 +116,10 @@ services:
     image: nginx:alpine
     container_name: media-nginx
     ports:
-      # Публикация на хост оставлена намеренно: через неё ходит NPM, и это путь отката,
-      # пока NPM на s3 не остановлен (PLAN-INFRA.md §48 M2).
-      - '3101:80'
+      # Только loopback: Traefik ходит к media-nginx по docker-сети (`media-nginx:80`), а NPM,
+      # ради которого порт торчал на 0.0.0.0, выведен из эксплуатации (2026-08-08). Снаружи
+      # порт не нужен (решение владельца 2026-09-19).
+      - '127.0.0.1:3101:80'
     volumes:
       - /data/processed:/data/processed:ro
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
