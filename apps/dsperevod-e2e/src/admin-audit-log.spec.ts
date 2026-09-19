@@ -33,7 +33,8 @@ test.describe.serial('admin: audit-log регрессия (AuditLog.metadata Jso
   test('редактирование блока контента и просмотр заявки не падают 500', async ({ page }) => {
     await page.goto('/sign-in')
     const emailInput = page.getByPlaceholder('admin@dsperevod.ru')
-    const passwordInput = page.getByPlaceholder('••••••••')
+    // placeholder у поля пароля на /sign-in больше нет (форма на @letar/forms) — ищем по типу
+    const passwordInput = page.locator('input[type="password"]')
     await fillWithHydrationRetry(emailInput, adminEmail)
     await fillWithHydrationRetry(passwordInput, adminPassword)
     // Повторное подтверждение прямо перед submit — WebKit мог сбросить email за время,

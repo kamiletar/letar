@@ -106,7 +106,9 @@ test.describe.serial('email-верификация: resend + verify (Этап 2)
     // 2. Попытка входа без верификации → тупик EMAIL_NOT_VERIFIED
     await page.goto('/sign-in')
     await page.getByPlaceholder('admin@dsperevod.ru').fill(email)
-    await page.getByPlaceholder('••••••••').fill(password)
+    // У поля пароля на /sign-in после переноса на @letar/forms нет placeholder («••••••••» пропал) —
+    // ищем по типу, единственное password-поле формы входа.
+    await page.locator('input[type="password"]').fill(password)
     await page.getByRole('button', { name: 'Войти' }).click()
 
     // Блок повторной отправки появляется только при EMAIL_NOT_VERIFIED
