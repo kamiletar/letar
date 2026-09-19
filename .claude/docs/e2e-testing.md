@@ -1246,7 +1246,7 @@ nx g @letar/generators:e2e-suite <app>
 ### Обновление репозитория
 
 ```bash
-ssh deploy@188.127.235.141
+ssh deploy@185.56.162.213   # s1 (до 2026-09-19 здесь был старый s3)
 cd /home/deploy/letar
 GIT_SSH_COMMAND="ssh -i /home/deploy/.ssh/id_ed25519" git pull --recurse-submodules
 ELECTRON_SKIP_BINARY_DOWNLOAD=1 bun install --frozen-lockfile

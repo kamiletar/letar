@@ -55,21 +55,21 @@ cd /home/deploy/letar
 
 ## E2E-ранер и деплой — staging-gated пайплайн (PLAN.md §18)
 
-**Обновлено сессия D:** ночной cron на s3 (`0 2 * * *`, полный прогон по SSH) остаётся как был —
+**Обновлено сессия D:** ночной cron на s1 (до 2026-09-19 — на старом s3; `0 2 * * *`, полный прогон по SSH) остаётся как был —
 это отдельный процесс, не про конкретный деплой. Отдельно появился **воркфлоу через `deploy-mcp`**,
 завязанный на конкретный коммит и конкретное приложение:
 
 ```
-deploy_app({ app, target: "staging" })                                  → s3: образ <app>:staging,
+deploy_app({ app, target: "staging" })                                  → s1: образ <app>:staging,
                                                                             контейнер на своём хостовом
                                                                             порту (docker-compose.staging.yml)
-run_e2e({ app, baseUrl: "https://<app>-stage.s1.letar.best" })          → s3: nx e2e <app>-e2e против baseUrl
+run_e2e({ app, baseUrl: "https://<app>-stage.s1.letar.best" })          → s1: nx e2e <app>-e2e против baseUrl
                                                                             (BASE_URL — конвенция всех
                                                                             playwright.config.ts)
                                                                             → пишет .last-e2e-status/<app>.json
 deploy_app({ app })                                                      → target production (по умолчанию):
                                                                             deploy-mcp читает
-                                                                            .last-e2e-status/<app>.json на s3.
+                                                                            .last-e2e-status/<app>.json на s1.
 ```
 
 **Два режима гейта одновременно** (2026-07-28, инцидент archetest v0.25.5):
@@ -87,9 +87,11 @@ HTTPS-домен** `<app>-stage.s1.letar.best`, не `localhost`. Cookie/CORS/OI
 живут в другом security-контексте браузера (нет `Secure`-cookie, нет настоящего cross-origin между
 staging-приложением и `auth.letar.best`) — тестирование против `localhost` не проверяет именно то,
 что чаще всего ломается при релизе. Домен — **один лейбл** (`<app>-stage`, дефис, не точка) —
-попадает под уже существующий DNS wildcard `*.s3 CNAME s3.letar.best` (`server-provision.md`),
-новая DNS-запись не нужна (`<app>.stage.s3.letar.best`, с точкой, НЕ подходит — DNS-wildcard
-матчит только один лейбл перед `.s3.letar.best`). NPM на s3 (уже поднят, порты 80/81/443
+попадает под DNS wildcard `*.s1` (с 2026-09-19; раньше — `*.s3 CNAME s3.letar.best`, см.
+`server-provision.md`), новая DNS-запись не нужна (`<app>.stage.s1.letar.best`, с точкой, НЕ
+подходит — DNS-wildcard матчит только один лейбл перед `.s1.letar.best`). ⚠️ Дальше по тексту —
+историческая схема с NPM на старом s3; боевой прокси на обоих новых серверах — Traefik
+([infra/traefik/README.md](/infra/traefik/README.md)). NPM на s3 (был поднят, порты 80/81/443
 публичны) → Proxy Host на этот домен, TLS через стандартный Let's Encrypt HTTP-01 (не wildcard,
 не DNS-01 — обычный флоу NPM, т.к. каждый staging-домен создаётся отдельным Proxy Host с
 собственным сертификатом) → форвард на хостовый порт staging-контейнера через docker-хост-гейтвей
@@ -108,7 +110,7 @@ staging-приложением и `auth.letar.best`) — тестировани�
    `Verification`/`consentLog`/`PushSubscription` не должны попадать в дамп вообще (OAuth-токены,
    session-токены, аудит согласий реальных пользователей — исключение на этапе дампа, не удаление
    после, минимизирует окно, когда сырые секреты вообще где-то лежат вне прод-БД).
-2. Восстановление в `grandslamcup-staging-db` на s3 (после того как staging-деплой уже прогнал
+2. Восстановление в `grandslamcup-staging-db` на s1 (после того как staging-деплой уже прогнал
    миграции — схема должна существовать до `pg_restore --data-only`).
 3. **`bun apps/grandslamcup/scripts/anonymize-staging-db.ts`** (запускать с `DATABASE_URL`,
    указывающим на staging) — псевдонимизирует `User.email/name/image/telegramChatId`, чистит
@@ -135,7 +137,7 @@ gate на уровне MCP-инструмента `deploy_app`.
 независимы, `grandslamcup` в `HARD_GATED_APPS` не входит.
 
 Полная инфраструктура e2e-ранера (контейнеры, порты, настройка нового приложения, обновление
-репозитория на s3) — [e2e-testing.md § «E2E-ранер на s3»](/.claude/docs/e2e-testing.md#e2e-ранер-на-s3-188127235141).
+репозитория на s1) — [e2e-testing.md § «E2E-ранер на s3»](/.claude/docs/e2e-testing.md#e2e-ранер-на-s3-188127235141).
 API-роут `/api/e2e/run` + `/api/e2e/status` — `apps/dashboard-agent/src/routes/e2e.ts`,
 MCP-инструменты `run_e2e`/`e2e_status` — `libs/deploy-mcp/README.md`.
 
