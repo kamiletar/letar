@@ -4240,3 +4240,46 @@ animatrona — NVENC-раздел `nvenc-web-video-codec-ladder.md`, строк�
 `git apply --cached` и коммит без pathspec — между ними другая сессия успела заменить блобы в
 общем индексе. Сверка `git diff --cached --name-only` перед коммитом была, но команда шла цепочкой
 через `&&` и не остановилась.
+
+## §188 (2026-09-19) Разнос старого s3 на два сервера: s1 (сборка/staging/e2e) и s3 (хранилище)
+
+Старый s3 (`188.127.235.141`) отключён за неуплату; оплачен один день на перенос. Разнесён на два
+новых сервера. Роли и что где живёт — [deployment](/.claude/docs/deployment.md),
+[traefik](/infra/traefik/README.md).
+
+- [x] **s1** `185.56.162.213`: Traefik (`docker-compose.s1.yml`, `traefik.s1.yml`, `dynamic/s1/`),
+      registry, staging-инстанс dashboard-agent, e2e-redis, Playwright (3 браузера), сборка и staging.
+      Wildcard `*.s1.letar.best` выпущен через acme-dns (до 2026-12-17).
+- [x] **s3** `185.130.251.234`: Traefik, media-server, kubo (тот же PeerID, раздачи не переносили),
+      pin-queue, GlitchTip (БД из дампа, 26 проектов / 854 issue сошлись).
+- [x] Staging-домены переименованы `*.s3` → `*.s1.letar.best` **в git** (коммит `60af7b05f`), а не
+      DNS-жонглированием (решение владельца). На s3 остались `errors.s3`, `pin1.s3`, `media`, `ipfs`.
+- [x] Ключ `s3` в `libs/infra-config` — теперь **роль «staging»**, `host = s1.letar.best`
+      (`9bf212525`). Настоящее переименование ключа в `s1` — отдельная задача ниже.
+- [x] acme-api allowlist на s2 — оба новых IP вместо старого (`546f31889`).
+- [x] `pin1.s3`: 502 → 200. Сервис на новом s3 слушал только loopback, Traefik из контейнера не
+      достаёт; `BIND_ADDR=172.17.0.1` (адрес docker-моста), правка вне git в `/opt/pin-queue`.
+- [x] `PINNER4_ADDR` в `libs/ipfs-kubo-core` → новый s3 (`f9e4f80ab`, версия 0.1.1).
+- [x] **Resilio-реплика бэкапов s2 на s3 заработала.** Причина простоя с 2026-09-02 — отсутствие
+      идентичности и лицензии (`stop transfers 2`), а не сеть и не ключ. Механизм и порядок —
+      [backup-architecture](/.claude/docs/backup-architecture.md#headless-запуск-resilio-на-новом-сервере-найдено-2026-09-19).
+      Пока реплика пустовала, офсайт-копия была одна (Windows владельца).
+- [x] Ловушки выпуска сертификата: CNAME `_acme-challenge.s1` вводить без зоны (панель дописывает
+      её сама); wildcard-CNAME `*.s1` перехватывает ненастроенные имена; публичные резолверы держат
+      старый ответ ~TTL (300 с), Traefik пишет `dns01: time limit exceeded` — кеш истёк сам, сброс
+      у Cloudflare/Google закрыт капчей.
+- [ ] Редеплой staging на s1 (метки `-stage.s1`), затем staging + `run_e2e` для приложений с жёстким
+      e2e-гейтом — их staging-БД на s1 пусты.
+- [ ] Запросы forms-dev на form-docs и form-example (agent-mail 1736/1737) — не исполнены.
+- [ ] `*-stage.s3` redirect URI в prod-БД auth-hub — появятся новые после деплоя auth-hub.
+- [ ] Релиз Electron-приложения с новым `PINNER4_ADDR`; до него клиент ходит на мёртвый адрес.
+- [ ] Переименовать ключ роли `s3` → `s1` в deploy-mcp / dashboard-agent / infra-config; обновить
+      доки (`deployment.md`, `firewall.md`, `deploy-coordination.md`); MCP-процесс `letar`
+      перезапустить — иначе держит старый host.
+- [ ] Сборка прода на s1 через registry — отдельная будущая задача.
+- [ ] ⚠️ Открытый вопрос: 24 ч оплаты старого s3 истекают; доедет ли до нового s3 всё нужное
+      (раздачи IPFS осознанно не переносили; GlitchTip: события между дампом 00:35 и переключением
+      DNS потеряны).
+
+⚠️ Порт `55555` на s2 снаружи закрыт (firewall-скрипт задаёт только порты, без привязки к
+источнику), реплика работает через релей Resilio. Прямое соединение s3 → s2 не нужно.
