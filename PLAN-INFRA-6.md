@@ -4275,7 +4275,26 @@ animatrona — NVENC-раздел `nvenc-web-video-codec-ladder.md`, строк�
 - [ ] Релиз Electron-приложения с новым `PINNER4_ADDR`; до него клиент ходит на мёртвый адрес.
 - [ ] Переименовать ключ роли `s3` → `s1` в deploy-mcp / dashboard-agent / infra-config; обновить
       доки (`deployment.md`, `firewall.md`, `deploy-coordination.md`); MCP-процесс `letar`
-      перезапустить — иначе держит старый host.
+      перезапустить — иначе держит старый host. Инвентаризация сделана 2026-09-19, правок в коде
+      ещё нет. Затронуто: `libs/infra-config` (`InfraServer`, `SERVERS`, `resolveDeployServer`,
+      `getCurrentServer`, `app-server.ts`), `libs/deploy-mcp` (`TUNNEL_PORTS`, `tokenForServer`,
+      `z.enum` серверов, `agentRequest('s3')`), `apps/dashboard-agent` (`server-config.ts`, guard в
+      `routes/deploy.ts` и `routes/e2e.ts`, 6 cron-задач, `docker-compose.s3.yml`),
+      `deploy-affected.sh`, `scripts/deploy-infra.sh`.
+  - [ ] ⚠️ Открытый вопрос: убрать `'s3'` из реестра (deploy-mcp отвечает явной ошибкой «s3 —
+        хранилище без агента, staging = s1») или оставить тихий алиас `s3→s1`. Рекомендация —
+        убрать: алиас воспроизводит путаницу, ради которой затевается переименование.
+  - [ ] ⚠️ Открытый вопрос: id cron-задач (`registry-gc-s3`, `next-cache-cleanup-s3` и др.)
+        персистентны в БД агента. Рекомендация — id не менять, править `server`/имя; иначе
+        остаются дубли и осиротевшие записи.
+  - [ ] ⚠️ Открытый вопрос: токен `AGENT_TOKEN_S3` → `AGENT_TOKEN_S1` (то же значение, через
+        `scripts/sops-env-set.sh`), на переходе читать оба.
+  - [ ] Порядок выката: код и новый `docker-compose.s1.yml` агента должны ехать одним деплоем
+        (агент на s1 сейчас со `SERVER_NAME=s3.letar.best`, при рассинхроне `getCurrentServer`
+        уйдёт в fallback `s2` и агент отвергнет staging-деплои). Деплой — только через
+        `deploy-agent-dev`.
+  - [ ] ⚠️ Побочная находка: на новом s3 есть Traefik, а dashboard-agent нет — бэкап секретов
+        Traefik (`traefik-backup-s3`) и его проверка свежести покрывают только s1.
 - [ ] Сборка прода на s1 через registry — отдельная будущая задача.
 - [ ] ⚠️ Открытый вопрос: 24 ч оплаты старого s3 истекают; доедет ли до нового s3 всё нужное
       (раздачи IPFS осознанно не переносили; GlitchTip: события между дампом 00:35 и переключением
