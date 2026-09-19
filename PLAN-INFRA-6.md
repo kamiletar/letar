@@ -4273,6 +4273,11 @@ animatrona — NVENC-раздел `nvenc-web-video-codec-ladder.md`, строк�
 - [ ] Запросы forms-dev на form-docs и form-example (agent-mail 1736/1737) — не исполнены.
 - [ ] `*-stage.s3` redirect URI в prod-БД auth-hub — появятся новые после деплоя auth-hub.
 - [ ] Релиз Electron-приложения с новым `PINNER4_ADDR`; до него клиент ходит на мёртвый адрес.
+- [x] Живые упоминания IP старого s3 в доках/комментариях актуализированы (2026-09-19):
+      `architecture`, `e2e-testing`, `deployment`, `firewall`, `deploy-coordination`,
+      `alpine-cdn-unreachable-s3`, `infra/traefik`, `infra/glitchtip`, `infra/animatrona-pinner3`,
+      комментарии `server-config.ts` и двух `Dockerfile.production`. `firewall.md` — только пометка:
+      состояние firewall на новых s1/s3 не проверено.
 - [ ] Переименовать ключ роли `s3` → `s1` в deploy-mcp / dashboard-agent / infra-config; обновить
       доки (`deployment.md`, `firewall.md`, `deploy-coordination.md`); MCP-процесс `letar`
       перезапустить — иначе держит старый host. Инвентаризация сделана 2026-09-19, правок в коде
