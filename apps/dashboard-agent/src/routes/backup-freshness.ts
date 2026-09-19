@@ -1,7 +1,7 @@
 /**
  * Backup Freshness Routes
  * Проверка «есть ли свежий бэкап» для бэкапов, которые создаются вне агента:
- * Maddy (Этап 0.3 корневого PLAN.md), acme-dns на s2 и секреты Traefik на s3 (PLAN-INFRA.md §48).
+ * Maddy (Этап 0.3 корневого PLAN.md), acme-dns на s2 и секреты Traefik на s1 (PLAN-INFRA.md §48).
  */
 
 import type { FastifyInstance } from 'fastify'
@@ -28,7 +28,7 @@ export async function backupFreshnessRoutes(fastify: FastifyInstance): Promise<v
   defineCronRoute(fastify, '/api/cron/acme-dns-backup-freshness-check', runAcmeDnsBackupFreshnessCheck)
 
   /**
-   * POST /api/cron/traefik-backup-freshness-check — прогон проверки секретов Traefik на s3
+   * POST /api/cron/traefik-backup-freshness-check — прогон проверки секретов Traefik на s1
    */
   defineCronRoute(fastify, '/api/cron/traefik-backup-freshness-check', runTraefikBackupFreshnessCheck)
 }

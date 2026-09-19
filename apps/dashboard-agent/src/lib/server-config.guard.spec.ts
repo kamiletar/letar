@@ -41,7 +41,7 @@ describe('server-config — синхронизация с @letar/infra-config', 
     expect(getServerForApp('__nonexistent__')).toBe('s2')
   })
 
-  it('s3 не входит в production-маппинг (это staging-раннер, не сервер приложений)', () => {
-    expect(Object.values(SERVER_APPS)).not.toContain('s3')
+  it('s1 не входит в production-маппинг (это staging-раннер, не сервер приложений)', () => {
+    expect(Object.values(SERVER_APPS)).not.toContain('s1')
   })
 })

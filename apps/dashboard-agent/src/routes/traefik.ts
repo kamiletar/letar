@@ -1,6 +1,6 @@
 /**
  * Traefik Routes
- * API для бэкапа секретов Traefik на s3 (PLAN-INFRA.md §48 M2)
+ * API для бэкапа секретов Traefik на s1 (PLAN-INFRA.md §48 M2)
  */
 
 import type { FastifyInstance } from 'fastify'

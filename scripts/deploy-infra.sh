@@ -59,13 +59,12 @@ fi
 case "$CURRENT_HOST" in
   *s1.letar.best* | s1 | server1) SERVER_NAME="s1" ;;
   *s2.letar.best* | s2 | server2) SERVER_NAME="s2" ;;
-  *s3.letar.best* | s3 | server3) SERVER_NAME="s3" ;;
   *) SERVER_NAME="unknown" ;;
 esac
 
 # Server-specific override — полная замена, не merge (тот же паттерн, что
 # docker-compose.<SERVER_NAME>.yml у apps в deploy-affected.sh). Без override — прежнее
-# поведение (docker-compose.yml / secrets/deploy.conf), s3 этот код не задевает вовсе.
+# поведение (docker-compose.yml / secrets/deploy.conf), сервер без override этот код не задевает вовсе.
 COMPOSE_FILE="docker-compose.yml"
 if [[ -f "$SERVICE_DIR/docker-compose.${SERVER_NAME}.yml" ]]; then
   COMPOSE_FILE="docker-compose.${SERVER_NAME}.yml"

@@ -7,12 +7,13 @@
  * ниже — производные экспорты для обратной совместимости (`app-registry.ts`,
  * guard-тесты), сам объект правится в одном месте.
  *
- * s1 выведен из эксплуатации (2026-06-20, сервер больше не принадлежит letar).
+ * s1 — 185.56.162.213 (с 2026-09-19): e2e-раннер + staging + registry (управляется через
+ *      deploy-mcp, не входит в SERVER_APPS). Роль «staging» до 2026-09-19 называлась `s3` по
+ *      имени старого сервера — переименована в `s1` (PLAN-INFRA-6.md §188); прежний s1 выведен
+ *      из эксплуатации 2026-06-20.
  * s2 — s2.letar.best (все production-приложения)
- * s1 — 185.56.162.213 (с 2026-09-19, новый): e2e-раннер + staging + registry (управляется через
- *      deploy-mcp, не входит в SERVER_APPS)
- * s3 — 185.130.251.234 (с 2026-09-19, новый): хранилище/media/IPFS/GlitchTip; старый s3
- *      188.127.235.141 отключён
+ * Настоящий s3 (185.130.251.234: хранилище/media/IPFS/GlitchTip) dashboard-agent не запускает,
+ * в `CronServer` его нет.
  *
  * `port`/`host` — ЛОКАЛЬНАЯ копия подмножества канона `APP_PORTS`/`APP_HOSTS` из
  * `@letar/infra-config` (только те приложения, кого dashboard-agent реально вызывает
@@ -24,7 +25,7 @@
 import { hostname } from 'os'
 
 /** Сервер на котором выполняется задача */
-export type CronServer = 's2' | 's3'
+export type CronServer = 's1' | 's2'
 
 interface AppRegistryEntry {
   server: CronServer
@@ -94,16 +95,16 @@ export const APP_HOSTS: Record<string, string> = Object.fromEntries(
  */
 export function getCurrentServer(): CronServer {
   // Приоритет: переменная окружения > hostname
-  if (process.env.SERVER_NAME?.includes('s3')) {
-    return 's3'
+  if (process.env.SERVER_NAME?.includes('s1')) {
+    return 's1'
   }
   if (process.env.SERVER_NAME?.includes('s2')) {
     return 's2'
   }
 
   const host = hostname()
-  if (host.includes('s3')) {
-    return 's3'
+  if (host.includes('s1')) {
+    return 's1'
   }
   if (host.includes('s2')) {
     return 's2'

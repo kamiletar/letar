@@ -143,18 +143,18 @@ WORKSPACE_ROOT=$(pwd)
 LAST_DEPLOY_DIR="$WORKSPACE_ROOT/.last-deploy"
 
 # Server-specific app configuration
-# s1 выведен из эксплуатации — все приложения на s2
+# s1.letar.best — staging + e2e-раннер + registry (с 2026-09-19; до этого роль называлась `s3`,
+# прежний s1 выведен 2026-06-20). Staging-приложения (через --staging, S1_APPS для них не
+# действует) + отдельные production-инстансы, у которых порт конфликтует с s2 (напр.
+# dashboard-agent, см. PLAN-INFRA.md §66 п.2). Пусто = разрешить любое explicit --app.
 S1_APPS=""
 # s2.letar.best apps
 S2_APPS="dashboard dashboard-agent driving-school auth-hub archetest time form-docs form-example grandslamcup aira-web mandala kami pravda umami animatrona-landing animatrona-tracker kami-key-the-landing letar-landing dsperevod aboi svoichuzhie aprel8008 studio domwellbes"
-# s3.letar.best — staging-приложения (через --staging, SERVER_APPS для них не действует) +
-# отдельные production-инстансы, у которых порт конфликтует с s2 (напр. dashboard-agent,
-# см. PLAN-INFRA.md §66 п.2). Пусто = разрешить любое explicit --app (как раньше для "unknown").
-S3_APPS=""
 
 # Detect current server. Приоритет — явная переменная DEPLOY_SERVER_NAME (для серверов, где
-# hostname -f не совпадает с *.letar.best, например s3 — hostname хостинг-провайдера
-# smartape-vps.com, см. PLAN-INFRA.md §81). hostname -f остаётся фолбэком для остальных.
+# hostname -f не совпадает с *.letar.best — у старого s3 это был hostname хостинг-провайдера,
+# см. PLAN-INFRA.md §81). hostname -f остаётся фолбэком для остальных. Настоящий s3 (хранилище)
+# деплой приложений не обслуживает — case для него нет, сработает ветка «unknown».
 if [ -n "$DEPLOY_SERVER_NAME" ]; then
   CURRENT_HOST="$DEPLOY_SERVER_NAME"
 else
@@ -168,13 +168,6 @@ case "$CURRENT_HOST" in
   *s2.letar.best*|s2|server2)
     SERVER_APPS="$S2_APPS"
     SERVER_NAME="s2"
-    ;;
-  *s3.letar.best*|s3|server3|*smartape-vps.com*)
-    # smartape-vps.com — реальный hostname s3 (см. §81), fallback на случай прямого SSH-запуска
-    # в обход dashboard-agent (там hostname хоста не покрыт DEPLOY_SERVER_NAME из compose-env).
-    # DEPLOY_SERVER_NAME остаётся приоритетным путём — этот паттерн только подстраховка.
-    SERVER_APPS="$S3_APPS"
-    SERVER_NAME="s3"
     ;;
   *)
     # Unknown server - allow all apps (for local testing)
@@ -780,11 +773,11 @@ for app in $AFFECTED_APPS; do
   APP_DIR="apps/${app}"
 
   # Серверный override compose-файла (PLAN-INFRA.md §66 п.2). Раньше скрипт различал только
-  # --staging → docker-compose.staging.yml, иначе всегда docker-compose.production.yml — на s3
+  # --staging → docker-compose.staging.yml, иначе всегда docker-compose.production.yml — на s1
   # это привело к тому, что --app dashboard-agent молча взял продовый compose с портом,
   # занятым media-api ("port is already allocated" — симптом не подсказывал первопричину).
   # Если для приложения на этом сервере лежит собственный docker-compose.<SERVER_NAME>.yml
-  # (сейчас — только apps/dashboard-agent/docker-compose.s3.yml) — используем его вместо
+  # (сейчас — только apps/dashboard-agent/docker-compose.s1.yml) — используем его вместо
   # общего $BASE_COMPOSE_FILE. Staging всегда идёт через docker-compose.staging.yml независимо
   # от сервера — override здесь не применяется.
   COMPOSE_FILE="$BASE_COMPOSE_FILE"
@@ -1171,7 +1164,7 @@ for app in $AFFECTED_APPS; do
   # PLAN-INFRA-1.md §19.1 Трек 1 — блокирующий гейт типов. `nx typecheck:tsgo` — единственная
   # реальная проверка типов в проекте, до этого нигде не вызывалась автоматически (ни в CI, ни в
   # git-хуках, ни здесь) — держалась только на ручной дисциплине «прогнал перед коммитом».
-  # Без условия по $DEPLOY_ENV — одинаково для прода (s2) и стейджа (s3), для всех приложений.
+  # Без условия по $DEPLOY_ENV — одинаково для прода (s2) и стейджа (s1), для всех приложений.
 
   # §19.1 Трек 1b — снятие дублирования для HARD_GATED_APPS на проде. deploy-mcp (evaluateE2eGate)
   # уже ОТКАЗЫВАЕТ в production-деплое этих приложений без свежего зелёного e2e на staging для
@@ -1494,7 +1487,7 @@ if [ ${#DEPLOYED_APPS[@]} -gt 0 ]; then
   phase_marker nginx-reload start
   echo -e "${YELLOW}🔄 Reloading Nginx Proxy Manager to pick up new container IPs...${NC}"
   # Имя контейнера NPM различается по серверам: "nginx-proxy-manager" на s2 (прод),
-  # "npm" на s3 (staging, поднят отдельно от canonical infra/nginx-proxy-manager/docker-compose.yml).
+  # "npm" на s1 (staging, поднят отдельно от canonical infra/nginx-proxy-manager/docker-compose.yml).
   NPM_CONTAINER=""
   for candidate in nginx-proxy-manager npm; do
     if docker exec "$candidate" nginx -s reload 2>/dev/null; then

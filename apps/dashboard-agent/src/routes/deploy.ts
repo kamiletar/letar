@@ -370,7 +370,7 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
   /**
    * POST /api/deploy/app — полный деплой приложения через deploy-affected.sh
    * Body: { appName: string; staging?: boolean; seed?: boolean }
-   * staging: true → deploy-affected.sh --staging (образ <app>:staging, для s3)
+   * staging: true → deploy-affected.sh --staging (образ <app>:staging, для s1)
    * seed: true → deploy-affected.sh --seed (nx run <app>:db:seed после успешного деплоя)
    *
    * Асинхронный: сразу возвращает deployId, клиент опрашивает /api/deploy/status.
@@ -397,16 +397,16 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
         return errorResponse('Invalid app name format')
       }
 
-      // Серверный guard: s3 (staging-раннер) принимает только staging-деплои, s2 (прод) —
+      // Серверный guard: s1 (staging-раннер) принимает только staging-деплои, s2 (прод) —
       // только production. Не даёт случайно задеплоить прод на staging-раннер или staging-
       // мусор на прод, независимо от того, кто и как вызвал API (defence in depth поверх
       // клиентской проверки в deploy-mcp).
       const currentServer = getCurrentServer()
-      if (currentServer === 's3' && !staging) {
-        return errorResponse('s3 — staging-раннер, принимает только staging-деплои (staging: true)')
+      if (currentServer === 's1' && !staging) {
+        return errorResponse('s1 — staging-раннер, принимает только staging-деплои (staging: true)')
       }
       if (currentServer === 's2' && staging) {
-        return errorResponse('s2 — production, staging-деплои идут на s3 (staging: true здесь запрещён)')
+        return errorResponse('s2 — production, staging-деплои идут на s1 (staging: true здесь запрещён)')
       }
 
       // Если уже есть запущенный деплой — отклоняем

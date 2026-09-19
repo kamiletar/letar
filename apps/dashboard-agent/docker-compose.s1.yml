@@ -1,24 +1,24 @@
-# Dashboard Agent — Staging Configuration (s3.letar.best)
+# Dashboard Agent — Staging Configuration (s1.letar.best)
 #
-# Инстанс агента на s3 — сервере e2e-раннера и staging. Управляет staging-деплоями
+# Инстанс агента на s1 — сервере e2e-раннера и staging (до 2026-09-19 роль называлась `s3`). Управляет staging-деплоями
 # (deploy_app target=staging → deploy-affected.sh --app X --staging через nsenter) и
 # e2e-прогонами против staging-контейнеров (Сессия D плана deploy-mcp).
 #
-# Запуск (через BlackCove, s3 — прод-операция):
-#   ./deploy-affected.sh --app dashboard-agent   (на самом s3; SERVER_NAME=s3 → guard пропустит)
+# Запуск (через deploy-agent-dev, s1 — прод-операция):
+#   ./deploy-affected.sh --app dashboard-agent   (на самом s1; SERVER_NAME=s1 → guard пропустит)
 #
 # Отличия от docker-compose.production.yml (s2):
-#   - НЕТ монтирования /secrets/*.env — на s3 нет прод-БД приложений, доступ к прод-
+#   - НЕТ монтирования /secrets/*.env — на s1 нет прод-БД приложений, доступ к прод-
 #     секретам не нужен (staging использует свои e2e/staging-БД).
 #   - НЕТ монтирования ~/.ssh — git remote операции в контейнере не нужны; staging-деплой
 #     идёт через nsenter в контексте ХОСТА (host SSH), не через контейнерный git.
-#   - SERVER_NAME=s3.letar.best — getCurrentServer() вернёт 's3', серверный guard в
+#   - SERVER_NAME=s1.letar.best — getCurrentServer() вернёт 's1', серверный guard в
 #     deploy.ts примет только target=staging (случайный прод-деплой на staging-раннер
 #     невозможен).
 #
-# ⚠️ AGENT_TOKEN: .env.docker на s3 ДОЛЖЕН содержать ОТДЕЛЬНЫЙ токен, не равный
-# прод-токену s2 (staging ниже по доверию). Раскладывается при provision s3 через
-# BlackCove (openssl rand -base64 32), не переиспользуется из s2.
+# ⚠️ AGENT_TOKEN: .env.docker на s1 ДОЛЖЕН содержать ОТДЕЛЬНЫЙ токен, не равный
+# прод-токену s2 (staging ниже по доверию). Раскладывается при provision s1 через
+# deploy-agent-dev (openssl rand -base64 32), не переиспользуется из s2.
 
 services:
   app:
@@ -34,38 +34,38 @@ services:
     pid: host
     privileged: true
     ports:
-      # host:3100 занят media-api → публикуем на 13103, и только на loopback:
+      # на старом s3 host:3100 был занят media-api → публикуем на 13103, и только на loopback:
       # SSH-туннель deploy-mcp достаёт (localhost:13103 на хосте), снаружи недоступен
       # (закрытие порта от интернета получаем даром, ufw не нужен). hostPort=13103
-      # синхронизирован с libs/infra-config (SERVERS.s3.hostPort).
+      # синхронизирован с libs/infra-config (SERVERS.s1.hostPort).
       - '127.0.0.1:13103:3100'
     env_file:
       - .env.docker
-      # Локальный, НЕ коммитится (.gitignore: .env.*), только на s3. Прокидывает
+      # Локальный, НЕ коммитится (.gitignore: .env.*), только на s1. Прокидывает
       # DEV_SESSION_TOKEN/ALLOW_DEV_SESSION в spawn-окружение e2e-раннера (nsenter
       # наследует env этого процесса, см. routes/e2e.ts) — сюда, а НЕ в .env.docker(.enc),
       # по правилу из .claude/rules/env-files.md (эти две переменные никогда не должны
       # попасть в прод-секреты). required:false — деплой не падает, если файла ещё нет.
-      - path: .env.s3-e2e.local
+      - path: .env.s1-e2e.local
         required: false
     environment:
       TZ: Europe/Moscow
       NODE_ENV: production
       PORT: 3100
       HOST: 0.0.0.0
-      SERVER_NAME: s3.letar.best
+      SERVER_NAME: s1.letar.best
       # §81: nsenter-спавн deploy.ts/e2e.ts наследует env контейнера, не shell хоста —
-      # .bashrc на s3 никогда не сорсится в этой цепочке. Здесь (git-файл, не секрет)
+      # .bashrc на s1 никогда не сорсится в этой цепочке. Здесь (git-файл, не секрет)
       # переменная переживает любой передеплой, в отличие от правки .env.docker,
       # которую deploy-affected.sh перезатирает расшифровкой .env.docker.enc.
-      DEPLOY_SERVER_NAME: s3
+      DEPLOY_SERVER_NAME: s1
       WORKSPACE_PATH: /home/deploy/letar
-      # Отдельный токен s3: AGENT_TOKEN_S3 живёт в общем .env.docker(.enc), сюда
+      # Отдельный токен s1: AGENT_TOKEN_S1 живёт в общем .env.docker(.enc), сюда
       # мапится как AGENT_TOKEN (переопределяет значение из env_file). Единый источник
-      # в .enc → и s3-контейнер валидирует им, и локальный deploy-mcp им же
-      # аутентифицируется (tokenForServer('s3') читает AGENT_TOKEN_S3). Требует
+      # в .enc → и s1-контейнер валидирует им, и локальный deploy-mcp им же
+      # аутентифицируется (tokenForServer('s1') читает AGENT_TOKEN_S1). Требует
       # deploy-affected.sh --env-file .env.docker (уже так) или `--env-file` при ручном up.
-      AGENT_TOKEN: ${AGENT_TOKEN_S3:?AGENT_TOKEN_S3 не задан — сгенерируй и добавь в .env.docker(.enc)}
+      AGENT_TOKEN: ${AGENT_TOKEN_S1:?AGENT_TOKEN_S1 не задан — сгенерируй и добавь в .env.docker(.enc)}
     volumes:
       # Docker socket для управления staging-контейнерами
       - /var/run/docker.sock:/var/run/docker.sock

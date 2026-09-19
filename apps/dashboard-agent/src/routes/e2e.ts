@@ -1,7 +1,7 @@
 /**
  * E2E API Routes
  *
- * Запуск Playwright e2e-прогона на s3 (единственный e2e-раннер, см. e2e-testing.md)
+ * Запуск Playwright e2e-прогона на s1 (единственный e2e-раннер, см. e2e-testing.md)
  * против staging-контейнера приложения и чтение персистентного статуса. Часть
  * staging-gated пайплайна (PLAN.md §18 Сессия D): deploy-mcp читает
  * `.last-e2e-status/<app>.json` перед production-деплоем (warn-only gate).
@@ -237,14 +237,14 @@ export async function e2eRoutes(fastify: FastifyInstance): Promise<void> {
         return errorResponse('Invalid grep pattern (запрещены кавычки/`$;|&<>\\` и переносы строк, макс. 200 символов)')
       }
       // workers тоже интерполируется в shell-строку — числовая проверка убирает риск инъекции
-      // без regex-эквилибристики. Верхняя граница 16 — щедрый потолок, реальные раннеры s3 меньше.
+      // без regex-эквилибристики. Верхняя граница 16 — щедрый потолок, реальные раннеры s1 меньше.
       if (workers !== undefined && (!Number.isInteger(workers) || workers < 1 || workers > 16)) {
         return errorResponse('Invalid workers value (целое число от 1 до 16)')
       }
 
-      // e2e гоняется только на s3 — там PostgreSQL/Redis E2E-инфра и nightly cron (e2e-testing.md)
-      if (getCurrentServer() !== 's3') {
-        return errorResponse('E2E запускается только на s3 (staging-раннер), этот сервер — не s3')
+      // e2e гоняется только на s1 — там PostgreSQL/Redis E2E-инфра и nightly cron (e2e-testing.md)
+      if (getCurrentServer() !== 's1') {
+        return errorResponse('E2E запускается только на s1 (staging-раннер), этот сервер — не s1')
       }
 
       if (isE2eRunning()) {
@@ -284,7 +284,7 @@ export async function e2eRoutes(fastify: FastifyInstance): Promise<void> {
 
       // nsenter выполняет команду на хосте (pid: host + privileged) — как в deploy.ts.
       // Внутри контейнера dashboard-agent нет ни `nx`, ни воркспейса; сам монорепо и bun/nx
-      // существуют только на хосте s3. `project`/`grep` уже провалидированы выше (regex/deny-лист) —
+      // существуют только на хосте s1. `project`/`grep` уже провалидированы выше (regex/deny-лист) —
       // обязательно до интерполяции в шелл-строку, см. hostShellArgs().
       // ⚠️ grep оборачиваем ДВОЙНЫМИ кавычками, не одинарными: e2eCommand целиком попадает внутрь
       // одинарных кавычек в nxCommand ниже (`bash -c '${e2eCommand}'`) — одинарная кавычка здесь

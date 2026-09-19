@@ -26,7 +26,7 @@ import { getServerForApp, resolveDeployServer, SERVERS } from '@letar/infra-conf
 ### Серверы
 
 ```typescript
-export type InfraServer = 's2' | 's3'
+export type InfraServer = 's1' | 's2'
 
 export interface ServerInfo {
   host: string // хост для SSH и внутренних обращений
@@ -39,8 +39,9 @@ export interface ServerInfo {
 export const SERVERS: Record<InfraServer, ServerInfo>
 ```
 
-`s2` — production (`s2.letar.best`, `hostPort: 3100`). `s3` — staging + e2e-раннер
-(`s3.letar.best`, `hostPort: 13103` — на хосте порт 3100 занят media-api).
+`s2` — production (`s2.letar.best`, `hostPort: 3100`). `s1` — staging + e2e-раннер
+(`s1.letar.best`, `hostPort: 13103`). Настоящий s3 — хранилище/media/IPFS/GlitchTip без
+dashboard-agent — в реестр не входит: deploy-инструменты на него не ходят.
 
 ### Маппинг приложений
 
@@ -50,7 +51,7 @@ export const SERVER_APPS: Record<string, InfraServer>
 /** Сервер, обслуживающий приложение в production. Fallback — s2. */
 export function getServerForApp(app: string): InfraServer
 
-/** production → сервер из SERVER_APPS; staging → всегда s3. */
+/** production → сервер из SERVER_APPS; staging → всегда s1. */
 export function resolveDeployServer(app: string, target: DeployTarget = 'production'): InfraServer
 ```
 
@@ -59,12 +60,12 @@ export function resolveDeployServer(app: string, target: DeployTarget = 'product
 import { type InfraServer, SERVERS } from '@letar/infra-config'
 
 export const TUNNEL_PORTS: Record<InfraServer, number> = {
+  s1: 13101,
   s2: 13100,
-  s3: 13101,
 }
 ```
 
-`s3` в `SERVER_APPS` намеренно не входит — это не сервер приложений, а staging-раннер;
+`s1` в `SERVER_APPS` намеренно не входит — это не сервер приложений, а staging-раннер;
 резолвинг на него идёт по `target === 'staging'` в `resolveDeployServer()`.
 
 ### e2e-гейты

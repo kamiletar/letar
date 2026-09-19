@@ -1,5 +1,5 @@
 /**
- * Плановая остановка простаивающих staging-контейнеров на s3 (PLAN-INFRA §77, разбор —
+ * Плановая остановка простаивающих staging-контейнеров на s1 (PLAN-INFRA §77, разбор —
  * `.claude/docs/s3-staging-host-memory-pressure.md`).
  *
  * `deploy-affected.sh --staging` пересоздаёт только сервис `app` (`up -d --force-recreate app`),

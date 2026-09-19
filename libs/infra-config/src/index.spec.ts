@@ -45,9 +45,9 @@ describe('resolveDeployServer', () => {
     }
   })
 
-  it('staging всегда резолвится на s3, независимо от production-сервера приложения', () => {
+  it('staging всегда резолвится на s1, независимо от production-сервера приложения', () => {
     for (const app of HARD_GATED_APPS) {
-      expect(resolveDeployServer(app, 'staging')).toBe('s3')
+      expect(resolveDeployServer(app, 'staging')).toBe('s1')
     }
   })
 

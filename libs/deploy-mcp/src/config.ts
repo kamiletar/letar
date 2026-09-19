@@ -17,8 +17,8 @@ export const REPO_ROOT = process.env['DEPLOY_MCP_REPO_ROOT'] ?? process.cwd()
 
 /** Локальные порты SSH-туннелей на каждый сервер (форвардятся на hostPort сервера). */
 export const TUNNEL_PORTS: Record<InfraServer, number> = {
+  s1: 13101,
   s2: 13100,
-  s3: 13101,
 }
 
 /** SSH-ключ и бинарь в зависимости от платформы (Windows — полный путь к ssh.exe). */
@@ -67,15 +67,16 @@ function readAgentEnv(): Record<string, string> {
 }
 
 /**
- * Bearer-токен для сервера. s3 (staging) использует отдельный AGENT_TOKEN_S3, если задан;
- * иначе падает на AGENT_TOKEN (с оговоркой — на s3 должен быть свой токен, см. plan).
+ * Bearer-токен для сервера. s1 (staging) использует отдельный AGENT_TOKEN_S1, если задан;
+ * иначе падает на AGENT_TOKEN (с оговоркой — на s1 должен быть свой токен, см. plan).
+ * Прежний AGENT_TOKEN_S3 не читается: переименован без переходного периода, чтобы не было двух имён.
  */
 export function tokenForServer(server: InfraServer): string {
   const env = readAgentEnv()
-  if (server === 's3') {
-    const s3 = env['AGENT_TOKEN_S3']
-    if (s3) {
-      return s3
+  if (server === 's1') {
+    const s1 = env['AGENT_TOKEN_S1']
+    if (s1) {
+      return s1
     }
   }
   const token = env['AGENT_TOKEN']
@@ -92,7 +93,7 @@ export function tokenForServer(server: InfraServer): string {
  * localHeadSha() тогда обгоняет origin/main непушнутыми чужими коммитами и hard e2e-gate
  * блокирует деплой на коммит, который никогда не будет задеплоен (найдено BlackCove, 2026-07-29:
  * archetest заблокирован 4 раза подряд на бегущих de8d375/062c3bb/52b709b, хотя origin/main и
- * s2/s3 всё время стояли на протестированном 5adbadb7).
+ * s2/s1 всё время стояли на протестированном 5adbadb7).
  */
 export function originMainSha(): string {
   execFileSync('git', ['-C', REPO_ROOT, 'fetch', '--quiet', 'origin', 'main'], { encoding: 'utf8' })

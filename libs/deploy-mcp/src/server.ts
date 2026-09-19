@@ -25,7 +25,10 @@ import { z } from 'zod'
 import { agentRequest, type AgentResponse } from './client.js'
 import { isAffectedSince, originMainSha } from './config.js'
 
-const serverEnum = z.enum(['s2', 's3'])
+// 's3' отвергается явно: настоящий s3 — хранилище без dashboard-agent, а роль staging с 2026-09-19 — s1.
+const serverEnum = z.enum(['s1', 's2'], {
+  error: 'server: допустимы s1 (staging) и s2 (прод). s3 — хранилище без dashboard-agent, staging теперь на s1',
+})
 const E2E_GATE_MAX_AGE_MS = 24 * 60 * 60 * 1000
 
 /** Форма ответа `/api/e2e/status` — то же поле, что читает и warn-, и hard-gate. */
@@ -43,7 +46,7 @@ interface E2eGateResult {
 
 /**
  * Оценивает e2e-гейт перед production-деплоем (PLAN.md §18 Сессия D, PLAN-INFRA.md §18.7):
- * читает `.last-e2e-status/<app>.json` на s3 через dashboard-agent и собирает причины
+ * читает `.last-e2e-status/<app>.json` на s1 через dashboard-agent и собирает причины
  * (несвежий/проваленный/отсутствующий прогон, коммит не совпадает, инфраструктурная ошибка).
  *
  * Вызывается только для приложений из `E2E_GATED_APPS` (`@letar/infra-config`) — вызывающий код
@@ -67,7 +70,7 @@ export async function evaluateE2eGate(
   app: string,
   hardGated: boolean,
   fetchStatus: (app: string) => Promise<AgentResponse<E2eStatusResponse>> = (a) =>
-    agentRequest<E2eStatusResponse>('s3', { path: `/api/e2e/status?app=${encodeURIComponent(a)}`, timeoutMs: 10000 }),
+    agentRequest<E2eStatusResponse>('s1', { path: `/api/e2e/status?app=${encodeURIComponent(a)}`, timeoutMs: 10000 }),
   getHeadSha: () => string = originMainSha,
   isAppAffectedSince: (app: string, sinceSha: string) => boolean = isAffectedSince,
 ): Promise<E2eGateResult> {
@@ -75,7 +78,7 @@ export async function evaluateE2eGate(
   try {
     const res = await fetchStatus(app)
     if (!res.success) {
-      reasons.push(`не удалось получить статус e2e на s3 (${res.error ?? 'нет данных'})`)
+      reasons.push(`не удалось получить статус e2e на s1 (${res.error ?? 'нет данных'})`)
       return { blocked: hardGated, reasons }
     }
     const last = res.data?.lastStatus ?? null
@@ -143,7 +146,7 @@ export function createDeployMcpServer(): McpServer {
         '## Приложение → сервер (production)',
         pretty(SERVER_APPS),
         '',
-        '_staging любого приложения резолвится на s3 (target: "staging")._',
+        '_staging любого приложения резолвится на s1 (target: "staging")._',
       ].join('\n'),
     )
   })
@@ -153,7 +156,7 @@ export function createDeployMcpServer(): McpServer {
     description:
       'Health-check dashboard-agent на сервере (GET /health, без авторизации). Отличает «сервер недоступен» от «токен неверный».',
     inputSchema: z.object({
-      server: serverEnum.optional().describe('Сервер: s2 (прод, по умолчанию) или s3 (staging)'),
+      server: serverEnum.optional().describe('Сервер: s2 (прод, по умолчанию) или s1 (staging)'),
     }),
   }, async ({ server = 's2' }) => {
     try {
@@ -169,7 +172,7 @@ export function createDeployMcpServer(): McpServer {
     description:
       'Git-статус репозитория на сервере (GET /api/git/status): ветка, незапушенные/входящие коммиты. Проверяй перед деплоем.',
     inputSchema: z.object({
-      server: serverEnum.optional().describe('Сервер: s2 (прод, по умолчанию) или s3 (staging)'),
+      server: serverEnum.optional().describe('Сервер: s2 (прод, по умолчанию) или s1 (staging)'),
     }),
   }, async ({ server = 's2' }) => {
     try {
@@ -191,7 +194,7 @@ export function createDeployMcpServer(): McpServer {
       '(экономит контекст при поллинге). В ответе totalLines/fromLine для следующего sinceLine.',
     ].join('\n'),
     inputSchema: z.object({
-      server: serverEnum.optional().describe('Сервер: s2 (прод, по умолчанию) или s3 (staging)'),
+      server: serverEnum.optional().describe('Сервер: s2 (прод, по умолчанию) или s1 (staging)'),
       deployId: z.string().optional().describe('ID конкретного деплоя из истории (без него — текущий/последний)'),
       sinceLine: z.number().int().min(0).optional().describe('Вернуть строки лога начиная с этого номера (курсор)'),
     }),
@@ -229,7 +232,7 @@ export function createDeployMcpServer(): McpServer {
       'на туннеле) — при большом деплое зови повторно, пока `running: true`.',
     ].join('\n'),
     inputSchema: z.object({
-      server: serverEnum.optional().describe('Сервер: s2 (прод, по умолчанию) или s3 (staging)'),
+      server: serverEnum.optional().describe('Сервер: s2 (прод, по умолчанию) или s1 (staging)'),
       deployId: z.string().optional().describe('ID конкретного деплоя из истории (без него — текущий/последний)'),
       waitSeconds: z.number().int().min(1).max(120).optional().describe(
         'Сколько максимум ждать (сервер капает до 120с)',
@@ -265,7 +268,7 @@ export function createDeployMcpServer(): McpServer {
     description:
       'Отменяет текущий деплой на сервере (POST /api/deploy/cancel, SIGTERM процессу). ⚠️ Прерывает деплой на полпути.',
     inputSchema: z.object({
-      server: serverEnum.optional().describe('Сервер: s2 (прод, по умолчанию) или s3 (staging)'),
+      server: serverEnum.optional().describe('Сервер: s2 (прод, по умолчанию) или s1 (staging)'),
     }),
   }, async ({ server = 's2' }) => {
     try {
@@ -283,7 +286,7 @@ export function createDeployMcpServer(): McpServer {
   server.registerTool('deploy_app', {
     description: [
       'Запускает деплой приложения (POST /api/deploy/app) — замена сырого SSH + deploy-affected.sh.',
-      'target: "production" (по умолчанию, → сервер приложения) или "staging" (→ s3, образ <app>:staging).',
+      'target: "production" (по умолчанию, → сервер приложения) или "staging" (→ s1, образ <app>:staging).',
       'seed: true → deploy-affected.sh --seed (nx run <app>:db:seed после успешного деплоя).',
       'Возвращает deployId — опрашивай прогресс через deploy_status({ server, deployId, sinceLine }).',
       '⚠️ Изменяет production. Перед деплоем убедись, что коммиты запушены (git_status).',
@@ -298,7 +301,7 @@ export function createDeployMcpServer(): McpServer {
       target: z
         .enum(['production', 'staging'])
         .optional()
-        .describe('production (по умолчанию, сервер приложения) или staging (s3)'),
+        .describe('production (по умолчанию, сервер приложения) или staging (s1)'),
       seed: z.boolean().optional().describe('Запустить nx run <app>:db:seed после успешного деплоя (--seed)'),
     }),
   }, async ({ app, target = 'production', seed = false }) => {
@@ -365,7 +368,7 @@ export function createDeployMcpServer(): McpServer {
       'infra/<service>/secrets/deploy.conf (если он есть у сервиса) и поднимает docker compose up -d.',
       'PLAN-INFRA.md §18.8.1.',
       'В отличие от deploy_app: нет staging/production выбора и нет e2e-гейта — infra-сервис живёт',
-      'на одном конкретном сервере (например traefik — s3, acme-dns — s2), server обязателен.',
+      'на одном конкретном сервере (например traefik — s1, acme-dns — s2), server обязателен.',
       '⚠️ Изменяет инфраструктуру сервера напрямую. Перед деплоем убедись, что коммиты запушены',
       '(git_status) — как и для deploy_app, скрипт поднимает то, что уже в рабочем дереве сервера.',
     ].join('\n'),
@@ -374,7 +377,7 @@ export function createDeployMcpServer(): McpServer {
         .string()
         .regex(/^[a-z0-9-]+$/, 'Имя сервиса: строчные буквы, цифры, дефис')
         .describe('Имя infra/<service>, например "traefik" или "acme-dns"'),
-      server: serverEnum.describe('Сервер, на котором живёт сервис (traefik — s3, acme-dns — s2)'),
+      server: serverEnum.describe('Сервер, на котором живёт сервис (traefik — s1, acme-dns — s2)'),
     }),
   }, async ({ service, server }) => {
     try {
@@ -408,7 +411,7 @@ export function createDeployMcpServer(): McpServer {
   // ─── run_e2e ─────────────────────────────────────────────────────────────────
   server.registerTool('run_e2e', {
     description: [
-      'Запускает Playwright e2e-прогон на s3 (POST /api/e2e/run) против staging-контейнера приложения.',
+      'Запускает Playwright e2e-прогон на s1 (POST /api/e2e/run) против staging-контейнера приложения.',
       'Приложение должно быть уже задеплоено на staging (deploy_app target:"staging"). baseUrl — куда бить',
       '⚠️ ВСЕГДА реальный публичный HTTPS-домен `https://<app>-stage.s1.letar.best`, НИКОГДА',
       '`http://localhost:<port>` — localhost не годится для проверки cookie/CORS/OIDC-редиректов, а',
@@ -434,13 +437,13 @@ export function createDeployMcpServer(): McpServer {
           message: 'baseUrl не должен быть localhost/127.0.0.1 — используй реальный публичный домен '
             + 'https://<app>-stage.s1.letar.best (иначе Playwright поднимет свой dev-сервер и прогон будет ложным)',
         })
-        .describe('Публичный HTTPS-домен staging на s3, например https://aboi-stage.s1.letar.best (НЕ localhost)'),
+        .describe('Публичный HTTPS-домен staging на s1, например https://aboi-stage.s1.letar.best (НЕ localhost)'),
       project: z.string().optional().describe('Playwright project (chromium/firefox/webkit/shard-*); по умолчанию все'),
       grep: z
         .string()
         .max(200, 'grep слишком длинный (макс. 200 символов)')
         .refine((v) => !/['"`$;|&<>\\\r\n]/.test(v), {
-          message: 'grep не должен содержать кавычки/`$;|&<>\\` и переносы строк (интерполируется в shell на s3)',
+          message: 'grep не должен содержать кавычки/`$;|&<>\\` и переносы строк (интерполируется в shell на s1)',
         })
         .optional()
         .describe(
@@ -462,7 +465,7 @@ export function createDeployMcpServer(): McpServer {
     }),
   }, async ({ app, baseUrl, project, grep, workers }) => {
     try {
-      const res = await agentRequest('s3', {
+      const res = await agentRequest('s1', {
         method: 'POST',
         path: '/api/e2e/run',
         body: { app, baseUrl, project, grep, workers },
@@ -473,7 +476,7 @@ export function createDeployMcpServer(): McpServer {
       const data = res.data as { runId?: string } | undefined
       return text(
         [
-          `🧪 E2E для **${app}** запущен на **s3**.`,
+          `🧪 E2E для **${app}** запущен на **s1**.`,
           '',
           `Опрашивай прогресс: \`e2e_status({ app: "${app}", runId: "${data?.runId ?? ''}", sinceLine: 0 })\``,
           '',
@@ -488,7 +491,7 @@ export function createDeployMcpServer(): McpServer {
   // ─── e2e_status ──────────────────────────────────────────────────────────────
   server.registerTool('e2e_status', {
     description: [
-      'Статус e2e-прогона на s3 (GET /api/e2e/status). Без runId — последний прогон приложения.',
+      'Статус e2e-прогона на s1 (GET /api/e2e/status). Без runId — последний прогон приложения.',
       'sinceLine — курсор лога. Всегда возвращает lastStatus (персистентный .last-e2e-status/<app>.json),',
       'даже если сейчас ничего не запущено — это то, что читает warn-gate в deploy_app(production).',
     ].join('\n'),
@@ -510,9 +513,9 @@ export function createDeployMcpServer(): McpServer {
     }
     const qs = params.toString()
     try {
-      const res = await agentRequest('s3', { path: `/api/e2e/status${qs ? `?${qs}` : ''}` })
+      const res = await agentRequest('s1', { path: `/api/e2e/status${qs ? `?${qs}` : ''}` })
       if (!res.success) {
-        return errorText(`ℹ️ e2e на s3: ${res.error ?? 'нет данных'}`)
+        return errorText(`ℹ️ e2e на s1: ${res.error ?? 'нет данных'}`)
       }
       return text(`## E2E статус${app ? ` (${app})` : ''}\n\n${pretty(res.data)}`)
     } catch (err) {

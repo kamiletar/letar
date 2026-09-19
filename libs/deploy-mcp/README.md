@@ -19,19 +19,20 @@ MCP-сервер: структурированный слой над REST API da
 | `deploy_cancel({ server })`                        | Отмена текущего деплоя (SIGTERM)                                                                                                        | `POST /api/deploy/cancel` |
 | `deploy_app({ app, target, seed? })`               | Запуск деплоя (`target`: `production`\|`staging`, `seed`: `--seed`) + e2e-gate (warn-only, hard для `HARD_GATED_APPS`)                  | `POST /api/deploy/app`    |
 | `deploy_infra({ service, server })`                | Деплой `infra/<service>` (Traefik, acme-dns, ...) — расшифровка `secrets/deploy.conf` + `docker compose up -d`, без e2e-gate (§18.8.1)  | `POST /api/deploy/infra`  |
-| `run_e2e({ app, baseUrl, project?, grep? })`       | Запуск Playwright e2e на s3 против `baseUrl`; `grep` — точечный прогон вместо всего набора                                              | `POST /api/e2e/run`       |
+| `run_e2e({ app, baseUrl, project?, grep? })`       | Запуск Playwright e2e на s1 против `baseUrl`; `grep` — точечный прогон вместо всего набора                                              | `POST /api/e2e/run`       |
 | `e2e_status({ app?, runId?, sinceLine? })`         | Статус e2e-прогона + персистентный `lastStatus` (что читает gate)                                                                       | `GET /api/e2e/status`     |
 
-`server` — `s2` (прод, по умолчанию) или `s3` (staging). В `deploy_app` сервер резолвится
-автоматически из `app` + `target` (staging → всегда s3). `run_e2e`/`e2e_status` всегда ходят
-на s3 — это единственный e2e-раннер (см. `e2e-testing.md`). `deploy_infra` не резолвит сервер
+`server` — `s2` (прод, по умолчанию) или `s1` (staging). Значение `s3` отвергается: настоящий s3 —
+хранилище без dashboard-agent, deploy-инструменты на него не ходят. В `deploy_app` сервер резолвится
+автоматически из `app` + `target` (staging → всегда s1). `run_e2e`/`e2e_status` всегда ходят
+на s1 — это единственный e2e-раннер (см. `e2e-testing.md`). `deploy_infra` не резолвит сервер
 автоматически — в отличие от приложений, у infra-сервисов нет единого маппинга «сервис →
-сервер» (`traefik` живёт на s3, `acme-dns` — на s2), `server` в `deploy_infra` обязателен.
+сервер» (`traefik` живёт на s1, `acme-dns` — на s2), `server` в `deploy_infra` обязателен.
 
 ### e2e-gate в deploy_app(production)
 
 Перед запуском production-деплоя (`target` не `"staging"`) `deploy_app` читает
-`.last-e2e-status/<app>.json` на s3 (через `agent_health`-туннель) и собирает причины, если:
+`.last-e2e-status/<app>.json` на s1 (через `agent_health`-туннель) и собирает причины, если:
 данных нет; последний прогон упал; прогонялся на другом коммите, чем деплоится; старше 24ч;
 или сам запрос статуса не удался (сеть/туннель).
 
@@ -52,7 +53,7 @@ MCP-сервер: структурированный слой над REST API da
 не годится для проверки cookie/CORS/OIDC-редиректов):
 
 ```
-deploy_app({ app: "grandslamcup", target: "staging" })                              // → образ на s3
+deploy_app({ app: "grandslamcup", target: "staging" })                              // → образ на s1
 run_e2e({ app: "grandslamcup", baseUrl: "https://grandslamcup-stage.s1.letar.best" }) // → nx e2e против staging
 e2e_status({ app: "grandslamcup", sinceLine: 0 })                                    // поллинг + финальный lastStatus
 deploy_app({ app: "grandslamcup" })                                                  // production — покажет gate-warnings
@@ -60,7 +61,7 @@ deploy_app({ app: "grandslamcup" })                                             
 
 `baseUrl` — явный параметр (не выводится автоматически): единая конвенция
 `https://<app>-stage.s1.letar.best` (один лейбл — попадает под существующий DNS wildcard
-`*.s3 CNAME s3.letar.best`) → NPM proxy host на s3 (TLS через обычный Let's Encrypt HTTP-01) →
+`*.s1 CNAME s1.letar.best`) → NPM proxy host на s1 (TLS через обычный Let's Encrypt HTTP-01) →
 форвард на хостовый порт staging-контейнера через docker-хост-гейтвей — инфраструктурная задача,
 выполняется через BlackCove/владельца. Данные staging-БД — анонимизированный снепшот прод
 (`apps/<app>/scripts/anonymize-staging-db.ts`), не пустая/seed-БД — подробности в `deployment.md`.
@@ -87,12 +88,12 @@ deploy_wait({ server: "s2", deployId, waitSeconds: 90 })  // ждёт смены
 ## Соединение и безопасность
 
 - **SSH-туннель.** Клиент поднимает `ssh -L <localPort>:localhost:3100 -N deploy@<host>`
-  (s2 → локальный порт 13100, s3 → 13101) и ходит на `127.0.0.1:<localPort>`. Туннель
+  (s2 → локальный порт 13100, s1 → 13101) и ходит на `127.0.0.1:<localPort>`. Туннель
   поднимается лениво при первом обращении и переиспользуется. Порт агента 3100 не обязан
   быть открыт в интернет.
 - **Bearer-токен** читается из `apps/dashboard-agent/.env.docker` (или расшифровывается из
   `.env.docker.enc` через `sops`, нужен `SOPS_AGE_KEY_FILE`) — **не хранится в `.mcp.json`**,
-  по аналогии с `.claude/mcp/pg-wrapper.mjs`. s3 использует отдельный `AGENT_TOKEN_S3`, если
+  по аналогии с `.claude/mcp/pg-wrapper.mjs`. s1 использует отдельный `AGENT_TOKEN_S1`, если
   задан.
 
 ## Диагностика
@@ -121,10 +122,10 @@ Env-override `DEPLOY_MCP_REPO_ROOT` — если cwd не корень репо.
 - **e2e-gate warn-only для приложений вне `HARD_GATED_APPS`** — не блокирует деплой при
   отсутствии/провале e2e-данных. Для `grandslamcup` (PLAN.md §18.6) hard gate — отдельное,
   ещё не принятое решение после недели эксплуатации warn-only.
-- **`run_e2e`/`e2e_status` требуют живого dashboard-agent на s3** — до тех пор возвращают ошибку
+- **`run_e2e`/`e2e_status` требуют живого dashboard-agent на s1** — до тех пор возвращают ошибку
   туннеля/недоступности; для warn-only приложений `deploy_app(production)` при этом всё равно
-  работает (gate просто warn'ит про недоступность s3, не падает), для `HARD_GATED_APPS` —
-  недоступность s3 тоже блокирует (fail-closed).
+  работает (gate просто warn'ит про недоступность s1, не падает), для `HARD_GATED_APPS` —
+  недоступность s1 тоже блокирует (fail-closed).
 - **`run_e2e` таймаут 15 мин** (`apps/dashboard-agent/src/routes/e2e.ts`) — зависший Playwright-
   прогон останавливается (SIGTERM → SIGKILL) и явно пишется как `passed:false`, иначе гейт читал
   бы устаревший «зелёный» статус, не зная о зависшем прогоне.

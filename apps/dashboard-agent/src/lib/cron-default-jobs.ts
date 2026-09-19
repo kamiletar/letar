@@ -229,26 +229,26 @@ export const DEFAULT_CRON_JOBS: CronJob[] = [
     server: 's2',
   },
   {
-    id: 'traefik-backup-s3',
-    name: 'Traefik Secrets Backup S3',
+    id: 'traefik-backup-s1',
+    name: 'Traefik Secrets Backup S1',
     app: 'dashboard-agent',
     endpoint: '/api/traefik/backup',
     schedule: '45 3 * * *',
     description:
-      'Бэкап секретов Traefik на s3 (три per-name аккаунта acme-dns + acme.json + basicAuth). Заведён после переезда s3 на Traefik: до него на s3 действительно нечего было бэкапить, теперь там лежит невосстановимое — PLAN-INFRA.md §48 M2',
+      'Бэкап секретов Traefik на s1 (три per-name аккаунта acme-dns + acme.json + basicAuth). Заведён после переезда staging-сервера на Traefik: до него бэкапить там действительно было нечего, теперь там лежит невосстановимое — PLAN-INFRA.md §48 M2. До 2026-09-19 сервер назывался s3, задача — traefik-backup-s3',
     enabled: true,
-    server: 's3',
+    server: 's1',
   },
   {
     id: 'traefik-backup-freshness-check',
-    name: 'Traefik Backup Freshness Check (s3)',
+    name: 'Traefik Backup Freshness Check (s1)',
     app: 'dashboard-agent',
     endpoint: '/api/cron/traefik-backup-freshness-check',
     schedule: '30 */6 * * *',
     description:
-      'Проверка свежести бэкапа Traefik на s3: алерт BACKUP_FAILED, если самый новый traefik_*.tar.gz старше 30ч. Отдельно от acme-dns-проверки — другой сервер, и свежий архив на s2 не должен закрывать отсутствие архива на s3',
+      'Проверка свежести бэкапа Traefik на s1: алерт BACKUP_FAILED, если самый новый traefik_*.tar.gz старше 30ч. Отдельно от acme-dns-проверки — другой сервер, и свежий архив на s2 не должен закрывать отсутствие архива на s1',
     enabled: true,
-    server: 's3',
+    server: 's1',
   },
   {
     id: 'account-issuer-null-check',
@@ -314,15 +314,15 @@ export const DEFAULT_CRON_JOBS: CronJob[] = [
     server: 's2',
   },
   {
-    id: 'next-cache-cleanup-s3',
-    name: 'Next.js Build Cache Cleanup (s3)',
+    id: 'next-cache-cleanup-s1',
+    name: 'Next.js Build Cache Cleanup (s1)',
     app: 'dashboard-agent',
     endpoint: '/api/cron/next-cache-cleanup',
     schedule: '30 4 * * *',
-    description: 'То же самое, что next-cache-cleanup-s2, но для staging-чекаута на s3 — deploy-affected.sh '
+    description: 'То же самое, что next-cache-cleanup-s2, но для staging-чекаута на s1 — deploy-affected.sh '
       + '--staging тоже пересобирает `.next` при каждом staging-деплое.',
     enabled: true,
-    server: 's3',
+    server: 's1',
   },
   {
     id: 'nx-cache-cleanup-s2',
@@ -338,21 +338,21 @@ export const DEFAULT_CRON_JOBS: CronJob[] = [
     server: 's2',
   },
   {
-    id: 'nx-cache-cleanup-s3',
-    name: 'Nx Cache Cleanup (s3)',
+    id: 'nx-cache-cleanup-s1',
+    name: 'Nx Cache Cleanup (s1)',
     app: 'dashboard-agent',
     endpoint: '/api/cron/nx-cache-cleanup',
     schedule: '40 4 * * *',
-    description: 'То же самое, что nx-cache-cleanup-s2, но для staging-чекаута на s3.',
+    description: 'То же самое, что nx-cache-cleanup-s2, но для staging-чекаута на s1.',
     enabled: true,
-    server: 's3',
+    server: 's1',
   },
   {
-    id: 'registry-gc-s3',
-    name: 'Registry GC (ретеншн тегов, s3)',
+    id: 'registry-gc-s1',
+    name: 'Registry GC (ретеншн тегов, s1)',
     app: 'dashboard-agent',
     endpoint: '/api/cron/registry-gc',
-    // Ночное окно, как у остальных чисток s3 (next-cache-cleanup/nx-cache-cleanup — 04:30/04:40).
+    // Ночное окно, как у остальных чисток s1 (next-cache-cleanup/nx-cache-cleanup — 04:30/04:40).
     // Официальная рекомендация Docker — не пушить в registry во время garbage-collect (race с
     // конкурентным push), окно низкой нагрузки закрывает и это (см. scripts/registry-gc.sh).
     schedule: '50 4 * * *',
@@ -360,21 +360,21 @@ export const DEFAULT_CRON_JOBS: CronJob[] = [
       + 'через registry API, затем `garbage-collect` внутри контейнера registry — TS-порт '
       + 'scripts/registry-gc.sh (infra/registry/README.md § «Ретеншн тегов», PLAN-INFRA-6.md §157)',
     enabled: true,
-    server: 's3',
+    server: 's1',
   },
   {
     id: 'staging-idle-shutdown',
-    name: 'Staging Idle Shutdown (s3)',
+    name: 'Staging Idle Shutdown (s1)',
     app: 'dashboard-agent',
     endpoint: '/api/cron/staging-idle-shutdown',
     schedule: '20 * * * *',
     description: 'Гасит staging-контейнеры (app+db), не пересоздававшиеся ≥24ч (STAGING_IDLE_SHUTDOWN_HOURS) — деплой '
       + 'пересоздаёт только `app`, возраст его контейнера ≈ время последнего использования (деплой всегда идёт '
       + 'перед e2e). `docker stop`, не `rm` — volume остаётся, следующий деплой просто стартует контейнер заново. '
-      + 'До 16 постоянных staging-инстансов на s3 держали ~6.5Gi RSS месяцами без пользы — см. '
+      + 'До 16 постоянных staging-инстансов на s1 (тогда s3) держали ~6.5Gi RSS месяцами без пользы — см. '
       + '.claude/docs/s3-staging-host-memory-pressure.md',
     enabled: true,
-    server: 's3',
+    server: 's1',
   },
   {
     id: 'log-scan',
@@ -516,4 +516,11 @@ export const RETIRED_JOB_IDS: string[] = [
   'dashboard-heartbeat',
   's2-pageview-count',
   's2-ssl-check',
+  // Переименование роли сервера `s3` → `s1` (PLAN-INFRA-6.md §188): id с суффиксом `-s3` заменены
+  // на `-s1`. Без этого списка старые записи остались бы в живом cron-jobs.json рядом с новыми
+  // и дублировали бы их запуск. Расписание/enabled, правленные через UI, у новых id — дефолтные.
+  'traefik-backup-s3',
+  'next-cache-cleanup-s3',
+  'nx-cache-cleanup-s3',
+  'registry-gc-s3',
 ]

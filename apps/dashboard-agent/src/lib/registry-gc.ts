@@ -1,5 +1,5 @@
 /**
- * Ретеншн тегов self-hosted Docker Registry (s3, infra/registry, PLAN-INFRA-6.md §157) —
+ * Ретеншн тегов self-hosted Docker Registry (s1, infra/registry, PLAN-INFRA-6.md §157) —
  * TS-порт `scripts/registry-gc.sh` для планового запуска через cron dashboard-agent, а не
  * только вручную (infra/registry/README.md § «Ретеншн тегов»).
  *
@@ -147,7 +147,7 @@ export async function runRegistryGc(): Promise<RegistryGcResult> {
 
   if (!registryUser || !registryPass) {
     throw new Error(
-      'REGISTRY_USER/REGISTRY_PASS не заданы — секрет не смонтирован в .env.docker dashboard-agent на s3',
+      'REGISTRY_USER/REGISTRY_PASS не заданы — секрет не смонтирован в .env.docker dashboard-agent на s1',
     )
   }
 

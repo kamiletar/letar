@@ -31,7 +31,7 @@ import { getServerForApp, type InfraServer } from './index'
 const COMMAND_SERVER_PATTERN = /\*\*Сервер:\*\*\s*(s\d+)/
 
 /** Известные серверы монорепо — то же множество, что `InfraServer` в `index.ts`. */
-const KNOWN_SERVERS = new Set<InfraServer>(['s2', 's3'])
+const KNOWN_SERVERS = new Set<InfraServer>(['s1', 's2'])
 
 function isKnownServer(value: string): value is InfraServer {
   return KNOWN_SERVERS.has(value as InfraServer)

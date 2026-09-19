@@ -11,6 +11,31 @@
 - Отправка метрик в Dashboard
 - WebSocket для real-time
 
+## [0.17.0] — 2026-09-19
+
+### Changed
+
+- **Роль сервера `s3` → `s1`** (`PLAN-INFRA-6.md` §188). После разноса старого s3 роль
+  «staging + e2e-раннер» живёт на s1 (`185.56.162.213`), а настоящий s3 — хранилище без агента.
+  Ключ `s3` убран из `CronServer` и `getCurrentServer()` (теперь `'s1' | 's2'`), guard'ы в
+  `routes/deploy.ts` и `routes/e2e.ts` проверяют `'s1'`.
+- `docker-compose.s3.yml` → `docker-compose.s1.yml`: `SERVER_NAME=s1.letar.best`,
+  `DEPLOY_SERVER_NAME=s1`, токен `AGENT_TOKEN_S1`, локальный env-файл `.env.s1-e2e.local`.
+- Cron-задачи: `server: 's1'` вместо `'s3'`; id `traefik-backup-s3`, `next-cache-cleanup-s3`,
+  `nx-cache-cleanup-s3`, `registry-gc-s3` → `-s1`. Старые id добавлены в `RETIRED_JOB_IDS`
+  (иначе остались бы в живом `cron-jobs.json` и дублировали запуск); расписание/`enabled`,
+  правленные через UI, у новых id — дефолтные.
+
+### ⚠️ Порядок выката
+
+- **Переименовать на сервере `.env.s3-e2e.local` → `.env.s1-e2e.local`** (если файл есть) до
+  деплоя: `env_file` с `required: false` при отсутствии файла молча не прокинет
+  `DEV_SESSION_TOKEN` в e2e-раннер.
+- `AGENT_TOKEN_S3` в `.env.docker.enc` переименован в `AGENT_TOKEN_S1` (значение то же) —
+  деплой без нового `.enc` упадёт на `${AGENT_TOKEN_S1:?…}`.
+- Код и `docker-compose.s1.yml` должны ехать одним деплоем: старый контейнер запущен со
+  `SERVER_NAME=s3.letar.best`, а новый код `s3` не распознаёт (fallback `s2`).
+
 ## [0.16.5] — 2026-09-06
 
 ### Added

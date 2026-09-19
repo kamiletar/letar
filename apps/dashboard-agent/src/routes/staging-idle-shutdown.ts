@@ -1,6 +1,6 @@
 /**
  * Staging Idle Shutdown Route
- * Плановая остановка простаивающих staging-контейнеров на s3, см. `lib/staging-idle-shutdown.ts`
+ * Плановая остановка простаивающих staging-контейнеров на s1, см. `lib/staging-idle-shutdown.ts`
  */
 
 import type { FastifyInstance } from 'fastify'

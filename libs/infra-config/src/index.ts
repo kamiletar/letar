@@ -16,13 +16,16 @@
  * (`S2_APPS`, строка ~107). Он НЕ импортирует этот файл (bash ≠ TS). При изменении
  * `SERVER_APPS` синхронизируй оба вручную — дрейф ловится на ревью.
  *
- * История: s1 выведен из эксплуатации 2026-06-20 (сервер больше не принадлежит letar).
+ * История: прежний s1 выведен из эксплуатации 2026-06-20. С 2026-09-19 имя `s1` снова занято —
+ * новым сервером (сборка, staging, e2e, registry). Настоящий s3 (хранилище, media, IPFS,
+ * GlitchTip) dashboard-agent не запускает и в этот реестр не входит: раньше роль «staging»
+ * называлась `s3` по имени старого сервера, переименована в `s1` (PLAN-INFRA-6.md §188).
  */
 
 import { hostname } from 'node:os'
 
 /** Серверы, на которых крутятся приложения/агенты letar. */
-export type InfraServer = 's2' | 's3'
+export type InfraServer = 's1' | 's2'
 
 /**
  * Обратная совместимость с прежним именем типа в dashboard-agent.
@@ -41,7 +44,7 @@ export interface ServerInfo {
   /**
    * Порт на ХОСТЕ сервера, на который опубликован dashboard-agent — цель SSH-туннеля
    * (`ssh -L <local>:localhost:<hostPort>`). Может отличаться от agentPort, если 3100
-   * на хосте занят (на s3 его держит media-api → агент опубликован на 13103).
+   * на хосте занят (на s1 порт 3100 может быть занят → агент опубликован на 13103).
    */
   hostPort: number
   /** Роль сервера: production обслуживает боевой трафик, staging — предпрод/e2e. */
@@ -50,6 +53,17 @@ export interface ServerInfo {
 
 /** Реестр серверов. */
 export const SERVERS: Record<InfraServer, ServerInfo> = {
+  s1: {
+    // Роль «staging + e2e-раннер» на сервере s1 (185.56.162.213). Ключ `s3` из реестра убран
+    // намеренно: настоящий s3 (185.130.251.234) — хранилище без dashboard-agent, `deploy_app`/
+    // `deploy_infra`/`run_e2e` на него не ходят (media-server, kubo и GlitchTip там обновляются
+    // вручную по SSH). Порт 13103 — как был у staging-агента (compose и туннель не менялись).
+    host: 's1.letar.best',
+    sshUser: 'deploy',
+    agentPort: 3100,
+    hostPort: 13103,
+    role: 'staging',
+  },
   s2: {
     host: 's2.letar.best',
     sshUser: 'deploy',
@@ -57,27 +71,12 @@ export const SERVERS: Record<InfraServer, ServerInfo> = {
     hostPort: 3100,
     role: 'production',
   },
-  s3: {
-    // ⚠️ Ключ `s3` здесь — РОЛЬ «staging + e2e-раннер», а не сервер `s3.letar.best`. С 2026-09-19
-    // (разнос старого s3 188.127.235.141) роль переехала на новый сервер s1 (185.56.162.213,
-    // сборочный), а настоящий s3 (185.130.251.234) — теперь хранилище + media + IPFS + GlitchTip
-    // без dashboard-agent. Переименование ключа в `s1` — отдельная задача (enum серверов в
-    // deploy-mcp, серверный guard dashboard-agent, docker-compose.s3.yml): пока имя роли
-    // историческое, а `host` — уже новый сервер. `deploy_infra(server: 's3')` поэтому попадает
-    // на s1, не на хранилище: media-server/kubo/GlitchTip там обновляются вручную по SSH.
-    // host:3100 на s1 свободен, но порт 13103 оставлен как был (compose и туннель не меняем).
-    host: 's1.letar.best',
-    sshUser: 'deploy',
-    agentPort: 3100,
-    hostPort: 13103,
-    role: 'staging',
-  },
 }
 
 /**
  * Канонический маппинг «production-приложение → сервер».
  *
- * s3 сюда НЕ входит: это не сервер приложений, а staging-раннер. Резолвинг на s3
+ * s1 сюда НЕ входит: это не сервер приложений, а staging-раннер. Резолвинг на s1
  * происходит по target='staging' в `resolveDeployServer()`, а не по этому маппингу.
  */
 export const SERVER_APPS: Record<string, InfraServer> = {
@@ -139,10 +138,10 @@ export const E2E_GATED_APPS: string[] = [
   'driving-school',
   // studio добавлен 2026-08-28 задним числом: в HARD_GATED_APPS он с 2026-08-06, а сюда его
   // тогда не внесли — реестр молча врал, что staging-e2e у него нет, хотя инфраструктура
-  // (`docker-compose.staging.yml`, порты s3 3032/5465) заведена и прогон 16/16 был зелёный.
+  // (`docker-compose.staging.yml`, порты s1 3032/5465) заведена и прогон 16/16 был зелёный.
   // Расхождение держалось три недели, потому что константу не читает никакой код.
   'studio',
-  // mandala добавлен 2026-09-01: docker-compose.staging.yml + порты s3 заведены давно,
+  // mandala добавлен 2026-09-01: docker-compose.staging.yml + порты s1 заведены давно,
   // но полный прогон 123/123 без единого unexpected впервые получен только сейчас —
   // apps/mandala/PLAN_COMPLETED.md § Раунд 7—8 (accountId в seed, ненадёжный сид согласия
   // баннеров, гонка гидратации при клике по SSR-ссылкам).
@@ -183,19 +182,19 @@ export const HARD_GATED_APPS: string[] = [
 
 /**
  * Определяет текущий сервер по env `SERVER_NAME` или hostname. Fallback — s2.
- * (Раньше fallback был s1 — сервер выведен из эксплуатации.)
+ * Ищет `s1` раньше `s2`; `s3` не распознаётся — на нём dashboard-agent не запускается.
  */
 export function getCurrentServer(): InfraServer {
   const name = process.env.SERVER_NAME ?? ''
-  if (name.includes('s3')) {
-    return 's3'
+  if (name.includes('s1')) {
+    return 's1'
   }
   if (name.includes('s2')) {
     return 's2'
   }
   const host = hostname()
-  if (host.includes('s3')) {
-    return 's3'
+  if (host.includes('s1')) {
+    return 's1'
   }
   if (host.includes('s2')) {
     return 's2'
@@ -208,10 +207,10 @@ export type DeployTarget = 'production' | 'staging'
 
 /**
  * Резолвит сервер для деплоя приложения с учётом target.
- * production → сервер приложения из SERVER_APPS; staging → всегда s3.
+ * production → сервер приложения из SERVER_APPS; staging → всегда s1.
  */
 export function resolveDeployServer(app: string, target: DeployTarget = 'production'): InfraServer {
-  return target === 'staging' ? 's3' : getServerForApp(app)
+  return target === 'staging' ? 's1' : getServerForApp(app)
 }
 
 /**

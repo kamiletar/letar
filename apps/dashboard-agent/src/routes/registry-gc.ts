@@ -1,6 +1,6 @@
 /**
  * Registry GC Route
- * Плановый ретеншн тегов self-hosted Docker Registry на s3, см. `lib/registry-gc.ts`
+ * Плановый ретеншн тегов self-hosted Docker Registry на s1, см. `lib/registry-gc.ts`
  */
 
 import type { FastifyInstance } from 'fastify'
