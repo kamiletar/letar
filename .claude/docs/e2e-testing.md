@@ -1108,8 +1108,8 @@ nx e2e animatrona-e2e -- --grep "Import"
 
 > ⚠️ До 2026-09-19 раннер и staging жили на старом s3 (188.127.235.141) — он отключён. Теперь они на
 > **s1**, домены — `<app>-stage.s1.letar.best`. Новый s3 (185.130.251.234) — хранилище/media/IPFS/
-> GlitchTip, e2e там нет. Ключ роли `s3` в коде (`libs/infra-config`, deploy-mcp,
-> dashboard-agent) переименовывается в `s1` — PLAN-INFRA-6.md §188.
+> GlitchTip, e2e там нет. Ключ роли в коде (`libs/infra-config`, deploy-mcp, dashboard-agent)
+> переименован `s3` → `s1` 2026-09-19 (PLAN-INFRA-6.md §188); `server: "s3"` в deploy-инструментах отвергается.
 
 Все E2E-прогоны переезжают с локальной машины на выделенный сервер s1.
 

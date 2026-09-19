@@ -63,14 +63,14 @@ REGISTRY_USER=admin REGISTRY_PASS=<пароль> scripts/registry-gc.sh
 DRY_RUN=true REGISTRY_USER=admin REGISTRY_PASS=<пароль> scripts/registry-gc.sh
 ```
 
-**Автоматическое расписание заведено (2026-09-06).** `dashboard-agent` на s3 гоняет TS-порт
-скрипта каждую ночь через `POST /api/cron/registry-gc` (job `registry-gc-s3`, `50 4 * * *` —
-то же ночное окно, что у `next-cache-cleanup-s3`/`nx-cache-cleanup-s3`, до общей чистки Docker
+**Автоматическое расписание заведено (2026-09-06).** `dashboard-agent` на s1 гоняет TS-порт
+скрипта каждую ночь через `POST /api/cron/registry-gc` (job `registry-gc-s1`, `50 4 * * *` —
+то же ночное окно, что у `next-cache-cleanup-s1`/`nx-cache-cleanup-s1`, до общей чистки Docker
 build cache). Логика 1:1 повторяет bash-версию, но HTTP через `fetch` (в контейнере агента нет
 `curl`/`jq`) и `garbage-collect` через уже используемый в приложении `dockerode`-клиент, а не
 через `docker-cli` — см. `apps/dashboard-agent/src/lib/registry-gc.ts`.
 `REGISTRY_USER`/`REGISTRY_PASS` — в `.env.docker.enc` dashboard-agent (тот же SOPS-конвейер, что
-у прочих секретов приложения; `env_file:` секции `services.app` в `docker-compose.s3.yml`
+у прочих секретов приложения; `env_file:` секции `services.app` в `docker-compose.s1.yml`
 прокидывает переменные в контейнер автоматически, отдельная правка `environment:` не нужна).
 `KEEP_TAGS`/`DRY_RUN` из bash-версии стали `REGISTRY_GC_KEEP_TAGS`/`REGISTRY_GC_DRY_RUN`
 (тот же смысл, дефолты те же: 3 и `false`).

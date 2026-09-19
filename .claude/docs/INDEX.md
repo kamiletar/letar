@@ -268,7 +268,7 @@
 
 - [nginx-proxy-manager](/infra/nginx-proxy-manager/README.md) ⛔ снят и с s3 (2026-08-08), и с s2 (2026-08-31) — история, не текущее состояние
 - [acme-dns](/infra/acme-dns/README.md) ⭐ wildcard-TLS без API регистратора
-- [traefik](/infra/traefik/README.md) боевой на s2 и s3
+- [traefik](/infra/traefik/README.md) боевой на s1, s2 и s3
 
 ## Безопасность и право
 

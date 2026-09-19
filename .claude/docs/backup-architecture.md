@@ -180,8 +180,8 @@ volumes:
 > **s1 выведен из эксплуатации (2026-06-20).** Прежний `docker-compose.s2.yml` удалён как
 > устаревший дубль (сессия B deploy-mcp, 2026-07-10) — живым всегда был `production.yml`.
 >
-> **s1 (staging/e2e; до 2026-09-19 — старый s3)** использует `docker-compose.s3.yml` (имя файла
-> историческое, переименование — PLAN-INFRA-6.md §188) — он **не монтирует** `/secrets/*.env`,
+> **s1 (staging/e2e; до 2026-09-19 — старый s3)** использует `docker-compose.s1.yml` (до
+> 2026-09-19 — `docker-compose.s3.yml`) — он **не монтирует** `/secrets/*.env`,
 > потому что прод-БД на staging-сервере нет.
 >
 > ⚠️ **Но «на s3 бэкапить нечего» — устарело с 2026-08-08.** Здесь раньше стояла именно такая
@@ -191,8 +191,8 @@ volumes:
 > переделать три `CNAME` у регистратора**. Восстановление упирается и в человека, и во внешний
 > сервис одновременно.
 >
-> Отсюда `traefik-backup-s3` (03:45) + проверка свежести (`traefik-backup-freshness-check`) —
-> см. «Бэкап секретов Traefik (s3)» ниже.
+> Отсюда `traefik-backup-s1` (03:45; до 2026-09-19 — `traefik-backup-s3`) + проверка свежести (`traefik-backup-freshness-check`) —
+> см. «Бэкап секретов Traefik (s1)» ниже.
 >
 > **Урок шире одного сервера:** утверждение «здесь бэкапить нечего» верно не навсегда, а до
 > ближайшего изменения состава системы. Пробел создался не забывчивостью — секунду назад его
@@ -381,7 +381,7 @@ deploy-affected.sh
 deploy-wrapper.sh
 docker-compose.yml
 docker-compose.production.yml
-docker-compose.s3.yml
+docker-compose.s1.yml
 docker-compose.staging.yml
 Dockerfile.production
 vitest.workspace.ts
@@ -611,7 +611,7 @@ SSH-ключ для rsync: `root@mail` → `deploy@s2` (`/root/.ssh/id_ed25519`,
 
 ---
 
-## Бэкап секретов Traefik (s3)
+## Бэкап секретов Traefik (s1)
 
 > Добавлен 2026-08-08, сразу после переезда s3 с NPM на Traefik. Трек —
 > [PLAN-INFRA-2.md §48 M2](/PLAN-INFRA-2.md).
@@ -634,7 +634,7 @@ s2 и база выданных поддоменов, здесь s3 и файл 
 ### Механизм
 
 ```
-cron traefik-backup-s3 (03:45)
+cron traefik-backup-s1 (03:45)
   → dashboard-agent POST /api/traefik/backup
   → tar -czf /home/deploy/lego/acme-dns-accounts.json + infra/traefik/acme/acme.json + infra/traefik/auth/
   → /home/deploy/letar/backups/traefik/traefik_<type>_<timestamp>.tar.gz  (chmod 600)
@@ -643,7 +643,7 @@ cron traefik-backup-freshness-check (30 */6 * * *)
   → алерт BACKUP_FAILED, если самый свежий traefik_*.tar.gz старше 30ч
 ```
 
-⚠️ Требует монтирования `/home/deploy/lego:/home/deploy/lego:ro` в `docker-compose.s3.yml` —
+⚠️ Требует монтирования `/home/deploy/lego:/home/deploy/lego:ro` в `docker-compose.s1.yml` —
 файл лежит вне workspace. Забыть строку = «нечего бэкапить» на каждом прогоне (проверка свежести
 это поймает, но лучше не доводить).
 

@@ -4278,28 +4278,30 @@ animatrona — NVENC-раздел `nvenc-web-video-codec-ladder.md`, строк�
       `alpine-cdn-unreachable-s3`, `infra/traefik`, `infra/glitchtip`, `infra/animatrona-pinner3`,
       комментарии `server-config.ts` и двух `Dockerfile.production`. `firewall.md` — только пометка:
       состояние firewall на новых s1/s3 не проверено.
-- [ ] Переименовать ключ роли `s3` → `s1` в deploy-mcp / dashboard-agent / infra-config; обновить
-      доки (`deployment.md`, `firewall.md`, `deploy-coordination.md`); MCP-процесс `letar`
-      перезапустить — иначе держит старый host. Инвентаризация сделана 2026-09-19, правок в коде
-      ещё нет. Затронуто: `libs/infra-config` (`InfraServer`, `SERVERS`, `resolveDeployServer`,
-      `getCurrentServer`, `app-server.ts`), `libs/deploy-mcp` (`TUNNEL_PORTS`, `tokenForServer`,
-      `z.enum` серверов, `agentRequest('s3')`), `apps/dashboard-agent` (`server-config.ts`, guard в
-      `routes/deploy.ts` и `routes/e2e.ts`, 6 cron-задач, `docker-compose.s3.yml`),
-      `deploy-affected.sh`, `scripts/deploy-infra.sh`.
-  - [ ] ⚠️ Открытый вопрос: убрать `'s3'` из реестра (deploy-mcp отвечает явной ошибкой «s3 —
-        хранилище без агента, staging = s1») или оставить тихий алиас `s3→s1`. Рекомендация —
-        убрать: алиас воспроизводит путаницу, ради которой затевается переименование.
-  - [ ] ⚠️ Открытый вопрос: id cron-задач (`registry-gc-s3`, `next-cache-cleanup-s3` и др.)
-        персистентны в БД агента. Рекомендация — id не менять, править `server`/имя; иначе
-        остаются дубли и осиротевшие записи.
-  - [ ] ⚠️ Открытый вопрос: токен `AGENT_TOKEN_S3` → `AGENT_TOKEN_S1` (то же значение, через
-        `scripts/sops-env-set.sh`), на переходе читать оба.
-  - [ ] Порядок выката: код и новый `docker-compose.s1.yml` агента должны ехать одним деплоем
-        (агент на s1 сейчас со `SERVER_NAME=s3.letar.best`, при рассинхроне `getCurrentServer`
-        уйдёт в fallback `s2` и агент отвергнет staging-деплои). Деплой — только через
-        `deploy-agent-dev`.
+- [x] Переименовать ключ роли `s3` → `s1` — код и доки (2026-09-19, коммит `931198126`,
+      dashboard-agent `0.17.0`). `'s3'` из реестра убран, `deploy_*`/`run_e2e` на него отвечают
+      явной ошибкой (решение владельца: путаницы нигде не оставлять — без тихого алиаса и без
+      переходного чтения `AGENT_TOKEN_S3`). id cron-задач `*-s3` → `*-s1`, старые в
+      `RETIRED_JOB_IDS`. `AGENT_TOKEN_S3` → `AGENT_TOKEN_S1` в `.env.docker.enc` (значение то же).
+  - [ ] **Выкат на s1** (только через `deploy-agent-dev`): 1) на сервере переименовать
+        `.env.s3-e2e.local` → `.env.s1-e2e.local`, если файл есть (`required: false` при его
+        отсутствии молча не прокинет `DEV_SESSION_TOKEN` в e2e-раннер); 2) код и
+        `docker-compose.s1.yml` — одним деплоем: старый контейнер идёт со
+        `SERVER_NAME=s3.letar.best`, новый код `s3` не распознаёт (fallback `s2` → агент
+        отвергнет staging-деплои). Порядок — в CHANGELOG агента, `[0.17.0]`.
+  - [ ] После выката: перезапустить MCP-процесс `letar` (держит старый enum и host в памяти);
+        проверить в `cron-jobs.json` на s1, что старые `*-s3` ушли, а новые `*-s1` есть.
+  - [ ] Расписание/`enabled`, правленные через UI у старых `*-s3`, у новых `*-s1` дефолтные и
+        история запусков в Redis начата заново — сверить, что ничего не отключали вручную.
+  - [ ] ⚠️ Падают 2 теста `libs/infra-config/src/app-ports.guard.spec.ts`: порт
+        `animatrona-tracker`: приложение объявляет порт 3009, а `.claude/commands/animatrona-tracker.md`
+        и `apps/auth-hub/prisma/seed.ts` указывают 3010. К переименованию не относится, найдено
+        при прогоне тестов; после правки seed нужен re-seed боевого auth-hub.
   - [ ] ⚠️ Побочная находка: на новом s3 есть Traefik, а dashboard-agent нет — бэкап секретов
-        Traefik (`traefik-backup-s3`) и его проверка свежести покрывают только s1.
+        Traefik (`traefik-backup-s1`) и его проверка свежести покрывают только s1.
+  - [ ] ⚠️ `deploy_infra` на настоящий s3 больше не ходит: `media-server`, kubo, GlitchTip там
+        обновляются вручную по SSH (`scripts/deploy-infra.sh`, см. `media-server.md`). Нужен
+        ли отдельный канал деплоя на s3 (агент или SSH-обёртка) — решение владельца.
 - [ ] Сборка прода на s1 через registry — отдельная будущая задача.
 - [ ] ⚠️ Открытый вопрос: 24 ч оплаты старого s3 истекают; доедет ли до нового s3 всё нужное
       (раздачи IPFS осознанно не переносили; GlitchTip: события между дампом 00:35 и переключением

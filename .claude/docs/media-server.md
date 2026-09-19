@@ -300,9 +300,12 @@ cd infra/media-server && bun test                # на локальном ffmpe
 
 ## Деплой
 
-Через `deploy-mcp` (`deploy_infra({ service: "media-server", server: "s3" })`) — как и остальные
-`infra/*`-сервисы. Файл называется `docker-compose.yml` (без `.production`/`.<server>` в имени)
-именно затем, чтобы совпадать с дефолтной конвенцией `scripts/deploy-infra.sh`.
+⚠️ С 2026-09-19 `deploy_infra` на s3 **не ходит**: на новом s3 (хранилище) нет dashboard-agent,
+а ключ `s3` из реестра `@letar/infra-config` убран (`server: "s3"` отвергается ошибкой). Обновление —
+вручную по SSH на s3: `git pull` в чекауте и `./scripts/deploy-infra.sh media-server` (при
+`SOPS_AGE_KEY_FILE`, если у сервиса есть `secrets/deploy.conf`). Файл называется
+`docker-compose.yml` (без `.production`/`.<server>` в имени) именно затем, чтобы совпадать с
+дефолтной конвенцией `scripts/deploy-infra.sh`.
 
 У `media-api` в compose стоит `build.target: runtime`: последняя стадия `Dockerfile` — тесты, и
 без `target` compose собирал бы и прогонял их при каждом деплое.

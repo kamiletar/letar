@@ -129,7 +129,7 @@ Build Cache     207       0         17.02GB   16.12GB
 Фикс — `lib/nx-cache-cleanup.ts`, симметричный `next-cache-cleanup.ts`: удаляет подкаталоги
 `.nx/cache/<hash>` по `mtime` (не трогает нижестоящие файлы поштучно — Nx создаёт запись целиком
 и больше не пишет в неё). Порог — `NX_CACHE_CLEANUP_DAYS` (по умолчанию 2 дня, тот же, что у
-`.next/cache`). Задачи `nx-cache-cleanup-s2`/`nx-cache-cleanup-s3`, `40 4 * * *` — сразу после
+`.next/cache`). Задачи `nx-cache-cleanup-s2`/`nx-cache-cleanup-s1` (до 2026-09-19 — `-s3`), `40 4 * * *` — сразу после
 `next-cache-cleanup-*` (`30 4 * * *`) и после `docker-prune` (`0 4 * * *`), чтобы три плановые
 чистки не спорили за I/O одновременно.
 

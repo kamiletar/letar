@@ -216,7 +216,7 @@ Subject: Re: deploy-request: <app-name>
 | Сервер | Приложения                                                                                                                                                                                                                                                                             |
 | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | s2     | dashboard, dashboard-agent, driving-school, auth-hub, archetest, grandslamcup, time, form-docs, form-example, aira-web, mandala, kami, pravda, umami, animatrona-landing, animatrona-tracker, kami-key-the-landing, letar-landing, dsperevod, aboi, premium-rosstil, imot, svoichuzhie |
-| s1     | staging-инстанс dashboard-agent (`docker-compose.s3.yml` — имя файла пока историческое, loopback `127.0.0.1:13103:3100`, отдельный токен, пока `AGENT_TOKEN_S3`) + Playwright e2e-раннер против staging-контейнеров (`run_e2e`/`e2e_status`)                                           |
+| s1     | staging-инстанс dashboard-agent (`docker-compose.s1.yml`, loopback `127.0.0.1:13103:3100`, отдельный токен `AGENT_TOKEN_S1`) + Playwright e2e-раннер против staging-контейнеров (`run_e2e`/`e2e_status`)                                                                               |
 
 ## Агрегация запросов
 

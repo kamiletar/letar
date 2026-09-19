@@ -243,7 +243,7 @@ docker compose pull && docker compose up -d
 
 ### Соединение и секреты
 
-- **SSH-туннель** `ssh -L <localPort>:localhost:3100 -N deploy@<host>` (s2 → 13100, s3 → 13101), поднимается лениво.
+- **SSH-туннель** `ssh -L <localPort>:localhost:3100 -N deploy@<host>` (s2 → 13100, s1 → 13101), поднимается лениво.
 - **Bearer-токен** читается из `apps/dashboard-agent/.env.docker` (или расшифровывается из `.env.docker.enc` через `sops`) — не хранится в `.mcp.json`.
 - **Диагностика:** начинай с `deploy_agent_health` — различает недоступность сервера и неверный токен.
 
