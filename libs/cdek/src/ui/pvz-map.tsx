@@ -48,7 +48,7 @@ function FitBounds({ points }: { points: CdekDeliveryPoint[] }) {
   return null
 }
 
-interface PvzMapProps {
+export interface PvzMapProps {
   points: CdekDeliveryPoint[]
   selectedCode: string | undefined
   onSelect: (point: CdekDeliveryPoint) => void
