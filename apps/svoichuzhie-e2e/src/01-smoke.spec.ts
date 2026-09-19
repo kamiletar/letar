@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { joinForm } from './helpers/auth-forms'
 
 test.describe('01 — Smoke: основные страницы', () => {
   test('главная страница загружается, есть навигация', async ({ page }) => {
@@ -27,7 +28,7 @@ test.describe('01 — Smoke: основные страницы', () => {
   test('страница /fanclub — информация о фан-клубе', async ({ page }) => {
     await page.goto('/fanclub')
     await expect(page).not.toHaveURL(/\/login/)
-    await expect(page.locator('form:has(#join-email)')).toBeVisible()
+    await expect(joinForm(page)).toBeVisible()
   })
 
   test('footer — ссылки на правовые страницы', async ({ page }) => {

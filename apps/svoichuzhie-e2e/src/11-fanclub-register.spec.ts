@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test'
 import { testFan } from './fixtures/test-data'
+import { emailField, joinForm, passwordField } from './helpers/auth-forms'
 
 // Уникальный email для каждого прогона — не конфликтует с другими тестами
 function freshEmail(): string {
@@ -25,8 +26,8 @@ test.describe('11 — Регистрация в фан-клуб', () => {
   test('форма содержит поля email, пароль и чекбоксы согласий', async ({ page }) => {
     await page.goto('/fanclub')
 
-    await expect(page.locator('#join-email')).toBeVisible()
-    await expect(page.locator('#join-password')).toBeVisible()
+    await expect(emailField(joinForm(page))).toBeVisible()
+    await expect(passwordField(joinForm(page))).toBeVisible()
 
     // Минимум 1 обязательный чекбокс (ПДн 152-ФЗ)
     const checkboxes = page.locator('input[type="checkbox"]')
@@ -39,8 +40,8 @@ test.describe('11 — Регистрация в фан-клуб', () => {
 
     const email = freshEmail()
 
-    const emailInput = page.locator('#join-email')
-    const passwordInput = page.locator('#join-password')
+    const emailInput = emailField(joinForm(page))
+    const passwordInput = passwordField(joinForm(page))
 
     await emailInput.click()
     await emailInput.fill(email)
@@ -53,12 +54,12 @@ test.describe('11 — Регистрация в фан-клуб', () => {
     // Локатор ОБЯЗАТЕЛЬНО скопирован формой: неограниченный `input[type="checkbox"]` на всей
     // странице попадает на чекбокс cookie-баннера («Необходимые» — disabled, всегда checked),
     // который рендерится раньше формы в DOM — .first() выбирал его, а не согласие формы.
-    const consentCheckbox = page.locator('form:has(#join-email) input[type="checkbox"]').first()
+    const consentCheckbox = joinForm(page).locator('input[type="checkbox"]').first()
     await consentCheckbox.focus()
     await page.keyboard.press('Space')
     await expect(consentCheckbox).toBeChecked()
 
-    await page.locator('form:has(#join-email) button[type="submit"]').click()
+    await joinForm(page).locator('button[type="submit"]').click()
 
     // После signUp (requireEmailVerification: true) показываем экран верификации
     await expect(page.getByText(/проверь почту/i)).toBeVisible({ timeout: 20_000 })
@@ -70,20 +71,20 @@ test.describe('11 — Регистрация в фан-клуб', () => {
     // При дублирующем email ответ 200 OK → форма показывает "Проверь почту" как обычно.
     await page.goto('/fanclub')
 
-    const emailInput = page.locator('#join-email')
-    const passwordInput = page.locator('#join-password')
+    const emailInput = emailField(joinForm(page))
+    const passwordInput = passwordField(joinForm(page))
 
     await emailInput.click()
     await emailInput.fill(testFan.email)
     await passwordInput.click()
     await passwordInput.fill('AnyPass123!')
 
-    const consentCheckbox = page.locator('form:has(#join-email) input[type="checkbox"]').first()
+    const consentCheckbox = joinForm(page).locator('input[type="checkbox"]').first()
     await consentCheckbox.focus()
     await page.keyboard.press('Space')
     await expect(consentCheckbox).toBeChecked()
 
-    await page.locator('form:has(#join-email) button[type="submit"]').click()
+    await joinForm(page).locator('button[type="submit"]').click()
 
     // Anti-enumeration: показываем "Проверь почту" независимо от того, существует email или нет
     await expect(page.getByText(/проверь почту/i)).toBeVisible({ timeout: 15_000 })
@@ -96,19 +97,24 @@ test.describe('11 — Регистрация в фан-клуб', () => {
     await expect(loginLink).toBeVisible()
   })
 
-  test('кнопка отправки заблокирована без согласия на ПДн', async ({ page }) => {
+  test('отправка без согласия на ПДн блокируется валидацией', async ({ page }) => {
     await page.goto('/fanclub')
 
-    const emailInput = page.locator('#join-email')
-    const passwordInput = page.locator('#join-password')
-    const submitBtn = page.locator('form:has(#join-email) button[type="submit"]')
+    const emailInput = emailField(joinForm(page))
+    const passwordInput = passwordField(joinForm(page))
+    const submitBtn = joinForm(page).locator('button[type="submit"]')
 
     await emailInput.click()
     await emailInput.fill(freshEmail())
     await passwordInput.click()
     await passwordInput.fill('TestPass123!')
 
-    // Без чекбокса — кнопка disabled
-    await expect(submitBtn).toBeDisabled()
+    // После переноса на @letar/forms кнопка не disabled — форма проверяет схему при отправке
+    // и показывает ошибку согласия (консент обязателен по 152-ФЗ), экран «Проверь почту» не наступает.
+    await submitBtn.click()
+
+    await expect(joinForm(page).getByText(/необходимо согласие на обработку персональных данных/i).first())
+      .toBeVisible()
+    await expect(page.getByText(/проверь почту/i)).toBeHidden()
   })
 })

@@ -1,10 +1,17 @@
 import { expect, type Page, test } from '@playwright/test'
 import { testFan } from './fixtures/test-data'
+import { emailField, loginForm, passwordField } from './helpers/auth-forms'
+
+// Better Auth отдаёт message сервера («Invalid email or password»), и assertAuthOk предпочитает
+// его русскому fallback'у формы — на staging пользователь сейчас видит английский текст.
+// Допускаем оба варианта: тест проверяет сам факт показа ошибки входа, а не локализацию.
+const WRONG_CREDENTIALS_RE = /неверный email или пароль|invalid email or password/i
 
 // Хелпер: заполняет и отправляет форму логина
 async function fillLoginForm(page: Page, email: string, password: string) {
-  const emailInput = page.locator('#login-email')
-  const passwordInput = page.locator('#login-password')
+  const form = loginForm(page)
+  const emailInput = emailField(form)
+  const passwordInput = passwordField(form)
 
   await emailInput.click()
   await emailInput.fill(email)
@@ -19,8 +26,8 @@ test.describe('10 — Авторизация', () => {
   test('страница /login отображает форму входа', async ({ page }) => {
     await page.goto('/login')
 
-    await expect(page.locator('#login-email')).toBeVisible()
-    await expect(page.locator('#login-password')).toBeVisible()
+    await expect(emailField(loginForm(page))).toBeVisible()
+    await expect(passwordField(loginForm(page))).toBeVisible()
     await expect(page.locator('form').getByRole('button', { name: /войти/i })).toBeVisible()
 
     // Ссылка на регистрацию (фан-клуб) внутри формы
@@ -32,7 +39,7 @@ test.describe('10 — Авторизация', () => {
 
     await fillLoginForm(page, testFan.email, 'wrong-password-xyz')
 
-    await expect(page.getByText(/неверный email или пароль/i)).toBeVisible({ timeout: 15_000 })
+    await expect(page.getByText(WRONG_CREDENTIALS_RE)).toBeVisible({ timeout: 15_000 })
     // Остаёмся на /login
     await expect(page).toHaveURL(/\/login/)
   })
@@ -42,7 +49,7 @@ test.describe('10 — Авторизация', () => {
 
     await fillLoginForm(page, 'no-such-user@e2e.test', 'AnyPass123!')
 
-    await expect(page.getByText(/неверный email или пароль/i)).toBeVisible({ timeout: 15_000 })
+    await expect(page.getByText(WRONG_CREDENTIALS_RE)).toBeVisible({ timeout: 15_000 })
   })
 
   test('успешный вход — редирект на /fanclub/profile', async ({ page }) => {

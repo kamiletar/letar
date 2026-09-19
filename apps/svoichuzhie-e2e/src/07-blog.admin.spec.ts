@@ -1,4 +1,28 @@
-import { expect, test } from '@playwright/test'
+import { expect, type Page, test } from '@playwright/test'
+
+/**
+ * Открывает первую статью блога, у которой есть секция-галерея с заголовком `sectionTitle`
+ * («Фотографии» / «Видео»). Возвращает false, если такой статьи нет.
+ *
+ * ⚠️ Заголовок ищем точным совпадением внутри `main`: подстрока `/фото/i` по всей странице
+ * всегда матчит пункты навигации шапки («Фото», «Видео»), и «условная» проверка превращалась
+ * в безусловную — тест падал на статье без галереи.
+ */
+async function openArticleWithGallery(page: Page, sectionTitle: string): Promise<boolean> {
+  await page.goto('/blog')
+  const hrefs = await page
+    .locator('a[href^="/blog/"]')
+    .evaluateAll((links) => [...new Set(links.map((a) => a.getAttribute('href') ?? ''))].filter(Boolean))
+
+  for (const href of hrefs) {
+    await page.goto(href)
+    await page.waitForLoadState('networkidle')
+    if (await page.locator('main').getByText(sectionTitle, { exact: true }).count()) {
+      return true
+    }
+  }
+  return false
+}
 
 // Этот файл запускается в authenticated-chromium (storageState admin)
 
@@ -28,43 +52,21 @@ test.describe('07 — Blog: галереи и admin-редактор (7.4/8.9)',
   })
 
   test('/blog/[slug] — галерея фото рендерится при наличии (7.4)', async ({ page }) => {
-    await page.goto('/blog')
-    const articleLink = page.locator('a[href^="/blog/"]').first()
-    if (!(await articleLink.count())) {
-      test.skip()
-      return
-    }
+    const found = await openArticleWithGallery(page, 'Фотографии')
+    // Галерея условная (hasPhotos) — на окружении без статьи с фото проверять нечего.
+    // Явный skip вместо тихого «зелёного»: в отчёте видно, что галерея не проверялась.
+    test.skip(!found, 'нет ни одной статьи с прикреплёнными фото — 7.4 не проверена')
 
-    await articleLink.click()
-    await page.waitForLoadState('networkidle')
-
-    // Галерея присутствует только если фото прикреплены — если нет, тест не падает
-    const photoSection = page.locator('text=/Фотографии|фото/i').first()
-    if (await photoSection.isVisible({ timeout: 2_000 }).catch(() => false)) {
-      // Есть заголовок секции — должны быть изображения
-      const imgs = page.locator('img[src]')
-      await expect(imgs.first()).toBeVisible()
-    }
-    // Нет фото — тест проходит (галерея условная)
+    // Плитки галереи — картинки в контенте статьи (не шапка/футер)
+    await expect(page.locator('main img[src]').first()).toBeVisible()
   })
 
   test('/blog/[slug] — видео-галерея рендерится при наличии (8.9)', async ({ page }) => {
-    await page.goto('/blog')
-    const articleLink = page.locator('a[href^="/blog/"]').first()
-    if (!(await articleLink.count())) {
-      test.skip()
-      return
-    }
+    const found = await openArticleWithGallery(page, 'Видео')
+    test.skip(!found, 'нет ни одной статьи с прикреплёнными видео — 8.9 не проверена')
 
-    await articleLink.click()
-    await page.waitForLoadState('networkidle')
-
-    const videoSection = page.locator('text=/Видео/i').first()
-    if (await videoSection.isVisible({ timeout: 2_000 }).catch(() => false)) {
-      // LazyEmbed или постер должны быть видны
-      const videoItem = page.locator('iframe, [aria-label*="Воспроизвести"], [role="button"]').first()
-      await expect(videoItem).toBeVisible()
-    }
+    // Каждое видео — ссылка на /video/<slug> (постер или заглушка-«play»), а не iframe
+    await expect(page.locator('main a[href^="/video/"]').first()).toBeVisible()
   })
 
   test('/admin/articles — список статей доступен admin', async ({ page }) => {
@@ -131,9 +133,13 @@ test.describe('07 — Blog: галереи и admin-редактор (7.4/8.9)',
     await editLink.click()
     // networkidle не гарантирует, что успела произойти именно эта клиентская навигация —
     // в dev-режиме клик иногда теряется из-за нестабильного порядка className при Fast Refresh
-    // (.claude/docs/nextjs16-turbopack-default-emotion-hydration.md), поэтому ждём смены URL явно
+    // (.claude/docs/nextjs16-turbopack-default-emotion-hydration.md), поэтому ждём смены URL явно.
+    // Таймаут 30 с, не 10: /admin/articles/[id] на холодном сервере рендерится дольше 10 с
+    // (компиляция маршрута в dev; на staging — серверные запросы статьи и списков фото/видео
+    // для пикеров под конкуренцией за CPU). В прогретом состоянии переход занимает ~150 мс,
+    // так что длинный таймаут не маскирует потерянный клик — тот всё равно упадёт.
     if (editHref) {
-      await page.waitForURL((url) => url.pathname === editHref, { timeout: 10_000 })
+      await page.waitForURL((url) => url.pathname === editHref, { timeout: 30_000 })
     }
     await page.waitForLoadState('networkidle')
 
