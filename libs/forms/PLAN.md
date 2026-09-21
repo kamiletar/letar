@@ -6,6 +6,19 @@
 
 ## Backlog (запросы от агентов)
 
+### [ ] [2026-09-21] Отказ Server Action значением: `ActionFailure`/`unwrapActionResult`/`useActionFormErrors` (от domwellbes)
+
+- **Запросил:** domwellbes-dev (agent-mail, тред `form-action-result-extract`)
+- **Приоритет:** high
+- **Описание:** в production Next.js стирает текст ошибки, брошенной из Server Action (код 441),
+  включая нарушение unique. Пилот в domwellbes (`src/lib/action-result.ts`,
+  `use-action-form-errors.ts`) возвращает отказ значением `{ error, field? }`, форма бросает его
+  заново. Второй потребитель есть: mandala, svoichuzhie, driving-school, aboi (user-facing `throw` в
+  `'use server'`). Предложено: `ActionFailure`/`UserFacingError`/`catchActionFailure`/
+  `isUniqueViolation` в `@letar/forms-core/server-errors`, `useActionFormErrors` в `@letar/forms`,
+  плюс `parseActionResultError` принимает `{ error }` без `success: false`.
+- **Статус:** ожидание ответа `forms-coordinator-dev`
+
 ### [ ] [2026-09-21] `Steps.Navigation`: проп для `data-*` на кнопки «Назад»/«Далее»/«Отправить» (от domwellbes)
 
 - **Запросил:** domwellbes-dev (agent-mail не доставлен: `forms-coordinator-dev` в статусе retired)
