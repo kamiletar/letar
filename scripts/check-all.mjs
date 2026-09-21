@@ -87,6 +87,24 @@ const CHECKS = [
     doc: '.claude/docs/root-pin-peer-drift.md',
   },
   {
+    id: 'lock-versions',
+    group: 'deps',
+    title: 'версии и зависимости workspace в bun.lock совпадают с package.json',
+    run: ['bun', ['scripts/check-lock-workspace-versions.mjs']],
+    // gate: расхождение даже в одной строке version роняет `bun install
+    // --frozen-lockfile` на сервере и встают деплои ВСЕХ приложений сразу; локально
+    // ни typecheck, ни lint, ни build его не видят (2026-09-21 — шесть workspace
+    // разом, включая три приватных submodule, чей bump физически не может обновить
+    // корневой lock).
+    severity: 'gate',
+    // ⚠️ В CI не запускается: шаг «Install dependencies» там идёт БЕЗ
+    // --frozen-lockfile (см. ci.yml) и перезаписывает bun.lock ДО этой проверки —
+    // она сверяла бы уже пересобранный lock с package.json и зеленела всегда.
+    // Настоящие точки: pre-commit (коммит bun.lock блокируется) и ручной прогон.
+    ci: 'no',
+    doc: '.claude/docs/bun-lock-drift-unpushed-commits-blocks-all-deploys.md',
+  },
+  {
     id: 'pin-drift',
     group: 'deps',
     title: 'apps/libs package.json разошлись с корневым намеренным точным пином',

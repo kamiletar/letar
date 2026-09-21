@@ -46,19 +46,70 @@ fi
 # блокировать его не должна.
 staged="$(git diff --cached --name-only --diff-filter=ACMR)"
 
-if ! grep -qE '(^|/)(bun\.lock|package\.json)$' <<< "$staged"; then
+# Сдвиг указателя submodule (gitlink, режим 160000) — тоже повод: bump версии внутри
+# submodule не может обновить корневой bun.lock, и это самый тихий источник дрейфа.
+gitlink_staged="$(git diff --cached --raw | grep -cE '^:[0-9]+ 160000 ' || true)"
+
+if ! grep -qE '(^|/)(bun\.lock|package\.json)$' <<< "$staged" && [[ "$gitlink_staged" -eq 0 ]]; then
   exit 0
 fi
 
+# Согласованность версий workspace в bun.lock с package.json
+# (scripts/check-lock-workspace-versions.mjs). Отдельно от блока ниже, потому что
+# политика другая:
+#   * коммит САМОГО bun.lock с расхождением — блокируем: ровно тут lock и правят,
+#     и ровно здесь в него попадает чужой WIP или половина обновления
+#     (2026-09-21: рабочий lock нёс libs/deploy-mcp 0.4.1 при package.json 0.5.0);
+#   * коммит package.json или указателя submodule — только предупреждаем. Lock и
+#     package.json едут РАЗНЫМИ коммитами (scope-guard режет bun.lock + apps/<x>
+#     как multi-scope), поэтому в момент bump'а расхождение неизбежно и
+#     блокировать его нельзя — но забыть про lock после него нельзя тоже.
+# Цена пропуска — встают деплои ВСЕХ приложений сразу
+# (.claude/docs/bun-lock-drift-unpushed-commits-blocks-all-deploys.md).
+lock_versions_check() {
+  local root="$1" lock_staged="$2"
+  [[ -f "$root/scripts/check-lock-workspace-versions.mjs" ]] || return 0
+  local out
+  if out="$(bun "$root/scripts/check-lock-workspace-versions.mjs" 2>&1)"; then
+    return 0
+  fi
+  echo "$out" >&2
+  if [[ "$lock_staged" -eq 1 ]]; then
+    cat >&2 <<'MSG'
+
+❌ Коммит остановлен: bun.lock, который ты коммитишь, расходится с package.json.
+Обход (осознанный промежуточный шаг): GIT_SKIP_DEPS_INTEGRITY=1 git commit ...
+MSG
+    return 1
+  fi
+  cat >&2 <<'MSG'
+
+⚠️  Не блокирую (lock коммитится отдельным коммитом), но НЕ забудь: после этого
+    коммита нужен коммит bun.lock — иначе `--frozen-lockfile` на сервере
+    остановит деплой ВСЕХ приложений. Если версия выросла в submodule — сначала
+    запушь submodule, потом lock (bash scripts/check-submodule-push-state.sh).
+MSG
+  return 0
+}
+
+lock_staged=0
+grep -qE '(^|/)bun\.lock$' <<< "$staged" && lock_staged=1
+
 # Проверки читают bun.lock и node_modules КОРНЯ монорепо. Внутри submodule
 # (собственный .git, куда install.sh ставит те же хуки) ни того, ни другого нет —
-# зависимости там общие, из корня. Запускать нечего, но и молча «проходить»
-# нельзя: сюда мы попадаем только когда package.json ВСЁ-ТАКИ застейджен, и
-# тихий успех в этом месте читался бы как «проверено и чисто»
-# (.claude/docs/verification-pitfalls.md). Поэтому говорим вслух.
-if [[ -n "$(git rev-parse --show-superproject-working-tree 2>/dev/null)" ]]; then
+# зависимости там общие, из корня. Полный набор запускать нечего, но и молча
+# «проходить» нельзя: сюда мы попадаем только когда package.json ВСЁ-ТАКИ
+# застейджен, и тихий успех в этом месте читался бы как «проверено и чисто»
+# (.claude/docs/verification-pitfalls.md). Поэтому говорим вслух. А расхождение
+# версий с корневым bun.lock — именно тот случай, ради которого сюда стоит зайти:
+# bump версии внутри submodule не может обновить lock, который лежит в корне letar.
+super_root="$(git rev-parse --show-superproject-working-tree 2>/dev/null)"
+if [[ -n "$super_root" ]]; then
   echo "ℹ️  package.json внутри submodule — целостность зависимостей проверяется" >&2
   echo "    в корне монорепо: bun scripts/check-all.mjs --group=deps" >&2
+  if command -v bun > /dev/null 2>&1; then
+    lock_versions_check "$super_root" 0
+  fi
   exit 0
 fi
 
@@ -67,6 +118,12 @@ repo_root="$(git rev-parse --show-toplevel)"
 if ! command -v bun > /dev/null 2>&1; then
   echo "⚠️  bun не найден в PATH — проверка целостности зависимостей пропущена." >&2
   echo "    Прогони вручную перед push: bun scripts/check-all.mjs --group=deps" >&2
+  exit 0
+fi
+
+# Указатель submodule без lock/package.json: остальным проверкам тут нечего делать.
+if [[ "$lock_staged" -eq 0 ]] && ! grep -qE '(^|/)package\.json$' <<< "$staged"; then
+  lock_versions_check "$repo_root" 0
   exit 0
 fi
 
@@ -86,5 +143,7 @@ if ! bun "$repo_root/scripts/check-all.mjs" --only=patched-deps,peer-deps,intent
 MSG
   exit 1
 fi
+
+lock_versions_check "$repo_root" "$lock_staged" || exit 1
 
 exit 0

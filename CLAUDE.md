@@ -43,7 +43,7 @@
 - [tsconfig-preset-rootdir-outdir-cascade](/.claude/docs/tsconfig-preset-rootdir-outdir-cascade.md) ⚠️ удаление `references` с унаследованным `outDir` — три побочных эффекта
 - [vitest-setup-file-tsconfig-graph-gap](/.claude/docs/vitest-setup-file-tsconfig-graph-gap.md) ⚠️ `vitest.setup.ts` вне графа `references` валит все тесты либы разом
 - [bun-lockfile-private-submodules](/.claude/docs/bun-lockfile-private-submodules.md) ⚠️ `--frozen-lockfile` падает без выкачанных submodule
-- [bun-lock-drift-unpushed-commits-blocks-all-deploys](/.claude/docs/bun-lock-drift-unpushed-commits-blocks-all-deploys.md) ⚠️ незапушенный bump версии роняет ЛЮБОЙ деплой
+- [bun-lock-drift-unpushed-commits-blocks-all-deploys](/.claude/docs/bun-lock-drift-unpushed-commits-blocks-all-deploys.md) ⚠️ lock ≠ версии (не запушено/не закоммичено) роняет ЛЮБОЙ деплой
 - [bun-server-version-lockfile-format-incompatibility](/.claude/docs/bun-server-version-lockfile-format-incompatibility.md) ⚠️ старый bun на сервере блокирует все деплои разом
 - [bun-install-stale-isolated-cache](/.claude/docs/bun-install-stale-isolated-cache.md) ⚠️ несколько версий в `.bun` — норма, чинит `--force`
 - [bun-isolated-linker-alias-shared-bucket-collision](/.claude/docs/bun-isolated-linker-alias-shared-bucket-collision.md) ⚠️ npm-alias двух версий пакета резолвится в один bucket
