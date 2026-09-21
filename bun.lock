@@ -733,7 +733,7 @@
     },
     "apps/form-develop-app": {
       "name": "form-develop-app",
-      "version": "0.1.20",
+      "version": "0.1.21",
       "dependencies": {
         "@letar/env-load": "workspace:*",
         "@letar/forms-core": "workspace:*",
@@ -754,7 +754,7 @@
     },
     "apps/form-docs": {
       "name": "form-docs",
-      "version": "0.6.13",
+      "version": "0.6.14",
       "dependencies": {
         "@letar/forms-core": "workspace:*",
         "@letar/glitchtip": "workspace:*",
@@ -766,7 +766,7 @@
     },
     "apps/form-example": {
       "name": "form-example",
-      "version": "0.1.23",
+      "version": "0.1.24",
       "dependencies": {
         "@letar/demo-protection": "workspace:*",
         "@letar/forms-core": "workspace:*",
@@ -1250,7 +1250,7 @@
     },
     "libs/form-mcp": {
       "name": "@letar/form-mcp",
-      "version": "2.1.0",
+      "version": "2.2.0",
       "dependencies": {
         "@modelcontextprotocol/server": "2.0.0",
         "zod": "4.6.5",
@@ -1265,7 +1265,7 @@
     },
     "libs/forms": {
       "name": "@letar/forms",
-      "version": "2.14.22",
+      "version": "2.15.0",
       "dependencies": {
         "@letar/format-utils": "workspace:*",
         "@tanstack/react-table": "^9.2.4",
@@ -1318,14 +1318,14 @@
     },
     "libs/forms-core": {
       "name": "@letar/forms-core",
-      "version": "0.12.6",
+      "version": "0.13.0",
       "dependencies": {
         "@tanstack/table-core": "^9.1.2",
       },
     },
     "libs/forms-react": {
       "name": "@letar/forms-react",
-      "version": "0.9.1",
+      "version": "0.10.0",
       "dependencies": {
         "@letar/forms-core": "workspace:*",
       },
