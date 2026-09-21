@@ -15,16 +15,19 @@
   может подсветить «Создать» в мастерах (материал, дом, работа). Предложение: `prevProps`/`nextProps`/
   `submitProps`/`skipProps` (типизированные, `data-*` без `as`) либо `assistIdPrefix` → `.prev/.next/
   .submit/.skip`. После релиза domwellbes сам проставит якоря.
-- **Статус:** ожидание
+- **Статус:** в работе → `forms-dev` (делегировано 2026-09-21, agent-mail 1784, тред
+  `form-domwellbes-steps-nav-assist-ids`). Рекомендованный API — `prevProps`/`nextProps`/`submitProps`/
+  `skipProps` (`ButtonProps` + `data-${string}`), не `assistIdPrefix`: он вшивает в библиотеку знание
+  о режиме наставника. После релиза `forms-dev` пишет номер версии в тред, domwellbes размечает мастера.
 
-### [ ] ⚠️ Открытый вопрос: деплой `form-docs` 0.6.12 / `form-example` не подтверждён (2026-09-19)
+### ✅ [2026-09-19] Деплой `form-docs` 0.6.12 / `form-example` (закрыт: подтверждён 2026-09-19)
 
-- **Контекст:** запросы 1736/1737 (agent-mail, треды `deploy-form-docs`/`deploy-form-example`, коммит
-  `740f5fdbc`) доставлены `deploy-agent-dev` (identity снята с retired), но подтверждения нет; на s2
-  остаётся чужой коммит `9bf212525`. Актуальный коммит для деплоя — `3564baa57` (form-docs 0.6.12).
-  Сессия «Deploy agent» отработала ход и ушла в idle, вероятно держит сообщения до подтверждения.
-- **Что сделать:** убедиться, что деплой-агент прочитал inbox; либо `forms-coordinator-dev` запросит
-  деплой сам (он обещал в треде `form-url-prefill-hydration`). Напрямую не деплоить.
+- **Итог:** `deploy-agent-dev` подтвердил деплой в треде `deploy-form-docs-form-example-20260919`
+  (agent-mail 1753): оба на s2 успешно, собрано с HEAD `8b3202ae5` (содержит `3564baa57`); form-docs
+  0.6.12 отдаёт `form.tooltip` на `/en/docs/guides/zenstack-plugin`, form-example 0.1.22 — 200 на
+  `/examples/zenstack`; staging form-example на s1 тоже передеплоен. Запросы 1736/1737/1738 закрыты этим
+  же деплоем. Вопрос был открыт из-за того, что подтверждение доставлено во входящие
+  `forms-coordinator-dev`, а тот числился retired.
 
 ### ✅ [2026-09-21] Сколько обратных слэшей реально стоит в `@regex` схем приложений (закрыт: везде верно)
 
