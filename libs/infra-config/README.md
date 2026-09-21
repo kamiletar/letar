@@ -68,6 +68,20 @@ export const TUNNEL_PORTS: Record<InfraServer, number> = {
 `s1` в `SERVER_APPS` намеренно не входит — это не сервер приложений, а staging-раннер;
 резолвинг на него идёт по `target === 'staging'` в `resolveDeployServer()`.
 
+### Сборка на s1 (`BUILD_ON_S1_APPS`)
+
+```typescript
+/** Приложения, у которых production-СБОРКА идёт на s1, а на s2 — только релиз (§157). */
+export const BUILD_ON_S1_APPS: string[]
+export function isBuiltOnS1(app: string): boolean
+```
+
+Для приложений из списка `resolveDeployServer(app, 'production')` возвращает `s1` (там собирается образ
+и запускается релиз на s2). `getServerForApp` и `SERVER_APPS` не меняются: **запускается** приложение
+по-прежнему на s2. Переходный список: приложение включается после пилота, откат — убрать имя.
+`deploy-affected.sh --remote-release` читает его же через `isBuiltOnS1()`. Подробности —
+[deployment.md](/.claude/docs/deployment.md#сборка-на-s1-релиз-на-s2-plan-infra-6md-157).
+
 ### e2e-гейты
 
 ```typescript

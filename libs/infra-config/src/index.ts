@@ -202,15 +202,39 @@ export function getCurrentServer(): InfraServer {
   return 's2'
 }
 
+/**
+ * Приложения, у которых production-СБОРКА идёт на s1, а на s2 выполняется только релиз
+ * (PLAN-INFRA-6.md §157): `deploy-affected.sh --remote-release` на s1 собирает образ, пушит его в
+ * registry и по ограниченному SSH-каналу зовёт `deploy-release-entry.sh` на s2.
+ *
+ * Список — переходный механизм (strangler): приложение включается после успешного пилота, откат —
+ * убрать имя из списка. Когда в списке окажутся все приложения с `Dockerfile.production`, старый
+ * однохостовый путь в `deploy-affected.sh` удаляется вместе с самим списком.
+ *
+ * ⚠️ `dashboard` и `dashboard-agent` сюда не входят и не могут входить: они перезапускают сами себя
+ * (канал деплоя идёт через их же контейнер), release-фаза на s2 такие приложения отвергает.
+ * ⚠️ Запуск СЕРВИСА остаётся на s2 (`SERVER_APPS` не меняется) — s1 только собирает.
+ */
+export const BUILD_ON_S1_APPS: string[] = []
+
+/** Собирается ли приложение в production на s1 (см. `BUILD_ON_S1_APPS`). */
+export function isBuiltOnS1(app: string): boolean {
+  return BUILD_ON_S1_APPS.includes(app)
+}
+
 /** Цель деплоя: боевой сервер или staging. */
 export type DeployTarget = 'production' | 'staging'
 
 /**
- * Резолвит сервер для деплоя приложения с учётом target.
- * production → сервер приложения из SERVER_APPS; staging → всегда s1.
+ * Резолвит сервер, КОТОРОМУ отправляется запрос деплоя, с учётом target.
+ * staging → всегда s1; production → s1 для приложений из `BUILD_ON_S1_APPS` (там идёт сборка и
+ * оттуда запускается релиз на s2), иначе сервер приложения из SERVER_APPS.
  */
 export function resolveDeployServer(app: string, target: DeployTarget = 'production'): InfraServer {
-  return target === 'staging' ? 's1' : getServerForApp(app)
+  if (target === 'staging' || isBuiltOnS1(app)) {
+    return 's1'
+  }
+  return getServerForApp(app)
 }
 
 /**

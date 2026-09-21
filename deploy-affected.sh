@@ -194,12 +194,20 @@ SKIP_NX_CACHE=false
 CLEAN_INSTALL=false
 STAGING=false  # Деплой на staging окружение (docker-compose.staging.yml + .env.staging)
 RUN_SEED=false  # Запустить nx db:seed после деплоя
+# PLAN-INFRA-6.md §157: production-сборка на s1, релиз на s2. Флаг ставит dashboard-agent на s1
+# для production-деплоя приложений из BUILD_ON_S1_APPS (libs/infra-config); руками — только при
+# отладке. Без флага скрипт ведёт себя ровно как раньше (сборка и запуск на одной машине).
+REMOTE_RELEASE=false
 
 while [[ $# -gt 0 ]]; do
   case $1 in
     --app)
       SPECIFIC_APP="$2"
       shift 2
+      ;;
+    --remote-release)
+      REMOTE_RELEASE=true
+      shift
       ;;
     --skip-git)
       SKIP_GIT=true
@@ -240,6 +248,7 @@ while [[ $# -gt 0 ]]; do
       echo "  --clean           Clean reinstall node_modules (fixes stale dependencies)"
       echo "  --staging         Deploy to staging (docker-compose.staging.yml + .env.staging)"
   echo "  --seed            Run nx db:seed after successful deploy"
+      echo "  --remote-release  (s1) Собрать образ здесь, запушить в registry, релиз выполнить на s2 (§157)"
       echo "  --dry-run         Show what would be deployed without actually deploying"
       echo "  --help            Show this help message"
       echo ""
@@ -323,6 +332,92 @@ save_deploy_commit() {
   local app=$1
   local commit=$2
   echo "$commit" > "$LAST_DEPLOY_DIR/$app"
+}
+
+# ───────────────────── Режим --remote-release (PLAN-INFRA-6.md §157) ─────────────────────
+# Сборка на s1, релиз на s2. Связь с s2 — один ограниченный SSH-ключ (authorized_keys на s2:
+# restrict + permitopen 127.0.0.1:* + forced-command scripts/deploy-release-entry.sh): он умеет
+# пробрасывать порты к Postgres на loopback s2 и вызывать `dump|release <app> <sha>`, больше ничего.
+REGISTRY_HOST="${REGISTRY_HOST:-registry.s1.letar.best}"
+REMOTE_RELEASE_HOST="${REMOTE_RELEASE_HOST:-deploy@s2.letar.best}"
+REMOTE_RELEASE_KEY="${REMOTE_RELEASE_KEY:-${HOME:-/home/deploy}/.ssh/s1_release_ed25519}"
+REMOTE_TUNNEL_SOCK="/tmp/letar-release-tunnel-$$.sock"
+TUNNEL_LOCAL_PORT=""
+
+if [ "$REMOTE_RELEASE" = true ]; then
+  if [ "$SERVER_NAME" != "s1" ]; then
+    echo -e "${RED}❌ --remote-release допустим только на s1 (сейчас: ${SERVER_NAME})${NC}"
+    exit 1
+  fi
+  if [ "$STAGING" = true ]; then
+    echo -e "${RED}❌ --remote-release и --staging несовместимы: staging собирается и запускается на s1${NC}"
+    exit 1
+  fi
+  if [ -z "$SPECIFIC_APP" ]; then
+    echo -e "${RED}❌ --remote-release требует --app <name>: релиз на s2 идёт по одному приложению${NC}"
+    exit 1
+  fi
+  if [ ! -r "$REMOTE_RELEASE_KEY" ]; then
+    echo -e "${RED}❌ Нет SSH-ключа s1→s2: ${REMOTE_RELEASE_KEY}${NC}"
+    echo -e "${YELLOW}   Заводится один раз, см. .claude/docs/deployment.md § «Сборка на s1, релиз на s2»${NC}"
+    exit 1
+  fi
+fi
+
+# ssh на s2 через ограниченный ключ. Аргумент — «команда» для forced-command (dump|release ...).
+remote_ssh() {
+  ssh -i "$REMOTE_RELEASE_KEY" \
+    -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
+    -o ConnectTimeout=15 -o ServerAliveInterval=30 -o ServerAliveCountMax=10 \
+    "$REMOTE_RELEASE_HOST" "$@"
+}
+
+# Туннель к Postgres приложения на s2: s1:localhost:<порт+20000> → s2:127.0.0.1:<порт>.
+# Смещение нужно затем, что на s1 свои staging-БД слушают порты, пересекающиеся с прод-портами
+# s2 (5455, 5456 есть в обоих наборах) — прямой проброс на тот же номер ткнулся бы в чужую БД.
+# Порт БД на s2 снаружи не открывается и не меняется: правил firewall нет.
+open_db_tunnel() {
+  local remote_port=$1
+  TUNNEL_LOCAL_PORT=$((remote_port + 20000))
+  echo -e "${YELLOW}🚇 Туннель к БД на s2: localhost:${TUNNEL_LOCAL_PORT} → s2:${remote_port}${NC}"
+  if ! ssh -i "$REMOTE_RELEASE_KEY" \
+    -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
+    -o ConnectTimeout=15 -o ServerAliveInterval=30 -o ExitOnForwardFailure=yes \
+    -M -S "$REMOTE_TUNNEL_SOCK" -N -f \
+    -L "127.0.0.1:${TUNNEL_LOCAL_PORT}:127.0.0.1:${remote_port}" \
+    "$REMOTE_RELEASE_HOST"; then
+    return 1
+  fi
+  return 0
+}
+
+close_db_tunnel() {
+  if [ -S "$REMOTE_TUNNEL_SOCK" ]; then
+    ssh -S "$REMOTE_TUNNEL_SOCK" -O exit "$REMOTE_RELEASE_HOST" >/dev/null 2>&1 || true
+  fi
+}
+trap close_db_tunnel EXIT
+
+# docker login в registry на s1. Учётные данные — те же REGISTRY_USER/REGISTRY_PASS из SOPS-секретов
+# dashboard-agent, что использует ночной ретеншн тегов; пароль идёт только через stdin.
+registry_login() {
+  local enc_file="$WORKSPACE_ROOT/apps/dashboard-agent/.env.docker.enc"
+  if [ ! -f "$enc_file" ]; then
+    echo -e "${RED}❌ Нет $enc_file — не откуда взять учётные данные registry${NC}"
+    return 1
+  fi
+  local env_text reg_user reg_pass
+  if ! env_text=$(sops --decrypt --input-type dotenv --output-type dotenv "$enc_file" 2>/dev/null); then
+    echo -e "${RED}❌ Не удалось расшифровать секреты dashboard-agent для docker login${NC}"
+    return 1
+  fi
+  reg_user=$(printf '%s\n' "$env_text" | grep '^REGISTRY_USER=' | head -1 | cut -d= -f2-)
+  reg_pass=$(printf '%s\n' "$env_text" | grep '^REGISTRY_PASS=' | head -1 | cut -d= -f2-)
+  if [ -z "$reg_user" ] || [ -z "$reg_pass" ]; then
+    echo -e "${RED}❌ В секретах dashboard-agent нет REGISTRY_USER/REGISTRY_PASS${NC}"
+    return 1
+  fi
+  printf '%s' "$reg_pass" | docker login "$REGISTRY_HOST" -u "$reg_user" --password-stdin >/dev/null
 }
 
 # Determine base commit for comparison
@@ -598,6 +693,19 @@ if [ ! -f "cron-jobs.json" ] && [ -f "cron-jobs.example.json" ]; then
 fi
 
 # Step 4: Get affected applications
+# --remote-release: приложение обязано числиться в BUILD_ON_S1_APPS (libs/infra-config). Читаем список
+# ПОСЛЕ git pull, иначе приложение, добавленное в него последним коммитом, было бы отвергнуто по
+# устаревшему чекауту. Не в списке — отказ, а не тихий откат на старый путь: переход по приложениям
+# осознанный, и «деплой прошёл» без сборки на s1 ввёл бы в заблуждение.
+if [ "$REMOTE_RELEASE" = true ]; then
+  IS_BUILT_ON_S1=$(bun -e "import('./libs/infra-config/src/index.ts').then(m => console.log(m.isBuiltOnS1('$SPECIFIC_APP')))" 2>/dev/null || echo "")
+  if [ "$IS_BUILT_ON_S1" != "true" ]; then
+    echo -e "${RED}❌ ${SPECIFIC_APP} не входит в BUILD_ON_S1_APPS (libs/infra-config/src/index.ts) — сборка на s1 для него не включена${NC}"
+    exit 1
+  fi
+  echo -e "${BLUE}ℹ️  Режим --remote-release: сборка на s1, релиз на s2 (§157)${NC}"
+fi
+
 echo -e "${YELLOW}🔍 Detecting affected applications...${NC}"
 
 # Function to check if app belongs to current server
@@ -828,6 +936,15 @@ for app in $AFFECTED_APPS; do
     continue
   fi
 
+  # --remote-release собирает образ на s1 и катит его на s2: у инфраструктурных приложений
+  # (без Dockerfile.production, внешние образы) собирать нечего
+  if [ "$REMOTE_RELEASE" = true ] && [ ! -f "$APP_DIR/Dockerfile.production" ]; then
+    echo -e "${RED}❌ У ${app} нет Dockerfile.production — --remote-release применим только к собираемым приложениям${NC}"
+    FAILED_APPS+=("$app")
+    echo ""
+    continue
+  fi
+
   # Check if this is an infrastructure app (no Dockerfile, uses external images)
   if [ ! -f "$APP_DIR/Dockerfile.production" ]; then
     echo -e "${BLUE}ℹ️  Infrastructure app detected (no Dockerfile.production)${NC}"
@@ -887,16 +1004,21 @@ for app in $AFFECTED_APPS; do
   [[ "$HAS_DB_SERVICE" =~ ^[0-9]+$ ]] || HAS_DB_SERVICE=0
 
   if [ -n "$BUILD_ENV_FILE" ] && [ "$HAS_DB_SERVICE" -gt 0 ]; then
-    echo -e "${YELLOW}🔧 Ensuring database is running for build...${NC}"
-
-    # Start only database if not running
-    if ! docker compose -f $COMPOSE_FILE ps db | grep -q "Up"; then
-      echo "Starting database container..."
-      docker compose -f $COMPOSE_FILE --env-file "$BUILD_ENV_FILE" up -d db
-      echo "Waiting for database to be ready..."
-      sleep 5
+    if [ "$REMOTE_RELEASE" = true ]; then
+      # БД приложения живёт на s2, здесь её нет и поднимать нельзя: доступ идёт через туннель ниже
+      echo -e "${BLUE}ℹ️  --remote-release: БД на s2, локальный старт пропущен${NC}"
     else
-      echo "Database already running"
+      echo -e "${YELLOW}🔧 Ensuring database is running for build...${NC}"
+
+      # Start only database if not running
+      if ! docker compose -f $COMPOSE_FILE ps db | grep -q "Up"; then
+        echo "Starting database container..."
+        docker compose -f $COMPOSE_FILE --env-file "$BUILD_ENV_FILE" up -d db
+        echo "Waiting for database to be ready..."
+        sleep 5
+      else
+        echo "Database already running"
+      fi
     fi
 
     # Export environment variables for build
@@ -924,9 +1046,23 @@ for app in $AFFECTED_APPS; do
     DB_NAME=$(grep "POSTGRES_DB:" $COMPOSE_FILE | awk '{print $2}' | head -1)
     DB_PORT=$(grep -A 1 "ports:" $COMPOSE_FILE | grep -o "[0-9]\+:5432" | cut -d: -f1 | head -1)
 
+    # Порт БД для сборки/миграций/seed. Обычно порт Docker-БД на этом же хосте; в --remote-release
+    # это конец SSH-туннеля к БД на s2 (см. open_db_tunnel), порт локальный и со смещением.
+    BUILD_DB_PORT="${DB_PORT:-5432}"
+    if [ "$REMOTE_RELEASE" = true ]; then
+      if ! open_db_tunnel "$BUILD_DB_PORT"; then
+        echo -e "${RED}❌ Не удалось открыть SSH-туннель к БД ${app} на s2 — сборка прервана${NC}"
+        FAILED_APPS+=("$app")
+        cd "$WORKSPACE_ROOT"
+        echo ""
+        continue
+      fi
+      BUILD_DB_PORT="$TUNNEL_LOCAL_PORT"
+    fi
+
     # DATABASE_URL for build - connect to Docker DB via localhost with dynamic port
-    export DATABASE_URL="postgresql://${DB_USER:-lena_user}:${ENCODED_PASSWORD}@localhost:${DB_PORT:-5432}/${DB_NAME}?schema=public"
-    echo "DATABASE_URL configured for ${DB_USER:-lena_user}@localhost:${DB_PORT:-5432}/${DB_NAME}"
+    export DATABASE_URL="postgresql://${DB_USER:-lena_user}:${ENCODED_PASSWORD}@localhost:${BUILD_DB_PORT}/${DB_NAME}?schema=public"
+    echo "DATABASE_URL configured for ${DB_USER:-lena_user}@localhost:${BUILD_DB_PORT}/${DB_NAME}"
   elif [ "$HAS_DB_SERVICE" -gt 0 ]; then
     # ${app} явно объявляет db-сервис в ${COMPOSE_FILE}, но ${ENV_FILE_NAME} не найден в
     # apps/${app}/ на момент проверки — блок выше молча пропускался целиком, включая
@@ -995,7 +1131,18 @@ for app in $AFFECTED_APPS; do
         # Перед миграцией — дамп прод-БД (защита данных; окно потери между ночными
         # бэкапами — до 24ч). Обход только явный: SKIP_PREMIGRATE_DUMP=1
         DUMP_DIR="${PRE_MIGRATE_DUMP_DIR:-/home/deploy/pre-migrate-dumps}"
-        if [ "${SKIP_PREMIGRATE_DUMP:-0}" != "1" ]; then
+        if [ "${SKIP_PREMIGRATE_DUMP:-0}" != "1" ] && [ "$REMOTE_RELEASE" = true ]; then
+          # pg_dump живёт рядом с БД, то есть на s2: просим s2 снять дамп (forced-command
+          # deploy-release-entry.sh → deploy-release.sh dump). Хранится там же, в pre-migrate-dumps.
+          echo -e "${YELLOW}💾 Pre-migrate dump на s2 (${app})...${NC}"
+          if ! remote_ssh "dump ${app} $(git -C "$WORKSPACE_ROOT" rev-parse --short HEAD)"; then
+            echo -e "${RED}❌ Pre-migrate dump на s2 не удался для ${app} — деплой прерван (миграция без бэкапа запрещена; явный обход: SKIP_PREMIGRATE_DUMP=1)${NC}"
+            FAILED_APPS+=("$app")
+            cd "$WORKSPACE_ROOT"
+            echo ""
+            continue
+          fi
+        elif [ "${SKIP_PREMIGRATE_DUMP:-0}" != "1" ]; then
           mkdir -p "$DUMP_DIR"
           DUMP_FILE="${DUMP_DIR}/${app}-$(git -C "$WORKSPACE_ROOT" rev-parse --short HEAD)-$(date +%Y%m%d-%H%M%S).sql.gz"
           # Имя контейнера БД — из compose (container_name под сервисом db:), fallback на конвенцию <app>-db.
@@ -1256,17 +1403,64 @@ for app in $AFFECTED_APPS; do
   # Дублирующий тег по git SHA — откат без пересборки: docker compose up с <app>:<sha>
   GIT_SHORT_SHA=$(git rev-parse --short HEAD)
   SHA_IMAGE="${app}:${GIT_SHORT_SHA}"
-  if docker build -f "$APP_DIR/Dockerfile.production" -t "$DOCKER_IMAGE" -t "$SHA_IMAGE" .; then
+  # --remote-release: третий тег — адрес в registry, откуда образ заберёт s2
+  REGISTRY_IMAGE="${REGISTRY_HOST}/${app}:${GIT_SHORT_SHA}"
+  REGISTRY_TAG_ARGS=()
+  if [ "$REMOTE_RELEASE" = true ]; then
+    REGISTRY_TAG_ARGS=(-t "$REGISTRY_IMAGE")
+  fi
+  if docker build -f "$APP_DIR/Dockerfile.production" -t "$DOCKER_IMAGE" -t "$SHA_IMAGE" "${REGISTRY_TAG_ARGS[@]}" .; then
     echo -e "${GREEN}✅ Docker image built: ${DOCKER_IMAGE} (+ rollback tag ${SHA_IMAGE})${NC}"
     # Ретеншн sha-тегов: храним последние 3 (docker images сортирует по дате создания);
     # rmi по тегу лишь снимает тег — образ под :latest/:staging не удаляется
     docker images "${app}" --format '{{.Tag}}' | grep -E '^[0-9a-f]{7,12}$' | tail -n +4 \
       | xargs -r -I{} docker rmi "${app}:{}" 2> /dev/null || true
+    # Публикация образа входит в build-фазу: «сборка прошла» без push бессмысленна, s2 нечего катить
+    if [ "$REMOTE_RELEASE" = true ]; then
+      echo -e "${YELLOW}📤 docker push ${REGISTRY_IMAGE}...${NC}"
+      if ! registry_login || ! docker push "$REGISTRY_IMAGE"; then
+        echo -e "${RED}❌ Не удалось отправить образ ${app} в registry — деплой прерван (s2 не тронут)${NC}"
+        phase_marker build fail
+        FAILED_APPS+=("$app")
+        echo ""
+        continue
+      fi
+      echo -e "${GREEN}✅ Образ отправлен в registry: ${REGISTRY_IMAGE}${NC}"
+      # Локальный registry-тег на s1 не нужен — образ остаётся под <app>:latest и <app>:<sha>
+      docker rmi "$REGISTRY_IMAGE" >/dev/null 2>&1 || true
+    fi
     phase_marker build ok
   else
     echo -e "${RED}❌ Docker build failed for ${app}${NC}"
     phase_marker build fail
     FAILED_APPS+=("$app")
+    echo ""
+    continue
+  fi
+
+  # --remote-release: запуск — на s2. Один вызов forced-command; вывод release-фазы (в том числе
+  # ::phase:-маркеры rollout/wait-healthy) идёт обратно по SSH в общий лог этого деплоя, поэтому
+  # deploy_status на s1 видит обе фазы. Любой ненулевой код = деплой не удался.
+  if [ "$REMOTE_RELEASE" = true ]; then
+    echo -e "${YELLOW}🚀 Релиз ${app} на s2 (образ ${GIT_SHORT_SHA})...${NC}"
+    if remote_ssh "release ${app} ${GIT_SHORT_SHA}"; then
+      DEPLOYED_APPS+=("$app")
+      echo -e "${GREEN}✅ ${app} выкачен на s2${NC}"
+      if [ "$RUN_SEED" = true ]; then
+        # nx и prisma есть только здесь (на s2 после переезда их не будет), БД — через тот же туннель
+        echo -e "${YELLOW}🌱 Running db:seed for ${app} (через туннель к s2)...${NC}"
+        SEED_DATABASE_URL="postgresql://${DB_USER:-lena_user}:${ENCODED_PASSWORD}@localhost:${BUILD_DB_PORT}/${DB_NAME}?schema=public"
+        if DATABASE_URL="$SEED_DATABASE_URL" nx run "${app}:db:seed"; then
+          echo -e "${GREEN}✅ Seed completed for ${app}${NC}"
+        else
+          echo -e "${RED}⚠️  Seed failed for ${app} (deploy succeeded)${NC}"
+        fi
+      fi
+    else
+      echo -e "${RED}❌ Релиз ${app} на s2 не удался (образ ${GIT_SHORT_SHA} уже в registry). Причина — в выводе release-фазы выше${NC}"
+      FAILED_APPS+=("$app")
+    fi
+    cd "$WORKSPACE_ROOT"
     echo ""
     continue
   fi
@@ -1444,7 +1638,8 @@ done
 
 # Ожидание готовности контейнеров перед reload nginx
 # Без этого NPM показывает default page пока контейнер стартует (5-10 мин даунтайм)
-if [ ${#DEPLOYED_APPS[@]} -gt 0 ]; then
+# --remote-release: ожидание healthcheck выполнено внутри release-фазы на s2, а контейнеров здесь нет
+if [ ${#DEPLOYED_APPS[@]} -gt 0 ] && [ "$REMOTE_RELEASE" != true ]; then
   phase_marker wait-healthy start
   echo -e "${YELLOW}⏳ Waiting for containers to become healthy before reloading Nginx...${NC}"
   for app in "${DEPLOYED_APPS[@]}"; do
@@ -1537,8 +1732,8 @@ fi
 echo -e "${GREEN}🎉 All deployments completed successfully!${NC}"
 echo ""
 
-# Show logs for deployed apps
-if [ ${#DEPLOYED_APPS[@]} -eq 1 ]; then
+# Show logs for deployed apps (при --remote-release контейнер на s2, здесь логов нет)
+if [ ${#DEPLOYED_APPS[@]} -eq 1 ] && [ "$REMOTE_RELEASE" != true ]; then
   app="${DEPLOYED_APPS[0]}"
   echo -e "${YELLOW}📋 Showing logs for ${app}:${NC}"
   cd "apps/${app}"

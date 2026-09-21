@@ -43,7 +43,7 @@ cd /home/deploy/letar
 | Сервер                        | Приложения                                                                                                                                                                                                                                                                                     |
 | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | ~~старый s1 (до 2026-06-20)~~ | ~~выведен из эксплуатации~~                                                                                                                                                                                                                                                                    |
-| **s1.letar.best**             | staging-контур (с 2026-09-19, `185.56.162.213`): staging-инстансы всех приложений `<app>-stage.s1.letar.best`, e2e-раннер, Docker registry, staging-инстанс dashboard-agent. Production-приложений нет                                                                                         |
+| **s1.letar.best**             | staging-контур (с 2026-09-19, `185.56.162.213`): staging-инстансы всех приложений `<app>-stage.s1.letar.best`, e2e-раннер, Docker registry, staging-инстанс dashboard-agent. Production-приложения не запускаются, но **собираются** здесь (`BUILD_ON_S1_APPS`, раздел ниже)                   |
 | **s3.letar.best**             | хранилище (с 2026-09-19, `185.130.251.234`): media-server, IPFS kubo, animatrona-pin-queue, GlitchTip. Приложения и dashboard-agent не деплоятся, `deploy_*` на него не ходят                                                                                                                  |
 | **s2.letar.best**             | dashboard, dashboard-agent, driving-school, auth-hub, archetest, time, form-docs, form-example, grandslamcup, aira-web, mandala, kami, pravda, umami, animatrona-landing, animatrona-tracker, kami-key-the-landing, letar-landing, dsperevod, aboi, svoichuzhie, aprel8008, studio, domwellbes |
 
@@ -65,6 +65,82 @@ bump на SHA, которого нет в origin submodule (закоммитил
 `git fetch origin --recurse-submodules=no` (конфиг не трогать), затем обычный деплой: `git pull` уже
 ничего не докачивает и в submodule не лезет. Профилактика: пушить submodule раньше bump, см.
 [git.md](/.claude/rules/git.md) («Порядок push нерушим»).
+
+## Сборка на s1, релиз на s2 (PLAN-INFRA-6.md §157)
+
+Production-сборка приложений уезжает с s2 на s1 (12 ядер, 31 ГБ RAM против 8 ядер и 15 ГБ у s2, на
+котором при этом работают 47 контейнеров). На s2 остаётся **релиз**: скачать готовый образ и
+запустить. Включается **по приложениям** — список `BUILD_ON_S1_APPS` в
+[libs/infra-config/src/index.ts](/libs/infra-config/src/index.ts); приложения вне списка идут
+прежним однохостовым путём. Контракт `deploy_app({ app, target: "production" })` не меняется.
+
+```
+deploy_app(prod) ─► агент на s1 ─► deploy-affected.sh --app X --remote-release
+                                    │  git pull · bun install · zenstack:generate
+                                    │  ssh s2 «dump X <sha>»          (только если есть миграции)
+                                    │  prisma migrate deploy          (через туннель к БД s2)
+                                    │  nx build · typecheck · sourcemaps → GlitchTip
+                                    │  docker build · docker push → registry.s1.letar.best/X:<sha>
+                                    └► ssh s2 «release X <sha>»
+                                         deploy-release-entry.sh → deploy-release.sh
+                                         git pull · docker pull · перетегирование в X:<sha>/X:latest
+                                         rollout / up -d · healthcheck · маркер деплоя
+```
+
+**Смотреть ход деплоя — на s1**: `deploy_status({ server: "s1", deployId })`. Лог release-фазы идёт
+обратно по SSH в тот же вывод, `::phase:`-маркеры `build` → `rollout` → `wait-healthy` те же.
+
+### Почему на s2 ничего не пришлось менять в compose и deploy-engine
+
+`deploy-release.sh` перетегирует скачанный образ в **локальные** `<app>:<sha>` и `<app>:latest` — ровно
+те, которые читают `docker-compose.production.yml` (`image: <app>:${DEPLOY_TAG:-latest}`) и
+`libs/deploy-engine`. Registry для них невидим.
+
+### Канал s1 → s2
+
+Один ограниченный SSH-ключ. В `authorized_keys` пользователя `deploy` на s2 он стоит с параметрами:
+`restrict` (запрещено всё, что не разрешено), `port-forwarding` + `permitopen="127.0.0.1:*"`
+(разрешён проброс только на loopback s2 — туннель к Postgres приложения, сами БД снаружи не видны),
+`command="…/scripts/deploy-release-entry.sh"` (единственное исполнимое действие). Shell по ключу
+получить нельзя. Точка входа принимает ровно `dump <app> <sha>` и `release <app> <sha>`, остальное
+отвергает с кодом 2 — белый список проверяет
+[scripts/deploy-release-entry.test.mjs](/scripts/deploy-release-entry.test.mjs) (`bun test`, в CI).
+
+Настройка — **один раз, руками владельца** (меняет authorized_keys на проде):
+
+```bash
+bash scripts/setup-release-channel.sh           # ключ на s1, строка на s2, known_hosts, проверка
+bash scripts/setup-release-channel.sh --check   # только проверка
+```
+
+Отзыв доступа — удалить строку с комментарием `s1-build-to-s2-release` из
+`/home/deploy/.ssh/authorized_keys` на s2.
+
+⚠️ Туннель к БД поднимается на локальный порт **порт_БД + 20000** (`5455` → `25455`): staging-БД на
+s1 занимают порты, пересекающиеся с прод-портами s2 (`5455`, `5456`), и прямой проброс на тот же
+номер попал бы в чужую базу.
+
+### Registry
+
+`registry.s1.letar.best` (`infra/registry/`, basic-auth на уровне Traefik). Учётные данные —
+`REGISTRY_USER`/`REGISTRY_PASS` из SOPS-секретов dashboard-agent; **оба** скрипта делают
+`docker login --password-stdin` сами при каждом запуске, ничего настраивать на хостах руками не
+нужно. Образы — кеш, а не источник истины (воспроизводимы из git), бэкап не нужен; ночной ретеншн
+тегов — job `registry-gc-s1`.
+
+### Что не поддерживается
+
+- **s1 или registry недоступны → прод-деплой приложений из `BUILD_ON_S1_APPS` не выполняется.**
+  Решение владельца (2026-09-06): аварийного однохостового пути не строим. В крайнем случае
+  приложение временно убирается из списка (коммит) — это тот же откат, что и штатный.
+- `dashboard` и `dashboard-agent` в список входить не могут: они перезапускают сами себя, а
+  release-фаза идёт по SSH-сессии, которую такой перезапуск оборвал бы.
+- `seed: true` в этом режиме выполняется **на s1** (nx и prisma на s2 после переезда не будут
+  нужны), БД — через тот же туннель.
+- Общий Nx-кеш: production и staging разведены (`.nx/cache-prod` / `.nx/cache-staging`, гейт §157
+  задача №1), иначе прод получил бы cache hit на staging-бандл с чужими `NEXT_PUBLIC_*`.
+- `libs/deploy-engine` на s2 по-прежнему запускается из `node_modules` s2 (`yaml`, `zod`). Пока это
+  так, `node_modules` с s2 снять нельзя — последний шаг тиража, отдельная задача.
 
 ## E2E-ранер и деплой — staging-gated пайплайн (PLAN.md §18)
 

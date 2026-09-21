@@ -344,6 +344,8 @@ export function createDeployMcpServer(): McpServer {
     description: [
       'Запускает деплой приложения (POST /api/deploy/app) — замена сырого SSH + deploy-affected.sh.',
       'target: "production" (по умолчанию, → сервер приложения) или "staging" (→ s1, образ <app>:staging).',
+      'Приложения из BUILD_ON_S1_APPS (libs/infra-config) собираются на s1 даже в production: запрос идёт на',
+      's1, образ уходит в registry, релиз выполняется на s2 — deploy_status/deploy_wait смотри на server: "s1".',
       'seed: true → deploy-affected.sh --seed (nx run <app>:db:seed после успешного деплоя).',
       'Возвращает deployId — опрашивай прогресс через deploy_status({ server, deployId, sinceLine }).',
       '⚠️ Изменяет production. Перед деплоем убедись, что коммиты запушены (git_status).',
@@ -402,6 +404,9 @@ export function createDeployMcpServer(): McpServer {
         [
           ...gatePrefix,
           `🚀 Деплой **${app}** (${target}) запущен на **${server}**.`,
+          ...(!staging && server === 's1'
+            ? ['Сборка идёт на s1, релиз на s2 (BUILD_ON_S1_APPS): весь ход деплоя — в логе на s1.']
+            : []),
           '',
           `Опрашивай прогресс: \`deploy_status({ server: "${server}", deployId: "${
             data?.deployId ?? ''

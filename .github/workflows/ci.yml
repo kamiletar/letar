@@ -173,4 +173,4 @@ jobs:
       # Перечисляй файлы явно.
       - name: Scripts tests
         if: always() && steps.install.outcome == 'success'
-        run: bun test scripts/check-schema-migration.test.mjs
+        run: bun test scripts/check-schema-migration.test.mjs scripts/deploy-release-entry.test.mjs

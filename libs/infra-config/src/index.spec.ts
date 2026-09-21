@@ -1,11 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import {
   APP_PORTS,
+  BUILD_ON_S1_APPS,
   E2E_GATED_APPS,
   getAppPort,
   getCurrentServer,
   getServerForApp,
   HARD_GATED_APPS,
+  isBuiltOnS1,
   resolveDeployServer,
   SERVER_APPS,
 } from './index'
@@ -54,6 +56,37 @@ describe('resolveDeployServer', () => {
   it('неизвестное приложение падает на s2 (fallback)', () => {
     expect(getServerForApp('несуществующее-приложение')).toBe('s2')
     expect(resolveDeployServer('несуществующее-приложение')).toBe('s2')
+  })
+
+  it('production резолвится на s1 ровно для приложений из BUILD_ON_S1_APPS', () => {
+    for (const app of Object.keys(SERVER_APPS)) {
+      const expected = BUILD_ON_S1_APPS.includes(app) ? 's1' : SERVER_APPS[app]
+      expect(resolveDeployServer(app, 'production')).toBe(expected)
+      expect(isBuiltOnS1(app)).toBe(BUILD_ON_S1_APPS.includes(app))
+    }
+  })
+
+  it('сборка на s1 не меняет сервер, где приложение ЗАПУСКАЕТСЯ (getServerForApp)', () => {
+    for (const app of BUILD_ON_S1_APPS) {
+      expect(getServerForApp(app)).toBe('s2')
+    }
+  })
+})
+
+describe('BUILD_ON_S1_APPS', () => {
+  it('каждое приложение известно SERVER_APPS (не опечатка в имени)', () => {
+    for (const app of BUILD_ON_S1_APPS) {
+      expect(SERVER_APPS[app]).toBeDefined()
+    }
+  })
+
+  it('не содержит приложений, которые перезапускают сами себя (release-фаза на s2 их отвергает)', () => {
+    expect(BUILD_ON_S1_APPS).not.toContain('dashboard')
+    expect(BUILD_ON_S1_APPS).not.toContain('dashboard-agent')
+  })
+
+  it('без дубликатов', () => {
+    expect(new Set(BUILD_ON_S1_APPS).size).toBe(BUILD_ON_S1_APPS.length)
   })
 })
 
