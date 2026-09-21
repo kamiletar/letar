@@ -95,7 +95,13 @@ done
 FAILED=0
 
 if [[ ${#CLEAN_FILES[@]} -gt 0 ]]; then
-  "$DPRINT_BIN" check "${CLEAN_FILES[@]}" || FAILED=1
+  # --allow-no-files: когда ВСЕ переданные файлы исключены конфигом (коммит только из
+  # `**/src/generated/**`, из каталога submodule под `excludes` корневого dprint.json и т.п.),
+  # dprint отвечает кодом 14 «No files found to format» — это не «файл не отформатирован», а
+  # «проверять нечего». Без флага хук принимал любой ненулевой код за блок и останавливал
+  # легитимный коммит. Флаг превращает 14 в 0; настоящая неотформатированность по-прежнему
+  # даёт 20, ошибка разбора — 1, и оба блокируют.
+  "$DPRINT_BIN" check --allow-no-files "${CLEAN_FILES[@]}" || FAILED=1
 fi
 
 if [[ ${#DIVERGED_FILES[@]} -gt 0 ]]; then
