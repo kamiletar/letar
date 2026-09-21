@@ -1,3 +1,4 @@
+import { actionFailure, ActionFailureError } from '@letar/forms-core/server-errors'
 import { act, renderHook } from '@testing-library/react'
 import type { RefObject } from 'react'
 import { describe, expect, it, vi } from 'vitest'
@@ -137,6 +138,56 @@ describe('useFormServerAction', () => {
 
     await act(async () => {
       await expect(result.current.run(action)).rejects.toBe(originalError)
+    })
+  })
+
+  describe('отказ значением (ActionFailure)', () => {
+    it('значение отказа разбирается как ошибка: поле, общий блок, toaster и throw ActionFailureError', async () => {
+      const action = vi.fn().mockResolvedValue(actionFailure('Такой адрес уже занят', 'slug'))
+      const onSuccess = vi.fn()
+      const toaster = { create: vi.fn() }
+      const formRef = createFormRef()
+      const { result } = renderHook(() => useFormServerAction(formRef, { toaster, successMessage: 'Сохранено' }))
+
+      await act(async () => {
+        await expect(result.current.run(action, onSuccess)).rejects.toBeInstanceOf(ActionFailureError)
+      })
+
+      expect(formRef.current?.setFieldMeta).toHaveBeenCalledWith('slug', expect.any(Function))
+      expect(formRef.current?.setErrorMap).toHaveBeenCalledWith({ onSubmit: 'Такой адрес уже занят' })
+      expect(toaster.create).toHaveBeenCalledTimes(1)
+      expect(toaster.create).toHaveBeenCalledWith({ type: 'error', title: 'Такой адрес уже занят' })
+      // отказ — не успех: ни тоста успеха, ни onSuccess
+      expect(onSuccess).not.toHaveBeenCalled()
+      expect(result.current.pending).toBe(false)
+    })
+
+    it('отказ без поля ложится только в общий блок формы', async () => {
+      const action = vi.fn().mockResolvedValue(actionFailure('Нельзя удалить'))
+      const formRef = createFormRef()
+      const { result } = renderHook(() => useFormServerAction(formRef))
+
+      await act(async () => {
+        await expect(result.current.run(action)).rejects.toBeInstanceOf(ActionFailureError)
+      })
+
+      expect(formRef.current?.setFieldMeta).not.toHaveBeenCalled()
+      expect(formRef.current?.setErrorMap).toHaveBeenCalledWith({ onSubmit: 'Нельзя удалить' })
+    })
+
+    it('успех с полем error без маркера отказом не считается', async () => {
+      const partial = { items: [1], error: 'часть строк пропущена' }
+      const action = vi.fn().mockResolvedValue(partial)
+      const onSuccess = vi.fn()
+      const formRef = createFormRef()
+      const { result } = renderHook(() => useFormServerAction(formRef))
+
+      await act(async () => {
+        await expect(result.current.run(action, onSuccess)).resolves.toBe(partial)
+      })
+
+      expect(onSuccess).toHaveBeenCalledWith(partial)
+      expect(formRef.current?.setErrorMap).not.toHaveBeenCalled()
     })
   })
 

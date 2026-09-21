@@ -254,7 +254,7 @@ function ContactForm() {
     name: 'server-errors' as FormPattern,
     title: 'Server Error Mapping',
     description:
-      'Auto-map Prisma, ZenStack, Zod server errors to form fields. Supports P2002 (unique), P2003 (FK), policy rejection, Zod flatten, ActionResult.',
+      'Auto-map Prisma, ZenStack, Zod server errors to form fields. Supports P2002 (unique), P2003 (FK), policy rejection, Zod flatten, ActionResult. A Server Action must RETURN an expected failure as a value (actionFailure / catchActionFailure) — production Next.js strips the text of a thrown error; useFormServerAction.run rethrows it on the client.',
     example: `import { applyServerErrors, mapServerErrors } from '@letar/forms'
 
 <Form schema={UserSchema} onSubmit={async ({ value }) => {
@@ -273,7 +273,23 @@ function ContactForm() {
   <Form.Field.String name="name" />
   <Form.Errors />
   <Form.Button.Submit>Create</Form.Button.Submit>
-</Form>`,
+</Form>
+
+// Server Action: return an expected failure as a VALUE (thrown text is stripped in production)
+'use server'
+import { catchActionFailure, UserFacingError } from '@letar/forms/server-errors'
+
+export async function createUser(input: UserInput) {
+  return catchActionFailure(async () => {
+    if (await isBanned(input.email)) throw new UserFacingError('Registration is closed', 'email')
+    return db.user.create({ data: input, select: { id: true } })
+  }, { uniqueMessages: { email: 'This email is already registered' } })
+}
+
+// Client: run() recognises the returned failure, puts it under the field + <Form.Errors />
+const formRef = useFormRef()
+const { run, pending } = useFormServerAction(formRef, { toaster })
+await run(() => createUser(data))`,
   },
   {
     name: 'undo-redo' as FormPattern,

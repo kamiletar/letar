@@ -1,6 +1,11 @@
 'use client'
 
-import { applyServerErrors, mapServerErrors } from '@letar/forms-core/server-errors'
+import {
+  ActionFailureError,
+  applyServerErrors,
+  isActionFailure,
+  mapServerErrors,
+} from '@letar/forms-core/server-errors'
 import type { MappedServerErrors, MapServerErrorsConfig } from '@letar/forms-core/server-errors'
 import type { RefObject } from 'react'
 import { useState } from 'react'
@@ -50,6 +55,11 @@ export interface UseFormServerActionResult<TResult> {
    * post-submit reset). Вызывающему коду по-прежнему не нужен свой try/catch: `<Form>` сам ловит
    * исключение из `onSubmit` в этом же кадре (см. `form-simple.tsx`) — то же самое место, что уже
    * ловит `throw` из Server Action в низкоуровневом пути `middleware.onError`.
+   *
+   * Отказ, который Server Action вернула ЗНАЧЕНИЕМ (`actionFailure(...)` / `catchActionFailure`), тоже
+   * считается ошибкой: `run` бросает `ActionFailureError`, а текст и поле (`field`) ложатся в форму
+   * как у любой другой серверной ошибки. `onSuccess` и тост успеха при этом не вызываются. Значение
+   * без маркера `success: false` (включая успех с полем `error`) отказом не считается.
    */
   run: <TData = TResult>(action: () => Promise<TData>, onSuccess?: (result: TData) => void) => Promise<TData>
 }
@@ -106,6 +116,11 @@ export function useFormServerAction<TResult = unknown>(
     setPending(true)
     try {
       const result = await action()
+      // Отказ, возвращённый значением (Server Action не может бросить текст в production) —
+      // превращаем в исключение здесь же: дальше он идёт тем же путём, что и `throw`
+      if (isActionFailure(result)) {
+        throw new ActionFailureError(result)
+      }
       if (successMessage) {
         toaster?.create({ type: 'success', title: successMessage })
       }

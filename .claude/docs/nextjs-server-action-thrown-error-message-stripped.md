@@ -40,10 +40,19 @@ const { formRef, middleware } = useActionFormErrors()          // middleware.onE
 
 ## Где реализовано
 
-Пилот — приватное приложение монорепо (`src/lib/action-result.ts`,
-`src/lib/use-action-form-errors.ts`). Кандидат на вынос в `libs/forms` (сейчас формат
-`{ error }` без `success: false` парсером ActionResult в `forms-core` не распознаётся — поэтому
-клиент бросает `ActionFailureError` сам).
+Вынесено в библиотеку форм (2026-09-21): `@letar/forms-core/server-errors` 0.13.0 (`actionFailure`,
+`unwrapActionResult`, `catchActionFailure`, `UserFacingError`, `ActionFailureError`, парсер в цепочке
+`mapServerErrors`), `useFormServerAction.run` и `useActionFormErrors` в `@letar/forms-react` 0.10.0.
+Server Action импортирует из `@letar/forms/server-errors` (подпуть без React). Разбор и границы —
+[libs/forms/docs/server-errors.md](/libs/forms/docs/server-errors.md) §«Отказ Server Action значением».
+
+Формат отказа в библиотеке — `{ success: false, error, field? }`: явный маркер `success: false`, иначе
+успешный результат с полем `error` бросился бы как отказ. Пилот в приложении жил на `{ error }` без
+маркера — при переходе на библиотеку значения отказов пересобираются фабрикой `actionFailure`.
+
+⚠️ Поле из имени unique-ограничения выводится только для `<Table>_<field>_key` (три части):
+составной ключ, `@@map("snake_case")` и `@map` неоднозначны — там общий текст, свой задаётся через
+`uniqueMessages`.
 
 ## Как проверить, что дыр не осталось
 

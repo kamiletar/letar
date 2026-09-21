@@ -4,6 +4,7 @@
  * null означает "не мой формат, передай следующему".
  */
 
+import { isActionFailureError } from './action-failure'
 import type {
   ActionResultError,
   FieldErrorMap,
@@ -235,7 +236,12 @@ export function parseActionResultError(error: unknown): MappedServerErrors | nul
   const result: MappedServerErrors = { fieldErrors: [], formErrors: [] }
 
   if (typeof error.error === 'string') {
-    // Простая строковая ошибка → глобальная
+    // Простая строковая ошибка → глобальная; с `field` (ActionFailure) — ещё и под полем.
+    // В общем блоке текст остаётся: в пошаговой форме поле может быть на другом шаге, а
+    // `Form.Errors` выводит только ошибки уровня формы.
+    if (error.field) {
+      result.fieldErrors.push({ field: error.field, message: error.error })
+    }
     result.formErrors.push(error.error)
   } else if (typeof error.error === 'object') {
     // Вложенный Zod flatten формат
@@ -249,6 +255,20 @@ export function parseActionResultError(error: unknown): MappedServerErrors | nul
   }
 
   return result
+}
+
+/**
+ * Парсер `ActionFailureError` — исключения, в которое `unwrapActionResult` превращает отказ
+ * Server Action. Должен стоять строго перед `parseErrorObject`: тот принимает любую `Error` и
+ * положил бы текст только в `formErrors`, потеряв поле.
+ */
+export function parseActionFailureError(error: unknown): MappedServerErrors | null {
+  if (!isActionFailureError(error)) { return null }
+
+  return {
+    fieldErrors: error.field ? [{ field: error.field, message: error.message }] : [],
+    formErrors: [error.message],
+  }
 }
 
 /**

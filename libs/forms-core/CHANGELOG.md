@@ -4,6 +4,30 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.13.0] - 2026-09-21
+
+### Added
+
+- **`@letar/forms-core/server-errors`: отказ Server Action значением** (задача `form-action-result-extract`,
+  вынесено из пилота domwellbes). В production Next.js стирает текст ошибки, брошенной из Server
+  Action (код 441), поэтому ожидаемый отказ возвращается значением, а клиент бросает его обратно:
+  - `ActionFailure` = `{ success: false; error: string; field?: string }` и фабрика
+    `actionFailure(error, field?)`; `isActionFailure` требует явный маркер `success: false`,
+    поэтому успех с полем `error` (частичный успех) отказом не считается;
+  - `unwrapActionResult(result)` — значение отказа → `ActionFailureError`, успех как есть;
+  - `catchActionFailure(work, { uniqueMessages?, locale? })` — серверная сторона: ловит
+    `UserFacingError` и нарушение unique (`23505`), остальное пробрасывает;
+  - `isDbErrorCode` / `isUniqueViolation` — SQLSTATE из `dbErrorCode` (ZenStack v3) и `cause.code`
+    (исходная pg-ошибка), от ORM не зависят; Prisma-код `P2002` не входит (его разбирает
+    `parsePrismaError`);
+  - `uniqueFieldsFromConstraint` — поле из имени ограничения **только когда оно однозначно**
+    (`Table_field_key`); составной ключ, `@@map` и `@map` с подчёркиванием дают пустой список;
+  - `parseActionFailureError` — парсер `ActionFailureError` в цепочке `mapServerErrors`, строго
+    перед `parseErrorObject`.
+- `ActionResultError.field` и `parseActionResultError`: строковая `error` с `field` раскладывается и
+  под поле, и в общий блок формы (текст остаётся в `formErrors` — в пошаговой форме поле может быть
+  на другом шаге). Без `field` поведение прежнее.
+
 ## [0.12.6] - 2026-09-15
 
 ### Changed

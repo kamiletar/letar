@@ -4,6 +4,25 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.10.0] - 2026-09-21
+
+### Added
+
+- **`useFormServerAction.run` понимает отказ, возвращённый значением** (`actionFailure(...)` /
+  `catchActionFailure` из `@letar/forms-core/server-errors`): `run` бросает `ActionFailureError`, текст
+  и поле ложатся в форму и в тост как у любой серверной ошибки, `onSuccess` и тост успеха не
+  вызываются. Значение без маркера `success: false` (в том числе успех с полем `error`) отказом
+  не считается.
+- **`useActionFormErrors(config?)`** — `{ formRef, middleware: { onError } }` для низкоуровневого пути
+  (`unwrapActionResult` внутри `onSubmit`) без pending и тоста. Опции `mapServerErrors` (`fieldMap`,
+  `locale`) передаются дальше; `middleware` стабилен между рендерами.
+
+### Changed
+
+- ⚠️ Action, которая через `run` возвращала `{ success: false, error: '…' }` (ActionResult), теперь
+  трактуется как отказ: `run` бросает вместо резолва этим значением. Внутри монорепо таких
+  вызовов нет (единственные потребители — четыре формы входа aboi на Better Auth).
+
 ## [0.9.1] - 2026-09-15
 
 ### Changed

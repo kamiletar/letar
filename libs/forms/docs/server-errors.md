@@ -96,7 +96,18 @@ import { mapServerErrors, applyServerErrors } from '@letar/forms'
 // Вложенный Zod flatten
 { success: false, error: { fieldErrors: { name: ['Обязательное'] }, formErrors: [] } }
 // → fieldErrors: [{ field: 'name', message: 'Обязательное' }]
+
+// Строковая ошибка с полем (ActionFailure, см. ниже)
+{ success: false, error: 'Такой адрес уже занят', field: 'slug' }
+// → fieldErrors: [{ field: 'slug', message: '…' }], formErrors: ['…']
 ```
+
+### ActionFailureError
+
+Исключение, в которое `unwrapActionResult` превращает отказ Server Action (см. раздел ниже).
+Текст — в `message`, поле — в `field`. Разбирается отдельным парсером `parseActionFailureError`,
+который стоит строго перед `parseErrorObject`: тот принимает любую `Error` и положил бы текст
+только в `formErrors`, потеряв поле.
 
 ## API
 
@@ -235,6 +246,96 @@ function MaterialForm() {
   для тех, кому нужен полный контроль — например разное поведение `onError` в зависимости от
   типа ошибки. `useFormServerAction` не заменяет его, а снимает ceremony для типового случая.
 
+## Отказ Server Action значением — `ActionFailure`
+
+⚠️ **В production Next.js стирает текст любой ошибки, брошенной из Server Action** — клиент
+получает «Minified React error» (код 441) вместо причины
+([разбор](../../../.claude/docs/nextjs-server-action-thrown-error-message-stripped.md)).
+Поэтому _ожидаемый_ отказ (бизнес-правило, дубль уникального значения) сервер возвращает
+**значением**, а форма на клиенте превращает его обратно в исключение — клиентский `throw` не
+стирается и доезжает до `mapServerErrors`. Настоящие неполадки по-прежнему бросаются: их текст
+пользователю и не нужен, они идут в логи и трекер ошибок.
+
+**Сервер** (Server Action). Импорт — из `@letar/forms/server-errors`: подпуть без React и Chakra.
+
+```typescript
+'use server'
+import { actionFailure, catchActionFailure, UserFacingError } from '@letar/forms/server-errors'
+
+export async function createCategory(input: CategoryInput) {
+  return catchActionFailure(async () => {
+    if (await isNameReserved(input.name)) {
+      throw new UserFacingError('Это название зарезервировано', 'name') // поле — необязательно
+    }
+    return db.category.create({ data: input, select: { id: true } })
+  }, {
+    // свои тексты при дубле: ключ — поле или поля через «_» для составного ограничения
+    uniqueMessages: { slug: 'Такой адрес уже занят — задайте другой' },
+  })
+}
+
+// Отказ можно вернуть и напрямую, без исключения:
+//   return actionFailure('Нельзя удалить: есть заказы', 'id')
+```
+
+`catchActionFailure` ловит **только** `UserFacingError` и нарушение unique (SQLSTATE `23505`);
+всё остальное пробрасывает как есть.
+
+**Клиент.** Два пути, оба кладут причину под поле и в `<Form.Errors />`:
+
+```tsx
+// 1. useFormServerAction: run сам узнаёт отказ-значение и бросает ActionFailureError
+const { run, pending } = useFormServerAction(formRef, { toaster })
+await run(() => createCategory(data), () => router.push('/admin/categories/'))
+
+// 2. Низкоуровневый путь: unwrapActionResult + middleware.onError
+const { formRef, middleware } = useActionFormErrors()
+<MyForm formRef={formRef} middleware={middleware}
+  onSubmit={async (data) => { unwrapActionResult(await createCategory(data)) }}>
+  <MyForm.Errors />
+```
+
+При отказе `onSuccess` и тост успеха не вызываются.
+
+### Маркер и ложные срабатывания
+
+Отказ — это значение вида `{ success: false, error: string, field?: string }`. Маркер
+`success: false` явный: успешный результат с полем `error`
+(`{ items, error: 'часть строк пропущена' }`) отказом **не** считается. Значение собирай
+фабрикой `actionFailure(error, field?)`, а не литералом.
+
+⚠️ Если action уже возвращала `{ success: false, error: '…' }` (ActionResult-соглашение) и
+вызывалась через `run`, теперь такое значение считается отказом: `run` бросит
+`ActionFailureError` вместо резолва с этим значением. Раньше вызывающий код обязан был проверять
+`result.success` сам, теперь форма делает это за него.
+
+### Дубль уникального значения: какое поле
+
+Prisma называет ограничение `<Table>_<field>[_<field>…]_key`. Поле выводится **только когда имя
+однозначно** — три части (`MaterialCategory_slug_key` → `slug`). Составной ключ
+(`WorkMaterialNorm_workId_materialId_effectiveFrom_key`), таблица с `@@map("snake_case")`,
+колонка с `@map` — поля не будет: разделитель `_` не отличает их от подчёркивания внутри имени, и
+ошибка под чужим полем хуже, чем общее сообщение. Пользователь получает общий текст
+(`Такая запись уже существует` / `This record already exists`, язык — `locale`), а свой текст
+подключается через `uniqueMessages`: ключ сверяется с хвостом имени ограничения (`…_<ключ>_key`),
+при нескольких подходящих берётся самый длинный. Имя не по схеме (частичный индекс,
+`@@unique(name: …)`, имя, усечённое Postgres до 63 символов) — тоже общий текст.
+
+Определение нарушения unique от ORM не зависит: проверяется SQLSTATE в `dbErrorCode`
+(ZenStack v3) и в `cause.code` (исходная pg-ошибка). Prisma-код `P2002` в `isUniqueViolation`
+не входит — его разбирает `parsePrismaError`
+([коды ZenStack v3](../../../.claude/docs/zenstack-v3-orm-error-codes.md)).
+
+### Как соотносится с Better Auth throw-bridge
+
+`assertAuthOk` (следующий раздел) решает ту же задачу с другой стороны: ответ Better Auth —
+значение `{ error }` на клиенте, его нужно _бросить_, чтобы форма увидела. `ActionFailure` —
+для собственных Server Action: там значение возвращает сервер, а бросает клиент.
+
+**Vue и Angular.** Обёртки под `useFormServerAction` там нет (в Vue/Angular нет такого хука).
+`ActionFailure`, `unwrapActionResult`, `catchActionFailure` и парсеры — framework-free, в
+`@letar/forms-core/server-errors`, и работают в любом скине.
+
 ## Better Auth — throw-bridge
 
 `@letar/forms` (и `mapServerErrors`/`applyServerErrors`) требует, чтобы `onSubmit` **бросал**
@@ -316,4 +417,8 @@ import { applyServerErrors, mapServerErrors } from '@letar/forms/server-errors'
 
 // Отдельные парсеры (для кастомных пайплайнов)
 import { parsePrismaError, parseZenStackError } from '@letar/forms/server-errors'
+
+// Отказ Server Action значением — сервер (без React) и клиент
+import { useActionFormErrors, useFormServerAction } from '@letar/forms'
+import { actionFailure, catchActionFailure, unwrapActionResult, UserFacingError } from '@letar/forms/server-errors'
 ```

@@ -45,17 +45,17 @@ const Schema = z.object({
 
 ## Документация
 
-| Категория        | Документация                                             | Описание                                              |
-| ---------------- | -------------------------------------------------------- | ----------------------------------------------------- |
-| Field компоненты | [docs/fields.md](./docs/fields.md)                       | 56 типов полей (String, Number, Select, ...)          |
-| Form-level       | [docs/form-level.md](./docs/form-level.md)               | Steps, When, Watch, Errors, Persistence               |
-| Schema генерация | [docs/schema-generation.md](./docs/schema-generation.md) | FromSchema, AutoFields, Builder, Templates            |
-| Server Errors    | [docs/server-errors.md](./docs/server-errors.md)         | Маппинг Prisma/ZenStack/Zod ошибок на поля            |
-| Offline          | [docs/offline.md](./docs/offline.md)                     | Оффлайн режим, очередь синхронизации                  |
-| ZenStack         | [docs/zenstack.md](./docs/zenstack.md)                   | Плагин, @meta("form.\*", value) директивы, withUIMeta |
-| i18n             | [docs/i18n.md](./docs/i18n.md)                           | Мультиязычность, перевод ошибок валидации             |
-| Analytics        | [docs/analytics.md](./docs/analytics.md)                 | Field-level аналитика, 4 адаптера                     |
-| API Reference    | [docs/api-reference.md](./docs/api-reference.md)         | Хуки, контексты, типы                                 |
+| Категория        | Документация                                             | Описание                                                                            |
+| ---------------- | -------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| Field компоненты | [docs/fields.md](./docs/fields.md)                       | 56 типов полей (String, Number, Select, ...)                                        |
+| Form-level       | [docs/form-level.md](./docs/form-level.md)               | Steps, When, Watch, Errors, Persistence                                             |
+| Schema генерация | [docs/schema-generation.md](./docs/schema-generation.md) | FromSchema, AutoFields, Builder, Templates                                          |
+| Server Errors    | [docs/server-errors.md](./docs/server-errors.md)         | Маппинг Prisma/ZenStack/Zod ошибок; отказ Server Action значением (`ActionFailure`) |
+| Offline          | [docs/offline.md](./docs/offline.md)                     | Оффлайн режим, очередь синхронизации                                                |
+| ZenStack         | [docs/zenstack.md](./docs/zenstack.md)                   | Плагин, @meta("form.\*", value) директивы, withUIMeta                               |
+| i18n             | [docs/i18n.md](./docs/i18n.md)                           | Мультиязычность, перевод ошибок валидации                                           |
+| Analytics        | [docs/analytics.md](./docs/analytics.md)                 | Field-level аналитика, 4 адаптера                                                   |
+| API Reference    | [docs/api-reference.md](./docs/api-reference.md)         | Хуки, контексты, типы                                                               |
 
 ---
 

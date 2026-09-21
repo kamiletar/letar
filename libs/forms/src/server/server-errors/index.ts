@@ -23,8 +23,22 @@
  * ```
  */
 
-export { applyServerErrors, mapServerErrors } from '@letar/forms-core/server-errors'
 export {
+  actionFailure,
+  ActionFailureError,
+  applyServerErrors,
+  catchActionFailure,
+  isActionFailure,
+  isActionFailureError,
+  isDbErrorCode,
+  isUniqueViolation,
+  mapServerErrors,
+  uniqueFieldsFromConstraint,
+  unwrapActionResult,
+  UserFacingError,
+} from '@letar/forms-core/server-errors'
+export {
+  parseActionFailureError,
   parseActionResultError,
   parseErrorObject,
   parsePrismaError,
@@ -32,7 +46,9 @@ export {
   parseZodFlatError,
 } from '@letar/forms-core/server-errors'
 export type {
+  ActionFailure,
   ActionResultError,
+  CatchActionFailureOptions,
   FieldError,
   FieldErrorMap,
   MappedServerErrors,

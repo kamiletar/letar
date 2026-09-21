@@ -1,5 +1,13 @@
 # Changelog — @letar/form-mcp
 
+## 2.2.0 (2026-09-21)
+
+### Changed
+
+- `get_form_pattern('server-errors')`: пример дополнен отказом Server Action значением
+  (`catchActionFailure` / `UserFacingError` на сервере, `useFormServerAction.run` на клиенте) —
+  `@letar/forms` 2.15.0. Причина в описании: в production Next.js стирает текст брошенной ошибки.
+
 ## 2.1.0 (2026-09-19)
 
 ### Added

@@ -6,7 +6,7 @@
 
 ## Backlog (запросы от агентов)
 
-### [ ] [2026-09-21] Отказ Server Action значением: `ActionFailure`/`unwrapActionResult`/`useActionFormErrors` (от domwellbes)
+### ✅ [2026-09-21] Отказ Server Action значением: `ActionFailure`/`unwrapActionResult`/`useActionFormErrors` (закрыт forms-core 0.13.0 / forms-react 0.10.0 / forms 2.15.0, от domwellbes)
 
 - **Запросил:** domwellbes-dev (agent-mail, тред `form-action-result-extract`)
 - **Приоритет:** high
@@ -23,7 +23,34 @@
   `mapServerErrors`; на решение `forms-dev` — маркер в формате отказа (дак-тайпинг `{ error: string }`
   бросит и успешный результат с полем `error`); границы разбора имени unique-ограничения (подчёркивания,
   `@map`) — тестами и README.
-- **Статус:** в работе → `forms-dev`
+- **Решение (2026-09-21):** в `@letar/forms-core/server-errors` — `ActionFailure` =
+  `{ success: false; error; field? }` (подтип `ActionResultError`, маркер явный, значение собирает
+  фабрика `actionFailure`), `unwrapActionResult`, `catchActionFailure`, `UserFacingError`,
+  `ActionFailureError`, `isDbErrorCode`/`isUniqueViolation` (SQLSTATE из `dbErrorCode` и `cause.code`,
+  P2002 не трогают), `uniqueFieldsFromConstraint`, парсер `parseActionFailureError` перед
+  `parseErrorObject`. `useFormServerAction.run` сам узнаёт возвращённый отказ и бросает
+  `ActionFailureError`; `useActionFormErrors(config?)` — тонкая обёртка `formRef` + `middleware`.
+  Всё реэкспортировано из `@letar/forms` и `@letar/forms/server-errors` (подпуть без React — для
+  Server Action).
+- **Отступления от триажа:** `parseActionResultError` всё же научен `field` — но только при
+  `success: false`, защита от ложного срабатывания сохранена (тест на `{ items, error }`); поле из
+  имени ограничения выводится **только для `Table_field_key`** (три части) — составной ключ,
+  `@@map("snake_case")` и `@map` неоднозначны, поля не будет, свой текст находится по хвосту имени
+  через `uniqueMessages`. В библиотеке только общий текст дубля по `locale` (ru/en); тексты
+  `slug`/`sku`/`inn` остаются в domwellbes.
+- ⚠️ **Поведенческое изменение `run`:** action, вернувшая `{ success: false, error: string }`, теперь
+  бросает вместо резолва. Потребители в монорепо — четыре формы входа aboi на Better Auth, они
+  возвращают не такие значения.
+- **Парити:** обёртки для Vue/Angular нет — там нет `useFormServerAction`; ядро (`ActionFailure`,
+  `unwrapActionResult`, `catchActionFailure`, парсеры) framework-free и работает в любом скине.
+- **Проверено:** тесты forms-core (`action-failure.spec.ts`), forms-react (`use-form-server-action`,
+  `use-action-form-errors`), lint/typecheck трёх пакетов и трёх приложений. Живой прогон демо — в
+  `form-develop-app` `/server-errors-demo`.
+- **Дальше (за domwellbes-dev):** перейти на импорты `@letar/forms`, удалить пилот
+  (`action-result.ts`, `use-action-form-errors.ts`, `db-errors.ts` в части unique) и вынести тексты
+  `slug`/`sku`/`inn` в `uniqueMessages`. Тест на настоящей ORM-ошибке (`action-result.db.spec.ts`)
+  остаётся в приложении — библиотека БД не знает.
+- **Статус:** ✅ закрыт
 
 ### ✅ [2026-09-21] `Steps.Navigation`: пропсы кнопок с `data-*` (закрыт v2.14.22, от domwellbes)
 

@@ -4,6 +4,20 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.15.0] - 2026-09-21
+
+### Added
+
+- **Отказ Server Action значением** — реэкспорт из `@letar/forms-core` (реализация и разбор — в его
+  CHANGELOG 0.13.0): `actionFailure`, `ActionFailure`, `unwrapActionResult`, `catchActionFailure`,
+  `UserFacingError`, `ActionFailureError`, `isActionFailure`, `isDbErrorCode`, `isUniqueViolation`,
+  `parseActionFailureError`, `uniqueFieldsFromConstraint` — из `@letar/forms/server-errors` (подпуть
+  без React, для Server Action) и, кроме серверных хелперов, из `@letar/forms`.
+- `useActionFormErrors` и обновлённый `useFormServerAction` (см. `@letar/forms-react` 0.10.0).
+- `docs/server-errors.md`: раздел «Отказ Server Action значением — `ActionFailure`» — почему бросать
+  из Server Action нельзя, серверная и клиентская сторона, маркер, какое поле выводится из имени
+  ограничения и почему не всегда.
+
 ## [2.14.22] - 2026-09-21
 
 ### Added

@@ -5,7 +5,8 @@
  * - Prisma P2002/P2003/P2025/P2014
  * - ZenStack rejected-by-policy / db-query-error
  * - Zod v4 flatten { fieldErrors, formErrors }
- * - ActionResult { success: false, error: ... }
+ * - ActionResult { success: false, error: ... } (в т.ч. ActionFailure с `field`)
+ * - ActionFailureError — клиентское исключение из unwrapActionResult
  * - Error объекты с .info (ZenStack) и .cause (Prisma)
  *
  * @example
@@ -28,6 +29,7 @@
  */
 
 import {
+  parseActionFailureError,
   parseActionResultError,
   parseErrorObject,
   parsePrismaError,
@@ -71,6 +73,8 @@ export function mapServerErrors(error: unknown, config?: MapServerErrorsConfig):
     () => parseZenStackError(error, fieldMap, locale),
     () => parseZodFlatError(error),
     () => parseActionResultError(error),
+    // строго перед parseErrorObject: тот принимает любую Error и теряет поле отказа
+    () => parseActionFailureError(error),
     () => parseErrorObject(error, fieldMap, locale),
   ]
 
@@ -96,7 +100,7 @@ function parseByFormat(
     case 'zod':
       return parseZodFlatError(error)
     case 'action-result':
-      return parseActionResultError(error)
+      return parseActionResultError(error) ?? parseActionFailureError(error)
     default:
       return null
   }

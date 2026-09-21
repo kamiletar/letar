@@ -64,4 +64,6 @@ export interface ActionResultError {
   success: false
   error: string | { formErrors?: string[]; fieldErrors?: Record<string, string[]> }
   message?: string
+  /** Поле формы для строковой `error` (см. `ActionFailure`). */
+  field?: string
 }

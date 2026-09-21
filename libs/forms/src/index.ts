@@ -68,6 +68,7 @@ export {
   // Metadata helpers
   relationMeta,
   textMeta,
+  useActionFormErrors,
   useActiveFiltersCount,
   useDeclarativeField,
   useDeclarativeForm,
@@ -245,9 +246,22 @@ export type {
 } from './lib/declarative/form-fields/specialized/credit-card'
 
 // Server Error Mapping (Prisma, ZenStack, Zod, ActionResult) — физически в src/server/
-export { applyServerErrors, mapServerErrors } from './server/server-errors'
+export {
+  actionFailure,
+  ActionFailureError,
+  applyServerErrors,
+  catchActionFailure,
+  isActionFailure,
+  isDbErrorCode,
+  isUniqueViolation,
+  mapServerErrors,
+  unwrapActionResult,
+  UserFacingError,
+} from './server/server-errors'
 export type {
+  ActionFailure,
   ActionResultError,
+  CatchActionFailureOptions,
   FieldError,
   FieldErrorMap,
   MappedServerErrors,

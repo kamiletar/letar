@@ -18,8 +18,22 @@
  * ```
  */
 
+export {
+  actionFailure,
+  ActionFailureError,
+  catchActionFailure,
+  isActionFailure,
+  isActionFailureError,
+  isDbErrorCode,
+  isUniqueViolation,
+  uniqueFieldsFromConstraint,
+  unwrapActionResult,
+  UserFacingError,
+} from './action-failure'
+export type { ActionFailure, CatchActionFailureOptions } from './action-failure'
 export { applyServerErrors, mapServerErrors } from './map-server-errors'
 export {
+  parseActionFailureError,
   parseActionResultError,
   parseErrorObject,
   parsePrismaError,

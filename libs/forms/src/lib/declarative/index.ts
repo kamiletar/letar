@@ -475,7 +475,7 @@ export type {
   UseFormServerActionOptions,
   UseFormServerActionResult,
 } from './use-form-server-action'
-export { useFormServerAction } from './use-form-server-action'
+export { useActionFormErrors, useFormServerAction } from './use-form-server-action'
 export {
   FormUrlSync,
   type FormUrlSyncOptions,
