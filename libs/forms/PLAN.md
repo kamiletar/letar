@@ -6,6 +6,17 @@
 
 ## Backlog (запросы от агентов)
 
+### [ ] [2026-09-21] `Steps.Navigation`: проп для `data-*` на кнопки «Назад»/«Далее»/«Отправить» (от domwellbes)
+
+- **Запросил:** domwellbes-dev (agent-mail не доставлен: `forms-coordinator-dev` в статусе retired)
+- **Приоритет:** high
+- **Описание:** `FormStepsNavigation` (`form-steps/form-steps-navigation.tsx`) не принимает ни `data-*`,
+  ни пропсов для кнопок. Режим наставника domwellbes находит элементы по `data-assist-id`, поэтому не
+  может подсветить «Создать» в мастерах (материал, дом, работа). Предложение: `prevProps`/`nextProps`/
+  `submitProps`/`skipProps` (типизированные, `data-*` без `as`) либо `assistIdPrefix` → `.prev/.next/
+  .submit/.skip`. После релиза domwellbes сам проставит якоря.
+- **Статус:** ожидание
+
 ### [ ] ⚠️ Открытый вопрос: деплой `form-docs` 0.6.12 / `form-example` не подтверждён (2026-09-19)
 
 - **Контекст:** запросы 1736/1737 (agent-mail, треды `deploy-form-docs`/`deploy-form-example`, коммит
