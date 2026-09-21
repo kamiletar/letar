@@ -4332,9 +4332,14 @@ animatrona — NVENC-раздел `nvenc-web-video-codec-ladder.md`, строк�
 - [x] Порт `3101` (`media-nginx`) на s3 закрыт — `127.0.0.1:3101:80` (`937e2d9bf`).
 - [ ] ⚠️ Открытый вопрос: hydration #418 в `Header` svoichuzhie **вживую не воспроизведён** — фикс
       защитный (unit-тест красный→зелёный). Если #418 вернётся в GlitchTip, причина не в `Header`.
-- [ ] ⚠️ Открытый вопрос: `libs/auth/src/client/assert-auth-ok.ts` бросает серверный текст
-      («Invalid email or password») раньше русского запасного — пользователь `/login` svoichuzhie
-      видит английскую ошибку; вероятно то же на других страницах с `assertAuthOk`.
+- [x] `assertAuthOk` (`@letar/auth` 0.16.0, 2026-09-21): английский `message` Better Auth больше не
+      перекрывает русский текст формы. Приоритет: `messages[code]` → русский серверный `message` →
+      `defaultMessage` (для ошибок с `code`) → `message` без `code` (rate-limit) → общий текст;
+      добавлены `AUTH_ERROR_MESSAGES_RU`, `resolveAuthErrorMessage`. Подключено в svoichuzhie
+      (`join-form`), dsperevod (sign-up/reset/forgot), aboi (sign-up); e2e svoichuzhie 10-auth
+      требует русский текст. Коммиты: `9b04d37aa`, bump `4b75b8f80`. Разбор —
+      [auth.md](/.claude/docs/auth.md) «Устранение неполадок».
+      ⏳ Submodule-коммиты не запушены; deploy-request не отправлялся.
 - [ ] ⚠️ Открытый вопрос: staging-сборка aboi на пустой БД падает на гонке
       `prisma.appSettings.upsert` при пререндере `/admin/settings` (P2002 `AppSettings_pkey`);
       на проде строка есть. Обход — повторный деплой.
@@ -4343,6 +4348,13 @@ animatrona — NVENC-раздел `nvenc-web-video-codec-ladder.md`, строк�
       теперь текст отказа называет оба SHA, их источник и изменённые пути. `extraArgs` в `run_e2e`
       не существовало — zod молча отбрасывал ключ и шёл весь набор; схема стала строгой,
       ответ печатает применённые фильтры. См. e2e-testing.md § «Ловушки свежего s1».
+- [ ] ⚠️ Открытый вопрос: процесс MCP `letar` нужно перезапустить, чтобы новая схема `run_e2e` и
+      текст отказа гейта (deploy-mcp 0.5.0) заработали; пока не перезапущен — действует старое.
+- [ ] ⚠️ Открытый вопрос: `bun.lock` в `HEAD` отстаёт от версий `package.json` у dashboard-agent
+      (0.16.5 против 0.17.0), aboi, poster-microtext-desktop, svoichuzhie; в рабочем дереве lock
+      обновлён, но не закоммитен, а запись deploy-mcp там 0.4.1 против 0.5.0 в коммите.
+      Риск — `--frozen-lockfile` на деплое (`bun-lock-drift-unpushed-commits-blocks-all-deploys`).
+      Не чинил: чужие версии, часть могла быть непушнутой.
 - [ ] ⚠️ Открытый вопрос: `forms-coordinator-dev`, `dsperevod-dev`, `svoichuzhie-dev` ретированы в
       Agent Mail — `send_message` им падает (`reply_message` в существующий тред работает); токенов
       deploy-агент не имеет.
