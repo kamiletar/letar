@@ -235,7 +235,7 @@
 
 - [deployment](/.claude/docs/deployment.md) ⭐ как устроен деплой
 - [verification-pitfalls](/.claude/docs/verification-pitfalls.md) ⭐ проверки, которые врут в успокаивающую (и одна — в тревожную) сторону
-- [dev-session-screenshot-bypass](/.claude/docs/dev-session-screenshot-bypass.md) живая проверка за admin-гейтом через Playwright-скрипт
+- [dev-session-screenshot-bypass](/.claude/docs/dev-session-screenshot-bypass.md) живая проверка за admin-гейтом через Playwright-скрипт: скриншот и сбор консоли (гидратация, черновик формы)
 - [docker-bind-mount-pitfalls](/.claude/docs/docker-bind-mount-pitfalls.md) ⚠️ `compose up -d` не перечитывает смонтированный конфиг
 - [nextjs-standalone-bind-mount-wrong-cwd](/.claude/docs/nextjs-standalone-bind-mount-wrong-cwd.md) ⚠️ `process.chdir()` — байты уходят в writable-слой мимо хоста
 - [docker-bind-mount-uid-gid-mismatch](/.claude/docs/docker-bind-mount-uid-gid-mismatch.md) ⚠️ EACCES по uid/gid при верном пути монтирования

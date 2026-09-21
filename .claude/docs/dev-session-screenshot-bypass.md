@@ -54,6 +54,55 @@ to invalid URL`. Обход — `MSYS_NO_PATHCONV=1` перед командой
 MSYS_NO_PATHCONV=1 node .claude/scripts/dev-session-screenshot.mjs aboi 3018 /catalog/gornyj-duh .claude/artifacts/check.png
 ```
 
+## Консоль вместо скриншота: `dev-session-console-check.mjs`
+
+Скриншот не показывает то, что нужно при разборе ошибки гидратации React (#418): в dev React
+печатает в консоль дифф несовпавшего узла, а на картинке страница выглядит целой. Для этого —
+[.claude/scripts/dev-session-console-check.mjs](/.claude/scripts/dev-session-console-check.mjs):
+тот же программный логин через `/api/auth/dev-session`, затем `networkidle` и вывод сообщений
+консоли уровня `error`/`warning` и `pageerror` (со стеком). Слушатели вешаются **после** логина —
+шума самого dev-session-запроса в отчёте нет.
+
+```bash
+MSYS_NO_PATHCONV=1 node .claude/scripts/dev-session-console-check.mjs <app> <port> <path> [email] [--reload-after-fill [--accept-restore]]
+# пример: черновик формы создания материала в domwellbes
+MSYS_NO_PATHCONV=1 node .claude/scripts/dev-session-console-check.mjs domwellbes 3025 /admin/materials/new admin@domwellbes.local --reload-after-fill --accept-restore
+```
+
+Аргументы и флаги:
+
+- `<app> <port> <path> [email]` — как у скриншот-скрипта; `email` по умолчанию `admin@<app>.local`.
+- `--reload-after-fill` — ввести текст в первые три видимые редактируемые текстовые поля
+  (`input` без `type`/`text`/`search`, `textarea`), подождать автосохранение черновика,
+  перезагрузить страницу и собрать консоль ещё раз (записи помечены `[load]` / `[after-reload]`).
+  Печатает имена ключей `localStorage` с размером значения и «введено → стало после перезагрузки»
+  по каждому полю. Содержимое `localStorage` в вывод не попадает.
+- `--accept-restore` — у форм с `FormPersistence` после перезагрузки поля пусты, пока пользователь
+  не нажмёт «Восстановить» в диалоге. Без флага скрипт только сообщает, показан ли диалог; с
+  флагом нажимает кнопку — так проверяется и гидратация с восстановленными значениями.
+- Код возврата `1` — есть `error`/`pageerror`, `0` — тишина или одни `warning`.
+
+Токен скрипт читает из `apps/<app>/.env.local` сам, в аргументах и выводе его нет: в тексте
+сообщений и URL значение (сырое и URL-кодированное) заменяется на `***`. В запрос логина токен
+идёт через `encodeURIComponent` — иначе `+` из base64 декодируется на сервере в пробел
+([dev-session-token-plus-char-query-corruption](/.claude/docs/dev-session-token-plus-char-query-corruption.md)).
+
+⚠️ **Тишина ≠ «гидратация цела».** Ноль сообщений подтверждает только то, что на этом пути и в
+этом состоянии React ничего не напечатал: другие шаги формы, другие данные и режим без
+`--accept-restore` остаются непроверенными. Ошибка, которая есть у пользователя, а у скрипта нет,
+чаще всего живёт в состоянии, которого скрипт не воспроизвёл (черновик, cookie, другой viewport).
+
+⚠️ **`--reload-after-fill` пишет в форму и `localStorage` профиля Playwright** — профиль
+одноразовый, реальные данные приложения не затрагиваются, но форма сохранение не отправляет
+(кнопки скрипт не нажимает, кроме «Восстановить»).
+
+## ⚠️ Git Bash: `MSYS_NO_PATHCONV=1` обязателен для обоих скриптов
+
+Любой аргумент вида `/admin/...` Git Bash считает путём к файлу и разворачивает в
+`C:/Program Files/Git/admin/...`. Консольный скрипт это ловит сам и завершается с подсказкой
+(«Путь … не похож на URL-путь»); скриншот-скрипт падает менее понятно — `Cannot navigate to
+invalid URL`. В PowerShell подмены нет, переменная не нужна.
+
 ## Предпосылки в приложении
 
 Работает для любого приложения с `createDevSessionRoute` из `@letar/auth/server` — двойной

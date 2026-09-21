@@ -535,7 +535,8 @@ grep -n "^DATABASE_URL\|^MCP_LOCAL_URL" apps/<app>/.env.local
   любые DNS-проверки с рабочей машины
 - [dev-session-screenshot-bypass.md](/.claude/docs/dev-session-screenshot-bypass.md) — соседний
   класс, но про инструмент, а не про проверку: Browser tool отказывается авторизоваться за
-  admin-гейтом, обход — Playwright-скрипт через Bash
+  admin-гейтом, обход — Playwright-скрипт через Bash; там же `dev-session-console-check.mjs` —
+  тексты консоли (дифф гидратации React #418) вместо скриншота, в т.ч. после ввода и перезагрузки
 - [chakra-css-memo-prop-order-hydration.md](/.claude/docs/chakra-css-memo-prop-order-hydration.md) —
   прецедент «состояние живёт в процессе»: холодный `next start` не показывает баг, потому что
   кеш заполняет сама проверяемая страница
