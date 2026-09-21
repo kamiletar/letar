@@ -15,6 +15,7 @@ import {
   E2E_GATED_APPS,
   HARD_GATED_APPS,
   type InfraServer,
+  isBuiltOnS1,
   resolveDeployServer,
   SERVER_APPS,
   SERVERS,
@@ -22,6 +23,7 @@ import {
 import { errorText, pretty, text } from '@letar/mcp-server-kit'
 import { McpServer } from '@modelcontextprotocol/server'
 import { z } from 'zod'
+import { readBuildOnS1Apps } from './build-on-s1.js'
 import { agentRequest, type AgentResponse } from './client.js'
 import { changedPathsSince, isAffectedSince, originMainSha } from './config.js'
 
@@ -186,7 +188,15 @@ export async function evaluateE2eGate(
   return result
 }
 
-export function createDeployMcpServer(): McpServer {
+export interface DeployMcpOptions {
+  /**
+   * Файл с `BUILD_ON_S1_APPS`, который `deploy_app` перечитывает при каждом production-деплое.
+   * По умолчанию — `libs/infra-config/src/index.ts`; в тестах указывает на временный файл.
+   */
+  infraConfigPath?: string
+}
+
+export function createDeployMcpServer(options: DeployMcpOptions = {}): McpServer {
   const server = new McpServer({ name: '@letar/deploy-mcp', version: '0.1.0' }, { capabilities: { tools: {} } })
 
   // ─── list_servers ────────────────────────────────────────────────────────────
@@ -364,7 +374,6 @@ export function createDeployMcpServer(): McpServer {
       seed: z.boolean().optional().describe('Запустить nx run <app>:db:seed после успешного деплоя (--seed)'),
     }),
   }, async ({ app, target = 'production', seed = false }) => {
-    const server = resolveDeployServer(app, target as DeployTarget)
     const staging = target === 'staging'
     const gated = !staging && E2E_GATED_APPS.includes(app)
     const hardGated = !staging && HARD_GATED_APPS.includes(app)
@@ -385,9 +394,12 @@ export function createDeployMcpServer(): McpServer {
         ].join('\n'),
       )
     }
-    const gatePrefix = gate.reasons.length > 0
-      ? [...gate.reasons.map((r) => `⚠️ e2e-gate: ${r}.`), '', ...(gate.hint ? [...gate.hint, ''] : [])]
-      : []
+    const gatePrefix = [
+      ...(listChangedNote.length > 0 ? [...listChangedNote, ''] : []),
+      ...(gate.reasons.length > 0
+        ? [...gate.reasons.map((r) => `⚠️ e2e-gate: ${r}.`), '', ...(gate.hint ? [...gate.hint, ''] : [])]
+        : []),
+    ]
     try {
       const res = await agentRequest(server, {
         method: 'POST',
@@ -398,6 +410,8 @@ export function createDeployMcpServer(): McpServer {
         return errorText(
           [...gatePrefix, `❌ Не удалось запустить деплой ${app} (${target}) на ${server}: ${res.error}`].join('\n'),
         )
+      'Список перечитывается из libs/infra-config/src/index.ts при каждом production-вызове: правка действует сразу,',
+      'рестарт MCP не нужен; не смог прочитать — отказ, а не молчаливый откат на s2.',
       }
       const data = res.data as { deployId?: string } | undefined
       return text(
@@ -418,6 +432,36 @@ export function createDeployMcpServer(): McpServer {
     } catch (err) {
       return errorText(
         [
+    // Список читается из файла на КАЖДЫЙ production-вызов, а не берётся из значения, вычисленного при
+    // старте процесса: иначе приложение, добавленное в BUILD_ON_S1_APPS после запуска MCP, уходило бы
+    // на s2 (сборка на прод-хосте). Прочитать не вышло — отказ, а не откат на s2 «по умолчанию».
+    // Для staging список не нужен (там всегда s1), поэтому битый файл staging не блокирует.
+    let buildOnS1Apps: string[] | undefined
+    if (!staging) {
+      try {
+        buildOnS1Apps = readBuildOnS1Apps(options.infraConfigPath)
+      } catch (err) {
+        return errorText(
+          [
+            `⛔ deploy_app(${app}, production) отказал: не удалось определить актуальный BUILD_ON_S1_APPS.`,
+            err instanceof Error ? err.message : String(err),
+            '',
+            'От списка зависит, куда пойдёт сборка (s1 или s2), поэтому без него деплой не запускается —',
+            'молчаливого отката на s2 нет. Исправь `libs/infra-config/src/index.ts` и повтори вызов; перезапуск MCP не нужен.',
+          ].join('\n'),
+        )
+      }
+    }
+    const server = resolveDeployServer(app, target as DeployTarget, buildOnS1Apps)
+    // Расхождение с тем, что процесс запомнил при старте, — видно в ответе: объясняет, почему маршрут
+    // отличается от того, что показал бы устаревший список (и что рестарт агенту не нужен).
+    const listChangedNote = buildOnS1Apps !== undefined && isBuiltOnS1(app) !== buildOnS1Apps.includes(app)
+      ? [
+        `ℹ️ BUILD_ON_S1_APPS перечитан из файла: ${app} ${
+          buildOnS1Apps.includes(app) ? 'теперь в списке' : 'больше не в списке'
+        } (при старте процесса было иначе) — маршрут по актуальному списку.`,
+      ]
+      : []
           ...gatePrefix,
           `❌ deploy_app ${app} (${target}) на ${server}: ${err instanceof Error ? err.message : String(err)}`,
         ].join('\n'),

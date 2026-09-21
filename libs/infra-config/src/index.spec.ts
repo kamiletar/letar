@@ -66,6 +66,22 @@ describe('resolveDeployServer', () => {
     }
   })
 
+  // Долгоживущий процесс (MCP letar) передаёт свежепрочитанный список — он важнее значения, вычисленного
+  // при импорте модуля (libs/deploy-mcp/src/build-on-s1.ts).
+  it('явно переданный список перекрывает BUILD_ON_S1_APPS в isBuiltOnS1 и resolveDeployServer', () => {
+    expect(isBuiltOnS1('pilot-app', ['pilot-app'])).toBe(true)
+    expect(resolveDeployServer('pilot-app', 'production', ['pilot-app'])).toBe('s1')
+    expect(resolveDeployServer('pilot-app', 'production', [])).toBe('s2')
+    const [listed] = BUILD_ON_S1_APPS
+    if (listed) {
+      expect(resolveDeployServer(listed, 'production', [])).toBe(SERVER_APPS[listed])
+    }
+  })
+
+  it('staging не зависит от переданного списка', () => {
+    expect(resolveDeployServer('pilot-app', 'staging', [])).toBe('s1')
+  })
+
   it('сборка на s1 не меняет сервер, где приложение ЗАПУСКАЕТСЯ (getServerForApp)', () => {
     for (const app of BUILD_ON_S1_APPS) {
       expect(getServerForApp(app)).toBe('s2')

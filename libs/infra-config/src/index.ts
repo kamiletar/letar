@@ -215,6 +215,12 @@ export function getCurrentServer(): InfraServer {
  * (канал деплоя идёт через их же контейнер), release-фаза на s2 такие приложения отвергает.
  * ⚠️ Запуск СЕРВИСА остаётся на s2 (`SERVER_APPS` не меняется) — s1 только собирает.
  *
+ * ⚠️ Форма записи — контракт. MCP `letar` (`deploy_app`) читает ЭТОТ файл текстом при каждом
+ * production-деплое и разбирает массив как литерал строк (`libs/deploy-mcp/src/build-on-s1.ts`):
+ * так добавление приложения действует сразу, без перезапуска процесса. Держи список литералом
+ * `['app-a', 'app-b']` — spread, константы и вычисления разбор отвергнет, и `deploy_app` откажет с
+ * пояснением (не откатится молча на s2). Охранный тест — `build-on-s1.spec.ts` в deploy-mcp.
+ *
  * Пилот 3 (2026-09-22): `mandala` — настоящий пререндер из БД (`generateStaticParams` читает мандалы,
  * товары и страницы): сборка читает прод-БД s2 через туннель. `kami` (2026-09-21) прошёл технически,
  * но у него `/sitemap.xml` динамический — чтение БД сборкой он не доказал.
@@ -224,9 +230,13 @@ export function getCurrentServer(): InfraServer {
  */
 export const BUILD_ON_S1_APPS: string[] = ['letar-landing', 'time', 'kami', 'mandala']
 
-/** Собирается ли приложение в production на s1 (см. `BUILD_ON_S1_APPS`). */
-export function isBuiltOnS1(app: string): boolean {
-  return BUILD_ON_S1_APPS.includes(app)
+/**
+ * Собирается ли приложение в production на s1 (см. `BUILD_ON_S1_APPS`).
+ * `buildOnS1Apps` — актуальный список вместо значения, вычисленного при импорте модуля: долгоживущий
+ * процесс (MCP `letar`) передаёт сюда свежепрочитанный из файла, см. `libs/deploy-mcp/src/build-on-s1.ts`.
+ */
+export function isBuiltOnS1(app: string, buildOnS1Apps: readonly string[] = BUILD_ON_S1_APPS): boolean {
+  return buildOnS1Apps.includes(app)
 }
 
 /** Цель деплоя: боевой сервер или staging. */
@@ -236,9 +246,14 @@ export type DeployTarget = 'production' | 'staging'
  * Резолвит сервер, КОТОРОМУ отправляется запрос деплоя, с учётом target.
  * staging → всегда s1; production → s1 для приложений из `BUILD_ON_S1_APPS` (там идёт сборка и
  * оттуда запускается релиз на s2), иначе сервер приложения из SERVER_APPS.
+ * `buildOnS1Apps` — см. `isBuiltOnS1`.
  */
-export function resolveDeployServer(app: string, target: DeployTarget = 'production'): InfraServer {
-  if (target === 'staging' || isBuiltOnS1(app)) {
+export function resolveDeployServer(
+  app: string,
+  target: DeployTarget = 'production',
+  buildOnS1Apps: readonly string[] = BUILD_ON_S1_APPS,
+): InfraServer {
+  if (target === 'staging' || isBuiltOnS1(app, buildOnS1Apps)) {
     return 's1'
   }
   return getServerForApp(app)

@@ -1,6 +1,9 @@
-import { HARD_GATED_APPS } from '@letar/infra-config'
+import { BUILD_ON_S1_APPS, E2E_GATED_APPS, HARD_GATED_APPS } from '@letar/infra-config'
 import { connectedClient, expectValidationError, textOf } from '@letar/mcp-test-kit'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import { afterAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { agentRequest } from './client'
 import { changedPathsSince, isAffectedSince, originMainSha } from './config'
 import { createDeployMcpServer } from './server'
@@ -160,5 +163,109 @@ describe('строгие входные схемы — неизвестный а
     const { client } = await connect()
     await expectValidationError(client, 'deploy_app', { app: 'svoichuzhie', staging: true })
     expect(agentRequest).not.toHaveBeenCalled()
+  })
+})
+
+// Регрессия 2026-09-22 (mandala, пилот 3 §157): приложение добавили в BUILD_ON_S1_APPS уже после
+// старта процесса MCP, и `deploy_app` отправил бы сборку на s2 (прод-хост) вместо s1 — список
+// вычислялся один раз при импорте. Сервер здесь создаётся ОДИН РАЗ, файл со списком правится
+// между вызовами того же клиента — ровно как живёт процесс `letar` у deploy-agent-dev.
+describe('deploy_app — BUILD_ON_S1_APPS перечитывается при каждом вызове', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'deploy-mcp-tools-'))
+  afterAll(() => rmSync(dir, { recursive: true, force: true }))
+
+  // Не входит ни в реальный BUILD_ON_S1_APPS, ни в e2e-гейты — маршрут определяется только списком.
+  const app = 'pilot-app'
+  const list = (...apps: string[]) =>
+    `export const BUILD_ON_S1_APPS: string[] = [${apps.map((a) => `'${a}'`).join(', ')}]\n`
+  const lastServer = () => vi.mocked(agentRequest).mock.calls.at(-1)?.[0]
+
+  beforeEach(() => {
+    vi.mocked(agentRequest).mockReset()
+    vi.mocked(agentRequest).mockResolvedValue({ success: true, data: { deployId: 'd-1' } })
+  })
+
+  it('добавление в список после старта сервера: следующий вызов идёт на s1, а не на s2', async () => {
+    const file = join(dir, 'add.ts')
+    writeFileSync(file, list('letar-landing'))
+    const { client } = await connectedClient(() => createDeployMcpServer({ infraConfigPath: file }))
+
+    await client.callTool({ name: 'deploy_app', arguments: { app } })
+    expect(lastServer()).toBe('s2')
+
+    writeFileSync(file, list('letar-landing', app))
+    const result = await client.callTool({ name: 'deploy_app', arguments: { app } })
+    expect(lastServer()).toBe('s1')
+    expect(textOf(result)).toContain('запущен на **s1**')
+    expect(textOf(result)).toContain('теперь в списке')
+  })
+
+  it('откат (имя убрали из списка): следующий вызов снова идёт по SERVER_APPS/s2', async () => {
+    const file = join(dir, 'remove.ts')
+    writeFileSync(file, list(app))
+    const { client } = await connectedClient(() => createDeployMcpServer({ infraConfigPath: file }))
+
+    await client.callTool({ name: 'deploy_app', arguments: { app } })
+    expect(lastServer()).toBe('s1')
+
+    writeFileSync(file, list())
+    await client.callTool({ name: 'deploy_app', arguments: { app } })
+    expect(lastServer()).toBe('s2')
+  })
+
+  it('без расхождения с памятью процесса заметки о перечитывании нет', async () => {
+    const file = join(dir, 'same.ts')
+    writeFileSync(file, list())
+    const { client } = await connectedClient(() => createDeployMcpServer({ infraConfigPath: file }))
+    const result = await client.callTool({ name: 'deploy_app', arguments: { app } })
+    expect(textOf(result)).not.toContain('перечитан')
+  })
+
+  it('файл нельзя разобрать: отказ с причиной, запрос к агенту не уходит (нет отката на s2)', async () => {
+    const file = join(dir, 'broken.ts')
+    writeFileSync(file, `const OTHER = ['x']\nexport const BUILD_ON_S1_APPS: string[] = [...OTHER, '${app}']\n`)
+    const { client } = await connectedClient(() => createDeployMcpServer({ infraConfigPath: file }))
+
+    const result = await client.callTool({ name: 'deploy_app', arguments: { app } })
+    expect(result.isError).toBe(true)
+    expect(textOf(result)).toContain('BUILD_ON_S1_APPS')
+    expect(textOf(result)).toContain('не литералом строк')
+    expect(agentRequest).not.toHaveBeenCalled()
+  })
+
+  it('файла нет: отказ, запрос к агенту не уходит', async () => {
+    const { client } = await connectedClient(() =>
+      createDeployMcpServer({ infraConfigPath: join(dir, 'нет-такого-файла.ts') })
+    )
+    const result = await client.callTool({ name: 'deploy_app', arguments: { app } })
+    expect(result.isError).toBe(true)
+    expect(textOf(result)).toContain('не удалось прочитать')
+    expect(agentRequest).not.toHaveBeenCalled()
+  })
+
+  it('staging идёт на s1 даже при нечитаемом файле — список ему не нужен', async () => {
+    const { client } = await connectedClient(() =>
+      createDeployMcpServer({ infraConfigPath: join(dir, 'нет-такого-файла.ts') })
+    )
+    const result = await client.callTool({ name: 'deploy_app', arguments: { app, target: 'staging' } })
+    expect(result.isError).toBeFalsy()
+    expect(lastServer()).toBe('s1')
+  })
+
+  // Путь по умолчанию — реальный libs/infra-config/src/index.ts, тот же файл, что импортирует процесс.
+  const listedApp = BUILD_ON_S1_APPS.find((a) => !E2E_GATED_APPS.includes(a))
+  it.skipIf(listedApp === undefined)(
+    'по умолчанию читается реальный файл: приложение из списка идёт на s1',
+    async () => {
+      const { client } = await connect()
+      await client.callTool({ name: 'deploy_app', arguments: { app: listedApp } })
+      expect(lastServer()).toBe('s1')
+    },
+  )
+
+  it('по умолчанию читается реальный файл: приложение вне списка идёт на s2', async () => {
+    const { client } = await connect()
+    await client.callTool({ name: 'deploy_app', arguments: { app } })
+    expect(lastServer()).toBe('s2')
   })
 })

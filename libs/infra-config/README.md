@@ -73,13 +73,18 @@ export const TUNNEL_PORTS: Record<InfraServer, number> = {
 ```typescript
 /** Приложения, у которых production-СБОРКА идёт на s1, а на s2 — только релиз (§157). */
 export const BUILD_ON_S1_APPS: string[]
-export function isBuiltOnS1(app: string): boolean
+export function isBuiltOnS1(app: string, buildOnS1Apps?: readonly string[]): boolean
+export function resolveDeployServer(app: string, target?: DeployTarget, buildOnS1Apps?: readonly string[]): InfraServer
 ```
 
 Для приложений из списка `resolveDeployServer(app, 'production')` возвращает `s1` (там собирается образ
 и запускается релиз на s2). `getServerForApp` и `SERVER_APPS` не меняются: **запускается** приложение
 по-прежнему на s2. Переходный список: приложение включается после пилота, откат — убрать имя.
-`deploy-affected.sh --remote-release` читает его же через `isBuiltOnS1()`. Подробности —
+`deploy-affected.sh --remote-release` читает его же через `isBuiltOnS1()`. Необязательный `buildOnS1Apps`
+подменяет значение, вычисленное при импорте модуля: долгоживущий MCP `letar` передаёт сюда список,
+свежепрочитанный из этого файла при каждом деплое (`libs/deploy-mcp/src/build-on-s1.ts`). ⚠️ Поэтому массив
+обязан оставаться литералом строк `['app-a', 'app-b']` — без spread и вычислений, иначе `deploy_app` откажет.
+Подробности —
 [deployment.md](/.claude/docs/deployment.md#сборка-на-s1-релиз-на-s2-plan-infra-6md-157).
 
 ### e2e-гейты
