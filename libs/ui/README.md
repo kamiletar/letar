@@ -550,6 +550,31 @@ const { sentinelRef, reachedEnd } = useScrollGate({ enabled: !consentGiven })
 </>
 ```
 
+### FormActions
+
+Футер формы: основное действие («Сохранить», «Создать») справа, дополнительное («Удалить»,
+«Отмена») прижато слева, отступ `mt=6` от карточки. Единый шаблон — не собирай футер руками из
+`Flex gap={3}` / `Box mt={2}`. В DOM основное действие идёт первым (Tab и Enter не начинаются с
+«Удалить»), слева-направо порядок выстраивает `row-reverse`. На узком экране кнопки в колонку на
+всю ширину, основная сверху.
+
+⚠️ Кнопки внутри одного `size` — компонент высоту не выравнивает.
+
+```tsx
+import { FormActions, TriggerConfirmDialog } from '@letar/ui'
+<FormActions
+  secondary={
+    <TriggerConfirmDialog
+      trigger={<Button colorPalette="error" variant="outline">Удалить</Button>}
+      title="Удалить поставщика?"
+      onConfirm={handleDelete}
+    />
+  }
+>
+  <AppForm.Button.Submit>Сохранить</AppForm.Button.Submit>
+</FormActions>
+```
+
 ### TouchLink
 
 Текстовая ссылка с высотой не ниже 44px (WCAG 2.5.5 touch target). Обёртка над Chakra
