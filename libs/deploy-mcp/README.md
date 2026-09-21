@@ -86,6 +86,8 @@ deploy_wait({ server: "s2", deployId, waitSeconds: 90 })  // ждёт смены
 появлении новой фазы в `phases[]` или смене `stalled`. Ответ — тот же снапшот, что и
 `deploy_status`, но `output` — только хвост (20 строк), не весь лог по курсору.
 
+⚠️ Внутри `letar` вызов идёт через in-memory клиент с таймаутом 10 мин (`INTERNAL_CALL_OPTIONS`); до 2026-09-21 там стояли дефолтные 60с и `waitSeconds` > ~55 обрывался с «Request timed out» — [разбор](/.claude/docs/mcp-servers.md#internal-client-timeout).
+
 `deploy_status({ server, deployId, sinceLine })` остаётся для точечного снапшота и полного
 курсорного чтения лога — `sinceLine` возвращает только новые строки начиная с этого номера
 (в ответе `totalLines`/`fromLine`). Экономит контекст при явном поллинге длинного деплоя.

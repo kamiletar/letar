@@ -40,6 +40,17 @@ const REPO_ROOT = resolve(__dirname, '..', '..')
 
 // ─── Подключение фабрики к внутреннему in-memory клиенту (как mcp-test-kit connectedClient) ───
 
+/**
+ * Таймаут внутреннего hop'а (in-memory клиент → часть). По умолчанию SDK ставит на КАЖДЫЙ запрос
+ * клиента 60с (DEFAULT_REQUEST_TIMEOUT_MSEC) — и long-poll инструменты (deploy_wait до 120с,
+ * assist_wait) обрывались на 60-й секунде с «Request timed out», хотя часть-фабрика была готова
+ * ждать и клиент внешнего уровня (Claude Code) ещё не сдался. Собственный таймаут у каждого
+ * инструмента уже есть (agentRequest.timeoutMs, waitSeconds), так что внутренний hop лишь
+ * страхует от вечного зависания — запас заведомо больше любого long-poll.
+ */
+const INTERNAL_CALL_TIMEOUT_MS = 10 * 60 * 1000
+const INTERNAL_CALL_OPTIONS = { timeout: INTERNAL_CALL_TIMEOUT_MS }
+
 async function connectInMemory(server: McpServer): Promise<Client> {
   const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair()
   const client = new Client({ name: 'letar-internal', version: '0.0.0' })
@@ -73,7 +84,10 @@ async function mountPart(id: string, client: Client, rename: Record<string, stri
         continue
       }
       toolDefs.set(externalName, { ...t, name: externalName })
-      toolDispatch.set(externalName, (args) => client.callTool({ name: t.name, arguments: args }))
+      toolDispatch.set(
+        externalName,
+        (args) => client.callTool({ name: t.name, arguments: args }, INTERNAL_CALL_OPTIONS),
+      )
     }
   } catch (err) {
     console.error(`[letar] часть "${id}": listTools упал —`, err)
@@ -83,7 +97,7 @@ async function mountPart(id: string, client: Client, rename: Record<string, stri
     const { resources } = await client.listResources()
     for (const r of resources) {
       resourceDefs.push(r)
-      resourceDispatch.set(r.uri, () => client.readResource({ uri: r.uri }))
+      resourceDispatch.set(r.uri, () => client.readResource({ uri: r.uri }, INTERNAL_CALL_OPTIONS))
     }
   } catch {
     // сервер может не объявлять capability resources — это не ошибка
@@ -106,7 +120,7 @@ async function mountPart(id: string, client: Client, rename: Record<string, stri
       promptDefs.set(p.name, p)
       promptDispatch.set(
         p.name,
-        (args) => client.getPrompt({ name: p.name, arguments: args as Record<string, string> }),
+        (args) => client.getPrompt({ name: p.name, arguments: args as Record<string, string> }, INTERNAL_CALL_OPTIONS),
       )
     }
   } catch {
@@ -174,7 +188,7 @@ async function mountAssist(devClient: Client | undefined, prodClient: Client | u
             : 'assist dev недоступен',
         )
       }
-      return chosen.callTool({ name: t.name, arguments: rest })
+      return chosen.callTool({ name: t.name, arguments: rest }, INTERNAL_CALL_OPTIONS)
     })
   }
 }
