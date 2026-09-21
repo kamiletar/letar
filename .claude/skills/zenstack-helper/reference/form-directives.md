@@ -140,6 +140,13 @@ export const RecipeTypeFormSchema = z.enum(['SWEET', 'SALTY']).meta({
 | `@lt(x)`            | `.lt(x)` (строго меньше)           |
 | `@regex("...")`     | `.regex(/.../)`                    |
 
+⚠️ **Слэши в `@regex("…")` — парой `\\`.** Строка ZModel разбирается с escape-последовательностями:
+`\s` доходит до плагина как `s`, `\d` как `d`, `\.` как `.` — генерация зелёная, регулярка другая.
+Верно `@regex("^[^@\\s]+@[^@\\s]+$")` (два слэша в файле, один в рантайме); четыре — обратная
+крайность. Нативный `@regex` виден в сгенерированной схеме строкой `"…\\s…"` внутри
+`ZodUtils.addStringValidation`, а не литералом `/…/`. Замеры, проверка и аудит репозитория —
+[zenstack-form-meta-directive-pitfalls § 2](/.claude/docs/zenstack-form-meta-directive-pitfalls.md).
+
 ```zmodel
 portions Int @gte(1) @lte(100)
   @meta("form.title", "Количество порций") @meta("form.fieldType", "numberInput")
