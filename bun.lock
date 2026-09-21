@@ -347,7 +347,7 @@
     },
     "apps/aboi": {
       "name": "@letar/aboi",
-      "version": "0.83.17",
+      "version": "0.83.20",
       "dependencies": {
         "@letar/admin-ui": "workspace:*",
         "@letar/analytics": "workspace:*",
@@ -597,7 +597,7 @@
     },
     "apps/dashboard-agent": {
       "name": "dashboard-agent",
-      "version": "0.16.5",
+      "version": "0.17.0",
       "dependencies": {
         "@fastify/cors": "^11.3.0",
         "@fastify/rate-limit": "^10",
@@ -890,7 +890,7 @@
     },
     "apps/poster-microtext-desktop": {
       "name": "@letar/poster-microtext-desktop",
-      "version": "0.19.7",
+      "version": "0.19.8",
       "dependencies": {
         "@letar/chakra-provider": "workspace:*",
         "@letar/icon-generator": "workspace:*",
@@ -953,7 +953,7 @@
     },
     "apps/svoichuzhie": {
       "name": "@letar/svoichuzhie",
-      "version": "0.10.60",
+      "version": "0.10.68",
       "dependencies": {
         "@letar/admin-ui": "workspace:*",
         "@letar/api-server": "workspace:*",
@@ -1084,7 +1084,7 @@
     },
     "libs/auth": {
       "name": "@letar/auth",
-      "version": "0.15.3",
+      "version": "0.16.0",
       "dependencies": {
         "@better-auth/utils": "^0.4.2",
         "@letar/pin-auth": "workspace:*",
@@ -1507,7 +1507,7 @@
     },
     "libs/ipfs-kubo-core": {
       "name": "@letar/ipfs-kubo-core",
-      "version": "0.1.0",
+      "version": "0.1.1",
     },
     "libs/jobs": {
       "name": "@letar/jobs",
