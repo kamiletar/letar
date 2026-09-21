@@ -109,6 +109,7 @@
 - [letar-forms-urlsync-window-read-in-render-hydration](/.claude/docs/letar-forms-urlsync-window-read-in-render-hydration.md) ⚠️ `window.location` в рендере хука — гидратация расходится с SSR
 - [external-state-alongside-createform-pattern](/.claude/docs/external-state-alongside-createform-pattern.md) внешний `useState` рядом с формой — согласия 152-ФЗ, immediate-upload
 - [ui-components](/.claude/docs/ui-components.md) ⭐ компоненты `@letar/ui`
+- [form-footer-formactions](/.claude/docs/form-footer-formactions.md) футер формы — только `FormActions`, не `Flex` руками
 - [images](/.claude/docs/images.md) · [upload-storage-backend](/.claude/docs/upload-storage-backend.md) `StorageBackend`, S3 не реализован
 - [font-cmap-coverage-verification](/.claude/docs/font-cmap-coverage-verification.md) покрытие символов — разбором `cmap`, не описанием шрифта
 - [sharp-raw-composite-alpha-pitfall](/.claude/docs/sharp-raw-composite-alpha-pitfall.md) ⚠️ `composite()` тихо добавляет alpha-канал
