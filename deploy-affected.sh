@@ -406,8 +406,15 @@ registry_login() {
     echo -e "${RED}❌ Нет $enc_file — не откуда взять учётные данные registry${NC}"
     return 1
   fi
-  local env_text reg_user reg_pass
-  if ! env_text=$(sops --decrypt --input-type dotenv --output-type dotenv "$enc_file" 2>/dev/null); then
+  # Формат .enc бывает и dotenv-построчным, и JSON-блобом (у dashboard-agent — блоб): определяем по
+  # первому символу, как в decrypt_sops_env. Жёсткий `--input-type dotenv` на блобе падал на s1
+  # в пилоте 1 §157 (2026-09-21), а `2>/dev/null` прятал причину.
+  local env_text reg_user reg_pass sops_type_flags=""
+  if [ "$(head -c1 "$enc_file")" != "{" ]; then
+    sops_type_flags="--input-type dotenv --output-type dotenv"
+  fi
+  # shellcheck disable=SC2086
+  if ! env_text=$(sops --decrypt $sops_type_flags "$enc_file" 2>/dev/null); then
     echo -e "${RED}❌ Не удалось расшифровать секреты dashboard-agent для docker login${NC}"
     return 1
   fi

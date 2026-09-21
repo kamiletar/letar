@@ -149,8 +149,14 @@ registry_login() {
   # не пишется, кроме стандартного ~/.docker/config.json.
   local enc_file="$WORKSPACE_ROOT/apps/dashboard-agent/.env.docker.enc"
   [ -f "$enc_file" ] || die "Нет $enc_file — не откуда взять учётные данные registry"
-  local env_text reg_user reg_pass
-  env_text=$(sops --decrypt --input-type dotenv --output-type dotenv "$enc_file" 2>/dev/null) \
+  # Формат .enc бывает и dotenv-построчным, и JSON-блобом (у dashboard-agent — блоб): определяем по
+  # первому символу. Жёсткий `--input-type dotenv` на блобе не расшифровывает файл.
+  local env_text reg_user reg_pass sops_type_flags=""
+  if [ "$(head -c1 "$enc_file")" != "{" ]; then
+    sops_type_flags="--input-type dotenv --output-type dotenv"
+  fi
+  # shellcheck disable=SC2086
+  env_text=$(sops --decrypt $sops_type_flags "$enc_file" 2>/dev/null) \
     || die "Не удалось расшифровать секреты dashboard-agent для docker login"
   reg_user=$(printf '%s\n' "$env_text" | grep '^REGISTRY_USER=' | head -1 | cut -d= -f2-)
   reg_pass=$(printf '%s\n' "$env_text" | grep '^REGISTRY_PASS=' | head -1 | cut -d= -f2-)
