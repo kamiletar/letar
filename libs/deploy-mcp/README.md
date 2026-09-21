@@ -9,18 +9,18 @@ MCP-сервер: структурированный слой над REST API da
 
 ## Инструменты
 
-| Инструмент                                             | Действие                                                                                                                                | Эндпоинт агента           |
-| ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
-| `list_servers()`                                       | Серверы + маппинг «приложение → сервер» (статика из `@letar/infra-config`)                                                              | —                         |
-| `agent_health({ server })`                             | Health-check (отличает «сервер недоступен» от «токен неверный»)                                                                         | `GET /health`             |
-| `git_status({ server })`                               | Ветка, незапушенные/входящие коммиты — проверять перед деплоем                                                                          | `GET /api/git/status`     |
-| `deploy_status({ server, deployId?, sinceLine? })`     | Статус деплоя + инкрементальные логи по курсору `sinceLine`; включает `phases[]`/`stalled`                                              | `GET /api/deploy/status`  |
-| `deploy_wait({ server, deployId?, waitSeconds? })`     | Long-poll вместо ручного опроса по таймеру — отпускает раньше `waitSeconds` (≤120с) при терминальном статусе/смене фазы/смене `stalled` | `GET /api/deploy/wait`    |
-| `deploy_cancel({ server })`                            | Отмена текущего деплоя (SIGTERM)                                                                                                        | `POST /api/deploy/cancel` |
-| `deploy_app({ app, target, seed? })`                   | Запуск деплоя (`target`: `production`\|`staging`, `seed`: `--seed`) + e2e-gate (warn-only, hard для `HARD_GATED_APPS`)                  | `POST /api/deploy/app`    |
-| `deploy_infra({ service, server })`                    | Деплой `infra/<service>` (Traefik, acme-dns, ...) — расшифровка `secrets/deploy.conf` + `docker compose up -d`, без e2e-gate (§18.8.1)  | `POST /api/deploy/infra`  |
-| `run_e2e({ app, baseUrl, project?, grep?, workers? })` | Запуск Playwright e2e на s1 против `baseUrl`; `grep` — точечный прогон. Схема строгая: неизвестные аргументы (`extraArgs`) отвергаются  | `POST /api/e2e/run`       |
-| `e2e_status({ app?, runId?, sinceLine? })`             | Статус e2e-прогона + персистентный `lastStatus` (что читает gate)                                                                       | `GET /api/e2e/status`     |
+| Инструмент                                                                               | Действие                                                                                                                                                                                                    | Эндпоинт агента           |
+| ---------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
+| `list_servers()`                                                                         | Серверы + маппинг «приложение → сервер» (статика из `@letar/infra-config`)                                                                                                                                  | —                         |
+| `agent_health({ server })`                                                               | Health-check (отличает «сервер недоступен» от «токен неверный»)                                                                                                                                             | `GET /health`             |
+| `git_status({ server })`                                                                 | Ветка, незапушенные/входящие коммиты — проверять перед деплоем                                                                                                                                              | `GET /api/git/status`     |
+| `deploy_status({ server, deployId?, sinceLine?, grep?, regex?, context?, routeTable? })` | Статус деплоя + инкрементальные логи по курсору `sinceLine`; включает `phases[]`/`stalled`; `grep`/`routeTable` — поиск по логу, ответ ограничен ~30 тыс. символов ([ниже](#поиск-по-большому-логу-деплоя)) | `GET /api/deploy/status`  |
+| `deploy_wait({ server, deployId?, waitSeconds? })`                                       | Long-poll вместо ручного опроса по таймеру — отпускает раньше `waitSeconds` (≤120с) при терминальном статусе/смене фазы/смене `stalled`                                                                     | `GET /api/deploy/wait`    |
+| `deploy_cancel({ server })`                                                              | Отмена текущего деплоя (SIGTERM)                                                                                                                                                                            | `POST /api/deploy/cancel` |
+| `deploy_app({ app, target, seed? })`                                                     | Запуск деплоя (`target`: `production`\|`staging`, `seed`: `--seed`) + e2e-gate (warn-only, hard для `HARD_GATED_APPS`)                                                                                      | `POST /api/deploy/app`    |
+| `deploy_infra({ service, server })`                                                      | Деплой `infra/<service>` (Traefik, acme-dns, ...) — расшифровка `secrets/deploy.conf` + `docker compose up -d`, без e2e-gate (§18.8.1)                                                                      | `POST /api/deploy/infra`  |
+| `run_e2e({ app, baseUrl, project?, grep?, workers? })`                                   | Запуск Playwright e2e на s1 против `baseUrl`; `grep` — точечный прогон. Схема строгая: неизвестные аргументы (`extraArgs`) отвергаются                                                                      | `POST /api/e2e/run`       |
+| `e2e_status({ app?, runId?, sinceLine? })`                                               | Статус e2e-прогона + персистентный `lastStatus` (что читает gate)                                                                                                                                           | `GET /api/e2e/status`     |
 
 `server` — `s2` (прод, по умолчанию) или `s1` (staging). Значение `s3` отвергается: настоящий s3 —
 хранилище без dashboard-agent, deploy-инструменты на него не ходят. В `deploy_app` сервер резолвится
@@ -113,6 +113,52 @@ deploy_wait({ server: "s2", deployId, waitSeconds: 90 })  // ждёт смены
 `deploy_status({ server, deployId, sinceLine })` остаётся для точечного снапшота и полного
 курсорного чтения лога — `sinceLine` возвращает только новые строки начиная с этого номера
 (в ответе `totalLines`/`fromLine`). Экономит контекст при явном поллинге длинного деплоя.
+
+### Поиск по большому логу деплоя
+
+Лог деплоя с s1-сборкой (`BUILD_ON_S1_APPS`, PLAN-INFRA-6.md §157) — ~2000 строк, ~250 тыс.
+символов (у kami — 2170 строк). Целиком он не влезает в ответ MCP-инструмента: раньше
+`deploy_status({ sinceLine: 0 })` падал с «exceeds maximum allowed tokens». Поэтому:
+
+- **Ответ ограничен ~30 тыс. символов** (`LOG_BUDGET_CHARS` в `src/log-tools.ts`). Если лог не влез,
+  сверху ответа — `⚠️ Лог обрезан …` с числом показанных/скрытых строк и подсказкой
+  `sinceLine` для продолжения, в JSON — `outputTruncated.nextSinceLine`. С `sinceLine` отдаётся
+  начало (листать вперёд), без него — хвост (свежее). Короткий лог без фильтров отдаётся прежним
+  форматом байт в байт. Строка длиннее 600 символов обрезается с пометкой `… [+N симв.]`,
+  ANSI-цвета убираются.
+- **`grep`** — только совпавшие строки с номерами (`NNN: строка`; контекст — `NNN- строка`,
+  несмежные группы — `--`). По умолчанию **подстрока без учёта регистра**, спецсимволы буквальны
+  (`/[locale]/blog/[slug]` найдёт именно эту строку, а не «любой символ из `locale`»);
+  `regex: true` — регулярное выражение (тоже без учёта регистра); `context: N` (0–10) — строки
+  вокруг. Ищет от `sinceLine` (без него — по всему доступному логу).
+- **`routeTable: true`** — блок «Route (app)» … легенда «(Static)/(SSG)/(Dynamic)» из лога
+  `next build`. Сверху **сводка**: сколько маршрутов каждого значка (○ static, ● SSG, ƒ dynamic,
+  ◐ PPR) и для параметрических маршрутов (`/[locale]/…/[slug]`) число перечисленных путей плюс
+  «`[+N more paths]`». Дальше — сам блок. Терпит префикс `docker build` (`#17 52.3 …`) и ANSI.
+  Несколько сборок в логе — несколько блоков; нет легенды — блок помечен как возможно неполный.
+- `grep` и `routeTable` можно вместе (бюджет делится пополам). При них массив `output` из
+  ответа убирается — вместо него `logView` с просмотренным диапазоном строк.
+
+Проверки пилотов §157 одним вызовом каждая:
+
+```
+deploy_status({ server: "s1", deployId, routeTable: true })
+deploy_status({ server: "s1", deployId, grep: "ECONNREFUSED|P1001|No pending migrations", regex: true, context: 2 })
+```
+
+Схема строгая: `regex`/`context` без `grep` — ошибка (а не молчаливо проигнорированный фильтр),
+некорректное регулярное выражение — ошибка до обращения к агенту. Сами фильтры агенту не
+передаются: работают на стороне deploy-mcp по уже полученному логу.
+
+⚠️ **dashboard-agent хранит не больше 2000 последних строк** (`MAX_OUTPUT_LINES`,
+`apps/dashboard-agent/src/lib/deploy-history.ts`): начало длинного лога вытесняется (`totalLines`
+больше числа полученных строк, `fromLine` > 0). Вытесненное не ищется ни `grep`, ни
+`routeTable` — ответ явно пишет «Первые N строк лога вытеснены на агенте».
+
+⚠️ Формат таблицы (значки, `[+N more paths]`) сверен с выводом Next.js 16 по памяти и
+синтетическим логом — на живом логе деплоя фильтр не запускался (деплоить можно только через
+`deploy-agent-dev`). Первая проверка на реальном деплое — `routeTable: true`: если сводка пишет
+«не распознано», поправь `TOP_ROUTE_RE`/`CHILD_PATH_RE` в `src/log-tools.ts`.
 
 ## Соединение и безопасность
 
