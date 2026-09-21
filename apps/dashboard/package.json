@@ -1,6 +1,6 @@
 {
   "name": "@letar/dashboard",
-  "version": "1.27.0",
+  "version": "1.27.1",
   "private": true,
   "nx": {
     "name": "dashboard",

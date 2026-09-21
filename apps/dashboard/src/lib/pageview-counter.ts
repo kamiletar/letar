@@ -130,9 +130,11 @@ export async function getPageViewsSummary(): Promise<DomainPageViews[]> {
   sevenDaysAgoDate.setDate(sevenDaysAgoDate.getDate() - 6)
   const sevenDaysAgo = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Moscow' }).format(sevenDaysAgoDate)
 
-  const rows: PageViewCount[] = await prisma.pageViewCount.findMany({
+  // `as unknown as`: tsgo TS2321 при сравнении полного ZenStack-типа с `PageViewCount[]`,
+  // см. .claude/docs/tsgo-excessive-stack-depth-zenstack.md
+  const rows = (await prisma.pageViewCount.findMany({
     where: { date: { gte: sevenDaysAgo } },
-  })
+  })) as unknown as PageViewCount[]
 
   const byDomain = new Map<string, DomainPageViews>()
   for (const row of rows) {

@@ -577,7 +577,7 @@
     },
     "apps/dashboard": {
       "name": "@letar/dashboard",
-      "version": "1.27.0",
+      "version": "1.27.1",
       "dependencies": {
         "@letar/admin-ui": "workspace:*",
         "@letar/analytics": "workspace:*",

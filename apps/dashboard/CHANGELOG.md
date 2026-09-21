@@ -2,6 +2,15 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [1.27.1] — 2026-09-21
+
+### Fixed
+
+- `typecheck:tsgo` падал на `TS2321: Excessive stack depth` в `alerts.ts` (`getActiveAlerts`, `createAlert`),
+  `pageview-counter.ts` и `app-metrics.ts` — и `deploy-affected.sh` останавливал деплой 1.27.0 на
+  typecheck-гейте. Результат ZenStack-запроса приводится через `as unknown as` к уже объявленному типу
+  (разбор — `.claude/docs/tsgo-excessive-stack-depth-zenstack.md`). Поведение не менялось.
+
 ## [1.27.0] — 2026-09-21
 
 ### Fixed

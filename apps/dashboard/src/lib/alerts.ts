@@ -81,10 +81,12 @@ export async function getAlerts(): Promise<AlertWithServer[]> {
  */
 export async function getActiveAlerts(): Promise<Alert[]> {
   try {
-    return await prisma.alert.findMany({
+    // `as unknown as`: tsgo TS2321 при сравнении полного ZenStack-типа с `Alert[]`,
+    // см. .claude/docs/tsgo-excessive-stack-depth-zenstack.md
+    return (await prisma.alert.findMany({
       where: { status: 'ACTIVE' },
       orderBy: { createdAt: 'desc' },
-    })
+    })) as unknown as Alert[]
   } catch (error) {
     console.error('Error reading active alerts:', error)
     return []
@@ -156,7 +158,8 @@ export async function createAlert(
       // только `message`, и заголовок + время первого срабатывания (например, от давно
       // неактуальной задачи) навсегда прилипали к записи, пока она остаётся ACTIVE, даже когда
       // причина провала сменилась или алерт сработал заново сильно позже.
-      return await prisma.alert.update({
+      // `as unknown as`: tsgo TS2321, см. .claude/docs/tsgo-excessive-stack-depth-zenstack.md
+      return (await prisma.alert.update({
         where: { id: existingAlert.id },
         data: {
           title,
@@ -164,11 +167,11 @@ export async function createAlert(
           lastOccurredAt: new Date(),
           ...(metadata !== undefined && { metadata }),
         },
-      })
+      })) as unknown as Alert
     }
 
     // Создаём новый
-    return await prisma.alert.create({
+    return (await prisma.alert.create({
       data: {
         type,
         severity,
@@ -179,7 +182,7 @@ export async function createAlert(
         ...(metadata !== undefined && { metadata }),
         ...(resolvedServerId && { serverId: resolvedServerId }),
       },
-    })
+    })) as unknown as Alert
   } catch (error) {
     console.error('Error creating alert:', error)
     throw error

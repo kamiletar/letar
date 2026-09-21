@@ -76,7 +76,9 @@ function dbCheckToApiResult(check: HealthCheckDB): HealthCheckResult {
  * Сохраняет результат health-check в БД
  */
 async function saveHealthCheckResult(app: string, result: HealthCheckResult): Promise<HealthCheckDB> {
-  return prisma.healthCheck.create({
+  // `as unknown as`: tsgo TS2321 при сравнении полного ZenStack-типа с `HealthCheckDB`,
+  // см. .claude/docs/tsgo-excessive-stack-depth-zenstack.md
+  return (await prisma.healthCheck.create({
     data: {
       app,
       timestamp: result.timestamp,
@@ -85,7 +87,7 @@ async function saveHealthCheckResult(app: string, result: HealthCheckResult): Pr
       statusCode: result.statusCode,
       error: result.error,
     },
-  })
+  })) as unknown as HealthCheckDB
 }
 
 /**
