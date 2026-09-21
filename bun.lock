@@ -547,7 +547,7 @@
     },
     "apps/auth-hub": {
       "name": "auth-hub",
-      "version": "0.7.22",
+      "version": "0.7.23",
       "dependencies": {
         "@letar/api-server": "workspace:*",
         "@letar/auth": "workspace:*",
@@ -1155,7 +1155,7 @@
     },
     "libs/deploy-mcp": {
       "name": "@letar/deploy-mcp",
-      "version": "0.7.0",
+      "version": "0.7.1",
       "dependencies": {
         "@letar/infra-config": "workspace:*",
         "@letar/mcp-server-kit": "workspace:*",
