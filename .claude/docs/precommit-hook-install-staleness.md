@@ -193,6 +193,30 @@ diff-filter/pathspec, что у одного из существующих тр�
 оправданно; до тех пор дублирование трёх похожих, но не идентичных, трёхстрочников дешевле, чем
 новая точка рассинхронизации install.sh.
 
+## Дополнение 2026-09-22: `pre-commit-syntax-check` — новый скрипт, установлен сразу везде
+
+Добавлен хук `pre-commit-syntax-check.sh` (+ `scripts/check-staged-syntax.mjs`, копируется как
+`_check-staged-syntax.mjs`; про инцидент, ради которого он заведён, — в
+[git-multi-agent-incidents](git-multi-agent-incidents.md)). По правилу из раздела ниже
+`bash scripts/hooks/install.sh --all-submodules` выполнен в той же сессии: хук стоит в корне letar и
+во всех 14 submodule, `scripts/check-precommit-hook-staleness.mjs` ожидает уже 9 скриптов и
+подхватил новый сам — он собирает список из строк `_pre-commit-*.sh` в `install.sh`, а не из
+комментария в шапке.
+
+Что этот хук добавляет к теме документа:
+
+- **Новый `.mjs`-чекер обязан приезжать вместе с `lib/`.** Как `check-stray-dts.mjs`, он импортирует
+  `./lib/repo-root.mjs`, а в hooks-каталоге относительный `..` указывает на `.git`, не на корень —
+  поэтому `install.sh` кладёт `hooks_dir/lib/repo-root.mjs` рядом. Копируешь ещё один чекер с
+  импортами — проверь, что каждый импорт лежит в `hooks_dir`.
+- **`typescript` резолвится не от расположения хука, а от корня репозитория** (`createRequire` от
+  `<корень>/package.json`): для submodule `require` поднимается по родителям `apps/<x>` до
+  `node_modules` монорепо — проверено на submodule обоих типов git-dir (`.git/modules/...` у
+  `domwellbes`, каталог `.git` внутри у `studio`). Клон submodule вне монорепо `typescript` не найдёт
+  — хук выведет предупреждение и пропустит проверку, а не заблокирует коммит.
+- **Проверка читает индекс** (`git cat-file --batch :<путь>`), в отличие от `dprint-check` и
+  `semgrep`, которые берут содержимое с диска, — см. разбор в `git-multi-agent-incidents.md`.
+
 ## Как предотвращать
 
 - **Заводишь или меняешь скрипт в `scripts/hooks/`** — сразу выполни `bash
