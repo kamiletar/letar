@@ -59,12 +59,20 @@ kebab-case вообще запрещён, а потому что конкрет�
 
 Официальный `docker-compose.yml` апстрима держит БД в **Postgres с именованным volume**
 (`pgdata:/var/lib/postgresql/data`, `DATABASE_URL=postgres+asyncpg://...`). Наш self-hosted
-деплой (`infra/agent-mail/setup.sh`) этот compose-файл не использует — контейнер поднят на
-дефолтном `DATABASE_URL=sqlite+aiosqlite:///./storage.sqlite3` (относительный путь). Проверено
-прямо в контейнере: `/app/storage.sqlite3` лежит в писчем слое (`WorkingDir=/app`), а
-примонтирован volume только `/data` (`STORAGE_ROOT=/data/mailbox` — человекочитаемый
-git-архив сообщений, не БД). Любой `docker rm`/пересоздание контейнера стирает
-`storage.sqlite3` вместе со всеми `registration_token`.
+деплой (`infra/agent-mail/setup.sh`) этот compose-файл не использует — до 2026-08-20 контейнер
+был поднят на дефолтном `DATABASE_URL=sqlite+aiosqlite:///./storage.sqlite3` (относительный
+путь). Так было на момент инцидента (история, не текущее состояние): `/app/storage.sqlite3`
+лежал в писчем слое (`WorkingDir=/app`), а примонтирован volume был только `/data`
+(`STORAGE_ROOT=/data/mailbox` — человекочитаемый git-архив сообщений, не БД). Любой
+`docker rm`/пересоздание контейнера стирал `storage.sqlite3` вместе со всеми
+`registration_token`.
+
+⚠️ **Сейчас БД лежит в `/data/storage.sqlite3`** (проверено 2026-09-22:
+`DATABASE_URL=sqlite+aiosqlite:////data/storage.sqlite3`, файл ~10 МБ и живой). `/app/storage.sqlite3`
+остался пустым файлом в 0 байт от старого дефолта: `sqlite3.connect` на нём проходит молча, а
+запрос `SELECT ... FROM agents` падает с `no such table: agents` (проверено 2026-09-22). Ошибку
+`unable to open database file` дают только пути, которых нет вовсе. Все команды чтения в доках и
+командах — только по `/data/`.
 
 **Фикс применён 2026-08-20.** Контейнер `mcp_agent_mail-agent-mail-1` пересоздан с
 `DATABASE_URL=sqlite+aiosqlite:////data/storage.sqlite3` (файл теперь внутри volume
@@ -156,12 +164,12 @@ kebab-case именем `<app>-dev`) и сохрани `registration_token` в �
 ушла в retired, живой сессии за ней не было) — это не чужой владелец, а сирота от гонки при
 создании. Прочитай собственный токен READ-ONLY из своей же инфраструктуры: agent-mail —
 self-hosted Docker на этой машине (`C:\web\letar\infra\agent-mail\mcp_agent_mail`, контейнер
-`mcp_agent_mail-agent-mail-1`, БД `/app/storage.sqlite3`).
+`mcp_agent_mail-agent-mail-1`, БД `/data/storage.sqlite3` — не `/app/`, см. выше).
 
 ```bash
 docker exec mcp_agent_mail-agent-mail-1 python3 -c "
 import sqlite3
-con = sqlite3.connect('file:/app/storage.sqlite3?mode=ro', uri=True)
+con = sqlite3.connect('file:/data/storage.sqlite3?mode=ro', uri=True)
 cur = con.cursor()
 cur.execute(\"SELECT registration_token FROM agents WHERE name=?\", ('<app>-dev',))
 print(cur.fetchone())

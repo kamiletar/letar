@@ -18,7 +18,7 @@ allowed-tools: Bash, Read, Grep, Glob
 ```bash
 docker exec mcp_agent_mail-agent-mail-1 python3 -c "
 import sqlite3
-conn = sqlite3.connect('/app/storage.sqlite3')
+conn = sqlite3.connect('file:/data/storage.sqlite3?mode=ro', uri=True)
 cur = conn.cursor()
 cur.execute('SELECT name, registration_token FROM agents WHERE name=\"deploy-agent-dev\"')
 row = cur.fetchone()
