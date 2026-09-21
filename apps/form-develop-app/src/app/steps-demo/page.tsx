@@ -98,7 +98,15 @@ export default function StepsDemoPage() {
                   </Form.Steps.CompletedContent>
                 </Box>
 
-                <Form.Steps.Navigation prevLabel="Back" nextLabel="Continue" submitLabel="Create Account" />
+                {/* data-* на кнопках навигации: якоря для подсказок наставника и тестов (v2.14.22+) */}
+                <Form.Steps.Navigation
+                  prevLabel="Back"
+                  nextLabel="Continue"
+                  submitLabel="Create Account"
+                  prevProps={{ 'data-assist-id': 'steps-demo.prev' }}
+                  nextProps={{ 'data-assist-id': 'steps-demo.next' }}
+                  submitProps={{ 'data-assist-id': 'steps-demo.submit' }}
+                />
               </Form.Steps>
             </Form>
           </Card.Body>

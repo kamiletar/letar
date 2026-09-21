@@ -28,7 +28,12 @@ export default function StepsDemoPage() {
           <FormSteps.CompletedContent>
             <p className="text-sm">Все шаги пройдены — можно отправлять.</p>
           </FormSteps.CompletedContent>
-          <FormSteps.Navigation />
+          {/* data-* на кнопках навигации: якоря для подсказок наставника и тестов */}
+          <FormSteps.Navigation
+            prevProps={{ 'data-assist-id': 'steps-demo.prev' }}
+            nextProps={{ 'data-assist-id': 'steps-demo.next' }}
+            submitProps={{ 'data-assist-id': 'steps-demo.submit' }}
+          />
         </FormSteps>
       </DemoForm>
     </DemoPageLayout>

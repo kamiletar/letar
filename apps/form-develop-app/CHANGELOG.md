@@ -2,6 +2,14 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.1.20] - 2026-09-21
+
+### Added
+
+- `steps-demo`: у `Form.Steps.Navigation` заданы `prevProps`/`nextProps`/`submitProps` с
+  `data-assist-id` (`@letar/forms` 2.14.22). Проверено вживую: на шагах 1–2 в DOM `prev` и `next`,
+  на последнем `next` исчезает и `submit` встаёт на кнопку «Create Account» (`type="submit"`).
+
 ## [0.1.19] - 2026-09-19
 
 ### Added

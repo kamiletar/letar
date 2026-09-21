@@ -60,6 +60,27 @@ import { SkinCodeFile } from '@/components/skin/skin-code-file'
 - **Индикатор** — отображение прогресса по шагам
 - **Навигация клавиатурой** — поддержка стрелок
 
+## Пропсы кнопок навигации
+
+`prevProps`, `nextProps`, `submitProps` и `skipProps` передают дополнительные атрибуты каждой
+кнопке — `data-*` (якоря подсказок наставника, `data-testid`, аналитика), `aria-*` и другие
+атрибуты нативной кнопки. Литералы `data-*` пишутся без `as`:
+
+```tsx
+<Form.Steps.Navigation
+  prevProps={{ 'data-assist-id': 'wizard.prev' }}
+  nextProps={{ 'data-assist-id': 'wizard.next' }}
+  submitProps={{ 'data-assist-id': 'wizard.submit' }}
+/>
+```
+
+- **«Далее» и «Отправить» — две разные кнопки.** На последнем шаге вместо `nextProps` действует
+  `submitProps`; атрибуты с одной кнопки на другую не переезжают.
+- `onClick`, `disabled`, `loading` и `type` задаёт сам компонент: в тип пропсов они не входят, а в
+  рантайме перекрываются, поэтому навигацию по шагам через эти пропсы не сломать.
+- Доступно с `@letar/forms` 2.14.22; те же пропсы есть в `@letar/forms-shadcn`, `@letar/forms-vue`
+  и `@letar/forms-vue-shadcn`.
+
 ## Сохранение шагов
 
 Шаги можно сохранять в localStorage для восстановления при перезагрузке страницы:

@@ -2,6 +2,13 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.1.23] - 2026-09-21
+
+### Added
+
+- `examples/multi-step`: `Form.Steps.Navigation` получил `prevProps`/`nextProps`/`submitProps` с
+  `data-assist-id` (`@letar/forms` 2.14.22).
+
 ## [0.1.22] - 2026-09-19
 
 ### Added

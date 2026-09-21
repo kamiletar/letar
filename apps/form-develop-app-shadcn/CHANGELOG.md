@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.2 (2026-09-21)
+
+### Added
+
+- `steps-demo`: у `FormSteps.Navigation` заданы `prevProps`/`nextProps`/`submitProps` с
+  `data-assist-id` (`@letar/forms-shadcn` 0.38.0).
+
 ## 0.2.1 (2026-09-09)
 
 ### Fixed

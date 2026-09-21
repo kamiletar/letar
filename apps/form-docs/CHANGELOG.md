@@ -2,6 +2,15 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.6.13] - 2026-09-21
+
+### Added
+
+- Гайд `multi-step` (en/ru): раздел про пропсы кнопок навигации `prevProps`/`nextProps`/
+  `submitProps`/`skipProps` (`data-*` без `as`, «Далее» и «Отправить» — разные кнопки, что
+  перекрывается компонентом), `@letar/forms` 2.14.22. Интерактивное демо `/demo/multi-step` задаёт
+  эти пропсы.
+
 ## [0.6.12] - 2026-09-19
 
 ### Changed

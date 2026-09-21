@@ -81,7 +81,11 @@ export default function MultiStepDemoPage() {
             </Stack>
           </Form.Steps.Step>
 
-          <Form.Steps.Navigation />
+          <Form.Steps.Navigation
+            prevProps={{ 'data-assist-id': 'multi-step.prev' }}
+            nextProps={{ 'data-assist-id': 'multi-step.next' }}
+            submitProps={{ 'data-assist-id': 'multi-step.submit' }}
+          />
         </Form.Steps>
 
         <SubmittedDataPreview data={submitted} />

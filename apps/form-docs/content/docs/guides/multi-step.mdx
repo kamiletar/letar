@@ -60,6 +60,27 @@ form-level, not a `Field`) with a smaller two-step schema — same mechanics, di
 - **Step indicator** — shows progress through steps
 - **Keyboard navigation** — supports arrow keys
 
+## Navigation button props
+
+`prevProps`, `nextProps`, `submitProps` and `skipProps` pass extra attributes to each button —
+`data-*` (assistant anchors, `data-testid`, analytics), `aria-*` and other native button attributes.
+`data-*` literals need no `as`:
+
+```tsx
+<Form.Steps.Navigation
+  prevProps={{ 'data-assist-id': 'wizard.prev' }}
+  nextProps={{ 'data-assist-id': 'wizard.next' }}
+  submitProps={{ 'data-assist-id': 'wizard.submit' }}
+/>
+```
+
+- **Next and Submit are two different buttons.** On the last step `submitProps` applies instead of
+  `nextProps`; attributes never move from one to the other.
+- `onClick`, `disabled`, `loading` and `type` are set by the component. They are not part of the
+  prop type and are overridden at runtime, so step navigation cannot be broken through these props.
+- Available since `@letar/forms` 2.14.22; the same props exist in `@letar/forms-shadcn`,
+  `@letar/forms-vue` and `@letar/forms-vue-shadcn`.
+
 ## Step Persistence
 
 Steps can be persisted to localStorage to survive page refreshes:
