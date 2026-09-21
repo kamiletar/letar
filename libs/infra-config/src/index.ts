@@ -215,12 +215,13 @@ export function getCurrentServer(): InfraServer {
  * (канал деплоя идёт через их же контейнер), release-фаза на s2 такие приложения отвергает.
  * ⚠️ Запуск СЕРВИСА остаётся на s2 (`SERVER_APPS` не меняется) — s1 только собирает.
  *
- * Пилот 2 (2026-09-21): `time` — с БД, без пререндера из неё (проверяет туннель, дамп и миграции
- * с s1).
+ * Пилот 3 (2026-09-21): `kami` — пререндер из БД (`sitemap.ts`, `prisma.audioFile` в try/catch): сборка
+ * читает прод-БД s2 через туннель.
+ * Пилот 2 (2026-09-21, пройден): `time` — с БД, без пререндера из неё.
  * Пилот 1 (2026-09-21, пройден): `letar-landing` — приложение без БД. Аварийного однохостового пути нет:
  * при недоступности s1/registry деплой не выполняется, откат — убрать имя из списка.
  */
-export const BUILD_ON_S1_APPS: string[] = ['letar-landing', 'time']
+export const BUILD_ON_S1_APPS: string[] = ['letar-landing', 'time', 'kami']
 
 /** Собирается ли приложение в production на s1 (см. `BUILD_ON_S1_APPS`). */
 export function isBuiltOnS1(app: string): boolean {
