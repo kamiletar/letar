@@ -214,8 +214,10 @@ diff-filter/pathspec, что у одного из существующих тр�
   `node_modules` монорепо — проверено на submodule обоих типов git-dir (`.git/modules/...` у
   `domwellbes`, каталог `.git` внутри у `studio`). Клон submodule вне монорепо `typescript` не найдёт
   — хук выведет предупреждение и пропустит проверку, а не заблокирует коммит.
-- **Проверка читает индекс** (`git cat-file --batch :<путь>`), в отличие от `dprint-check` и
-  `semgrep`, которые берут содержимое с диска, — см. разбор в `git-multi-agent-incidents.md`.
+- **Проверка читает индекс** (`git cat-file --batch :<путь>`). До 2026-09-22 `dprint-check` и
+  `semgrep` брали из индекса только имена, а содержимое — с диска; теперь оба тоже смотрят индекс
+  (`dprint fmt --stdin` для расходящихся с диском файлов, `git checkout-index` во временный каталог
+  для semgrep) — см. разбор в `git-multi-agent-incidents.md`.
 
 ## Как предотвращать
 

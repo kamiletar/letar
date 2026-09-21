@@ -19,6 +19,13 @@
 # один --config не резолвится, semgrep не сканирует НИ ОДНОГО файла вообще (paths.scanned
 # пуст), а не откатывается на локальный конфиг. Отсюда и политика ниже.
 #
+# ⚠️ Сканируется содержимое ИНДЕКСА, а не рабочего дерева. Из индекса раньше брался только список
+# имён, а semgrep читал файлы с диска: при `MM` (часть хунков застейджена, часть в рабочем дереве)
+# проверялась не та версия, что уйдёт в коммит — уязвимость в застейдженном хунке проходила бы, если
+# на диске её уже нет. Теперь индексные версии выгружаются `git checkout-index` во временный
+# каталог с теми же относительными путями, и semgrep запускается оттуда (см.
+# .claude/docs/git-multi-agent-incidents.md § «Дополнение 2026-09-22»).
+#
 # ERROR блокирует коммит, WARNING печатается. Сам semgrep не отработал (сеть, fatal error,
 # unparseable YAML) — тоже блокирует, а не пропускает молча: анализ безопасности, который
 # не смог ответить, не должен читаться как «проверено и чисто»
@@ -57,22 +64,28 @@ if [[ ${#FILES[@]} -eq 0 ]]; then
   exit 0
 fi
 
-# Файл мог быть удалён/перемещён после стейджа — отдаём semgrep только существующие
-EXISTING=()
-for f in "${FILES[@]}"; do
-  [[ -f "$REPO_ROOT/$f" ]] && EXISTING+=("$REPO_ROOT/$f")
-done
-[[ ${#EXISTING[@]} -eq 0 ]] && exit 0
-
-echo "🔎 semgrep: проверяю ${#EXISTING[@]} файл(ов)…"
+echo "🔎 semgrep: проверяю ${#FILES[@]} файл(ов)…"
 
 OUT="$(mktemp)"
-trap 'rm -f "$OUT"' EXIT
+SCAN_DIR="$(mktemp -d)"
+trap 'rm -f "$OUT"; rm -rf "$SCAN_DIR"' EXIT
 
+# Индексные версии — во временный каталог с теми же относительными путями. checkout-index берёт
+# именно индекс (в том числе временный GIT_INDEX_FILE при `git commit -- <путь>`, дочерний git
+# наследует переменную), один процесс на все файлы; --prefix обязан оканчиваться на «/».
+# Не выгрузилось — это «не знаем», а не «чисто»: блокируем, как и при сбое самого semgrep.
+if ! printf '%s\0' "${FILES[@]}" | git checkout-index --prefix="$SCAN_DIR/" -z --stdin; then
+  echo "⛔ не удалось выгрузить индексные версии для semgrep — коммит остановлен"
+  echo "   Обход (осознанный пропуск проверки): SKIP_SEMGREP=1 git commit ..."
+  exit 1
+fi
+
+# Запуск из корня выгрузки: пути в `paths:` правил (`/apps/*/main/**`, `libs/forms/**`) и в
+# отчёте получаются относительными корню репозитория, как при запуске из самого репозитория.
 # PYTHONUTF8=1 обязателен: на Windows semgrep читает YAML в системной cp1251 и падает
 # UnicodeDecodeError на кириллице в message правил.
-PYTHONUTF8=1 timeout 120 uvx semgrep scan "${CONFIGS[@]}" --quiet --json --metrics=off \
-  "${EXISTING[@]}" >"$OUT" 2>/dev/null
+(cd "$SCAN_DIR" && PYTHONUTF8=1 timeout 120 uvx semgrep scan "${CONFIGS[@]}" --quiet --json --metrics=off \
+  "${FILES[@]}" >"$OUT" 2>/dev/null)
 SCAN_STATUS=$?
 
 if [[ $SCAN_STATUS -ne 0 || ! -s "$OUT" ]]; then
@@ -110,7 +123,7 @@ const warnings = results.filter((r) => r.extra.severity !== "ERROR")
 const show = (list, icon) => {
   for (const r of list) {
     const rule = r.check_id.split(".").pop()
-    console.error(`${icon} ${r.path}:${r.start.line} [${rule}]`)
+    console.error(`${icon} ${r.path.replace(/[\x5c]/g, "/")}:${r.start.line} [${rule}]`)
     console.error(`   ${(r.extra.message || "").trim().replace(/\s+/g, " ")}`)
   }
 }
