@@ -1,7 +1,8 @@
 /**
- * Тонкий read-only HTTP-клиент к GlitchTip REST API (Sentry-совместимый `/api/0/...`,
+ * Тонкий HTTP-клиент к GlitchTip REST API (Sentry-совместимый `/api/0/...`,
  * см. libs/glitchtip/README.md). Bearer-токен из config.ts, без логина — GlitchTip Auth Token
- * долгоживущий, в отличие от Umami-сессии.
+ * долгоживущий, в отличие от Umami-сессии. Единственная запись — смена статуса группы
+ * (`setIssueStatus`), остальное только чтение.
  */
 
 import { glitchtipOrg, glitchtipToken, glitchtipUrl } from './config.js'
@@ -32,10 +33,15 @@ export interface GlitchtipEvent {
   entries: Array<{ type: string; data: unknown }>
 }
 
-/** Запрос к GlitchTip API с Bearer-токеном. */
-async function glitchtipRequest<T>(path: string): Promise<T> {
+/** Запрос к GlitchTip API с Bearer-токеном; `init` — метод и JSON-тело для записи. */
+async function glitchtipRequest<T>(path: string, init: { method: 'PUT'; body: unknown } | null = null): Promise<T> {
   const res = await fetch(`${glitchtipUrl()}${path}`, {
-    headers: { Authorization: `Bearer ${glitchtipToken()}` },
+    method: init?.method ?? 'GET',
+    headers: {
+      Authorization: `Bearer ${glitchtipToken()}`,
+      ...(init ? { 'Content-Type': 'application/json' } : {}),
+    },
+    body: init ? JSON.stringify(init.body) : undefined,
     signal: AbortSignal.timeout(15000),
   })
   if (!res.ok) {
@@ -77,4 +83,14 @@ export async function listIssues(project: string, options: ListIssuesOptions = {
 /** Последнее событие issue (сообщение + стектрейс) — GlitchTip issue id, не project slug. */
 export async function getLatestIssueEvent(issueId: string): Promise<GlitchtipEvent> {
   return glitchtipRequest<GlitchtipEvent>(`/api/0/issues/${issueId}/events/latest/`)
+}
+
+export type GlitchtipIssueStatus = 'unresolved' | 'resolved' | 'ignored'
+
+/**
+ * Смена статуса группы (`PUT /api/0/issues/{id}/`, тело `{ status }`). Вызывающий обязан
+ * передать числовой id — он подставляется в путь как есть.
+ */
+export async function setIssueStatus(issueId: string, status: GlitchtipIssueStatus): Promise<GlitchtipIssue> {
+  return glitchtipRequest<GlitchtipIssue>(`/api/0/issues/${issueId}/`, { method: 'PUT', body: { status } })
 }

@@ -97,10 +97,11 @@ process.env.(NEXT_PUBLIC_)GLITCHTIP_RELEASE` в `instrumentation(-client).ts`,
 
 Org slug (для API, отличается от отображаемого имени организации «Letar») — `kami`.
 
-Команда `/infra:glitchtip-errors <app> [environment]` — read-only разбор issues/стектрейсов
-через MCP-сервер `glitchtip-mcp` (`libs/glitchtip-mcp/`, REST API `/api/0/...`). Токен и org
-slug читаются из `infra/glitchtip/.env.local` (не в git); токен создаётся только через
-GlitchTip UI (Settings → Auth Tokens, права `project:read` + `event:read`) — API намеренно не
+Команда `/infra:glitchtip-errors <app> [environment]` — разбор issues/стектрейсов и (по
+просьбе пользователя) закрытие групп через MCP-сервер `glitchtip-mcp` (`libs/glitchtip-mcp/`,
+REST API `/api/0/...`). Токен и org slug читаются из `infra/glitchtip/.env.local` (не в git);
+токен создаётся только через GlitchTip UI (Settings → Auth Tokens, права `project:read` +
+`event:read`, для смены статуса групп — ещё запись) — API намеренно не
 даёт токену создавать другие токены. Подробности — [glitchtip-mcp/README.md](/libs/glitchtip-mcp/README.md).
 
 ## Пропущенные приложения

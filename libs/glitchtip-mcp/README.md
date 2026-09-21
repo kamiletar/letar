@@ -1,6 +1,6 @@
 # @letar/glitchtip-mcp
 
-MCP-сервер: read-only доступ к self-hosted GlitchTip (`errors.s3.letar.best`,
+MCP-сервер: доступ к self-hosted GlitchTip (`errors.s3.letar.best`,
 [infra/glitchtip/README.md](/infra/glitchtip/README.md)) через её REST API
 ([libs/glitchtip/README.md](/libs/glitchtip/README.md) — GlitchTip Sentry-совместим, `/api/0/...`).
 
@@ -11,11 +11,19 @@ MCP-сервер: read-only доступ к self-hosted GlitchTip (`errors.s3.le
 | `glitchtip_list_projects()`                                                       | Все проекты организации (slug совпадает с именем приложения)        | `GET /api/0/organizations/{org}/projects/`    |
 | `glitchtip_list_issues({ project, environment?, statsPeriod?, status?, limit? })` | Issues проекта, по умолчанию `is:unresolved` за 14 дней, по частоте | `GET /api/0/projects/{org}/{project}/issues/` |
 | `glitchtip_get_issue_event({ issueId })`                                          | Последнее событие issue — сообщение и стектрейс                     | `GET /api/0/issues/{id}/events/latest/`       |
+| `glitchtip_set_issue_status({ issueId, status })`                                 | ✍️ Смена статуса группы: `resolved` / `ignored` / `unresolved`       | `PUT /api/0/issues/{id}/` с `{ "status": … }` |
 
-Только чтение — сервер не резолвит/не игнорирует issues и не мутирует ничего на стороне
-GlitchTip. Это осознанное решение (см. `.claude/commands/infra/glitchtip-errors.md`), не
-недоработка: mutating-действия — по явному запросу пользователя каждый раз, не через MCP-тул,
-который агент может дёрнуть в рамках обычного разбора.
+Единственная запись — `glitchtip_set_issue_status` (добавлен 2026-09-21: без него шумовые и старые
+группы нельзя было закрыть, разбор оставался «закрыть вручную»). Правила вызова:
+
+- **Только по явной просьбе пользователя** и только для перечисленных им id — это действие на
+  внешнем сервисе. Обычный разбор (`/infra:glitchtip-errors`) сам ничего не закрывает.
+- Схема строгая (`z.strictObject`): `issueId` — только цифры (подставляется в путь запроса),
+  `status` — из трёх значений; лишний ключ отвергается до обращения к GlitchTip.
+- Какой статус: `resolved` — исправлено или сошло на нет; при новом событии GlitchTip сам
+  переоткроет группу (регресс виден). `ignored` — шум, не баг (зонды сканеров): группа молчит и
+  при новых событиях не всплывает. Свежие группы, по которым ждётся выкладка фикса, не закрывай —
+  сначала проверь, что после неё новых событий нет.
 
 ## ⚠️ `sort` не Sentry-совместим
 
@@ -33,8 +41,11 @@ GlitchTip. Это осознанное решение (см. `.claude/commands/i
   `GLITCHTIP_BASE_URL` — `https://errors.s3.letar.best`.
 - **Auth Token создаётся только через GlitchTip UI** (Settings → Auth Tokens, сессионный логин) —
   API намеренно не даёт токену создавать/управлять другими токенами
-  (`/api/0/api-tokens/` отвечает `401` на токен-авторизацию, только на сессионную). Рекомендуемые
-  права — `project:read` + `event:read`, этому серверу больше не нужно.
+  (`/api/0/api-tokens/` отвечает `401` на токен-авторизацию, только на сессионную). Чтения хватает
+  `project:read` + `event:read`; для `glitchtip_set_issue_status` токену нужны права на запись
+  (используемый токен их имеет — проверено живой сменой статуса 2026-09-21). Нет прав — ответ
+  `403`, инструмент вернёт `isError` с кодом; выпустить новый токен с записью может только
+  владелец через UI, агент его не создаёт.
 
 ## Запуск
 

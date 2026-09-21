@@ -2,16 +2,18 @@ import { connectedClient as connectMcp, expectValidationError, textOf } from '@l
 import type { Client } from '@modelcontextprotocol/client'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-const { listProjectsMock, listIssuesMock, getLatestIssueEventMock } = vi.hoisted(() => ({
+const { listProjectsMock, listIssuesMock, getLatestIssueEventMock, setIssueStatusMock } = vi.hoisted(() => ({
   listProjectsMock: vi.fn(),
   listIssuesMock: vi.fn(),
   getLatestIssueEventMock: vi.fn(),
+  setIssueStatusMock: vi.fn(),
 }))
 
 vi.mock('./client.js', () => ({
   listProjects: listProjectsMock,
   listIssues: listIssuesMock,
   getLatestIssueEvent: getLatestIssueEventMock,
+  setIssueStatus: setIssueStatusMock,
 }))
 
 import { createGlitchtipMcpServer } from './server.js'
@@ -31,6 +33,7 @@ describe('createGlitchtipMcpServer', () => {
     listProjectsMock.mockReset()
     listIssuesMock.mockReset()
     getLatestIssueEventMock.mockReset()
+    setIssueStatusMock.mockReset()
   })
 
   describe('glitchtip_list_projects', () => {
@@ -145,6 +148,49 @@ describe('createGlitchtipMcpServer', () => {
       expect(textOf(result)).toContain('HTTP 404')
     })
   })
+
+  describe('glitchtip_set_issue_status', () => {
+    it('ошибка валидации — отсутствует обязательный status', async () => {
+      await expectValidationError(client, 'glitchtip_set_issue_status', { issueId: '771' })
+      expect(setIssueStatusMock).not.toHaveBeenCalled()
+    })
+
+    it('ошибка валидации — статус вне списка', async () => {
+      await expectValidationError(client, 'glitchtip_set_issue_status', { issueId: '771', status: 'deleted' })
+      expect(setIssueStatusMock).not.toHaveBeenCalled()
+    })
+
+    it('ошибка валидации — нечисловой issueId не попадает в путь запроса', async () => {
+      await expectValidationError(client, 'glitchtip_set_issue_status', { issueId: '1/../../x', status: 'ignored' })
+      expect(setIssueStatusMock).not.toHaveBeenCalled()
+    })
+
+    it('успешный вызов меняет статус и возвращает обновлённую группу', async () => {
+      setIssueStatusMock.mockResolvedValue({ id: '771', title: 'ContextError', status: 'ignored' })
+
+      const result = await client.callTool({
+        name: 'glitchtip_set_issue_status',
+        arguments: { issueId: '771', status: 'ignored' },
+      })
+
+      expect(result.isError).toBeFalsy()
+      expect(textOf(result)).toContain('Issue 771: статус → ignored')
+      expect(setIssueStatusMock).toHaveBeenCalledWith('771', 'ignored')
+    })
+
+    it('ошибка внешнего вызова (нет прав токена) возвращает isError с id и статусом', async () => {
+      setIssueStatusMock.mockRejectedValue(new Error('GlitchTip API error: HTTP 403'))
+
+      const result = await client.callTool({
+        name: 'glitchtip_set_issue_status',
+        arguments: { issueId: '771', status: 'resolved' },
+      })
+
+      expect(result.isError).toBe(true)
+      expect(textOf(result)).toContain('glitchtip_set_issue_status(771, resolved)')
+      expect(textOf(result)).toContain('HTTP 403')
+    })
+  })
 })
 
 // zod по умолчанию молча отбрасывает неизвестные ключи: `glitchtip_list_issues` с опечаткой в
@@ -158,6 +204,7 @@ describe('строгие входные схемы — неизвестный а
       listIssuesMock,
     ],
     ['glitchtip_get_issue_event', { issueId: '42' }, getLatestIssueEventMock],
+    ['glitchtip_set_issue_status', { issueId: '42', status: 'resolved' }, setIssueStatusMock],
   ]
 
   it.each(cases)('%s: валидный вызов проходит', async (tool, args, mock) => {

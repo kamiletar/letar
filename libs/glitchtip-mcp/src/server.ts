@@ -1,15 +1,14 @@
 /**
- * MCP-сервер glitchtip-mcp — read-only доступ к self-hosted GlitchTip (errors.s3.letar.best)
- * через её REST API вместо ручных curl/PowerShell в теле команды `/infra:glitchtip-errors`.
- * Только чтение: сервер не резолвит/не игнорирует issues и ничего не мутирует на стороне
- * GlitchTip — см. infra/glitchtip/README.md § «Что не сделано» про осознанное решение не
- * автоматизировать write-действия здесь.
+ * MCP-сервер glitchtip-mcp — доступ к self-hosted GlitchTip (errors.s3.letar.best) через её
+ * REST API вместо ручных curl/PowerShell в теле команды `/infra:glitchtip-errors`.
+ * Читает issues и события; единственная запись — `glitchtip_set_issue_status` (закрыть/
+ * игнорировать/переоткрыть группу), вызывается только по явной просьбе пользователя.
  */
 
 import { errorText, pretty, text } from '@letar/mcp-server-kit'
 import { McpServer } from '@modelcontextprotocol/server'
 import { z } from 'zod'
-import { getLatestIssueEvent, listIssues, listProjects } from './client.js'
+import { getLatestIssueEvent, listIssues, listProjects, setIssueStatus } from './client.js'
 
 export function createGlitchtipMcpServer(): McpServer {
   const server = new McpServer({ name: '@letar/glitchtip-mcp', version: '0.1.0' }, { capabilities: { tools: {} } })
@@ -64,6 +63,29 @@ export function createGlitchtipMcpServer(): McpServer {
     } catch (err) {
       return errorText(
         `❌ glitchtip_get_issue_event(${issueId}): ${err instanceof Error ? err.message : String(err)}`,
+      )
+    }
+  })
+
+  // ─── glitchtip_set_issue_status ──────────────────────────────────────────────
+  server.registerTool('glitchtip_set_issue_status', {
+    description:
+      'Меняет статус группы (issue) в GlitchTip: resolved — исправлено, ignored — шум/не баг, unresolved — переоткрыть. '
+      + 'Пишет во внешний сервис: вызывай только по явной просьбе пользователя и только для перечисленных им id. '
+      + 'issueId — числовой id из glitchtip_list_issues.',
+    inputSchema: z.strictObject({
+      issueId: z.string().regex(/^\d+$/, 'issueId — числовой id группы').describe('id issue из glitchtip_list_issues'),
+      status: z.enum(['resolved', 'ignored', 'unresolved']).describe('Новый статус группы'),
+    }),
+  }, async ({ issueId, status }) => {
+    try {
+      const issue = await setIssueStatus(issueId, status)
+      return text(`✅ Issue ${issueId}: статус → ${issue.status}
+
+${pretty(issue)}`)
+    } catch (err) {
+      return errorText(
+        `❌ glitchtip_set_issue_status(${issueId}, ${status}): ${err instanceof Error ? err.message : String(err)}`,
       )
     }
   })

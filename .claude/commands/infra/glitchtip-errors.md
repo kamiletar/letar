@@ -11,7 +11,7 @@ arguments: <app> [environment]
 
 Используется часть `glitchtip` объединённого MCP-сервера `letar` (`@letar/glitchtip-mcp`,
 [README](/libs/glitchtip-mcp/README.md); до 2026-09-14 — отдельный сервер `glitchtip-mcp`) —
-read-only обёртка над REST API GlitchTip ([libs/glitchtip/README.md](/libs/glitchtip/README.md),
+обёртка над REST API GlitchTip ([libs/glitchtip/README.md](/libs/glitchtip/README.md),
 эндпоинты `/api/0/...`), а не сырой curl. Если инструменты `mcp__letar__glitchtip_*` недоступны
 (сервер ещё грузится/не подключён) — дождись их через `ToolSearch` с запросом `glitchtip`, не
 переходи на curl в обход MCP.
@@ -34,8 +34,9 @@ EOF
 
 Токен создаётся **только** в GlitchTip UI → Settings → Auth Tokens (сессионный логин) — API не
 даёт токену создавать другие токены, `/api/0/api-tokens/` отвечает `401` на токен-авторизацию.
-Права — `project:read` + `event:read` (read-only достаточно — `glitchtip-mcp` ничего не мутирует,
-см. ниже). Org slug — Settings → организация (тот же, что в URL дашборда).
+Права — `project:read` + `event:read` для разбора; для шага 7 (закрытие групп) токену нужны ещё
+права на запись — без них `glitchtip_set_issue_status` вернёт `403`, тогда не создавай токен сам,
+а опиши владельцу, что выпустить. Org slug — Settings → организация (тот же, что в URL дашборда).
 
 Если `glitchtip_list_projects` падает с ошибкой про `GLITCHTIP_API_TOKEN`/`GLITCHTIP_ORG` —
 останови команду и попроси пользователя выпустить токен через UI, не пытайся угадывать или
@@ -94,11 +95,27 @@ mcp__letar__glitchtip_get_issue_event({ issueId: "<id из шага 1>" })
 фикс, файл:строка. Не вноси правки автоматически без запроса пользователя — эта команда только
 разбирает и предлагает; сложные/спорные случаи явно пометь как «нужно уточнение».
 
+### 7. Закрытие групп (только по просьбе пользователя)
+
+Разбор заканчивается закрытием групп, но **сам ничего не закрывай**: `glitchtip_set_issue_status`
+пишет во внешний сервис. Покажи предложение таблицей — «id → статус, почему» — и закрывай после
+подтверждения (или если пользователь сразу попросил закрыть):
+
+```
+mcp__letar__glitchtip_set_issue_status({ issueId: "<числовой id>", status: "ignored" })
+```
+
+- `ignored` — шум, не баг (зонды сканеров, `POST /` с `next-action: x`): группа не всплывёт снова;
+- `resolved` — исправлено или старая группа, не повторявшаяся; при новом событии GlitchTip
+  сам переоткроет её;
+- **свежие** группы, по которым ждётся выкладка фикса, не закрывай — сначала проверь, что после
+  выкладки новых событий нет;
+- проверь итог: `glitchtip_list_issues({ project: "$1" })` не должен содержать закрытых id.
+
 ## Что НЕ делает эта команда
 
-⛔ Не резолвит и не игнорирует issues — `glitchtip-mcp` намеренно не даёт mutating-инструментов
-(`PUT /api/0/issues/<id>/` со `status: resolved` — действие на внешнем сервисе, требует явного
-запроса пользователя каждый раз, не должно быть доступно агенту в рамках обычного разбора).
+⛔ Не закрывает группы без просьбы пользователя — шаг 7 только по явному запросу, для
+перечисленных им (или подтверждённых им) id.
 
 ⛔ Не деплоит фикс — после правки кода дальше обычный `git commit` → `nx lint`/`typecheck:tsgo` →
 деплой-запрос deploy-agent-dev ([deploy-coordination.md](/.claude/rules/deploy-coordination.md)), как
@@ -113,8 +130,8 @@ mcp__letar__glitchtip_get_issue_event({ issueId: "<id из шага 1>" })
 
 - [infra/glitchtip/README.md](/infra/glitchtip/README.md) — таблица подключённых приложений,
   список project slug
-- [libs/glitchtip-mcp/README.md](/libs/glitchtip-mcp/README.md) — MCP-сервер, инструменты, формат
-  секретов
+- [libs/glitchtip-mcp/README.md](/libs/glitchtip-mcp/README.md) — MCP-сервер, инструменты
+  (включая `glitchtip_set_issue_status`), формат секретов
 - [libs/glitchtip/README.md](/libs/glitchtip/README.md) — SDK-обёртка приложений, `scrubPii`
 - [personal-data.md](/.claude/docs/personal-data.md) — почему PII в событиях уже вычищен на
   этапе отправки (`scrubPii`), но не полагайся на это при пересказе содержимого ошибок
