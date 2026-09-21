@@ -1,5 +1,12 @@
 # Changelog @letar/forms-vue-shadcn
 
+## 0.17.0 (2026-09-21)
+
+- **Feature:** `FormStepsNavigation` принимает пропсы кнопок `prevProps`/`nextProps`/`submitProps`/
+  `skipProps` (паритет с `@letar/forms` 2.14.22) — `data-*` и атрибуты нативной `<button>`.
+  `onClick`/`disabled`/`type`/`class` исключены из типа и перекрываются компонентом.
+  Экспортируется `FormStepsNavigationButtonProps`.
+
 ## 0.16.1 (2026-08-17)
 
 - **Fix:** `@tiptap/vue-3` пинился на точную `3.29.2`, тогда как `@tiptap/starter-kit`/

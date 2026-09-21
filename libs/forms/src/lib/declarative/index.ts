@@ -504,6 +504,7 @@ export {
   FormStepsIndicator,
   type FormStepsIndicatorProps,
   FormStepsNavigation,
+  type FormStepsNavigationButtonProps,
   type FormStepsNavigationProps,
   type FormStepsProps,
   FormStepsStep,

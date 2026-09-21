@@ -2,8 +2,19 @@
 
 import { useDeclarativeForm } from '@letar/forms-react'
 import { cn } from '@letar/tailwind-utils'
-import { type ReactNode, useCallback, useState } from 'react'
+import { type ButtonHTMLAttributes, type ReactNode, useCallback, useState } from 'react'
 import { useFormStepsContext } from './form-steps-context'
+
+/** Произвольные `data-*` атрибуты (без `as` в JSX-литерале) */
+type DataAttributes = { [K in `data-${string}`]?: string }
+
+/**
+ * Пропсы отдельной кнопки навигации. `onClick`/`disabled`/`type`/`className` задаёт сам компонент и не даёт
+ * их перебить — иначе навигация по шагам сломалась бы молча.
+ */
+export type FormStepsNavigationButtonProps =
+  & Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'onClick' | 'disabled' | 'type' | 'className'>
+  & DataAttributes
 
 export interface FormStepsNavigationProps {
   prevLabel?: ReactNode
@@ -13,6 +24,14 @@ export interface FormStepsNavigationProps {
   showPrev?: boolean
   showNext?: boolean
   showSkip?: boolean
+  /** Доп. пропсы кнопки «Назад» (`data-*`, `aria-*`, `data-testid` и т.п.) */
+  prevProps?: FormStepsNavigationButtonProps
+  /** Доп. пропсы кнопки «Далее» (на последнем шаге её место занимает «Отправить» — см. `submitProps`) */
+  nextProps?: FormStepsNavigationButtonProps
+  /** Доп. пропсы кнопки «Отправить» (последний шаг) */
+  submitProps?: FormStepsNavigationButtonProps
+  /** Доп. пропсы кнопки «Пропустить» */
+  skipProps?: FormStepsNavigationButtonProps
   onStepChange?: (step: number) => void
   onSubmit?: () => void
   onSkip?: () => Promise<boolean> | boolean | void
@@ -33,6 +52,10 @@ export function FormStepsNavigation({
   showPrev = true,
   showNext = true,
   showSkip = false,
+  prevProps,
+  nextProps,
+  submitProps,
+  skipProps,
   onStepChange,
   onSubmit,
   onSkip,
@@ -87,6 +110,7 @@ export function FormStepsNavigation({
     <div className="flex gap-2">
       {showPrev && (
         <button
+          {...prevProps}
           type="button"
           onClick={handlePrev}
           disabled={isFirstStep || !canGoPrev || isNavigating || isSkipping}
@@ -98,6 +122,7 @@ export function FormStepsNavigation({
 
       {showSkip && (
         <button
+          {...skipProps}
           type="button"
           onClick={() => void handleSkip()}
           disabled={isNavigating}
@@ -110,6 +135,7 @@ export function FormStepsNavigation({
       {showNext && (isLastStep
         ? (
           <button
+            {...submitProps}
             type="button"
             onClick={() => void handleSubmit()}
             disabled={isSubmittingForm || isNavigating || isSkipping}
@@ -120,6 +146,7 @@ export function FormStepsNavigation({
         )
         : (
           <button
+            {...nextProps}
             type="button"
             onClick={() => void handleNext()}
             disabled={isNavigating}

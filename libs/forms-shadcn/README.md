@@ -295,6 +295,10 @@ import { FieldString, FormSteps } from '@letar/forms-shadcn'
 Chakra-версии без изменений — framework-free логика. UI (индикатор с прогрессом, кнопки
 Назад/Далее/Отправить) — нативная разметка вместо Chakra `Steps.Root`.
 
+`FormSteps.Navigation` принимает `prevProps`/`nextProps`/`submitProps`/`skipProps` — `data-*`, `aria-*` и прочие
+атрибуты нативной `<button>` (`data-assist-id`, `data-testid`); `onClick`/`disabled`/`type`/`className`
+задаёт компонент. `nextProps` действует на «Далее», на последнем шаге вместо него — `submitProps`.
+
 **Beta-упрощения:** без интеграции с `Form.When` (условное скрытие полей от валидации на шаге —
 в Chakra-версии это `hiddenFields`), без пропа `segment` (авто-обёртка `Form.Group` — модуля
 `FormGroupDeclarative` в `@letar/forms-react` ещё нет) и без анимаций перехода между шагами

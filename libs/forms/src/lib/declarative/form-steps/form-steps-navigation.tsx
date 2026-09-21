@@ -5,6 +5,17 @@ import { type ReactNode, useCallback, useState } from 'react'
 import { useDeclarativeForm } from '../form-context'
 import { useFormStepsContext } from './form-steps-context'
 
+/** Произвольные `data-*` атрибуты (без `as` в JSX-литерале) */
+type DataAttributes = { [K in `data-${string}`]?: string }
+
+/**
+ * Пропсы отдельной кнопки навигации. Служебные `onClick`/`disabled`/`loading`/`type` кнопки
+ * задаёт сам компонент и не даёт их перебить — иначе навигация по шагам сломалась бы молча.
+ */
+export type FormStepsNavigationButtonProps =
+  & Omit<ButtonProps, 'onClick' | 'disabled' | 'loading' | 'type'>
+  & DataAttributes
+
 export interface FormStepsNavigationProps {
   /** Label for previous button */
   prevLabel?: ReactNode
@@ -32,6 +43,14 @@ export interface FormStepsNavigationProps {
   colorPalette?: string
   /** Gap between buttons */
   gap?: number | string
+  /** Доп. пропсы кнопки «Назад» (`data-*`, `aria-*`, `data-testid` и т.п.) */
+  prevProps?: FormStepsNavigationButtonProps
+  /** Доп. пропсы кнопки «Далее» (на последнем шаге её место занимает «Отправить» — см. `submitProps`) */
+  nextProps?: FormStepsNavigationButtonProps
+  /** Доп. пропсы кнопки «Отправить» (последний шаг) */
+  submitProps?: FormStepsNavigationButtonProps
+  /** Доп. пропсы кнопки «Пропустить» */
+  skipProps?: FormStepsNavigationButtonProps
   /** Callback after successful step change */
   onStepChange?: (step: number) => void
   /** Callback when form is submitted */
@@ -52,6 +71,7 @@ export interface FormStepsNavigationProps {
  *   prevLabel="Back"
  *   nextLabel="Continue"
  *   submitLabel="Create Account"
+ *   submitProps={{ 'data-assist-id': 'wizard.submit' }}
  * />
  * ```
  */
@@ -69,6 +89,10 @@ export function FormStepsNavigation({
   skipVariant = 'ghost',
   colorPalette = 'brand',
   gap = 2,
+  prevProps,
+  nextProps,
+  submitProps,
+  skipProps,
   onStepChange,
   onSubmit,
   onSkip,
@@ -135,6 +159,7 @@ export function FormStepsNavigation({
     <ButtonGroup gap={gap}>
       {showPrev && (
         <Button
+          {...prevProps}
           variant={prevVariant}
           size={size}
           onClick={handlePrev}
@@ -147,6 +172,7 @@ export function FormStepsNavigation({
 
       {showSkip && (
         <Button
+          {...skipProps}
           variant={skipVariant}
           size={size}
           onClick={handleSkip}
@@ -162,6 +188,7 @@ export function FormStepsNavigation({
         && (isLastStep
           ? (
             <Button
+              {...submitProps}
               type="submit"
               variant={nextVariant}
               size={size}
@@ -175,6 +202,7 @@ export function FormStepsNavigation({
           )
           : (
             <Button
+              {...nextProps}
               variant={nextVariant}
               size={size}
               onClick={handleNext}

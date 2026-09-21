@@ -4,6 +4,15 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.38.0] - 2026-09-21
+
+### Added
+
+- **`FormSteps.Navigation` — пропсы кнопок `prevProps`/`nextProps`/`submitProps`/`skipProps`**
+  (паритет с `@letar/forms` 2.14.22). `data-*` и остальные атрибуты нативной `<button>` без `as`;
+  `onClick`/`disabled`/`type`/`className` исключены из типа и перекрываются компонентом.
+  Экспортируется `FormStepsNavigationButtonProps`.
+
 ## [0.37.2] - 2026-09-14
 
 ### Changed

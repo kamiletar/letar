@@ -1,6 +1,17 @@
-import { defineComponent, h, type PropType, ref, type VNode } from 'vue'
+import { type ButtonHTMLAttributes, defineComponent, h, type PropType, ref, type VNode } from 'vue'
 import { useAppFormContext } from '../../core/form-context'
 import { useFormStepsContext } from '../../core/form-steps-context'
+
+/** Произвольные `data-*` атрибуты (без `as` в литерале пропа) */
+type DataAttributes = { [K in `data-${string}`]?: string }
+
+/**
+ * Пропсы отдельной кнопки навигации. `onClick`/`disabled`/`type`/`class` задаёт сам компонент и не
+ * даёт их перебить — иначе навигация по шагам сломалась бы молча.
+ */
+export type FormStepsNavigationButtonProps =
+  & Omit<ButtonHTMLAttributes, 'onClick' | 'disabled' | 'type' | 'class'>
+  & DataAttributes
 
 /**
  * `Form.Steps.Navigation` — headless-версия. Кнопки Назад/Далее с автоматической валидацией; на
@@ -16,6 +27,10 @@ export const FormStepsNavigation = defineComponent({
     showPrev: { type: Boolean, required: false, default: true },
     showNext: { type: Boolean, required: false, default: true },
     showSkip: { type: Boolean, required: false, default: false },
+    prevProps: { type: Object as PropType<FormStepsNavigationButtonProps>, required: false, default: undefined },
+    nextProps: { type: Object as PropType<FormStepsNavigationButtonProps>, required: false, default: undefined },
+    submitProps: { type: Object as PropType<FormStepsNavigationButtonProps>, required: false, default: undefined },
+    skipProps: { type: Object as PropType<FormStepsNavigationButtonProps>, required: false, default: undefined },
     onStepChange: { type: Function as PropType<(step: number) => void>, required: false, default: undefined },
     onSubmit: { type: Function as PropType<() => void>, required: false, default: undefined },
     onSkip: {
@@ -85,6 +100,7 @@ export const FormStepsNavigation = defineComponent({
           ? h(
             'button',
             {
+              ...props.prevProps,
               type: 'button',
               onClick: handlePrev,
               disabled: isFirstStep.value || !canGoPrev.value || isNavigating.value || isSkipping.value,
@@ -98,6 +114,7 @@ export const FormStepsNavigation = defineComponent({
           ? h(
             'button',
             {
+              ...props.skipProps,
               type: 'button',
               onClick: () => void handleSkip(),
               disabled: isNavigating.value,
@@ -112,6 +129,7 @@ export const FormStepsNavigation = defineComponent({
             ? h(
               'button',
               {
+                ...props.submitProps,
                 type: 'button',
                 onClick: () => void handleSubmit(),
                 disabled: isSubmittingForm.value || isNavigating.value || isSkipping.value,
@@ -122,6 +140,7 @@ export const FormStepsNavigation = defineComponent({
             : h(
               'button',
               {
+                ...props.nextProps,
                 type: 'button',
                 onClick: () => void handleNext(),
                 disabled: isNavigating.value,

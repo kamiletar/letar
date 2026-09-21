@@ -1,5 +1,12 @@
 # Changelog @letar/forms-vue
 
+## 0.16.0 (2026-09-21)
+
+- **Feature:** `FormStepsNavigation` принимает пропсы кнопок `prevProps`/`nextProps`/`submitProps`/
+  `skipProps` (паритет с `@letar/forms` 2.14.22) — `data-*` и атрибуты нативной `<button>`.
+  `onClick`/`disabled`/`type`/`class` исключены из типа и перекрываются компонентом.
+  Экспортируется `FormStepsNavigationButtonProps`.
+
 ## 0.15.3 (2026-09-05)
 
 - **Fix:** CI-падение `nx affected -t lint` — oxlint-правило `react(immutability)` считало

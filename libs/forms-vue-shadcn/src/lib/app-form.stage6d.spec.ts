@@ -226,3 +226,88 @@ describe('Этап 6 (часть 4) — Form.Steps', () => {
     expect(wrapperB.find('[data-step-index="0"]').exists()).toBe(false)
   })
 })
+
+describe('Form.Steps.Navigation — пропсы кнопок (data-*)', () => {
+  const schema = z.object({
+    firstName: z.string().min(1, 'Обязательное поле'),
+    email: z.string(),
+  })
+
+  function NavigationPropsForm() {
+    return defineComponent({
+      setup() {
+        return () =>
+          h(
+            AppForm,
+            { schema, initialValue: { firstName: '', email: '' }, onSubmit: vi.fn() },
+            {
+              default: () => [
+                h(FormSteps, null, () => [
+                  h(FormStepsStep, { title: 'Шаг 1' }, () => [h(FieldString, { name: 'firstName' })]),
+                  h(FormStepsStep, { title: 'Шаг 2' }, () => [h(FieldString, { name: 'email' })]),
+                  h(FormStepsNavigation, {
+                    showSkip: true,
+                    prevProps: { 'data-assist-id': 'wizard.prev' },
+                    skipProps: { 'data-assist-id': 'wizard.skip' },
+                    nextProps: { 'data-assist-id': 'wizard.next' },
+                    submitProps: { 'data-assist-id': 'wizard.submit' },
+                  }),
+                ]),
+              ],
+            },
+          )
+      },
+    })
+  }
+
+  function buttonByText(wrapper: ReturnType<typeof mount>, text: string) {
+    return wrapper.findAll('button').find((btn) => btn.text().includes(text))
+  }
+
+  it('data-* доходит до «Назад», «Пропустить» и «Далее»; submitProps на первом шаге не виден', () => {
+    const wrapper = mount(NavigationPropsForm())
+
+    expect(buttonByText(wrapper, 'Назад')?.attributes('data-assist-id')).toBe('wizard.prev')
+    expect(buttonByText(wrapper, 'Пропустить')?.attributes('data-assist-id')).toBe('wizard.skip')
+    expect(buttonByText(wrapper, 'Далее')?.attributes('data-assist-id')).toBe('wizard.next')
+    expect(wrapper.find('[data-assist-id="wizard.submit"]').exists()).toBe(false)
+  })
+
+  it('на последнем шаге data-* из submitProps попадает на «Отправить», а nextProps — нет', async () => {
+    const wrapper = mount(NavigationPropsForm())
+
+    await wrapper.find('input').setValue('Ками')
+    await buttonByText(wrapper, 'Далее')!.trigger('click')
+    await flushPromises()
+    await nextTick()
+
+    expect(buttonByText(wrapper, 'Отправить')?.attributes('data-assist-id')).toBe('wizard.submit')
+    expect(wrapper.find('[data-assist-id="wizard.next"]').exists()).toBe(false)
+  })
+
+  it('пропсы потребителя не перебивают служебные type и disabled', () => {
+    const wrapper = mount(
+      defineComponent({
+        setup() {
+          return () =>
+            h(
+              AppForm,
+              { schema, initialValue: { firstName: '', email: '' }, onSubmit: vi.fn() },
+              {
+                default: () => [
+                  h(FormSteps, null, () => [
+                    h(FormStepsStep, { title: 'Шаг 1' }, () => [h(FieldString, { name: 'firstName' })]),
+                    h(FormStepsNavigation, { prevProps: { disabled: false, type: 'submit' } as never }),
+                  ]),
+                ],
+              },
+            )
+        },
+      }),
+    )
+
+    const prev = buttonByText(wrapper, 'Назад')!
+    expect(prev.attributes('disabled')).toBeDefined()
+    expect(prev.attributes('type')).toBe('button')
+  })
+})

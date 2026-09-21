@@ -239,6 +239,89 @@ describe('FormStepsNavigation', () => {
     })
   })
 
+  describe('пропсы кнопок (data-*)', () => {
+    it('прокидывает data-* на кнопки Back, Skip и Next', () => {
+      const wrapper = createWrapper(
+        createMockFormContext(),
+        createMockStepsContext({ isFirstStep: false, canGoPrev: true, currentStep: 1 }),
+      )
+
+      render(
+        <FormStepsNavigation
+          showSkip
+          prevProps={{ 'data-assist-id': 'wizard.prev' }}
+          skipProps={{ 'data-assist-id': 'wizard.skip' }}
+          nextProps={{ 'data-assist-id': 'wizard.next' }}
+        />,
+        { wrapper },
+      )
+
+      expect(screen.getByText('Back')).toHaveAttribute('data-assist-id', 'wizard.prev')
+      expect(screen.getByText('Skip')).toHaveAttribute('data-assist-id', 'wizard.skip')
+      expect(screen.getByText('Next')).toHaveAttribute('data-assist-id', 'wizard.next')
+    })
+
+    it('на последнем шаге data-* из submitProps попадает на Submit, а nextProps — нет', () => {
+      const wrapper = createWrapper(createMockFormContext(), createMockStepsContext({ isLastStep: true }))
+
+      render(
+        <FormStepsNavigation
+          nextProps={{ 'data-assist-id': 'wizard.next' }}
+          submitProps={{ 'data-assist-id': 'wizard.submit' }}
+        />,
+        { wrapper },
+      )
+
+      expect(screen.getByText('Submit')).toHaveAttribute('data-assist-id', 'wizard.submit')
+      expect(document.querySelector('[data-assist-id="wizard.next"]')).toBeNull()
+    })
+
+    it('data-assist-id есть в DOM ровно у одной кнопки «вперёд» на каждом шаге', () => {
+      const wrapper = createWrapper(createMockFormContext(), createMockStepsContext())
+
+      render(
+        <FormStepsNavigation
+          nextProps={{ 'data-assist-id': 'wizard.next' }}
+          submitProps={{ 'data-assist-id': 'wizard.submit' }}
+        />,
+        { wrapper },
+      )
+
+      expect(document.querySelectorAll('[data-assist-id]')).toHaveLength(1)
+      expect(screen.getByText('Next')).toHaveAttribute('data-assist-id', 'wizard.next')
+    })
+
+    it('пропсы потребителя не перебивают собственный onClick кнопки', async () => {
+      const goToNext = vi.fn().mockResolvedValue(true)
+      const wrapper = createWrapper(createMockFormContext(), createMockStepsContext({ goToNext }))
+      const onClick = vi.fn()
+
+      render(<FormStepsNavigation nextProps={{ onClick } as never} />, { wrapper })
+
+      await userEvent.click(screen.getByText('Next'))
+
+      await waitFor(() => {
+        expect(goToNext).toHaveBeenCalled()
+      })
+    })
+
+    it('пропсы потребителя не перебивают disabled кнопки Back на первом шаге', () => {
+      const wrapper = createWrapper(createMockFormContext(), createMockStepsContext())
+
+      render(<FormStepsNavigation prevProps={{ disabled: false } as never} />, { wrapper })
+
+      expect(screen.getByText('Back')).toBeDisabled()
+    })
+
+    it('пропсы потребителя не перебивают type="submit" кнопки Submit', () => {
+      const wrapper = createWrapper(createMockFormContext(), createMockStepsContext({ isLastStep: true }))
+
+      render(<FormStepsNavigation submitProps={{ type: 'button' } as never} />, { wrapper })
+
+      expect(screen.getByText('Submit')).toHaveAttribute('type', 'submit')
+    })
+  })
+
   describe('callbacks', () => {
     it('вызывает onStepChange после успешного goToNext', async () => {
       const formContext = createMockFormContext()

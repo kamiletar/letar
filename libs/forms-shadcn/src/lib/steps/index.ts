@@ -8,7 +8,7 @@ import { FormStepsStep } from './form-steps-step'
 
 export type { FormStepsCompletedContentProps } from './form-steps-completed'
 export type { FormStepsIndicatorProps } from './form-steps-indicator'
-export type { FormStepsNavigationProps } from './form-steps-navigation'
+export type { FormStepsNavigationButtonProps, FormStepsNavigationProps } from './form-steps-navigation'
 export type { FormStepsProps, StepPersistenceConfig } from './form-steps-root'
 export type { FormStepsStepProps } from './form-steps-step'
 

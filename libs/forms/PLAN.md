@@ -19,19 +19,27 @@
   плюс `parseActionResultError` принимает `{ error }` без `success: false`.
 - **Статус:** ожидание ответа `forms-coordinator-dev`
 
-### [ ] [2026-09-21] `Steps.Navigation`: проп для `data-*` на кнопки «Назад»/«Далее»/«Отправить» (от domwellbes)
+### ✅ [2026-09-21] `Steps.Navigation`: пропсы кнопок с `data-*` (закрыт v2.14.22, от domwellbes)
 
-- **Запросил:** domwellbes-dev (agent-mail не доставлен: `forms-coordinator-dev` в статусе retired)
+- **Запросил:** domwellbes-dev (тред `form-domwellbes-steps-nav-assist-ids`, agent-mail 1784 от координатора)
 - **Приоритет:** high
-- **Описание:** `FormStepsNavigation` (`form-steps/form-steps-navigation.tsx`) не принимает ни `data-*`,
-  ни пропсов для кнопок. Режим наставника domwellbes находит элементы по `data-assist-id`, поэтому не
-  может подсветить «Создать» в мастерах (материал, дом, работа). Предложение: `prevProps`/`nextProps`/
-  `submitProps`/`skipProps` (типизированные, `data-*` без `as`) либо `assistIdPrefix` → `.prev/.next/
-  .submit/.skip`. После релиза domwellbes сам проставит якоря.
-- **Статус:** в работе → `forms-dev` (делегировано 2026-09-21, agent-mail 1784, тред
-  `form-domwellbes-steps-nav-assist-ids`). Рекомендованный API — `prevProps`/`nextProps`/`submitProps`/
-  `skipProps` (`ButtonProps` + `data-${string}`), не `assistIdPrefix`: он вшивает в библиотеку знание
-  о режиме наставника. После релиза `forms-dev` пишет номер версии в тред, domwellbes размечает мастера.
+- **Описание:** `FormStepsNavigation` не принимал ни `data-*`, ни пропсов для кнопок. Режим наставника
+  domwellbes находит элементы по `data-assist-id`, поэтому не мог подсветить «Создать» в мастерах.
+- **Решение:** `prevProps`/`nextProps`/`submitProps`/`skipProps`, тип `FormStepsNavigationButtonProps` =
+  пропсы кнопки (Chakra `ButtonProps` / атрибуты нативной `<button>`) без `onClick`/`disabled`/`loading`/
+  `type` (в shadcn и Vue ещё и без `className`/`class`) + сигнатура `data-${string}`, так что литерал
+  `{ 'data-assist-id': '…' }` пишется без `as`. Пропсы потребителя раскладываются **до** собственных
+  атрибутов кнопки — служебные `onClick`/`disabled`/`type` перебить нельзя (тесты на это есть).
+  «Далее» и «Отправить» — две разные кнопки: на последнем шаге `nextProps` не применяется, там
+  `submitProps`. Не выбран `assistIdPrefix`: он вшивал бы в библиотеку знание о режиме наставника.
+- **Паритет:** `@letar/forms` 2.14.22, `@letar/forms-shadcn` 0.38.0, `@letar/forms-vue` 0.16.0,
+  `@letar/forms-vue-shadcn` 0.17.0. `@letar/forms-angular` компонента шагов не имеет (Фаза 11 его не
+  портировала) — API там не нужен. `libs/form-mcp` `Steps.Navigation` не описывает — не менялся.
+- **Проверка:** тесты во всех четырёх скинах (красные до фикса); живая проверка в `form-develop-app`
+  `/steps-demo`: шаги 1–2 — `prev` и `next`, последний — `next` исчезает, `submit` встаёт на «Create
+  Account» (`type="submit"`). Демо/доки: `form-develop-app` (+`-shadcn`), `form-docs` (гайд `multi-step`
+  en/ru + `/demo/multi-step`), `form-example` (`/examples/multi-step`).
+- **Статус:** ✅ закрыт, версия `@letar/forms` 2.14.22 сообщена в тред.
 
 ### ✅ [2026-09-19] Деплой `form-docs` 0.6.12 / `form-example` (закрыт: подтверждён 2026-09-19)
 

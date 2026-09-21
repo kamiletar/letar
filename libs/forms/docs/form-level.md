@@ -346,6 +346,26 @@ useEffect(() => { detectLocation().then(setGeo) }, [])
 />
 ```
 
+### Атрибуты кнопок навигации (v2.14.22+)
+
+`prevProps` / `nextProps` / `submitProps` / `skipProps` — доп. пропсы каждой кнопки. Нужны для
+`data-*` (якоря подсказок наставника, `data-testid`, аналитика) и `aria-*`; литерал пишется без `as`:
+
+```tsx
+<Form.Steps.Navigation
+  prevProps={{ 'data-assist-id': 'wizard.prev' }}
+  nextProps={{ 'data-assist-id': 'wizard.next' }}
+  submitProps={{ 'data-assist-id': 'wizard.submit' }}
+/>
+```
+
+- «Далее» и «Отправить» — **разные кнопки**: на последнем шаге вместо `nextProps` действует
+  `submitProps`, `data-*` с одной на другую не переезжает.
+- `onClick`, `disabled`, `loading` и `type` задаёт компонент — в тип они не входят, а в рантайме
+  перекрываются собственными значениями (навигацию по шагам через эти пропсы не сломать).
+- Тип — `FormStepsNavigationButtonProps`. Те же пропсы есть в `@letar/forms-shadcn`,
+  `@letar/forms-vue`, `@letar/forms-vue-shadcn`.
+
 ### useFormStepsContext (v0.32.0+)
 
 Хук для программного управления шагами:

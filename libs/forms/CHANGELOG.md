@@ -4,6 +4,22 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.14.22] - 2026-09-21
+
+### Added
+
+- **`Form.Steps.Navigation` — пропсы отдельных кнопок: `prevProps`, `nextProps`, `submitProps`,
+  `skipProps`** (запрос domwellbes-dev, тред `form-domwellbes-steps-nav-assist-ids`). Позволяют
+  повесить на кнопки «Назад»/«Далее»/«Отправить»/«Пропустить» `data-*` (например
+  `data-assist-id` для подсказок наставника или `data-testid`), `aria-*` и прочие атрибуты Chakra
+  `Button`. `data-*` пишется литералом без `as` — тип `FormStepsNavigationButtonProps` содержит
+  сигнатуру `data-${string}`. Служебные `onClick`/`disabled`/`loading`/`type` из этих пропсов
+  исключены из типа и в рантайме перекрываются собственными: навигацию по шагам через них не
+  сломать. «Далее» и «Отправить» — две разные кнопки: `nextProps` не переезжает на последний
+  шаг, там действует `submitProps`. Тип `FormStepsNavigationButtonProps` экспортируется.
+  Пропсы добавлены и в `@letar/forms-shadcn` 0.38.0, `@letar/forms-vue` 0.16.0,
+  `@letar/forms-vue-shadcn` 0.17.0 (у `@letar/forms-angular` компонента шагов нет).
+
 ## [2.14.21] - 2026-09-19
 
 ### Fixed
