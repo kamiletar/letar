@@ -4575,3 +4575,28 @@ animatrona — NVENC-раздел `nvenc-web-video-codec-ladder.md`, строк�
       плюс прямая `adm-zip` в приватном приложении — вне объёма этого прогона.
 - ⚠️ `postinstall` у `@letar/animatrona` падает `EBUSY` на `ntsuspend/win32-x64_lib.node`, пока запущен
   Animatrona (файл держит процесс) — `bun install` нужно делать при закрытом приложении.
+
+## §190 — pre-commit гейт синтаксиса TypeScript; разбор коммита с непарсящимся `server.ts` ✅ ЗАКРЫТО (2026-09-22)
+
+Коммит `b8a213578` занёс в `libs/deploy-mcp/src/server.ts` блок, вставленный внутрь чужих
+выражений (11 ошибок парсера); исправлено следующим коммитом `c2063f3e2`, историю не переписывали.
+Разбор — [git-multi-agent-incidents](/.claude/docs/git-multi-agent-incidents.md).
+
+- [x] `scripts/hooks/pre-commit-syntax-check.sh` + `scripts/check-staged-syntax.mjs`: парсер
+      `typescript` по индексной версии staged `.ts/.tsx/.mts/.cts`. Весь репозиторий (5906 файлов) —
+      ~6 с и 0 ложных срабатываний; типичный коммит ~0,3 с. Обход WIP — `GIT_ALLOW_SYNTAX_ERRORS=1`.
+      Установлен в корень и 14 submodule (`install.sh --all-submodules`).
+- [x] Разбор в `git-multi-agent-incidents.md`, дополнения в `precommit-hook-install-staleness.md`
+      и `agent-mail-server-quirks.md`.
+- [x] Правило «вторая сессия того же приложения» в `.claude/rules/agent-mail.md`: `whois` перед
+      регистрацией под `<app>-dev`, занято — `create_agent_identity` без `name_hint`. Причина: с
+      валидным токеном две сессии молча становятся одним агентом, и их file reservations не
+      конфликтуют между собой.
+- [ ] ⚠️ `pre-commit-dprint-check.sh` и `pre-commit-semgrep.sh` берут из индекса только имена
+      файлов, а проверяют содержимое на **диске** — при индексе `MM` рваный индексный блоб проходит
+      молча. Воспроизведено на временном `GIT_INDEX_FILE`. Заведён отдельный чип.
+- [ ] ⚠️ Открытый вопрос: что именно пропустило `b8a213578`. Диск-вместо-индекса — единственное
+      объяснение, совместимое с фактами и воспроизведённое, но тогдашние индекс и установленный набор
+      хуков не сохранились, поэтому доказать нельзя (не исключён и `--no-verify`).
+- [ ] Гейт работает только в pre-commit и не зарегистрирован в `scripts/check-all.mjs`: в CI
+      `typecheck:tsgo` рваный файл и так ловит, а сам хук нужен ради минут до пуша. Не пересматривалось.
