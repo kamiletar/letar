@@ -311,6 +311,11 @@ nx sync                       # Обновить references во всех tsconf
 nx test infra-config
 ```
 
+⚠️ **`APP_PORTS` в `@letar/infra-config` — не dev-порт.** Реестр хранит порт production-контейнера
+(по нему ходят health-check dashboard и межконтейнерные вызовы dashboard-agent). У части приложений
+он расходится с dev-портом из `.env`: `animatrona-tracker` (dev 3009, контейнер 3010), `auth-hub`
+(dev 3014, контейнер 3010). Для dev-адреса читай `apps/<app>/.env`, а не `getAppPort()`.
+
 ⚠️ **Правка seed Ключницы не действует сама по себе.** Локальные приложения ходят в **прод**-
 Ключницу (`OIDC_DISCOVERY_URL=https://auth.letar.best/...`), поэтому `localhost`-адрес должен
 лежать в боевой БД: после изменения `seed.ts` нужен re-seed прод-инстанса `auth-hub`
