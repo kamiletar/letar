@@ -344,6 +344,23 @@ const CHECKS = [
     doc: '.claude/docs/tsgo-stray-declarations.md',
   },
   {
+    id: 'zmodel-regex-backslashes',
+    group: 'hygiene',
+    title: 'обратные слэши в @regex/form.props.pattern всех .zmodel (одиночный слэш съедается Langium)',
+    run: ['node', ['scripts/check-zmodel-regex-backslashes.mjs']],
+    // gate: признак детерминированный (лексер строкового литерала по правилам Langium, не
+    // эвристика), а ошибка тихая на всех остальных уровнях — `zenstack generate`, typecheck и
+    // lint зелёные, регулярка при этом молча другая (`\s` доходит до плагина буквой `s`) и
+    // вылезает только на живом вводе. На регистрации (2026-09-21) репо чистое: единственный
+    // @regex со слэшами записан верно, находок 0 — ложной красной, которая приучила бы
+    // игнорировать проверку, нет. Предупреждения (три и больше слэшей подряд) на код
+    // возврата не влияют: серия из четырёх бывает намеренной (искать сам слэш).
+    severity: 'gate',
+    ci: 'partial',
+    ciNote: 'приватные submodule не выкачаны — их .zmodel не проверены (скрипт сам печатает список)',
+    doc: '.claude/docs/zenstack-form-meta-directive-pitfalls.md § 2',
+  },
+  {
     id: 'doc-counts',
     group: 'docs',
     title: 'счётные утверждения в .claude/docs (doc-count-аннотации) против реального состояния',

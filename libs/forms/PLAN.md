@@ -32,8 +32,12 @@
   пришлось. Уточнено попутно: нативный `@regex` в сгенерированном файле — TS-строка внутри
   `ZodUtils.addStringValidation`, а не `.regex(/…/)` (тот путь только у `form.props.pattern`);
   проверка в доке исправлена. Абзац про съедаемые слэши добавлен в README плагина и
-  `.claude/skills/zenstack-helper/reference/form-directives.md`. Автоматического сторожа нет:
-  ошибка по-прежнему тихая, ловится только сверкой сгенерированного файла или тестом на схеме.
+  `.claude/skills/zenstack-helper/reference/form-directives.md`. Сторож добавлен
+  2026-09-21: `scripts/check-zmodel-regex-backslashes.mjs`, gate `zmodel-regex-backslashes` в
+  `bun scripts/check-all.mjs` (одиночный слэш перед классом или другим символом — ошибка, серия
+  из трёх и больше слэшей — предупреждение); в CI покрытие неполное — приватные submodule не
+  выкачаны. Он проверяет запись слэшей, а не смысл регулярки: семантику по-прежнему проверяют
+  сверка сгенерированного файла и тест на схеме.
 
 ### ✅ [2026-09-19] `zenstack-form-plugin` — `title`/`placeholder`/`description` вставляются в код без экранирования (закрыт plugin v4.1.1, найдено при tooltip)
 
