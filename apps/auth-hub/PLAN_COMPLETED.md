@@ -2,6 +2,18 @@
 
 Детальное описание всех реализованных фич auth-hub.
 
+## v0.7.23 — seed: localhost-redirect animatrona-tracker на порт 3009 (2026-09-22)
+
+Guard-тест `libs/infra-config/src/app-ports.guard.spec.ts` падал: seed Ключницы и команда
+`/animatrona-tracker` указывали 3010, а dev-порт приложения с 2026-09-09 — 3009 (`c52b2ce1a`,
+конфликт EADDRINUSE на 3010). Истина по правилу guard — `apps/<app>/.env`.
+
+- `prisma/seed.ts`: `redirectUrls` клиента `animatrona-tracker-prod` — `http://localhost:3009/sign-in`.
+- `.claude/commands/animatrona-tracker.md`: `**Порт:** 3009` (production-контейнер — 3010).
+- `APP_PORTS` в `libs/infra-config` не менялся: 3010 — порт production-контейнера, он верный.
+- Отправлен `deploy-request: auth-hub (seed: true)` (тред `deploy-auth-hub-seed-tracker-port`) —
+  локальные приложения ходят в ПРОД-Ключницу, правка seed вступает в силу только после re-seed.
+
 ## Код из письма — Фаза A.4/A.6: сброс пароля + тесты (2026-09-15)
 
 Продолжение Фазы A (A.2/A.3 — предыдущая сессия). Полный разбор — `PLAN_EMAIL_CODE.md` A.4-A.6.

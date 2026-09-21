@@ -1,5 +1,16 @@
 # План разработки auth-hub
 
+## ⚠️ Открытый вопрос: re-seed боевого auth-hub для порта animatrona-tracker (2026-09-22)
+
+seed (v0.7.23) исправлен и запушен, `deploy-request` с `seed: true` отправлен `deploy-agent-dev`
+(тред `deploy-auth-hub-seed-tracker-port`), но на момент конца сессии ответа ещё не было.
+
+- [ ] ⚠️ Открытый вопрос: подтвердить, что re-seed выполнен и `redirectUrls` клиента
+      `animatrona-tracker-prod` содержит `http://localhost:3009/sign-in` (select по `oauthApplication`
+      через letar-db). Не решён сейчас: ждёт деплоя. Побочно — в seed для этого клиента нет
+      localhost-варианта `/api/auth/callback/letar-auth` (у остальных приложений есть) — проверить,
+      не нужен ли он для локального входа в трекер.
+
 ## Код из письма + уведомление других вкладок (запланировано 2026-09-14, Фаза 0 закрыта 2026-09-15)
 
 Подтверждение email 6-значным кодом (плагин Better Auth `emailOTP`), сброс пароля кодом (сейчас
