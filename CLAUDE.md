@@ -105,7 +105,7 @@
 - [letar-forms-field-auto-fieldtype-drops-extra-props](/.claude/docs/letar-forms-field-auto-fieldtype-drops-extra-props.md) ⚠️ `Field.Auto` с `meta.ui.fieldType` молча теряет лишние пропсы
 - [letar-forms-urlsync-missing-router-no-rsc-refetch](/.claude/docs/letar-forms-urlsync-missing-router-no-rsc-refetch.md) ⚠️ `UrlSync` без `router` — URL меняется, данные нет
 - [letar-forms-field-date-urlsync-date-object](/.claude/docs/letar-forms-field-date-urlsync-date-object.md) ⚠️ `Field.Date` + `UrlSync`: поле навсегда «активно»
-- [letar-forms-urlsync-window-read-in-render-hydration](/.claude/docs/letar-forms-urlsync-window-read-in-render-hydration.md) ⚠️ `window.location` в рендере хука — первый клиентский рендер расходится с SSR
+- [letar-forms-urlsync-window-read-in-render-hydration](/.claude/docs/letar-forms-urlsync-window-read-in-render-hydration.md) ⚠️ `window.location` в рендере хука — гидратация расходится с SSR
 - [external-state-alongside-createform-pattern](/.claude/docs/external-state-alongside-createform-pattern.md) внешний `useState` рядом с формой — согласия 152-ФЗ, immediate-upload
 - [ui-components](/.claude/docs/ui-components.md) ⭐ компоненты `@letar/ui`
 - [images](/.claude/docs/images.md) · [upload-storage-backend](/.claude/docs/upload-storage-backend.md) `StorageBackend`, S3 не реализован
