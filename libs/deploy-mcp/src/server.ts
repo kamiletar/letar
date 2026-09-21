@@ -26,6 +26,7 @@ import { z } from 'zod'
 import { readBuildOnS1Apps } from './build-on-s1.js'
 import { agentRequest, type AgentResponse } from './client.js'
 import { changedPathsSince, isAffectedSince, originMainSha } from './config.js'
+import { CONTEXT_MAX, renderDeployStatusBody } from './log-tools.js'
 
 // 's3' отвергается явно: настоящий s3 — хранилище без dashboard-agent, а роль staging с 2026-09-19 — s1.
 const serverEnum = z.enum(['s1', 's2'], {
@@ -259,13 +260,60 @@ export function createDeployMcpServer(options: DeployMcpOptions = {}): McpServer
       'Статус деплоя на сервере (GET /api/deploy/status).',
       'Без deployId — текущий/последний деплой. sinceLine — курсор: вернёт только новые строки лога',
       '(экономит контекст при поллинге). В ответе totalLines/fromLine для следующего sinceLine.',
+      '',
+      'Лог деплоя с s1-сборкой — ~2000 строк / ~250 тыс. символов, целиком он не влезает в ответ.',
+      'Ответ ограничен ~30 тыс. символов; если лог обрезан, об этом сказано в начале ответа вместе',
+      'с подсказкой sinceLine для продолжения. Вместо чтения всего лога ищи нужное:',
+      '- grep — только строки с совпадением, с номерами. По умолчанию подстрока без учёта регистра',
+      '  (спецсимволы вроде `[slug]` — как есть); regex: true — регулярное выражение; context: N — по N',
+      '  строк вокруг совпадения. Ищет от sinceLine (по умолчанию по всему доступному логу).',
+      '- routeTable: true — таблица маршрутов Next.js («Route (app)» … легенда «(Static)/(SSG)/(Dynamic)»):',
+      '  сводка по значкам ○/●/ƒ, число путей у параметрических маршрутов (/[locale]/…/[slug]) и сам блок.',
+      'grep и routeTable можно вместе; при них массив output в ответе заменяется найденным.',
+      '⚠️ dashboard-agent хранит не больше 2000 последних строк — более ранние вытеснены и не ищутся.',
     ].join('\n'),
     inputSchema: z.strictObject({
       server: serverEnum.optional().describe('Сервер: s2 (прод, по умолчанию) или s1 (staging)'),
       deployId: z.string().optional().describe('ID конкретного деплоя из истории (без него — текущий/последний)'),
       sinceLine: z.number().int().min(0).optional().describe('Вернуть строки лога начиная с этого номера (курсор)'),
+      grep: z
+        .string()
+        .min(1)
+        .max(200)
+        .optional()
+        .describe(
+          'Вернуть только строки лога с этой подстрокой (без учёта регистра); с regex: true — регулярное выражение',
+        ),
+      regex: z.boolean().optional().describe('Трактовать grep как регулярное выражение (по умолчанию — подстрока)'),
+      context: z
+        .number()
+        .int()
+        .min(0)
+        .max(CONTEXT_MAX)
+        .optional()
+        .describe(`Строк контекста до и после каждого совпадения grep (0–${CONTEXT_MAX}, по умолчанию 0)`),
+      routeTable: z
+        .boolean()
+        .optional()
+        .describe('Вернуть таблицу маршрутов Next.js из лога сборки со сводкой по значкам и числу путей'),
     }),
-  }, async ({ server = 's2', deployId, sinceLine }) => {
+  }, async ({ server = 's2', deployId, sinceLine, grep, regex, context, routeTable }) => {
+    // Параметры-модификаторы без grep — не «молча игнорируем»: это тот же класс ошибки, что
+    // run_e2e({ extraArgs }) 2026-09-19, когда вызывающий думал, что фильтр применён.
+    if (grep === undefined && (regex !== undefined || context !== undefined)) {
+      return errorText('❌ deploy_status: regex и context имеют смысл только вместе с grep.')
+    }
+    if (grep !== undefined && regex) {
+      try {
+        new RegExp(grep, 'i')
+      } catch (err) {
+        return errorText(
+          `❌ deploy_status: grep — некорректное регулярное выражение: ${
+            err instanceof Error ? err.message : String(err)
+          }`,
+        )
+      }
+    }
     const params = new URLSearchParams()
     if (deployId) {
       params.set('deployId', deployId)
@@ -281,7 +329,11 @@ export function createDeployMcpServer(options: DeployMcpOptions = {}): McpServer
       if (!res.success) {
         return errorText(`ℹ️ ${server}: ${res.error ?? 'нет данных о деплое'}`)
       }
-      return text(`## Деплой на ${server}\n\n${pretty(res.data)}`)
+      return text(
+        `## Деплой на ${server}\n\n${
+          renderDeployStatusBody(res.data, { grep, regex, context, routeTable, sinceLine })
+        }`,
+      )
     } catch (err) {
       return errorText(`❌ deploy_status на ${server}: ${err instanceof Error ? err.message : String(err)}`)
     }
@@ -356,6 +408,8 @@ export function createDeployMcpServer(options: DeployMcpOptions = {}): McpServer
       'target: "production" (по умолчанию, → сервер приложения) или "staging" (→ s1, образ <app>:staging).',
       'Приложения из BUILD_ON_S1_APPS (libs/infra-config) собираются на s1 даже в production: запрос идёт на',
       's1, образ уходит в registry, релиз выполняется на s2 — deploy_status/deploy_wait смотри на server: "s1".',
+      'Список перечитывается из libs/infra-config/src/index.ts при каждом production-вызове: правка действует сразу,',
+      'рестарт MCP не нужен; не смог прочитать — отказ, а не молчаливый откат на s2.',
       'seed: true → deploy-affected.sh --seed (nx run <app>:db:seed после успешного деплоя).',
       'Возвращает deployId — опрашивай прогресс через deploy_status({ server, deployId, sinceLine }).',
       '⚠️ Изменяет production. Перед деплоем убедись, что коммиты запушены (git_status).',
@@ -375,6 +429,36 @@ export function createDeployMcpServer(options: DeployMcpOptions = {}): McpServer
     }),
   }, async ({ app, target = 'production', seed = false }) => {
     const staging = target === 'staging'
+    // Список читается из файла на КАЖДЫЙ production-вызов, а не берётся из значения, вычисленного при
+    // старте процесса: иначе приложение, добавленное в BUILD_ON_S1_APPS после запуска MCP, уходило бы
+    // на s2 (сборка на прод-хосте). Прочитать не вышло — отказ, а не откат на s2 «по умолчанию».
+    // Для staging список не нужен (там всегда s1), поэтому битый файл staging не блокирует.
+    let buildOnS1Apps: string[] | undefined
+    if (!staging) {
+      try {
+        buildOnS1Apps = readBuildOnS1Apps(options.infraConfigPath)
+      } catch (err) {
+        return errorText(
+          [
+            `⛔ deploy_app(${app}, production) отказал: не удалось определить актуальный BUILD_ON_S1_APPS.`,
+            err instanceof Error ? err.message : String(err),
+            '',
+            'От списка зависит, куда пойдёт сборка (s1 или s2), поэтому без него деплой не запускается —',
+            'молчаливого отката на s2 нет. Исправь `libs/infra-config/src/index.ts` и повтори вызов; перезапуск MCP не нужен.',
+          ].join('\n'),
+        )
+      }
+    }
+    const server = resolveDeployServer(app, target as DeployTarget, buildOnS1Apps)
+    // Расхождение с тем, что процесс запомнил при старте, — видно в ответе: объясняет, почему маршрут
+    // отличается от того, что показал бы устаревший список (и что рестарт агенту не нужен).
+    const listChangedNote = buildOnS1Apps !== undefined && isBuiltOnS1(app) !== buildOnS1Apps.includes(app)
+      ? [
+        `ℹ️ BUILD_ON_S1_APPS перечитан из файла: ${app} ${
+          buildOnS1Apps.includes(app) ? 'теперь в списке' : 'больше не в списке'
+        } (при старте процесса было иначе) — маршрут по актуальному списку.`,
+      ]
+      : []
     const gated = !staging && E2E_GATED_APPS.includes(app)
     const hardGated = !staging && HARD_GATED_APPS.includes(app)
     // e2e-gate: только для production и только для приложений из E2E_GATED_APPS — у остальных
@@ -410,8 +494,6 @@ export function createDeployMcpServer(options: DeployMcpOptions = {}): McpServer
         return errorText(
           [...gatePrefix, `❌ Не удалось запустить деплой ${app} (${target}) на ${server}: ${res.error}`].join('\n'),
         )
-      'Список перечитывается из libs/infra-config/src/index.ts при каждом production-вызове: правка действует сразу,',
-      'рестарт MCP не нужен; не смог прочитать — отказ, а не молчаливый откат на s2.',
       }
       const data = res.data as { deployId?: string } | undefined
       return text(
@@ -432,36 +514,6 @@ export function createDeployMcpServer(options: DeployMcpOptions = {}): McpServer
     } catch (err) {
       return errorText(
         [
-    // Список читается из файла на КАЖДЫЙ production-вызов, а не берётся из значения, вычисленного при
-    // старте процесса: иначе приложение, добавленное в BUILD_ON_S1_APPS после запуска MCP, уходило бы
-    // на s2 (сборка на прод-хосте). Прочитать не вышло — отказ, а не откат на s2 «по умолчанию».
-    // Для staging список не нужен (там всегда s1), поэтому битый файл staging не блокирует.
-    let buildOnS1Apps: string[] | undefined
-    if (!staging) {
-      try {
-        buildOnS1Apps = readBuildOnS1Apps(options.infraConfigPath)
-      } catch (err) {
-        return errorText(
-          [
-            `⛔ deploy_app(${app}, production) отказал: не удалось определить актуальный BUILD_ON_S1_APPS.`,
-            err instanceof Error ? err.message : String(err),
-            '',
-            'От списка зависит, куда пойдёт сборка (s1 или s2), поэтому без него деплой не запускается —',
-            'молчаливого отката на s2 нет. Исправь `libs/infra-config/src/index.ts` и повтори вызов; перезапуск MCP не нужен.',
-          ].join('\n'),
-        )
-      }
-    }
-    const server = resolveDeployServer(app, target as DeployTarget, buildOnS1Apps)
-    // Расхождение с тем, что процесс запомнил при старте, — видно в ответе: объясняет, почему маршрут
-    // отличается от того, что показал бы устаревший список (и что рестарт агенту не нужен).
-    const listChangedNote = buildOnS1Apps !== undefined && isBuiltOnS1(app) !== buildOnS1Apps.includes(app)
-      ? [
-        `ℹ️ BUILD_ON_S1_APPS перечитан из файла: ${app} ${
-          buildOnS1Apps.includes(app) ? 'теперь в списке' : 'больше не в списке'
-        } (при старте процесса было иначе) — маршрут по актуальному списку.`,
-      ]
-      : []
           ...gatePrefix,
           `❌ deploy_app ${app} (${target}) на ${server}: ${err instanceof Error ? err.message : String(err)}`,
         ].join('\n'),
