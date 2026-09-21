@@ -26,6 +26,6 @@
     "@letar/label-printer-core": "workspace:*"
   },
   "devDependencies": {
-    "electron": "44.4.0"
+    "electron": "44.4.3"
   }
 }

@@ -4456,3 +4456,42 @@ animatrona — NVENC-раздел `nvenc-web-video-codec-ladder.md`, строк�
 
 ⚠️ Порт `55555` на s2 снаружи закрыт (firewall-скрипт задаёт только порты, без привязки к
 источнику), реплика работает через релей Resilio. Прямое соединение s3 → s2 не нужно.
+
+## §189 (2026-09-21) `/infra:deps-update`: патчи и миноры внутри диапазонов
+
+Только `bun update` (без `--latest`). Затронуто ~30 пакетов: `@tanstack/react-query*` 5.103.2,
+`ai` 7.0.108, `@ai-sdk/*`, `eslint` 10.11.0, `next-intl` 4.14.6, `fumadocs-*` 16.15.12,
+`kysely` 0.29.6, `webpack` 5.111.1, `jsdom` 30.1.0, `electron` 44.4.3 и др.
+
+- [x] Gate-проверки `check-all --group=deps` зелёные; `peer-deps` без новых строк (изменилась
+      только версия eslint в тексте).
+- [x] **electron** — точные пины в шести приложениях подняты 44.4.0 → 44.4.3 (`animatrona`,
+      `animatrona-folder-player`, `animatrona-ipfs-player`, `kami-key-the`, `label-printer-desktop`,
+      `poster-microtext-desktop` — последний в приватном submodule). ⚠️ В `animatrona` версия ещё и
+      зашита в `postinstall`/`postinstall:dev` (`@electron/rebuild -v`) — там стояла 44.3.0, то есть
+      отставала уже от прошлого bump'а; выровнена на 44.4.3 (ловушка из
+      [electron-version-drift](/.claude/docs/electron-version-drift.md)).
+- [x] `typecheck:tsgo` по 90 проектам: зелёный, кроме `grandslamcup`, `mandala`,
+      `animatrona-tracker` — 8 ошибок TS2321 `MapType<Schema, ?>` (класс
+      [tsgo-excessive-stack-depth-zenstack](/.claude/docs/tsgo-excessive-stack-depth-zenstack.md)).
+      Причастность `kysely` 0.29.6 проверена откатом на 0.29.5: те же 8 ошибок в тех же местах,
+      ни `zod`, ни ZenStack, ни компилятор в этом прогоне не менялись. С коммитом до обновления
+      напрямую не сравнивали — ошибки считаем прежним техдолгом.
+- [x] `test`: 2561 из 2573 в domwellbes + остальные проекты. Упавшие: 12 тестов domwellbes
+      (гонки на общей БД при `--parallel=3`; последовательный перезапуск — 30/30 зелёные),
+      `poster-microtext-desktop` (не скачался бинарник electron 44.4.3 — сеть; после
+      `node node_modules/electron/install.js` 107/107).
+- [ ] Не связаны с обновлением, остались красными: `@letar/infra-config` (порт
+      `animatrona-tracker`: командный файл указывает 3010, приложение объявляет 3009),
+      `@letar/ipfs-kubo-core` («No test files found» → код 1 у таргета `test`),
+      `@letar/redis-client` (15/15 прошли, код 1 из-за unhandled `EnvironmentTeardownError`).
+- [ ] `nx build` не прогонялся — только typecheck и тесты.
+- [ ] Не тронуты (мажоры): `typescript` 7, `prisma` 8-rc, `@babel/*` 8, `nodemailer` 10,
+      `imapflow` 2, `fast-check` 4, `size-limit` 14, `@types/node` 26, `googleapis` 181,
+      `react-native-*` (safe-area-context, screens, blob-util). Пины из `intentional-pins.json` не
+      снимались, `oxlint` остаётся на 1.81.0 (доступна 1.85.0 — отдельным осознанным bump'ом).
+- [ ] `bun audit`: 12 находок (8 high, 3 moderate, 1 low), критичных нет; почти все транзитивные
+      (`browserslist`, `esbuild`, `mysql2`, `smol-toml`, `trim-newlines`, `deepmerge-ts`, `fflate`),
+      плюс прямая `adm-zip` в приватном приложении — вне объёма этого прогона.
+- ⚠️ `postinstall` у `@letar/animatrona` падает `EBUSY` на `ntsuspend/win32-x64_lib.node`, пока запущен
+  Animatrona (файл держит процесс) — `bun install` нужно делать при закрытом приложении.
