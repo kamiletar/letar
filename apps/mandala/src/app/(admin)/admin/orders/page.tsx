@@ -69,26 +69,25 @@ export default async function OrdersListPage({ searchParams }: OrdersPageProps) 
 
   const db = getEnhancedPrisma(session.user)
 
-  // Параллельно запрашиваем данные и count
-  const [orders, total] = await Promise.all([
-    db.order.findMany({
-      where,
-      orderBy: { createdAt: 'desc' },
-      include: {
-        items: {
-          include: {
-            product: {
-              // Оптимизация: загружаем только нужные поля (экономит память при большом description)
-              select: { name: true },
-            },
+  // Раздельные await вместо Promise.all: tsgo TS2321 «Excessive stack depth» на кортеже разных
+  // ZenStack-типов, см. .claude/docs/tsgo-excessive-stack-depth-zenstack.md (подпаттерн 2)
+  const orders = await db.order.findMany({
+    where,
+    orderBy: { createdAt: 'desc' },
+    include: {
+      items: {
+        include: {
+          product: {
+            // Оптимизация: загружаем только нужные поля (экономит память при большом description)
+            select: { name: true },
           },
         },
       },
-      skip: (currentPage - 1) * PAGE_SIZE,
-      take: PAGE_SIZE,
-    }),
-    db.order.count({ where }),
-  ])
+    },
+    skip: (currentPage - 1) * PAGE_SIZE,
+    take: PAGE_SIZE,
+  })
+  const total = await db.order.count({ where })
 
   const hasFilters = q || status
 

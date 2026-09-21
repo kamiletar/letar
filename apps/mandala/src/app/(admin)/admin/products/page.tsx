@@ -56,21 +56,20 @@ export default async function ProductsListPage({ searchParams }: ProductsPagePro
 
   const db = getEnhancedPrisma(session.user)
 
-  // Параллельно запрашиваем данные и count
-  const [products, total] = await Promise.all([
-    db.product.findMany({
-      where,
-      // Вторичный ключ сортировки обязателен: у всех новых записей order по
-      // умолчанию 0, без createdAt как тайбрейкера Postgres возвращает записи
-      // с одинаковым order в недетерминированном порядке — новый товар
-      // может не попасть на первую страницу списка
-      orderBy: [{ order: 'asc' }, { createdAt: 'desc' }],
-      include: { images: { orderBy: { order: 'asc' }, take: 1 } },
-      skip: (currentPage - 1) * PAGE_SIZE,
-      take: PAGE_SIZE,
-    }),
-    db.product.count({ where }),
-  ])
+  // Раздельные await вместо Promise.all: tsgo TS2321 «Excessive stack depth» на кортеже разных
+  // ZenStack-типов, см. .claude/docs/tsgo-excessive-stack-depth-zenstack.md (подпаттерн 2)
+  const products = await db.product.findMany({
+    where,
+    // Вторичный ключ сортировки обязателен: у всех новых записей order по
+    // умолчанию 0, без createdAt как тайбрейкера Postgres возвращает записи
+    // с одинаковым order в недетерминированном порядке — новый товар
+    // может не попасть на первую страницу списка
+    orderBy: [{ order: 'asc' }, { createdAt: 'desc' }],
+    include: { images: { orderBy: { order: 'asc' }, take: 1 } },
+    skip: (currentPage - 1) * PAGE_SIZE,
+    take: PAGE_SIZE,
+  })
+  const total = await db.product.count({ where })
 
   const hasFilters = q || published !== undefined || inStock !== undefined
 

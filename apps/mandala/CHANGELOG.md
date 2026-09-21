@@ -2,6 +2,22 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.40.32] - 2026-09-22
+
+### Fixed
+
+- `typecheck:tsgo` падал на `TS2321: Excessive stack depth` в `admin/orders/page.tsx` и
+  `admin/products/page.tsx` (кортеж разных ZenStack-типов в `Promise.all`) и останавливал деплой на
+  гейте (пилот 3 §157). Запрос списка и `count` теперь идут раздельными `await`
+  (`.claude/docs/tsgo-excessive-stack-depth-zenstack.md`, подпаттерн 2).
+
+### Changed
+
+- `generateStaticParams` в `mandalas/[slug]` и `shop/[slug]` печатает ошибку в `catch`
+  (`console.error`). Раньше пустой список при недоступной БД был неотличим от «нет опубликованных
+  записей»: сборка на s1 читает БД по SSH-туннелю, и в пилоте 3 §157 все три вернули `[]` без
+  единой строки в логе.
+
 ## [0.40.31] - 2026-09-14
 
 ### Changed
