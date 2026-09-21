@@ -151,6 +151,9 @@ export function renderGrepRow(row: GrepRow, width: number): string {
 
 // ─── таблица маршрутов Next.js ───────────────────────────────────────────────
 
+// ⚠️ ROUTE_HEADER_RE, LEGEND_RE и BLANK_RE продублированы в apps/dashboard-agent/src/lib/deploy-route-table.ts
+// (агент собран изолированно и не может импортировать отсюда) и должны совпадать дословно: синхронность стережёт
+// scripts/check-route-table-regex-sync.mjs (`bun scripts/check-all.mjs`), правь обе копии в одном коммите.
 const ROUTE_HEADER_RE = /Route \((?:app|pages)\)/
 const LEGEND_RE = /\((?:Static|SSG|ISR|Dynamic|Partial Prerender)\)/
 // `#14 45.123 ` — префикс `docker build --progress=plain`; пустая строка бывает и с ним.

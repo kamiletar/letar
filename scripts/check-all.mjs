@@ -272,6 +272,21 @@ const CHECKS = [
     doc: '.claude/docs/mcp-servers.md#typecheck',
   },
   {
+    id: 'route-table-regex-sync',
+    group: 'deploy',
+    title: 'регулярки таблицы маршрутов Next.js в dashboard-agent и deploy-mcp — одинаковые копии',
+    run: ['node', ['scripts/check-route-table-regex-sync.mjs']],
+    // gate: две копии дублированы намеренно (агент собран изолированно от монорепо и не может
+    // импортировать из libs/), а расхождение ни typecheck, ни lint, ни тесты каждой стороны не
+    // ловят — у каждой свои фикстуры. Смена формата вывода Next.js, поправленная в одной копии,
+    // молча разводит агента и deploy-mcp: агент сохранит один блок, а deploy-mcp будет искать
+    // другой. Долга нет (на регистрации 2026-09-22 копии совпадают дословно), обе стороны публичные —
+    // в CI видны целиком, ложной красной, которая приучила бы игнорировать проверку, нет.
+    severity: 'gate',
+    ci: 'full',
+    doc: 'PLAN-INFRA-6.md §157',
+  },
+  {
     id: 'submodule-gitignore',
     group: 'submodule',
     title: 'шаблоны .gitignore во всех submodule',
