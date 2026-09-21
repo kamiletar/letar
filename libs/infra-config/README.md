@@ -121,6 +121,8 @@ export function getAppHost(app: string): string // fallback — 'localhost' (dev
 `APP_PORTS` хранит порт **production-контейнера**, а не dev-порт: `animatrona-tracker` (dev 3009,
 контейнер 3010) и `auth-hub` (dev 3014, контейнер 3010) расходятся. Dev-порт — в
 `apps/<app>/.env`, его сверяет `app-ports.guard.spec.ts` (раздел «Дрейф dev-портов» ниже).
+Сами значения `APP_PORTS` ведутся вручную — с реальным контейнером их сверяет
+`app-ports-production.guard.spec.ts` (раздел «Дрейф production-портов» ниже).
 
 `APP_HOSTS` — как ДРУГИЕ контейнеры сети видят приложение (`localhost` внутри контейнера —
 это сам контейнер, а не сосед по bridge-сети). Намеренно нет записи для самоссылки — какой
@@ -170,6 +172,18 @@ export function formatPortDrift(drift: PortDrift[]): string
 Nx-плагин, импорт `@letar/*` из него падает в рантайме (`node_modules/@letar/` в воркспейсе не
 существует). При правке регулярок меняй оба файла — расхождение регулярок ловит
 `port-parser.guard.spec.ts`.
+
+### Дрейф production-портов (`app-ports-production.ts`)
+
+Значение `APP_PORTS[app]` — порт production-контейнера, но ведётся вручную, а сам порт объявлен
+ещё в `apps/<app>/docker-compose.production.yml` (traefik-метка
+`traefik.http.services.<app>.loadbalancer.server.port` и `PORT` в `environment:`) и в
+`apps/<app>/Dockerfile.production` (`ENV PORT=`). Guard `app-ports-production.guard.spec.ts`
+(`nx test infra-config`) читает эти файлы для каждой записи `APP_PORTS` и падает при расхождении
+или если у приложения нет ни метки, ни `PORT` (`unverifiable`). Разбор — регулярками; `SOCKET_PORT`
+и `SMTP_PORT` не матчатся (ключ ровно `PORT`). Приложения без compose-файла в чекауте (приватные
+submodule в CI) пропускаются, но тест требует минимум 6 сверенных — иначе «зелёный» прогон мог бы
+ничего не проверять. Числа в `APP_PORTS` тест не правит — только сообщает, какой файл разошёлся.
 
 ### Дрейф production-сервера (`app-server.ts`)
 
