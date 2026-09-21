@@ -81,6 +81,8 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
    *   deployId  — конкретный деплой из истории (без него — текущий/последний)
    *   sinceLine — курсор: вернуть только строки лога начиная с этого номера
    *               (номер сквозной с учётом truncatedLines)
+   * Ответ несёт `routeTables` — таблицы маршрутов Next.js, вынутые из лога отдельно и потому
+   * доступные, даже когда их строки уже вытеснены из `output` (PLAN-INFRA-6.md §157).
    */
   fastify.get<{ Querystring: { deployId?: string; sinceLine?: string } }>(
     '/api/deploy/status',
@@ -139,7 +141,7 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
       request,
     ): Promise<
       ApiResponse<
-        Omit<DeployStatus, 'output'> & {
+        Omit<DeployStatus, 'output' | 'routeTables'> & {
           output: string[]
           totalLines: number
           stalled: boolean
@@ -192,9 +194,11 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
       const output = deploy.output.slice(-WAIT_LOG_TAIL_LINES)
       const { stalled, stalledSince } = computeStalled(deploy)
 
+      // routeTables — только в /status: /wait дёргается поллингом, таблица там не нужна
+      const { routeTables: _routeTables, ...deployForWait } = deploy
       return {
         success: true,
-        data: { ...deploy, output, totalLines, stalled, stalledSince },
+        data: { ...deployForWait, output, totalLines, stalled, stalledSince },
         timestamp: new Date().toISOString(),
       }
     },
@@ -205,10 +209,12 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
    */
   fastify.get(
     '/api/deploy/history',
-    async (): Promise<ApiResponse<Array<Omit<DeployStatus, 'output' | 'truncatedLines'>>>> => {
+    async (): Promise<ApiResponse<Array<Omit<DeployStatus, 'output' | 'truncatedLines' | 'routeTables'>>>> => {
       return {
         success: true,
-        data: deployHistory.map(({ output: _output, truncatedLines: _t, ...rest }) => rest).reverse(),
+        data: deployHistory
+          .map(({ output: _output, truncatedLines: _t, routeTables: _r, ...rest }) => rest)
+          .reverse(),
         timestamp: new Date().toISOString(),
       }
     },

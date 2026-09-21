@@ -82,6 +82,15 @@ nx start dashboard-agent
 
 Состояние PostgreSQL баз данных.
 
+### GET /api/deploy/status
+
+Статус деплоя (`?deployId=` — из истории, без него — текущий/последний; `?sinceLine=` — курсор по
+логу). Лог деплоя ограничен `MAX_OUTPUT_LINES` (2000) — начало вытесняется, `truncatedLines` —
+сколько строк уже потеряно, `totalLines`/`fromLine` — сквозная нумерация. Поле **`routeTables`** —
+таблицы маршрутов Next.js («Route (app)» … легенда), вынутые из лога по мере поступления, поэтому
+они доступны и после вытеснения строк из `output` (PLAN-INFRA-6.md §157). Из `/api/deploy/wait` и
+`/api/deploy/history` поле не отдаётся.
+
 ## Структура
 
 ```

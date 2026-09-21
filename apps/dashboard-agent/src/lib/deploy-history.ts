@@ -7,6 +7,7 @@ import { randomUUID } from 'crypto'
 import { EventEmitter } from 'events'
 import { flushPersist, persistDeploy, persistIndex, rehydrateFromRedis, schedulePersist } from './deploy-history-redis'
 import { applyPhaseLine, type DeployPhase } from './deploy-phases'
+import { captureRouteTableLine, type RouteTableCapture } from './deploy-route-table'
 
 // Ограничения хранения: сколько деплоев помним и сколько строк лога на деплой
 export const MAX_DEPLOY_HISTORY = 20
@@ -35,6 +36,11 @@ export interface DeployStatus {
    * deploy-affected.sh и из уже существующих `[step-id]` строк libs/deploy-engine (rollout.ts)
    * при zero-downtime rollout. Не заменяет прозу в `output`, а дополняет её (PLAN-INFRA.md §38). */
   phases: DeployPhase[]
+  /** Таблицы маршрутов Next.js, вынутые из потока лога по мере поступления (PLAN-INFRA-6.md §157).
+   * Живут отдельно от `output`: таблица печатается в начале фазы `build`, а при s1-сборке (~2000+
+   * строк лога) первой вытесняется из капнутого `output`. Занимают килобайты, поэтому общий
+   * MAX_OUTPUT_LINES не поднят — см. lib/deploy-route-table.ts. */
+  routeTables: RouteTableCapture[]
   /** ISO-время последней строки лога — основа watchdog'а залипания (computeStalled) */
   lastOutputAt?: string
 }
@@ -52,13 +58,14 @@ export async function rehydrateHistory(): Promise<void> {
 
 /** Создаёт новую запись деплоя и кладёт в историю */
 export function createDeploy(
-  partial: Omit<DeployStatus, 'deployId' | 'output' | 'truncatedLines' | 'phases'>,
+  partial: Omit<DeployStatus, 'deployId' | 'output' | 'truncatedLines' | 'phases' | 'routeTables'>,
 ): DeployStatus {
   const deploy: DeployStatus = {
     deployId: randomUUID(),
     output: [],
     truncatedLines: 0,
     phases: [],
+    routeTables: [],
     lastOutputAt: new Date().toISOString(),
     ...partial,
   }
@@ -116,6 +123,8 @@ export function appendOutput(deploy: DeployStatus, line: string): void {
   }
   deploy.lastOutputAt = new Date().toISOString()
   applyPhaseLine(deploy.phases, line)
+  // Сквозной номер только что добавленной строки: вытесненные + индекс последней в output
+  captureRouteTableLine(deploy.routeTables, line, deploy.truncatedLines + deploy.output.length - 1)
   schedulePersist(deploy)
   emitDeployEvent(deploy.deployId)
 }

@@ -111,6 +111,8 @@ export async function rehydrateFromRedis(deployHistory: DeployStatus[]): Promise
         const deploy = JSON.parse(raw) as DeployStatus
         // Записи, персистированные до §38 (нет phases в Redis) — бэкфилл пустым массивом.
         deploy.phases = deploy.phases ?? []
+        // То же для записей до §157 (нет routeTables) — пустой массив, а не undefined.
+        deploy.routeTables = deploy.routeTables ?? []
         if (deploy.running) {
           deploy.running = false
           deploy.interrupted = true

@@ -11,6 +11,28 @@
 - Отправка метрик в Dashboard
 - WebSocket для real-time
 
+## [0.18.1] — 2026-09-22
+
+### Added
+
+- **Таблица маршрутов Next.js хранится отдельно от лога деплоя** (`PLAN-INFRA-6.md` §157). Лог
+  капится `MAX_OUTPUT_LINES = 2000`, старые строки вытесняются; деплой с s1-сборкой даёт ~2200
+  строк (kami), а «Route (app)» печатается шагом `nx build` в начале фазы `build` — то есть в
+  вытесняемой части. Теперь `appendOutput` вынимает блок «Route (app)» … легенда «(Static)/
+  (SSG)/(Dynamic)» из потока по мере поступления в `DeployStatus.routeTables` (до 4 блоков по
+  ≤ 600 строк; сквозные `fromLine`/`toLine`, флаг `complete`). `GET /api/deploy/status` отдаёт
+  поле; `deploy_status({ routeTable: true })` в deploy-mcp берёт таблицу оттуда, даже когда её
+  строки уже вытеснены из `output`. Общий лимит лога намеренно **не поднят**: каждая персистация
+  в Redis (debounce 1 с) пишет весь деплой одним JSON, лимит ×3 утроил бы этот трафик и память
+  20 записей истории, а таблица занимает килобайты.
+- Модуль `lib/deploy-route-table.ts` (чистая функция `captureRouteTableLine`) + тесты; тест
+  `deploy-history.spec.ts` — таблица переживает вытеснение через настоящий `appendOutput`.
+
+### Changed
+
+- `GET /api/deploy/wait` и `GET /api/deploy/history` поле `routeTables` не отдают (поллинг и
+  краткая история остаются лёгкими); записи, восстановленные из Redis без поля, получают `[]`.
+
 ## [0.18.0] — 2026-09-21
 
 ### Added
