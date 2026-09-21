@@ -375,4 +375,74 @@ describe('deploy_status — routeTable', () => {
     expect(out).toContain(`${big.tunnelAt}: [db-tunnel]`)
     expect(out.length).toBeLessThan(LOG_BUDGET_CHARS)
   })
+
+  // ── таблица, сохранённая самим агентом (dashboard-agent ≥ 0.18.1, PLAN-INFRA-6.md §157) ──
+
+  /** Блок так, как его отдаёт агент: без пустых строк, со сквозными номерами. */
+  const agentBlock = (fromLine: number, over: Record<string, unknown> = {}) => ({
+    fromLine,
+    toLine: fromLine + ROUTE_TABLE.length - 1,
+    complete: true,
+    lines: ROUTE_TABLE.filter((l) => l !== ''),
+    ...over,
+  })
+
+  it('таблица вытеснена из output, но сохранена агентом — берётся оттуда', async () => {
+    // Начало лога (170 строк, среди них таблица) агент уже выбросил: в output её нет вовсе.
+    const output = Array.from({ length: 300 }, (_, i) => `шум ${i}`)
+    mockAgent(
+      snapshot(output, {
+        truncatedLines: 170,
+        fromLine: 170,
+        totalLines: 470,
+        routeTables: [agentBlock(60)],
+      }),
+    )
+    const { out, result } = await callStatus({ routeTable: true })
+    expect(result.isError).toBe(false)
+    expect(out).toContain('Таблица маршрутов Next.js — строки 60–')
+    expect(out).toContain('сохранена агентом отдельно')
+    expect(out).toContain('Маршрутов по значкам: ○ static ×2, ● SSG ×2, ƒ dynamic ×3')
+    expect(out).toContain('● /[locale]/blog/[slug] — путей перечислено: 3, «ещё»: 5 (всего 8)')
+    expect(out).not.toContain('Не найдена')
+  })
+
+  it('блок агента в ответ без routeTable не просачивается: ни в обычный вид, ни в обрезанный', async () => {
+    mockAgent(snapshot(['короткий лог'], { routeTables: [agentBlock(3)] }))
+    const short = await callStatus({ sinceLine: 0 })
+    expect(short.out).not.toContain('Route (app)')
+    expect(short.out).not.toContain('routeTables')
+
+    mockAgent(snapshot(buildBigLog().output, { routeTables: [agentBlock(900)] }))
+    const big = await callStatus({ sinceLine: 0 })
+    expect(big.out).toContain('Лог обрезан до лимита ответа')
+    expect(big.out).not.toContain('routeTables')
+  })
+
+  it('агент новый, блока не встретил — сказано про это, а не про «старый агент»', async () => {
+    mockAgent(snapshot(['шум'], { routeTables: [] }))
+    const { out } = await callStatus({ routeTable: true })
+    expect(out).toContain('Не найдена среди 1 просмотренных строк')
+    expect(out).toContain('Агент сохраняет таблицу отдельно')
+    expect(out).not.toContain('версия < 0.18.1')
+  })
+
+  it('старый агент без поля routeTables — сказано про версию, разбор идёт по строкам лога', async () => {
+    mockAgent(snapshot(['шум']))
+    const { out } = await callStatus({ routeTable: true })
+    expect(out).toContain('версия < 0.18.1')
+  })
+
+  it('поле routeTables неверной формы игнорируется: ищем в логе, ответ не падает', async () => {
+    mockAgent(snapshot(ROUTE_TABLE, { routeTables: [{ fromLine: 'x' }, null, 42] }))
+    const { out, result } = await callStatus({ routeTable: true })
+    expect(result.isError).toBe(false)
+    expect(out).toContain('● /[locale]/blog/[slug] — путей перечислено: 3, «ещё»: 5 (всего 8)')
+  })
+
+  it('оборванный блок агента (нет легенды) помечен как возможно неполный', async () => {
+    mockAgent(snapshot(['шум'], { routeTables: [agentBlock(10, { complete: false, lines: ROUTE_TABLE.slice(0, 6) })] }))
+    const { out } = await callStatus({ routeTable: true })
+    expect(out).toContain('Легенда «(Static)/(SSG)/(Dynamic)» не найдена')
+  })
 })

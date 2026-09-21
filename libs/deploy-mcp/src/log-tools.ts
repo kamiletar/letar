@@ -203,6 +203,30 @@ export function findRouteTables(lines: readonly LogLine[]): RouteTableBlock[] {
   return blocks
 }
 
+/**
+ * Таблицы маршрутов, сохранённые самим dashboard-agent (поле `routeTables` снапшота, агент ≥ 0.18.1):
+ * он вынимает блок из потока лога отдельно, поэтому таблица доступна, даже когда её строки уже
+ * вытеснены из капнутого `output`. `null` — поля нет (старый агент), `[]` — агент новый, но блока
+ * в этом деплое не было. Формат элемента проверяется по форме: дрейф версий не должен ронять ответ.
+ */
+export function parseAgentRouteTables(value: unknown): RouteTableBlock[] | null {
+  if (!Array.isArray(value)) {
+    return null
+  }
+  const blocks: RouteTableBlock[] = []
+  for (const item of value) {
+    const b = item as Partial<RouteTableBlock> | null
+    if (
+      b === null || typeof b !== 'object' || typeof b.fromLine !== 'number' || typeof b.toLine !== 'number'
+      || typeof b.complete !== 'boolean' || !isStringArray(b.lines)
+    ) {
+      continue
+    }
+    blocks.push({ fromLine: b.fromLine, toLine: b.toLine, complete: b.complete, lines: b.lines.map(cleanLine) })
+  }
+  return blocks
+}
+
 export interface RouteEntry {
   route: string
   symbol: string
@@ -318,7 +342,11 @@ export function renderDeployStatusBody(data: unknown, opts: StatusLogOptions): s
   if (!isStringArray(snapshot.output)) {
     return pretty(data)
   }
-  const { output, ...rest } = snapshot as { output: string[] } & Record<string, unknown>
+  // routeTables из JSON-вида убираем: таблица показывается отдельным разделом по `routeTable: true`
+  const { output, routeTables, ...rest } = snapshot as
+    & { output: string[]; routeTables?: unknown }
+    & Record<string, unknown>
+  const agentTables = parseAgentRouteTables(routeTables)
   const truncatedByAgent = typeof rest.truncatedLines === 'number' ? rest.truncatedLines : 0
   const fromLine = typeof rest.fromLine === 'number' ? rest.fromLine : truncatedByAgent
   const totalLines = typeof rest.totalLines === 'number' ? rest.totalLines : fromLine + output.length
@@ -336,7 +364,7 @@ export function renderDeployStatusBody(data: unknown, opts: StatusLogOptions): s
       ? `Первые ${truncatedByAgent} строк лога вытеснены на агенте (лимит 2000) и недоступны.`
       : null
     const sections = [
-      ...(wantRoutes ? renderRouteSection(lines, budget, evicted) : []),
+      ...(wantRoutes ? renderRouteSection(lines, budget, evicted, agentTables) : []),
       ...(wantGrep ? renderGrepSection(lines, opts, budget, evicted) : []),
     ]
     const view = {
@@ -349,7 +377,13 @@ export function renderDeployStatusBody(data: unknown, opts: StatusLogOptions): s
   // ── без фильтров ──
   const size = output.reduce((sum, s) => sum + jsonLineCost(s), 0)
   if (size <= LOG_BUDGET_CHARS) {
-    return pretty(data)
+    // Порядок ключей и остальное — как пришло от агента; только routeTables (их место — раздел
+    // routeTable: true) в этот вид не тащим, иначе они дублировали бы таблицу в каждом ответе.
+    return pretty(
+      routeTables === undefined
+        ? data
+        : Object.fromEntries(Object.entries(snapshot).filter(([key]) => key !== 'routeTables')),
+    )
   }
   const keep = opts.sinceLine !== undefined ? 'head' : 'tail'
   const { kept, omitted } = fitToBudget(lines, (l) => jsonLineCost(clipLine(l.text)), LOG_BUDGET_CHARS, keep)
@@ -372,12 +406,23 @@ export function renderDeployStatusBody(data: unknown, opts: StatusLogOptions): s
   return [...notice, '', pretty(view)].join('\n')
 }
 
-function renderRouteSection(lines: readonly LogLine[], budget: number, evicted: string | null): string[] {
-  const blocks = findRouteTables(lines)
+function renderRouteSection(
+  lines: readonly LogLine[],
+  budget: number,
+  evicted: string | null,
+  agentTables: RouteTableBlock[] | null,
+): string[] {
+  // Блоки, сохранённые агентом, полнее и переживают вытеснение лога — они в приоритете;
+  // разбор `output` остаётся запасным путём для старого агента без поля `routeTables`.
+  const blocks = agentTables !== null && agentTables.length > 0 ? agentTables : findRouteTables(lines)
+  const scannedFrom = lines[0]?.n ?? 0
   if (blocks.length === 0) {
     return [
       '### Таблица маршрутов Next.js',
       `Не найдена среди ${lines.length} просмотренных строк (ищу «Route (app)» … легенду «(Static)/(SSG)/(Dynamic)»).`,
+      agentTables === null
+        ? 'Агент не сохраняет таблицу отдельно (версия < 0.18.1) — ищется только в строках лога, которые он ещё держит.'
+        : 'Агент сохраняет таблицу отдельно, но блока «Route (app)» в этом деплое не встретил (сборка не Next.js, ещё не дошла до него или запись деплоя старше 0.18.1).',
       ...(evicted ? [evicted] : []),
       '',
     ]
@@ -387,7 +432,8 @@ function renderRouteSection(lines: readonly LogLine[], budget: number, evicted: 
     const title = blocks.length > 1
       ? `Таблица маршрутов Next.js (${idx + 1} из ${blocks.length})`
       : 'Таблица маршрутов Next.js'
-    out.push(`### ${title} — строки ${block.fromLine}–${block.toLine}`)
+    const fromAgent = block.fromLine < scannedFrom ? ' (сохранена агентом отдельно — в логе уже вытеснена)' : ''
+    out.push(`### ${title} — строки ${block.fromLine}–${block.toLine}${fromAgent}`)
     if (!block.complete) {
       out.push(
         '⚠️ Легенда «(Static)/(SSG)/(Dynamic)» не найдена — блок может быть неполным (лог оборван или вытеснен).',
