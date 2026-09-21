@@ -280,17 +280,17 @@ docker compose pull && docker compose up -d
 
 ### Tools
 
-| Инструмент            | Описание                                                                                                                  |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `deploy_list_servers` | Серверы + маппинг «приложение → сервер» (из `@letar/infra-config`)                                                        |
-| `deploy_agent_health` | Health-check (`GET /health`) — «сервер недоступен» vs «токен неверный»                                                    |
-| `deploy_git_status`   | Ветка, незапушенные/входящие коммиты — проверять перед деплоем                                                            |
-| `deploy_status`       | Статус деплоя + инкрементальные логи по курсору `sinceLine`; включает `phases[]`/`stalled`                                |
-| `deploy_wait`         | Long-poll вместо ручного поллинга — отпускает раньше `waitSeconds` (≤120с) при смене фазы/терминале (PLAN-INFRA.md §38)   |
-| `deploy_cancel`       | Отмена текущего деплоя (SIGTERM)                                                                                          |
-| `deploy_app`          | Запуск деплоя (`target`: `production`\|`staging`; staging → s1) + e2e-gate                                                |
-| `run_e2e`             | Playwright e2e на s1 против staging-контейнера (Фаза 2); строгая схема: только `app`/`baseUrl`/`project`/`grep`/`workers` |
-| `e2e_status`          | Статус e2e-прогона + персистентный `lastStatus` (что читает gate)                                                         |
+| Инструмент            | Описание                                                                                                                                                                                                                                             |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `deploy_list_servers` | Серверы + маппинг «приложение → сервер» (из `@letar/infra-config`)                                                                                                                                                                                   |
+| `deploy_agent_health` | Health-check (`GET /health`) — «сервер недоступен» vs «токен неверный»                                                                                                                                                                               |
+| `deploy_git_status`   | Ветка, незапушенные/входящие коммиты — проверять перед деплоем                                                                                                                                                                                       |
+| `deploy_status`       | Статус деплоя + логи по курсору `sinceLine`; `phases[]`/`stalled`; `grep`/`regex`/`context`/`routeTable` — поиск по логу и таблица маршрутов Next.js, ответ ≤ ~30 тыс. символов ([README](/libs/deploy-mcp/README.md#поиск-по-большому-логу-деплоя)) |
+| `deploy_wait`         | Long-poll вместо ручного поллинга — отпускает раньше `waitSeconds` (≤120с) при смене фазы/терминале (PLAN-INFRA.md §38)                                                                                                                              |
+| `deploy_cancel`       | Отмена текущего деплоя (SIGTERM)                                                                                                                                                                                                                     |
+| `deploy_app`          | Запуск деплоя (`target`: `production`\|`staging`; staging → s1) + e2e-gate                                                                                                                                                                           |
+| `run_e2e`             | Playwright e2e на s1 против staging-контейнера (Фаза 2); строгая схема: только `app`/`baseUrl`/`project`/`grep`/`workers`                                                                                                                            |
+| `e2e_status`          | Статус e2e-прогона + персистентный `lastStatus` (что читает gate)                                                                                                                                                                                    |
 
 ### `BUILD_ON_S1_APPS` перечитывается при каждом деплое {#build-on-s1-fresh}
 
