@@ -1155,7 +1155,7 @@
     },
     "libs/deploy-mcp": {
       "name": "@letar/deploy-mcp",
-      "version": "0.5.0",
+      "version": "0.6.0",
       "dependencies": {
         "@letar/infra-config": "workspace:*",
         "@letar/mcp-server-kit": "workspace:*",
@@ -1459,7 +1459,7 @@
     },
     "libs/glitchtip-mcp": {
       "name": "@letar/glitchtip-mcp",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "dependencies": {
         "@letar/mcp-server-kit": "workspace:*",
         "@modelcontextprotocol/server": "2.0.0",
@@ -1616,7 +1616,7 @@
     },
     "libs/studio-mcp": {
       "name": "@letar/studio-mcp",
-      "version": "0.1.2",
+      "version": "0.2.0",
       "dependencies": {
         "@letar/mcp-server-kit": "workspace:*",
         "@modelcontextprotocol/server": "2.0.0",
@@ -1629,7 +1629,7 @@
     },
     "libs/studio-time-mcp": {
       "name": "@letar/studio-time-mcp",
-      "version": "0.4.0",
+      "version": "0.5.0",
       "dependencies": {
         "@letar/mcp-server-kit": "workspace:*",
         "@modelcontextprotocol/server": "2.0.0",
@@ -1672,7 +1672,7 @@
     },
     "libs/umami-mcp": {
       "name": "@letar/umami-mcp",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "dependencies": {
         "@letar/mcp-server-kit": "workspace:*",
         "@modelcontextprotocol/server": "2.0.0",
