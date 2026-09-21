@@ -2,10 +2,19 @@
 
 import { omitAtPaths } from '@letar/forms-core/security'
 import { useSensitiveFieldPaths } from '@letar/forms-react'
-import { useCallback } from 'react'
+import { useCallback, useRef } from 'react'
 import { type FormOfflineConfig, useOfflineForm } from '../../offline'
 import { type FormPersistenceConfig, useFormPersistence } from '../form-persistence'
 import type { FormOfflineState } from '../types'
+
+/** Снимок значений для сравнения «правили или нет»; null — значения не сериализуются */
+function safeJsonSnapshot(values: unknown): string | null {
+  try {
+    return JSON.stringify(values)
+  } catch {
+    return null
+  }
+}
 
 /**
  * Конфигурация для хука useFormFeatures
@@ -66,6 +75,10 @@ export function useFormFeatures<TData extends object>({
   const isPersistenceEnabled = !!persistence
   const isOfflineEnabled = !!offline
   const sensitivePaths = useSensitiveFieldPaths()
+  // Снимок значений на момент первой подписки = исходное состояние формы. Живёт в ref, а не в
+  // замыкании подписки: эффект подписки перезапускается при смене `features`, и снимок,
+  // взятый заново, оказался бы уже правленными значениями
+  const baselineSnapshotRef = useRef<string | null>(null)
 
   // Hook persistence (if не вkeyён — используем disabled key)
   const persistenceResult = useFormPersistence<TData>(persistence ?? { key: '__disabled__' })
@@ -140,9 +153,27 @@ export function useFormFeatures<TData extends object>({
         return () => {}
       }
 
+      // Снимок берём в момент подписки, а не при первом уведомлении: первым уведомлением
+      // может оказаться уже сама правка пользователя
+      if (baselineSnapshotRef.current === null) {
+        const initial = form.state.values as TData
+        baselineSnapshotRef.current = safeJsonSnapshot(
+          sensitivePaths.length > 0 ? omitAtPaths(initial, sensitivePaths) : initial,
+        )
+      }
+
       const subscription = form.store.subscribe(() => {
         const values = form.state.values as TData
         const safeValues = sensitivePaths.length > 0 ? omitAtPaths(values, sensitivePaths) : values
+
+        // Стор формы шумит и без правок пользователя (монтирование, валидация, фокус/blur).
+        // Значения при этом равны исходным — писать такой «черновик» нельзя: при следующем
+        // открытии формы он вылезает диалогом «Восстановить сохранённые данные?» на пустом месте
+        const snapshot = safeJsonSnapshot(safeValues)
+        if (snapshot !== null && snapshot === baselineSnapshotRef.current) {
+          return
+        }
+
         persistenceResult.saveValues(safeValues)
       })
 
