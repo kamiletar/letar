@@ -293,7 +293,8 @@ export function createDeployMcpServer(options: DeployMcpOptions = {}): McpServer
       '- routeTable: true — таблица маршрутов Next.js («Route (app)» … легенда «(Static)/(SSG)/(Dynamic)»):',
       '  сводка по значкам ○/●/ƒ, число путей у параметрических маршрутов (/[locale]/…/[slug]) и сам блок.',
       'grep и routeTable можно вместе; при них массив output в ответе заменяется найденным.',
-      '⚠️ dashboard-agent хранит не больше 2000 последних строк — более ранние вытеснены и не ищутся.',
+      '⚠️ dashboard-agent хранит не больше 2000 последних строк — более ранние вытеснены и не ищутся grep.',
+      'Таблицу маршрутов агент ≥ 0.18.1 хранит отдельно — routeTable находит её и после вытеснения.',
     ].join('\n'),
     inputSchema: z.strictObject({
       server: serverEnum.optional().describe('Сервер: s2 (прод, по умолчанию) или s1 (staging)'),
