@@ -9,18 +9,18 @@ MCP-сервер: структурированный слой над REST API da
 
 ## Инструменты
 
-| Инструмент                                         | Действие                                                                                                                                | Эндпоинт агента           |
-| -------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
-| `list_servers()`                                   | Серверы + маппинг «приложение → сервер» (статика из `@letar/infra-config`)                                                              | —                         |
-| `agent_health({ server })`                         | Health-check (отличает «сервер недоступен» от «токен неверный»)                                                                         | `GET /health`             |
-| `git_status({ server })`                           | Ветка, незапушенные/входящие коммиты — проверять перед деплоем                                                                          | `GET /api/git/status`     |
-| `deploy_status({ server, deployId?, sinceLine? })` | Статус деплоя + инкрементальные логи по курсору `sinceLine`; включает `phases[]`/`stalled`                                              | `GET /api/deploy/status`  |
-| `deploy_wait({ server, deployId?, waitSeconds? })` | Long-poll вместо ручного опроса по таймеру — отпускает раньше `waitSeconds` (≤120с) при терминальном статусе/смене фазы/смене `stalled` | `GET /api/deploy/wait`    |
-| `deploy_cancel({ server })`                        | Отмена текущего деплоя (SIGTERM)                                                                                                        | `POST /api/deploy/cancel` |
-| `deploy_app({ app, target, seed? })`               | Запуск деплоя (`target`: `production`\|`staging`, `seed`: `--seed`) + e2e-gate (warn-only, hard для `HARD_GATED_APPS`)                  | `POST /api/deploy/app`    |
-| `deploy_infra({ service, server })`                | Деплой `infra/<service>` (Traefik, acme-dns, ...) — расшифровка `secrets/deploy.conf` + `docker compose up -d`, без e2e-gate (§18.8.1)  | `POST /api/deploy/infra`  |
-| `run_e2e({ app, baseUrl, project?, grep? })`       | Запуск Playwright e2e на s1 против `baseUrl`; `grep` — точечный прогон вместо всего набора                                              | `POST /api/e2e/run`       |
-| `e2e_status({ app?, runId?, sinceLine? })`         | Статус e2e-прогона + персистентный `lastStatus` (что читает gate)                                                                       | `GET /api/e2e/status`     |
+| Инструмент                                             | Действие                                                                                                                                | Эндпоинт агента           |
+| ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
+| `list_servers()`                                       | Серверы + маппинг «приложение → сервер» (статика из `@letar/infra-config`)                                                              | —                         |
+| `agent_health({ server })`                             | Health-check (отличает «сервер недоступен» от «токен неверный»)                                                                         | `GET /health`             |
+| `git_status({ server })`                               | Ветка, незапушенные/входящие коммиты — проверять перед деплоем                                                                          | `GET /api/git/status`     |
+| `deploy_status({ server, deployId?, sinceLine? })`     | Статус деплоя + инкрементальные логи по курсору `sinceLine`; включает `phases[]`/`stalled`                                              | `GET /api/deploy/status`  |
+| `deploy_wait({ server, deployId?, waitSeconds? })`     | Long-poll вместо ручного опроса по таймеру — отпускает раньше `waitSeconds` (≤120с) при терминальном статусе/смене фазы/смене `stalled` | `GET /api/deploy/wait`    |
+| `deploy_cancel({ server })`                            | Отмена текущего деплоя (SIGTERM)                                                                                                        | `POST /api/deploy/cancel` |
+| `deploy_app({ app, target, seed? })`                   | Запуск деплоя (`target`: `production`\|`staging`, `seed`: `--seed`) + e2e-gate (warn-only, hard для `HARD_GATED_APPS`)                  | `POST /api/deploy/app`    |
+| `deploy_infra({ service, server })`                    | Деплой `infra/<service>` (Traefik, acme-dns, ...) — расшифровка `secrets/deploy.conf` + `docker compose up -d`, без e2e-gate (§18.8.1)  | `POST /api/deploy/infra`  |
+| `run_e2e({ app, baseUrl, project?, grep?, workers? })` | Запуск Playwright e2e на s1 против `baseUrl`; `grep` — точечный прогон. Схема строгая: неизвестные аргументы (`extraArgs`) отвергаются  | `POST /api/e2e/run`       |
+| `e2e_status({ app?, runId?, sinceLine? })`             | Статус e2e-прогона + персистентный `lastStatus` (что читает gate)                                                                       | `GET /api/e2e/status`     |
 
 `server` — `s2` (прод, по умолчанию) или `s1` (staging). Значение `s3` отвергается: настоящий s3 —
 хранилище без dashboard-agent, deploy-инструменты на него не ходят. В `deploy_app` сервер резолвится
@@ -35,6 +35,11 @@ MCP-сервер: структурированный слой над REST API da
 `.last-e2e-status/<app>.json` на s1 (через `agent_health`-туннель) и собирает причины, если:
 данных нет; последний прогон упал; прогонялся на другом коммите, чем деплоится; старше 24ч;
 или сам запрос статуса не удался (сеть/туннель).
+
+Сравнивается коммит e2e-прогона (s1) с `origin/main` чекаута deploy-mcp после `git fetch` —
+локальный `HEAD` и непушнутые коммиты не участвуют. Отказ/предупреждение печатает блок «Что
+сравнивалось»: оба полных SHA, источник каждого, число и первые пути изменённых файлов и команду
+`git diff --stat`.
 
 Два режима одновременно (`evaluateE2eGate()` в `server.ts`):
 

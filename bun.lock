@@ -1155,12 +1155,16 @@
     },
     "libs/deploy-mcp": {
       "name": "@letar/deploy-mcp",
-      "version": "0.4.1",
+      "version": "0.5.0",
       "dependencies": {
         "@letar/infra-config": "workspace:*",
         "@letar/mcp-server-kit": "workspace:*",
         "@modelcontextprotocol/server": "2.0.0",
         "zod": "4.6.5",
+      },
+      "devDependencies": {
+        "@letar/mcp-test-kit": "workspace:*",
+        "@modelcontextprotocol/client": "2.0.0",
       },
     },
     "libs/driving-school-db": {

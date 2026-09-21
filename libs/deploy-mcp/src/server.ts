@@ -23,7 +23,7 @@ import { errorText, pretty, text } from '@letar/mcp-server-kit'
 import { McpServer } from '@modelcontextprotocol/server'
 import { z } from 'zod'
 import { agentRequest, type AgentResponse } from './client.js'
-import { isAffectedSince, originMainSha } from './config.js'
+import { changedPathsSince, isAffectedSince, originMainSha } from './config.js'
 
 // 's3' отвергается явно: настоящий s3 — хранилище без dashboard-agent, а роль staging с 2026-09-19 — s1.
 const serverEnum = z.enum(['s1', 's2'], {
@@ -42,6 +42,55 @@ interface E2eGateResult {
   blocked: boolean
   /** Причины без ведущего «⚠️»/форматирования — вызывающий код сам решает, как их показать. */
   reasons: string[]
+  /**
+   * Как расшифровать сравнение: какие именно SHA сверялись и откуда они взяты. Есть только когда
+   * есть причины (иначе не нужен), показывается вместе с ними.
+   */
+  hint?: string[]
+}
+
+/** Сколько путей из `git diff --name-only` показывать в подсказке (остальное — счётчиком). */
+const HINT_MAX_PATHS = 8
+
+/**
+ * Строки-подсказка «что с чем сравнивалось» для отказа гейта. Найдено 2026-09-19: текст «e2e на X,
+ * а деплоится Y» не говорит, откуда взят Y, и его принимали за локальный HEAD общего чекаута.
+ * Это не так — Y всегда `origin/main` после `git fetch`; подсказка называет источник явно.
+ */
+function comparisonHint(
+  app: string,
+  e2eSha: string,
+  targetSha: string | null,
+  getChangedPaths: (sinceSha: string) => string[],
+): string[] {
+  const lines = [
+    'Что сравнивалось:',
+    `- e2e-прогон: ${e2eSha} — lastStatus из .last-e2e-status/${app}.json на s1 (посмотреть: e2e_status({ app: "${app}" }))`,
+  ]
+  if (targetSha === null) {
+    lines.push('- цель деплоя: SHA не определён (см. причины выше)')
+    return lines
+  }
+  lines.push(
+    `- цель деплоя: ${targetSha} — origin/main чекаута deploy-mcp после git fetch, то есть то, что подтянет git pull на сервере; `
+      + 'локальный HEAD и непушнутые локальные коммиты в сравнении НЕ участвуют',
+  )
+  if (e2eSha !== targetSha) {
+    try {
+      const paths = getChangedPaths(e2eSha)
+      const shown = paths.slice(0, HINT_MAX_PATHS).join(', ')
+      const rest = paths.length > HINT_MAX_PATHS ? ` … и ещё ${paths.length - HINT_MAX_PATHS}` : ''
+      lines.push(`- изменилось между ними: ${paths.length} файл(ов)${paths.length > 0 ? `: ${shown}${rest}` : ''}`)
+    } catch {
+      lines.push('- изменённые файлы определить не удалось (нет e2e-коммита в локальном клоне?)')
+    }
+    lines.push(
+      `- проверить руками: git diff --stat ${e2eSha.slice(0, 7)}..${
+        targetSha.slice(0, 7)
+      } -- apps/${app} apps/${app}-e2e libs`,
+    )
+  }
+  return lines
 }
 
 /**
@@ -73,8 +122,10 @@ export async function evaluateE2eGate(
     agentRequest<E2eStatusResponse>('s1', { path: `/api/e2e/status?app=${encodeURIComponent(a)}`, timeoutMs: 10000 }),
   getHeadSha: () => string = originMainSha,
   isAppAffectedSince: (app: string, sinceSha: string) => boolean = isAffectedSince,
+  getChangedPaths: (sinceSha: string) => string[] = changedPathsSince,
 ): Promise<E2eGateResult> {
   const reasons: string[] = []
+  let compared: { e2eSha: string; targetSha: string | null } | null = null
   try {
     const res = await fetchStatus(app)
     if (!res.success) {
@@ -89,8 +140,10 @@ export async function evaluateE2eGate(
     if (!last.passed) {
       reasons.push(`последний e2e для ${app} (коммит ${last.commitSha.slice(0, 7)}, ${last.timestamp}) УПАЛ`)
     }
+    compared = { e2eSha: last.commitSha, targetSha: null }
     try {
       const head = getHeadSha()
+      compared.targetSha = head
       if (last.commitSha !== head) {
         let affected: boolean
         try {
@@ -126,7 +179,11 @@ export async function evaluateE2eGate(
   } catch (err) {
     reasons.push(`ошибка проверки e2e-статуса (${err instanceof Error ? err.message : String(err)})`)
   }
-  return { blocked: hardGated && reasons.length > 0, reasons }
+  const result: E2eGateResult = { blocked: hardGated && reasons.length > 0, reasons }
+  if (reasons.length > 0 && compared) {
+    result.hint = comparisonHint(app, compared.e2eSha, compared.targetSha, getChangedPaths)
+  }
+  return result
 }
 
 export function createDeployMcpServer(): McpServer {
@@ -320,12 +377,15 @@ export function createDeployMcpServer(): McpServer {
           `⛔ deploy_app(${app}, production) заблокирован hard e2e-gate:`,
           ...gate.reasons.map((r) => `- ${r}`),
           '',
+          ...(gate.hint ? [...gate.hint, ''] : []),
           'Чтобы снять блок: deploy_app({ app, target: "staging" }) → run_e2e({ app, baseUrl: '
           + `"https://${app}-stage.s1.letar.best" }) → дождаться passed:true на текущем коммите → повторить deploy_app.`,
         ].join('\n'),
       )
     }
-    const gatePrefix = gate.reasons.length > 0 ? [...gate.reasons.map((r) => `⚠️ e2e-gate: ${r}.`), ''] : []
+    const gatePrefix = gate.reasons.length > 0
+      ? [...gate.reasons.map((r) => `⚠️ e2e-gate: ${r}.`), '', ...(gate.hint ? [...gate.hint, ''] : [])]
+      : []
     try {
       const res = await agentRequest(server, {
         method: 'POST',
@@ -424,8 +484,12 @@ export function createDeployMcpServer(): McpServer {
       'grep — точечный прогон вместо всего набора (playwright test --grep): имя файла-спека, название',
       'теста/describe-блока (подстрока) или regex. Экономит время, когда нужно подтвердить фикс в паре',
       'тестов, а не гонять все ~100+ (типовой кейс: точечная проверка после фикса конкретной страницы).',
+      '',
+      'Других аргументов нет: произвольные флаги Playwright (`extraArgs` и т.п.) не принимаются — схема',
+      'строгая и отвергает неизвестные ключи. Раньше они молча отбрасывались, и «точечный» прогон',
+      'шёл по всему набору (2026-09-19). Допустимы только project, grep, workers.',
     ].join('\n'),
-    inputSchema: z.object({
+    inputSchema: z.strictObject({
       app: z
         .string()
         .regex(/^[a-z0-9-]+$/, 'Имя приложения: строчные буквы, цифры, дефис')
@@ -474,9 +538,15 @@ export function createDeployMcpServer(): McpServer {
         return errorText(`❌ Не удалось запустить e2e для ${app}: ${res.error}`)
       }
       const data = res.data as { runId?: string } | undefined
+      const applied = [
+        project ? `project=${project}` : '',
+        grep ? `grep=${grep}` : '',
+        workers !== undefined ? `workers=${workers}` : '',
+      ].filter(Boolean)
       return text(
         [
           `🧪 E2E для **${app}** запущен на **s1**.`,
+          `Фильтры: ${applied.length > 0 ? applied.join(', ') : 'не заданы — идёт весь набор'}.`,
           '',
           `Опрашивай прогресс: \`e2e_status({ app: "${app}", runId: "${data?.runId ?? ''}", sinceLine: 0 })\``,
           '',

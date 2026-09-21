@@ -101,6 +101,17 @@ export function originMainSha(): string {
 }
 
 /**
+ * Файлы, изменённые между `sinceSha` (коммит e2e-прогона) и `origin/main` — для текста отказа
+ * гейта: по нему видно, ЧТО именно изменилось с прогона, без ручного `git diff`.
+ */
+export function changedPathsSince(sinceSha: string): string[] {
+  return execFileSync('git', ['-C', REPO_ROOT, 'diff', '--name-only', sinceSha, 'origin/main'], { encoding: 'utf8' })
+    .split('\n')
+    .map((f) => f.trim())
+    .filter(Boolean)
+}
+
+/**
  * Корневые файлы вне графа Nx, которые тем не менее управляют деплоем/сборкой ВСЕХ
  * приложений разом — правка любого из них обязана сбрасывать e2e-гейт всем hard-gated
  * приложениям, даже тем, кто по `nx affected` формально не задет (PLAN-INFRA.md §51, DoD).
