@@ -3,6 +3,9 @@
 #
 # Ставит:
 #   - pre-commit-scope-guard.sh  — блокирует голый commit, затянувший несвязанные scope
+#   - pre-commit-syntax-check.sh — блокирует commit staged .ts/.tsx/.mts/.cts, которые не
+#                                   парсятся (только парсер typescript, без типов — доли секунды;
+#                                   проверяется содержимое ИНДЕКСА, не рабочего дерева)
 #   - pre-commit-semgrep.sh      — статический анализ безопасности по staged-файлам
 #   - pre-commit-sops.sh         — авто-шифрование .env.docker/.env.staging → *.enc
 #   - pre-commit-dprint-check.sh — блокирует commit staged-файлов не в стиле dprint (напр.
@@ -48,6 +51,8 @@ install_into() {
   cp "$SRC_DIR/pre-commit-scope-guard.sh" "$hooks_dir/_pre-commit-scope-guard.sh"
   cp "$SRC_DIR/pre-commit-sops.sh" "$hooks_dir/_pre-commit-sops.sh"
   cp "$SRC_DIR/pre-commit-semgrep.sh" "$hooks_dir/_pre-commit-semgrep.sh"
+  cp "$SRC_DIR/pre-commit-syntax-check.sh" "$hooks_dir/_pre-commit-syntax-check.sh"
+  cp "$SRC_DIR/../check-staged-syntax.mjs" "$hooks_dir/_check-staged-syntax.mjs"
   cp "$SRC_DIR/pre-commit-dprint-check.sh" "$hooks_dir/_pre-commit-dprint-check.sh"
   cp "$SRC_DIR/pre-commit-deps-integrity.sh" "$hooks_dir/_pre-commit-deps-integrity.sh"
   cp "$SRC_DIR/pre-commit-schema-migration-check.sh" "$hooks_dir/_pre-commit-schema-migration-check.sh"
@@ -56,14 +61,14 @@ install_into() {
   cp "$SRC_DIR/../check-section-numbers.mjs" "$hooks_dir/_check-section-numbers.mjs"
   cp "$SRC_DIR/pre-commit-stray-dts-check.sh" "$hooks_dir/_pre-commit-stray-dts-check.sh"
   cp "$SRC_DIR/../check-stray-dts.mjs" "$hooks_dir/_check-stray-dts.mjs"
-  # check-section-numbers.mjs и check-stray-dts.mjs импортируют './lib/repo-root.mjs'
+  # check-section-numbers.mjs, check-stray-dts.mjs и check-staged-syntax.mjs импортируют './lib/repo-root.mjs'
   # относительно своего расположения — рядом с копией в hooks_dir нужна и копия lib/.
   mkdir -p "$hooks_dir/lib"
   cp "$SRC_DIR/../lib/repo-root.mjs" "$hooks_dir/lib/repo-root.mjs"
   chmod +x "$hooks_dir/_pre-commit-scope-guard.sh" "$hooks_dir/_pre-commit-sops.sh" \
     "$hooks_dir/_pre-commit-semgrep.sh" "$hooks_dir/_pre-commit-dprint-check.sh" \
     "$hooks_dir/_pre-commit-deps-integrity.sh" "$hooks_dir/_pre-commit-schema-migration-check.sh" \
-    "$hooks_dir/_pre-commit-section-number-check.sh" "$hooks_dir/_pre-commit-stray-dts-check.sh"
+    "$hooks_dir/_pre-commit-section-number-check.sh" "$hooks_dir/_pre-commit-stray-dts-check.sh"     "$hooks_dir/_pre-commit-syntax-check.sh"
 
   cat > "$hooks_dir/pre-commit" <<'DISPATCH'
 #!/usr/bin/env bash
@@ -72,6 +77,9 @@ set -uo pipefail
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 status=0
 bash "$DIR/_pre-commit-scope-guard.sh" || status=$?
+if [[ $status -eq 0 ]]; then
+  bash "$DIR/_pre-commit-syntax-check.sh" || status=$?
+fi
 if [[ $status -eq 0 ]]; then
   bash "$DIR/_pre-commit-semgrep.sh" || status=$?
 fi
@@ -113,7 +121,7 @@ exec bash "$DIR/_pre-push-submodule-check.sh" "$@"
 PUSH_DISPATCH
   chmod +x "$hooks_dir/pre-push"
 
-  echo "✅ $label → $hooks_dir/pre-commit (scope-guard + semgrep + dprint-check + deps-integrity + schema-migration-check + section-number-check + stray-dts-check + sops)"
+  echo "✅ $label → $hooks_dir/pre-commit (scope-guard + syntax-check + semgrep + dprint-check + deps-integrity + schema-migration-check + section-number-check + stray-dts-check + sops)"
   echo "   $label → $hooks_dir/pre-push (submodule-check)"
 }
 
