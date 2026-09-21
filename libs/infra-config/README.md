@@ -118,6 +118,10 @@ export const APP_HOSTS: Record<string, string> // container_name / network alias
 export function getAppHost(app: string): string // fallback — 'localhost' (dev-режим)
 ```
 
+`APP_PORTS` хранит порт **production-контейнера**, а не dev-порт: `animatrona-tracker` (dev 3009,
+контейнер 3010) и `auth-hub` (dev 3014, контейнер 3010) расходятся. Dev-порт — в
+`apps/<app>/.env`, его сверяет `app-ports.guard.spec.ts` (раздел «Дрейф dev-портов» ниже).
+
 `APP_HOSTS` — как ДРУГИЕ контейнеры сети видят приложение (`localhost` внутри контейнера —
 это сам контейнер, а не сосед по bridge-сети). Намеренно нет записи для самоссылки — какой
 host правильный для «текущее приложение вызывает само себя» зависит от того, кто спрашивает,

@@ -260,10 +260,16 @@ export function resolveDeployServer(
 }
 
 /**
- * HTTP-порт, на котором приложение слушает запросы (dev/production — совпадают,
- * см. `.claude/rules/env-files.md`). Канон для двух ранее независимых копий:
- * `apps/dashboard/src/lib/app-metrics.ts` (health-check изнутри dashboard) и
- * `apps/dashboard-agent/src/lib/app-registry.ts` (межконтейнерные HTTP-вызовы cron/алертов).
+ * HTTP-порт **production-контейнера** приложения — тот, на котором оно слушает внутри
+ * `kami-network`. Это НЕ dev-порт: у большинства приложений они случайно совпадают, но не
+ * обязаны (`animatrona-tracker` — dev 3009 в `.env`, контейнер 3010; `auth-hub` — dev 3014,
+ * контейнер 3010). Dev-порт живёт в `apps/<app>/.env` (`.env.local`, CLI-команда в
+ * `project.json`) и сверяется отдельно guard-тестом `app-ports.guard.spec.ts` — этот реестр
+ * его не читает и для dev-адреса не годится.
+ *
+ * Канон для двух ранее независимых копий: `apps/dashboard/src/lib/app-metrics.ts`
+ * (health-check изнутри dashboard) и `apps/dashboard-agent/src/lib/app-registry.ts`
+ * (межконтейнерные HTTP-вызовы cron/алертов) — обе ходят в production-контейнер.
  *
  * Список — union портов, известных обеим копиям на момент объединения (2026-07-30). Каждый
  * потребитель сам решает, какое подмножество приложений ему актуально опрашивать/вызывать —
