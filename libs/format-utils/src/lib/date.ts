@@ -41,6 +41,45 @@ export function formatDateTime(date: Date | string | null | undefined): string {
   return `${formatDate(d)} ${d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}`
 }
 
+export interface FormatDateTimeInZoneOptions {
+  /** IANA-зона, в которой показывается момент времени, например `Europe/Moscow` */
+  timeZone: string
+  /** Приписывается через пробел после времени, например `МСК` */
+  suffix?: string
+}
+
+/**
+ * Форматирует дату и время в явной часовой зоне: "21.09.2026, 22:00 МСК".
+ *
+ * В отличие от `formatDateTime` не зависит от зоны процесса: сервер в UTC и браузер сотрудника
+ * покажут один и тот же момент одинаково. Для срока, который читает человек, нужна именно она —
+ * `toLocaleString('ru-RU')` без `timeZone` показывает время сервера, со сдвигом.
+ */
+export function formatDateTimeInZone(
+  date: Date | string | null | undefined,
+  { timeZone, suffix }: FormatDateTimeInZoneOptions,
+): string {
+  if (!date) {
+    return 'N/A'
+  }
+  const formatted = new Date(date).toLocaleString('ru-RU', {
+    timeZone,
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+  return suffix ? `${formatted} ${suffix}` : formatted
+}
+
+/**
+ * Дата и время по Москве с суффиксом «МСК»: "21.09.2026, 22:00 МСК"
+ */
+export function formatDateTimeMsk(date: Date | string | null | undefined): string {
+  return formatDateTimeInZone(date, { timeZone: 'Europe/Moscow', suffix: 'МСК' })
+}
+
 /**
  * Форматирует дату в короткий формат "01.12.25"
  */

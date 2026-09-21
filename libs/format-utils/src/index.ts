@@ -6,12 +6,16 @@ export {
   formatDateSeparator,
   formatDateShort,
   formatDateTime,
+  formatDateTimeInZone,
+  formatDateTimeMsk,
   // Duration and experience
   formatDuration,
   formatExperience,
   formatMessageTime,
   formatTime,
 } from './lib/date'
+
+export type { FormatDateTimeInZoneOptions } from './lib/date'
 
 // Money utilities
 export { formatKopecks, formatRubles, toKopecks } from './lib/money'

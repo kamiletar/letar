@@ -47,6 +47,8 @@ import {
   formatDateLong,
   formatDateShort,
   formatDateTime,
+  formatDateTimeInZone,
+  formatDateTimeMsk,
   formatDuration,
   formatExperience,
   formatTime,
@@ -60,6 +62,10 @@ formatDateShort(date) // 15 янв
 formatDateLong(date) // 15 января 2025
 formatDateTime(date) // 15.01.2025 14:30
 formatTime(date) // 14:30
+
+// Дата и время в явной зоне — не зависит от зоны процесса (сервер в UTC, читает человек в Москве)
+formatDateTimeMsk(new Date('2026-09-21T19:00:00Z')) // 21.09.2026, 22:00 МСК
+formatDateTimeInZone(new Date('2026-09-21T19:00:00Z'), { timeZone: 'Asia/Yekaterinburg', suffix: 'ЕКБ' }) // 22.09.2026, 00:00 ЕКБ
 
 // Длительность
 formatDuration(90) // 1 ч 30 мин
@@ -100,7 +106,9 @@ runtime-зависимость на `format-utils` ему не подходит.
 - `formatDate` — базовый формат DD.MM.YYYY
 - `formatDateShort` — короткий формат
 - `formatDateLong` — полный формат
-- `formatDateTime` — дата и время
+- `formatDateTime` — дата и время (в зоне процесса)
+- `formatDateTimeInZone` — дата и время в явной IANA-зоне с необязательным суффиксом
+- `formatDateTimeMsk` — то же для Москвы с суффиксом «МСК»
 - `formatTime` — только время
 - `formatDuration` — длительность
 - `formatExperience` — опыт в годах
