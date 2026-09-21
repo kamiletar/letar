@@ -214,3 +214,50 @@ describe('defaultSessionRef', () => {
     expect(defaultSessionRef()).toBe(`pid-${process.pid}`)
   })
 })
+
+// zod по умолчанию молча отбрасывает неизвестные ключи. Для тайм-трекера это тихая порча учёта:
+// опечатка в `stage`/`kind`/`sessionRef` пишет время без этапа, с типом WORK или в таймер другой
+// сессии. Схемы строгие: лишний ключ — ошибка валидации, запрос в studio не уходит.
+// `time_fix_internal_billable` без аргументов не затрагивается.
+describe('строгие входные схемы — неизвестный аргумент отвергается', () => {
+  const cases: Array<[tool: string, args: Record<string, unknown>]> = [
+    ['time_start', { app: 'svoichuzhie', description: 'делаю фичу', stage: 'Каталог' }],
+    ['time_switch', { app: 'svoichuzhie', description: 'делаю фичу', kind: 'MEETING' }],
+    ['time_stop', { sessionRef: 's1' }],
+    ['time_pause', { sessionRef: 's1' }],
+    ['time_resume', { sessionRef: 's1' }],
+    ['time_discard', { sessionRef: 's1' }],
+    ['time_note', { description: 'уточнение', sessionRef: 's1' }],
+    ['time_status', { sessionRef: 's1' }],
+    ['time_log', { app: 'svoichuzhie', minutes: 30, description: 'созвон', kind: 'MEETING' }],
+    ['time_stage_close', { app: 'svoichuzhie', stage: 'Каталог' }],
+  ]
+
+  beforeEach(() => {
+    studioTimeRequestMock.mockReset()
+    studioTimeRequestMock.mockResolvedValue({ ok: true, status: 200, json: { data: { id: 't1' } } })
+  })
+
+  it.each(cases)('%s: валидный вызов проходит', async (tool, args) => {
+    const { client } = await connectedClient()
+    const result = await client.callTool({ name: tool, arguments: args })
+    expect(textOf(result)).not.toContain('Input validation error')
+    expect(studioTimeRequestMock).toHaveBeenCalledTimes(1)
+  })
+
+  it.each(cases)('%s: лишний ключ даёт ошибку валидации без запроса в studio', async (tool, args) => {
+    const { client } = await connectedClient()
+    await expectValidationError(client, tool, { ...args, unknownArg: 'x' })
+    expect(studioTimeRequestMock).not.toHaveBeenCalled()
+  })
+
+  it('time_start: `session_ref` вместо `sessionRef` не открывает таймер в сессии по умолчанию', async () => {
+    const { client } = await connectedClient()
+    await expectValidationError(client, 'time_start', {
+      app: 'svoichuzhie',
+      description: 'делаю фичу',
+      session_ref: 'other',
+    })
+    expect(studioTimeRequestMock).not.toHaveBeenCalled()
+  })
+})

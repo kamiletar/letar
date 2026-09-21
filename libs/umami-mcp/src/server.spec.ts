@@ -206,3 +206,34 @@ describe('createUmamiMcpServer', () => {
     })
   })
 })
+
+// zod по умолчанию молча отбрасывает неизвестные ключи: `umami_get_website_stats` с опечаткой в
+// `period` вернёт статистику за 24ч по умолчанию — смысл выборки меняется без единого сигнала.
+// Схемы строгие: лишний ключ — ошибка валидации, обращения к Umami нет.
+describe('строгие входные схемы — неизвестный аргумент отвергается', () => {
+  const cases: Array<[tool: string, args: Record<string, unknown>, mock: ReturnType<typeof vi.fn>]> = [
+    ['umami_find_website', { domain: 'domwellbes.ru' }, findWebsiteByDomainMock],
+    ['umami_get_website_stats', { websiteId: 'w1', period: '7d' }, getWebsiteStatsMock],
+    ['umami_create_website', { name: 'Domwellbes', domain: 'domwellbes.ru' }, createWebsiteMock],
+  ]
+
+  it.each(cases)('%s: валидный вызов проходит', async (tool, args, mock) => {
+    mock.mockResolvedValue({})
+    const { client } = await connectedClient()
+    const result = await client.callTool({ name: tool, arguments: args })
+    expect(textOf(result)).not.toContain('Input validation error')
+    expect(mock).toHaveBeenCalledTimes(1)
+  })
+
+  it.each(cases)('%s: лишний ключ даёт ошибку валидации без обращения к Umami', async (tool, args, mock) => {
+    const { client } = await connectedClient()
+    await expectValidationError(client, tool, { ...args, unknownArg: 'x' })
+    expect(mock).not.toHaveBeenCalled()
+  })
+
+  it('umami_get_website_stats: `range` вместо `period` не подменяется тихим 24h', async () => {
+    const { client } = await connectedClient()
+    await expectValidationError(client, 'umami_get_website_stats', { websiteId: 'w1', range: '30d' })
+    expect(getWebsiteStatsMock).not.toHaveBeenCalled()
+  })
+})

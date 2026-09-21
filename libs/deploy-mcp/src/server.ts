@@ -212,7 +212,7 @@ export function createDeployMcpServer(): McpServer {
   server.registerTool('agent_health', {
     description:
       'Health-check dashboard-agent на сервере (GET /health, без авторизации). Отличает «сервер недоступен» от «токен неверный».',
-    inputSchema: z.object({
+    inputSchema: z.strictObject({
       server: serverEnum.optional().describe('Сервер: s2 (прод, по умолчанию) или s1 (staging)'),
     }),
   }, async ({ server = 's2' }) => {
@@ -228,7 +228,7 @@ export function createDeployMcpServer(): McpServer {
   server.registerTool('git_status', {
     description:
       'Git-статус репозитория на сервере (GET /api/git/status): ветка, незапушенные/входящие коммиты. Проверяй перед деплоем.',
-    inputSchema: z.object({
+    inputSchema: z.strictObject({
       server: serverEnum.optional().describe('Сервер: s2 (прод, по умолчанию) или s1 (staging)'),
     }),
   }, async ({ server = 's2' }) => {
@@ -250,7 +250,7 @@ export function createDeployMcpServer(): McpServer {
       'Без deployId — текущий/последний деплой. sinceLine — курсор: вернёт только новые строки лога',
       '(экономит контекст при поллинге). В ответе totalLines/fromLine для следующего sinceLine.',
     ].join('\n'),
-    inputSchema: z.object({
+    inputSchema: z.strictObject({
       server: serverEnum.optional().describe('Сервер: s2 (прод, по умолчанию) или s1 (staging)'),
       deployId: z.string().optional().describe('ID конкретного деплоя из истории (без него — текущий/последний)'),
       sinceLine: z.number().int().min(0).optional().describe('Вернуть строки лога начиная с этого номера (курсор)'),
@@ -288,7 +288,7 @@ export function createDeployMcpServer(): McpServer {
       'waitSeconds капается на сервере (максимум ~120с — ограничение Fastify/nginx-таймаутов',
       'на туннеле) — при большом деплое зови повторно, пока `running: true`.',
     ].join('\n'),
-    inputSchema: z.object({
+    inputSchema: z.strictObject({
       server: serverEnum.optional().describe('Сервер: s2 (прод, по умолчанию) или s1 (staging)'),
       deployId: z.string().optional().describe('ID конкретного деплоя из истории (без него — текущий/последний)'),
       waitSeconds: z.number().int().min(1).max(120).optional().describe(
@@ -324,7 +324,7 @@ export function createDeployMcpServer(): McpServer {
   server.registerTool('deploy_cancel', {
     description:
       'Отменяет текущий деплой на сервере (POST /api/deploy/cancel, SIGTERM процессу). ⚠️ Прерывает деплой на полпути.',
-    inputSchema: z.object({
+    inputSchema: z.strictObject({
       server: serverEnum.optional().describe('Сервер: s2 (прод, по умолчанию) или s1 (staging)'),
     }),
   }, async ({ server = 's2' }) => {
@@ -350,7 +350,7 @@ export function createDeployMcpServer(): McpServer {
       `⛔ Для приложений из HARD_GATED_APPS (${HARD_GATED_APPS.join(', ')}) production-деплой`,
       'ОТКАЗЫВАЕТ без свежего зелёного e2e на staging для текущего коммита — не обходится флагом.',
     ].join('\n'),
-    inputSchema: z.object({
+    inputSchema: z.strictObject({
       app: z
         .string()
         .regex(/^[a-z0-9-]+$/, 'Имя приложения: строчные буквы, цифры, дефис')
@@ -432,7 +432,7 @@ export function createDeployMcpServer(): McpServer {
       '⚠️ Изменяет инфраструктуру сервера напрямую. Перед деплоем убедись, что коммиты запушены',
       '(git_status) — как и для deploy_app, скрипт поднимает то, что уже в рабочем дереве сервера.',
     ].join('\n'),
-    inputSchema: z.object({
+    inputSchema: z.strictObject({
       service: z
         .string()
         .regex(/^[a-z0-9-]+$/, 'Имя сервиса: строчные буквы, цифры, дефис')
@@ -565,7 +565,7 @@ export function createDeployMcpServer(): McpServer {
       'sinceLine — курсор лога. Всегда возвращает lastStatus (персистентный .last-e2e-status/<app>.json),',
       'даже если сейчас ничего не запущено — это то, что читает warn-gate в deploy_app(production).',
     ].join('\n'),
-    inputSchema: z.object({
+    inputSchema: z.strictObject({
       app: z.string().optional().describe('Имя приложения (для lastStatus и последнего прогона)'),
       runId: z.string().optional().describe('ID конкретного прогона из истории'),
       sinceLine: z.number().int().min(0).optional().describe('Курсор лога'),

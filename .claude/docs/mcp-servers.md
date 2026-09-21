@@ -71,6 +71,40 @@ domwellbes-assist ×2) слиты в один процесс `letar`; 8 Postgres
 `deploy_git_status`/`deploy_agent_health` — были голыми именами без префикса, риск столкновения
 с чужим сервером. Всё остальное уже было с уникальным префиксом.
 
+### ⚠️ Строгие входные схемы: неизвестный аргумент — ошибка, а не тишина {#strict-input-schemas}
+
+`z.object` по умолчанию **молча отбрасывает** ключи, которых нет в схеме. Вызов с опечаткой или
+выдуманным флагом проходит валидацию и выполняется с дефолтами: `run_e2e({ extraArgs })` запустил
+весь набор Playwright вместо точечного прогона (2026-09-19). Поэтому инструменты с побочным
+эффектом или с фильтрами объявлены как `z.strictObject` — лишний ключ даёт `isError: true` с
+`Input validation error` до обращения к внешнему сервису (2026-09-21).
+
+| Библиотека        | Строго                                                                                                                                                  | Не строго и почему                                                                                                      |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `deploy-mcp`      | всё с аргументами: `deploy_app`, `deploy_infra`, `deploy_cancel`, `deploy_status`, `deploy_wait`, `run_e2e`, `e2e_status`, `git_status`, `agent_health` | `list_servers` — без аргументов                                                                                         |
+| `studio-mcp`      | все мутации и списки с фильтрами (`*_create`/`*_update`/`*_set_*`/`*_toggle`/`*_delete`/`*_send`/`*_mark_paid`/`*_cancel`, `*_list`, `time_entries`)    | `*_get` — единственный аргумент `id`, терять нечего                                                                     |
+| `studio-time-mcp` | все, кроме `time_fix_internal_billable`                                                                                                                 | `time_fix_internal_billable` — без аргументов                                                                           |
+| `umami-mcp`       | `umami_find_website`, `umami_get_website_stats`, `umami_create_website`                                                                                 | `umami_list_websites` — без аргументов                                                                                  |
+| `glitchtip-mcp`   | `glitchtip_list_issues`, `glitchtip_get_issue_event`                                                                                                    | `glitchtip_list_projects` — без аргументов                                                                              |
+| `form-mcp`        | —                                                                                                                                                       | опубликован в npm, его вызывают внешние клиенты, лишние поля там не наша территория; инструменты — read-only справочник |
+
+Где опасность конкретно: `studio_client_update`/`studio_project_update` — «полная замена»,
+опечатка в необязательном поле молча стирает значение; `studio_recurring_delete({ id, dryRun })`
+удалил бы по-настоящему; `studio_invoice_mark_paid({ id, amount })` закрыл бы счёт целиком, потому
+что поле называется `amountKopecks`; `deploy_app({ app, staging: true })` ушёл бы в production;
+`time_*({ session_ref })` писал бы время в таймер сессии по умолчанию.
+
+Через `letar` схема доезжает как есть: агрегатор отдаёт клиенту `inputSchema` части без правок
+(в JSON Schema появляется `additionalProperties: false`). Исключение — `assist_*`: `letar` сам
+добавляет параметр `target` и вырезает его перед пересылкой, поэтому строгость части assist его не
+затрагивает.
+
+**Новый инструмент:** с мутацией или фильтром — `z.strictObject`, тест «валидный вызов + лишний
+ключ» через `connectedClient`/`expectValidationError` (образцы — блоки «строгие входные схемы» в
+`server.spec.ts` каждой библиотеки; красный тест первым, см.
+[mcp-tool-handler-testing-pattern](/.claude/docs/mcp-tool-handler-testing-pattern.md)). Сознательно
+принимать лишние поля — только если клиенты действительно шлют их штатно.
+
 ### Наставник domwellbes: dev/prod через параметр `target`
 
 Раньше — два отдельных stdio-процесса (`domwellbes-assist-mcp` и `domwellbes-assist-mcp-prod`),

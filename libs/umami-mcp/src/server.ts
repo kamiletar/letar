@@ -30,7 +30,7 @@ export function createUmamiMcpServer(): McpServer {
   // ─── umami_find_website ──────────────────────────────────────────────────────
   server.registerTool('umami_find_website', {
     description: 'Проверить, заведён ли домен в Umami — точное совпадение по полю domain.',
-    inputSchema: z.object({ domain: z.string().min(1).describe('Домен без протокола, напр. "domwellbes.ru"') }),
+    inputSchema: z.strictObject({ domain: z.string().min(1).describe('Домен без протокола, напр. "domwellbes.ru"') }),
   }, async ({ domain }) => {
     try {
       const site = await findWebsiteByDomain(domain)
@@ -46,7 +46,7 @@ export function createUmamiMcpServer(): McpServer {
   // ─── umami_get_website_stats ─────────────────────────────────────────────────
   server.registerTool('umami_get_website_stats', {
     description: 'Статистика сайта (pageviews/visitors/visits/bounces/totaltime) за период.',
-    inputSchema: z.object({
+    inputSchema: z.strictObject({
       websiteId: z.string().min(1).describe('id сайта в Umami — см. umami_list_websites/umami_find_website'),
       period: PERIOD.optional().describe('Период: 1h/24h/7d/30d, по умолчанию 24h'),
     }),
@@ -65,7 +65,7 @@ export function createUmamiMcpServer(): McpServer {
   server.registerTool('umami_create_website', {
     description: 'Завести новый сайт в Umami (POST /api/websites). Возвращает websiteId — его нужно положить '
       + 'в .env.docker.enc приложения (NEXT_PUBLIC_UMAMI_WEBSITE_ID) и в docker-compose.production.yml.',
-    inputSchema: z.object({
+    inputSchema: z.strictObject({
       name: z.string().min(1).describe('Отображаемое имя сайта в панели Umami'),
       domain: z.string().min(1).describe('Домен без протокола, напр. "domwellbes.ru"'),
     }),

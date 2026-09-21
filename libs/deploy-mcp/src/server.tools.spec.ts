@@ -121,3 +121,44 @@ describe('deploy_app — отказ hard e2e-gate', () => {
     expect(out).toContain('PLAN.md')
   })
 })
+
+// Регрессия 2026-09-19 (run_e2e) в общем виде: zod по умолчанию молча отбрасывает неизвестные ключи,
+// и вызов с опечаткой (`srv`, `staging: true`, `dryRun`) выполняется с дефолтами — деплой уходит на
+// s2/production, курсор лога и фильтры игнорируются. Здесь у каждого инструмента с аргументами —
+// валидный вызов плюс лишний ключ: должна быть ошибка валидации, а не запрос к dashboard-agent.
+describe('строгие входные схемы — неизвестный аргумент отвергается', () => {
+  const cases: Array<[tool: string, args: Record<string, unknown>]> = [
+    ['agent_health', { server: 's1' }],
+    ['git_status', { server: 's1' }],
+    ['deploy_status', { server: 's1', deployId: 'd1' }],
+    ['deploy_wait', { server: 's1', waitSeconds: 5 }],
+    ['deploy_cancel', { server: 's1' }],
+    ['deploy_app', { app: 'svoichuzhie', target: 'staging' }],
+    ['deploy_infra', { service: 'traefik', server: 's1' }],
+    ['e2e_status', { app: 'svoichuzhie' }],
+  ]
+
+  beforeEach(() => {
+    vi.mocked(agentRequest).mockReset()
+    vi.mocked(agentRequest).mockResolvedValue({ success: true, data: {} })
+  })
+
+  it.each(cases)('%s: валидный вызов проходит', async (tool, args) => {
+    const { client } = await connect()
+    const result = await client.callTool({ name: tool, arguments: args })
+    expect(textOf(result)).not.toContain('Input validation error')
+  })
+
+  it.each(cases)('%s: лишний ключ даёт ошибку валидации без запроса к агенту', async (tool, args) => {
+    const { client } = await connect()
+    vi.mocked(agentRequest).mockClear()
+    await expectValidationError(client, tool, { ...args, unknownArg: 'x' })
+    expect(agentRequest).not.toHaveBeenCalled()
+  })
+
+  it('deploy_app: `staging: true` вместо `target` не превращается в production-деплой', async () => {
+    const { client } = await connect()
+    await expectValidationError(client, 'deploy_app', { app: 'svoichuzhie', staging: true })
+    expect(agentRequest).not.toHaveBeenCalled()
+  })
+})

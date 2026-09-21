@@ -25,7 +25,7 @@ export function createStudioAdminMcpServer(): McpServer {
 
   server.registerTool('studio_client_list', {
     description: 'Список клиентов студии, с числом проектов и счетов.',
-    inputSchema: z.object({ search: z.string().optional().describe('Поиск по имени/email') }),
+    inputSchema: z.strictObject({ search: z.string().optional().describe('Поиск по имени/email') }),
   }, async ({ search }) => {
     const res = await studioAdminRequest({ path: '/api/mcp/admin/clients', query: { search } })
     if (!res.ok) {
@@ -60,7 +60,7 @@ export function createStudioAdminMcpServer(): McpServer {
 
   server.registerTool('studio_client_create', {
     description: 'Создаёт нового клиента студии.',
-    inputSchema: z.object(clientFields),
+    inputSchema: z.strictObject(clientFields),
   }, async (input) => {
     const res = await studioAdminRequest({ method: 'POST', path: '/api/mcp/admin/clients', body: input })
     if (!res.ok) {
@@ -71,7 +71,7 @@ export function createStudioAdminMcpServer(): McpServer {
 
   server.registerTool('studio_client_update', {
     description: 'Обновляет клиента (полная замена реквизитов — как форма редактирования, не патч отдельных полей).',
-    inputSchema: z.object({ id: z.string().min(1), ...clientFields }),
+    inputSchema: z.strictObject({ id: z.string().min(1), ...clientFields }),
   }, async ({ id, ...input }) => {
     const res = await studioAdminRequest({ method: 'PATCH', path: `/api/mcp/admin/clients/${id}`, body: input })
     if (!res.ok) {
@@ -84,7 +84,7 @@ export function createStudioAdminMcpServer(): McpServer {
 
   server.registerTool('studio_project_list', {
     description: 'Список проектов, опционально по клиенту/статусу.',
-    inputSchema: z.object({ clientId: z.string().optional(), status: PROJECT_STATUS.optional() }),
+    inputSchema: z.strictObject({ clientId: z.string().optional(), status: PROJECT_STATUS.optional() }),
   }, async ({ clientId, status }) => {
     const res = await studioAdminRequest({ path: '/api/mcp/admin/projects', query: { clientId, status } })
     if (!res.ok) {
@@ -131,7 +131,7 @@ export function createStudioAdminMcpServer(): McpServer {
 
   server.registerTool('studio_project_create', {
     description: 'Создаёт проект у клиента.',
-    inputSchema: z.object(projectFields),
+    inputSchema: z.strictObject(projectFields),
   }, async (input) => {
     const res = await studioAdminRequest({
       method: 'POST',
@@ -146,7 +146,7 @@ export function createStudioAdminMcpServer(): McpServer {
 
   server.registerTool('studio_project_update', {
     description: 'Обновляет проект (полная замена — как форма редактирования).',
-    inputSchema: z.object({ id: z.string().min(1), ...projectFields }),
+    inputSchema: z.strictObject({ id: z.string().min(1), ...projectFields }),
   }, async ({ id, ...input }) => {
     const res = await studioAdminRequest({
       method: 'PATCH',
@@ -161,7 +161,7 @@ export function createStudioAdminMcpServer(): McpServer {
 
   server.registerTool('studio_project_set_status', {
     description: 'Меняет только статус проекта, не трогая остальные поля.',
-    inputSchema: z.object({ id: z.string().min(1), status: PROJECT_STATUS }),
+    inputSchema: z.strictObject({ id: z.string().min(1), status: PROJECT_STATUS }),
   }, async ({ id, status }) => {
     const res = await studioAdminRequest({
       method: 'PATCH',
@@ -183,7 +183,7 @@ export function createStudioAdminMcpServer(): McpServer {
       'уже оплаченных по фикс-прайсу (billable должен быть false — иначе они уйдут в следующий',
       'почасовой счёт). Список неограничен по размеру — на больших проектах фильтруй status/billable.',
     ].join(' '),
-    inputSchema: z.object({
+    inputSchema: z.strictObject({
       id: z.string().min(1),
       status: TIME_STATUS.optional(),
       billable: z.boolean().optional(),
@@ -205,7 +205,7 @@ export function createStudioAdminMcpServer(): McpServer {
       '(это делает крон абонентки на каждый цикл). Используй при переводе проекта на HOURLY после того,',
       'как банк уже накопился по старым правилам, или чтобы вручную вернуть/списать часы клиенту.',
     ].join(' '),
-    inputSchema: z.object({
+    inputSchema: z.strictObject({
       id: z.string().min(1),
       hours: z.number().min(0).describe('Новый остаток банка в часах (заменяет текущий)'),
     }),
@@ -225,7 +225,7 @@ export function createStudioAdminMcpServer(): McpServer {
 
   server.registerTool('studio_recurring_list', {
     description: 'Список абонентских правил (автовыставление счёта — поддержка/подписка), опционально по клиенту.',
-    inputSchema: z.object({ clientId: z.string().optional() }),
+    inputSchema: z.strictObject({ clientId: z.string().optional() }),
   }, async ({ clientId }) => {
     const res = await studioAdminRequest({ path: '/api/mcp/admin/recurring', query: { clientId } })
     if (!res.ok) {
@@ -285,7 +285,7 @@ export function createStudioAdminMcpServer(): McpServer {
       'и каждые intervalMonths после. ВАЖНО: если nextRunAt в прошлом или сегодня — первый счёт уйдёт',
       'клиенту письмом при ближайшем прогоне крона, не после подтверждения.',
     ].join(' '),
-    inputSchema: z.object(recurringFields),
+    inputSchema: z.strictObject(recurringFields),
   }, async (input) => {
     const res = await studioAdminRequest({
       method: 'POST',
@@ -300,7 +300,7 @@ export function createStudioAdminMcpServer(): McpServer {
 
   server.registerTool('studio_recurring_update', {
     description: 'Обновляет абонентское правило (полная замена).',
-    inputSchema: z.object({ id: z.string().min(1), ...recurringFields }),
+    inputSchema: z.strictObject({ id: z.string().min(1), ...recurringFields }),
   }, async ({ id, ...input }) => {
     const res = await studioAdminRequest({
       method: 'PATCH',
@@ -315,7 +315,7 @@ export function createStudioAdminMcpServer(): McpServer {
 
   server.registerTool('studio_recurring_toggle', {
     description: 'Включает/выключает абонентку без изменения остальных полей — выключенная не выставляет счета.',
-    inputSchema: z.object({ id: z.string().min(1), active: z.boolean() }),
+    inputSchema: z.strictObject({ id: z.string().min(1), active: z.boolean() }),
   }, async ({ id, active }) => {
     const res = await studioAdminRequest({
       method: 'PATCH',
@@ -330,7 +330,7 @@ export function createStudioAdminMcpServer(): McpServer {
 
   server.registerTool('studio_recurring_delete', {
     description: 'Удаляет абонентское правило безвозвратно (уже выставленные по нему счета не трогает).',
-    inputSchema: z.object({ id: z.string().min(1) }),
+    inputSchema: z.strictObject({ id: z.string().min(1) }),
   }, async ({ id }) => {
     const res = await studioAdminRequest({ method: 'DELETE', path: `/api/mcp/admin/recurring/${id}` })
     if (!res.ok) {
@@ -350,7 +350,7 @@ export function createStudioAdminMcpServer(): McpServer {
 
   server.registerTool('studio_invoice_list', {
     description: 'Список счетов, опционально по клиенту/статусу.',
-    inputSchema: z.object({ clientId: z.string().optional(), status: INVOICE_STATUS.optional() }),
+    inputSchema: z.strictObject({ clientId: z.string().optional(), status: INVOICE_STATUS.optional() }),
   }, async ({ clientId, status }) => {
     const res = await studioAdminRequest({ path: '/api/mcp/admin/invoices', query: { clientId, status } })
     if (!res.ok) {
@@ -373,7 +373,7 @@ export function createStudioAdminMcpServer(): McpServer {
   server.registerTool('studio_invoice_create', {
     description:
       'Создаёт счёт в статусе DRAFT (черновик, клиент его ещё не видит) — для отправки см. studio_invoice_send.',
-    inputSchema: z.object({
+    inputSchema: z.strictObject({
       clientId: z.string().min(1),
       projectId: z.string().optional(),
       paymentMethod: PAYMENT_METHOD.default('BANK_TRANSFER'),
@@ -408,7 +408,7 @@ export function createStudioAdminMcpServer(): McpServer {
   server.registerTool('studio_invoice_send', {
     description:
       'Переводит черновик в SENT и ОТПРАВЛЯЕТ клиенту письмо со счётом (если у клиента указан email) — необратимо видимое клиенту действие.',
-    inputSchema: z.object({ id: z.string().min(1) }),
+    inputSchema: z.strictObject({ id: z.string().min(1) }),
   }, async ({ id }) => {
     const res = await studioAdminRequest({ method: 'POST', path: `/api/mcp/admin/invoices/${id}/send` })
     if (!res.ok) {
@@ -420,7 +420,7 @@ export function createStudioAdminMcpServer(): McpServer {
   server.registerTool('studio_invoice_mark_paid', {
     description:
       'Регистрирует ручную оплату счёта (банковский перевод/наличные вне вебхука эквайринга) — создаёт Payment и переводит счёт в PAID/PARTIALLY_PAID.',
-    inputSchema: z.object({ id: z.string().min(1), amountKopecks: z.number().int().positive().optional() }),
+    inputSchema: z.strictObject({ id: z.string().min(1), amountKopecks: z.number().int().positive().optional() }),
   }, async ({ id, amountKopecks }) => {
     const res = await studioAdminRequest({
       method: 'POST',
@@ -435,7 +435,7 @@ export function createStudioAdminMcpServer(): McpServer {
 
   server.registerTool('studio_invoice_cancel', {
     description: 'Отменяет неоплаченный счёт (PAID отменить нельзя).',
-    inputSchema: z.object({ id: z.string().min(1) }),
+    inputSchema: z.strictObject({ id: z.string().min(1) }),
   }, async ({ id }) => {
     const res = await studioAdminRequest({ method: 'POST', path: `/api/mcp/admin/invoices/${id}/cancel` })
     if (!res.ok) {

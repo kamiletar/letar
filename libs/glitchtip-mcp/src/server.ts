@@ -31,7 +31,7 @@ export function createGlitchtipMcpServer(): McpServer {
   // ─── glitchtip_list_issues ───────────────────────────────────────────────────
   server.registerTool('glitchtip_list_issues', {
     description: 'Необработанные issues проекта, отсортированные по частоте (по умолчанию is:unresolved за 14 дней).',
-    inputSchema: z.object({
+    inputSchema: z.strictObject({
       project: z.string().min(1).describe('Slug проекта в GlitchTip, совпадает с именем приложения'),
       environment: z.string().optional().describe('Фильтр по окружению, напр. "production" или "staging"'),
       statsPeriod: z.string().optional().describe(
@@ -56,7 +56,7 @@ export function createGlitchtipMcpServer(): McpServer {
   server.registerTool('glitchtip_get_issue_event', {
     description:
       'Последнее событие issue — сообщение и стектрейс. issueId берётся из glitchtip_list_issues (поле id), не project slug.',
-    inputSchema: z.object({ issueId: z.string().min(1).describe('id issue из glitchtip_list_issues') }),
+    inputSchema: z.strictObject({ issueId: z.string().min(1).describe('id issue из glitchtip_list_issues') }),
   }, async ({ issueId }) => {
     try {
       const event = await getLatestIssueEvent(issueId)

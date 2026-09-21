@@ -36,7 +36,7 @@ export function createStudioTimeMcpServer(): McpServer {
       'Останавливает предыдущий активный таймер, если он был — эквивалент time_switch.',
       'Записи всегда идут черновиком (status: DRAFT) — владелец утверждает их в studio перед выставлением клиенту.',
     ].join('\n'),
-    inputSchema: z.object({
+    inputSchema: z.strictObject({
       app: z
         .string()
         .min(1)
@@ -95,7 +95,7 @@ export function createStudioTimeMcpServer(): McpServer {
       'Технически идентичен time_start (тот сам останавливает предыдущую запись и стартует новую)',
       '— отдельный тул только ради явной семантики для тебя самого, не ради разного поведения.',
     ].join('\n'),
-    inputSchema: z.object({
+    inputSchema: z.strictObject({
       app: z.string().min(1).describe('repoSlug приложения, на которое переключаешься'),
       description: z.string().min(1).max(2000).describe('Чем занимаешься теперь — видит клиент'),
       kind: TIME_KIND.optional().describe('Тип активности: WORK (по умолчанию) / MEETING / TRAVEL / ADMIN'),
@@ -132,7 +132,7 @@ export function createStudioTimeMcpServer(): McpServer {
   // ─── time_stop ───────────────────────────────────────────────────────────────
   server.registerTool('time_stop', {
     description: 'Останавливает активный таймер ЭТОЙ сессии, если он есть.',
-    inputSchema: z.object({ sessionRef: sessionRefField }),
+    inputSchema: z.strictObject({ sessionRef: sessionRefField }),
   }, async ({ sessionRef }) => {
     try {
       const res = await studioTimeRequest({
@@ -160,7 +160,7 @@ export function createStudioTimeMcpServer(): McpServer {
       'на следующем его сообщении сразу вызывай time_resume.',
       'Это НЕ остановка: чтобы закрыть запись, нужен time_stop, а чтобы закрыть небиллируемой — time_discard.',
     ].join('\n'),
-    inputSchema: z.object({ sessionRef: sessionRefField }),
+    inputSchema: z.strictObject({ sessionRef: sessionRefField }),
   }, async ({ sessionRef }) => {
     try {
       const res = await studioTimeRequest({
@@ -186,7 +186,7 @@ export function createStudioTimeMcpServer(): McpServer {
       'Снимает паузу с активного таймера ЭТОЙ сессии — время снова идёт.',
       'Вызывай сразу, как владелец продолжил взаимодействие после «паузы», не дожидаясь отдельной просьбы.',
     ].join('\n'),
-    inputSchema: z.object({ sessionRef: sessionRefField }),
+    inputSchema: z.strictObject({ sessionRef: sessionRefField }),
   }, async ({ sessionRef }) => {
     try {
       const res = await studioTimeRequest({
@@ -215,7 +215,7 @@ export function createStudioTimeMcpServer(): McpServer {
       'иначе владельцу придётся вручную чистить черновик от небиллируемого времени.',
       'Раньше этот инструмент назывался time_pause, хотя ничего не приостанавливал.',
     ].join('\n'),
-    inputSchema: z.object({ sessionRef: sessionRefField }),
+    inputSchema: z.strictObject({ sessionRef: sessionRefField }),
   }, async ({ sessionRef }) => {
     try {
       const res = await studioTimeRequest({
@@ -238,7 +238,7 @@ export function createStudioTimeMcpServer(): McpServer {
   // ─── time_note ───────────────────────────────────────────────────────────────
   server.registerTool('time_note', {
     description: 'Уточняет описание активной записи ЭТОЙ сессии без остановки таймера.',
-    inputSchema: z.object({
+    inputSchema: z.strictObject({
       description: z.string().min(1).max(2000).describe('Новое описание — видит клиент'),
       sessionRef: sessionRefField,
     }),
@@ -261,7 +261,7 @@ export function createStudioTimeMcpServer(): McpServer {
   // ─── time_status ─────────────────────────────────────────────────────────────
   server.registerTool('time_status', {
     description: 'Что идёт сейчас у ЭТОЙ сессии: активный проект, описание, с какого времени.',
-    inputSchema: z.object({ sessionRef: sessionRefField }),
+    inputSchema: z.strictObject({ sessionRef: sessionRefField }),
   }, async ({ sessionRef }) => {
     try {
       const res = await studioTimeRequest({
@@ -284,7 +284,7 @@ export function createStudioTimeMcpServer(): McpServer {
   server.registerTool('time_log', {
     description:
       'Записывает время задним числом — не трогает активный таймер (например созвон/дорогу, которые не отследил в моменте таймером).',
-    inputSchema: z.object({
+    inputSchema: z.strictObject({
       app: z.string().min(1).describe('repoSlug приложения'),
       minutes: z
         .number()
@@ -321,7 +321,7 @@ export function createStudioTimeMcpServer(): McpServer {
       'открытым (заведён через параметр stage у time_start/time_switch либо вручную в studio).',
       'Не трогает активный таймер: закрытие этапа и остановка записи времени по нему независимы.',
     ].join('\n'),
-    inputSchema: z.object({
+    inputSchema: z.strictObject({
       app: z.string().min(1).describe('repoSlug приложения'),
       stage: z.string().min(1).max(300).describe('Название открытого этапа — должно совпадать с тем, что при создании'),
     }),

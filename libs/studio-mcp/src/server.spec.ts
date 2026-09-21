@@ -384,3 +384,65 @@ describe('createStudioAdminMcpServer', () => {
     })
   })
 })
+
+// zod по умолчанию молча отбрасывает неизвестные ключи. Для мутаций и фильтров это опасно:
+// `studio_client_update` — полная замена реквизитов, опечатка в необязательном поле стирает его;
+// `studio_recurring_delete` с чужим `dryRun: true` удаляет по-настоящему; `studio_invoice_mark_paid`
+// с `amount` вместо `amountKopecks` закрывает счёт целиком. Поэтому схемы строгие: лишний ключ —
+// ошибка валидации, запрос в studio не уходит. Read-инструменты только с `id` намеренно не строгие.
+describe('строгие входные схемы — неизвестный аргумент отвергается', () => {
+  const cases: Array<[tool: string, args: Record<string, unknown>]> = [
+    ['studio_client_list', { search: 'ООО' }],
+    ['studio_client_create', { type: 'COMPANY', name: 'ООО Ромашка' }],
+    ['studio_client_update', { id: 'c1', type: 'COMPANY', name: 'ООО Ромашка' }],
+    ['studio_project_list', { clientId: 'c1', status: 'IN_PROGRESS' }],
+    ['studio_project_create', { clientId: 'c1', title: 'Сайт', status: 'IN_PROGRESS' }],
+    ['studio_project_update', { id: 'p1', clientId: 'c1', title: 'Сайт', status: 'IN_PROGRESS' }],
+    ['studio_project_set_status', { id: 'p1', status: 'DONE' }],
+    ['studio_project_time_entries', { id: 'p1', status: 'APPROVED', billable: true }],
+    ['studio_project_set_included_hours', { id: 'p1', hours: 10 }],
+    ['studio_recurring_list', { clientId: 'c1' }],
+    ['studio_recurring_create', { clientId: 'c1', itemName: 'Поддержка', amountRub: 1000, nextRunAt: '2026-10-01' }],
+    [
+      'studio_recurring_update',
+      { id: 'r1', clientId: 'c1', itemName: 'Поддержка', amountRub: 1000, nextRunAt: '2026-10-01' },
+    ],
+    ['studio_recurring_toggle', { id: 'r1', active: false }],
+    ['studio_recurring_delete', { id: 'r1' }],
+    ['studio_invoice_list', { clientId: 'c1', status: 'SENT' }],
+    ['studio_invoice_create', { clientId: 'c1', items: [{ name: 'Работа', quantity: 1, unitPriceRub: 1000 }] }],
+    ['studio_invoice_send', { id: 'i1' }],
+    ['studio_invoice_mark_paid', { id: 'i1', amountKopecks: 100 }],
+    ['studio_invoice_cancel', { id: 'i1' }],
+  ]
+
+  beforeEach(() => {
+    studioAdminRequestMock.mockReset()
+    studioAdminRequestMock.mockResolvedValue({ ok: true, status: 200, json: { data: {} } })
+  })
+
+  it.each(cases)('%s: валидный вызов проходит', async (tool, args) => {
+    const { client } = await connectedClient()
+    const result = await client.callTool({ name: tool, arguments: args })
+    expect(textOf(result)).not.toContain('Input validation error')
+    expect(studioAdminRequestMock).toHaveBeenCalledTimes(1)
+  })
+
+  it.each(cases)('%s: лишний ключ даёт ошибку валидации без запроса в studio', async (tool, args) => {
+    const { client } = await connectedClient()
+    await expectValidationError(client, tool, { ...args, unknownArg: 'x' })
+    expect(studioAdminRequestMock).not.toHaveBeenCalled()
+  })
+
+  it('studio_recurring_delete: `dryRun: true` не приводит к настоящему удалению', async () => {
+    const { client } = await connectedClient()
+    await expectValidationError(client, 'studio_recurring_delete', { id: 'r1', dryRun: true })
+    expect(studioAdminRequestMock).not.toHaveBeenCalled()
+  })
+
+  it('studio_invoice_mark_paid: `amount` вместо `amountKopecks` не закрывает счёт целиком', async () => {
+    const { client } = await connectedClient()
+    await expectValidationError(client, 'studio_invoice_mark_paid', { id: 'i1', amount: 100 })
+    expect(studioAdminRequestMock).not.toHaveBeenCalled()
+  })
+})

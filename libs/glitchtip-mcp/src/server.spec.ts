@@ -146,3 +146,37 @@ describe('createGlitchtipMcpServer', () => {
     })
   })
 })
+
+// zod по умолчанию молча отбрасывает неизвестные ключи: `glitchtip_list_issues` с опечаткой в
+// `environment`/`status`/`statsPeriod` вернёт issues по умолчанию (unresolved за 14 дней, все
+// окружения) — выборка выглядит валидной, но отвечает на другой вопрос. Схемы строгие.
+describe('строгие входные схемы — неизвестный аргумент отвергается', () => {
+  const cases: Array<[tool: string, args: Record<string, unknown>, mock: ReturnType<typeof vi.fn>]> = [
+    [
+      'glitchtip_list_issues',
+      { project: 'aboi', environment: 'production', statsPeriod: '24h', status: 'resolved', limit: 5 },
+      listIssuesMock,
+    ],
+    ['glitchtip_get_issue_event', { issueId: '42' }, getLatestIssueEventMock],
+  ]
+
+  it.each(cases)('%s: валидный вызов проходит', async (tool, args, mock) => {
+    mock.mockResolvedValue([{ id: '1' }])
+    const { client } = await connectedClient()
+    const result = await client.callTool({ name: tool, arguments: args })
+    expect(textOf(result)).not.toContain('Input validation error')
+    expect(mock).toHaveBeenCalledTimes(1)
+  })
+
+  it.each(cases)('%s: лишний ключ даёт ошибку валидации без обращения к GlitchTip', async (tool, args, mock) => {
+    const { client } = await connectedClient()
+    await expectValidationError(client, tool, { ...args, unknownArg: 'x' })
+    expect(mock).not.toHaveBeenCalled()
+  })
+
+  it('glitchtip_list_issues: `env` вместо `environment` не отдаёт issues всех окружений', async () => {
+    const { client } = await connectedClient()
+    await expectValidationError(client, 'glitchtip_list_issues', { project: 'aboi', env: 'production' })
+    expect(listIssuesMock).not.toHaveBeenCalled()
+  })
+})
