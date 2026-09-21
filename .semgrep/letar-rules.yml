@@ -224,6 +224,32 @@ rules:
       См. .claude/rules/forms.md § «Не делай».
     pattern-regex: '\.Field\.NativeSelect\b'
 
+  # ⚠️ WARNING, не ERROR: правило ловит и встроенные в карточку мини-формы (панели сделок, рейсы),
+  # где одиночная кнопка на месте, — их перевод на FormActions отдельная задача, а не повод
+  # блокировать коммит. Ловит только «голую» обёртку прямо перед Submit: футер, у которого между
+  # обёрткой и кнопкой есть другой элемент, правило не видит.
+  - id: letar-forms-hand-rolled-footer-use-formactions
+    languages: [generic]
+    severity: WARNING
+    paths:
+      include:
+        - '*.tsx'
+      exclude:
+        - libs/forms/**
+        - libs/forms-core/**
+        - libs/forms-react/**
+        - libs/forms-shadcn/**
+        - libs/forms-vue/**
+        - libs/forms-vue-shadcn/**
+        - libs/forms-angular/**
+        - libs/ui/**
+    message: >-
+      Футер формы собран руками (Flex/Box/HStack прямо над Button.Submit). Используй FormActions из
+      @letar/ui: основное действие справа, дополнительное («Удалить», «Отмена») — в проп secondary,
+      слева; отступ от карточки и раскладка на телефоне зашиты в компонент. Кнопки внутри одного
+      size. См. libs/ui/README.md § FormActions и .claude/docs/form-footer-formactions.md.
+    pattern-regex: '<(Flex|Box|HStack)\b[^>]*>\s*<\w+\.Button\.Submit\b'
+
   # ⚠️ Не запрет quitAndInstall() как такового — все три текущих Electron-приложения легитимно
   # вызывают его как fallback-ветку ПОСЛЕ installAndRelaunchViaScheduler() (см. образец
   # apps/kami-key-the/main/updater.ts): планировщик задач не принял задачу → штатная тихая
