@@ -591,6 +591,10 @@ export const ProfileSchema = z
 export type ProfileFormData = z.infer<typeof ProfileSchema>
 ```
 
+⚠️ Схемы из `schema.zmodel` (`@meta("form.*")`, `@email`, `@regex`) ломаются тихо: `@email` не
+принимает `''` от очищенного необязательного поля, в строках ZModel съедается одиночный `\`.
+Разбор и чеклист — [zenstack-form-meta-directive-pitfalls](/.claude/docs/zenstack-form-meta-directive-pitfalls.md).
+
 ---
 
 ## React 19 хуки для оптимистичных обновлений

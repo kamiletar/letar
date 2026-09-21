@@ -102,6 +102,7 @@
 - [letar-forms-missing-i18nprovider-english-hints](/.claude/docs/letar-forms-missing-i18nprovider-english-hints.md) ⚠️ без `FormI18nProvider` подсказки молча остаются английскими
 - [letar-forms-select-nullable-meta-options-lost](/.claude/docs/letar-forms-select-nullable-meta-options-lost.md) ⚠️ nullable enum → пустой дропдаун, `.meta()` не найден
 - [letar-forms-fieldprops-typed-tags-not-resolved](/.claude/docs/letar-forms-fieldprops-typed-tags-not-resolved.md) ✅ закрыто в v0.7.0 — история на случай регрессии
+- [zenstack-form-meta-directive-pitfalls](/.claude/docs/zenstack-form-meta-directive-pitfalls.md) ⚠️ `@email` и `''`, слэши в `@regex`, `form.tooltip.*` — тихие ловушки директив
 - [letar-forms-field-auto-fieldtype-drops-extra-props](/.claude/docs/letar-forms-field-auto-fieldtype-drops-extra-props.md) ⚠️ `Field.Auto` с `meta.ui.fieldType` молча теряет лишние пропсы
 - [letar-forms-urlsync-missing-router-no-rsc-refetch](/.claude/docs/letar-forms-urlsync-missing-router-no-rsc-refetch.md) ⚠️ `UrlSync` без `router` — URL меняется, данные нет
 - [letar-forms-field-date-urlsync-date-object](/.claude/docs/letar-forms-field-date-urlsync-date-object.md) ⚠️ `Field.Date` + `UrlSync`: поле навсегда «активно»
