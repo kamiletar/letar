@@ -73,6 +73,6 @@ send_message(to: ["animatrona-coordinator-dev"], subject: "change: <описан
 ## Проект
 
 **Приложение:** animatrona-tracker (Next.js 16)
-**Порт:** 3010 (dev и production — совпадают, см. `.claude/rules/env-files.md`)
+**Порт:** 3009 (dev, `apps/animatrona-tracker/.env`; в production-контейнере — 3010, `docker-compose.production.yml`)
 **Домен:** animatrona-tracker.letar.best
 **Описание:** Веб-платформа для каталога аниме, регистрации IPFS раздач и модерации контента
