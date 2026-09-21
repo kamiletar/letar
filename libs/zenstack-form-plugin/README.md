@@ -227,26 +227,35 @@ ZModel `enum` (см. ниже), а не оставлять на старом с�
 их на `create`/`update` через `@zenstackhq/zod` — плагин форм наследует те же constraints в
 клиентскую Zod-схему, так что источник валидации остаётся один:
 
-| ZModel-атрибут       | Zod-constraint                                                                 |
-| -------------------- | ------------------------------------------------------------------------------ |
-| `@email`             | `.email()`                                                                     |
-| `@length(min, max)`  | `.min(min)` / `.max(max)` (строки и списки)                                    |
-| `@gte(x)`            | `.min(x)` (включительно)                                                       |
-| `@gt(x)`             | `.gt(x)` (строго больше)                                                       |
-| `@lte(x)`            | `.max(x)` (включительно)                                                       |
-| `@lt(x)`             | `.lt(x)` (строго меньше)                                                       |
-| `@regex("...")`      | `.regex(/.../)`                                                                |
-| `@startsWith("...")` | `.startsWith(...)`                                                             |
-| `@endsWith("...")`   | `.endsWith(...)`                                                               |
-| `@contains("...")`   | `.includes(...)`                                                               |
-| `@datetime`          | `.datetime()`                                                                  |
-| `@date`              | `.date()`                                                                      |
-| `@time(precision?)`  | `.time()` / `.time({ precision })`                                             |
-| `@url`               | `.url()`                                                                       |
-| `@phone`             | телефон как строка (валидируется через `ZodUtils`, формат не диктуется формой) |
-| `@trim`              | `.trim()`                                                                      |
-| `@lower`             | `.toLowerCase()`                                                               |
-| `@upper`             | `.toUpperCase()`                                                               |
+| ZModel-атрибут       | Zod-эквивалент (что вызывает `ZodUtils`)                  |
+| -------------------- | --------------------------------------------------------- |
+| `@email`             | `.email()`                                                |
+| `@length(min, max)`  | `.min(min)` / `.max(max)` (строки и списки)               |
+| `@gte(x)`            | `.gte(x)` (включительно)                                  |
+| `@gt(x)`             | `.gt(x)` (строго больше)                                  |
+| `@lte(x)`            | `.lte(x)` (включительно)                                  |
+| `@lt(x)`             | `.lt(x)` (строго меньше)                                  |
+| `@regex("...")`      | `.regex(new RegExp("..."))`                               |
+| `@startsWith("...")` | `.startsWith(...)`                                        |
+| `@endsWith("...")`   | `.endsWith(...)`                                          |
+| `@contains("...")`   | `.includes(...)`                                          |
+| `@datetime`          | `.datetime()`                                             |
+| `@date`              | `.date()`                                                 |
+| `@time(precision?)`  | `.time()` / `.time({ precision })`                        |
+| `@url`               | `.url()`                                                  |
+| `@phone`             | `.e164()` (международный формат, например `+79991234567`) |
+| `@trim`              | `.trim()`                                                 |
+| `@lower`             | `.toLowerCase()`                                          |
+| `@upper`             | `.toUpperCase()`                                          |
+
+⚠️ **Правая колонка — семантика, а не сгенерированный код.** Нативные атрибуты плагин не
+разворачивает в цепочку `.min()`/`.regex(/…/)`: он эмитит
+`withNative(z.string(), (s) => ZodUtils.addStringValidation(s, [{ name: '@regex', args: [...] }]))` —
+атрибуты уходят данными в `@zenstackhq/zod`, а вызовы из колонки делает уже `ZodUtils`
+(`addStringValidation` для `String`, `addNumberValidation` для `Int`/`Float`, `addBigIntValidation`
+для `BigInt`, `addListValidation` для списков). Кастомный `message` дополнительно оборачивает всё в
+`applyNativeMessages(...)`. Обычной цепочкой (`.min(...)`, `.regex(/…/)`) плагин выписывает только
+ключи `form.props` (escape hatch ниже) и поля `Decimal`.
 
 ⚠️ **Обратные слэши в `@regex("…")` записывай парой `\\`.** Строковый литерал ZModel
 разбирается с escape-последовательностями, и неизвестный escape теряет слэш: `\s` доходит до
@@ -260,7 +269,8 @@ ZModel `enum` (см. ниже), а не оставлять на старом с�
 
 `Decimal`-поля не поддерживают эти атрибуты через нативный путь (несовместимость
 `ZodUtils.addDecimalValidation` с контрактом `Decimal → z.number()` формы) — для них по-прежнему
-работают только `@gte`/`@gt`/`@lte`/`@lt`.
+работают только `@gte`/`@gt`/`@lte`/`@lt`, и плагин выписывает их обычной цепочкой, без
+`ZodUtils`: `@gte` → `.min()`, `@gt` → `.gt()`, `@lte` → `.max()`, `@lt` → `.lt()`.
 
 ```zmodel
 portions Int @gte(1) @lte(100) @meta("form.title", "Количество порций")
@@ -271,8 +281,17 @@ email String @email @meta("form.title", "Email")
 Генерирует:
 
 ```typescript
-portions: z.number().int().min(1).max(100).meta({ ui: { title: 'Количество порций' } })
-email: z.string().email().meta({ ui: { title: 'Email' } })
+portions: withNative(
+  z.number().int(),
+  (s) =>
+    ZodUtils.addNumberValidation(s, [
+      { name: '@gte', args: [{ name: 'value', value: { kind: 'literal', value: 1 } }] },
+      { name: '@lte', args: [{ name: 'value', value: { kind: 'literal', value: 100 } }] },
+    ]),
+)
+  .meta({ ui: { title: 'Количество порций' } })
+email: withNative(z.string(), (s) => ZodUtils.addStringValidation(s, [{ name: '@email' }]))
+  .meta({ ui: { title: 'Email' } })
 ```
 
 Ни одного дублирующего `form.props`-ключа не нужно — форма и ORM валидируют одинаково, потому что
@@ -291,8 +310,19 @@ email String @email("Введите настоящий email") @meta("form.title
 ```
 
 ```typescript
-price: z.number().int().min(0, 'Цена не может быть отрицательной').meta({ ui: { title: 'Цена' } })
+price: applyNativeMessages(
+  withNative(z.number().int(), (s) =>
+    ZodUtils.addNumberValidation(s, [{
+      name: '@gte',
+      args: [{ name: 'value', value: { kind: 'literal', value: 0 } }],
+    }])),
+  [{ count: 1 }, { count: 1, message: 'Цена не может быть отрицательной' }],
+)
+  .meta({ ui: { title: 'Цена' } })
 ```
+
+Первая запись `{ count: 1 }` — служебная: `z.number().int()` сам кладёт один check ещё до
+`ZodUtils`, и без неё текст съехал бы на чужую проверку. Для `String`/`Float` её нет.
 
 `message` — не `@meta`-ключ, он остаётся частью самого нативного атрибута ZModel. Для `@length`
 один `message` применяется к обеим границам (`min` и `max`), если заданы обе.

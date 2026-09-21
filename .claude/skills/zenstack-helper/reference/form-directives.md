@@ -130,15 +130,23 @@ export const RecipeTypeFormSchema = z.enum(['SWEET', 'SALTY']).meta({
 которое ORM уже применяет на `create`/`update` через `@zenstackhq/zod`. Один источник валидации
 вместо двух параллельных:
 
-| ZModel-атрибут      | Zod-constraint                     |
-| ------------------- | ---------------------------------- |
-| `@email`            | `.email()`                         |
-| `@length(min, max)` | `.min(min)` / `.max(max)` (строки) |
-| `@gte(x)`           | `.min(x)` (включительно)           |
-| `@gt(x)`            | `.gt(x)` (строго больше)           |
-| `@lte(x)`           | `.max(x)` (включительно)           |
-| `@lt(x)`            | `.lt(x)` (строго меньше)           |
-| `@regex("...")`     | `.regex(/.../)`                    |
+| ZModel-атрибут      | Zod-эквивалент (вызывает `ZodUtils`)        |
+| ------------------- | ------------------------------------------- |
+| `@email`            | `.email()`                                  |
+| `@length(min, max)` | `.min(min)` / `.max(max)` (строки и списки) |
+| `@gte(x)`           | `.gte(x)` (включительно)                    |
+| `@gt(x)`            | `.gt(x)` (строго больше)                    |
+| `@lte(x)`           | `.lte(x)` (включительно)                    |
+| `@lt(x)`            | `.lt(x)` (строго меньше)                    |
+| `@regex("...")`     | `.regex(new RegExp("..."))`                 |
+
+⚠️ **Правая колонка — семантика, а не сгенерированный код.** Нативные атрибуты плагин не
+разворачивает в цепочку `.min()`/`.regex(/…/)`: он эмитит
+`withNative(z.string(), (s) => ZodUtils.addStringValidation(s, [{ name: '@regex', args: [...] }]))`,
+а вызовы из колонки делает уже `ZodUtils` (`addNumberValidation` для `Int`/`Float`,
+`addListValidation` для списков); кастомный `message` оборачивает всё ещё в
+`applyNativeMessages(...)`. Обычной цепочкой плагин выписывает только `form.props`-ключи и поля
+`Decimal`. `@phone` → `.e164()`.
 
 ⚠️ **Слэши в `@regex("…")` — парой `\\`.** Строка ZModel разбирается с escape-последовательностями:
 `\s` доходит до плагина как `s`, `\d` как `d`, `\.` как `.` — генерация зелёная, регулярка другая.
@@ -156,10 +164,14 @@ portions Int @gte(1) @lte(100)
 Генерирует:
 
 ```typescript
-portions: z.number()
-  .int()
-  .min(1)
-  .max(100)
+portions: withNative(
+  z.number().int(),
+  (s) =>
+    ZodUtils.addNumberValidation(s, [
+      { name: '@gte', args: [{ name: 'value', value: { kind: 'literal', value: 1 } }] },
+      { name: '@lte', args: [{ name: 'value', value: { kind: 'literal', value: 100 } }] },
+    ]),
+)
   .meta({ ui: { title: 'Количество порций', fieldType: 'numberInput', fieldProps: { showValue: true } } })
 ```
 
