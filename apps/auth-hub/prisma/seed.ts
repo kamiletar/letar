@@ -109,7 +109,7 @@ const clients = [
     redirectUrls: [
       'https://animatrona-tracker.letar.best/api/auth/callback/letar-auth',
       'https://animatrona-tracker.letar.best/sign-in',
-      'http://localhost:3010/sign-in',
+      'http://localhost:3009/sign-in',
     ].join(','),
   },
   {
