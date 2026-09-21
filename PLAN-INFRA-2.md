@@ -1726,6 +1726,17 @@ Redis как `interrupted`, а не молча исчезать при рест�
 
 ---
 
+### Постскриптум 2026-09-21: `deploy_wait` > 60с падал «Request timed out»
+
+Не клиент `deploy-mcp` и не Fastify/туннель: внутренний in-memory `Client` агрегатора `letar`
+(`.claude/mcp/letar.ts`) держал дефолтные 60с SDK на каждый вызов. Исправлено (10 мин на все
+внутренние вызовы), воспроизведено скриптом 60с/65с. Разбор —
+[mcp-servers.md](/.claude/docs/mcp-servers.md#internal-client-timeout).
+
+- [ ] ⚠️ Открытый вопрос: «Unable to connect» к туннелю `:13101` при живом `deploy_agent_health`
+      не объяснён (гипотеза — устаревший keep-alive через SSH-туннель в Bun fetch); при повторе —
+      один повтор GET в `agentRequest` (`libs/deploy-mcp/src/client.ts`).
+
 ## §39 — Шаблон `.gitignore` для приватных submodule уже́ корневого: `uploads/` не закрыт ✅ ЗАКРЫТО (2026-08-06)
 
 Продолжение §34.2 п.2. Там закрыли «у submodule вообще нет своего `.gitignore`» — генератор
