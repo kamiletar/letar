@@ -4350,11 +4350,15 @@ animatrona — NVENC-раздел `nvenc-web-video-codec-ladder.md`, строк�
       ответ печатает применённые фильтры. См. e2e-testing.md § «Ловушки свежего s1».
 - [ ] ⚠️ Открытый вопрос: процесс MCP `letar` нужно перезапустить, чтобы новая схема `run_e2e` и
       текст отказа гейта (deploy-mcp 0.5.0) заработали; пока не перезапущен — действует старое.
-- [ ] ⚠️ Открытый вопрос: `bun.lock` в `HEAD` отстаёт от версий `package.json` у dashboard-agent
-      (0.16.5 против 0.17.0), aboi, poster-microtext-desktop, svoichuzhie; в рабочем дереве lock
-      обновлён, но не закоммитен, а запись deploy-mcp там 0.4.1 против 0.5.0 в коммите.
-      Риск — `--frozen-lockfile` на деплое (`bun-lock-drift-unpushed-commits-blocks-all-deploys`).
-      Не чинил: чужие версии, часть могла быть непушнутой.
+- [x] `bun.lock` отстаёт от версий `package.json` — закрыто 2026-09-21: lock выровнен (6 workspace,
+      включая `libs/auth`, которого в находке не было; `deploy-mcp` оставлен на 0.5.0), добавлена
+      gate-проверка `lock-versions` (`check-all`, pre-commit), шаг 5 в `app-workflow.md` дополнен.
+      Механизм — `bun-lock-drift-unpushed-commits-blocks-all-deploys` § «Второй класс».
+- [ ] ⚠️ Открытый вопрос: указатели `aboi`/`dsperevod`/`svoichuzhie` в letar записаны на коммиты,
+      которых нет на origin submodule — сначала push submodule, потом letar; до этого любой деплой
+      падает на `not our ref` (`bash scripts/check-submodule-push-state.sh`).
+- [ ] ⚠️ Открытый вопрос: хук `pre-commit-deps-integrity.sh` в `.git/hooks` — старая копия; новая
+      логика `lock-versions` заработает после `bash scripts/hooks/install.sh --all-submodules`.
 - [ ] ⚠️ Открытый вопрос: `forms-coordinator-dev`, `dsperevod-dev`, `svoichuzhie-dev` ретированы в
       Agent Mail — `send_message` им падает (`reply_message` в существующий тред работает); токенов
       deploy-агент не имеет.

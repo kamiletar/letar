@@ -39,6 +39,11 @@
 3. `apps/<app>/CHANGELOG.md` — запись об изменениях
 4. `apps/<app>/PLAN_TESTING.md` — если добавил тесты
 5. `apps/<app>/package.json` — поднять версию (semver)
+   ⚠️ и **сразу** `bun.lock`: сверка `bun scripts/check-lock-workspace-versions.mjs`, при расхождении
+   `bun install --lockfile-only` (только в чистом дереве) и отдельный коммит lock. Без этого
+   `--frozen-lockfile` на сервере роняет деплой ВСЕХ приложений. Версия выросла внутри приватного
+   submodule — lock коммить после push submodule
+   ([разбор](/.claude/docs/bun-lock-drift-unpushed-commits-blocks-all-deploys.md))
 6. `time_stage_close`, если работал в рамках именованного этапа
 7. `nx run-many -t format --projects=<app>` → `nx lint <app>` → `nx typecheck:tsgo <app>`
 8. Закоммитить осмысленным сообщением ([git.md](/.claude/rules/git.md))
