@@ -54,6 +54,10 @@ to invalid URL`. Обход — `MSYS_NO_PATHCONV=1` перед командой
 MSYS_NO_PATHCONV=1 node .claude/scripts/dev-session-screenshot.mjs aboi 3018 /catalog/gornyj-duh .claude/artifacts/check.png
 ```
 
+Чтение токена, запуск chromium, логин через `/api/auth/dev-session` и проверка подмены пути Git Bash
+общие для обоих скриптов ниже и живут в [.claude/scripts/lib/dev-session.mjs](/.claude/scripts/lib/dev-session.mjs) —
+правь там, не копируй в новый скрипт.
+
 ## Консоль вместо скриншота: `dev-session-console-check.mjs`
 
 Скриншот не показывает то, что нужно при разборе ошибки гидратации React (#418): в dev React

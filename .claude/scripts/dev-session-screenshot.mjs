@@ -17,31 +17,22 @@
 //   node .claude/scripts/dev-session-screenshot.mjs <app> <port> <path> <output.png> [email]
 // Пример:
 //   node .claude/scripts/dev-session-screenshot.mjs aboi 3018 /catalog/gornyj-duh .claude/artifacts/check.png
-import { readFileSync } from 'node:fs'
-import { chromium } from 'playwright'
+import { assertUrlPath, launchPage, loginWithDevSession, readDevSessionToken } from './lib/dev-session.mjs'
 
 const [, , app, port, targetPath, outPath, email = `admin@${app}.local`] = process.argv
 if (!app || !port || !targetPath || !outPath) {
   console.error('Usage: node dev-session-screenshot.mjs <app> <port> <path> <output.png> [email]')
   process.exit(1)
 }
+assertUrlPath(targetPath)
 
 const BASE_URL = `http://localhost:${port}`
-const envLocal = readFileSync(`apps/${app}/.env.local`, 'utf8')
-const tokenMatch = envLocal.match(/^DEV_SESSION_TOKEN=(?:"([^"]+)"|(\S+))$/m)
-if (!tokenMatch) {
-  throw new Error(`DEV_SESSION_TOKEN не найден в apps/${app}/.env.local — см. .claude/docs/verification-pitfalls.md`)
-}
-const token = tokenMatch[1] ?? tokenMatch[2]
+const token = readDevSessionToken(app)
 
-const browser = await chromium.launch()
-const context = await browser.newContext({ viewport: { width: 1280, height: 2200 } })
-const page = await context.newPage()
+const { browser, page } = await launchPage({ width: 1280, height: 2200 })
 
 // Программная авторизация — секрет не покидает этот процесс, не набирается через UI
-await page.goto(
-  `${BASE_URL}/api/auth/dev-session?email=${encodeURIComponent(email)}&token=${encodeURIComponent(token)}`,
-)
+await loginWithDevSession(page, BASE_URL, email, token)
 
 await page.goto(`${BASE_URL}${targetPath}`, { waitUntil: 'networkidle' })
 await page.waitForTimeout(500) // дать догрузиться lazy-контенту/шрифтам

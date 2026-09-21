@@ -22,9 +22,7 @@
 // собрать консоль ещё раз. Диалог «Восстановить черновик» скрипт лишь фиксирует; --accept-restore
 // (вместе с --reload-after-fill) ещё и нажимает «Восстановить» — проверить гидратацию восстановленных
 // значений. Код возврата: 1 — есть error/pageerror, 0 — только warning или тишина.
-import { readFileSync } from 'node:fs'
-import { fileURLToPath } from 'node:url'
-import { chromium } from 'playwright'
+import { assertUrlPath, launchPage, loginWithDevSession, readDevSessionToken } from './lib/dev-session.mjs'
 
 const FILL_FIELDS_COUNT = 3
 const DRAFT_SAVE_WAIT_MS = 1500
@@ -41,36 +39,20 @@ if (!app || !port || !targetPath) {
   )
   process.exit(1)
 }
-// Признак подмены пути Git Bash: вместо `/admin/...` пришёл Windows-путь
-if (!targetPath.startsWith('/') || /^[A-Za-z]:/.test(targetPath)) {
-  console.error(
-    `Путь «${targetPath}» не похож на URL-путь. В Git Bash ведущий / подменяется на C:/Program Files/Git/… — `
-      + 'запусти с MSYS_NO_PATHCONV=1 (в PowerShell не нужно).',
-  )
-  process.exit(1)
-}
+assertUrlPath(targetPath)
 
 const BASE_URL = `http://localhost:${port}`
-const envPath = fileURLToPath(new URL(`../../apps/${app}/.env.local`, import.meta.url))
-const tokenMatch = readFileSync(envPath, 'utf8').match(/^DEV_SESSION_TOKEN=(?:"([^"]+)"|(\S+))$/m)
-if (!tokenMatch) {
-  throw new Error(`DEV_SESSION_TOKEN не найден в apps/${app}/.env.local — см. .claude/docs/verification-pitfalls.md`)
-}
-const token = tokenMatch[1] ?? tokenMatch[2]
+const token = readDevSessionToken(app)
 
 // Маскировка секрета в любом тексте, который уйдёт в вывод (сырой и URL-кодированный вид)
 const secretForms = [...new Set([token, encodeURIComponent(token)])]
 const mask = (text) => secretForms.reduce((acc, form) => acc.split(form).join('***'), text)
 const clip = (text) => text.length > MAX_MESSAGE_LENGTH ? `${text.slice(0, MAX_MESSAGE_LENGTH)}… [обрезано]` : text
 
-const browser = await chromium.launch()
-const context = await browser.newContext({ viewport: { width: 1280, height: 900 } })
-const page = await context.newPage()
+const { browser, page } = await launchPage({ width: 1280, height: 900 })
 
-// Программная авторизация — секрет не покидает этот процесс. + в токене кодируется через encodeURIComponent
-await page.goto(
-  `${BASE_URL}/api/auth/dev-session?email=${encodeURIComponent(email)}&token=${encodeURIComponent(token)}`,
-)
+// Программная авторизация — секрет не покидает этот процесс
+await loginWithDevSession(page, BASE_URL, email, token)
 
 // Слушатели — после логина: шум самого dev-session-запроса в отчёт не нужен
 let phase = 'load'
