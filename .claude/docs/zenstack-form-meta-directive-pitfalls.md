@@ -116,7 +116,7 @@ grep -n "@regex\|\.regex(" src/generated/form-schemas/Supplier.form.ts
 регулярки: верная пара слэшей не гарантирует верного паттерна, и слэш в самом конце паттерна он
 не разбирает — тест на сгенерированной схеме (положительный и отрицательный пример) остаётся
 единственным способом проверить семантику. Тесты сторожа —
-`bun test scripts/check-zmodel-regex-backslashes.test.mjs` (в `ci.yml` пока не подключены).
+`bun test scripts/check-zmodel-regex-backslashes.test.mjs`.
 
 ## 3. Подсказки поля: `form.tooltip.*` (`zenstack-form-plugin` 4.1.0+)
 
