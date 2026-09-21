@@ -2,10 +2,9 @@ import { expect, type Page, test } from '@playwright/test'
 import { testFan } from './fixtures/test-data'
 import { emailField, loginForm, passwordField } from './helpers/auth-forms'
 
-// Better Auth отдаёт message сервера («Invalid email or password»), и assertAuthOk предпочитает
-// его русскому fallback'у формы — на staging пользователь сейчас видит английский текст.
-// Допускаем оба варианта: тест проверяет сам факт показа ошибки входа, а не локализацию.
-const WRONG_CREDENTIALS_RE = /неверный email или пароль|invalid email or password/i
+// Better Auth отдаёт английский message («Invalid email or password») вместе с кодом ошибки;
+// assertAuthOk предпочитает локализованный текст формы, поэтому английского быть не должно.
+const WRONG_CREDENTIALS_RE = /неверный email или пароль/i
 
 // Хелпер: заполняет и отправляет форму логина
 async function fillLoginForm(page: Page, email: string, password: string) {

@@ -1479,6 +1479,16 @@ export async function updateProject(projectId: string, data: ProjectData) {
 
 ## Устранение неполадок
 
+**Пользователь видит английское «Invalid email or password» вместо русской ошибки формы**
+
+Better Auth клиент возвращает `{ error: { code, message } }`, где `message` для каждого `code` —
+английская заготовка каталога (`BASE_ERROR_CODES`). Бросать её напрямую нельзя. `assertAuthOk`
+из `@letar/auth/client` (≥ 0.16.0) выбирает текст так: `messages[code]` → серверный `message` с
+кириллицей → `defaultMessage` формы (если у ошибки есть `code`) → серверный `message` (ошибка
+без `code`: rate-limit не маскируется под «Неверный пароль») → «Произошла ошибка». Для
+ru-приложений — `messages: AUTH_ERROR_MESSAGES_RU`; многоязычные (aboi) передают строку из своего
+i18n. ⚠️ e2e не должен принимать оба варианта («неверный… | invalid…») — это скрывает регресс.
+
 **Ошибка "Unauthorized"**
 
 ```typescript

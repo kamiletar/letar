@@ -33,7 +33,13 @@ export {
 } from './create-auth-client'
 
 // Components
-export { assertAuthOk, type AuthResultLike } from './assert-auth-ok'
+export {
+  assertAuthOk,
+  type AssertAuthOkOptions,
+  AUTH_ERROR_MESSAGES_RU,
+  type AuthResultLike,
+  resolveAuthErrorMessage,
+} from './assert-auth-ok'
 export { type AuthGuardProps, createAuthGuard } from './auth-guard'
 export {
   createOAuthButtons,

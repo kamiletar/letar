@@ -255,6 +255,17 @@ async function handleSubmit(data: SignUpData) {
 }
 ```
 
+Какой текст увидит пользователь (`@letar/auth` ≥ 0.16.0): `messages[code]` → серверный `message`
+на кириллице → `defaultMessage` (для ошибок с `code`: их `message` — английская заготовка Better
+Auth, «Invalid email or password») → серверный `message` (ошибка без `code`, например rate-limit)
+→ «Произошла ошибка». Для ru-приложений есть готовый словарь кодов:
+
+```ts
+import { assertAuthOk, AUTH_ERROR_MESSAGES_RU } from '@letar/auth/client'
+
+assertAuthOk(result, { defaultMessage: 'Ошибка регистрации', messages: AUTH_ERROR_MESSAGES_RU })
+```
+
 `mapServerErrors` дальше разбирает обычный `Error`/строку как `ActionResult`-формат (см. раздел
 выше) — отдельного парсера под Better Auth не требуется, сообщение уйдёт в `formErrors`. Если
 нужен field-level маппинг конкретных `result.error.code` — передай `fieldMap`, как для любого

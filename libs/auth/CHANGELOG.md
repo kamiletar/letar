@@ -7,6 +7,24 @@
 
 ## [Unreleased]
 
+## [0.16.0] - 2026-09-21
+
+### Changed
+
+- **`assertAuthOk`: английский `message` Better Auth больше не перекрывает локализованный текст
+  формы.** Раньше `result.error.message` бросался раньше `defaultMessage`, и на `/login`
+  пользователь видел «Invalid email or password». Теперь приоритет: `messages[code]` →
+  серверный `message` с кириллицей (сервер локализовал сам) → `defaultMessage` (если у ошибки
+  есть `code` — `message` там английская заготовка каталога Better Auth) → серверный `message`
+  (ошибка без `code`: rate-limit и т. п. не маскируется под «Неверный пароль») → «Произошла ошибка».
+  Второй аргумент по-прежнему принимает строку.
+
+### Added
+
+- `assertAuthOk(result, { defaultMessage?, messages? })`, `resolveAuthErrorMessage(error, options)`,
+  `AssertAuthOkOptions`, `AUTH_ERROR_MESSAGES_RU` (готовый словарь кодов для ru-приложений;
+  подключается явно — многоязычные берут тексты из своего i18n). `AuthResultLike.error.status`.
+
 ## [0.15.3] - 2026-09-17
 
 ### Added
