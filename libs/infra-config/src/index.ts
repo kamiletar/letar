@@ -214,8 +214,11 @@ export function getCurrentServer(): InfraServer {
  * ⚠️ `dashboard` и `dashboard-agent` сюда не входят и не могут входить: они перезапускают сами себя
  * (канал деплоя идёт через их же контейнер), release-фаза на s2 такие приложения отвергает.
  * ⚠️ Запуск СЕРВИСА остаётся на s2 (`SERVER_APPS` не меняется) — s1 только собирает.
+ *
+ * Пилот 1 (2026-09-21): `letar-landing` — приложение без БД. Аварийного однохостового пути нет:
+ * при недоступности s1/registry деплой не выполняется, откат — убрать имя из списка.
  */
-export const BUILD_ON_S1_APPS: string[] = []
+export const BUILD_ON_S1_APPS: string[] = ['letar-landing']
 
 /** Собирается ли приложение в production на s1 (см. `BUILD_ON_S1_APPS`). */
 export function isBuiltOnS1(app: string): boolean {
