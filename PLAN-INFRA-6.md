@@ -4600,3 +4600,21 @@ animatrona — NVENC-раздел `nvenc-web-video-codec-ladder.md`, строк�
       хуков не сохранились, поэтому доказать нельзя (не исключён и `--no-verify`).
 - [ ] Гейт работает только в pre-commit и не зарегистрирован в `scripts/check-all.mjs`: в CI
       `typecheck:tsgo` рваный файл и так ловит, а сам хук нужен ради минут до пуша. Не пересматривалось.
+
+## §191 (2026-09-22) Guard `APP_PORTS` против production-compose ✅ ЗАКРЫТО
+
+`APP_PORTS` в `@letar/infra-config` хранит порт production-контейнера и ведётся вручную;
+`app-ports.guard.spec.ts` сверяет dev-порты, `app-registry.guard.spec.ts` — копию dashboard-agent с
+каноном, а с реальным контейнером запись не сверялась (история пропусков — §136, `auth-hub` и
+`animatrona-tracker`).
+
+- [x] [libs/infra-config/src/app-ports-production.guard.spec.ts](/libs/infra-config/src/app-ports-production.guard.spec.ts):
+      для каждой записи `APP_PORTS` порт сверяется с `traefik…server.port` и `PORT` в
+      `docker-compose.production.yml` и с `ENV PORT=` в `Dockerfile.production`. Логика —
+      [app-ports-production.ts](/libs/infra-config/src/app-ports-production.ts), регулярки покрыты
+      `app-ports-production.spec.ts`. Ключ ровно `PORT` (не `SOCKET_PORT`/`SMTP_PORT`). Проверено на
+      реальном репо: 14 из 14 совпадают, подмена значения ловится. Коммит `bec3e88ce`, не запушен.
+- [x] Приложения без compose-файла (приватные submodule в CI) пропускаются, но меньше 6 сверенных
+      — падение; compose без метки и без `PORT` — `unverifiable`, тоже падение.
+- [ ] Обратная проверка (compose есть, записи в `APP_PORTS` нет) не сделана: набор production-
+      приложений для неё нужно брать из dashboard/dashboard-agent, иначе шум.
