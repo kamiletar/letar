@@ -720,7 +720,8 @@ allowlist). Только после этого — `nx g @letar/generators:theme
    активных) или «orphan» (в retired, `inception_ts` ≈ `last_active_ts`, то есть создана и сразу
    ушла в retired без живой сессии).
 2. Для orphan-случая — recovery без порчи данных: agent-mail self-hosted в этом же Docker
-   (`mcp_agent_mail-agent-mail-1`, БД `/app/storage.sqlite3`), `registration_token` читается
+   (`mcp_agent_mail-agent-mail-1`, БД `/app/storage.sqlite3` на тот момент; с 2026-08-20 —
+   `/data/storage.sqlite3`, см. §94), `registration_token` читается
    READ-ONLY SQL-запросом (`sqlite3.connect('file:...?mode=ro', uri=True)`) через `docker exec`,
    дальше — штатный `unretire_agent` этим токеном. Легитимно: БД своя, не чужая, просто чтение
    секрета из своей же инфраструктуры вместо угадывания.
