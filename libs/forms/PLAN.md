@@ -17,7 +17,13 @@
   `'use server'`). Предложено: `ActionFailure`/`UserFacingError`/`catchActionFailure`/
   `isUniqueViolation` в `@letar/forms-core/server-errors`, `useActionFormErrors` в `@letar/forms`,
   плюс `parseActionResultError` принимает `{ error }` без `success: false`.
-- **Статус:** ожидание ответа `forms-coordinator-dev`
+- **Триаж (2026-09-21):** принято, делегировано `forms-dev` (agent-mail, тред `form-action-result-extract`).
+  Раскладка домашнего приложения принята. Отступления от предложения: `parseActionResultError` не
+  расширяется (защита `success === false`), вместо этого отдельный парсер отказа перед ним в цепочке
+  `mapServerErrors`; на решение `forms-dev` — маркер в формате отказа (дак-тайпинг `{ error: string }`
+  бросит и успешный результат с полем `error`); границы разбора имени unique-ограничения (подчёркивания,
+  `@map`) — тестами и README.
+- **Статус:** в работе → `forms-dev`
 
 ### ✅ [2026-09-21] `Steps.Navigation`: пропсы кнопок с `data-*` (закрыт v2.14.22, от domwellbes)
 
