@@ -23,7 +23,7 @@
 - [agent-skills-mirror](/.claude/docs/agent-skills-mirror.md) зеркало `.claude/skills/` для Codex
 - [nextjs16-agent-guide-files](/.claude/docs/nextjs16-agent-guide-files.md) `next dev` сам пишет `AGENTS.md`
 - [llms-txt-pattern](/.claude/docs/llms-txt-pattern.md) `llms.txt`: статика vs роут, юридические запреты
-- [git-multi-agent-incidents](/.claude/docs/git-multi-agent-incidents.md) ⭐ почему правила git такие строгие
+- [git-multi-agent-incidents](/.claude/docs/git-multi-agent-incidents.md) ⭐ почему правила git такие строгие; ⚠️ две сессии под одной identity + `Write` + смешанный индекс = коммит с непарсящимся файлом
 - [git-pathspec-commit-worktree-not-index](/.claude/docs/git-pathspec-commit-worktree-not-index.md) ⚠️ `commit -- <path>` берёт рабочее дерево, не индекс
 - [nx-convert-to-inferred-scope-regression](/.claude/docs/nx-convert-to-inferred-scope-regression.md) ⚠️ генератор тихо меняет охват таргета
 - [nx-target-without-executor-silent-noop](/.claude/docs/nx-target-without-executor-silent-noop.md) ⚠️ таргет без `executor` → `nx:noop`, «успех» за 21мс без тестов
@@ -362,12 +362,16 @@
 bash scripts/hooks/install.sh
 ```
 
-Ставит связку из пяти pre-commit хуков и одного pre-push:
+Ставит связку pre-commit хуков и одного pre-push (ниже — основные; полный набор — в шапке
+`scripts/hooks/install.sh`):
 
 - `pre-commit-scope-guard.sh` — блокирует голый `git commit`/`git add -A`, затянувший файлы из
   нескольких несвязанных `apps/*`/`libs/*`: типовая причина, по которой один агент коммитит чужую
   незакоммиченную работу другого. Обход для легитимных multi-scope коммитов —
   [git.md § Работа рядом с другими агентами](/.claude/rules/git.md).
+- `pre-commit-syntax-check.sh` — блокирует коммит staged `.ts/.tsx`, которые не парсятся (только
+  парсер, доли секунды, проверяет содержимое **индекса**); обход осознанного WIP —
+  `GIT_ALLOW_SYNTAX_ERRORS=1`. Разбор — [git-multi-agent-incidents](/.claude/docs/git-multi-agent-incidents.md).
 - `pre-commit-semgrep.sh` — статический анализ безопасности по staged-файлам.
 - `pre-commit-dprint-check.sh` — блокирует коммит файлов не в стиле dprint (например после
   случайного Prettier-форматирования голой `nx format`).
