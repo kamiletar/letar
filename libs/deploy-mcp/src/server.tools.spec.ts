@@ -21,6 +21,17 @@ const E2E_SHA = 'a'.repeat(40)
 const ORIGIN_SHA = 'b'.repeat(40)
 const connect = () => connectedClient(createDeployMcpServer)
 
+// Файл в формате `libs/infra-config/src/index.ts` для `infraConfigPath`: читалка требует все три объявления
+// (BUILD_ON_S1_APPS, E2E_GATED_APPS, HARD_GATED_APPS), отсутствующие в `lists` — пустые массивы.
+const literal = (apps: string[]) => `[${apps.map((a) => `'${a}'`).join(', ')}]`
+const infraConfig = (lists: { build?: string[]; e2e?: string[]; hard?: string[] } = {}) =>
+  [
+    `export const E2E_GATED_APPS: string[] = ${literal(lists.e2e ?? [])}`,
+    `export const HARD_GATED_APPS: string[] = ${literal(lists.hard ?? [])}`,
+    `export const BUILD_ON_S1_APPS: string[] = ${literal(lists.build ?? [])}`,
+    '',
+  ].join('\n')
+
 describe('run_e2e — фильтры прогона', () => {
   beforeEach(() => {
     vi.mocked(agentRequest).mockResolvedValue({
@@ -176,8 +187,7 @@ describe('deploy_app — BUILD_ON_S1_APPS перечитывается при к
 
   // Не входит ни в реальный BUILD_ON_S1_APPS, ни в e2e-гейты — маршрут определяется только списком.
   const app = 'pilot-app'
-  const list = (...apps: string[]) =>
-    `export const BUILD_ON_S1_APPS: string[] = [${apps.map((a) => `'${a}'`).join(', ')}]\n`
+  const list = (...apps: string[]) => infraConfig({ build: apps })
   const lastServer = () => vi.mocked(agentRequest).mock.calls.at(-1)?.[0]
 
   beforeEach(() => {
@@ -223,7 +233,10 @@ describe('deploy_app — BUILD_ON_S1_APPS перечитывается при к
 
   it('файл нельзя разобрать: отказ с причиной, запрос к агенту не уходит (нет отката на s2)', async () => {
     const file = join(dir, 'broken.ts')
-    writeFileSync(file, `const OTHER = ['x']\nexport const BUILD_ON_S1_APPS: string[] = [...OTHER, '${app}']\n`)
+    writeFileSync(
+      file,
+      infraConfig({}).replace('BUILD_ON_S1_APPS: string[] = []', `BUILD_ON_S1_APPS: string[] = [...OTHER, '${app}']`),
+    )
     const { client } = await connectedClient(() => createDeployMcpServer({ infraConfigPath: file }))
 
     const result = await client.callTool({ name: 'deploy_app', arguments: { app } })
@@ -267,5 +280,146 @@ describe('deploy_app — BUILD_ON_S1_APPS перечитывается при к
     const { client } = await connect()
     await client.callTool({ name: 'deploy_app', arguments: { app } })
     expect(lastServer()).toBe('s2')
+  })
+})
+
+// Тот же класс регресса для e2e-гейтов: `HARD_GATED_APPS`/`E2E_GATED_APPS` вычислялись при импорте, и
+// процесс MCP, запущенный до появления приложения в списке, деплоил его вообще без гейта (fail-open) —
+// хуже, чем s2 вместо s1: там неверен маршрут, здесь пропущена блокирующая проверка.
+describe('deploy_app — HARD_GATED_APPS и E2E_GATED_APPS перечитываются при каждом вызове', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'deploy-mcp-gates-'))
+  afterAll(() => rmSync(dir, { recursive: true, force: true }))
+
+  // Не входит ни в реальные гейты, ни в BUILD_ON_S1_APPS — поведение определяется только файлом.
+  const app = 'gated-pilot-app'
+  const deployCalls = () => vi.mocked(agentRequest).mock.calls.filter(([, req]) => req?.path === '/api/deploy/app')
+  const serverFor = (file: string) => connectedClient(() => createDeployMcpServer({ infraConfigPath: file }))
+
+  beforeEach(() => {
+    vi.mocked(agentRequest).mockReset()
+    vi.mocked(originMainSha).mockReturnValue(ORIGIN_SHA)
+    vi.mocked(isAffectedSince).mockReturnValue(true)
+    vi.mocked(changedPathsSince).mockReturnValue([])
+    // e2e-статуса на s1 нет — для hard-gated приложения это причина отказа; сам деплой агент принимает.
+    vi.mocked(agentRequest).mockImplementation(async (_server, req) =>
+      req?.path === '/api/deploy/app'
+        ? { success: true, data: { deployId: 'd-1' } }
+        : { success: false, error: 'нет данных' }
+    )
+  })
+
+  it('добавление в HARD_GATED_APPS после старта сервера: следующий вызов блокируется, деплой не уходит', async () => {
+    const file = join(dir, 'add-hard.ts')
+    writeFileSync(file, infraConfig())
+    const { client } = await serverFor(file)
+
+    const before = await client.callTool({ name: 'deploy_app', arguments: { app } })
+    expect(before.isError).toBeFalsy()
+    expect(deployCalls()).toHaveLength(1)
+
+    writeFileSync(file, infraConfig({ e2e: [app], hard: [app] }))
+    const after = await client.callTool({ name: 'deploy_app', arguments: { app } })
+    expect(after.isError).toBe(true)
+    expect(textOf(after)).toContain('заблокирован hard e2e-gate')
+    expect(deployCalls()).toHaveLength(1)
+  })
+
+  it('снятие с HARD_GATED_APPS: следующий вызов снова проходит', async () => {
+    const file = join(dir, 'remove-hard.ts')
+    writeFileSync(file, infraConfig({ e2e: [app], hard: [app] }))
+    const { client } = await serverFor(file)
+
+    const blocked = await client.callTool({ name: 'deploy_app', arguments: { app } })
+    expect(blocked.isError).toBe(true)
+
+    writeFileSync(file, infraConfig())
+    const passed = await client.callTool({ name: 'deploy_app', arguments: { app } })
+    expect(passed.isError).toBeFalsy()
+    expect(deployCalls()).toHaveLength(1)
+  })
+
+  it('приложение только в E2E_GATED_APPS: гейт warn-only — предупреждение в ответе, деплой уходит', async () => {
+    const file = join(dir, 'warn-only.ts')
+    writeFileSync(file, infraConfig({ e2e: [app] }))
+    const { client } = await serverFor(file)
+    const result = await client.callTool({ name: 'deploy_app', arguments: { app } })
+    expect(result.isError).toBeFalsy()
+    expect(textOf(result)).toContain('e2e-gate')
+    expect(deployCalls()).toHaveLength(1)
+  })
+
+  // Расхождение реестров (инвариант «HARD ⊂ E2E» нарушен правкой файла) не должно отключать блокировку.
+  it('приложение в HARD_GATED_APPS, но не в E2E_GATED_APPS: всё равно блокируется', async () => {
+    const file = join(dir, 'hard-without-e2e.ts')
+    writeFileSync(file, infraConfig({ hard: [app] }))
+    const { client } = await serverFor(file)
+    const result = await client.callTool({ name: 'deploy_app', arguments: { app } })
+    expect(result.isError).toBe(true)
+    expect(textOf(result)).toContain('заблокирован hard e2e-gate')
+    expect(deployCalls()).toHaveLength(0)
+  })
+
+  it('в ответе видно, что гейт перечитан из файла (расхождение с памятью процесса)', async () => {
+    const file = join(dir, 'note.ts')
+    writeFileSync(file, infraConfig({ e2e: [app], hard: [app] }))
+    const { client } = await serverFor(file)
+    const result = await client.callTool({ name: 'deploy_app', arguments: { app } })
+    expect(textOf(result)).toContain('HARD_GATED_APPS перечитан')
+    expect(textOf(result)).toContain('теперь в списке')
+  })
+
+  it('без расхождения с памятью процесса заметок о перечитывании нет', async () => {
+    const file = join(dir, 'same.ts')
+    writeFileSync(file, infraConfig())
+    const { client } = await serverFor(file)
+    const result = await client.callTool({ name: 'deploy_app', arguments: { app } })
+    expect(textOf(result)).not.toContain('перечитан')
+  })
+
+  // Отказ вместо молчаливого «гейта нет»: каждый из двух списков по отдельности.
+  it.each([
+    [
+      'HARD_GATED_APPS',
+      infraConfig().replace('HARD_GATED_APPS: string[] = []', 'HARD_GATED_APPS: string[] = [...OTHER]'),
+    ],
+    ['E2E_GATED_APPS', infraConfig().replace('E2E_GATED_APPS: string[] = []', 'E2E_GATED_APPS: string[] = [...OTHER]')],
+  ])('%s нельзя разобрать: отказ с причиной, запрос к агенту не уходит', async (name, source) => {
+    const file = join(dir, `broken-${name}.ts`)
+    writeFileSync(file, source)
+    const { client } = await serverFor(file)
+    const result = await client.callTool({ name: 'deploy_app', arguments: { app } })
+    expect(result.isError).toBe(true)
+    expect(textOf(result)).toContain(name)
+    expect(textOf(result)).toContain('не литералом строк')
+    expect(agentRequest).not.toHaveBeenCalled()
+  })
+
+  it('нет объявления HARD_GATED_APPS: отказ, а не деплой без гейта', async () => {
+    const file = join(dir, 'no-hard.ts')
+    writeFileSync(file, infraConfig().replace('export const HARD_GATED_APPS', 'const HARD_GATED_APPS'))
+    const { client } = await serverFor(file)
+    const result = await client.callTool({ name: 'deploy_app', arguments: { app } })
+    expect(result.isError).toBe(true)
+    expect(textOf(result)).toContain('HARD_GATED_APPS')
+    expect(agentRequest).not.toHaveBeenCalled()
+  })
+
+  it('staging не читает файл и не гейтится — нечитаемый файл ему не мешает', async () => {
+    const { client } = await serverFor(join(dir, 'нет-такого-файла.ts'))
+    const result = await client.callTool({ name: 'deploy_app', arguments: { app, target: 'staging' } })
+    expect(result.isError).toBeFalsy()
+    expect(deployCalls()).toHaveLength(1)
+  })
+
+  // Описание регистрируется один раз при старте: перечисленный в нём список устарел бы так же, как
+  // устаревал сам массив. Имена берутся из реального файла — тест не привязан к конкретным приложениям.
+  it('описание инструмента не зашивает список HARD_GATED_APPS, вычисленный при старте', async () => {
+    const { client } = await connect()
+    const { tools } = await client.listTools()
+    const description = tools.find((t) => t.name === 'deploy_app')?.description ?? ''
+    expect(description).toContain('HARD_GATED_APPS')
+    for (const gated of HARD_GATED_APPS) {
+      expect(description).not.toContain(gated)
+    }
   })
 })

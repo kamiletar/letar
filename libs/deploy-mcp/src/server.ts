@@ -11,11 +11,11 @@
  */
 
 import {
+  BUILD_ON_S1_APPS,
   type DeployTarget,
   E2E_GATED_APPS,
   HARD_GATED_APPS,
   type InfraServer,
-  isBuiltOnS1,
   resolveDeployServer,
   SERVER_APPS,
   SERVERS,
@@ -23,7 +23,7 @@ import {
 import { errorText, pretty, text } from '@letar/mcp-server-kit'
 import { McpServer } from '@modelcontextprotocol/server'
 import { z } from 'zod'
-import { readBuildOnS1Apps } from './build-on-s1.js'
+import { type DeployLists, readDeployLists } from './build-on-s1.js'
 import { agentRequest, type AgentResponse } from './client.js'
 import { changedPathsSince, isAffectedSince, originMainSha } from './config.js'
 import { CONTEXT_MAX, renderDeployStatusBody } from './log-tools.js'
@@ -189,10 +189,33 @@ export async function evaluateE2eGate(
   return result
 }
 
+/**
+ * Заметки о расхождении актуальных списков с тем, что процесс MCP запомнил при старте: объясняют, почему
+ * маршрут или гейт отличаются от того, что показал бы устаревший список, и что рестарт агенту не нужен.
+ * Пусто, когда файл и память совпадают.
+ */
+function listChangeNotes(app: string, fresh: DeployLists): string[] {
+  const lists: Array<{ name: string; startup: readonly string[]; current: readonly string[]; effect: string }> = [
+    { name: 'BUILD_ON_S1_APPS', startup: BUILD_ON_S1_APPS, current: fresh.buildOnS1Apps, effect: 'маршрут' },
+    { name: 'E2E_GATED_APPS', startup: E2E_GATED_APPS, current: fresh.e2eGatedApps, effect: 'гейт' },
+    { name: 'HARD_GATED_APPS', startup: HARD_GATED_APPS, current: fresh.hardGatedApps, effect: 'гейт' },
+  ]
+  return lists.flatMap(({ name, startup, current, effect }) =>
+    startup.includes(app) === current.includes(app)
+      ? []
+      : [
+        `ℹ️ ${name} перечитан из файла: ${app} ${
+          current.includes(app) ? 'теперь в списке' : 'больше не в списке'
+        } (при старте процесса было иначе) — ${effect} по актуальному списку.`,
+      ]
+  )
+}
+
 export interface DeployMcpOptions {
   /**
-   * Файл с `BUILD_ON_S1_APPS`, который `deploy_app` перечитывает при каждом production-деплое.
-   * По умолчанию — `libs/infra-config/src/index.ts`; в тестах указывает на временный файл.
+   * Файл со списками `BUILD_ON_S1_APPS`/`E2E_GATED_APPS`/`HARD_GATED_APPS`, который `deploy_app`
+   * перечитывает при каждом production-деплое. По умолчанию — `libs/infra-config/src/index.ts`;
+   * в тестах указывает на временный файл.
    */
   infraConfigPath?: string
 }
@@ -408,13 +431,15 @@ export function createDeployMcpServer(options: DeployMcpOptions = {}): McpServer
       'target: "production" (по умолчанию, → сервер приложения) или "staging" (→ s1, образ <app>:staging).',
       'Приложения из BUILD_ON_S1_APPS (libs/infra-config) собираются на s1 даже в production: запрос идёт на',
       's1, образ уходит в registry, релиз выполняется на s2 — deploy_status/deploy_wait смотри на server: "s1".',
-      'Список перечитывается из libs/infra-config/src/index.ts при каждом production-вызове: правка действует сразу,',
-      'рестарт MCP не нужен; не смог прочитать — отказ, а не молчаливый откат на s2.',
+      'Списки BUILD_ON_S1_APPS, E2E_GATED_APPS и HARD_GATED_APPS перечитываются из libs/infra-config/src/index.ts',
+      'при каждом production-вызове: правка действует сразу, рестарт MCP не нужен; не смог прочитать — отказ,',
+      'а не молчаливый откат на s2 или деплой без гейта.',
       'seed: true → deploy-affected.sh --seed (nx run <app>:db:seed после успешного деплоя).',
       'Возвращает deployId — опрашивай прогресс через deploy_status({ server, deployId, sinceLine }).',
       '⚠️ Изменяет production. Перед деплоем убедись, что коммиты запушены (git_status).',
-      `⛔ Для приложений из HARD_GATED_APPS (${HARD_GATED_APPS.join(', ')}) production-деплой`,
-      'ОТКАЗЫВАЕТ без свежего зелёного e2e на staging для текущего коммита — не обходится флагом.',
+      '⛔ Для приложений из HARD_GATED_APPS (libs/infra-config; актуальный список — в файле, здесь он не',
+      'дублируется, чтобы не устаревать) production-деплой ОТКАЗЫВАЕТ без свежего зелёного e2e на staging',
+      'для текущего коммита — не обходится флагом.',
     ].join('\n'),
     inputSchema: z.strictObject({
       app: z
@@ -429,38 +454,35 @@ export function createDeployMcpServer(options: DeployMcpOptions = {}): McpServer
     }),
   }, async ({ app, target = 'production', seed = false }) => {
     const staging = target === 'staging'
-    // Список читается из файла на КАЖДЫЙ production-вызов, а не берётся из значения, вычисленного при
-    // старте процесса: иначе приложение, добавленное в BUILD_ON_S1_APPS после запуска MCP, уходило бы
-    // на s2 (сборка на прод-хосте). Прочитать не вышло — отказ, а не откат на s2 «по умолчанию».
-    // Для staging список не нужен (там всегда s1), поэтому битый файл staging не блокирует.
-    let buildOnS1Apps: string[] | undefined
+    // Списки маршрута и гейтов читаются из файла на КАЖДЫЙ production-вызов, а не берутся из значений,
+    // вычисленных при старте процесса: иначе приложение, добавленное в BUILD_ON_S1_APPS после запуска MCP,
+    // уходило бы на s2 (сборка на прод-хосте), а добавленное в HARD_GATED_APPS — деплоилось бы без e2e-гейта.
+    // Прочитать не вышло — отказ, а не откат на s2 или «гейта нет» по умолчанию.
+    // Для staging списки не нужны (там всегда s1 и нет гейта), поэтому битый файл staging не блокирует.
+    let lists: DeployLists | undefined
     if (!staging) {
       try {
-        buildOnS1Apps = readBuildOnS1Apps(options.infraConfigPath)
+        lists = readDeployLists(options.infraConfigPath)
       } catch (err) {
         return errorText(
           [
-            `⛔ deploy_app(${app}, production) отказал: не удалось определить актуальный BUILD_ON_S1_APPS.`,
+            `⛔ deploy_app(${app}, production) отказал: не удалось определить актуальные BUILD_ON_S1_APPS / E2E_GATED_APPS / HARD_GATED_APPS.`,
             err instanceof Error ? err.message : String(err),
             '',
-            'От списка зависит, куда пойдёт сборка (s1 или s2), поэтому без него деплой не запускается —',
-            'молчаливого отката на s2 нет. Исправь `libs/infra-config/src/index.ts` и повтори вызов; перезапуск MCP не нужен.',
+            'От списков зависит, куда пойдёт сборка (s1 или s2) и есть ли блокирующий e2e-гейт, поэтому без них',
+            'деплой не запускается — ни отката на s2, ни «гейта нет». Исправь `libs/infra-config/src/index.ts`',
+            'и повтори вызов; перезапуск MCP не нужен.',
           ].join('\n'),
         )
       }
     }
-    const server = resolveDeployServer(app, target as DeployTarget, buildOnS1Apps)
-    // Расхождение с тем, что процесс запомнил при старте, — видно в ответе: объясняет, почему маршрут
-    // отличается от того, что показал бы устаревший список (и что рестарт агенту не нужен).
-    const listChangedNote = buildOnS1Apps !== undefined && isBuiltOnS1(app) !== buildOnS1Apps.includes(app)
-      ? [
-        `ℹ️ BUILD_ON_S1_APPS перечитан из файла: ${app} ${
-          buildOnS1Apps.includes(app) ? 'теперь в списке' : 'больше не в списке'
-        } (при старте процесса было иначе) — маршрут по актуальному списку.`,
-      ]
-      : []
-    const gated = !staging && E2E_GATED_APPS.includes(app)
-    const hardGated = !staging && HARD_GATED_APPS.includes(app)
+    const server = resolveDeployServer(app, target as DeployTarget, lists?.buildOnS1Apps)
+    const listChangedNote = lists ? listChangeNotes(app, lists) : []
+    const hardGated = lists?.hardGatedApps.includes(app) ?? false
+    // Приложение из HARD_GATED_APPS гейтится и тогда, когда в E2E_GATED_APPS его нет: инвариант «HARD ⊂ E2E»
+    // закреплён тестом в infra-config, но правка файла между запусками может его нарушить — блокировка
+    // от этого отключаться не должна.
+    const gated = hardGated || (lists?.e2eGatedApps.includes(app) ?? false)
     // e2e-gate: только для production и только для приложений из E2E_GATED_APPS — у остальных
     // нет staging-e2e инфры, проверка была бы чистым шумом (§126 PLAN-INFRA-4.md). Внутри
     // gated-приложений: HARD_GATED_APPS — fail-closed (блокирует деплой), остальные — старое
@@ -469,6 +491,7 @@ export function createDeployMcpServer(options: DeployMcpOptions = {}): McpServer
     if (gate.blocked) {
       return errorText(
         [
+          ...(listChangedNote.length > 0 ? [...listChangedNote, ''] : []),
           `⛔ deploy_app(${app}, production) заблокирован hard e2e-gate:`,
           ...gate.reasons.map((r) => `- ${r}`),
           '',

@@ -1,21 +1,23 @@
 /**
- * Актуальный `BUILD_ON_S1_APPS` на момент вызова — без рестарта процесса MCP.
+ * Актуальные `BUILD_ON_S1_APPS`, `E2E_GATED_APPS` и `HARD_GATED_APPS` на момент вызова — без рестарта
+ * процесса MCP. (Имя файла историческое: сначала читался один `BUILD_ON_S1_APPS`, гейты добавлены позже.)
  *
- * Зачем. `letar.ts` один раз импортирует `server.ts`, а тот — `@letar/infra-config`; массив
- * `BUILD_ON_S1_APPS` вычисляется при первом импорте и живёт в памяти до перезапуска сессии. Когда
- * приложение добавляют в список (пилоты §157 PLAN-INFRA-6.md), уже запущенный процесс про него не
- * знает: `deploy_app` уходит на s2 и собирает образ на прод-хосте вместо s1. Обнаружено 2026-09-22
- * на mandala (пилот 3): deploy-agent-dev сверял время старта процесса со временем коммита и
- * останавливал деплой до перезапуска сессии — так уже случалось в пилотах 1–3.
+ * Зачем. `letar.ts` один раз импортирует `server.ts`, а тот — `@letar/infra-config`; массивы
+ * вычисляются при первом импорте и живут в памяти до перезапуска сессии. Когда приложение добавляют в
+ * `BUILD_ON_S1_APPS` (пилоты §157 PLAN-INFRA-6.md), уже запущенный процесс про него не знает:
+ * `deploy_app` уходит на s2 и собирает образ на прод-хосте вместо s1. Обнаружено 2026-09-22 на mandala
+ * (пилот 3): deploy-agent-dev сверял время старта процесса со временем коммита и останавливал деплой до
+ * перезапуска сессии — так уже случалось в пилотах 1–3. С гейтами последствие хуже: приложение,
+ * добавленное в `HARD_GATED_APPS` после старта процесса, деплоилось вообще без e2e-проверки (fail-open).
  *
- * Как. Файл `libs/infra-config/src/index.ts` читается текстом при КАЖДОМ production-деплое и
- * массив разбирается сканером литералов — не `import()` с cache-busting: у Bun (рантайм `letar.ts`)
- * и у vite-node (тесты) разная семантика кеша модулей по query-строке, а чтение файла даёт одно
- * поведение везде и не копит в памяти по экземпляру модуля на каждую правку.
+ * Как. Файл `libs/infra-config/src/index.ts` читается текстом при КАЖДОМ production-деплое и массивы
+ * разбираются сканером литералов — не `import()` с cache-busting: у Bun (рантайм `letar.ts`) и у
+ * vite-node (тесты) разная семантика кеша модулей по query-строке, а чтение файла даёт одно поведение
+ * везде и не копит в памяти по экземпляру модуля на каждую правку.
  *
- * ⛔ Никакого «слепого» fallback на s2: если файл не прочитан или массив записан не литералом
- * строк, функция БРОСАЕТ — `deploy_app` отказывает с текстом причины. Молча подставить прежний
- * список из памяти значило бы вернуть ровно тот баг, который здесь чинится.
+ * ⛔ Никакого «слепого» fallback: если файл не прочитан, объявления нет или массив записан не литералом
+ * строк, функция БРОСАЕТ — `deploy_app` отказывает с текстом причины. Молча подставить прежние списки
+ * из памяти значило бы вернуть ровно тот баг, который здесь чинится; молча считать «гейта нет» — хуже.
  */
 
 import { readFileSync } from 'node:fs'
@@ -76,13 +78,30 @@ export function parseStringArrayConst(source: string, name: string): string[] {
   )
 }
 
-/** Читает актуальный `BUILD_ON_S1_APPS` из файла (при каждом вызове — без кеша). */
-export function readBuildOnS1Apps(path: string = INFRA_CONFIG_SOURCE): string[] {
+/** Списки `libs/infra-config`, от которых зависит production-деплой (маршрут и e2e-гейты). */
+export interface DeployLists {
+  /** `BUILD_ON_S1_APPS` — приложения, которые в production собираются на s1. */
+  buildOnS1Apps: string[]
+  /** `E2E_GATED_APPS` — приложения под e2e-гейтом (warn-only, кроме hard-gated). */
+  e2eGatedApps: string[]
+  /** `HARD_GATED_APPS` — приложения с fail-closed e2e-гейтом. */
+  hardGatedApps: string[]
+}
+
+/**
+ * Читает актуальные списки из файла (при каждом вызове — без кеша). Файл читается один раз; бросает,
+ * если он недоступен или хотя бы один из трёх списков не разобрался.
+ */
+export function readDeployLists(path: string = INFRA_CONFIG_SOURCE): DeployLists {
   let source: string
   try {
     source = readFileSync(path, 'utf8')
   } catch (err) {
     throw new Error(`не удалось прочитать ${path}: ${err instanceof Error ? err.message : String(err)}`, { cause: err })
   }
-  return parseStringArrayConst(source, 'BUILD_ON_S1_APPS')
+  return {
+    buildOnS1Apps: parseStringArrayConst(source, 'BUILD_ON_S1_APPS'),
+    e2eGatedApps: parseStringArrayConst(source, 'E2E_GATED_APPS'),
+    hardGatedApps: parseStringArrayConst(source, 'HARD_GATED_APPS'),
+  }
 }

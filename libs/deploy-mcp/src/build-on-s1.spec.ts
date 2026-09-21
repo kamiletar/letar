@@ -1,9 +1,9 @@
-import { BUILD_ON_S1_APPS } from '@letar/infra-config'
+import { BUILD_ON_S1_APPS, E2E_GATED_APPS, HARD_GATED_APPS } from '@letar/infra-config'
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterAll, describe, expect, it } from 'vitest'
-import { INFRA_CONFIG_SOURCE, parseStringArrayConst, readBuildOnS1Apps } from './build-on-s1'
+import { INFRA_CONFIG_SOURCE, parseStringArrayConst, readDeployLists } from './build-on-s1'
 
 describe('parseStringArrayConst', () => {
   it('читает однострочный массив с аннотацией типа', () => {
@@ -49,27 +49,73 @@ describe('parseStringArrayConst', () => {
   })
 })
 
-describe('readBuildOnS1Apps', () => {
+describe('readDeployLists', () => {
   const dir = mkdtempSync(join(tmpdir(), 'deploy-mcp-build-on-s1-'))
   afterAll(() => rmSync(dir, { recursive: true, force: true }))
 
+  const source = (build: string[], e2e: string[], hard: string[]) => {
+    const literal = (apps: string[]) => `[${apps.map((a) => `'${a}'`).join(', ')}]`
+    return [
+      `export const E2E_GATED_APPS: string[] = ${literal(e2e)}`,
+      `export const HARD_GATED_APPS: string[] = ${literal(hard)}`,
+      `export const BUILD_ON_S1_APPS: string[] = ${literal(build)}`,
+    ].join('\n')
+  }
+
+  it('читает все три списка одним вызовом', () => {
+    const file = join(dir, 'all.ts')
+    writeFileSync(file, source(['b'], ['e', 'h'], ['h']))
+    expect(readDeployLists(file)).toEqual({ buildOnS1Apps: ['b'], e2eGatedApps: ['e', 'h'], hardGatedApps: ['h'] })
+  })
+
   it('видит правку файла между вызовами — без перезапуска', () => {
     const file = join(dir, 'infra-config.ts')
-    writeFileSync(file, `export const BUILD_ON_S1_APPS: string[] = ['a']`)
-    expect(readBuildOnS1Apps(file)).toEqual(['a'])
-    writeFileSync(file, `export const BUILD_ON_S1_APPS: string[] = ['a', 'b']`)
-    expect(readBuildOnS1Apps(file)).toEqual(['a', 'b'])
+    writeFileSync(file, source(['a'], [], []))
+    expect(readDeployLists(file).buildOnS1Apps).toEqual(['a'])
+    writeFileSync(file, source(['a', 'b'], ['x'], ['x']))
+    expect(readDeployLists(file)).toEqual({ buildOnS1Apps: ['a', 'b'], e2eGatedApps: ['x'], hardGatedApps: ['x'] })
   })
 
   it('бросает, если файла нет', () => {
-    expect(() => readBuildOnS1Apps(join(dir, 'нет-такого-файла.ts'))).toThrow(/не удалось прочитать/)
+    expect(() => readDeployLists(join(dir, 'нет-такого-файла.ts'))).toThrow(/не удалось прочитать/)
   })
 
-  // ⚠️ Охранный тест формата. Разбор текста и `import` — два независимых пути к одному списку; если
+  // Каждый из трёх списков обязателен: пропавшее объявление — отказ с именем константы, а не «гейта нет».
+  it.each(['BUILD_ON_S1_APPS', 'E2E_GATED_APPS', 'HARD_GATED_APPS'])(
+    'бросает с именем константы, если нет %s',
+    (name) => {
+      const file = join(dir, `missing-${name}.ts`)
+      const full = source(['b'], ['h'], ['h'])
+      writeFileSync(file, full.replace(`export const ${name}`, `const ${name}`))
+      expect(() => readDeployLists(file)).toThrow(new RegExp(name))
+    },
+  )
+
+  it('бросает с именем константы, если HARD_GATED_APPS записан не литералом', () => {
+    const file = join(dir, 'hard-spread.ts')
+    writeFileSync(
+      file,
+      [
+        `export const E2E_GATED_APPS: string[] = ['h']`,
+        `export const HARD_GATED_APPS: string[] = [...E2E_GATED_APPS]`,
+        `export const BUILD_ON_S1_APPS: string[] = ['b']`,
+      ].join('\n'),
+    )
+    expect(() => readDeployLists(file)).toThrow(/HARD_GATED_APPS.*не литералом строк/)
+  })
+
+  // ⚠️ Охранный тест формата. Разбор текста и `import` — два независимых пути к одним спискам; если
   // кто-то перепишет объявление так, что сканер его не поймёт, deploy_app начнёт отказывать в проде.
-  // Этот тест роняет CI раньше: разбор реального файла обязан совпасть с импортированной константой.
-  it('разбор реального libs/infra-config/src/index.ts совпадает с импортированным BUILD_ON_S1_APPS', () => {
-    expect(readFileSync(INFRA_CONFIG_SOURCE, 'utf8')).toContain('BUILD_ON_S1_APPS')
-    expect(readBuildOnS1Apps()).toEqual(BUILD_ON_S1_APPS)
+  // Этот тест роняет CI раньше: разбор реального файла обязан совпасть с импортированными константами.
+  it('разбор реального libs/infra-config/src/index.ts совпадает с импортированными списками', () => {
+    const text = readFileSync(INFRA_CONFIG_SOURCE, 'utf8')
+    for (const name of ['BUILD_ON_S1_APPS', 'E2E_GATED_APPS', 'HARD_GATED_APPS']) {
+      expect(text).toContain(`export const ${name}`)
+    }
+    expect(readDeployLists()).toEqual({
+      buildOnS1Apps: BUILD_ON_S1_APPS,
+      e2eGatedApps: E2E_GATED_APPS,
+      hardGatedApps: HARD_GATED_APPS,
+    })
   })
 })
