@@ -2,6 +2,15 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.6.14] - 2026-09-21
+
+### Added
+
+- Гайд `server-errors` (en/ru): раздел «Отказ Server Action значением — `ActionFailure`» — почему
+  нельзя бросать из Server Action, серверная (`catchActionFailure`) и клиентская (`run`,
+  `useActionFormErrors`) сторона, маркер `success: false`, на какое поле ляжет дубль; строка
+  `ActionFailure` в таблице форматов и импорты.
+
 ## [0.6.13] - 2026-09-21
 
 ### Added

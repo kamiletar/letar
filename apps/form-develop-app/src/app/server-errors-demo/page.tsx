@@ -1,7 +1,7 @@
 'use client'
 
 import { Box, Code, Heading, HStack, Text, VStack } from '@chakra-ui/react'
-import { Form, mapServerErrors, useFormRef, useFormServerAction } from '@letar/forms'
+import { actionFailure, Form, mapServerErrors, useFormRef, useFormServerAction } from '@letar/forms'
 import { useState } from 'react'
 import { z } from 'zod/v4'
 import { DemoPageLayout } from '../_components'
@@ -28,6 +28,7 @@ const ERROR_EXAMPLES = {
     success: false as const,
     error: { formErrors: [], fieldErrors: { name: ['Обязательное поле'] } },
   },
+  'ActionFailure (поле)': { success: false as const, error: 'Такой адрес уже занят', field: 'slug' },
   'Error объект': new Error('Что-то пошло не так'),
   null: null,
 } as const
@@ -73,6 +74,60 @@ function UseFormServerActionDemo() {
       >
         <Form.Errors />
         <Form.Field.String name="email" />
+        <Form.Button.Submit loadingText="Отправка...">Создать</Form.Button.Submit>
+      </Form>
+      <Text fontSize="xs" color="fg.muted">
+        pending: <Code>{String(pending)}</Code>
+      </Text>
+    </VStack>
+  )
+}
+
+// --- Отказ Server Action значением (ActionFailure) ---
+
+const CategorySchema = z.object({
+  slug: z.string().min(1).meta({ ui: { title: 'Адрес (slug)' } }),
+}).strip()
+
+type CategoryData = z.infer<typeof CategorySchema>
+
+/**
+ * Имитация server action, которая ВОЗВРАЩАЕТ отказ значением (в production Next.js стирает текст
+ * брошенной ошибки). На сервере это делает `catchActionFailure` из `@letar/forms/server-errors`.
+ */
+async function fakeCreateCategory(data: CategoryData) {
+  await new Promise((resolve) => setTimeout(resolve, 600))
+  if (data.slug === 'taken') {
+    return actionFailure('Такой адрес уже занят — задайте другой', 'slug')
+  }
+  if (data.slug === 'locked') {
+    return actionFailure('Категорию нельзя изменять: она используется в заказах')
+  }
+  return { id: crypto.randomUUID() }
+}
+
+function ActionFailureDemo() {
+  const formRef = useFormRef()
+  const { run, pending } = useFormServerAction(formRef, { toaster, successMessage: 'Категория создана' })
+
+  return (
+    <VStack align="stretch" gap={3} maxW="sm">
+      <Text fontSize="sm" color="fg.muted">
+        <Code>taken</Code> — отказ с полем (под полем и в общем блоке), <Code>locked</Code>{' '}
+        — отказ без поля (только общий блок). Любой другой адрес — успех. Отказ приходит значением, а <Code>run</Code>
+        {' '}
+        сам бросает его как <Code>ActionFailureError</Code>.
+      </Text>
+      <Form
+        schema={CategorySchema}
+        initialValue={{ slug: '' }}
+        formRef={formRef}
+        onSubmit={async (data) => {
+          await run(() => fakeCreateCategory(data))
+        }}
+      >
+        <Form.Errors />
+        <Form.Field.String name="slug" />
         <Form.Button.Submit loadingText="Отправка...">Создать</Form.Button.Submit>
       </Form>
       <Text fontSize="xs" color="fg.muted">
@@ -201,6 +256,18 @@ export default function ServerErrorsDemoPage() {
           <UseFormServerActionDemo />
         </Box>
 
+        {/* Отказ значением */}
+        <Box>
+          <Heading size="md" mb={3}>
+            Отказ Server Action значением — ActionFailure
+          </Heading>
+          <Text fontSize="sm" color="fg.muted" mb={3}>
+            В production Next.js стирает текст ошибки, брошенной из Server Action. Ожидаемый отказ сервер возвращает
+            значением (<Code>actionFailure</Code> / <Code>catchActionFailure</Code>), а форма бросает его обратно.
+          </Text>
+          <ActionFailureDemo />
+        </Box>
+
         {/* Поддерживаемые форматы */}
         <Box>
           <Heading size="md" mb={3}>
@@ -230,6 +297,9 @@ export default function ServerErrorsDemoPage() {
             </Text>
             <Text>
               <strong>ActionResult</strong> — {'{ success: false, error }'} → строка или nested
+            </Text>
+            <Text>
+              <strong>ActionFailure</strong> — {'{ success: false, error, field? }'} → под поле и в общий блок
             </Text>
             <Text>
               <strong>Error с .info</strong> — ZenStack стиль (.info.reason)

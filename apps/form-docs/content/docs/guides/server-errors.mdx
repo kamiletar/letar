@@ -137,6 +137,65 @@ function SignupForm() {
 - The low-level path (`middleware.onError` from the section above) stays fully supported — use it
   when error handling needs to differ by error type (e.g. suppress the toast for some errors).
 
+## Rejecting a Server Action with a value — `ActionFailure`
+
+⚠️ **In production Next.js strips the text of any error thrown from a Server Action** — the client
+sees "Minified React error" (code 441) instead of the reason. So an *expected* failure (a business
+rule, a duplicate of a unique value) is **returned as a value**, and the form turns it back into an
+exception on the client — a client-side `throw` is not stripped. Real faults are still thrown: their
+text is not for the user and belongs in the logs and error tracker.
+
+**Server** (import from `@letar/forms/server-errors` — no React or Chakra):
+
+```ts
+'use server'
+import { catchActionFailure, UserFacingError } from '@letar/forms/server-errors'
+
+export async function createCategory(input: CategoryInput) {
+  return catchActionFailure(async () => {
+    if (await isNameReserved(input.name)) {
+      throw new UserFacingError('This name is reserved', 'name') // the field is optional
+    }
+    return db.category.create({ data: input, select: { id: true } })
+  }, {
+    // your own texts for a duplicate: the key is the field, or fields joined by "_"
+    uniqueMessages: { slug: 'This address is taken — pick another' },
+    locale: 'en', // language of the generic duplicate message
+  })
+}
+```
+
+`catchActionFailure` catches **only** `UserFacingError` and a unique violation (SQLSTATE `23505`);
+everything else is rethrown. To reject directly, `return actionFailure('Cannot delete', 'id')`.
+
+**Client** — two ways, both put the reason under the field and into `<Form.Errors />`:
+
+```tsx
+// 1. useFormServerAction: run recognises the returned failure and throws ActionFailureError
+const { run, pending } = useFormServerAction(formRef, { toaster })
+await run(() => createCategory(data), () => router.push('/admin/categories/'))
+
+// 2. Low-level: unwrapActionResult + middleware.onError
+const { formRef, middleware } = useActionFormErrors()
+<MyForm formRef={formRef} middleware={middleware}
+  onSubmit={async (data) => { unwrapActionResult(await createCategory(data)) }}>
+  <MyForm.Errors />
+```
+
+`onSuccess` and the success toast are not called on a failure.
+
+**The marker.** A failure is `{ success: false, error: string, field?: string }`. The explicit
+`success: false` matters: a successful result that happens to carry an `error` field
+(`{ items, error: 'some rows skipped' }`) is **not** treated as a failure. Build it with
+`actionFailure(error, field?)`, not by hand.
+
+**Which field a duplicate lands on.** Prisma names the constraint `<Table>_<field>_key`. The field
+is derived **only when the name is unambiguous** — three parts (`MaterialCategory_slug_key` →
+`slug`). A composite key, a `@@map("snake_case")` table or a `@map` column has no field: `_` cannot
+tell them apart from an underscore inside a name, and an error under the wrong field is worse than
+a generic message. The message then comes from `uniqueMessages` (matched against the tail of the
+constraint name) or falls back to a generic one.
+
 ## Supported Formats
 
 | Format            | Example                                                 | Result                                   |
@@ -148,6 +207,7 @@ function SignupForm() {
 | ZenStack db-query | `{ reason: 'db-query-error', code: 'P2002', meta }`     | Delegates to Prisma parser               |
 | Zod flatten       | `{ fieldErrors: { email: ['msg'] } }`                   | Direct mapping                           |
 | ActionResult      | `{ success: false, error: 'msg' }`                      | `formErrors: ['msg']`                    |
+| ActionFailure     | `{ success: false, error: 'msg', field: 'slug' }`       | `fieldErrors` + `formErrors`             |
 
 ## API
 
@@ -193,4 +253,8 @@ import { mapServerErrors } from '@letar/forms/server-errors'
 
 // Individual parsers
 import { parsePrismaError, parseZenStackError } from '@letar/forms/server-errors'
+
+// Rejecting a Server Action with a value (server — no React; client — hooks)
+import { actionFailure, catchActionFailure, unwrapActionResult, UserFacingError } from '@letar/forms/server-errors'
+import { useActionFormErrors, useFormServerAction } from '@letar/forms'
 ```

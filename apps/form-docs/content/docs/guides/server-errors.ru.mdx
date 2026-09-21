@@ -137,6 +137,62 @@ function SignupForm() {
   нужно разное поведение по типу ошибки (например не показывать toast на одних ошибках и
   показывать на других).
 
+## Отказ Server Action значением — `ActionFailure`
+
+⚠️ **В production Next.js стирает текст любой ошибки, брошенной из Server Action** — клиент видит
+«Minified React error» (код 441) вместо причины. Поэтому *ожидаемый* отказ (бизнес-правило, дубль
+уникального значения) сервер возвращает **значением**, а форма на клиенте превращает его обратно в
+исключение — клиентский `throw` не стирается. Настоящие неполадки по-прежнему бросаются: их текст
+пользователю не нужен, он идёт в логи и трекер ошибок.
+
+**Сервер** (импорт из `@letar/forms/server-errors` — без React и Chakra):
+
+```ts
+'use server'
+import { catchActionFailure, UserFacingError } from '@letar/forms/server-errors'
+
+export async function createCategory(input: CategoryInput) {
+  return catchActionFailure(async () => {
+    if (await isNameReserved(input.name)) {
+      throw new UserFacingError('Это название зарезервировано', 'name') // поле — необязательно
+    }
+    return db.category.create({ data: input, select: { id: true } })
+  }, {
+    // свои тексты при дубле: ключ — поле или поля через «_» для составного ограничения
+    uniqueMessages: { slug: 'Такой адрес уже занят — задайте другой' },
+  })
+}
+```
+
+`catchActionFailure` ловит **только** `UserFacingError` и нарушение unique (SQLSTATE `23505`);
+остальное пробрасывает. Вернуть отказ напрямую: `return actionFailure('Нельзя удалить', 'id')`.
+
+**Клиент** — два пути, оба кладут причину под поле и в `<Form.Errors />`:
+
+```tsx
+// 1. useFormServerAction: run сам узнаёт возвращённый отказ и бросает ActionFailureError
+const { run, pending } = useFormServerAction(formRef, { toaster })
+await run(() => createCategory(data), () => router.push('/admin/categories/'))
+
+// 2. Низкоуровневый путь: unwrapActionResult + middleware.onError
+const { formRef, middleware } = useActionFormErrors()
+<MyForm formRef={formRef} middleware={middleware}
+  onSubmit={async (data) => { unwrapActionResult(await createCategory(data)) }}>
+  <MyForm.Errors />
+```
+
+При отказе `onSuccess` и тост успеха не вызываются.
+
+**Маркер.** Отказ — это `{ success: false, error: string, field?: string }`. Явный `success: false`
+важен: успешный результат с полем `error` (`{ items, error: 'часть строк пропущена' }`) отказом
+**не** считается. Собирай значение через `actionFailure(error, field?)`, а не руками.
+
+**На какое поле ляжет дубль.** Prisma называет ограничение `<Table>_<field>_key`. Поле выводится
+**только когда имя однозначно** — три части (`MaterialCategory_slug_key` → `slug`). Составной ключ,
+таблица с `@@map("snake_case")` или колонка с `@map` поля не дадут: `_` не отличает их от
+подчёркивания внутри имени, а ошибка под чужим полем хуже общего сообщения. Тогда текст берётся из
+`uniqueMessages` (ключ сверяется с хвостом имени ограничения) либо общий.
+
 ## Поддерживаемые форматы
 
 | Формат            | Пример                                                  | Результат                                |
@@ -148,6 +204,7 @@ function SignupForm() {
 | ZenStack db-query | `{ reason: 'db-query-error', code: 'P2002', meta }`     | Делегация Prisma                         |
 | Zod flatten       | `{ fieldErrors: { email: ['msg'] } }`                   | Прямой маппинг                           |
 | ActionResult      | `{ success: false, error: 'msg' }`                      | `formErrors: ['msg']`                    |
+| ActionFailure     | `{ success: false, error: 'msg', field: 'slug' }`       | `fieldErrors` + `formErrors`             |
 
 ## API
 
@@ -172,4 +229,8 @@ const mapped = mapServerErrors(error, {
 import { applyServerErrors, mapServerErrors } from '@letar/forms'
 import { mapServerErrors } from '@letar/forms/server-errors'
 import { parsePrismaError, parseZenStackError } from '@letar/forms/server-errors'
+
+// Отказ Server Action значением: сервер — без React, клиент — хуки
+import { actionFailure, catchActionFailure, unwrapActionResult, UserFacingError } from '@letar/forms/server-errors'
+import { useActionFormErrors, useFormServerAction } from '@letar/forms'
 ```

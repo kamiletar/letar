@@ -2,6 +2,13 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.1.24] - 2026-09-21
+
+### Added
+
+- `examples/server-errors`: пример «Отказ Server Action значением — ActionFailure» и вариант в списке
+  форматов (`@letar/forms` 2.15.0).
+
 ## [0.1.23] - 2026-09-21
 
 ### Added

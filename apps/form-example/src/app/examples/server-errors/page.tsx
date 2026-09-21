@@ -2,7 +2,7 @@
 
 import { PageH1 } from '@/components/page-h1'
 import { Box, Code, HStack, Text, VStack } from '@chakra-ui/react'
-import { Form, mapServerErrors, useFormRef, useFormServerAction } from '@letar/forms'
+import { actionFailure, Form, mapServerErrors, useFormRef, useFormServerAction } from '@letar/forms'
 import { useState } from 'react'
 import { z } from 'zod/v4'
 
@@ -11,6 +11,7 @@ const ERRORS: Record<string, unknown> = {
   'ZenStack policy': { reason: 'rejected-by-policy' },
   'Zod flatten': { formErrors: ['Пароли не совпадают'], fieldErrors: { email: ['Некорректный'] } },
   ActionResult: { success: false, error: 'Email уже занят' },
+  ActionFailure: { success: false, error: 'Такой адрес уже занят', field: 'slug' },
 }
 
 const SignupSchema = z.object({
@@ -47,6 +48,50 @@ function UseFormServerActionExample() {
       >
         <Form.Errors />
         <Form.Field.String name="email" />
+        <Form.Button.Submit loadingText="Отправка...">Создать</Form.Button.Submit>
+      </Form>
+      <Text fontSize="xs" color="fg.muted">
+        pending: <Code>{String(pending)}</Code>
+      </Text>
+    </VStack>
+  )
+}
+
+const CategorySchema = z.object({
+  slug: z.string().min(1).meta({ ui: { title: 'Адрес (slug)' } }),
+}).strip()
+
+/**
+ * Имитация server action, которая ВОЗВРАЩАЕТ отказ значением: в production Next.js стирает текст
+ * брошенной из Server Action ошибки. На сервере это делает `catchActionFailure`.
+ */
+async function fakeCreateCategory(data: { slug: string }) {
+  await new Promise((resolve) => setTimeout(resolve, 500))
+  if (data.slug === 'taken') {
+    return actionFailure('Такой адрес уже занят — задайте другой', 'slug')
+  }
+  return { id: crypto.randomUUID() }
+}
+
+function ActionFailureExample() {
+  const formRef = useFormRef()
+  const { run, pending } = useFormServerAction(formRef)
+
+  return (
+    <VStack align="stretch" gap={3}>
+      <Text fontSize="sm" color="fg.muted">
+        Введите <Code>taken</Code>, чтобы увидеть отказ под полем и в общем блоке. Любой другой адрес — успех.
+      </Text>
+      <Form
+        schema={CategorySchema}
+        initialValue={{ slug: '' }}
+        formRef={formRef}
+        onSubmit={async (data) => {
+          await run(() => fakeCreateCategory(data))
+        }}
+      >
+        <Form.Errors />
+        <Form.Field.String name="slug" />
         <Form.Button.Submit loadingText="Отправка...">Создать</Form.Button.Submit>
       </Form>
       <Text fontSize="xs" color="fg.muted">
@@ -115,6 +160,16 @@ export default function ServerErrorsExamplePage() {
           `formRef` + `mapServerErrors`/`applyServerErrors` + pending-состояние в одном хуке.
         </Text>
         <UseFormServerActionExample />
+      </Box>
+
+      <Box>
+        <Text fontSize="sm" fontWeight="bold" mb={2}>
+          Отказ Server Action значением — ActionFailure
+        </Text>
+        <Text fontSize="xs" color="fg.muted" mb={3}>
+          Ожидаемый отказ сервер возвращает значением, `run` сам бросает его как `ActionFailureError`.
+        </Text>
+        <ActionFailureExample />
       </Box>
     </VStack>
   )

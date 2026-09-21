@@ -2,6 +2,14 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.1.21] - 2026-09-21
+
+### Added
+
+- `server-errors-demo`: живой пример «Отказ Server Action значением — ActionFailure» (`@letar/forms`
+  2.15.0): `taken` — отказ под полем и в общем блоке, `locked` — только в общем блоке; в таблицу
+  разбора добавлен вариант `ActionFailure (поле)`.
+
 ## [0.1.20] - 2026-09-21
 
 ### Added
