@@ -220,12 +220,41 @@ await page.waitForURL((url) => !url.pathname.startsWith(`${LOCALE_PREFIX}/auth/`
 })
 ```
 
-### ⚠️ `networkidle` не работает в dev-режиме Next.js
+### ⚠️ `networkidle` в dev-режиме Next.js — уточнение 2026-09-22
 
-`page.waitForLoadState('networkidle')` **виснет на весь таймаут** (30с по умолчанию) на `next dev` —
-HMR держит открытым WebSocket, поэтому «нет сетевой активности 500мс» никогда не наступает. Это не
-флейк, а гарантированное зависание на каждом прогоне. Не используй `networkidle` ни для чего в
-dev-режиме — только `domcontentloaded` или явное ожидание конкретного элемента/состояния.
+До этой даты здесь было написано, что `page.waitForLoadState('networkidle')` **виснет на весь
+таймаут** на `next dev`, потому что HMR держит открытым WebSocket. Прямой замер на `mandala`
+(Next.js 16.3.5, `next dev --webpack`, Playwright 1.63) этого не подтвердил: `networkidle`
+надёжно резолвится за 0–3.3с в трёх подряд вызовах на уже загруженной странице, зависаний не
+было. Похоже, старое наблюдение относилось к другой версии Next.js/Playwright или к моменту
+активной HMR-перекомпиляции — сейчас это не общее правило «никогда не используй `networkidle` в
+dev», хотя как основной инструмент ожидания (вместо ожидания конкретного элемента/состояния) он
+всё ещё избыточен и медленнее точечного `waitFor`.
+
+**Полезное применение, подтверждённое эмпирически:** страница с формой на `useFormPersistence`
+(`@letar/forms`) в первые ~1-2с после первого интерактивного пейнта ещё донагружает часть JS —
+взаимодействие со стейтфулным неконтролируемым полем (в первую очередь `<input type="file">`
+внутри `Dropzone`, `@letar/image-upload`) в этом окне молча теряется: `setInputFiles` отрабатывает
+без ошибки, но `onChange`-результат (upload, локальный `file`-state, кнопка «Удалить»/превью) не
+доезжает — компонент откатывается при подхвате отложенных чанков. Не специфично для одной
+страницы/приложения: подтверждено на полностью свежем `mandala` dev-сервере (3/3 падения без
+ожидания, 3/3 успеха с ним) и независимо воспроизведено тем же паттерном (`@letar/forms` форма +
+`Dropzone`) в другом приложении. Точный React-механизм (кандидат — hydration-mismatch recovery,
+не сам `Dropzone`) не идентифицирован до конца, но обход надёжен:
+
+```typescript
+await page.goto('/admin/mandalas/new', { waitUntil: 'domcontentloaded' })
+await expect(page.getByRole('heading', { name: /создать мандалу/i })).toBeVisible()
+
+// Дать странице донагрузиться ДО первого взаимодействия с Dropzone/файловым input —
+// иначе setInputFiles рискует попасть в окно, где смена файла молча теряется
+await page.waitForLoadState('networkidle')
+
+await page.locator('input[type="file"]').first().setInputFiles(testImagePath)
+```
+
+Прецедент и коммит фикса — `apps/mandala-e2e/src/tests/07-full-mandala-crud.admin.spec.ts`
+(`f4be7f6cf`, 2026-09-22).
 
 ### Гонка гидратации (SSR → hydrate race) при клике сразу после `page.goto()`
 
