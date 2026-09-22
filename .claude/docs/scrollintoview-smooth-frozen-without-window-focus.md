@@ -32,21 +32,32 @@ Playwright-браузеры в CI регулярно запускаются бе
 Простой путь (использован везде в этом аудите, включая исходный фикс в `pravda`) — заменить
 `behavior: 'smooth'` на `behavior: 'instant'`. Не нужен guard на `document.hasFocus()` или
 `prefers-reduced-motion`: `instant` не анимирует вовсе, поэтому не зависит от `rAF` и не может
-зависнуть по этой причине. Для UI, где плавность скролла — сознательная часть дизайна (не этот
-случай), альтернатива — маленький хелпер:
+зависнуть по этой причине. Во всех найденных случаях (навигация по якорям, автоскролл к
+последнему сообщению чата/лога, скролл к первому невалидному полю формы) плавность не несёт
+функциональной нагрузки, и `'instant'` — конечный выбор, не временная затычка.
+
+### Готовый хелпер — для нового кода, где плавность нужна
+
+Паттерн независимо всплыл в 9 приложениях (репо-широкий аудит 2026-09-22) — на этот случай
+заведён `scrollIntoViewSafe` в `@letar/hooks/browser` (с 0.6.2):
 
 ```ts
-function getScrollBehavior(): ScrollBehavior {
-  if (typeof document !== 'undefined' && !document.hasFocus()) {
-    return 'instant'
-  }
-  return 'smooth'
-}
+import { scrollIntoViewSafe } from '@letar/hooks/browser'
+
+scrollIntoViewSafe(sectionRef.current, { behavior: 'smooth', block: 'center' })
 ```
 
-но это усложнение того не стоило ни разу — во всех найденных случаях (навигация по якорям,
-автоскролл к последнему сообщению чата/лога, скролл к первому невалидному полю формы) плавность
-не несёт функциональной нагрузки, и `'instant'` — конечный выбор.
+Переключает `behavior` на `'instant'` сам, когда `smooth` заведомо не отработает (окно без
+фокуса, `prefers-reduced-motion: reduce`), иначе передаёт его без изменений. **Уже пофикшенные
+14+ мест на этот хелпер не переведены** — они меняли `smooth` на голый `'instant'` именно потому,
+что плавность там не нужна функционально; подключать ради этого зависимость и возвращать
+`smooth`-анимацию было бы решением ради решения, а не UX-улучшением. Хелпер — для нового кода,
+где плавность действительно часть дизайна и окно обычно в фокусе (пример такого случая пока не
+встретился в репо).
+
+Есть semgrep-правило `letar-scrollintoview-smooth-frozen-without-focus`
+(`.semgrep/letar-rules.yml`, WARNING) — ловит новый прямой `behavior: 'smooth'` в pre-commit, не
+блокирует существующий код.
 
 ## Чеклист
 
@@ -67,3 +78,6 @@ function getScrollBehavior(): ScrollBehavior {
 2026-09-22. Монорепо-аудит остальных вхождений `scrollIntoView(smooth)` — та же сессия/дата, охватил
 `apps/kami`, `apps/kami-key-the-landing`, `apps/animatrona-landing`, `apps/dashboard`, `apps/aboi`,
 `apps/driving-school`, `apps/svoichuzhie`, `apps/synth`, `apps/animatrona`.
+
+`libs/hooks` — `scrollIntoViewSafe` (0.6.2) и semgrep-правило `letar-scrollintoview-smooth-frozen-
+without-focus`, та же дата, отдельная сессия по итогам аудита.
