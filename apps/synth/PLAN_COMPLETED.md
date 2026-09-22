@@ -1,5 +1,15 @@
 # PLAN_COMPLETED — synth
 
+## 2026-09-22 (`scrollIntoView(smooth)` подсветки наставника зависал без OS-фокуса окна)
+
+Делегировано из сессии `pravda-dev` — репо-широкий грепа по паттерну, зависающему при фиксе TOC
+в `apps/pravda` (коммиты `e61e2cbae`/`0b68c95d0`). `MentorFocusZone` скроллит к активной зоне по
+вызову MCP-инструмента `focus_section` — приоритетный кейс: момент вызова реалистично совпадает
+с отсутствием OS-фокуса у окна студии (владелец по определению не взаимодействует с окном именно
+в этот момент). `behavior: 'smooth'` → `'instant'`, см.
+[scrollintoview-smooth-frozen-without-window-focus.md](/.claude/docs/scrollintoview-smooth-frozen-without-window-focus.md).
+Коммит `38213e029`.
+
 ## 2026-09-15 (общая `slugify` из `@letar/format-utils`)
 
 Локальная `slugify()` в `src/lib/storage/patches-db.ts` (id патчей) использовала упрощённую
