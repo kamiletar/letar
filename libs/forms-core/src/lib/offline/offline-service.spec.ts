@@ -403,5 +403,32 @@ describe('offline-service', () => {
       expect(store.getQueueLength()).toBe(1)
       expect(store.getQueue()[0].attempts).toBe(1)
     })
+
+    // React useSyncExternalStore сравнивает снапшоты через Object.is — мутация массива queue
+    // "на месте" (push/индексное присваивание) оставляет ту же ссылку, и React решает, что
+    // ничего не изменилось, даже когда notifyListeners() уже вызван. Симптом в проде: бейдж
+    // FormSyncStatus в domwellbes (`/admin/receiving`) не обновлялся с "Отправлено" на
+    // "Не отправлено: N" после постановки формы в офлайн-очередь.
+    it('add возвращает НОВУЮ ссылку на массив из getQueue (не мутирует старую)', async () => {
+      const store = createSyncQueueStore()
+      const before = store.getQueue()
+
+      await store.add({ type: 'FORM_SUBMIT', payload: {} })
+
+      const after = store.getQueue()
+      expect(after).not.toBe(before)
+    })
+
+    it('processAll при неуспехе возвращает НОВУЮ ссылку на массив из getQueue', async () => {
+      const store = createSyncQueueStore()
+      await store.add({ type: 'FORM_SUBMIT', payload: {} })
+      const before = store.getQueue()
+
+      const handler = vi.fn().mockResolvedValue({ success: false, error: 'Failed' })
+      await store.processAll(handler)
+
+      const after = store.getQueue()
+      expect(after).not.toBe(before)
+    })
   })
 })

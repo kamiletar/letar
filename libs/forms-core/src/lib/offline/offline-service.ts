@@ -269,7 +269,10 @@ export function createSyncQueueStore(storageKey?: string): SyncQueueStore {
 
     add: async (action: SyncAction) => {
       const item = await addToQueue(action, key)
-      queue.push(item)
+      // Новая ссылка на массив обязательна: useSyncExternalStore сравнивает снапшоты через
+      // Object.is, а notifyListeners() лишь просит React перечитать getSnapshot() — мутация
+      // "на месте" (push) вернула бы ту же ссылку, и React решил бы, что ничего не изменилось.
+      queue = [...queue, item]
       notifyListeners()
       return item
     },
@@ -296,10 +299,10 @@ export function createSyncQueueStore(storageKey?: string): SyncQueueStore {
             await removeFromQueue(item.id, key)
             queue = queue.filter((q) => q.id !== item.id)
           } else if (result.item) {
-            // Update item in queue
+            // Update item in queue — та же причина новой ссылки, что в add()
             const index = queue.findIndex((q) => q.id === item.id)
             if (index !== -1) {
-              queue[index] = result.item
+              queue = [...queue.slice(0, index), result.item, ...queue.slice(index + 1)]
             }
             await saveQueueToStorage(queue, key)
           }
