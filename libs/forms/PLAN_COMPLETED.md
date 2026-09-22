@@ -1,5 +1,65 @@
 # Выполненные задачи — @letar/forms
 
+## 2026-09-22 (сессия forms-dev) — общий резолвер статичных UI-строк форм (forms 2.16.5)
+
+**Контекст:** находка из сессии про `minChars` (2.16.3, см. запись ниже) — одна и та же лестница
+резолва статичной UI-строки («перевод приложения по ключу → встроенный словарь по `locale` →
+английский/дефолт из пропов, если провайдера нет вовсе») была написана в библиотеке независимо
+трижды: `form-errors.tsx` (`resolveDefaultErrorsTitle`), `min-chars-hint.ts`
+(`resolveMinCharsHint`) и `form-persistence.tsx` (`localizeOrFallback`) — каждый раз чуть иначе.
+У `form-persistence` не было встроенного словаря вовсе (fallback из пропов, русский текст), у
+`min-chars-hint` — интерполяция параметра и плюрализация через `Intl.PluralRules`.
+
+**Решение:** `resolveStaticFormText` в `libs/forms-core/src/lib/i18n/resolve-static-text.ts`
+(framework-free, без React-зависимостей — рядом с `resolveTranslation`, который резолвер
+переиспользует внутри): принимает контекст `useFormI18n()` (`{ t, locale, enabled } | null`),
+ключ перевода, колбэк `resolveBuiltin(locale) => string` за встроенным дефолтом и опциональные
+`params` для интерполяции. `resolveBuiltin` сам решает, что значит «встроенный дефолт по
+`locale`» — так под одной сигнатурой уместились и словарь с плюрализацией (`minCharsHint`), и
+константа из пропов без словаря (`form-persistence`, где `resolveBuiltin` просто игнорирует
+переданную `locale`).
+
+Все три места переведены на общий резолвер, поведение сохранено бит-в-бит (включая то, что
+`form-persistence` раньше не проверял `i18n.enabled` перед `t()` — безвредно, при выключенном
+`i18n` `t` тождественна, `resolveTranslation` и так отбрасывает `result === key`). Пока это
+делалось, параллельная сессия начала локализацию дефолтов `placeholder`/`loadingMessage`/
+`emptyMessage` Combobox/Autocomplete и сразу построила свой резолвер `selection-field-strings.ts`
+на этом же примитиве (обнаружено по неиспользуемому импорту в `lint`, до того как файл был
+дописан до конца, — см. запись 2.16.4 ниже) — четвёртой независимой копии лестницы не появилось.
+
+**Проверено:** `nx test forms` (`min-chars-hint.spec.ts`, `form-errors.spec.tsx`,
+`form-persistence.spec.tsx` зелёные без правок ожиданий; новая `resolve-static-text.spec.ts` в
+`forms-core`), `nx lint forms`, `nx typecheck:tsgo forms`.
+
+## 2026-09-22 (сессия forms-dev) — локализация дефолтов `placeholder`/`loadingMessage`/`emptyMessage` в Combobox/Autocomplete (forms 2.16.4)
+
+**Контекст:** прямая задача, продолжение фикса `minChars` (2.16.3, см. запись ниже) — рядом
+остались непочиненные литералы того же класса: `resolved.placeholder ?? 'Search...'`/
+`'Start typing...'`, `componentProps.loadingMessage ?? 'Loading...'`,
+`componentProps.emptyMessage ?? 'Nothing found'`/`'No suggestions'` в `field-combobox.tsx` и
+`field-autocomplete.tsx`. Отличие от `minChars`: эти строки переопределяются пропами, речь только
+о встроенном дефолте — приоритет «явный проп/schema meta > перевод > встроенный словарь >
+английский» должен был сохраниться.
+
+**Решение:** новый резолвер `declarative/form-fields/selection/selection-field-strings.ts`
+(`resolveSelectionString` + хук `useSelectionString`), простой словарь ru/en по шести ключам
+(`formSelection.combobox.placeholder`/`.loadingMessage`/`.emptyMessage`,
+`formSelection.autocomplete.placeholder`/`.loadingMessage`/`.emptyMessage`), без
+интерполяции/плюрализации в отличие от `minCharsHint`. Пока задача выполнялась, параллельная
+сессия завела общий резолвер лестницы `resolveStaticFormText` (`@letar/forms-core/i18n`) и
+мигрировала на него `min-chars-hint.ts`/`form-errors.tsx`/`form-persistence.tsx` (три места,
+раньше повторявшие один порядок независимо) — обнаружено по `lint` (несвязанное предупреждение об
+неиспользуемом импорте всплыло из-за конкурентной правки того же файла). `selection-field-strings.ts`
+сразу переведён на `resolveStaticFormText`, четвёртой копии лестницы не осталось. Дефолты считаются
+в `useFieldState` обоих полей и приходят в `render` через
+`fieldState.defaultPlaceholder`/`defaultLoadingMessage`/`defaultEmptyMessage` — та же причина, что
+у `minCharsHint` (`render` в `createField` — колбэк, не компонент, хуки там небезопасны).
+`resolved.placeholder` уже сам приоритизирует проп над schema meta (`useResolvedFieldProps`), наш
+резолвер — только последний шаг ладдера, когда ни то ни другое не задано.
+
+**Проверено:** `nx test forms` (новая `selection-field-strings.spec.ts`), `nx lint forms`,
+`nx typecheck:tsgo forms`.
+
 ## 2026-09-22 (сессия forms-dev) — локализация подсказки `minChars` в Combobox/Autocomplete (forms 2.16.3)
 
 **Контекст:** прямая задача — `<Combobox.Empty>Enter at least {minChars} characters</Combobox.Empty>`

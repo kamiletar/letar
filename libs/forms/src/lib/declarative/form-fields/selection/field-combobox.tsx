@@ -16,6 +16,7 @@ import {
   useGroupedOptions,
 } from '../base'
 import { useMinCharsHint } from './min-chars-hint'
+import { useSelectionString } from './selection-field-strings'
 
 /**
  * Props for Form.Field.Combobox
@@ -147,6 +148,12 @@ interface ComboboxFieldState extends GroupedOptionsResult {
   resolvedClearable: boolean
   /** Локализованная подсказка «введите ещё символов» для пустого списка */
   minCharsHint: string
+  /** Локализованный дефолт `placeholder`, когда его не задали ни проп, ни schema meta */
+  defaultPlaceholder: string
+  /** Локализованный дефолт `loadingMessage`, когда проп не задан */
+  defaultLoadingMessage: string
+  /** Локализованный дефолт `emptyMessage`, когда проп не задан */
+  defaultEmptyMessage: string
 }
 
 /**
@@ -276,9 +283,12 @@ export const FieldCombobox = createField<ComboboxFieldProps, string, ComboboxFie
     // Auto-determine clearable
     const resolvedClearable = componentProps.clearable ?? !resolved.required
 
-    // Подсказка резолвится здесь, а не в `render`: `render` — колбэк внутри `form.Field`,
-    // хуки там небезопасны (см. JSDoc `useMinCharsHint`)
+    // Подсказка и дефолты статичных строк резолвятся здесь, а не в `render`: `render` — колбэк
+    // внутри `form.Field`, хуки там небезопасны (см. JSDoc `useMinCharsHint`)
     const minCharsHint = useMinCharsHint(componentProps.minChars ?? 1)
+    const defaultPlaceholder = useSelectionString('formSelection.combobox.placeholder')
+    const defaultLoadingMessage = useSelectionString('formSelection.combobox.loadingMessage')
+    const defaultEmptyMessage = useSelectionString('formSelection.combobox.emptyMessage')
 
     return {
       inputValue,
@@ -289,6 +299,9 @@ export const FieldCombobox = createField<ComboboxFieldProps, string, ComboboxFie
       groups,
       resolvedClearable,
       minCharsHint,
+      defaultPlaceholder,
+      defaultLoadingMessage,
+      defaultEmptyMessage,
     }
   },
   render: ({ field, fullPath, resolved, hasError, errorMessage, componentProps, fieldState }): ReactElement => {
@@ -321,7 +334,7 @@ export const FieldCombobox = createField<ComboboxFieldProps, string, ComboboxFie
           )}
 
           <Combobox.Control>
-            <Combobox.Input placeholder={resolved.placeholder ?? 'Search...'} />
+            <Combobox.Input placeholder={resolved.placeholder ?? fieldState.defaultPlaceholder} />
             <Combobox.IndicatorGroup>
               {fieldState.isLoading && <Spinner size="xs" />}
               {fieldState.resolvedClearable && <Combobox.ClearTrigger />}
@@ -334,14 +347,14 @@ export const FieldCombobox = createField<ComboboxFieldProps, string, ComboboxFie
               <Combobox.Content>
                 {/* Loading state */}
                 {fieldState.isLoading && fieldState.options.length === 0 && (
-                  <Combobox.Empty>{componentProps.loadingMessage ?? 'Loading...'}</Combobox.Empty>
+                  <Combobox.Empty>{componentProps.loadingMessage ?? fieldState.defaultLoadingMessage}</Combobox.Empty>
                 )}
 
                 {/* Empty result */}
                 {!fieldState.isLoading
                   && fieldState.options.length === 0
                   && fieldState.inputValue.length >= minChars && (
-                  <Combobox.Empty>{componentProps.emptyMessage ?? 'Nothing found'}</Combobox.Empty>
+                  <Combobox.Empty>{componentProps.emptyMessage ?? fieldState.defaultEmptyMessage}</Combobox.Empty>
                 )}
 
                 {/* Hint about minimum characters */}

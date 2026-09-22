@@ -1,6 +1,7 @@
 'use client'
 
 import { Button, CloseButton, Dialog, Portal, Text } from '@chakra-ui/react'
+import { resolveStaticFormText } from '@letar/forms-core/i18n'
 import { useFormI18n } from '@letar/forms-react'
 import { type ReactElement, useCallback, useEffect, useRef, useState } from 'react'
 
@@ -164,22 +165,13 @@ const STORAGE_PREFIX = 'form-persistence:'
 
 /**
  * Переводит строку диалога через FormI18nProvider, если он подключён и перевод под ключом
- * реально задан; иначе — переданный дефолт (русский текст компонента)
+ * реально задан; иначе — переданный дефолт (русский текст компонента). Общая лестница
+ * `resolveStaticFormText` (`@letar/forms-core/i18n`) — здесь без встроенного словаря: fallback
+ * приходит из пропов, а не из ru/en-словаря, поэтому `resolveBuiltin` игнорирует переданную
+ * `locale` и всегда возвращает один и тот же дефолт.
  */
 function localizeOrFallback(i18n: ReturnType<typeof useFormI18n>, key: string, fallback: string): string {
-  if (!i18n) {
-    return fallback
-  }
-
-  try {
-    const translated = i18n.t(key)
-    if (!translated || translated === key) {
-      return fallback
-    }
-    return translated
-  } catch {
-    return fallback
-  }
+  return resolveStaticFormText(i18n, key, () => fallback)
 }
 
 /**

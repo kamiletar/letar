@@ -1,7 +1,7 @@
 'use client'
 
 import { Alert, Box, List, Text } from '@chakra-ui/react'
-import { resolveTranslation } from '@letar/forms-core/i18n'
+import { resolveStaticFormText } from '@letar/forms-core/i18n'
 import { getFieldMeta } from '@letar/forms-core/schema'
 import { useFormI18n } from '@letar/forms-react'
 import type { ReactElement, ReactNode } from 'react'
@@ -29,25 +29,19 @@ const BUILTIN_ERRORS_TITLE: Record<string, string> = {
   ru: 'Пожалуйста, исправьте следующие ошибки:',
 }
 
+function resolveErrorsTitleBuiltin(locale: string): string {
+  const lang = locale.split('-')[0] ?? locale
+  return BUILTIN_ERRORS_TITLE[lang] ?? DEFAULT_ERRORS_TITLE
+}
+
 /**
- * Резолвит дефолтный заголовок `Form.Errors` без явного `title`-пропа.
- *
- * Порядок: перевод приложения по ключу `formErrors.title` (если `FormI18nProvider`
- * получил `t`) → встроенный словарь по `locale` (ru/en) → жёстко заданный английский
- * текст — совпадает с прежним поведением, если провайдера в дереве нет вовсе.
+ * Резолвит дефолтный заголовок `Form.Errors` без явного `title`-пропа — общая лестница
+ * `resolveStaticFormText` (`@letar/forms-core/i18n`): перевод приложения по ключу
+ * `formErrors.title` → встроенный словарь по `locale` (ru/en) → английский текст, если
+ * провайдера в дереве нет вовсе.
  */
 function resolveDefaultErrorsTitle(i18n: ReturnType<typeof useFormI18n>): string {
-  if (!i18n) {
-    return DEFAULT_ERRORS_TITLE
-  }
-
-  const translated = i18n.enabled ? resolveTranslation(i18n.t, ERRORS_TITLE_KEY) : undefined
-  if (translated) {
-    return translated
-  }
-
-  const lang = i18n.locale.split('-')[0] ?? i18n.locale
-  return BUILTIN_ERRORS_TITLE[lang] ?? DEFAULT_ERRORS_TITLE
+  return resolveStaticFormText(i18n, ERRORS_TITLE_KEY, resolveErrorsTitleBuiltin)
 }
 
 interface ZodIssue {

@@ -4,6 +4,48 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.16.5] - 2026-09-22
+
+### Changed
+
+- **Сведена в один резолвер лестница «перевод приложения → встроенный словарь по locale →
+  английский/дефолт из пропов»**, которая была написана в библиотеке независимо трижды (заголовок
+  `Form.Errors`, подсказка `minChars` из 2.16.3, тексты диалога `form-persistence`) и каждый раз
+  чуть иначе — например, `form-persistence` не проверял `i18n.enabled` перед вызовом `t()`
+  (безвредно: при выключенном `i18n` `t` — функция-тождество, значит `resolveTranslation` и так
+  отбраковывает результат по `result === key`, но лестница дублировалась текстуально).
+  Общий примитив — `resolveStaticFormText` (`@letar/forms-core/i18n`, рядом с `resolveTranslation`
+  — framework-free, без React-зависимостей): принимает контекст `useFormI18n()`, ключ перевода,
+  колбэк `resolveBuiltin(locale)` за встроенным дефолтом (словарь ru/en с плюрализацией — как у
+  `minCharsHint`, либо просто fallback-текст из пропов без своего словаря — как у
+  `form-persistence`) и опциональные `params` для интерполяции.
+  Поведение всех трёх мест сохранено бит-в-бит, включая контракт «без `FormI18nProvider` в дереве
+  — английский/дефолт из пропов, это не ошибка конфигурации»
+  (`.claude/docs/letar-forms-missing-i18nprovider-english-hints.md`). Новый резолвер сразу же
+  использован и в параллельно готовившейся локализации дефолтов `placeholder`/`loadingMessage`/
+  `emptyMessage` Combobox/Autocomplete (`selection-field-strings.ts`, см. 2.16.4) — четвёртой
+  независимой копии лестницы не появилось.
+  Покрыт `resolve-static-text.spec.ts` в `@letar/forms-core`; существующие
+  `min-chars-hint.spec.ts` и `form-errors.spec.tsx` остались зелёными без правок ожиданий.
+
+## [2.16.4] - 2026-09-22
+
+### Fixed
+
+- **Дефолты `placeholder`/`loadingMessage`/`emptyMessage` в `Form.Field.Combobox` /
+  `Form.Field.Autocomplete` были жёстко зашиты по-английски** (`'Search...'`, `'Start typing...'`,
+  `'Loading...'`, `'Nothing found'`, `'No suggestions'`) — тот же класс проблемы, что и у подсказки
+  `minChars` в 2.16.3, только для дефолтов, переопределяемых пропами. Приоритет сохранён: явный
+  проп (`placeholder`/`loadingMessage`/`emptyMessage`) или `placeholder` из schema meta
+  (`resolved.placeholder`, уже проходит через `useResolvedFieldProps`) остаются сильнее — резолвер
+  вступает только когда ни то ни другое не задано. Порядок дефолта: перевод приложения по ключу
+  (`formSelection.combobox.*`/`formSelection.autocomplete.*`, если `FormI18nProvider` получил `t`)
+  → встроенный словарь ru/en по `locale` → английский текст. Без `FormI18nProvider` в дереве —
+  английский, как раньше.
+  Резолвер — `declarative/form-fields/selection/selection-field-strings.ts`
+  (`resolveSelectionString` + хук `useSelectionString`), построен на общей лестнице
+  `resolveStaticFormText` (`@letar/forms-core/i18n`), покрыт `selection-field-strings.spec.ts`.
+
 ## [2.16.3] - 2026-09-22
 
 ### Fixed

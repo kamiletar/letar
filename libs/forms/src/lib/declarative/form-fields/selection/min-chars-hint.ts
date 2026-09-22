@@ -1,6 +1,6 @@
 'use client'
 
-import { resolveTranslation } from '@letar/forms-core/i18n'
+import { DEFAULT_STATIC_TEXT_LOCALE, resolveStaticFormText } from '@letar/forms-core/i18n'
 import { useFormI18n } from '@letar/forms-react'
 
 /**
@@ -9,9 +9,6 @@ import { useFormI18n } from '@letar/forms-react'
  * передав свой `t` в `FormI18nProvider` — параметр интерполяции один: `minChars`.
  */
 const MIN_CHARS_HINT_KEY = 'formSelection.minCharsHint'
-
-/** Локаль встроенного словаря по умолчанию — совпадает с дефолтом `FormI18nProvider` */
-const DEFAULT_LOCALE = 'en'
 
 /**
  * Встроенный словарь подсказки — отдельный от `validation.*`
@@ -65,7 +62,7 @@ function pluralizeChars(minChars: number, locale: string, lang: string): string 
 
 function buildBuiltinHint(locale: string, minChars: number): string {
   const lang = locale.split('-')[0] ?? locale
-  const template = BUILTIN_MIN_CHARS_HINT[lang] ?? BUILTIN_MIN_CHARS_HINT[DEFAULT_LOCALE]!
+  const template = BUILTIN_MIN_CHARS_HINT[lang] ?? BUILTIN_MIN_CHARS_HINT[DEFAULT_STATIC_TEXT_LOCALE]!
 
   return template
     .replace('{minChars}', String(minChars))
@@ -73,25 +70,15 @@ function buildBuiltinHint(locale: string, minChars: number): string {
 }
 
 /**
- * Резолвит подсказку о минимальной длине поискового запроса.
- *
- * Порядок (тот же, что у заголовка `Form.Errors`, см. `resolveDefaultErrorsTitle`):
- * перевод приложения по ключу `formSelection.minCharsHint` (если `FormI18nProvider` получил `t`)
- * → встроенный словарь по `locale` (ru/en) → английский текст. Провайдера в дереве нет вовсе —
- * остаётся английский, как было до локализации: `FormI18nProvider` опционален, его отсутствие
- * не ошибка конфигурации.
+ * Резолвит подсказку о минимальной длине поискового запроса — общая лестница
+ * `resolveStaticFormText` (`@letar/forms-core/i18n`, тот же порядок, что у заголовка
+ * `Form.Errors`, см. `resolveDefaultErrorsTitle`): перевод приложения по ключу
+ * `formSelection.minCharsHint` → встроенный словарь по `locale` (ru/en, с плюрализацией) →
+ * английский текст, если провайдера в дереве нет вовсе — `FormI18nProvider` опционален, его
+ * отсутствие не ошибка конфигурации.
  */
 export function resolveMinCharsHint(i18n: ReturnType<typeof useFormI18n>, minChars: number): string {
-  if (!i18n) {
-    return buildBuiltinHint(DEFAULT_LOCALE, minChars)
-  }
-
-  const translated = i18n.enabled ? resolveTranslation(i18n.t, MIN_CHARS_HINT_KEY, { minChars }) : undefined
-  if (translated) {
-    return translated
-  }
-
-  return buildBuiltinHint(i18n.locale, minChars)
+  return resolveStaticFormText(i18n, MIN_CHARS_HINT_KEY, (locale) => buildBuiltinHint(locale, minChars), { minChars })
 }
 
 /**
