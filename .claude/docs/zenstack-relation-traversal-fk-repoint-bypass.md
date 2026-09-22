@@ -81,6 +81,13 @@ enforced immutability через relation-traversal и не защищает с�
   (`apps/domwellbes/schema.zmodel`) проверены и **не подпадают** — их write-policy вообще не
   проверяет состояние parent'а (`isCurrent`/`isPublished` участвует только в read-policy),
   значит обходить нечего: staff-редактирование этих моделей не заявлено как immutable.
+  ⚠️ **Уточнение 2026-09-22:** вывод верен для _этого_ паттерна (нет relation-traversal условия —
+  нечего обходить repoint'ом), но часть child-моделей состава `HouseVersion` держит immutability
+  не через policy, а через app-level copy-on-write хелпер — это другой класс дыры с тем же фиксом,
+  разобран отдельно в
+  [zenstack-version-scoped-fk-immutable-pattern](/.claude/docs/zenstack-version-scoped-fk-immutable-pattern.md).
+  Не считать эту строку доказательством безопасности version-scoped FK без проверки по тому
+  документу.
 - **`domwellbes`** — `EstimateLimitedCost.estimateId` / `EstimateSection.estimateId` /
   `EstimateItem.estimateId` (`@@deny('create,update,delete', estimate.status != DRAFT)` без
   field-level деня на `estimateId`), закрыто тем же приёмом при сквозном аудите монорепо

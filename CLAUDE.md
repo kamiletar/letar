@@ -79,6 +79,7 @@
 - [zenstack-self-only-user-policy-staff-picker](/.claude/docs/zenstack-self-only-user-policy-staff-picker.md) ⚠️ self-only политика режет staff-lookup до одной записи
 - [zenstack-required-relation-nested-select-null](/.claude/docs/zenstack-required-relation-nested-select-null.md) ⚠️ обязательная relation тихо резолвится в `null`
 - [zenstack-relation-traversal-fk-repoint-bypass](/.claude/docs/zenstack-relation-traversal-fk-repoint-bypass.md) ⚠️ политика по relation не видит переставленный FK
+- [zenstack-version-scoped-fk-immutable-pattern](/.claude/docs/zenstack-version-scoped-fk-immutable-pattern.md) ⚠️ FK на copy-on-write версию нужен `@deny` даже без условия в policy — иммутабельность держит только app-хелпер
 - [zenstack-field-level-allow-does-not-narrow](/.claude/docs/zenstack-field-level-allow-does-not-narrow.md) ⚠️ field-level `@allow` только добавляет право, сужает лишь `@deny`
 - [role-gate-vs-model-policy-drift](/.claude/docs/role-gate-vs-model-policy-drift.md) ⚠️ `requireRole` шире `@@allow` модели — отказ на записи вместо гейта
 - [tree-model-parent-select](/.claude/docs/tree-model-parent-select.md) self-referencing `parentId`
