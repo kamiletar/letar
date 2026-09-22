@@ -743,7 +743,7 @@
     },
     "apps/form-develop-app-e2e": {
       "name": "form-develop-app-e2e",
-      "version": "0.0.2",
+      "version": "0.0.3",
       "dependencies": {
         "@letar/e2e-testing": "workspace:*",
       },
