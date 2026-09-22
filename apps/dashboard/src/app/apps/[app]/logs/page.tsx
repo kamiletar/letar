@@ -26,10 +26,11 @@ export default function AppLogsPage({ params: paramsPromise }: { params: Promise
 
   const logsEndRef = useRef<HTMLDivElement>(null)
 
-  // Auto-scroll to bottom
+  // Auto-scroll to bottom. 'instant', не 'smooth' — без OS-фокуса окна анимация
+  // зависает навсегда (.claude/docs/scrollintoview-smooth-frozen-without-window-focus.md)
   useEffect(() => {
     if (autoScroll && logsEndRef.current) {
-      logsEndRef.current.scrollIntoView({ behavior: 'smooth' })
+      logsEndRef.current.scrollIntoView({ behavior: 'instant' })
     }
   }, [logs, autoScroll])
 

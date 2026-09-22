@@ -43,10 +43,11 @@ export const DeployProgress = ({ enabled = true }: DeployProgressProps) => {
     }
   }, [data?.logs])
 
-  // Автоскролл вниз
+  // Автоскролл вниз. 'instant', не 'smooth' — без OS-фокуса окна анимация зависает
+  // навсегда (.claude/docs/scrollintoview-smooth-frozen-without-window-focus.md)
   useEffect(() => {
     if (autoScroll && logsEndRef.current) {
-      logsEndRef.current.scrollIntoView({ behavior: 'smooth' })
+      logsEndRef.current.scrollIntoView({ behavior: 'instant' })
     }
   }, [allLogs, autoScroll])
 
