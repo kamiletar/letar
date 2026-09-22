@@ -1503,7 +1503,7 @@
     },
     "libs/infra-config": {
       "name": "@letar/infra-config",
-      "version": "0.3.5",
+      "version": "0.3.6",
     },
     "libs/ipfs-kubo-core": {
       "name": "@letar/ipfs-kubo-core",

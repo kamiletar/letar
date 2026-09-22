@@ -221,14 +221,20 @@ export function getCurrentServer(): InfraServer {
  * `['app-a', 'app-b']` — spread, константы и вычисления разбор отвергнет, и `deploy_app` откажет с
  * пояснением (не откатится молча на s2). Охранный тест — `build-on-s1.spec.ts` в deploy-mcp.
  *
- * Пилот 3 (2026-09-22): `mandala` — настоящий пререндер из БД (`generateStaticParams` читает мандалы,
- * товары и страницы): сборка читает прод-БД s2 через туннель. `kami` (2026-09-21) прошёл технически,
- * но у него `/sitemap.xml` динамический — чтение БД сборкой он не доказал.
+ * Пилот 3 попытка 2 (2026-09-22, в процессе): `mandala` технически прошла (typecheck-фикс), но
+ * критерий не подтверждён — обе кандидатные страницы (`mandalas/[slug]`, `shop/[slug]`) имеют
+ * `export const dynamic = 'force-dynamic'`, поэтому `generateStaticParams` на рендер не влияет и
+ * пререндера из БД там нет в принципе. Настоящий кандидат — `grandslamcup`: три страницы
+ * (`[citySlug]/donate`, `/news`, `/rules`) тянут `prisma.city.findMany` в `generateStaticParams`
+ * без `force-dynamic`/`headers()`/`auth()` в файле или родительских layout — подтверждено чтением
+ * исходников перед добавлением в список.
+ * Пилот 3 попытка 1 (2026-09-21): `kami` прошёл технически, но у него `/sitemap.xml` динамический —
+ * чтение БД сборкой он не доказал.
  * Пилот 2 (2026-09-21, пройден): `time` — с БД, без пререндера из неё.
  * Пилот 1 (2026-09-21, пройден): `letar-landing` — приложение без БД. Аварийного однохостового пути нет:
  * при недоступности s1/registry деплой не выполняется, откат — убрать имя из списка.
  */
-export const BUILD_ON_S1_APPS: string[] = ['letar-landing', 'time', 'kami', 'mandala']
+export const BUILD_ON_S1_APPS: string[] = ['letar-landing', 'time', 'kami', 'mandala', 'grandslamcup']
 
 /**
  * Собирается ли приложение в production на s1 (см. `BUILD_ON_S1_APPS`).
