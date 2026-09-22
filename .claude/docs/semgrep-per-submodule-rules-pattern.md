@@ -41,8 +41,12 @@ domwellbes). В шапке файла — та же аргументация, ч
 
 ```bash
 cd apps/domwellbes
-uvx semgrep scan --config .semgrep/letar-rules.yml src
+PYTHONUTF8=1 PYTHONIOENCODING=utf-8 uvx semgrep scan --config .semgrep/letar-rules.yml src
 ```
+
+⚠️ На Windows без этих переменных semgrep читает YAML в системной cp1251 и падает
+`UnicodeDecodeError` на кириллице в комментариях правил — `pre-commit-semgrep.sh` их уже
+выставляет, ручной прогон вне хука их наследует только если задать явно.
 
 ## Когда заводить новый такой файл
 

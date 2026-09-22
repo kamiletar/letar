@@ -9,7 +9,10 @@
 #
 # Запускается из scripts/hooks/pre-commit-semgrep.sh по staged-файлам.
 # Ручной прогон по всему репо:
-#   uvx semgrep scan --config .semgrep/letar-rules.yml apps libs
+#   PYTHONUTF8=1 PYTHONIOENCODING=utf-8 uvx semgrep scan --config .semgrep/letar-rules.yml apps libs
+#
+# На Windows без этих переменных semgrep читает YAML в системной cp1251 и падает
+# UnicodeDecodeError на кириллице в комментариях правил — сам pre-commit-хук их уже выставляет.
 
 rules:
   - id: letar-prisma-raw-unsafe-concat

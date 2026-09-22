@@ -87,9 +87,9 @@ fi
 
 # Запуск из корня выгрузки: пути в `paths:` правил (`/apps/*/main/**`, `libs/forms/**`) и в
 # отчёте получаются относительными корню репозитория, как при запуске из самого репозитория.
-# PYTHONUTF8=1 обязателен: на Windows semgrep читает YAML в системной cp1251 и падает
-# UnicodeDecodeError на кириллице в message правил.
-(cd "$SCAN_DIR" && PYTHONUTF8=1 timeout 120 uvx semgrep scan "${CONFIGS[@]}" --quiet --json --metrics=off \
+# PYTHONUTF8=1 + PYTHONIOENCODING=utf-8 обязательны: на Windows semgrep читает YAML (и пишет
+# вывод) в системной cp1251 и падает UnicodeDecodeError на кириллице в message правил/комментариях.
+(cd "$SCAN_DIR" && PYTHONUTF8=1 PYTHONIOENCODING=utf-8 timeout 120 uvx semgrep scan "${CONFIGS[@]}" --quiet --json --metrics=off \
   "${FILES[@]}" >"$OUT" 2>/dev/null)
 SCAN_STATUS=$?
 
