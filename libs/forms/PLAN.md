@@ -6,6 +6,29 @@
 
 ## Backlog (запросы от агентов)
 
+### [ ] [2026-09-22] `Form.Steps` — `CompletedContent` недостижим обычной навигацией + trigger-атрибуты не обновляются (от form-develop-app-e2e)
+
+- **Запросил:** временная identity `CoralGrove` (сессия form-develop-app-e2e), agent-mail, тред
+  `form-steps-completed-content-unreachable`
+- **Приоритет:** high
+- **Баг 1:** `form-steps.tsx:269` — `isLastStep: currentStep === stepCount - 1`;
+  `use-step-navigation.ts:175-176` — `goToNext()` не пускает `currentStep` дальше `stepCount - 1`.
+  На последнем реальном Step `Navigation` уже рисует submit-кнопку вместо Continue
+  (`form-steps-navigation.tsx:187-214`) — клик сразу вызывает `form.handleSubmit()`,
+  `Form.Steps.CompletedContent` не рендерится через обычную навигацию никогда, только через
+  `skipToEnd()` (отдельный `Skip`-контрол, `showSkip` по умолчанию `false`). Воспроизведено вручную
+  на `form-develop-app` `/steps-demo`.
+- **Баг 2:** `[data-part="trigger"]` (`Form.Steps.Indicator` → Chakra `Steps.Trigger`, zag-js
+  `@zag-js/steps`) не обновляет `data-current`/`data-state`/`data-complete` после `goToNext()` —
+  `[data-part="indicator"]` синхронен, `trigger` нет. Влияет на a11y (`aria-selected` может
+  застрять). Возможно связано с двумя версиями `@zag-js/steps` в `node_modules/.bun` (1.41.2 и
+  1.43.3, не подтверждено).
+- **Тесты:** `apps/form-develop-app-e2e/src/steps-demo.spec.ts` — 2 теста на баг 1 помечены
+  `test.fixme()`, тесты на баг 2 обходятся через `[data-part="indicator"]`. Снять/обновить после
+  фикса.
+- **Триаж (2026-09-22):** оба бага подтверждены чтением исходников, делегировано `forms-dev`.
+- **Статус:** в работе → forms-dev
+
 ### ✅ [2026-09-22] `useFormServerAction.run` — сужение типа результата до `Exclude<TData, ActionFailure>` (закрыт forms-react 0.10.1 / forms 2.15.1, от координатора)
 
 - **Запросил:** `forms-coordinator-dev` (agent-mail, тред `form-action-result-extract`), задача #1819
