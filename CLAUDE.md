@@ -236,6 +236,7 @@
 - [dprint-eslint-curly-conflict](/.claude/docs/dprint-eslint-curly-conflict.md) `--fix` и `fmt` откатывают друг друга
 - [react-native-eslint-flat-config-eslint10](/.claude/docs/react-native-eslint-flat-config-eslint10.md) ⚠️ RN-пресет роняет прогон целиком под ESLint 10
 - [oxlint-eslint-disable-directive-namespace-mismatch](/.claude/docs/oxlint-eslint-disable-directive-namespace-mismatch.md) ⚠️ `oxlint-disable` и `eslint-disable` — разные неймспейсы
+- [eslint-flat-config-ignores-not-gitignore](/.claude/docs/eslint-flat-config-ignores-not-gitignore.md) ⚠️ flat config не читает `.gitignore`: `.claude/artifacts/` и `.next-smoke/` линтуются
 - [dprint-typescript-nested-aschild-comment-instability](/.claude/docs/dprint-typescript-nested-aschild-comment-instability.md) ⚠️ «Formatting not stable» на комментарии в вложенных `asChild`
 - [dprint-markdown-table-reformat](/.claude/docs/dprint-markdown-table-reformat.md) ⚠️ `Edit` падает на «верном» тексте таблицы
 - [prettier-dprint-conflict-root-cause](/.claude/docs/prettier-dprint-conflict-root-cause.md) ⚠️ голая `nx format` — это Prettier, `NX_SKIP_FORMAT` её не гасит
