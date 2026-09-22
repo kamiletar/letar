@@ -12,6 +12,20 @@
 - `vitest.config.mts`: убран избыточный alias `@letar/hooks` — пакет уже прямая зависимость,
   симлинк bun резолвит его без alias.
 
+## [1.9.12] - 2026-09-22
+
+### Fixed
+
+- `src/app/_components/use-toc-scroll.ts`: прогресс-бар TOC (`aria-valuenow`) стабильно оставался
+  на 0% в webkit при e2e-прогоне и флейково — в chromium/firefox, даже после фикса throttle на
+  `setTimeout` в 1.9.9/1.9.10. Причина глубже, чем rAF: программный `window.scrollTo()` в headless
+  WebKit без OS-фокуса окна не всегда доставляет DOM-событие `scroll` вовсе (тот же класс, что и
+  зависающий `scrollIntoView(smooth)`, оба завязаны на композитор-кадр, которого без фокуса не
+  происходит — см. `.claude/docs/scrollintoview-smooth-frozen-without-window-focus.md`), поэтому
+  throttled `handleScroll` не срабатывал ни разу. Фикс — убрать зависимость от события `scroll`
+  целиком: `setInterval(50мс)` читает `scrollY`/`getBoundingClientRect()` напрямую, не дожидаясь
+  доставки события.
+
 ## [1.9.11] - 2026-09-22
 
 ### Changed

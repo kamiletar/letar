@@ -912,7 +912,7 @@
     },
     "apps/pravda": {
       "name": "@letar/pravda",
-      "version": "1.9.11",
+      "version": "1.9.12",
       "dependencies": {
         "@letar/glitchtip": "workspace:*",
         "@letar/hooks": "workspace:*",

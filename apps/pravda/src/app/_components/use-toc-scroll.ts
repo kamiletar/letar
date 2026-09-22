@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 export interface TocItem {
   id: string
@@ -16,12 +16,15 @@ const HEADING_SELECTOR = 'h2[id], h3[id], [id^="section-"], [id^="chapter-"]'
 const ACTIVE_THRESHOLD = 80
 
 /**
- * Throttle scroll-хэндлера через setTimeout, НЕ requestAnimationFrame: rAF полностью замирает
- * без фокуса окна (.claude/docs/raf-vs-timers-background-tab.md) — Playwright-браузеры в CI
- * обычно без реального фокуса, поэтому throttle на rAF не срабатывал стабильно в webkit и
- * флейково в firefox. 50мс-таймер достаточен, визуальную плавность даёт CSS `transition`.
+ * Опрос вместо `scroll`-листенера: в headless WebKit без OS-фокуса окна программный
+ * `window.scrollTo()` не всегда доставляет DOM-событие `scroll` (похоже на тот же механизм, что и
+ * зависающий `scrollIntoView(smooth)` — оба завязаны на композитор-кадр, которого без фокуса не
+ * происходит, см. .claude/docs/scrollintoview-smooth-frozen-without-window-focus.md) — throttled
+ * `handleScroll` в таком случае не срабатывает вовсе, прогресс-бар стабильно застревал на 0% в
+ * e2e (webkit stable fail, chromium/firefox flaky — там композитор иногда всё же тикает).
+ * Периодический `setInterval` читает `scrollY` напрямую и не зависит от доставки события.
  */
-const THROTTLE_MS = 50
+const POLL_MS = 50
 
 /**
  * Собирает заголовки документа из DOM (один проход querySelectorAll).
@@ -74,7 +77,6 @@ export function useTocScroll(resetKey?: string): TocScrollState {
   const [headings, setHeadings] = useState<TocItem[]>([])
   const [activeId, setActiveId] = useState<string>('')
   const [progress, setProgress] = useState<number>(0)
-  const throttleIdRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     // Синхронизация с навигацией (внешняя система) — сброс состояния при смене страницы
@@ -85,43 +87,26 @@ export function useTocScroll(resetKey?: string): TocScrollState {
     const elements = Array.from(document.querySelectorAll(HEADING_SELECTOR))
     setHeadings(collectHeadings(elements))
 
-    const handleScroll = () => {
-      // Пропускаем если уже запланировано обновление
-      if (throttleIdRef.current !== null) {
-        return
-      }
+    const update = () => {
+      const scrollTop = window.scrollY
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight
+      const scrollProgress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0
+      setProgress(Math.min(100, Math.max(0, scrollProgress)))
 
-      throttleIdRef.current = setTimeout(() => {
-        const scrollTop = window.scrollY
-        const docHeight = document.documentElement.scrollHeight - window.innerHeight
-        const scrollProgress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0
-        setProgress(Math.min(100, Math.max(0, scrollProgress)))
-
-        let active = ''
-        for (const el of elements) {
-          if (el.getBoundingClientRect().top <= ACTIVE_THRESHOLD) {
-            active = el.id
-          }
+      let active = ''
+      for (const el of elements) {
+        if (el.getBoundingClientRect().top <= ACTIVE_THRESHOLD) {
+          active = el.id
         }
-        setActiveId(active)
-
-        throttleIdRef.current = null
-      }, THROTTLE_MS)
+      }
+      setActiveId(active)
     }
 
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    handleScroll() // Инициализируем значение
+    update() // Инициализируем значение
+    const intervalId = setInterval(update, POLL_MS)
 
     return () => {
-      window.removeEventListener('scroll', handleScroll)
-      if (throttleIdRef.current !== null) {
-        clearTimeout(throttleIdRef.current)
-        // Сбрасываем ref после отмены — иначе после StrictMode double-invoke (или повторного
-        // запуска эффекта при смене resetKey) handleScroll() новой инстанции эффекта видит
-        // "устаревший" ненулевой id отменённого таймера и НАВСЕГДА пропускает планирование
-        // нового (ранний return по `throttleIdRef.current !== null`). Прогресс-бар застревал на 0%.
-        throttleIdRef.current = null
-      }
+      clearInterval(intervalId)
     }
   }, [resetKey])
 

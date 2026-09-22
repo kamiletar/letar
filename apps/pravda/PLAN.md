@@ -106,6 +106,17 @@
       `toc.tsx`/`mobile-toc.tsx` используют хук, уникальная часть (desktop sticky nav с автоскроллом
       к активному пункту vs mobile Drawer/FAB) не тронута. Проверено `typecheck:tsgo`+`lint`;
       мобильный viewport по-прежнему не покрыт e2e (см. выше) — живым прогоном не подтверждено.
+      **Живой прогон на staging после 1.9.11 (2026-09-22, `run_e2e --grep "прогресс"`, runId
+      `1cf89fe4`) показал: фикс не устранил проблему** — 6 passed / 2 failed / 4 flaky, картина та
+      же, что до фикса (webkit стабильно 0, chromium/firefox flaky). Причина оказалась глубже rAF:
+      программный `window.scrollTo()` в headless WebKit без OS-фокуса окна не всегда доставляет
+      DOM-событие `scroll` вовсе (тот же механизм, что зависающий `scrollIntoView(smooth)` —
+      композитор-кадр без фокуса не наступает), поэтому throttled `handleScroll` не срабатывал ни
+      разу, независимо от того, `rAF` внутри него или `setTimeout`. **Фикс `v1.9.12`** — убрать
+      зависимость от события `scroll` целиком: `setInterval(50мс)` в `use-toc-scroll.ts` читает
+      `scrollY`/`getBoundingClientRect()` напрямую опросом, не дожидаясь события. Проверено
+      `typecheck:tsgo`+`lint`; живым прогоном `run_e2e` после деплоя не подтверждено — запрошен
+      редеплой staging у `deploy-agent-dev`, тред `pravda-e2e-first-run-failures`.
 
 **Решение владельца (2026-09-01): pravda НЕ добавляется в `E2E_GATED_APPS`.** ⚠️ **Устарело
 2026-09-22** — коммит `d1aa6686d` (`feat(infra-config): все прод-деплои — через e2e-гейт, весь
