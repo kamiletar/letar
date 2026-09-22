@@ -20,6 +20,9 @@ output/
 # .d.ts.map руками никто не пишет — безопасно игнорировать везде.
 **/src/**/*.d.ts.map
 
+# Python
+__pycache__/
+
 # dependencies
 node_modules
 
