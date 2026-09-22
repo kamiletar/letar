@@ -170,7 +170,7 @@ test.describe('FileUpload Demo', () => {
     await submitButton.click()
 
     // Should show validation error for avatar
-    await expect(page.locator('text=/required|avatar/i')).toBeVisible({ timeout: 10000 })
+    await expect(page.getByText('Avatar is required')).toBeVisible({ timeout: 10000 })
   })
 
   test('should upload document files to documents dropzone', async ({ page }) => {
