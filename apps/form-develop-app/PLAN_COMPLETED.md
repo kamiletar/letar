@@ -19,6 +19,24 @@
 несвязанным причинам (неверный ожидаемый текст плейсхолдера, strict-mode locator), не трогались —
 заведены отдельными задачами через `spawn_task`.
 
+**Обе спавненные задачи закрыты (2026-09-22, отдельная сессия):**
+
+- `should display input variant with placeholder` — текст `'Select your resume...'` никогда не
+  существовал на странице (проп `placeholder` у поля `resume` не был задан, использовался дефолт
+  `'Выберите файл(ы)'` из `field-file-upload.tsx`). Добавлен
+  `placeholder="Select your resume..."` в `file-upload-demo/page.tsx`.
+- `should show validation error when required file is missing` — `page.locator('text=/required|
+  avatar/i')` матчил 3 элемента (label «Avatar\*», кнопку «Upload avatar», текст ошибки) → strict
+  mode violation. Заменён на точный `page.getByText('Avatar is required')`.
+
+`nx e2e form-develop-app-e2e -- --project=chromium --grep "FileUpload Demo" --workers=1
+--repeat-each=5` → 60/60 зелёных. Коммиты `952d18e3a` (page.tsx) и `e478ee62e` (spec.ts).
+
+⚠️ **Тот же антипаттерн (`text=/word1|word2/i` на странице с полем-лейблом того же слова) найден
+ещё в 4 файлах** — `steps-demo.spec.ts` (×2), `rating-demo.spec.ts`, `pin-input-demo.spec.ts`,
+`fields-demo.spec.ts`. Не проверялись и не трогались в этой сессии — заведена отдельная задача
+через `spawn_task`.
+
 ## `filters-state-demo` — поле `Form.Field.Date` + `Form.UrlSync` (2026-09-15)
 
 Добавлено поле «Создано с» (`Form.Field.Date`, схема `since: z.string()` — без `z.date()`) в
