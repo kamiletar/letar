@@ -5,15 +5,17 @@ import { CookieBanner } from '@letar/ui'
 import type { Metadata, Viewport } from 'next'
 import { hasLocale, NextIntlClientProvider } from 'next-intl'
 import { getMessages, setRequestLocale } from 'next-intl/server'
-import { JetBrains_Mono } from 'next/font/google'
+import localFont from 'next/font/local'
 import { notFound } from 'next/navigation'
 import type { ReactNode } from 'react'
 
 import { ChakraProviders } from '../_components/providers'
 import { Toolbar } from '../_components/toolbar'
 
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ['cyrillic', 'latin', 'latin-ext', 'greek', 'vietnamese'],
+// Шрифт лежит файлом, а не тянется `next/font/google` — см. ../fonts/README.md
+const jetbrainsMono = localFont({
+  src: '../fonts/JetBrainsMono-cyrillic-latin.woff2',
+  weight: '100 700',
   variable: '--font-mono',
 })
 
