@@ -2,6 +2,18 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.40.33] - 2026-09-22
+
+### Fixed
+
+- `07-full-mandala-crud.admin.spec.ts` — гонка `setInputFiles` на `Dropzone` сразу после первого
+  интерактивного пейнта формы (`useFormPersistence` донагружает JS ~1-2с) молча теряла выбранный
+  файл без единой ошибки: `/api/upload` не вызывался, превью и кнопка «Удалить» не появлялись.
+  Подтверждено на полностью свежем dev-сервере: 3/3 падения без `waitForLoadState('networkidle')`
+  перед взаимодействием с dropzone, 3/3 успеха с ним. Не специфично для mandala — тот же паттерн
+  (`@letar/forms` форма + `Dropzone`, `@letar/image-upload`) независимо воспроизведён в другом
+  приложении. Разбор — `.claude/docs/e2e-testing.md` § «`networkidle` в dev-режиме Next.js».
+
 ## [0.40.32] - 2026-09-22
 
 ### Fixed

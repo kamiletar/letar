@@ -870,7 +870,7 @@
     },
     "apps/mandala": {
       "name": "@letar/mandala",
-      "version": "0.40.32",
+      "version": "0.40.33",
       "dependencies": {
         "@letar/admin-ui": "workspace:*",
         "@letar/api-server": "workspace:*",
