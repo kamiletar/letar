@@ -547,7 +547,7 @@
     },
     "apps/auth-hub": {
       "name": "auth-hub",
-      "version": "0.7.23",
+      "version": "0.7.24",
       "dependencies": {
         "@letar/api-server": "workspace:*",
         "@letar/auth": "workspace:*",
@@ -577,7 +577,7 @@
     },
     "apps/dashboard": {
       "name": "@letar/dashboard",
-      "version": "1.27.1",
+      "version": "1.27.2",
       "dependencies": {
         "@letar/admin-ui": "workspace:*",
         "@letar/analytics": "workspace:*",
@@ -616,7 +616,7 @@
     },
     "apps/domwellbes": {
       "name": "@letar/domwellbes",
-      "version": "0.308.1",
+      "version": "0.308.3",
       "dependencies": {
         "@gltf-transform/core": "^4.5.0",
         "@gltf-transform/extensions": "^4.5.0",
