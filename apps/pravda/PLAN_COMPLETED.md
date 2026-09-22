@@ -1,5 +1,19 @@
 # Pravda - Выполненные задачи
 
+## Фикс TOC scroll-tracking + зависающий smooth-scroll (2026-09-22, v1.9.8)
+
+По запросу `letar-dev` (первый e2e-прогон pravda на staging в рамках новой политики «все
+прод-деплои через e2e-гейт», PLAN-INFRA-6.md §157, тред agent-mail
+`pravda-e2e-first-run-failures`) root-caused и закрыт «Класс 2» (не flaky, все 3 браузера) из
+кластера, который раньше был принят владельцем как недиагностированный флейк
+(2026-09-01, PLAN.md). Полный разбор — в `PLAN.md` §«Кластер: assert'ы позиции скролла»,
+детали — `CHANGELOG.md` v1.9.8. Коротко: `scroll-padding-top`(globals.css)+`scroll-margin-top`
+секций складывались при `scrollIntoView`, давая 140px вместо 80 (фикс — `SCROLL_MARGIN_TOP`
+80→20px); отдельно `behavior:'smooth'` у `scrollIntoView` зависал навсегда без фокуса окна
+(Playwright в CI обычно без фокуса) — переведено на `instant`. Локально `pravda-e2e`:
+6 failed+4 flaky → 4 failed+5 flaky (остаток — уже известный недиагностированный
+прогресс-бар-кластер и апстрим-баг Next.js RSC-навигации, не новый).
+
 ## Фикс truncation-бага в defineSlotRecipe (2026-09-10, v1.9.6)
 
 Аудит по монорепо на баг positional-merge Chakra (`createSystem` мержит массивы `slots`

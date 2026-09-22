@@ -104,6 +104,10 @@ Palette Escape по-прежнему помечены `test.skip` с обосн�
 прогона на staging (2026-09-22, `run_e2e`, коммит `d1aa6686d`) и фикса — тред agent-mail
 `pravda-e2e-first-run-failures`.
 
+- [ ] Подтвердить фикс класса 2 (`SCROLL_MARGIN_TOP`, `behavior:'instant'`) через `run_e2e` на
+      staging после передеплоя (запрошен у `letar-dev`/`deploy-agent-dev`, тред
+      `pravda-e2e-first-run-failures`), затем зарегистрировать pravda в `E2E_GATED_APPS` — ждём
+      действий letar-dev/deploy-agent-dev, сам деплой не делаю
 - [x] Печать документов (кнопка + CSS @media print)
 - [x] Экспорт в PDF (через диалог печати браузера)
 - [ ] Сравнение редакций
@@ -124,4 +128,4 @@ studio, aboi. Подключать по одному, не пакетно — al
 
 ---
 
-**Последнее обновление:** 2026-09-01
+**Последнее обновление:** 2026-09-22
