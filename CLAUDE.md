@@ -137,7 +137,7 @@
 - [tanstack-query-client-recreated-per-render](/.claude/docs/tanstack-query-client-recreated-per-render.md) ⚠️ клиент в теле провайдера — правки «не доезжают до экрана»
 - [pwa-offline](/.claude/docs/pwa-offline.md) Serwist, офлайн-формы, очередь синхронизации
 - [serwist-turbopack-stale-sw-artifact](/.claude/docs/serwist-turbopack-stale-sw-artifact.md) ⚠️ Serwist только с webpack, иначе отдаётся воркер прошлой сборки
-- [serwist-domwellbes-webpack-build-blocked](/.claude/docs/serwist-domwellbes-webpack-build-blocked.md) ⚠️ `--webpack` падает: OOM и `ContextError` на `/_global-error`
+- [serwist-domwellbes-webpack-build-blocked](/.claude/docs/serwist-domwellbes-webpack-build-blocked.md) ✅ снято 2026-09-22; ⚠️ `webpackBuildWorker` глохнет от своего же `webpack()`-хука
 - [react-effect-stable-ref-pitfall](/.claude/docs/react-effect-stable-ref-pitfall.md) ⚠️ эффект с deps на ref/DOM не перезапускается
 - [route-announcer-persistent-layout-required](/.claude/docs/route-announcer-persistent-layout-required.md) ⚠️ `RouteAnnouncer` вне persistent layout молчит
 
