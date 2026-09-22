@@ -19,17 +19,21 @@ import { YandexMetrika } from '@letar/yandex-metrika'
 import type { Metadata } from 'next'
 import { hasLocale, NextIntlClientProvider } from 'next-intl'
 import { getMessages, setRequestLocale } from 'next-intl/server'
-import { Inter, JetBrains_Mono } from 'next/font/google'
+import localFont from 'next/font/local'
 import { notFound } from 'next/navigation'
 
-// Шрифты
-const inter = Inter({
-  subsets: ['cyrillic', 'latin'],
+// Шрифты лежат файлами, а не тянутся `next/font/google` — см. src/app/fonts/README.md
+const inter = localFont({
+  src: '../fonts/Inter-cyrillic-latin.woff2',
+  weight: '400 700',
+  display: 'swap',
   variable: '--font-inter',
 })
 
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ['cyrillic', 'latin'],
+const jetbrainsMono = localFont({
+  src: '../fonts/JetBrainsMono-cyrillic-latin.woff2',
+  weight: '400 700',
+  display: 'swap',
   variable: '--font-mono',
 })
 

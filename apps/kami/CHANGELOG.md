@@ -5,6 +5,14 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 проект придерживается [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.35.4] - 2026-09-22
+
+### Changed
+
+- Шрифты (Inter, JetBrains Mono) переведены с `next/font/google` на `next/font/local` —
+  `src/app/fonts/README.md`. Сборка больше не ходит в сеть за шрифтами; причина —
+  `apps/domwellbes/src/app/fonts/README.md` (падение загрузчика на прошлой сборке domwellbes).
+
 ## [0.35.2] - 2026-09-09
 
 ### Fixed
