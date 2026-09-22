@@ -4,6 +4,13 @@
 
 ## [Unreleased]
 
+### Changed
+
+- **Шрифт Inter в renderer переведён с `next/font/google` на `next/font/local`** —
+  `renderer/src/app/fonts/README.md`. Сборка больше не ходит в сеть за шрифтом; причина —
+  разбор падения загрузчика на domwellbes 2026-09-22
+  (`apps/domwellbes/src/app/fonts/README.md`).
+
 ### Fixed
 
 - **Автообновление ставилось не тихо, как обещал `UpdateDrawer`** — `installUpdate()`

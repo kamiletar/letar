@@ -11,10 +11,11 @@ import { Toaster } from '@/components/ui/toaster'
 import { UpdateDrawer, UpdateProgressIndicator } from '@/components/update'
 import { UpdateNotificationManager } from '@/components/update/UpdateNotificationManager'
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import localFont from 'next/font/local'
 import Script from 'next/script'
 
-const inter = Inter({ subsets: ['latin', 'cyrillic'], variable: '--font-inter' })
+// Шрифт лежит файлом, а не тянется `next/font/google` — см. src/app/fonts/README.md
+const inter = localFont({ src: './fonts/Inter-cyrillic-latin.woff2', weight: '400 700', variable: '--font-inter' })
 
 export const metadata: Metadata = {
   title: 'Animatrona',
