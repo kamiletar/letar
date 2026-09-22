@@ -33,6 +33,13 @@ export interface FormStepsContextValue {
   isCompleted: boolean
   /** Whether we're on the last step */
   isLastStep: boolean
+  /**
+   * Есть ли в дереве `<Form.Steps.CompletedContent>`. Определяет поведение кнопки на последнем
+   * шаге: без `CompletedContent` она сразу отправляет форму (старое поведение); с ним —
+   * сначала переводит в состояние "завершено" (`isCompleted`), и только оттуда форма
+   * отправляется — см. `FormStepsNavigation`.
+   */
+  hasCompletedContent: boolean
   /** Whether we're on the first step */
   isFirstStep: boolean
   /** Register a step */

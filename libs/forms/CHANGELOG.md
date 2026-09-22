@@ -4,6 +4,28 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.16.0] - 2026-09-22
+
+### Fixed
+
+- **`Form.Steps.CompletedContent` был недостижим обычной навигацией** (#1922, тред
+  `form-steps-completed-content-unreachable`): `FormStepsNavigation` на последнем реальном шаге
+  всегда рендерила Submit вместо Continue, а `goToNext()` (`@letar/forms-react` 0.11.0) не пускал
+  `currentStep` дальше `stepCount - 1` — экран `CompletedContent` был физически недостижим кликами,
+  только через `skipToEnd()`. Теперь `Form.Steps` определяет присутствие
+  `<Form.Steps.CompletedContent>` в дереве (`hasCompletedContent` в контексте) и меняет поведение
+  последнего шага только когда он есть: сначала Continue переводит в состояние "завершено"
+  (`isCompleted`), Submit появляется уже там. Формы без `CompletedContent` не меняются — старое
+  поведение (Submit сразу на последнем шаге) сохранено бит-в-бит.
+- **Расследован (не исправлен, т.к. не был реальным багом) предполагаемый баг `[data-part="trigger"]`**
+  из того же треда: на странице `steps-demo` линейная форма рендерится с `linear` → в
+  `FormStepsIndicator` `isClickable=false` → `Steps.Trigger` для неё вообще не монтируется. Ручная
+  проверка через document-wide `[data-part="trigger"]` молча матчила чужой, нетронутый виджет —
+  триггер ВТОРОЙ (non-linear) формы на странице, который естественно не менялся. `[data-part="indicator"]`
+  и в Chakra Steps, и в `@zag-js/steps` (единственная версия 1.43.3, дублей нет — `bun why` проверен)
+  обновляется корректно и синхронно с `currentStep`; классический паттерн unscoped-локатора,
+  описанный в `e2e-testing.md`. Библиотека не менялась, e2e-тест причёсан.
+
 ## [2.15.3] - 2026-09-22
 
 ### Fixed

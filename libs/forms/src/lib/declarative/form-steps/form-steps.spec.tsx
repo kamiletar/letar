@@ -1,5 +1,6 @@
 import { ChakraProvider, defaultSystem } from '@chakra-ui/react'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 
 import { Form } from '../'
@@ -60,5 +61,70 @@ describe('FormSteps — синхронный count на первом ренде�
 
     expect(screen.getByText('Visible')).toBeInTheDocument()
     expect(screen.queryByText('Hidden')).not.toBeInTheDocument()
+  })
+})
+
+describe('FormSteps — CompletedContent достижим обычной навигацией (#1922)', () => {
+  it('клик Continue на последнем шаге показывает CompletedContent, а не сразу отправляет форму', async () => {
+    const onSubmit = vi.fn()
+    const user = userEvent.setup()
+
+    render(
+      <Form initialValue={{ a: '', b: '' }} onSubmit={onSubmit}>
+        <Form.Steps>
+          <Form.Steps.Indicator />
+          <Form.Steps.Step title="One">
+            <Form.Field.String name="a" />
+          </Form.Steps.Step>
+          <Form.Steps.Step title="Two">
+            <Form.Field.String name="b" />
+          </Form.Steps.Step>
+          <Form.Steps.CompletedContent>
+            <div>Всё готово!</div>
+          </Form.Steps.CompletedContent>
+          <Form.Steps.Navigation />
+        </Form.Steps>
+      </Form>,
+      { wrapper: TestWrapper },
+    )
+
+    await user.click(screen.getByRole('button', { name: 'Next' }))
+    await waitFor(() => expect(screen.queryByText('Two')).toBeInTheDocument())
+
+    // Последний реальный шаг — кнопка ещё "Next" (не "Submit"), CompletedContent ещё не показан.
+    // Chakra `Steps.Content`/`Steps.CompletedContent` держат панели смонтированными постоянно и
+    // скрывают неактивные через `hidden` — поэтому проверяем видимость, не присутствие в DOM.
+    expect(screen.getByRole('button', { name: 'Next' })).toBeInTheDocument()
+    expect(screen.getByText('Всё готово!')).not.toBeVisible()
+
+    await user.click(screen.getByRole('button', { name: 'Next' }))
+
+    await waitFor(() => expect(screen.getByText('Всё готово!')).toBeVisible())
+    expect(onSubmit).not.toHaveBeenCalled()
+
+    await user.click(screen.getByRole('button', { name: 'Submit' }))
+    await waitFor(() => expect(onSubmit).toHaveBeenCalled())
+  })
+
+  it('без CompletedContent последний шаг сразу отправляет форму (старое поведение)', async () => {
+    const onSubmit = vi.fn()
+    const user = userEvent.setup()
+
+    render(
+      <Form initialValue={{ a: '' }} onSubmit={onSubmit}>
+        <Form.Steps>
+          <Form.Steps.Step title="One">
+            <Form.Field.String name="a" />
+          </Form.Steps.Step>
+          <Form.Steps.Navigation />
+        </Form.Steps>
+      </Form>,
+      { wrapper: TestWrapper },
+    )
+
+    expect(screen.getByRole('button', { name: 'Submit' })).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Submit' }))
+    await waitFor(() => expect(onSubmit).toHaveBeenCalled())
   })
 })

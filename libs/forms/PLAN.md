@@ -6,28 +6,42 @@
 
 ## Backlog (запросы от агентов)
 
-### [ ] [2026-09-22] `Form.Steps` — `CompletedContent` недостижим обычной навигацией + trigger-атрибуты не обновляются (от form-develop-app-e2e)
+### ✅ [2026-09-22] `Form.Steps` — `CompletedContent` недостижим обычной навигацией + trigger-атрибуты не обновляются (закрыт forms-react 0.11.0 / forms 2.16.0, от form-develop-app-e2e)
 
 - **Запросил:** временная identity `CoralGrove` (сессия form-develop-app-e2e), agent-mail, тред
   `form-steps-completed-content-unreachable`
-- **Приоритет:** high
-- **Баг 1:** `form-steps.tsx:269` — `isLastStep: currentStep === stepCount - 1`;
-  `use-step-navigation.ts:175-176` — `goToNext()` не пускает `currentStep` дальше `stepCount - 1`.
-  На последнем реальном Step `Navigation` уже рисует submit-кнопку вместо Continue
-  (`form-steps-navigation.tsx:187-214`) — клик сразу вызывает `form.handleSubmit()`,
-  `Form.Steps.CompletedContent` не рендерится через обычную навигацию никогда, только через
-  `skipToEnd()` (отдельный `Skip`-контрол, `showSkip` по умолчанию `false`). Воспроизведено вручную
-  на `form-develop-app` `/steps-demo`.
-- **Баг 2:** `[data-part="trigger"]` (`Form.Steps.Indicator` → Chakra `Steps.Trigger`, zag-js
-  `@zag-js/steps`) не обновляет `data-current`/`data-state`/`data-complete` после `goToNext()` —
-  `[data-part="indicator"]` синхронен, `trigger` нет. Влияет на a11y (`aria-selected` может
-  застрять). Возможно связано с двумя версиями `@zag-js/steps` в `node_modules/.bun` (1.41.2 и
-  1.43.3, не подтверждено).
-- **Тесты:** `apps/form-develop-app-e2e/src/steps-demo.spec.ts` — 2 теста на баг 1 помечены
-  `test.fixme()`, тесты на баг 2 обходятся через `[data-part="indicator"]`. Снять/обновить после
-  фикса.
-- **Триаж (2026-09-22):** оба бага подтверждены чтением исходников, делегировано `forms-dev`.
-- **Статус:** в работе → forms-dev
+- **Баг 1 (реальный, исправлен):** `form-steps.tsx:269` — `isLastStep: currentStep === stepCount - 1`;
+  `use-step-navigation.ts:175-176` — `goToNext()` не пускал `currentStep` дальше `stepCount - 1`. На
+  последнем реальном Step `Navigation` уже рисовала submit-кнопку вместо Continue — клик сразу
+  вызывал `form.handleSubmit()`, `Form.Steps.CompletedContent` не рендерился через обычную
+  навигацию никогда, только через `skipToEnd()`.
+  - **Решение:** `FormSteps` теперь детектирует наличие `<Form.Steps.CompletedContent>` в дереве
+    (`hasCompletedContent`, тем же механизмом, что и `countDeclaredSteps` — синхронный обход
+    `children`, без ожидания эффектов) и передаёт его в контекст. `FormStepsNavigation` рендерит
+    Submit по `hasCompletedContent ? isCompleted : isLastStep` — без `CompletedContent` поведение
+    не меняется вовсе (Submit сразу на последнем шаге), с ним последний шаг сначала Continue →
+    состояние "завершено" → уже там Submit. Граница `goToNext()` расширена с `nextStep <
+    stepCountRef.current` до `nextStep <= stepCountRef.current` — безопасно для форм без
+    `CompletedContent`, потому что для них `goToNext()` с последнего шага не вызывается вообще
+    (кнопка там сразу Submit, не Continue).
+- **Баг 2 (не был реальным багом):** ручная проверка `[data-part="trigger"]` "залипал" после
+  `goToNext()`. Расследование в браузере показало: страница `/steps-demo` держит ДВЕ формы, у первой
+  (`linear`) `Steps.Trigger` вообще не монтируется (`FormStepsIndicator`: `isClickable = clickable
+  && !linear` → `false`), а `bun why @zag-js/steps` подтвердил единственную версию 1.43.3 (дублей
+  нет — теория из триажа не подтвердилась). Document-wide `[data-part="trigger"]` без scope на
+  форму молча матчил триггер ВТОРОЙ (non-linear) формы — классический паттерн unscoped-локатора
+  (`.claude/docs/e2e-testing.md`). При точечной проверке (`page.locator` внутри нужной формы)
+  триггер обновляется корректно и синхронно с `currentStep`, как и `[data-part="indicator"]`. Код
+  библиотеки не менялся — только комментарии в e2e-тесте приведены в соответствие с находкой.
+- **Тесты:** `apps/form-develop-app-e2e/src/steps-demo.spec.ts` — оба `test.fixme()` сняты, оба
+  теста проходят (`nx e2e form-develop-app-e2e -- --project=chromium`, 15/15 зелёных). Комментарии
+  про мнимый баг триггера переписаны. `form-steps.spec.tsx` — 2 новых интеграционных теста
+  (с `CompletedContent`/без), `form-steps-navigation.spec.tsx` — 2 новых юнит-теста на
+  `hasCompletedContent`. `nx test forms`/`forms-react` — 828/122 зелёных, `typecheck:tsgo`/`lint`
+  чистые.
+- **Документация:** `libs/forms/docs/form-level.md` и `apps/form-docs` (en/ru `multi-step.mdx`) —
+  новый раздел про `CompletedContent`.
+- **Статус:** ✅ закрыт
 
 ### ✅ [2026-09-22] `useFormServerAction.run` — сужение типа результата до `Exclude<TData, ActionFailure>` (закрыт forms-react 0.10.1 / forms 2.15.1, от координатора)
 

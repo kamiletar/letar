@@ -63,7 +63,9 @@ export interface FormStepsNavigationProps {
  * Form.Steps.Navigation - Navigation buttons for multi-step form
  *
  * Provides Previous/Next buttons with automatic validation.
- * On the last step, shows Submit button instead of Next.
+ * On the last step, shows Submit button instead of Next — unless the form has a
+ * `Form.Steps.CompletedContent`, in which case Submit only appears once the completed state is
+ * reached (Continue on the last step moves there first).
  *
  * @example
  * ```tsx
@@ -98,7 +100,21 @@ export function FormStepsNavigation({
   onSkip,
 }: FormStepsNavigationProps) {
   const { form } = useDeclarativeForm()
-  const { goToNext, goToPrev, skipToEnd, isFirstStep, isLastStep, canGoPrev, currentStep } = useFormStepsContext()
+  const {
+    goToNext,
+    goToPrev,
+    skipToEnd,
+    isFirstStep,
+    isLastStep,
+    isCompleted,
+    hasCompletedContent,
+    canGoPrev,
+    currentStep,
+  } = useFormStepsContext()
+
+  // Без `Form.Steps.CompletedContent` — старое поведение: Submit сразу на последнем реальном шаге.
+  // С ним — последний шаг ещё Continue (переводит в `isCompleted`), Submit появляется только там.
+  const showSubmit = hasCompletedContent ? isCompleted : isLastStep
 
   const [isNavigating, setIsNavigating] = useState(false)
   const [isSkipping, setIsSkipping] = useState(false)
@@ -185,7 +201,7 @@ export function FormStepsNavigation({
       )}
 
       {showNext
-        && (isLastStep
+        && (showSubmit
           ? (
             <Button
               {...submitProps}

@@ -4,6 +4,7 @@ import { Steps } from '@chakra-ui/react'
 import { type StepPersistenceConfig, useStepNavigation, useStepPersistence, useStepState } from '@letar/forms-react'
 import { Children, cloneElement, isValidElement, type ReactNode, useCallback, useMemo, useRef, useState } from 'react'
 import { useDeclarativeForm } from '../form-context'
+import { FormStepsCompletedContent } from './form-steps-completed'
 import { FormStepsContext, type FormStepsContextValue } from './form-steps-context'
 import { FormStepsStep, type FormStepsStepProps } from './form-steps-step'
 
@@ -38,6 +39,29 @@ function countDeclaredSteps(children: ReactNode): number {
     }
   })
   return count
+}
+
+/**
+ * Есть ли в дереве `children` `Form.Steps.CompletedContent` — определяет, должен ли последний шаг
+ * сначала переводить в состояние "завершено" вместо немедленной отправки формы (см.
+ * `FormStepsNavigation` и `FormStepsContextValue.hasCompletedContent`).
+ */
+function hasCompletedContentChild(children: ReactNode): boolean {
+  let found = false
+  Children.forEach(children, (child) => {
+    if (found || !isValidElement(child)) {
+      return
+    }
+    if (child.type === FormStepsCompletedContent) {
+      found = true
+      return
+    }
+    const props = child.props as { children?: ReactNode } | undefined
+    if (props?.children) {
+      found = found || hasCompletedContentChild(props.children)
+    }
+  })
+  return found
 }
 
 /**
@@ -200,6 +224,10 @@ export function FormSteps({
   const declaredStepCount = useMemo(() => countDeclaredSteps(children), [children])
   const effectiveStepCount = Math.max(stepCount, declaredStepCount)
 
+  // См. hasCompletedContentChild — пересчитывается только при смене ссылки на children.
+  // oxlint-disable-next-line react-hooks/exhaustive-deps
+  const hasCompletedContent = useMemo(() => hasCompletedContentChild(children), [children])
+
   // Дети с проставленным __declaredIndex — см. assignDeclaredIndices. Убирает вспышку пустого
   // контента до первого прохода эффектов регистрации.
   // oxlint-disable-next-line react-hooks/exhaustive-deps
@@ -267,6 +295,7 @@ export function FormSteps({
       canGoPrev: currentStep > 0,
       isCompleted: currentStep >= stepCount,
       isLastStep: currentStep === stepCount - 1,
+      hasCompletedContent,
       isFirstStep: currentStep === 0,
       registerStep,
       unregisterStep,
@@ -316,6 +345,7 @@ export function FormSteps({
       direction,
       hideFieldsFromValidation,
       showFieldsForValidation,
+      hasCompletedContent,
     ],
   )
 

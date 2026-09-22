@@ -333,6 +333,29 @@ useEffect(() => { detectLocation().then(setGeo) }, [])
 >
 ```
 
+### CompletedContent — экран после последнего шага (v2.16.0+)
+
+```tsx
+<Form.Steps validateOnNext linear>
+  <Form.Steps.Indicator />
+  <Form.Steps.Step title="Personal">...</Form.Steps.Step>
+  <Form.Steps.Step title="Contact">...</Form.Steps.Step>
+
+  <Form.Steps.CompletedContent>
+    <Heading size="md">Всё готово!</Heading>
+    <Text>Проверьте данные и нажмите «Отправить».</Text>
+  </Form.Steps.CompletedContent>
+
+  <Form.Steps.Navigation />
+</Form.Steps>
+```
+
+Присутствие `<Form.Steps.CompletedContent>` в дереве меняет поведение последнего шага: Continue
+сначала переводит форму в состояние «завершено» (показывается `CompletedContent`), и только оттуда
+`Form.Steps.Navigation` рендерит Submit. Без `CompletedContent` — старое поведение: Submit сразу
+на последнем шаге, промежуточного экрана нет. Программно то же состояние достигается через
+`skipToEnd()` (пропуск без валидации остальных шагов).
+
 ### Skip и программный submit
 
 ```tsx

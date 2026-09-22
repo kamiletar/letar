@@ -41,6 +41,7 @@ function createMockStepsContext(overrides?: Partial<FormStepsContextValue>): For
     canGoPrev: false,
     isCompleted: false,
     isLastStep: false,
+    hasCompletedContent: false,
     isFirstStep: true,
     registerStep: vi.fn(),
     unregisterStep: vi.fn(),
@@ -100,6 +101,28 @@ describe('FormStepsNavigation', () => {
       render(<FormStepsNavigation />, { wrapper })
 
       expect(screen.getByText('Back')).toBeInTheDocument()
+      expect(screen.getByText('Submit')).toBeInTheDocument()
+      expect(screen.queryByText('Next')).not.toBeInTheDocument()
+    })
+
+    it('с hasCompletedContent рендерит Next (не Submit) на последнем шаге до завершения', () => {
+      const formContext = createMockFormContext()
+      const stepsContext = createMockStepsContext({ isLastStep: true, hasCompletedContent: true, isCompleted: false })
+      const wrapper = createWrapper(formContext, stepsContext)
+
+      render(<FormStepsNavigation />, { wrapper })
+
+      expect(screen.getByText('Next')).toBeInTheDocument()
+      expect(screen.queryByText('Submit')).not.toBeInTheDocument()
+    })
+
+    it('с hasCompletedContent рендерит Submit только в состоянии isCompleted', () => {
+      const formContext = createMockFormContext()
+      const stepsContext = createMockStepsContext({ isLastStep: false, hasCompletedContent: true, isCompleted: true })
+      const wrapper = createWrapper(formContext, stepsContext)
+
+      render(<FormStepsNavigation />, { wrapper })
+
       expect(screen.getByText('Submit')).toBeInTheDocument()
       expect(screen.queryByText('Next')).not.toBeInTheDocument()
     })

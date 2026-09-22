@@ -24,6 +24,7 @@ function createMockStepsContext(overrides?: Partial<FormStepsContextValue>): For
     canGoPrev: false,
     isCompleted: false,
     isLastStep: false,
+    hasCompletedContent: false,
     isFirstStep: true,
 
     registerStep: () => {},
