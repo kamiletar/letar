@@ -195,8 +195,12 @@ export const E2E_GATED_APPS: string[] = [
  * (заведены 2026-09-22, коммит `11c63e014`), но БЕЗ подтверждённого зелёного прогона на s1 —
  * `form-docs`, `animatrona-landing`, `kami-key-the-landing`, `letar-landing`. `animatrona-tracker`
  * — есть e2e-suite, staging-compose не заведён (БД+Redis+Better Auth OIDC через Ключницу,
- * отдельная проработка). `pravda` зарегистрирован в `E2E_GATED_APPS` 2026-09-22 после первого
- * зелёного прогона (см. комментарий там) — в `HARD_GATED_APPS` не входит, ждёт истории прогонов.
+ * отдельная проработка).
+ *
+ * `pravda` добавлен 2026-09-22 (тем же днём, что и уравнивание списков выше) — владелец:
+ * «мы же договорились, что у нас теперь всё HARD_GATED_APPS без исключений». Прогон v1.9.13
+ * (runId `83efaee4`) зелёный: 225 passed / 0 flaky, остаток — 8 skipped (кластер прогресс-бара
+ * + Firefox RSC-навигация, апстрим-баг vercel/next.js#85374, не наш баг) — см. apps/pravda/PLAN.md.
  */
 export const HARD_GATED_APPS: string[] = [
   'archetest',
@@ -214,6 +218,7 @@ export const HARD_GATED_APPS: string[] = [
   'form-example',
   'driving-school',
   'mandala',
+  'pravda',
 ]
 
 /**
