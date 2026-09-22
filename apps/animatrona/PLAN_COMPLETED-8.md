@@ -3,6 +3,14 @@
 > Точка входа и карта всех частей — [PLAN_COMPLETED.md](./PLAN_COMPLETED.md).
 > Диапазон: 2026-09-07 (перенос из PLAN.md при архивации).
 
+## `scrollIntoView(smooth)` чата Watch Party зависал без OS-фокуса окна (2026-09-22)
+
+Делегировано из сессии `pravda-dev` — репо-широкий грепа по паттерну, зависающему при фиксе TOC
+в `apps/pravda` (коммиты `e61e2cbae`/`0b68c95d0`). `usePartyChat` (renderer) —
+`behavior: 'smooth'` → `'instant'`, см.
+[scrollintoview-smooth-frozen-without-window-focus.md](/.claude/docs/scrollintoview-smooth-frozen-without-window-focus.md).
+Коммит `73620fee6`.
+
 ## Общая `slugify` из `@letar/format-utils` (2026-09-15)
 
 Найдено при выносе дублей `slugify` в svoichuzhie — репо-широкий grep вскрыл ещё 5 копий вне
