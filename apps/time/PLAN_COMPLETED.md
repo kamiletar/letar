@@ -1,5 +1,28 @@
 # Time — Выполненные задачи
 
+## ✅ JetBrains Mono переведён с `next/font/google` на `next/font/local` (2026-09-22, v0.5.17)
+
+Часть репо-широкой миграции (падение сборки на domwellbes 2026-09-22 внутри самого загрузчика
+Google — `apps/domwellbes/src/app/fonts/README.md`). Variable-шрифт, ось `wght` ограничена
+реально используемым диапазоном 100–700 (было без ограничения). Unicode-диапазоны
+latin/latin-ext/cyrillic/greek/vietnamese взяты дословно с `fonts.googleapis.com` — точное
+соответствие прежним `subsets` без сужения/расширения.
+
+**Приложение на 40 локалей** (`ALL_LOCALES` в `src/i18n/routing.ts`) — проверено, какие локали
+шрифт физически не может покрыть: CJK (`ja`/`zh`/`ko`), арабский (`ar`/`fa`/`ur`), иврит (`he`),
+армянский (`hy`), грузинский (`ka`), деванагари (`hi`/`mr`), бенгальский (`bn`),
+тамильский/телугу (`ta`/`te`), тайский (`th`) — у гарнитуры этих скриптов нет вовсе, ни в
+субсете, ни в полном невырезанном файле; браузер и раньше рисовал их через системный fallback,
+не регрессия. Отдельно — известный пробел: казахские/таджикские буквы Қ/ҷ/ӣ в
+`locale-switcher.tsx` вне блока Cyrillic Extended-B, которого у JetBrains Mono тоже нет — был и
+раньше под `next/font/google`. Полный разбор — `src/app/fonts/README.md`.
+
+Живая проверка: поднял `docker-compose.dev.yml` (нужна БД для `next dev`, cron-инстанс жалуется
+на `ECONNREFUSED` без неё — не связано с шрифтами), `preview_start time` →
+`getComputedStyle(document.body).fontFamily` → `jetbrainsMono`, скриншот главной страницы и
+раскрытого переключателя локали — все 40 меток отрисовались (родные скрипты — через fallback,
+как и ожидалось).
+
 ## ✅ Cron-задача перенесена на @letar/jobs (2026-09-03)
 
 `/api/cron/notifications` (milestone-уведомления, каждую минуту) перенесена на `@letar/jobs`
