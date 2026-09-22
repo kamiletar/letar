@@ -2,6 +2,23 @@
 
 Детальное описание всех реализованных фич.
 
+## `file-upload-demo.spec.ts` — защита от гонки гидратации setInputFiles + попутный баг libs/forms (2026-09-22)
+
+По аналогии с гонкой SSR→hydrate, найденной в domwellbes (`page.goto(..., {waitUntil:
+'domcontentloaded'})` + `setInputFiles()` без React-подтверждённого взаимодействия — событие
+`change` теряется, если React ещё не навесил `onChange`), 7 тестов `file-upload-demo.spec.ts`
+(button/dropzone/input варианты `Form.Field.FileUpload`) переведены на
+`setInputFilesWithHydrationRetry` из `@letar/e2e-testing` (пакет добавлен в зависимости
+`form-develop-app-e2e`).
+
+**Попутная находка (не эта задача, но блокировала зелёный прогон):** прогон 5 повторов показал
+5 из 7 целевых тестов падающими детерминированно — реальный баг `@letar/forms` (`FileImageList`
+не оборачивала превью в `FileUpload.ItemGroup`, крашила всё поле при выборе image-файла), плюс
+разница в верстке (`FileImageList` показывает alt-текст превью, не имя файла текстом). Root cause,
+фикс и версия — `libs/forms/PLAN_COMPLETED.md` (2.15.3). Два теста в том же файле, падающие по
+несвязанным причинам (неверный ожидаемый текст плейсхолдера, strict-mode locator), не трогались —
+заведены отдельными задачами через `spawn_task`.
+
 ## `filters-state-demo` — поле `Form.Field.Date` + `Form.UrlSync` (2026-09-15)
 
 Добавлено поле «Создано с» (`Form.Field.Date`, схема `since: z.string()` — без `z.date()`) в
