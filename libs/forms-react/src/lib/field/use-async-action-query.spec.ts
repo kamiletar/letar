@@ -74,6 +74,26 @@ describe('useAsyncActionQuery', () => {
 
     expect(result.current.data).toEqual([{ id: 'кирпич' }])
   })
+
+  it('вызывает action на пустой строке, если явно передан minChars: 0 (список без ввода)', async () => {
+    const action = vi.fn().mockResolvedValue([{ id: '1', name: 'Кирпич' }])
+    const { result } = renderHook(() => useAsyncActionQuery('', action, { minChars: 0 }))
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false)
+    })
+
+    expect(action).toHaveBeenCalledWith('')
+    expect(result.current.data).toEqual([{ id: '1', name: 'Кирпич' }])
+  })
+
+  it('без minChars сохраняет старое поведение — пустая строка не бьёт в action', () => {
+    const action = vi.fn().mockResolvedValue([])
+    const { result } = renderHook(() => useAsyncActionQuery('', action))
+
+    expect(action).not.toHaveBeenCalled()
+    expect(result.current).toEqual({ data: undefined, isLoading: false, error: null })
+  })
 })
 
 describe('createAsyncActionQuery', () => {
@@ -92,5 +112,18 @@ describe('createAsyncActionQuery', () => {
     await waitFor(() => {
       expect(result.current.data).toEqual([{ id: '1' }])
     })
+  })
+
+  it('прокидывает minChars: 0 — список без ввода (comboboxes-каталоги)', async () => {
+    const action = vi.fn().mockResolvedValue([{ id: '1' }, { id: '2' }])
+    const useQuery = createAsyncActionQuery(action, { minChars: 0 })
+
+    const { result } = renderHook(() => useQuery(''))
+
+    await waitFor(() => {
+      expect(result.current.data).toEqual([{ id: '1' }, { id: '2' }])
+    })
+
+    expect(action).toHaveBeenCalledWith('')
   })
 })

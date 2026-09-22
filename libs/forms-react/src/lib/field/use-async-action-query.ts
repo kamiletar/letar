@@ -17,6 +17,11 @@ import type { AsyncQueryFn, AsyncQueryResult } from './use-async-search'
  *
  * @param search - Текущая (уже задебаунсенная) поисковая строка — приходит от `useAsyncSearch`
  * @param action - Async-функция поиска, например server action `(search) => Promise<Item[]>`
+ * @param options.minChars - Минимальная длина `search`, с которой запрос реально уходит
+ * (по умолчанию 1 — старое поведение, пустая строка не бьёт в action). `0` — для comboboxes,
+ * которые должны показывать список сразу по клику, ещё до ввода: `useAsyncSearch` с
+ * `minChars={0}` передаёт сюда честную пустую строку (не служебный признак «не спрашивать»,
+ * им остаётся только фактическая длина `search` — иначе от «gate closed» её было бы не отличить).
  *
  * @example
  * ```tsx
@@ -31,7 +36,10 @@ import type { AsyncQueryFn, AsyncQueryResult } from './use-async-search'
 export function useAsyncActionQuery<TData = unknown>(
   search: string,
   action: (search: string) => Promise<TData[]>,
+  options?: { minChars?: number },
 ): AsyncQueryResult<TData> {
+  const { minChars = 1 } = options ?? {}
+  const shouldQuery = search.length >= minChars
   const [data, setData] = useState<TData[]>()
   const [error, setError] = useState<Error | null>(null)
   // Последний поисковый запрос, для которого уже пришёл ответ (успешный или с ошибкой) —
@@ -40,10 +48,10 @@ export function useAsyncActionQuery<TData = unknown>(
   // isLoading перед стартом fetch» — обе мутации состояния случаются только внутри
   // `.then()`/`.catch()`, то есть уже после асинхронного разрыва, а не синхронно при выполнении
   // эффекта). Тот же приём, что в `useClientSearchOptions` (domwellbes).
-  const [completedSearch, setCompletedSearch] = useState('')
+  const [completedSearch, setCompletedSearch] = useState<string>()
 
   useEffect(() => {
-    if (!search) {
+    if (!shouldQuery) {
       return
     }
 
@@ -66,11 +74,11 @@ export function useAsyncActionQuery<TData = unknown>(
     return () => {
       cancelled = true
     }
-  }, [search, action])
+  }, [search, action, shouldQuery])
 
   return {
-    data: search ? data : undefined,
-    isLoading: Boolean(search) && search !== completedSearch,
+    data: shouldQuery ? data : undefined,
+    isLoading: shouldQuery && search !== completedSearch,
     error,
   }
 }
@@ -81,6 +89,10 @@ export function useAsyncActionQuery<TData = unknown>(
  * combobox. Сам не является хуком (не вызывает хуки напрямую), но всегда возвращает один и тот
  * же по структуре вызовов хук-конформный колбэк — так же, как уже работает
  * `useQuery={(search) => useFindManyUser(...)}` для ZenStack-хуков.
+ *
+ * @param options.minChars - см. `useAsyncActionQuery` — прокинуть `0` для combobox, который
+ * должен предлагать список сразу, ещё до ввода (сам `<Form.Field.Combobox minChars={0} />`
+ * гейтит только подсказку «введите ещё N символов», за реальный запрос отвечает эта опция).
  *
  * @example
  * ```tsx
@@ -94,6 +106,7 @@ export function useAsyncActionQuery<TData = unknown>(
  */
 export function createAsyncActionQuery<TData = unknown>(
   action: (search: string) => Promise<TData[]>,
+  options?: { minChars?: number },
 ): AsyncQueryFn<TData> {
-  return (search: string) => useAsyncActionQuery(search, action)
+  return (search: string) => useAsyncActionQuery(search, action, options)
 }
