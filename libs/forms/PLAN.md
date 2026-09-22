@@ -6,6 +6,21 @@
 
 ## Backlog (запросы от агентов)
 
+### ✅ [2026-09-22] Дефолты `placeholder`/`loadingMessage`/`emptyMessage` в Combobox/Autocomplete захардкожены по-английски (закрыт forms 2.16.4→2.16.5, от пользователя)
+
+- **Запросил:** пользователь напрямую, продолжение фикса подсказки `minChars` (2.16.3, см. запись
+  ниже) — рядом остались непочиненные литералы того же класса.
+- **Приоритет:** normal
+- **Решение:** `selection-field-strings.ts` (`resolveSelectionString`/`useSelectionString`),
+  приоритет «явный проп/schema meta > перевод > встроенный словарь > английский» сохранён.
+  Параллельно (независимая сессия `forms-dev` с той же fixed-identity, замечено по гонке в
+  `lint`) появился общий резолвер лестницы `resolveStaticFormText` (`@letar/forms-core/i18n`) —
+  сразу переиспользован вместо собственной копии. Обе части объединены в один коммит `28297c82a`
+  (forms 2.16.5), координация зафиксирована в agent-mail (тред
+  `forms-selection-strings-parallel-session`).
+- **Тесты:** `selection-field-strings.spec.ts` + `resolve-static-text.spec.ts`,
+  `nx test forms`/`forms-core` — 843+561 зелёных.
+
 ### ✅ [2026-09-22] `Form.Steps` — `CompletedContent` недостижим обычной навигацией + trigger-атрибуты не обновляются (закрыт forms-react 0.11.0 / forms 2.16.0, от form-develop-app-e2e)
 
 - **Запросил:** временная identity `CoralGrove` (сессия form-develop-app-e2e), agent-mail, тред
