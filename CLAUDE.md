@@ -70,6 +70,7 @@
 - [database](/.claude/docs/database.md) ⭐ воркфлоу схемы и миграций
 - [seed-scripts](/.claude/docs/seed-scripts.md) идемпотентный `prisma/seed.ts`
 - [zenstack-decimal-optional-fields](/.claude/docs/zenstack-decimal-optional-fields.md) ⚠️ optional `Decimal` не принимает `number`
+- [zenstack-int4-overflow-money-fields](/.claude/docs/zenstack-int4-overflow-money-fields.md) ⚠️ `Int`-копейки переполняют INT4 на реалистичных суммах, фикс — `BigInt` + границы конвертации
 - [zenstack-typed-interface-json-snapshot](/.claude/docs/zenstack-typed-interface-json-snapshot.md) ⚠️ именованный `interface` не проходит в `Json`-поле
 - [zenstack-nullable-json-field-null-sentinel](/.claude/docs/zenstack-nullable-json-field-null-sentinel.md) ⚠️ nullable `Json` не принимает JS `null` — нужен `JsonNull`
 - [zenstack-public-write-read-back](/.claude/docs/zenstack-public-write-read-back.md) ⚠️ публичный `@@allow('create')` не даёт прочитать запись назад
