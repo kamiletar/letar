@@ -94,6 +94,7 @@
 - [chakra-flexwrap-column-direction-overflow](/.claude/docs/chakra-flexwrap-column-direction-overflow.md) ⚠️ безусловный `flexWrap` при `direction: column` уводит элементы вбок
 - [form-analytics-goals](/.claude/docs/form-analytics-goals.md) цели формы в Метрике/Umami через `useFormAnalytics`
 - [tristate-cascade-boolean-pattern](/.claude/docs/tristate-cascade-boolean-pattern.md) nullable boolean с явным «наследовать»
+- [letar-forms-tabs-error-pattern](/.claude/docs/letar-forms-tabs-error-pattern.md) ⚠️ ошибка на скрытой вкладке `Tabs.Content` невидима без `useFormErrorTab`
 - [letar-forms-field-date-runtime-string](/.claude/docs/letar-forms-field-date-runtime-string.md) ⚠️ `Field.Date` отдаёт string в `onSubmit`, typecheck не ловит
 - [letar-forms-lazy-component-ssr-stuck-suspense](/.claude/docs/letar-forms-lazy-component-ssr-stuck-suspense.md) ⚠️ зависший серверный Suspense, rAF не тикает в фоновой вкладке
 - [letar-forms-lazy-component-eager-jsx-seed-crash](/.claude/docs/letar-forms-lazy-component-eager-jsx-seed-crash.md) ⚠️ JSX на верхнем уровне модуля падает под `tsx` (`db:seed`)
