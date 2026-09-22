@@ -2,6 +2,47 @@
 
 Детальное описание всех реализованных фич.
 
+## `steps-demo.spec.ts` — фикс beforeEach + strict-mode локаторов, два бага @letar/forms делегированы (2026-09-22)
+
+Закрывает spawn_task-задачу из «Аудита broad-regex локаторов» ниже (`steps-demo.spec.ts:61,167`
+были «не проверено» из-за отдельного блокирующего бага).
+
+- [x] `beforeEach` (`page.locator('form').waitFor()`) матчил обе формы на `/steps-demo` (Linear +
+      Non-linear рендерятся одновременно) — strict mode violation ронял все 15 тестов файла ещё до
+      тела. Заменено на `.locator('form').first().waitFor()`.
+- [x] После починки beforeEach полный прогон вскрыл ещё 6 независимых strict-mode/устаревших
+      локаторов, все исправлены:
+  - `should display navigation buttons`, `should navigate back to previous step` — обе формы
+    используют дефолтную подпись кнопки "Back", сужено до `page.locator('form').first()`.
+  - `steps-demo.spec.ts:61` (`text=/2 character|required/i`) — матчил ошибку firstName И lastName
+    одновременно (тот же антипаттерн, что в rating-demo/pin-input-demo, коммиты 058a08ca3). Сужен
+    до `page.getByRole('group').filter({ hasText: 'First Name' })`.
+  - `steps-demo.spec.ts:167` (`text=/invalid email|email/i`) — матчил ещё и лейбл "Email\*".
+    Заменён на точный `page.getByText('Invalid email')` (по образцу `e478ee62e`).
+  - `should display non-linear form heading` — ожидал «Non-linear Steps (clickable)», страница
+    давно рендерит «Non-linear Steps (with animation)» — контент и тест разъехались.
+  - `should mark completed steps`/`should show current step as active` — ожидали
+    `data-state: 'complete'/'active'` на `[data-part="trigger"]`; реальный API `@zag-js/steps`
+    (`steps.connect.mjs`, `getTriggerProps`) — булевы атрибуты `data-complete`/`data-current`,
+    `data-state` хранит только `open`/`closed` текущей панели.
+- [x] Найдены и делегированы `forms-coordinator-dev` (agent-mail, thread `1921`, 2026-09-22) два
+      реальных бага `@letar/forms`, не тестового локатора, подтверждённых вручную в браузере:
+  1. **`Form.Steps.CompletedContent` физически недостижим.** `isLastStep` (form-steps.tsx:269)
+     подменяет кнопку "Continue" на submit уже на последнем реальном Step, а `goToNext()`
+     (use-step-navigation.ts:175-176) никогда не пускает `currentStep` дальше `stepCount - 1`.
+     Клик по финальной submit-кнопке сразу вызывает `onSubmit`, минуя экран "все шаги пройдены".
+     Единственный путь туда — `skipToEnd()` (кнопка "Skip", по умолчанию выключена). Два теста
+     (`should complete all steps and show completion content`, `should submit form after
+     completing all steps`) помечены `test.fixme()` с комментарием и ссылкой на письмо.
+  2. **`[data-part="trigger"]` не обновляет `data-current`/`data-state` после перехода между
+     шагами** — остаётся со значениями первого рендера, хотя `[data-part="indicator"]` (дочерний
+     элемент) корректно синхронен с `currentStep`. Похоже на стейл-пропсы React-биндинга zag-js;
+     возможно связано с двумя параллельно установленными версиями `@zag-js/steps`
+     (`1.41.2`/`1.43.3` в `node_modules/.bun`) — не проверялось. Два теста переведены на
+     `[data-part="indicator"]` как рабочий обходной путь.
+- `nx e2e form-develop-app-e2e -- --project=chromium --grep "Form.Steps Demo" --workers=1` →
+  13 passed + 2 fixme, стабильно на 3 повторных прогонах. Коммит `3b804c91f`.
+
 ## `file-upload-demo.spec.ts` — защита от гонки гидратации setInputFiles + попутный баг libs/forms (2026-09-22)
 
 По аналогии с гонкой SSR→hydrate, найденной в domwellbes (`page.goto(..., {waitUntil:
@@ -1614,9 +1655,6 @@ function App({ children }) {
     hasText: 'PIN Code' })`.
   - `fields-demo.spec.ts:185` (`text=/2 character|2 символ/i`) — стабильно проходит 5/5, не
     трогал (ложное срабатывание грепа, на странице только одно совпадение).
-  - `steps-demo.spec.ts:61,167` — **не проверено**: все 15 тестов файла падают ещё в
-    `beforeEach` (`page.locator('form').waitFor()` матчит 2 формы разом — Linear + Non-linear
-    Steps демо рендерятся одновременно на `/steps-demo`). Баг долгоживущий (не менялся с
-    initial commit), не связан с задачей и шире её — вынесен отдельным чипом
-    (`spawn_task`, "Fix steps-demo.spec.ts beforeEach: form locator matches 2 elements").
+  - `steps-demo.spec.ts:61,167` — **закрыто отдельной сессией 2026-09-22**, см.
+    «`steps-demo.spec.ts` — фикс beforeEach + strict-mode локаторов…» выше.
   - Коммит: `058a08ca3`.
