@@ -49,6 +49,12 @@
     целевого сервера (см. turbopack/crates/turbo-tasks/src/parallel.rs), чтобы локальный замер
     был сопоставим с прод-хостом, а не с числом ядер машины разработчика.
 
+.PARAMETER Webpack
+    Собирать через `next build --webpack` вместо Turbopack по умолчанию — для приложений,
+    переключивших прод-сборку на webpack (Serwist не работает с Turbopack, см.
+    .claude/docs/pwa-offline.md). `TURBO_TASKS_AVAILABLE_PARALLELISM` в этом режиме не влияет ни
+    на что (Turbopack не участвует в сборке), но выставляется как обычно — безвредно.
+
 .PARAMETER StartDevDb
     Перед сборкой поднять dev-БД приложения (`docker compose -f <ComposeFile> up -d
     <ComposeService>`). Нужно приложениям, которые на фазе "Collecting page data" обращаются к
@@ -94,6 +100,8 @@ param(
     [int]$PollIntervalSec = 2,
 
     [int]$Parallelism = 8,
+
+    [switch]$Webpack,
 
     [switch]$StartDevDb,
 
@@ -175,7 +183,8 @@ Write-Host ''
 $env:NEXT_DIST_DIR = $DistDir
 $env:TURBO_TASKS_AVAILABLE_PARALLELISM = "$Parallelism"
 
-$proc = Start-Process -FilePath $nextExe -ArgumentList 'build' -WorkingDirectory $appFullPath `
+$buildArgs = if ($Webpack) { @('build', '--webpack') } else { @('build') }
+$proc = Start-Process -FilePath $nextExe -ArgumentList $buildArgs -WorkingDirectory $appFullPath `
     -RedirectStandardOutput $stdoutLog -RedirectStandardError $stderrLog `
     -PassThru -WindowStyle Hidden
 
