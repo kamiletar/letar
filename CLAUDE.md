@@ -288,6 +288,7 @@
 - [better-auth-pages-option-dead-code](/.claude/docs/better-auth-pages-option-dead-code.md) ⚠️ `pages: {...}` — несуществующая опция, мёртвый код в 7 приложениях
 - [better-auth-1.7-oidc-provider-removed](/.claude/docs/better-auth-1.7-oidc-provider-removed.md) ⚠️ `bun update` в пределах `^1.6.x` убирает `oidcProvider`
 - [better-auth-1.7-account-issuer-field](/.claude/docs/better-auth-1.7-account-issuer-field.md) ⚠️ требуется поле `issuer`; коммит миграции ≠ её применение
+- [better-auth-organization-teams-schema-fields](/.claude/docs/better-auth-organization-teams-schema-fields.md) ⚠️ `teams` плагина organization требует новые поля — падение на старте
 - [better-auth-oauth-provider-schema-drift](/.claude/docs/better-auth-oauth-provider-schema-drift.md) ⚠️ своя схема плагина; 7-слойный прод-инцидент SSO
 - [runtime-invariant-missing-from-select](/.claude/docs/runtime-invariant-missing-from-select.md) ⚠️ отсутствующее поле неотличимо от легитимного отказа
 - [better-auth-vk-id-migration-and-linksocial-pitfalls](/.claude/docs/better-auth-vk-id-migration-and-linksocial-pitfalls.md) ⚠️ VK ID вместо legacy; `linkSocial()` молчит без `allowDifferentEmails`
