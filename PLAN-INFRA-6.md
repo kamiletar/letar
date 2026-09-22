@@ -4783,3 +4783,21 @@ animatrona — NVENC-раздел `nvenc-web-video-codec-ladder.md`, строк�
       про путь БД, владелец не ответил.
 - [ ] Старые копии доков со `/app/`-путём лежат в брошенном worktree
       `.claude/worktrees/agent-a71245acc59b55070`; чужая работа, не трогали.
+
+## §193 (2026-09-22) Semgrepignore v2: exclude-пути `.semgrep/letar-rules.yml` — anchored явно ✅ ЗАКРЫТО
+
+`uvx semgrep scan` предупреждал на каждом прогоне: exclude-паттерны вида `libs/forms/**` (без
+ведущего `/`) в будущей версии semgrep станут anchored (матч только от корня репо) вместо
+нынешнего unanchored (матч в любом месте дерева) — Semgrepignore v2 приводит поведение к
+Gitignore-спецификации.
+
+- [x] Четыре правила (`letar-forms-raw-select-combobox-outside-lib`,
+      `letar-forms-native-select-deprecated`, `letar-forms-hand-rolled-footer-use-formactions`,
+      `letar-scrollintoview-smooth-frozen-without-focus`) переведены на явный `/libs/...` —
+      anchored-форма, уже используемая в этом же файле для `letar-electron-quitandinstall-
+      bypasses-scheduler` (`/apps/*/main/**`). Все реальные exclude-пути и так лежат в корне
+      репо, так что поведение не меняется ни сейчас, ни после апгрейда semgrep — но выбор сделан
+      явно, а не оставлен на волю дефолта будущей версии.
+- [x] Проверено: `--validate` — 0 ошибок конфигурации; полный прогон по `apps libs` до/после —
+      набор срабатываний (check_id+путь+строка) идентичен побайтово, 444/444 findings по всем 8
+      активным правилам. Предупреждения исчезли. Коммит `99fe3024c`, не запушен.
