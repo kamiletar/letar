@@ -54,6 +54,13 @@ import { useDebounce, usePrevious, useThrottle } from '@letar/hooks/utility'
 | `useClientOrigin()`                     | `window.location.origin`, безопасный для SSR — `''` до монтирования, реальный origin после            |
 | `useLocalStorage<T>(key, initialValue)` | Синхронизация с localStorage                                                                          |
 
+### Browser Utilities (не хуки)
+
+| Функция                                 | Описание                                                                      |
+| --------------------------------------- | ----------------------------------------------------------------------------- |
+| `prefersReducedMotion()`                | Разовое синхронное чтение `prefers-reduced-motion`                            |
+| `scrollIntoViewSafe(element, options?)` | Безопасная замена `element.scrollIntoView({ behavior: 'smooth' })` — см. ниже |
+
 ### TanStack Query Hooks
 
 | Хук                      | Описание                   |
@@ -199,6 +206,29 @@ function LiveMetrics() {
 всегда переподключает его сам). `reconnect: 'native'` (по умолчанию) не трогает соединение при
 ошибке — переподключение отдаётся браузеру; `'none'` — закрывает без ретраев; объект — closes и
 переподключается по стратегии `'constant' | 'linear' | 'exponential'`.
+
+### Плавный скролл, который не зависает без фокуса окна
+
+```tsx
+import { scrollIntoViewSafe } from '@letar/hooks/browser'
+
+function JumpToSection({ sectionRef }: { sectionRef: React.RefObject<HTMLElement> }) {
+  return (
+    <Button onClick={() => scrollIntoViewSafe(sectionRef.current, { behavior: 'smooth', block: 'center' })}>
+      К разделу
+    </Button>
+  )
+}
+```
+
+`element.scrollIntoView({ behavior: 'smooth' })` анимируется через `requestAnimationFrame`,
+который не тикает без OS-фокуса окна — вызов зависает навсегда, не медленно (особенно в
+Playwright под параллельными воркерами). `scrollIntoViewSafe` переключается на `'instant'`, когда
+`smooth` заведомо не отработает (окно без фокуса, `prefers-reduced-motion: reduce`), и не трогает
+`behavior` в остальных случаях. Для кода, где плавность не несёт функциональной нагрузки (переход
+по якорю, автоскролл чата, скролл к невалидному полю формы) — проще и надёжнее вызывать
+`element.scrollIntoView({ behavior: 'instant' })` напрямую, хелпер не нужен. Подробности —
+`.claude/docs/scrollintoview-smooth-frozen-without-window-focus.md` в letar.
 
 ### Responsive UI
 

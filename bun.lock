@@ -1476,7 +1476,7 @@
     },
     "libs/hooks": {
       "name": "@letar/hooks",
-      "version": "0.6.1",
+      "version": "0.6.2",
       "peerDependencies": {
         "@tanstack/react-query": ">=5.0.0",
         "react": ">=18.0.0",

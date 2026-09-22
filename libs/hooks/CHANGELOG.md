@@ -2,6 +2,26 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.6.2] — 2026-09-22
+
+### Added: `scrollIntoViewSafe(element, options?)` в `./browser`
+
+Безопасная замена `element.scrollIntoView({ behavior: 'smooth' })`: Chromium анимирует `smooth`
+через `requestAnimationFrame`, который не тикает без OS-фокуса окна — вызов зависает навсегда, не
+медленно (особенно опасно в Playwright под параллельными воркерами). Хелпер переключается на
+`'instant'`, когда `smooth` заведомо не отработает (окно без фокуса, `prefers-reduced-motion:
+reduce`), иначе передаёт `behavior` без изменений.
+
+Заведён после репо-широкого аудита 2026-09-22: паттерн независимо всплыл в 9 приложениях
+(`pravda`, `kami`, `kami-key-the-landing`, `animatrona-landing`, `dashboard`, `synth`,
+`animatrona`, плюс приватные `aboi`/`driving-school`/`svoichuzhie`), каждый раз чинился одинаково
+— заменой на голый `'instant'`. Существующие фиксы **не переведены** на этот хелпер: во всех
+случаях смысловая плавность не несла функциональной нагрузки (переход по якорю, автоскролл
+чата/лога, скролл к невалидному полю формы), а сам факт, что фикс уже задокументирован как
+осознанный выбор `'instant'`, — не повод возвращать `smooth` без причины. Хелпер — для будущего
+кода, где плавность действительно часть дизайна. См.
+`.claude/docs/scrollintoview-smooth-frozen-without-window-focus.md` в letar.
+
 ## [0.6.1] — 2026-09-09
 
 ### Fixed: `useLocalStorage` перенесён из `./utility` в `./browser`
