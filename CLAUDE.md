@@ -247,6 +247,7 @@
 
 - [deployment](/.claude/docs/deployment.md) ⭐ как устроен деплой
 - [verification-pitfalls](/.claude/docs/verification-pitfalls.md) ⭐ проверки, которые врут в успокаивающую (и одна — в тревожную) сторону
+- [prod-build-runtime-diagnosis-ladder](/.claude/docs/prod-build-runtime-diagnosis-ladder.md) dev → next start → standalone → контейнер: какая ступень что отсекает; ⚠️ проверка резолва не проверяет цепочку
 - [dev-session-screenshot-bypass](/.claude/docs/dev-session-screenshot-bypass.md) живая проверка за admin-гейтом через Playwright-скрипт: скриншот и сбор консоли (гидратация, черновик формы)
 - [docker-bind-mount-pitfalls](/.claude/docs/docker-bind-mount-pitfalls.md) ⚠️ `compose up -d` не перечитывает смонтированный конфиг
 - [nextjs-standalone-bind-mount-wrong-cwd](/.claude/docs/nextjs-standalone-bind-mount-wrong-cwd.md) ⚠️ `process.chdir()` — байты уходят в writable-слой мимо хоста
