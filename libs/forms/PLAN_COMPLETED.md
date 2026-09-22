@@ -1,5 +1,25 @@
 # Выполненные задачи — @letar/forms
 
+## 2026-09-22 (сессия forms-dev) — `extractFieldNames` — общая функция вместо дубля в form-when/form-steps-step (forms 2.16.2)
+
+**Контекст:** прямая задача (не через agent-mail-backlog) — рекурсивный обход `children` для
+сбора имён полей (`extractFieldNames`, namespace через `Form.Group`, пропуск рекурсии в
+`Form.Group.List`) был byte-for-byte продублирован в `form-when.tsx` и
+`form-steps/form-steps-step.tsx`, различались только формулировки комментариев (RU/EN вперемешку).
+
+**Решение:** вынесена одна копия в `declarative/extract-field-names.ts`, оба места импортируют её
+напрямую (без реэкспорта через `src/index.ts` — внутренняя утилита, как и `walkStepsTree`). Убраны
+ставшие лишними импорты `Children`/`isValidElement` из `form-when.tsx`. Третьего использования не
+найдено (`Grep` по всему `libs/forms/src`). Чисто внутренний рефакторинг, без изменения публичного
+API и поведения.
+
+**Проверено:** `../../node_modules/.bin/vitest.exe run src/lib/declarative` напрямую (обход
+известного OOM plugin-worker у `nx test`) — 760/760 зелёных; `nx lint forms` и
+`nx typecheck:tsgo forms` — чистые.
+
+**Коммит:** `a9ec99377` — `refactor(forms): extractFieldNames — общая функция вместо дубля в
+form-when/form-steps-step`.
+
 ## 2026-09-22 (сессия forms-dev) — form-steps.tsx: общий `walkStepsTree` вместо трёх дублирующих обходов дерева (forms 2.16.1)
 
 **Контекст:** прямая задача (не через agent-mail-backlog) — `countDeclaredSteps`,
