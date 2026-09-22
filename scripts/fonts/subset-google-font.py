@@ -54,18 +54,25 @@ def main() -> None:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument('--slug', required=True, help='Папка в google/fonts/ofl/, напр. "jetbrainsmono"')
     p.add_argument('--family-camel', help='Имя файла без [axes].ttf, напр. "JetBrainsMono". По умолчанию = --slug с большой буквы по словам')
-    p.add_argument('--weights', nargs=2, type=int, metavar=('LO', 'HI'), required=True, help='Диапазон оси wght, напр. 400 700')
+    p.add_argument('--weights', nargs=2, type=int, metavar=('LO', 'HI'), help='Диапазон оси wght для variable-шрифта, напр. 400 700')
+    p.add_argument('--static-file', help='Имя статического .ttf в ofl/<slug>/ (шрифт без variable-файла, напр. "FiraSansCondensed-Black.ttf") — вместо --weights/--family-camel')
     p.add_argument('--unicodes', nargs='+', required=True, help='Один или несколько unicode range списков (latin, cyrillic, extra...)')
     p.add_argument('--out', required=True, help='Путь для .woff2 (лицензия рядом как OFL-<Family>.txt)')
     args = p.parse_args()
 
     from fontTools import subset
     from fontTools.ttLib import TTFont
-    from fontTools.varLib import instancer
 
-    family_camel = args.family_camel or ''.join(w.capitalize() for w in args.slug.replace('-', ' ').split())
-    ttf_name = find_variable_ttf(args.slug, family_camel)
-    print(f'Найден variable TTF: ofl/{args.slug}/{ttf_name}')
+    if args.static_file:
+        ttf_name = args.static_file
+        family_camel = args.family_camel or ttf_name.rsplit('.', 1)[0]
+        print(f'Статический TTF: ofl/{args.slug}/{ttf_name}')
+    else:
+        if not args.weights:
+            raise SystemExit('--weights обязателен для variable-шрифта (или используй --static-file)')
+        family_camel = args.family_camel or ''.join(w.capitalize() for w in args.slug.replace('-', ' ').split())
+        ttf_name = find_variable_ttf(args.slug, family_camel)
+        print(f'Найден variable TTF: ofl/{args.slug}/{ttf_name}')
 
     ttf_bytes = fetch(RAW_BASE.format(slug=args.slug, name=ttf_name))
     ofl_bytes = fetch(RAW_BASE.format(slug=args.slug, name='OFL.txt'))
@@ -86,15 +93,18 @@ def main() -> None:
     s.populate(unicodes=subset.parse_unicodes(unicode_str))
     s.subset(font)
 
-    lo, hi = args.weights
-    font = instancer.instantiateVariableFont(font, {'wght': (lo, hi)})
+    if not args.static_file:
+        from fontTools.varLib import instancer
+
+        lo, hi = args.weights
+        font = instancer.instantiateVariableFont(font, {'wght': (lo, hi)})
     font.flavor = 'woff2'
 
     out_path = Path(args.out)
     font.save(str(out_path))
     tmp_ttf.unlink()
 
-    ofl_path = out_path.parent / f'OFL-{family_camel}.txt'
+    ofl_path = out_path.parent / f'OFL-{args.family_camel or family_camel.split("-")[0]}.txt'
     ofl_path.write_bytes(ofl_bytes)
 
     size_kb = out_path.stat().st_size / 1024
