@@ -6,7 +6,7 @@ import {
   isActionFailure,
   mapServerErrors,
 } from '@letar/forms-core/server-errors'
-import type { MappedServerErrors, MapServerErrorsConfig } from '@letar/forms-core/server-errors'
+import type { ActionFailure, MappedServerErrors, MapServerErrorsConfig } from '@letar/forms-core/server-errors'
 import type { RefObject } from 'react'
 import { useState } from 'react'
 import type { AppFormApi } from '../types'
@@ -36,7 +36,7 @@ export interface UseFormServerActionOptions extends MapServerErrorsConfig {
   successMessage?: string
 }
 
-export interface UseFormServerActionResult<TResult> {
+export interface UseFormServerActionResult<_TResult> {
   /** `true`, пока текущий вызов `run` не завершился. */
   pending: boolean
   /**
@@ -60,8 +60,20 @@ export interface UseFormServerActionResult<TResult> {
    * считается ошибкой: `run` бросает `ActionFailureError`, а текст и поле (`field`) ложатся в форму
    * как у любой другой серверной ошибки. `onSuccess` и тост успеха при этом не вызываются. Значение
    * без маркера `success: false` (включая успех с полем `error`) отказом не считается.
+   *
+   * Тип результата — `Exclude<TData, ActionFailure>`, не сам `TData`: для action, обёрнутой в
+   * `catchActionFailure` (`TData = T | ActionFailure`), `onSuccess` и резолв `run` получают
+   * только `T` — рантайм уже отсёк отказ (бросил выше), тип должен отражать то же самое, без
+   * ручного `as`/type guard на стороне вызывающего кода. Для `TData` без пересечения с
+   * `ActionFailure` (например четыре формы входа `aboi` на Better Auth) `Exclude` — тождество,
+   * старые вызовы не меняются. `TData`, структурно совпадающий с `ActionFailure` целиком
+   * (`{ success: false; error: string }` без `field` — `field` в `ActionFailure` опционален),
+   * тоже исключается: он неотличим от настоящего отказа.
    */
-  run: <TData = TResult>(action: () => Promise<TData>, onSuccess?: (result: TData) => void) => Promise<TData>
+  run: <TData>(
+    action: () => Promise<TData>,
+    onSuccess?: (result: Exclude<TData, ActionFailure>) => void,
+  ) => Promise<Exclude<TData, ActionFailure>>
 }
 
 function errorToastTitle(mapped: MappedServerErrors, defaultMessage?: string): string {
@@ -112,20 +124,26 @@ export function useFormServerAction<TResult = unknown>(
   const [pending, setPending] = useState(false)
   const { toaster, successMessage, ...mapConfig } = options
 
-  async function run<TData = TResult>(action: () => Promise<TData>, onSuccess?: (result: TData) => void) {
+  async function run<TData>(
+    action: () => Promise<TData>,
+    onSuccess?: (result: Exclude<TData, ActionFailure>) => void,
+  ): Promise<Exclude<TData, ActionFailure>> {
     setPending(true)
     try {
       const result = await action()
       // Отказ, возвращённый значением (Server Action не может бросить текст в production) —
-      // превращаем в исключение здесь же: дальше он идёт тем же путём, что и `throw`
+      // превращаем в исключение здесь же: дальше он идёт тем же путём, что и `throw`. TS не умеет
+      // сужать неограниченный дженерик `TData` через рантайм-предикат — `result` после проверки
+      // структурно уже не ActionFailure, но тип это не отражает без явного приведения.
       if (isActionFailure(result)) {
         throw new ActionFailureError(result)
       }
+      const narrowed = result as Exclude<TData, ActionFailure>
       if (successMessage) {
         toaster?.create({ type: 'success', title: successMessage })
       }
-      onSuccess?.(result)
-      return result
+      onSuccess?.(narrowed)
+      return narrowed
     } catch (error) {
       const mapped = mapServerErrors(error, mapConfig)
       if (formRef.current) {

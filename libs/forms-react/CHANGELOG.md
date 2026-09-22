@@ -4,6 +4,19 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.10.1] - 2026-09-22
+
+### Fixed
+
+- **`useFormServerAction.run` сужает тип результата до `Exclude<TData, ActionFailure>`** (#1819,
+  тред `form-action-result-extract`): для action, обёрнутой в `catchActionFailure`
+  (`TData = T | ActionFailure`), `onSuccess` и резолв `run` теперь типизированы как `T` — рантайм
+  уже отсекал отказ (бросал `ActionFailureError`, до `onSuccess` не доходило), тип раньше этого не
+  отражал и требовал ручного `as`/type guard на стороне вызывающего кода. `TData` без пересечения
+  с `ActionFailure` (например 4 формы входа `aboi` на Better Auth) не меняется — `Exclude` для них
+  тождество. `TData`, структурно совпадающий с `ActionFailure` целиком (без опционального `field`),
+  тоже исключается — он неотличим от настоящего отказа.
+
 ## [0.10.0] - 2026-09-21
 
 ### Added
