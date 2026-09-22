@@ -4820,3 +4820,27 @@ Gitignore-спецификации.
       не стоит экономии на дублировании 7 строк. `.semgrep/letar-rules.yml` не тронут.
       Разбор — [semgrep-yaml-anchor-exclude-invalid.md](/.claude/docs/semgrep-yaml-anchor-exclude-invalid.md),
       ссылка в индексе `CLAUDE.md`. Коммиты `6cfc53f82` (доки), `2b48da8c7` (индекс), не запушены.
+
+## §195 (2026-09-22) `next/font/google` → `next/font/local` — репо-широкая миграция ✅ ЗАКРЫТО
+
+Триггер — падение сборки на `domwellbes` 2026-09-22 внутри самого загрузчика Google
+(`TypeError: Cannot read properties of null (reading '1')` в `next/dist/compiled/@next/font/
+dist/google/loader.js:122`) при полностью доступном Google Fonts — хрупкость парсера, не сети.
+Разбор инцидента — `apps/domwellbes/src/app/fonts/README.md`.
+
+- [x] Переведены все найденные `next/font/google`-вызовы: `domwellbes` (первым, до этой записи),
+      `aboi`, `animatrona/renderer`, `aprel8008`, `auth-hub`, `dashboard`, `driving-school`,
+      `dsperevod`, `kami`, `kami-key-the-landing`, `svoichuzhie`, `time`.
+- [x] Инструментарий — `scripts/fonts/subset-google-font.py` (subset ДО instancer, `--static-file`
+      для семейств без variable-файла) + `scripts/fonts/scan-extra-glyphs.py`. Разбор воркфлоу и
+      почему каждый найденный кандидат-глиф проверяется по контексту (не бланкетно копируется) —
+      [nextjs-font-google-to-local-migration-pattern.md](/.claude/docs/nextjs-font-google-to-local-migration-pattern.md).
+- [x] Мультиязычный случай (`time`, 40 локалей) — отдельный разбор, какие скрипты гарнитура
+      физически не покрывает (не регрессия, fallback был и раньше) — `apps/time/src/app/fonts/
+      README.md`.
+- [x] `bun install --lockfile-only` — `bun.lock` синхронизирован с version bump'ами `aboi`/`time`.
+- ⚠️ **Не в этом тираже:** `apps/label-printer-desktop/renderer/app/_fonts/index.ts` — Electron-
+  приложение, не входило в исходный список кандидатов (грепом на дату составления списка),
+  найдено попутно финальной проверкой. Не мигрировано — решение за владельцем, стоит ли
+  применять тот же паттерн к Electron-рендереру (иной цикл сборки, не тот же класс риска
+  сетевого сбоя при каждом `next build` на сервере деплоя).
