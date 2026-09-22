@@ -1,10 +1,14 @@
 {
   "name": "form-develop-app-e2e",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": true,
   "nx": {
     "implicitDependencies": [
-      "form-develop-app"
+      "form-develop-app",
+      "@letar/e2e-testing"
     ]
+  },
+  "dependencies": {
+    "@letar/e2e-testing": "workspace:*"
   }
 }

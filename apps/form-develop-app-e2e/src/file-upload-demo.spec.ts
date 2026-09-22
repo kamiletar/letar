@@ -1,3 +1,4 @@
+import { setInputFilesWithHydrationRetry } from '@letar/e2e-testing'
 import type { Page } from '@playwright/test'
 import { expect, test } from '@playwright/test'
 
@@ -51,15 +52,18 @@ test.describe('FileUpload Demo', () => {
     const avatarField = getField(page, 'avatar')
     const fileInput = avatarField.locator('input[type="file"]')
 
-    // Upload file
-    await fileInput.setInputFiles({
-      name: 'test-avatar.png',
-      mimeType: 'image/png',
-      buffer: fileContent,
-    })
-
-    // File should appear in the list
-    await expect(page.getByText('test-avatar.png')).toBeVisible()
+    // Upload file — ретрай на случай гонки гидратации (см. setInputFilesWithHydrationRetry).
+    // FileImageList рендерит превью-картинку с alt="preview of <имя>", а не текст с именем файла
+    // (текстовое имя показывает только FileList — соседний вариант для не-image accept).
+    await setInputFilesWithHydrationRetry(
+      fileInput,
+      {
+        name: 'test-avatar.png',
+        mimeType: 'image/png',
+        buffer: fileContent,
+      },
+      { locator: page.getByAltText('preview of test-avatar.png'), state: 'visible' },
+    )
   })
 
   test('should upload multiple files via dropzone', async ({ page }) => {
@@ -67,23 +71,26 @@ test.describe('FileUpload Demo', () => {
     const galleryField = getField(page, 'gallery')
     const fileInput = galleryField.locator('input[type="file"]')
 
-    // Upload multiple files
-    await fileInput.setInputFiles([
-      {
-        name: 'image1.jpg',
-        mimeType: 'image/jpeg',
-        buffer: Buffer.from('image1 content'),
-      },
-      {
-        name: 'image2.jpg',
-        mimeType: 'image/jpeg',
-        buffer: Buffer.from('image2 content'),
-      },
-    ])
+    // Upload multiple files — ретрай на случай гонки гидратации
+    await setInputFilesWithHydrationRetry(
+      fileInput,
+      [
+        {
+          name: 'image1.jpg',
+          mimeType: 'image/jpeg',
+          buffer: Buffer.from('image1 content'),
+        },
+        {
+          name: 'image2.jpg',
+          mimeType: 'image/jpeg',
+          buffer: Buffer.from('image2 content'),
+        },
+      ],
+      { locator: page.getByAltText('preview of image1.jpg'), state: 'visible' },
+    )
 
-    // Files should appear in the list
-    await expect(page.getByText('image1.jpg')).toBeVisible()
-    await expect(page.getByText('image2.jpg')).toBeVisible()
+    // Files should appear in the list (превью-картинки, FileImageList не показывает имя текстом)
+    await expect(page.getByAltText('preview of image2.jpg')).toBeVisible()
   })
 
   test('should clear uploaded file when clearable', async ({ page }) => {
@@ -91,14 +98,16 @@ test.describe('FileUpload Demo', () => {
     const avatarField = getField(page, 'avatar')
     const fileInput = avatarField.locator('input[type="file"]')
 
-    await fileInput.setInputFiles({
-      name: 'to-delete.png',
-      mimeType: 'image/png',
-      buffer: Buffer.from('delete me'),
-    })
-
-    // Verify file is shown
-    await expect(page.getByText('to-delete.png')).toBeVisible()
+    const preview = page.getByAltText('preview of to-delete.png')
+    await setInputFilesWithHydrationRetry(
+      fileInput,
+      {
+        name: 'to-delete.png',
+        mimeType: 'image/png',
+        buffer: Buffer.from('delete me'),
+      },
+      { locator: preview, state: 'visible' },
+    )
 
     // Click clear/delete button for this file
     // The clear button is typically next to the file name
@@ -106,7 +115,7 @@ test.describe('FileUpload Demo', () => {
     await clearButton.click()
 
     // File should be removed
-    await expect(page.getByText('to-delete.png')).toBeHidden()
+    await expect(preview).toBeHidden()
   })
 
   test('should show file sizes when showSize is enabled', async ({ page }) => {
@@ -114,14 +123,16 @@ test.describe('FileUpload Demo', () => {
     const galleryField = getField(page, 'gallery')
     const fileInput = galleryField.locator('input[type="file"]')
 
-    await fileInput.setInputFiles({
-      name: 'sized-file.jpg',
-      mimeType: 'image/jpeg',
-      buffer: Buffer.from('a'.repeat(1024)), // 1KB file
-    })
-
-    // File size should be displayed (1 KB or similar)
-    await expect(page.getByText(/\d+\s*(B|KB|MB)/)).toBeVisible()
+    await setInputFilesWithHydrationRetry(
+      fileInput,
+      {
+        name: 'sized-file.jpg',
+        mimeType: 'image/jpeg',
+        buffer: Buffer.from('a'.repeat(1024)), // 1KB file
+      },
+      // File size should be displayed (1 KB or similar)
+      { locator: page.getByText(/\d+\s*(B|KB|MB)/), state: 'visible' },
+    )
   })
 
   test('should submit form with uploaded files', async ({ page, browserName }) => {
@@ -131,11 +142,15 @@ test.describe('FileUpload Demo', () => {
     const avatarField = getField(page, 'avatar')
     const avatarInput = avatarField.locator('input[type="file"]')
 
-    await avatarInput.setInputFiles({
-      name: 'my-avatar.png',
-      mimeType: 'image/png',
-      buffer: Buffer.from('avatar content'),
-    })
+    await setInputFilesWithHydrationRetry(
+      avatarInput,
+      {
+        name: 'my-avatar.png',
+        mimeType: 'image/png',
+        buffer: Buffer.from('avatar content'),
+      },
+      { locator: page.getByAltText('preview of my-avatar.png'), state: 'visible' },
+    )
 
     // Submit the form
     const submitButton = page.getByRole('button', { name: 'Submit' })
@@ -163,15 +178,16 @@ test.describe('FileUpload Demo', () => {
     const documentsField = getField(page, 'documents')
     const fileInput = documentsField.locator('input[type="file"]')
 
-    // Upload a PDF file
-    await fileInput.setInputFiles({
-      name: 'document.pdf',
-      mimeType: 'application/pdf',
-      buffer: Buffer.from('pdf content'),
-    })
-
-    // File should appear
-    await expect(page.getByText('document.pdf')).toBeVisible()
+    // Upload a PDF file — ретрай на случай гонки гидратации
+    await setInputFilesWithHydrationRetry(
+      fileInput,
+      {
+        name: 'document.pdf',
+        mimeType: 'application/pdf',
+        buffer: Buffer.from('pdf content'),
+      },
+      { locator: page.getByText('document.pdf'), state: 'visible' },
+    )
   })
 
   test('should allow selecting file via input variant', async ({ page }) => {
@@ -179,14 +195,15 @@ test.describe('FileUpload Demo', () => {
     const resumeField = getField(page, 'resume')
     const fileInput = resumeField.locator('input[type="file"]')
 
-    // Upload a PDF file
-    await fileInput.setInputFiles({
-      name: 'my-resume.pdf',
-      mimeType: 'application/pdf',
-      buffer: Buffer.from('resume content'),
-    })
-
-    // File name should be shown
-    await expect(page.getByText('my-resume.pdf')).toBeVisible()
+    // Upload a PDF file — ретрай на случай гонки гидратации
+    await setInputFilesWithHydrationRetry(
+      fileInput,
+      {
+        name: 'my-resume.pdf',
+        mimeType: 'application/pdf',
+        buffer: Buffer.from('resume content'),
+      },
+      { locator: page.getByText('my-resume.pdf'), state: 'visible' },
+    )
   })
 })
