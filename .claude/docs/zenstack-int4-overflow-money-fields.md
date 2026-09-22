@@ -75,11 +75,15 @@ data: {
 ## Известные случаи в монорепо
 
 - **`domwellbes`** — `FinancingProgram.minAmountKopecks`/`maxAmountKopecks`/
-  `previewMatCapitalKopecks` (исправлено 2026-09-22, `apps/domwellbes/CHANGELOG.md` 0.304.0).
-- **Не исправлено, оценено как более низкий риск** (максимальные реалистичные значения
-  правдоподобно остаются под INT4_MAX, но стоит перепроверить при росте цен):
-  `House.basePriceKopecks`, `HouseOption.priceDeltaKopecks`, `HouseExtra.priceKopecks` —
-  все три в том же `house-config.zmodel`.
+  `previewMatCapitalKopecks` (исправлено 2026-09-22, `apps/domwellbes/CHANGELOG.md` 0.304.0);
+  `House.basePriceKopecks` (исправлено 2026-09-22, `apps/domwellbes/CHANGELOG.md` 0.305.0) —
+  поле без верхней границы валидации, вводится вручную, текущий максимум демо-данных (9,8 млн ₽)
+  был уже на 45% от INT4_MAX.
+- **Не исправлено, перепроверено 2026-09-22 — риск по-прежнему низкий**: в том же
+  `house-config.zmodel` — `HouseOption.priceDeltaKopecks` (дельта цены опции, максимум в
+  демо-данных ~450 тыс. ₽) и `HouseExtra.priceKopecks` (допрасходы вроде скважины/септика,
+  максимум ~250 тыс. ₽) — оба на два порядка меньше цены дома по смыслу поля, а не только по
+  текущим демо-значениям.
 - Паттерн `*Kopecks Int` встречается в схемах и других приложений монорепо — при добавлении
   нового денежного поля или увеличении верхней границы существующего сверяться с INT4_MAX сразу,
   не откладывать до прод-инцидента.
