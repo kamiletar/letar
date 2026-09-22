@@ -1,5 +1,16 @@
 # Выполненные задачи — Kami
 
+## `scrollIntoView(smooth)` зависал без OS-фокуса окна (2026-09-22)
+
+Делегировано из сессии `pravda-dev` — после фикса зависающего TOC-скролла в `apps/pravda`
+(коммиты `e61e2cbae`/`0b68c95d0`) прошлись грепом по всему монорепо в поисках того же паттерна.
+В kami — два места: TOC-клик в `_components/table-of-contents.tsx` и автоскролл AI-чата в
+`_components/chat/chat-messages.tsx`. `behavior: 'smooth'` → `'instant'`: Chromium не тикает
+rAF-анимацию плавного скролла без фокуса окна, скролл зависал навсегда, не просто «работал
+медленно». Паттерн задокументирован —
+[scrollintoview-smooth-frozen-without-window-focus.md](/.claude/docs/scrollintoview-smooth-frozen-without-window-focus.md).
+Коммит `6b3d47b62`.
+
 ## Общая `slugify` из `@letar/format-utils` (2026-09-15)
 
 Найдено при выносе дублей `slugify` в svoichuzhie — репо-широкий grep вскрыл ещё 5 копий вне
