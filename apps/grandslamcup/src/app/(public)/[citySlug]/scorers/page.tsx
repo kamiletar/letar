@@ -51,8 +51,19 @@ export default async function ScorersPage({ params }: { params: Params }) {
     },
   })
 
+  // Узкий вручную написанный тип строки матча вместо `typeof matches` в значении Map — tsgo
+  // TS2321 (Excessive stack depth), подпаттерн 1 из
+  // .claude/docs/tsgo-excessive-stack-depth-zenstack.md. Поля — по факту использования в JSX ниже.
+  interface ScorerMatchRow {
+    id: string
+    scheduledAt: Date | null
+    status: string
+    homeTeam: { team: { name: string } }
+    awayTeam: { team: { name: string } }
+  }
+
   // Группируем по счетоводу
-  const scorerMap = new Map<string, { name: string; image: string | null; matches: typeof matches }>()
+  const scorerMap = new Map<string, { name: string; image: string | null; matches: ScorerMatchRow[] }>()
   for (const m of matches) {
     if (!m.scorerUser) {
       continue

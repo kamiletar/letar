@@ -88,9 +88,10 @@ export default async function AdminMatchDetailPage({ params }: { params: Params 
   const mvp = computeMvp(match.performances, isFinished)
   const cardStats = computeCardStats(match.performances)
 
-  // Составы по командам
-  const homeLineup = match.lineups.filter((l) => l.teamSeason.id === match.homeTeamId)
-  const awayLineup = match.lineups.filter((l) => l.teamSeason.id === match.awayTeamId)
+  // Составы по командам. Аннотация параметра callback обрывает структурное сравнение tsgo
+  // (TS2321), см. .claude/docs/tsgo-excessive-stack-depth-zenstack.md, подпаттерн 1.
+  const homeLineup = match.lineups.filter((l: (typeof match.lineups)[number]) => l.teamSeason.id === match.homeTeamId)
+  const awayLineup = match.lineups.filter((l: (typeof match.lineups)[number]) => l.teamSeason.id === match.awayTeamId)
 
   // Дисквалификации за плагиат
   const seasonId = match.tour?.round?.season?.id

@@ -47,6 +47,17 @@ export async function formatTourSummary(tourId: string): Promise<{ text: string;
 
   const leagueName = tour.matches[0]?.league?.name ?? ''
 
+  // Узкий вручную написанный тип вместо `typeof tour.matches` — tsgo TS2321 (Excessive stack
+  // depth), подпаттерн 1 из .claude/docs/tsgo-excessive-stack-depth-zenstack.md: облегчённая
+  // аннотация параметра `(typeof tour.matches)[number]` здесь не спасла (сам `typeof` уже требует
+  // структурной экспансии), понадобился явный interface + аннотация переменной перед `.flatMap`.
+  interface TourPerformance {
+    player: { name: string; slug: string; disambiguation: string | null }
+    teamSeason: { team: { name: string; slug: string } }
+    totalScore: number | null
+  }
+  const tourMatches: { performances: TourPerformance[] }[] = tour.matches
+
   const parts: string[] = [
     `📊 <b>Итоги ${tour.number} тура${leagueName ? ` • ${escapeHtml(leagueName)}` : ''} | ${escapeHtml(city.name)}</b>`,
     '',
@@ -61,7 +72,7 @@ export async function formatTourSummary(tourId: string): Promise<{ text: string;
   }
 
   // Лучший игрок тура (максимальный totalScore среди всех перформансов)
-  const allPerfs = tour.matches.flatMap((m) => m.performances)
+  const allPerfs = tourMatches.flatMap((m) => m.performances)
   const bestPerf = allPerfs.reduce((best, p) => ((p.totalScore ?? 0) > (best?.totalScore ?? 0) ? p : best), allPerfs[0])
 
   if (bestPerf?.player && bestPerf.totalScore) {

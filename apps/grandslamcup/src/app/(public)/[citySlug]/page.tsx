@@ -34,46 +34,48 @@ export default async function CityHomePage({ params }: { params: Params }) {
     notFound()
   }
 
-  const [upcomingMatches, recentResults, activeSeason] = await Promise.all([
-    prisma.match.findMany({
-      where: {
-        status: 'SCHEDULED',
-        scheduledAt: { gte: new Date() },
-        OR: [{ tour: { round: { season: { cityId: city.id } } } }, { season: { cityId: city.id } }],
-      },
-      orderBy: { scheduledAt: 'asc' },
-      take: 4,
-      include: {
-        homeTeam: { include: { team: { select: { name: true } } } },
-        awayTeam: { include: { team: { select: { name: true } } } },
-        venue: { select: { name: true } },
-      },
-    }),
-    prisma.match.findMany({
-      where: {
-        status: 'FINISHED',
-        OR: [{ tour: { round: { season: { cityId: city.id } } } }, { season: { cityId: city.id } }],
-      },
-      orderBy: { scheduledAt: 'desc' },
-      take: 4,
-      include: {
-        homeTeam: { include: { team: { select: { name: true } } } },
-        awayTeam: { include: { team: { select: { name: true } } } },
-        venue: { select: { name: true } },
-      },
-    }),
-    prisma.season.findFirst({
-      where: { status: 'ACTIVE', cityId: city.id },
-      include: {
-        teamSeasons: {
-          include: {
-            team: { select: { name: true, slug: true } },
-            league: { select: { name: true } },
-          },
+  // Раздельные await вместо Promise.all — tsgo TS2321 (Excessive stack depth) на кортеже
+  // с разными ZenStack-типами, подпаттерн 2 из
+  // .claude/docs/tsgo-excessive-stack-depth-zenstack.md. Теряем параллельность трёх запросов,
+  // здесь это приемлемо (страница не в горячем пути).
+  const upcomingMatches = await prisma.match.findMany({
+    where: {
+      status: 'SCHEDULED',
+      scheduledAt: { gte: new Date() },
+      OR: [{ tour: { round: { season: { cityId: city.id } } } }, { season: { cityId: city.id } }],
+    },
+    orderBy: { scheduledAt: 'asc' },
+    take: 4,
+    include: {
+      homeTeam: { include: { team: { select: { name: true } } } },
+      awayTeam: { include: { team: { select: { name: true } } } },
+      venue: { select: { name: true } },
+    },
+  })
+  const recentResults = await prisma.match.findMany({
+    where: {
+      status: 'FINISHED',
+      OR: [{ tour: { round: { season: { cityId: city.id } } } }, { season: { cityId: city.id } }],
+    },
+    orderBy: { scheduledAt: 'desc' },
+    take: 4,
+    include: {
+      homeTeam: { include: { team: { select: { name: true } } } },
+      awayTeam: { include: { team: { select: { name: true } } } },
+      venue: { select: { name: true } },
+    },
+  })
+  const activeSeason = await prisma.season.findFirst({
+    where: { status: 'ACTIVE', cityId: city.id },
+    include: {
+      teamSeasons: {
+        include: {
+          team: { select: { name: true, slug: true } },
+          league: { select: { name: true } },
         },
       },
-    }),
-  ])
+    },
+  })
 
   /* Подсчёт таблицы для активного сезона */
   const standings = await computeStandings(activeSeason)
@@ -226,22 +228,16 @@ export default async function CityHomePage({ params }: { params: Params }) {
 // Вспомогательная функция — подсчёт таблицы по матчам сезона
 // ---------------------------------------------------------------------------
 
-type ActiveSeason = Awaited<
-  ReturnType<
-    typeof prisma.season.findFirst<{
-      include: {
-        teamSeasons: {
-          include: {
-            team: { select: { name: true; slug: true } }
-            league: { select: { name: true } }
-          }
-        }
-      }
-    }>
-  >
->
+// Ручной interface вместо `Awaited<ReturnType<typeof prisma.season.findFirst<{...}>>>` — tsgo
+// TS2321 (Excessive stack depth) уже на объявлении такого алиаса, подпаттерн 1a из
+// .claude/docs/tsgo-excessive-stack-depth-zenstack.md. Поле `league` из include не используется
+// в computeStandings ниже, поэтому в interface не включено.
+interface ActiveSeason {
+  id: string
+  teamSeasons: { id: string; team: { name: string; slug: string } }[]
+}
 
-async function computeStandings(activeSeason: ActiveSeason): Promise<StandingsRow[]> {
+async function computeStandings(activeSeason: ActiveSeason | null): Promise<StandingsRow[]> {
   if (!activeSeason) { return [] }
 
   const seasonMatches = await prisma.match.findMany({

@@ -63,6 +63,10 @@ export default async function AlbumPage({ params }: { params: Params }) {
 
   const year = new Date(album.publishedAt).getFullYear()
 
+  // Узкий тип для .map() ниже — tsgo TS2321 (Excessive stack depth), подпаттерн 1 из
+  // .claude/docs/tsgo-excessive-stack-depth-zenstack.md.
+  const albumPoems: { id: string; poem: { title: string; slug: string } }[] = album.albumPoems
+
   return (
     <VStack gap={8} align="stretch" maxW="2xl" mx="auto">
       {/* Навигация */}
@@ -128,7 +132,7 @@ export default async function AlbumPage({ params }: { params: Params }) {
 
       {/* Список стихов */}
       <VStack gap={1} align="stretch">
-        {album.albumPoems.map((ap, i) => (
+        {albumPoems.map((ap, i) => (
           <AlbumPoemItem
             key={ap.id}
             index={i + 1}

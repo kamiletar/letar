@@ -139,7 +139,13 @@ export default async function MatchPage({ params }: { params: Params }) {
   const hoursUntilMatch = match.scheduledAt ? (match.scheduledAt.getTime() - Date.now()) / (1000 * 60 * 60) : null
   const lineupsLocked = isScheduled && hoursUntilMatch !== null && hoursUntilMatch > 6
 
-  type LineupItem = (typeof match)['lineups'][number]
+  // Ручной interface вместо `(typeof match)['lineups'][number]` — tsgo TS2321 (Excessive stack
+  // depth), подпаттерн 1a из .claude/docs/tsgo-excessive-stack-depth-zenstack.md.
+  interface LineupItem {
+    id: string
+    teamSeason: { id: string }
+    player: { name: string; slug: string; photo: string | null; disambiguation: string | null }
+  }
   function filterLineup(lineup: LineupItem[], teamSeasonId: string) {
     if (!lineupsLocked) { return lineup }
     // Тренер видит состав только своей команды
@@ -183,8 +189,9 @@ export default async function MatchPage({ params }: { params: Params }) {
 
   const half1 = match.performances.filter((p) => p.half === 1)
   const half2 = match.performances.filter((p) => p.half === 2)
-  const homeLineupRaw = match.lineups.filter((l) => l.teamSeason.id === match.homeTeamId)
-  const awayLineupRaw = match.lineups.filter((l) => l.teamSeason.id === match.awayTeamId)
+  const matchLineups: LineupItem[] = match.lineups
+  const homeLineupRaw = matchLineups.filter((l) => l.teamSeason.id === match.homeTeamId)
+  const awayLineupRaw = matchLineups.filter((l) => l.teamSeason.id === match.awayTeamId)
   const homeLineup = filterLineup(homeLineupRaw, match.homeTeamId)
   const awayLineup = filterLineup(awayLineupRaw, match.awayTeamId)
   const homeLineupHidden = lineupsLocked && homeLineupRaw.length > 0 && homeLineup.length === 0

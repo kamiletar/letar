@@ -48,32 +48,43 @@ export default async function TeamsPage({ params, searchParams }: { params: Para
     ...(q ? { name: { contains: q, mode: 'insensitive' as const } } : {}),
   }
 
-  // Параллельно: список команд с лимитом + общее количество для пагинации
-  const [teams, totalCount] = await Promise.all([
-    prisma.team.findMany({
-      where: teamWhere,
-      orderBy: { name: 'asc' },
-      take: limit,
-      include: {
-        city: { select: { name: true } },
-        homeVenue: { select: { name: true } },
-        teamSeasons: {
-          include: {
-            league: { select: { name: true } },
-            season: { select: { name: true, status: true } },
-          },
-          orderBy: { season: { startDate: 'desc' } },
-          take: 1,
+  // Раздельные await вместо Promise.all — tsgo TS2321 (Excessive stack depth) на кортеже с
+  // разными ZenStack-типами, подпаттерн 2 из .claude/docs/tsgo-excessive-stack-depth-zenstack.md.
+  const teams = await prisma.team.findMany({
+    where: teamWhere,
+    orderBy: { name: 'asc' },
+    take: limit,
+    include: {
+      city: { select: { name: true } },
+      homeVenue: { select: { name: true } },
+      teamSeasons: {
+        include: {
+          league: { select: { name: true } },
+          season: { select: { name: true, status: true } },
         },
-        _count: {
-          select: {
-            teamSeasons: true,
-          },
+        orderBy: { season: { startDate: 'desc' } },
+        take: 1,
+      },
+      _count: {
+        select: {
+          teamSeasons: true,
         },
       },
-    }),
-    prisma.team.count({ where: teamWhere }),
-  ])
+    },
+  })
+  const totalCount = await prisma.team.count({ where: teamWhere })
+
+  // Узкий тип строки перед sort/map ниже — tsgo TS2321 (Excessive stack depth), подпаттерн 1 из
+  // .claude/docs/tsgo-excessive-stack-depth-zenstack.md.
+  interface TeamRow {
+    id: string
+    slug: string
+    name: string
+    logo: string | null
+    homeVenue: { name: string } | null
+    teamSeasons: { league: { name: string }; season: { name: string; status: string } }[]
+  }
+  const teamRows: TeamRow[] = teams
 
   return (
     <VStack gap={6} align="stretch">
@@ -90,7 +101,7 @@ export default async function TeamsPage({ params, searchParams }: { params: Para
       </Flex>
 
       <SimpleGrid columns={{ base: 1, sm: 2, lg: 3 }} gap={4}>
-        {[...teams]
+        {[...teamRows]
           .sort((a, b) => {
             const aActive = a.teamSeasons[0]?.season.status === 'ACTIVE' ? 1 : 0
             const bActive = b.teamSeasons[0]?.season.status === 'ACTIVE' ? 1 : 0

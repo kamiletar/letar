@@ -2,6 +2,22 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [3.39.20] - 2026-09-22
+
+### Fixed
+
+- `nx typecheck:tsgo` падал `TS2321: Excessive stack depth` (`.claude/docs/tsgo-excessive-stack-depth-zenstack.md`)
+  в 12 файлах — заблокировано на этом гейте PLAN-INFRA-6.md §157 (двухфазный деплой, сборка на
+  s1). Три подпаттерна: `.map()`/`.filter()` без аннотации параметра (`src/lib/telegram/messages/tour-summary.ts`,
+  `src/app/api/coach/{available-players,friendly-options}/route.ts`,
+  `src/app/(public)/[citySlug]/{scorers,teams,players/[slug]}/page.tsx`,
+  `src/app/(public)/[citySlug]/players/[slug]/albums/[albumSlug]/page.tsx`,
+  `src/app/(public)/[citySlug]/matches/[id]/page.tsx`, `src/app/admin/matches/[id]/page.tsx`),
+  тип-алиас через `ReturnType<typeof fn>` (`src/lib/telegram/match-data.ts` — `MatchData`,
+  `src/app/(public)/[citySlug]/page.tsx` — `ActiveSeason`), деструктуризация `Promise.all`
+  (`src/app/(public)/[citySlug]/{players,teams}/page.tsx`). Фикс — ручные узкие `interface` вместо
+  вывода из ZenStack-типа, где облегчённая аннотация `(typeof x)[number]` не спасала.
+
 ## [3.39.19] - 2026-09-16
 
 ### Changed

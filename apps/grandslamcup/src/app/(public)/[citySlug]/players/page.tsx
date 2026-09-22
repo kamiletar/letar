@@ -97,29 +97,28 @@ export default async function PlayersPage({ params, searchParams }: { params: Pa
     }
   }
 
-  // Параллельно: список игроков с лимитом + общее количество для пагинации
-  const [players, totalCount] = await Promise.all([
-    prisma.player.findMany({
-      where: playerWhere,
-      orderBy: { name: 'asc' },
-      take: limit,
-      include: {
-        performances: {
-          where: performanceWhere,
-          select: { totalScore: true, textAdjusted: true, deliveryAdjusted: true },
-        },
-        playerTeamSeasons: {
-          include: {
-            teamSeason: { include: { team: { select: { name: true, slug: true } } } },
-          },
-          where: { leftAt: null },
-          take: 1,
-          orderBy: { teamSeason: { season: { startDate: 'desc' } } },
-        },
+  // Раздельные await вместо Promise.all — tsgo TS2321 (Excessive stack depth) на кортеже с
+  // разными ZenStack-типами, подпаттерн 2 из .claude/docs/tsgo-excessive-stack-depth-zenstack.md.
+  const players = await prisma.player.findMany({
+    where: playerWhere,
+    orderBy: { name: 'asc' },
+    take: limit,
+    include: {
+      performances: {
+        where: performanceWhere,
+        select: { totalScore: true, textAdjusted: true, deliveryAdjusted: true },
       },
-    }),
-    prisma.player.count({ where: playerWhere }),
-  ])
+      playerTeamSeasons: {
+        include: {
+          teamSeason: { include: { team: { select: { name: true, slug: true } } } },
+        },
+        where: { leftAt: null },
+        take: 1,
+        orderBy: { teamSeason: { season: { startDate: 'desc' } } },
+      },
+    },
+  })
+  const totalCount = await prisma.player.count({ where: playerWhere })
 
   // Считаем статистику для рейтинговой таблицы
   const playerStats: PlayerStat[] = players

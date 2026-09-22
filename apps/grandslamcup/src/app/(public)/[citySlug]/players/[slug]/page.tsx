@@ -123,10 +123,13 @@ export default async function PlayerPage({ params }: { params: Params }) {
     select: { id: true, matchesLeft: true },
   })
 
-  // Серверная проверка прав
+  // Серверная проверка прав. `(typeof ...)[number]` на параметре callback не спас — tsgo TS2321
+  // (Excessive stack depth), понадобился явный узкий interface + аннотация переменной, см.
+  // .claude/docs/tsgo-excessive-stack-depth-zenstack.md, подпаттерн 1.
+  const playerTeamSeasonRows: { teamSeasonId: string }[] = player.playerTeamSeasons
   const canEdit = await canEditPlayer(
     player.userId,
-    player.playerTeamSeasons.map((pts) => pts.teamSeasonId),
+    playerTeamSeasonRows.map((pts) => pts.teamSeasonId),
   )
 
   const currentTeam = player.playerTeamSeasons[0]

@@ -45,8 +45,19 @@ export async function GET(request: NextRequest) {
     orderBy: { player: { name: 'asc' } },
   })
 
+  // `(typeof players)[number]` на параметре callback не спас (сам typeof уже требует структурной
+  // экспансии) — понадобился явный узкий interface + аннотация переменной перед `.map()`, см.
+  // .claude/docs/tsgo-excessive-stack-depth-zenstack.md, подпаттерн 1.
+  interface AvailablePlayerRow {
+    player: { id: string; name: string; slug: string }
+    teamSeasonId: string
+    teamSeason: { team: { name: string } }
+    role: string
+  }
+  const rows: AvailablePlayerRow[] = players
+
   return NextResponse.json(
-    players.map((pts) => ({
+    rows.map((pts) => ({
       playerId: pts.player.id,
       playerName: pts.player.name,
       playerSlug: pts.player.slug,

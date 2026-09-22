@@ -53,8 +53,17 @@ export async function GET() {
       orderBy: { name: 'asc' },
     })
 
+    // `(typeof teamSeasons)[number]` на параметре callback не спас — понадобился явный узкий
+    // interface + аннотация переменной перед `.map()`, см.
+    // .claude/docs/tsgo-excessive-stack-depth-zenstack.md, подпаттерн 1.
+    interface FriendlyTeamRow {
+      id: string
+      team: { name: string }
+    }
+    const teamRows: FriendlyTeamRow[] = teamSeasons
+
     return NextResponse.json({
-      teams: teamSeasons.map((ts) => ({
+      teams: teamRows.map((ts) => ({
         id: ts.id,
         teamName: ts.team.name,
       })),
