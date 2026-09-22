@@ -88,12 +88,18 @@ s2/s3/mail — kubo, relay, nginx-proxy-manager, maddy, все теперь git-
 напрямую в БД, хвоста нет) и [§56](/PLAN-INFRA-3.md) (зомби-проверка cron-задач чистая, механизм
 ретира подтверждён на первом реальном случае §75). Следующий приоритет пока не выбран.
 
-- [ ] ⚠️ Открытый вопрос (2026-09-22): `bun.lock` разошёлся с `package.json` — 7 расхождений
-      (`@ai-sdk/anthropic`, `@ai-sdk/react`, `ai`, `jsdom` в корне; версии `apps/domwellbes`,
-      `apps/driving-school`, `libs/forms` в package.json опережают lock). `bun install
-      --frozen-lockfile` на сервере остановит деплой ВСЕХ приложений, пока это не
-      синхронизировано. Не чинил сам в этой сессии: рабочее дерево не чистое (агенты domwellbes и
-      pravda активно правят код параллельно) — `bun install --lockfile-only` в грязном дереве
-      рискует затянуть чужой WIP в lock ([разбор](/.claude/docs/bun-lock-drift-unpushed-commits-blocks-all-deploys.md)).
-      Нужно прогнать `bun install --lockfile-only` и закоммитить `bun.lock` отдельным коммитом,
-      когда дерево освободится (после того как domwellbes/driving-school/forms запушат свои SHA).
+- [x] `bun.lock` разошёлся с `package.json` — закрыто 2026-09-22. Открывший сессию снимок (7
+      расхождений: `apps/aprel8008`, `apps/domwellbes` deps, `apps/dsperevod`, `apps/kami`,
+      `apps/svoichuzhie`) засинкан коммитом `04b68f5c9` — версии четырёх приложений подтянуты,
+      `apps/domwellbes` намеренно пропущен: его `@serwist/next`/`serwist`/`idb-keyval` были только
+      в непушнутых и незабампленных в letar коммитах submodule (`ace557d82..6a0e5a966`) — синк
+      против неподтверждённого чекаута создал бы то же расхождение в обратную сторону. Попутно
+      обнаружен отдельный активный блокер деплоя того же класса: `apps/dsperevod` в letar был
+      записан на коммит, которого не было на origin submodule'а (`check-submodule-push-state.sh`
+      падал) — не трогал сам (в submodule шёл чужой live WIP), написал `domwellbes-dev`.
+      Оба фронта закрыты в течение той же сессии последующими коммитами `1fb29a3ff` (bump
+      domwellbes submodule + sync lock) и `2282745aa` (финальный sync lock) — вероятно, silently
+      подхвачено `domwellbes-dev`/`deploy-agent-dev` по мотивам сообщения. Финал: `bun
+      scripts/check-all.mjs`/`check-lock-workspace-versions.mjs` — зелёный (136 workspace),
+      `check-submodule-push-state.sh` — 14/14 синхронны. Разбор класса бага —
+      [bun-lock-drift-unpushed-commits-blocks-all-deploys](/.claude/docs/bun-lock-drift-unpushed-commits-blocks-all-deploys.md).
