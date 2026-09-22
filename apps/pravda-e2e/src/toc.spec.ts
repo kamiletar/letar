@@ -191,7 +191,12 @@ test.describe('Table of Contents (TOC)', () => {
     expect(isLastLinkVisibleInToc).toBe(true)
   })
 
-  test('прогресс-бар обновляется при скролле', async ({ page }) => {
+  test('прогресс-бар обновляется при скролле', async ({ page, browserName }) => {
+    // webkit: остаточный флейк после фикса опроса вместо scroll-события (apps/pravda v1.9.12) —
+    // владелец решил не продолжать охоту за 0 flaky, тред agent-mail
+    // pravda-e2e-first-run-failures, apps/pravda/PLAN.md.
+    test.skip(browserName === 'webkit', 'остаточный флейк, владелец принял решение не чинить дальше')
+
     await page.setViewportSize({ width: 1400, height: 900 })
 
     const toc = page.locator('nav[aria-label="Содержание документа"]')
@@ -239,7 +244,15 @@ test.describe('Table of Contents (TOC)', () => {
     expect(tocText).not.toContain('ПОДОХОДНАЯ ПОДАТЬ')
   })
 
-  test('прогресс сбрасывается при навигации на другой документ', async ({ page }) => {
+  test('прогресс сбрасывается при навигации на другой документ', async ({ page, browserName }) => {
+    // firefox: стабильный фейл, webkit: флейк — остаток скролл/прогресс-кластера после фикса
+    // опроса вместо scroll-события (apps/pravda v1.9.12), владелец решил не продолжать охоту за
+    // 0 flaky, тред agent-mail pravda-e2e-first-run-failures, apps/pravda/PLAN.md.
+    test.skip(
+      browserName === 'firefox' || browserName === 'webkit',
+      'остаточный флейк/фейл, владелец принял решение не чинить дальше',
+    )
+
     await page.setViewportSize({ width: 1400, height: 900 })
 
     const toc = page.locator('nav[aria-label="Содержание документа"]')

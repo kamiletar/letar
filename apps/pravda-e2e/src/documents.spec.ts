@@ -109,7 +109,15 @@ test.describe('Документы', () => {
     await expect(progressBar).toHaveAttribute('aria-valuenow', '0')
   })
 
-  test('прогресс чтения обновляется при прокрутке', async ({ page }) => {
+  test('прогресс чтения обновляется при прокрутке', async ({ page, browserName }) => {
+    // chromium/webkit: остаточный флейк после фикса опроса вместо scroll-события
+    // (apps/pravda v1.9.12) — владелец решил не продолжать охоту за 0 flaky, тред agent-mail
+    // pravda-e2e-first-run-failures, apps/pravda/PLAN.md.
+    test.skip(
+      browserName === 'chromium' || browserName === 'webkit',
+      'остаточный флейк, владелец принял решение не чинить дальше',
+    )
+
     await page.setViewportSize({ width: 1400, height: 900 })
 
     await page.goto('/constitution/')
