@@ -118,7 +118,13 @@ export default function FileUploadDemoPage() {
             <Heading size="sm" mb={2}>
               Input Variant
             </Heading>
-            <Form.Field.FileUpload name="resume" variant="input" accept=".pdf" maxFiles={1} />
+            <Form.Field.FileUpload
+              name="resume"
+              variant="input"
+              accept=".pdf"
+              maxFiles={1}
+              placeholder="Select your resume..."
+            />
           </Box>
 
           <Form.Button.Submit>Submit</Form.Button.Submit>
