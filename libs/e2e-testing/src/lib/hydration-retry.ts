@@ -74,6 +74,40 @@ export async function fillWithHydrationRetry(
  * Zag.js вешает обработчик toggle конкретно на control-часть, клик по label/тексту согласия его
  * не триггерит (найдено 2026-08-09, svoichuzhie, подтверждено трейсом на staging).
  */
+/**
+ * Устанавливает файлы на `<input type="file">` с ретраем до подтверждения побочного эффекта.
+ *
+ * Гонка (найдено 2026-09-22, domwellbes): `setInputFiles()` физически проставляет `input.files` и
+ * диспатчит трастовые `input`/`change` события сразу — но если это происходит до того, как React
+ * навесил `onChange` (гидратация ещё не завершилась), событие теряется так же, как и в
+ * {@link fillWithHydrationRetry}: `input.files` в DOM остаётся заполненным, а React-состояние (и
+ * любой производный от него UI — например кнопка «Разобрать файл», которая включается только по
+ * колбэку `onFilesSelected`) не меняется вовсе, без единой ошибки actionability. В отличие от
+ * `fill()`, повторный `setInputFiles()` с теми же файлами идемпотентен по той же причине (просто
+ * переустанавливает `FileList` и передиспатчит события) — ретраить безопасно.
+ *
+ * ⚠️ Клик по скрытому (`display: none`) `<input type="file">`, открывающему системный диалог через
+ * `inputRef.current?.click()` в обработчике `onClick` контейнера (`page.waitForEvent('filechooser')`
+ * + `Promise.all` с кликом), НЕ решает эту гонку — сам клик тоже не сработает, если гидратация не
+ * завершилась, и `filechooser` просто не наступит (90с таймаут вместо потерянного `change`). Прямой
+ * `setInputFiles()` на локаторе инпута с ретраем — единственный надёжный путь для Dropzone-паттерна
+ * этого репозитория (скрытый input + видимый div-триггер).
+ */
+export async function setInputFilesWithHydrationRetry(
+  fileInput: Locator,
+  files: Parameters<Locator['setInputFiles']>[0],
+  waitFor: { locator: Locator; state: 'enabled' | 'visible' },
+  timeoutMs = 20_000,
+): Promise<void> {
+  const assert = waitFor.state === 'enabled'
+    ? () => expect(waitFor.locator).toBeEnabled({ timeout: 2_000 })
+    : () => expect(waitFor.locator).toBeVisible({ timeout: 2_000 })
+  await expect(async () => {
+    await fileInput.setInputFiles(files)
+    await assert()
+  }).toPass({ timeout: timeoutMs })
+}
+
 export async function checkWithHydrationRetry(
   clickTarget: Locator,
   checkboxLocator: Locator,

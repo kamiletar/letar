@@ -83,6 +83,28 @@ staging используется отдельный staging-only роут `/api/
   await checkWithHydrationRetry(control, checkbox)
   ```
 
+- `setInputFilesWithHydrationRetry(fileInput, files, waitFor, timeoutMs?)` — устанавливает файлы
+  на `<input type="file">` с ретраем до подтверждения побочного эффекта. `setInputFiles()`
+  диспатчит трастовые `input`/`change` сразу, физически проставляя `input.files` — но если React
+  ещё не навесил `onChange` (гидратация не завершилась), событие тихо теряется точно так же, как
+  и у `fillWithHydrationRetry`. Повторный `setInputFiles()` с теми же файлами идемпотентен, ретрай
+  безопасен. ⚠️ Клик по скрытому `<input type="file">` через `page.waitForEvent('filechooser')` +
+  клик по видимому контейнеру-триггеру **не решает** эту гонку — сам клик по ещё не
+  гидрированному контейнеру тоже теряется (90с таймаут на `filechooser` вместо потерянного
+  `change`). Найдено 2026-09-22 в domwellbes на Dropzone-паттерне (скрытый input + div-триггер).
+
+  ```ts
+  import { setInputFilesWithHydrationRetry } from '@letar/e2e-testing'
+
+  const fileInput = page.locator('input[type="file"]')
+  const parseButton = page.getByRole('button', { name: 'Разобрать файл' })
+  await setInputFilesWithHydrationRetry(
+    fileInput,
+    { name: 'quote.xlsx', mimeType: '...', buffer },
+    { locator: parseButton, state: 'enabled' },
+  )
+  ```
+
 ## Пример
 
 ```ts

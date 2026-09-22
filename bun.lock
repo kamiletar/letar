@@ -1174,7 +1174,7 @@
     },
     "libs/e2e-testing": {
       "name": "@letar/e2e-testing",
-      "version": "0.1.2",
+      "version": "0.1.3",
     },
     "libs/eager-jsx-check": {
       "name": "@letar/eager-jsx-check",
