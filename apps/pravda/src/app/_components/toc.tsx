@@ -67,7 +67,7 @@ export function TableOfContents() {
   const [headings, setHeadings] = useState<TocItem[]>([])
   const [activeId, setActiveId] = useState<string>('')
   const [progress, setProgress] = useState<number>(0)
-  const rafIdRef = useRef<number | null>(null)
+  const throttleIdRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const tocRef = useRef<HTMLElement>(null)
 
   // Автоскролл к активному пункту в TOC.
@@ -100,7 +100,13 @@ export function TableOfContents() {
     const elements = Array.from(document.querySelectorAll('h2[id], h3[id], [id^="section-"], [id^="chapter-"]'))
     setHeadings(collectHeadings())
 
-    // 2. Scroll handler с throttle через requestAnimationFrame — прогресс чтения И активный пункт.
+    // 2. Scroll handler с throttle через setTimeout — прогресс чтения И активный пункт.
+    // НЕ requestAnimationFrame: rAF полностью замирает без фокуса окна (см.
+    // .claude/docs/raf-vs-timers-background-tab.md и комментарий у автоскролла TOC выше про
+    // scrollIntoView) — Playwright-браузеры в CI обычно без реального фокуса, поэтому throttle на
+    // rAF никогда не срабатывал в webkit (стабильно) и иногда в firefox (флейково): прогресс-бар
+    // и активный пункт застревали на начальном значении. Визуальную плавность даёт CSS `transition`
+    // на самой полосе, точность до кадра здесь не нужна — 50мс-таймер достаточен и не замирает.
     // Раньше активный пункт считал отдельный IntersectionObserver с rootMargin (-80px 0px -80%
     // 0px). Он давал недетерминированный результат: Section оборачивает ВСЕ свои Chapter целиком
     // (это огромный контейнер), поэтому остаётся "intersecting" всю прокрутку внутри раздела —
@@ -120,11 +126,11 @@ export function TableOfContents() {
 
     const handleScroll = () => {
       // Пропускаем если уже запланировано обновление
-      if (rafIdRef.current !== null) {
+      if (throttleIdRef.current !== null) {
         return
       }
 
-      rafIdRef.current = requestAnimationFrame(() => {
+      throttleIdRef.current = setTimeout(() => {
         const scrollTop = window.scrollY
         const docHeight = document.documentElement.scrollHeight - window.innerHeight
         const scrollProgress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0
@@ -138,8 +144,8 @@ export function TableOfContents() {
         }
         setActiveId(active)
 
-        rafIdRef.current = null
-      })
+        throttleIdRef.current = null
+      }, 50)
     }
 
     window.addEventListener('scroll', handleScroll, { passive: true })
@@ -148,13 +154,13 @@ export function TableOfContents() {
     // Общий cleanup
     return () => {
       window.removeEventListener('scroll', handleScroll)
-      if (rafIdRef.current !== null) {
-        cancelAnimationFrame(rafIdRef.current)
+      if (throttleIdRef.current !== null) {
+        clearTimeout(throttleIdRef.current)
         // Сбрасываем ref после отмены — иначе после StrictMode double-invoke (или повторного
         // запуска эффекта при смене pathname) handleScroll() новой инстанции эффекта видит
-        // "устаревший" ненулевой id отменённого rAF и НАВСЕГДА пропускает планирование нового
-        // кадра (ранний return по `rafIdRef.current !== null`). Прогресс-бар застревал на 0%.
-        rafIdRef.current = null
+        // "устаревший" ненулевой id отменённого таймера и НАВСЕГДА пропускает планирование
+        // нового (ранний return по `throttleIdRef.current !== null`). Прогресс-бар застревал на 0%.
+        throttleIdRef.current = null
       }
     }
   }, [pathname])
