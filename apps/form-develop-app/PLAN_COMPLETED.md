@@ -1600,3 +1600,23 @@ function App({ children }) {
 - [x] `@letar/forms-core` реально импортировался в коде, но не был объявлен ни в
       `dependencies`, ни в `nx.implicitDependencies` (PLAN-INFRA-6.md §169). Добавлен в
       `dependencies` (`workspace:*`), проверено format/lint/typecheck:tsgo.
+
+## Аудит broad-regex локаторов в form-develop-app-e2e (2026-09-22)
+
+- [x] Продолжение фикса `text=/required|avatar/i` в `file-upload-demo.spec.ts` (коммит
+      e478ee62e) — найдены ещё 4 подозрительных `text=/word1|word2/i` локатора, каждый
+      прогнан `--repeat-each=5 --workers=1` для подтверждения детерминированности:
+  - `rating-demo.spec.ts:110` (`text=/rating|required/i`) — 15 элементов, strict mode
+    violation (поле `productRating` дублируется в size-variant демо той же ошибкой). Сужен
+    до `page.getByRole('group').filter({ hasText: 'Product Rating' })`.
+  - `pin-input-demo.spec.ts:189` (`text=/4 (digits|characters|символ)/i`) — 3 элемента, та же
+    причина (поле `pin` дублируется в size-variant демо). Сужен до `getByRole('group').filter({
+    hasText: 'PIN Code' })`.
+  - `fields-demo.spec.ts:185` (`text=/2 character|2 символ/i`) — стабильно проходит 5/5, не
+    трогал (ложное срабатывание грепа, на странице только одно совпадение).
+  - `steps-demo.spec.ts:61,167` — **не проверено**: все 15 тестов файла падают ещё в
+    `beforeEach` (`page.locator('form').waitFor()` матчит 2 формы разом — Linear + Non-linear
+    Steps демо рендерятся одновременно на `/steps-demo`). Баг долгоживущий (не менялся с
+    initial commit), не связан с задачей и шире её — вынесен отдельным чипом
+    (`spawn_task`, "Fix steps-demo.spec.ts beforeEach: form locator matches 2 elements").
+  - Коммит: `058a08ca3`.
