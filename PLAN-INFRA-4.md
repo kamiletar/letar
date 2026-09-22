@@ -1152,6 +1152,16 @@ SaaS-Sentry отпадает отдельно: тело ошибки тащит 
    `animatrona-mobile`, `animatrona-tv`) — как в исходном плане п.7, без изменений, отдельная
    работа (другой SDK: `@sentry/electron`/`@sentry/react-native`).
 
+   ✅ **Дополнение 2026-09-22: хвост мёртвых eslint-disable добит на всех приложениях.**
+   `domwellbes` снят коммитом `f6e423de` в той же сессии; следом в `aboi`, `aprel8008`,
+   `driving-school`, `svoichuzhie` (коммиты `c892013`/`5a26607`/`8050017`/`dbbaed7` в приватных
+   submodule) — все пять были обходом на момент тиража, ESLint подтвердил
+   `Unused eslint-disable directive` в каждом (для `aboi`/`svoichuzhie` штатный `nx lint` ESLint
+   не гоняет вовсе — нет `eslint.config.mjs`, проверено прямым `eslint .`). `nx reset` перед
+   удалением не понадобился — правило нигде не сработало без него. Дальше искать по репо
+   незачем: `eslint-disable-next-line @nx/enforce-module-boundaries` на `@letar/glitchtip/client`
+   в приложениях больше не осталось.
+
 ### Что это даёт агентам
 
 Диагностика инцидента вместо «посмотрю логи контейнера» начинается с файла, строки и релиза.
