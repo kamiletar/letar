@@ -111,7 +111,8 @@ export function MobileTOC() {
   const handleLinkClick = (id: string) => {
     const target = document.getElementById(id)
     if (target) {
-      target.scrollIntoView({ behavior: 'smooth' })
+      // 'instant', не 'smooth' — см. комментарий у аналогичного клика в toc.tsx
+      target.scrollIntoView({ behavior: 'instant' })
       window.history.pushState(null, '', `#${id}`)
       setOpen(false)
     }
