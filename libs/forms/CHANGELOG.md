@@ -4,6 +4,30 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.16.6] - 2026-09-22
+
+### Fixed
+
+- **Оставшиеся жёстко зашитые по-английски дефолты `placeholder` в семи специализированных
+  полях** — тот же класс проблемы, что и у Combobox/Autocomplete в 2.16.4, но за пределами
+  `form-fields/selection/`: `Field.Address` (`'Start typing address...'`), `Field.City`
+  (`'Enter city'`), `Field.Signature` (`'Sign here'`), `Field.Editable` (`'Click to edit'`),
+  `Field.PasswordStrength` (`'Enter password'`), `Field.RichText` (`'Start typing...'`) и
+  единственный формат `Field.Duration` (`format="minutes"`, юнит-подпись `'min'`). Приоритет
+  сохранён: явный проп `placeholder` или `resolved.placeholder` из schema meta остаются сильнее
+  — новый резолвер вызывается только когда ни то ни другое не задано.
+  Новый общий словарь — `field-default-strings.ts` (`form-fields/base/`, ключи
+  `formField.<field>.placeholder`) поверх той же лестницы `resolveStaticFormText`
+  (`@letar/forms-core/i18n`), что уже используют `selection-field-strings.ts`/`min-chars-hint.ts`/
+  заголовок `Form.Errors` — отдельный файл, не расширение `selection-field-strings.ts`: эти поля
+  не относятся к Combobox/Autocomplete и не разделяют с ними родителя.
+  `Field.Address`/`Field.City`/`Field.Signature`/`Field.PasswordStrength` уже вызывали
+  `useFieldState`, хук резолва добавлен туда же (правило то же, что у `useMinCharsHint`/
+  `useSelectionString` — вызывать до `render`, не внутри него). `Field.Editable`/`Field.Duration`
+  своего `useFieldState` не имели — заведён с нуля. `Field.RichText` — исключение: обычный
+  компонент, минующий `createField`/render-колбэк, поэтому хук вызван прямо в его теле.
+  Покрыт `field-default-strings.spec.ts` по образцу `selection-field-strings.spec.ts`.
+
 ## [2.16.5] - 2026-09-22
 
 ### Changed

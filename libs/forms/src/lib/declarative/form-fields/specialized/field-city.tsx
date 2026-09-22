@@ -5,7 +5,7 @@ import { useStore } from '@tanstack/react-form'
 import { type ReactElement, useCallback, useEffect, useRef, useState } from 'react'
 import { useDeclarativeFormOptional } from '../../form-context'
 import type { CityFieldProps } from '../../types'
-import { createField, FieldError, FieldLabel, useDebounce } from '../base'
+import { createField, FieldError, FieldLabel, useDebounce, useFieldDefaultString } from '../base'
 import type { AddressProvider, AddressSuggestion } from './providers'
 import { createDaDataProvider } from './providers'
 
@@ -51,6 +51,7 @@ interface CityFieldState {
   setHighlightedIndex: (index: number) => void
   containerRef: React.RefObject<HTMLDivElement | null>
   debouncedQuery: string
+  defaultPlaceholder: string
 }
 
 /**
@@ -89,6 +90,7 @@ export const FieldCity = createField<CityFieldProps, string, CityFieldState>({
     const [highlightedIndex, setHighlightedIndex] = useState(-1)
     const containerRef = useRef<HTMLDivElement | null>(null)
     const debouncedQuery = useDebounce(inputValue, debounceMs)
+    const defaultPlaceholder = useFieldDefaultString('formField.city.placeholder')
     // Flag: just selected city, skip next fetch
     const justSelectedRef = useRef(false)
     // Flag: inputValue already initialized from field value
@@ -175,6 +177,7 @@ export const FieldCity = createField<CityFieldProps, string, CityFieldState>({
       debouncedQuery,
       justSelectedRef,
       initializedRef,
+      defaultPlaceholder,
     } as CityFieldState & { justSelectedRef: React.RefObject<boolean>; initializedRef: React.RefObject<boolean> }
   },
 
@@ -190,6 +193,7 @@ export const FieldCity = createField<CityFieldProps, string, CityFieldState>({
       highlightedIndex,
       setHighlightedIndex,
       containerRef,
+      defaultPlaceholder,
     } = fieldState
     const { justSelectedRef } = fieldState as CityFieldState & {
       justSelectedRef: React.RefObject<boolean>
@@ -266,7 +270,7 @@ export const FieldCity = createField<CityFieldProps, string, CityFieldState>({
               field.handleBlur()
             }}
             onKeyDown={handleKeyDown}
-            placeholder={resolved.placeholder ?? 'Enter city'}
+            placeholder={resolved.placeholder ?? defaultPlaceholder}
             data-field-name={fullPath}
           />
           {isLoading && (

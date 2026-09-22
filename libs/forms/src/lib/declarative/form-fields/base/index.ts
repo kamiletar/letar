@@ -50,3 +50,6 @@ export { chakraUIKit } from './uikit-chakra'
 
 // Обход бага контролируемого NumberInput.Root (см. докстринг файла) — Field.Currency/Number/Percentage
 export { useUncontrolledNumberSync } from './use-uncontrolled-number-sync'
+
+// Встроенные дефолты статичных строк отдельных специализированных полей (placeholder)
+export { type FieldDefaultStringKey, resolveFieldDefaultString, useFieldDefaultString } from './field-default-strings'

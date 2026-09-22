@@ -3,7 +3,7 @@
 import { Field, HStack, NumberInput, Text } from '@chakra-ui/react'
 import type { ReactElement } from 'react'
 import type { DurationFieldProps } from '../../types'
-import { createField, FieldError, FieldLabel } from '../base'
+import { createField, FieldError, FieldLabel, useFieldDefaultString } from '../base'
 
 /**
  * Converts minutes to HH:MM format
@@ -43,10 +43,18 @@ function hhmmToMinutes(hours: number, mins: number): number {
  * <Form.Field.Duration name="duration" min={30} max={240} step={15} />
  * ```
  */
-export const FieldDuration = createField<DurationFieldProps, number>({
+interface DurationFieldState {
+  defaultMinutesPlaceholder: string
+}
+
+export const FieldDuration = createField<DurationFieldProps, number, DurationFieldState>({
   displayName: 'FieldDuration',
 
-  render: ({ field, fullPath, resolved, hasError, errorMessage, componentProps }): ReactElement => {
+  useFieldState: () => ({
+    defaultMinutesPlaceholder: useFieldDefaultString('formField.duration.minutesPlaceholder'),
+  }),
+
+  render: ({ field, fullPath, resolved, hasError, errorMessage, componentProps, fieldState }): ReactElement => {
     const { format = 'HH:MM', min = 0, max = 1440, step = 15 } = componentProps
 
     const value = (field.state.value as number) ?? 0
@@ -96,7 +104,10 @@ export const FieldDuration = createField<DurationFieldProps, number>({
               <NumberInput.IncrementTrigger />
               <NumberInput.DecrementTrigger />
             </NumberInput.Control>
-            <NumberInput.Input placeholder={resolved.placeholder ?? 'min'} data-field-name={fullPath} />
+            <NumberInput.Input
+              placeholder={resolved.placeholder ?? fieldState.defaultMinutesPlaceholder}
+              data-field-name={fullPath}
+            />
           </NumberInput.Root>
           <FieldError hasError={hasError} errorMessage={errorMessage} helperText={resolved.helperText} />
         </Field.Root>

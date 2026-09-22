@@ -1,5 +1,32 @@
 # Выполненные задачи — @letar/forms
 
+## 2026-09-22 (параллельная сессия, `forms-dev` был занят) — локализация оставшихся хардкод-дефолтов placeholder (forms 2.16.6)
+
+**Контекст:** повторная сверка `grep -rnE "\?\? '[A-Z][a-zA-Z ]{3,}'"` по `form-fields/` после
+2.16.4/2.16.5 нашла семь литералов того же класса вне `form-fields/selection/` (тот регекс не
+матчил строки с многоточием — при повторной проверке расширенным паттерном обнаружился ещё один,
+`Field.Duration`, не входивший в исходный список): `Field.Address`, `Field.City`,
+`Field.Signature`, `Field.Editable`, `Field.PasswordStrength`, `Field.RichText` и юнит-подпись
+`'min'` в `Field.Duration` (`format="minutes"`).
+
+**Решение:** новый файл `form-fields/base/field-default-strings.ts` — тот же примитив
+`resolveStaticFormText`, что у `selection-field-strings.ts`/`min-chars-hint.ts`/заголовка
+`Form.Errors`, но отдельный словарь (`formField.<field>.placeholder`): эти поля не относятся к
+Combobox/Autocomplete, общего родителя с `selection-field-strings.ts` не разделяют. Приоритет
+«проп → schema meta → перевод приложения → встроенный словарь по locale → английский» сохранён.
+
+Четыре поля (`Address`/`City`/`Signature`/`PasswordStrength`) уже вызывали `useFieldState` —
+резолв добавлен туда же, тем же приёмом, что `useMinCharsHint`/`useSelectionString` (вызывать до
+`render`, не внутри его callback). Двум (`Editable`/`Duration`) `useFieldState` пришлось завести
+с нуля. `Field.RichText` — единственное исключение из паттерна `createField`: обычный
+функциональный компонент, хук вызван прямо в его теле.
+
+**Проверено:** `nx test forms` (849/849, включая новую `field-default-strings.spec.ts` по
+образцу `selection-field-strings.spec.ts`), `nx lint forms`, `nx typecheck:tsgo forms`.
+Обнаружено параллельно с основной сессией `forms-dev` (занята другой задачей резолвера) —
+работа велась под временной identity agent-mail, файлы не пересекались (проверено file
+reservation).
+
 ## 2026-09-22 (сессия forms-dev) — общий резолвер статичных UI-строк форм (forms 2.16.5)
 
 **Контекст:** находка из сессии про `minChars` (2.16.3, см. запись ниже) — одна и та же лестница

@@ -5,7 +5,7 @@ import { useStore } from '@tanstack/react-form'
 import { type ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useDeclarativeFormOptional } from '../../form-context'
 import type { AddressFieldProps, AddressValue } from '../../types'
-import { createField, FieldError, FieldLabel, useDebounce } from '../base'
+import { createField, FieldError, FieldLabel, useDebounce, useFieldDefaultString } from '../base'
 import type { AddressProvider, AddressSuggestion } from './providers'
 import { createDaDataProvider } from './providers'
 
@@ -47,6 +47,7 @@ interface AddressFieldState {
   fetchSuggestions: (query: string) => Promise<void>
   initializedRef: React.RefObject<boolean>
   justSelectedRef: React.RefObject<boolean>
+  defaultPlaceholder: string
 }
 
 /**
@@ -90,6 +91,7 @@ export const FieldAddress = createField<AddressFieldProps, AddressValue | string
     const justSelectedRef = useRef(false)
 
     const debouncedQuery = useDebounce(inputValue, debounceMs)
+    const defaultPlaceholder = useFieldDefaultString('formField.address.placeholder')
 
     // Инициализация `inputValue` из значения поля (сценарий `defaultValues` при редактировании).
     // Хук вызывается здесь, на верхнем уровне `FieldComponent`, а не внутри render-prop
@@ -200,6 +202,7 @@ export const FieldAddress = createField<AddressFieldProps, AddressValue | string
       fetchSuggestions,
       initializedRef,
       justSelectedRef,
+      defaultPlaceholder,
     }
   },
 
@@ -217,6 +220,7 @@ export const FieldAddress = createField<AddressFieldProps, AddressValue | string
       setHighlightedIndex,
       containerRef,
       justSelectedRef,
+      defaultPlaceholder,
     } = fieldState
 
     // Handler for suggestion selection
@@ -286,7 +290,7 @@ export const FieldAddress = createField<AddressFieldProps, AddressValue | string
             }}
             onBlur={field.handleBlur}
             onKeyDown={handleKeyDown}
-            placeholder={resolved.placeholder ?? 'Start typing address...'}
+            placeholder={resolved.placeholder ?? defaultPlaceholder}
             data-field-name={fullPath}
           />
           {isLoading && (

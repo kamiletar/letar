@@ -6,6 +6,25 @@
 
 ## Backlog (запросы от агентов)
 
+### ✅ [2026-09-22] Хардкод-дефолты `placeholder` вне Combobox/Autocomplete — 7 полей (закрыт forms 2.16.6, от пользователя)
+
+- **Запросил:** пользователь напрямую, продолжение фикса Combobox/Autocomplete (2.16.4→2.16.5,
+  запись ниже) — повторная сверка `grep` за пределами `form-fields/selection/` нашла ещё
+  непочиненные литералы того же класса.
+- **Приоритет:** normal
+- **Описание:** `Field.Address` (`'Start typing address...'`), `Field.City` (`'Enter city'`),
+  `Field.Signature` (`'Sign here'`), `Field.Editable` (`'Click to edit'`),
+  `Field.PasswordStrength` (`'Enter password'`), `Field.RichText` (`'Start typing...'`) и юнит-
+  подпись `'min'` у `Field.Duration` (`format="minutes"`, найден повторной проверкой расширенным
+  паттерном — исходный `grep` из задачи не матчил многоточие).
+- **Решение:** новый `field-default-strings.ts` (`form-fields/base/`) на общем
+  `resolveStaticFormText`, отдельный от `selection-field-strings.ts` (разные поля, нет общего
+  родителя). Приоритет проп → schema meta → перевод приложения → словарь → английский сохранён.
+- **Тесты:** `field-default-strings.spec.ts` по образцу `selection-field-strings.spec.ts`,
+  `nx test forms` 849/849, `nx lint forms`, `nx typecheck:tsgo forms`.
+- **Статус:** ✅ закрыто. Работа велась параллельно основной сессии `forms-dev` (занята другой
+  задачей) под временной identity agent-mail, конфликтов по файлам не было (file reservation).
+
 ### ✅ [2026-09-22] Дублирование лестницы резолва статичных UI-строк в трёх местах — заголовок `Form.Errors`, `minChars`, `form-persistence` (закрыт forms-core 0.13.1 / forms 2.16.5, от пользователя)
 
 - **Запросил:** Ками напрямую — находка из сессии про локализацию `minChars` (2.16.3): три места

@@ -4,7 +4,7 @@ import { Box, Button, Field, HStack, Input, SegmentGroup } from '@chakra-ui/reac
 import { type ReactElement, type RefObject, useCallback, useEffect, useRef, useState } from 'react'
 import { LuEraser, LuPen, LuType } from 'react-icons/lu'
 import type { FieldTooltipMeta } from '../../types'
-import { createField, FieldError, FieldLabel } from '../base'
+import { createField, FieldError, FieldLabel, useFieldDefaultString } from '../base'
 
 /**
  * Props для поля цифровой подписи
@@ -57,6 +57,7 @@ interface SignatureState {
   stopDrawing: () => string
   clearCanvas: () => void
   renderTypedSignature: (text: string) => string
+  defaultPlaceholder: string
 }
 
 /** Точка штриха подписи */
@@ -187,6 +188,7 @@ export const FieldSignature = createField<SignatureFieldProps, string, Signature
     const [mode, setMode] = useState<'draw' | 'typed'>('draw')
     const [typedText, setTypedText] = useState('')
     const [isEmpty, setIsEmpty] = useState(true)
+    const defaultPlaceholder = useFieldDefaultString('formField.signature.placeholder')
 
     // SVG export: запись штрихов (refs — без ре-рендеров при рисовании)
     const strokesRef = useRef<SignatureStroke[]>([])
@@ -364,12 +366,13 @@ export const FieldSignature = createField<SignatureFieldProps, string, Signature
       stopDrawing,
       clearCanvas,
       renderTypedSignature,
+      defaultPlaceholder,
     }
   },
 
   render: ({ field, resolved, hasError, errorMessage, componentProps, fieldState }): ReactElement => {
     const { width = 400, height = 150, clearLabel = 'Clear', allowTyped = true } = componentProps
-    const placeholder = resolved.placeholder ?? 'Sign here'
+    const placeholder = resolved.placeholder ?? fieldState.defaultPlaceholder
 
     const {
       canvasRef,

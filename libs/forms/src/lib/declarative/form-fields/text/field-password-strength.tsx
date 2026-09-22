@@ -4,7 +4,7 @@ import { Box, Field, HStack, IconButton, Input, List, Progress, Text, VStack } f
 import { type ReactElement, useState } from 'react'
 import { LuCheck, LuEye, LuEyeOff, LuX } from 'react-icons/lu'
 import type { PasswordRequirement, PasswordStrengthFieldProps } from '../../types'
-import { createField, FieldError, FieldLabel } from '../base'
+import { createField, FieldError, FieldLabel, useFieldDefaultString } from '../base'
 
 /**
  * Default password requirements
@@ -78,6 +78,8 @@ interface PasswordStrengthFieldState {
   visible: boolean
   /** Toggle visibility */
   toggle: () => void
+  /** Встроенный дефолт placeholder — сильнее только `resolved.placeholder` */
+  defaultPlaceholder: string
 }
 
 /**
@@ -104,12 +106,13 @@ export const FieldPasswordStrength = createField<PasswordStrengthFieldProps, str
 
   useFieldState: (props) => {
     const [visible, setVisible] = useState(props.defaultVisible ?? false)
-    return { visible, toggle: () => setVisible((v) => !v) }
+    const defaultPlaceholder = useFieldDefaultString('formField.passwordStrength.placeholder')
+    return { visible, toggle: () => setVisible((v) => !v), defaultPlaceholder }
   },
 
   render: ({ field, fullPath, resolved, hasError, errorMessage, componentProps, fieldState }): ReactElement => {
     const { requirements = DEFAULT_REQUIREMENTS, showRequirements = true } = componentProps
-    const { visible, toggle } = fieldState
+    const { visible, toggle, defaultPlaceholder } = fieldState
 
     const value = (field.state.value as string) ?? ''
     const strength = calculateStrength(value, requirements)
@@ -130,7 +133,7 @@ export const FieldPasswordStrength = createField<PasswordStrengthFieldProps, str
               value={value}
               onChange={(e) => field.handleChange(e.target.value)}
               onBlur={field.handleBlur}
-              placeholder={resolved.placeholder ?? 'Enter password'}
+              placeholder={resolved.placeholder ?? defaultPlaceholder}
               data-field-name={fullPath}
               flex={1}
             />

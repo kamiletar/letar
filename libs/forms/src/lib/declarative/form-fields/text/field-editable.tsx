@@ -3,7 +3,7 @@
 import { Editable, Field, IconButton } from '@chakra-ui/react'
 import type { ReactElement, ReactNode } from 'react'
 import type { BaseFieldProps } from '../../types'
-import { createField, FieldError, FieldLabel } from '../base'
+import { createField, FieldError, FieldLabel, useFieldDefaultString } from '../base'
 
 /**
  * Props for Editable field
@@ -27,6 +27,10 @@ export interface EditableFieldProps extends Omit<BaseFieldProps, 'placeholder'> 
   submitIcon?: ReactNode
   /** Save on blur (by default: true) */
   submitOnBlur?: boolean
+}
+
+interface EditableFieldState {
+  defaultPlaceholder: string
 }
 
 /**
@@ -62,10 +66,14 @@ export interface EditableFieldProps extends Omit<BaseFieldProps, 'placeholder'> 
  * />
  * ```
  */
-export const FieldEditable = createField<EditableFieldProps, string>({
+export const FieldEditable = createField<EditableFieldProps, string, EditableFieldState>({
   displayName: 'FieldEditable',
 
-  render: ({ field, resolved, hasError, errorMessage, componentProps }): ReactElement => {
+  useFieldState: () => ({
+    defaultPlaceholder: useFieldDefaultString('formField.editable.placeholder'),
+  }),
+
+  render: ({ field, resolved, hasError, errorMessage, componentProps, fieldState }): ReactElement => {
     const {
       multiline = false,
       activationMode = 'click',
@@ -92,7 +100,7 @@ export const FieldEditable = createField<EditableFieldProps, string>({
           onValueChange={(details) => field.handleChange(details.value)}
           disabled={resolved.disabled}
           readOnly={resolved.readOnly}
-          placeholder={resolved.placeholder ?? 'Click to edit'}
+          placeholder={resolved.placeholder ?? fieldState.defaultPlaceholder}
           activationMode={activationMode}
           submitMode={submitOnBlur ? 'blur' : 'enter'}
         >

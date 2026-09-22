@@ -10,7 +10,7 @@ import { type Content, EditorContent, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { type ReactElement, useEffect, useMemo } from 'react'
 import type { BaseFieldProps, FieldTooltipMeta } from '../../types'
-import { FieldError, FieldLabel, getFieldErrors, useResolvedFieldProps } from '../base'
+import { FieldError, FieldLabel, getFieldErrors, useFieldDefaultString, useResolvedFieldProps } from '../base'
 import { ImagePopover, type ImageUploadConfig } from './image-popover'
 import { LinkPopover } from './link-popover'
 import { DEFAULT_TOOLBAR_BUTTONS, TOOLBAR_CONFIG, type ToolbarButton } from './toolbar-config'
@@ -84,6 +84,7 @@ export function FieldRichText({
     disabled: resolvedDisabled,
     readOnly: resolvedReadOnly,
   } = useResolvedFieldProps(name, { label, placeholder, helperText, required, disabled, readOnly, tooltip })
+  const defaultPlaceholder = useFieldDefaultString('formField.richText.placeholder')
 
   return (
     <form.Field name={fullPath}>
@@ -102,7 +103,7 @@ export function FieldRichText({
               value={field.state.value as string}
               onChange={(value) => field.handleChange(value)}
               onBlur={field.handleBlur}
-              placeholder={resolvedPlaceholder}
+              placeholder={resolvedPlaceholder ?? defaultPlaceholder}
               minHeight={minHeight}
               maxHeight={maxHeight}
               showToolbar={showToolbar}
@@ -175,7 +176,7 @@ function RichTextEditor({
         },
       }),
       Placeholder.configure({
-        placeholder: placeholder ?? 'Start typing...',
+        placeholder: placeholder ?? '',
       }),
       // Add Image extension only if imageUpload is configured
       ...(imageUpload
