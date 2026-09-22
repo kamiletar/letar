@@ -129,6 +129,35 @@ ns.default.createRequire: function
 Готовая обёртка (`createNodeRequire()`, с явным `TypeError` вместо «X is not a function», если
 бандлер снова сломает namespace) — `apps/domwellbes/src/lib/node-require.ts`.
 
+### ⚠️ Четвёртый способ: `import.meta.url` заинлайнен на машине сборки
+
+Живой прогон на стенде сразу после починки третьего способа дал следующую ошибку — уже громкую,
+но с обманчивым `Require stack`:
+
+```
+Error: Cannot find module 'web-ifc/web-ifc-node.wasm'
+Require stack:
+- /home/deploy/letar/apps/domwellbes/src/lib/ifc/web-ifc.ts
+```
+
+Файла по этому пути нет **ни у кого**: это путь исходника на машине, которая собирала образ, а
+приложение живёт в `/app`. `import.meta.url` вычисляется при сборке и попадает в чанк строкой,
+поэтому `createRequire(import.meta.url)` строит резолвер, который ищет `node_modules` вверх от
+`/home/deploy/...`. Ошибки при создании не будет — `createRequire()` не проверяет существование
+файла, — падает только сам резолв, и стек показывает путь, которого на этой машине не бывает.
+
+Рабочая база — `process.cwd()`: в standalone это каталог приложения (`/app/apps/domwellbes`), в
+dev — `apps/domwellbes`, и в обоих случаях подъём по `node_modules` доходит до настоящих пакетов.
+`import.meta.url` стоит оставить запасным: он верен там, где код исполняется из исходников
+(vitest, `tsx`, `next dev`). Обе базы пробуются в `resolvePackageFile()` — каждая целиком, вместе
+с созданием `require`: на Windows `createRequire('file:///home/deploy/…')` бросает
+`ERR_INVALID_ARG_VALUE` **до** резолва, на linux та же строка проходит и падает позже.
+
+⚠️ Ни один статический гейт этого не ловит: путь в чанке выглядит совершенно законно, а
+`check-standalone-runtime-files.mjs` резолвит **своим** `createRequire` от каталога чанков —
+внутри standalone любая база сходится к одному и тому же `node_modules`. Расхождение видно только
+там, где база указывает наружу standalone, то есть в контейнере на живом прогоне.
+
 ### Когда `createRequire` не нужен вовсе
 
 Если резолвится **сам пакет**, а не файл внутри него, статический `createRequire` не проблема, а
