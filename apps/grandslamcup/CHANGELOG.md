@@ -2,6 +2,18 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [3.39.21] - 2026-09-22
+
+### Fixed
+
+- Каскад `TS2321` из 3.39.20 оказался шире — деплой (попытка 3, s1) поймал ещё два файла,
+  не задетых локальным прогоном: `src/app/admin/matches/[id]/page.tsx` (облегчённая аннотация
+  `(typeof match.lineups)[number]` перестала спасать при живой сборке — эскалация до ручного
+  `interface AdminLineupItem` + типизированной переменной, тот же файл поймал второй `TS2321`
+  на соседнем `.map()` над `match.performances`) и `src/app/match/[id]/presenter/page.tsx`
+  (`.map()` над `homeTeam.lineups`/`awayTeam.lineups`). `nx typecheck:tsgo --skip-nx-cache` — 0
+  ошибок.
+
 ## [3.39.20] - 2026-09-22
 
 ### Fixed

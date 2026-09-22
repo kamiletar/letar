@@ -88,14 +88,24 @@ export default async function AdminMatchDetailPage({ params }: { params: Params 
   const mvp = computeMvp(match.performances, isFinished)
   const cardStats = computeCardStats(match.performances)
 
-  // Составы по командам. Аннотация параметра callback обрывает структурное сравнение tsgo
-  // (TS2321), см. .claude/docs/tsgo-excessive-stack-depth-zenstack.md, подпаттерн 1.
-  const homeLineup = match.lineups.filter((l: (typeof match.lineups)[number]) => l.teamSeason.id === match.homeTeamId)
-  const awayLineup = match.lineups.filter((l: (typeof match.lineups)[number]) => l.teamSeason.id === match.awayTeamId)
+  // Типизированная промежуточная переменная перед .filter — аннотация параметра callback
+  // недостаточна, tsgo TS2321 (Excessive stack depth), эскалация из
+  // .claude/docs/tsgo-excessive-stack-depth-zenstack.md, подпаттерн 1.
+  interface AdminLineupItem {
+    id: string
+    status: string
+    teamSeason: { id: string }
+    player: { name: string; slug: string; disambiguation: string | null }
+  }
+  const adminMatchLineups: AdminLineupItem[] = match.lineups
+  const homeLineup = adminMatchLineups.filter((l) => l.teamSeason.id === match.homeTeamId)
+  const awayLineup = adminMatchLineups.filter((l) => l.teamSeason.id === match.awayTeamId)
 
-  // Дисквалификации за плагиат
+  // Дисквалификации за плагиат. Типизированная промежуточная переменная перед .map —
+  // tsgo TS2321 (Excessive stack depth), см. .claude/docs/tsgo-excessive-stack-depth-zenstack.md.
   const seasonId = match.tour?.round?.season?.id
-  const playerIds = match.performances.map((p) => p.playerId)
+  const matchPerformances: { playerId: string }[] = match.performances
+  const playerIds = matchPerformances.map((p) => p.playerId)
 
   const existingPlagiarisms = seasonId
     ? await prisma.playerSuspension.findMany({

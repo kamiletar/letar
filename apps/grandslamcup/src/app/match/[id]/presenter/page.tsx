@@ -73,6 +73,15 @@ export default async function PresenterPage({ params, searchParams }: { params: 
     redirect('/')
   }
 
+  // Типизированные промежуточные переменные перед .map — tsgo TS2321 (Excessive stack depth),
+  // см. .claude/docs/tsgo-excessive-stack-depth-zenstack.md, подпаттерн 1.
+  interface PresenterLineupItem {
+    status: string
+    player: { id: string; name: string; disambiguation: string | null }
+  }
+  const homeTeamLineups: PresenterLineupItem[] = match.homeTeam.lineups
+  const awayTeamLineups: PresenterLineupItem[] = match.awayTeam.lineups
+
   const matchData = {
     id: match.id,
     status: match.status,
@@ -83,7 +92,7 @@ export default async function PresenterPage({ params, searchParams }: { params: 
     homeTeam: {
       id: match.homeTeam.id,
       name: match.homeTeam.team.name,
-      players: match.homeTeam.lineups.map((l) => ({
+      players: homeTeamLineups.map((l) => ({
         id: l.player.id,
         name: playerDisplayName(l.player),
         status: l.status,
@@ -92,7 +101,7 @@ export default async function PresenterPage({ params, searchParams }: { params: 
     awayTeam: {
       id: match.awayTeam.id,
       name: match.awayTeam.team.name,
-      players: match.awayTeam.lineups.map((l) => ({
+      players: awayTeamLineups.map((l) => ({
         id: l.player.id,
         name: playerDisplayName(l.player),
         status: l.status,
