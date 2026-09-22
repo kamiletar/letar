@@ -4,6 +4,17 @@
 
 ## [Unreleased]
 
+### Changed
+
+- **`next/font/google` → `next/font/local` для Source Sans 3 и Cousine** (`renderer/app/_fonts/`).
+  Причина — репо-широкая миграция 2026-09-22 (`PLAN-INFRA-6.md` §195): загрузчик Google Fonts
+  падал на domwellbes на хрупком парсере ответа при полностью доступной сети, не только при её
+  отсутствии; `label-printer-desktop` собирает renderer через `next build` в каждом
+  `build`/`build:win`/`build:linux`, поэтому та же хрупкость применима к любому релизу. Шрифты
+  вырезаны субсеттером под `latin`+`cyrillic` (те же диапазоны, что были в `subsets`), без
+  дополнительных символов — единственный найденный не-latin/cyrillic глиф (`→`) оказался внутри
+  серверного `console.error`, не рендерится в UI. Подробности — `renderer/app/_fonts/fonts/README.md`.
+
 ### Fixed
 
 - **Удалён debug-дамп PNG с захардкоженным путём в `print:printImage`** —

@@ -102,6 +102,10 @@ Electron desktop приложение для печати этикеток "Че
 - [x] Splash screen (gradient + анимация загрузки)
 - [x] Документация (README обновлён)
 - [x] FAQ (FAQ.md)
+- [x] `next/font/google` → `next/font/local` (2026-09-22) — сборка renderer больше не ходит в
+      сеть за шрифтами при каждом `build`/`build:win`/`build:linux`. Разбор — репо-широкая заметка
+      `.claude/docs/nextjs-font-google-to-local-migration-pattern.md`, детали шрифтов —
+      `renderer/app/_fonts/fonts/README.md`.
 - [ ] CI/CD: GitHub Actions, code signing
 
 ---
