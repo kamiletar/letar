@@ -2,12 +2,13 @@ import { Provider } from '@/app/_components/ui/provider'
 import { UmamiScript } from '@letar/analytics'
 import { AnalyticsGate, CookieBanner } from '@letar/ui'
 import type { Metadata, Viewport } from 'next'
-import { JetBrains_Mono } from 'next/font/google'
+import localFont from 'next/font/local'
 import './globals.css'
 
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ['latin', 'cyrillic'],
-  weight: ['400', '500', '600', '700'],
+// Шрифт лежит файлом, а не тянется `next/font/google` — см. src/app/fonts/README.md
+const jetbrainsMono = localFont({
+  src: './fonts/JetBrainsMono-cyrillic-latin.woff2',
+  weight: '400 700',
   variable: '--font-mono',
   display: 'swap',
 })

@@ -2,6 +2,16 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.4.4] - 2026-09-22
+
+### Changed
+
+- JetBrains Mono переведён с `next/font/google` на `next/font/local` — сборка больше не ходит в
+  сеть за шрифтом при каждом прогоне (хрупкость загрузчика на других приложениях монорепо,
+  разбор — `apps/domwellbes/src/app/fonts/README.md`). Файл урезан по unicode (latin+cyrillic) и
+  оси `wght` (400–700, как было у прежнего `weight`). Рецепт и лицензия —
+  `src/app/fonts/README.md`.
+
 ## [0.4.3] - 2026-09-13
 
 ### Changed
