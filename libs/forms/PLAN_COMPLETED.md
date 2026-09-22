@@ -1,5 +1,32 @@
 # Выполненные задачи — @letar/forms
 
+## 2026-09-22 (сессия forms-dev) — #1819/#1866/#1922: сужение типа `run()`, подпись поля в `Form.Errors`, `Form.Steps.CompletedContent`
+
+**Контекст:** `/forms-dev`, три задачи `forms-coordinator-dev` за одну сессию (agent-mail: `form-action-result-extract`, `forms-domwellbes-error-summary-field-key`, `form-steps-completed-content-unreachable`).
+
+**#1819 (forms-react 0.10.1 / forms 2.15.1):** `useFormServerAction.run` сужает результат до
+`Exclude<TData, ActionFailure>` — рантайм и раньше отсекал отказ (бросал `ActionFailureError`),
+тип не отражал этого и требовал ручного `as`/type guard. Тест на типы через instantiation
+expressions (`run<...>`), 4 случая включая вырожденный `TData = ActionFailure` → `never`.
+
+**#1866 (forms 2.15.2):** `Form.Errors` показывала сырой ключ поля (`consentAccepted: ...`) вместо
+подписи. Схема уже была в контексте формы (`DeclarativeFormContextValue.schema`) — резолв через
+существующий `getFieldMeta(schema, path).ui?.title` (`@letar/forms-core/schema`), без нового
+реестра label. Без схемы/подписи — только `issue.message`, без технического ключа в любом виде.
+
+**#1922 (forms-react 0.11.0 / forms 2.16.0):** `Form.Steps.CompletedContent` был физически
+недостижим обычной навигацией — Navigation на последнем шаге всегда рисовала Submit, `goToNext()`
+не пускал `currentStep` дальше `stepCount - 1`. Фикс: `FormSteps` детектирует
+`<Form.Steps.CompletedContent>` в дереве (`hasCompletedContent`), Navigation переключает Submit по
+`hasCompletedContent ? isCompleted : isLastStep`; формы без `CompletedContent` не меняются.
+Второй пункт того же треда ([data-part="trigger"] якобы не обновляется) не подтвердился — это был
+unscoped e2e-локатор, матчивший чужую (non-linear) форму на той же странице; версия `@zag-js/steps`
+единственная (1.43.3), дублей нет.
+
+**Проверено:** `nx test forms`/`forms-react` (828/122 зелёных суммарно), `nx e2e
+form-develop-app-e2e -- --project=chromium` (steps-demo 15/15, включая 2 ранее `test.fixme()`),
+`typecheck:tsgo`/`lint` чистые на всех задетых проектах.
+
 ## 2026-09-22 (сессия form-develop-app-dev) — `FileImageList` не оборачивала превью в `FileUpload.ItemGroup`
 
 **Контекст:** задача — обернуть `setInputFiles()` в `apps/form-develop-app-e2e/src/file-upload-demo.spec.ts`
