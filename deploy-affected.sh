@@ -1320,17 +1320,19 @@ for app in $AFFECTED_APPS; do
   # git-хуках, ни здесь) — держалась только на ручной дисциплине «прогнал перед коммитом».
   # Без условия по $DEPLOY_ENV — одинаково для прода (s2) и стейджа (s1), для всех приложений.
 
-  # §19.1 Трек 1b — снятие дублирования для HARD_GATED_APPS на проде. deploy-mcp (evaluateE2eGate)
+  # §19.1 Трек 1b — снятие дублирования для E2E_GATED_APPS на проде. deploy-mcp (evaluateE2eGate)
   # уже ОТКАЗЫВАЕТ в production-деплое этих приложений без свежего зелёного e2e на staging для
   # текущего коммита (не affected с прогона) — а staging-деплой того же коммита уже прогнал этот
   # самый typecheck (Трек 1 безусловен для staging). Повторный прогон на проде — чистое
   # дублирование по времени, не по надёжности. Не распространяется на STAGING=true (там typecheck
   # и есть то, что делает гейт возможным) и на резервный SSH-канал в обход deploy-mcp — если
   # bun/резолв списка не удался, безопасный дефолт — НЕ пропускать (typecheck остаётся).
+  # ⚠️ До 2026-09-22 список назывался HARD_GATED_APPS (fail-closed подмножество warn-only
+  # E2E_GATED_APPS) — оба схлопнуты в один, всегда fail-closed, см. libs/infra-config/src/index.ts.
   SKIP_TYPECHECK=false
   if [ "$STAGING" != true ]; then
-    IS_HARD_GATED=$(bun -e "import('./libs/infra-config/src/index.ts').then(m => console.log(m.HARD_GATED_APPS.includes('$app')))" 2>/dev/null)
-    if [ "$IS_HARD_GATED" = "true" ]; then
+    IS_GATED=$(bun -e "import('./libs/infra-config/src/index.ts').then(m => console.log(m.E2E_GATED_APPS.includes('$app')))" 2>/dev/null)
+    if [ "$IS_GATED" = "true" ]; then
       SKIP_TYPECHECK=true
     fi
   fi
