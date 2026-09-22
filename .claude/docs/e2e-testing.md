@@ -567,7 +567,7 @@ kami, kami-key-the-landing, pravda, time) на предмет той же сиг
   Next.js, Command Palette Escape — принятый некритичный флейк), но один из кластеров явно
   падает вперемешку по всем трём браузерам, не только firefox/webkit — не та сигнатура; владелец
   2026-09-01 решил не диагностировать и не чинить.
-- archetest, dsperevod (`HARD_GATED_APPS`) — firefox/webkit-таймауты на staging были, но у обоих
+- archetest, dsperevod (`E2E_GATED_APPS`, fail-closed) — firefox/webkit-таймауты на staging были, но у обоих
   найден и исправлен реальный root cause в коде/тестах (гонка гидратации `DisclaimerConsent`,
   z-index race `StickyActionBar`/`CookieBanner`, сброс controlled email-инпута WebKit,
   БД-rate-limit между прогонами) — не CPU-конкуренция. У archetest `--workers=1` использовался
@@ -575,9 +575,9 @@ kami, kami-key-the-landing, pravda, time) на предмет той же сиг
   (21/21) прошёл в штатном параллельном режиме.
 
 Вывод: `workers: 1` профилактически нигде из этих 12 не добавлен — паттерн не подтверждён.
-Если у нового приложения на `E2E_GATED_APPS`/`HARD_GATED_APPS` появится история «chromium
-зелёный, firefox/webkit стабильно таймаутятся на staging без другой найденной причины» — это
-кандидат на тот же фикс, что и aboi, а не на очередной бамп таймаута.
+Если у нового приложения на `E2E_GATED_APPS` появится история «chromium зелёный, firefox/webkit
+стабильно таймаутятся на staging без другой найденной причины» — это кандидат на тот же фикс,
+что и aboi, а не на очередной бамп таймаута.
 
 ## Next.js 16: proxy.ts вместо middleware.ts
 

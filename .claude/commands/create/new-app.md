@@ -215,6 +215,28 @@ nx g @letar/generators:e2e-suite <name>
 Подробности пайплайна и текущий список подключённых/ожидающих приложений — `.claude/docs/deployment.md`
 и `PLAN.md` §18.7.
 
+### Подключение к `BUILD_ON_S1_APPS` (опционально, когда появится `Dockerfile.production`)
+
+Отдельная от e2e-гейта ось: список определяет, где в production **собирается** образ (s1 или
+s2), а не блокирует ли деплой отсутствие e2e. Не обязательный шаг при создании приложения — как
+и `E2E_GATED_APPS`, это более поздний тираж (PLAN-INFRA-6.md §157), а не часть первичной
+настройки: у свежесозданного приложения обычно ещё нет ни `Dockerfile.production`, ни
+подтверждённого чистого typecheck.
+
+Когда у приложения появится `docker-compose.production.yml`/`Dockerfile.production`:
+
+1. Прогони `nx typecheck:tsgo <name> --skip-nx-cache` локально — критерий тиража (волны 1 и 2
+   §157) чист именно так, без кеша.
+2. Добавь имя в `BUILD_ON_S1_APPS` (`libs/infra-config/src/index.ts`) — литералом строки, без
+   spread/вычислений (см. комментарий у константы, почему это контракт для
+   `libs/deploy-mcp/src/build-on-s1.ts`).
+3. `dashboard`/`dashboard-agent` сюда никогда не попадают — они перезапускают сами себя, и
+   release-фаза на s2 такой канал отвергает.
+
+Список — переходный механизм (strangler): когда там окажутся все приложения с
+`Dockerfile.production`, однохостовый путь в `deploy-affected.sh` удаляется вместе с самим
+списком, см. комментарий у `BUILD_ON_S1_APPS`.
+
 ### Создать команду приложения (`.claude/commands/<name>.md`)
 
 Создай файл `.claude/commands/<name>.md` по образцу `apps/grandslamcup.md`:
