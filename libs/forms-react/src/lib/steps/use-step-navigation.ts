@@ -173,7 +173,11 @@ export function useStepNavigation({
     }
 
     const nextStep = step + 1
-    if (nextStep < stepCountRef.current) {
+    // `<=`, не `<`: последний реальный шаг (nextStep === stepCountRef.current) — валидное состояние
+    // "завершено" для форм с `Form.Steps.CompletedContent`. Без него Navigation всё равно рендерит
+    // Submit прямо на последнем шаге и goToNext() с этого шага никогда не вызывается — граница
+    // расширилась безопасно для форм без CompletedContent. См. hasCompletedContent в form-steps.tsx.
+    if (nextStep <= stepCountRef.current) {
       setDirection('forward')
       if (controlledStepRef.current === undefined) {
         setInternalStep(nextStep)

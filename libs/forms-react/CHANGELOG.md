@@ -4,6 +4,20 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.11.0] - 2026-09-22
+
+### Fixed
+
+- **`useStepNavigation().goToNext()` теперь пускает `currentStep` в состояние "завершено"**
+  (#1922, тред `form-steps-completed-content-unreachable`): раньше `nextStep < stepCountRef.current`
+  жёстко запрещал уйти дальше последнего реального шага — `Form.Steps.CompletedContent` в
+  `@letar/forms` был физически недостижим обычным кликом (только через `skipToEnd()`), потому что
+  Navigation на последнем шаге сразу подменяла "Continue" на Submit, а `goToNext()` даже если бы
+  вызвался — всё равно не пропустил бы переход. Граница расширена до `nextStep <= stepCountRef.current`.
+  Для форм без `CompletedContent` поведение не меняется: последний шаг там по-прежнему сразу
+  показывает Submit (см. `hasCompletedContent` в `@letar/forms`), `goToNext()` с этого шага не
+  вызывается вовсе.
+
 ## [0.10.1] - 2026-09-22
 
 ### Fixed
