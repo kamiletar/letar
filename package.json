@@ -55,8 +55,8 @@
     }
   },
   "dependencies": {
-    "@ai-sdk/anthropic": "^4.0.58",
-    "@ai-sdk/react": "^4.0.111",
+    "@ai-sdk/anthropic": "^4.0.59",
+    "@ai-sdk/react": "^4.0.112",
     "@babel/runtime": "^7.29.7",
     "@better-auth/oauth-provider": "^1.7.5",
     "@chakra-ui/anatomy": "^2.3.4",
@@ -145,7 +145,7 @@
     "@zenstackhq/server": "^3.9.4",
     "@zenstackhq/zod": "^3.9.4",
     "@zxing/library": "^0.23.0",
-    "ai": "^7.0.108",
+    "ai": "^7.0.109",
     "async-mutex": "^0.5.0",
     "bcryptjs": "^3.0.3",
     "better-auth": "^1.7.5",
@@ -364,7 +364,7 @@
     "fast-check": "^3.23.2",
     "hermes-compiler": "250829098.0.17",
     "jiti": "2.7.0",
-    "jsdom": "^30.1.0",
+    "jsdom": "^30.1.1",
     "nextron": "^10.3.0",
     "ntsuspend": "^1.0.2",
     "numeralize-ru": "^2.0.0",
