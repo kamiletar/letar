@@ -2,6 +2,15 @@
 
 Детальное описание всех реализованных фич.
 
+## `scrollIntoView(smooth)` автоскролла логов зависал без OS-фокуса окна (2026-09-22)
+
+Делегировано из сессии `pravda-dev` — репо-широкий грепа по паттерну, зависающему при фиксе TOC
+в `apps/pravda` (коммиты `e61e2cbae`/`0b68c95d0`). Два места: автоскролл лога деплоя
+(`DeployProgress.tsx`) и автоскролл лога приложения (`apps/[app]/logs/page.tsx`) —
+`behavior: 'smooth'` → `'instant'`, см.
+[scrollintoview-smooth-frozen-without-window-focus.md](/.claude/docs/scrollintoview-smooth-frozen-without-window-focus.md).
+Коммит `39f79dba1`.
+
 ## Фикс `mutationFn` для `controlScheduler` — ложный success-тост при отказе (2026-09-03)
 
 Аудит по всему монорепо на класс бага «`mutationFn` резолвит server action, возвращающий
