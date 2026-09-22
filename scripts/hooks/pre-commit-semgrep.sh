@@ -47,8 +47,13 @@ fi
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 RULES="$REPO_ROOT/.semgrep/letar-rules.yml"
 
-# Свои правила лежат только в корневом letar. Внутри submodule их нет — там работают
-# лишь реестровые наборы; молча пропускать нельзя, поэтому сообщаем.
+# По умолчанию свои правила есть только в корневом letar. Отдельный submodule может завести
+# свой .semgrep/letar-rules.yml для правил, специфичных для его приватной бизнес-логики —
+# этот же скрипт (копируется в submodule через install.sh --all-submodules) резолвит путь от
+# своего git rev-parse --show-toplevel, поэтому имя файла совпадает с корневым намеренно и
+# подхватывается автоматически, без единой правки самого скрипта. Образец — apps/domwellbes
+# (см. .claude/docs/semgrep-per-submodule-rules-pattern.md). Своего файла в submodule нет —
+# работают только реестровые наборы (p/secrets); молча пропускать нельзя, поэтому сообщаем.
 CONFIGS=()
 [[ -f "$RULES" ]] && CONFIGS+=(--config "$RULES")
 CONFIGS+=(--config "p/secrets")

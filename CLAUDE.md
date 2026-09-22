@@ -24,6 +24,7 @@
 - [nextjs16-agent-guide-files](/.claude/docs/nextjs16-agent-guide-files.md) `next dev` сам пишет `AGENTS.md`
 - [llms-txt-pattern](/.claude/docs/llms-txt-pattern.md) `llms.txt`: статика vs роут, юридические запреты
 - [git-multi-agent-incidents](/.claude/docs/git-multi-agent-incidents.md) ⭐ почему правила git такие строгие; ⚠️ две сессии под одной identity + `Write` + смешанный индекс = коммит с непарсящимся файлом
+- [semgrep-per-submodule-rules-pattern](/.claude/docs/semgrep-per-submodule-rules-pattern.md) кастомные правила для приватного submodule — в его собственном `.semgrep/`, не в корневом
 - [git-pathspec-commit-worktree-not-index](/.claude/docs/git-pathspec-commit-worktree-not-index.md) ⚠️ `commit -- <path>` берёт рабочее дерево, не индекс
 - [nx-convert-to-inferred-scope-regression](/.claude/docs/nx-convert-to-inferred-scope-regression.md) ⚠️ генератор тихо меняет охват таргета
 - [nx-target-without-executor-silent-noop](/.claude/docs/nx-target-without-executor-silent-noop.md) ⚠️ таргет без `executor` → `nx:noop`, «успех» за 21мс без тестов
