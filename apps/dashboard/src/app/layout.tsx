@@ -9,11 +9,12 @@ import { ThemeProvider } from '@/app/_components/theme-provider'
 import { Toaster } from '@/app/_components/ui/toaster'
 import { UmamiScript } from '@letar/analytics'
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import localFont from 'next/font/local'
 
-const inter = Inter({
-  subsets: ['cyrillic', 'latin'],
-  weight: ['400', '500', '600', '700'],
+// Шрифт лежит файлом, а не тянется `next/font/google` — см. src/app/fonts/README.md
+const inter = localFont({
+  src: './fonts/Inter-cyrillic-latin.woff2',
+  weight: '400 700',
 })
 
 export const metadata: Metadata = {

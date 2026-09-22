@@ -2,6 +2,15 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [1.27.2] — 2026-09-22
+
+### Changed
+
+- Inter переведён с `next/font/google` на `next/font/local` — сборка больше не ходит в сеть за
+  шрифтом при каждом прогоне (хрупкость загрузчика, разбор на domwellbes —
+  `apps/domwellbes/src/app/fonts/README.md`). Ось `wght` сужена до 400–700 (как было в прежнем
+  `weight`). Рецепт и лицензия — `src/app/fonts/README.md`.
+
 ## [1.27.1] — 2026-09-21
 
 ### Fixed
