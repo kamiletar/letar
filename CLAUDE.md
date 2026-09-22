@@ -55,6 +55,7 @@
 - [shared-get-client-ip-consolidation](/.claude/docs/shared-get-client-ip-consolidation.md) `getClientIpFromHeaders`, третья копия оставлена намеренно
 - [lib-consumer-missing-lib-dom](/.claude/docs/lib-consumer-missing-lib-dom.md) ⚠️ баррель либы тянет чужие `window`-файлы в typecheck потребителя
 - [webpack-emscripten-runtime-wasm-not-emitted](/.claude/docs/webpack-emscripten-runtime-wasm-not-emitted.md) ⚠️ `.wasm` не копируется, падает на пререндере
+- [webpack-createrequire-resolve-nullified](/.claude/docs/webpack-createrequire-resolve-nullified.md) ⚠️ обратный случай: `createRequire()` переписан в `undefined`, `webpackIgnore` чинит половину
 - [webpack-concatenatemodules-electron-updater-jsyaml-crash](/.claude/docs/webpack-concatenatemodules-electron-updater-jsyaml-crash.md) ⚠️ scope hoisting ломает `electron-updater`
 
 ### MCP-серверы
