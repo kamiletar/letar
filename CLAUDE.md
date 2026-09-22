@@ -152,6 +152,7 @@
 - [nextjs-standalone-tracing](/.claude/docs/nextjs-standalone-tracing.md) ⚠️ ECONNREFUSED/ERR_DLOPEN_FAILED при зелёном билде
 - [nextjs-stale-dotnext-types-tsgo-ts6305](/.claude/docs/nextjs-stale-dotnext-types-tsgo-ts6305.md) ⚠️ TS6305 от устаревшего `.next/types`, бисекция не ловит
 - [nextjs-dynamic-fs-path-tracing](/.claude/docs/nextjs-dynamic-fs-path-tracing.md) ⚠️ рантайм-путь в `fs` утаскивает весь проект в standalone
+- [nextjs-tracing-excludes-windows-backslash](/.claude/docs/nextjs-tracing-excludes-windows-backslash.md) ⚠️ `outputFileTracingExcludes` молча не работает при сборке под Windows — на проде (linux) работает
 - [prisma-upsert-empty-update-build-race](/.claude/docs/prisma-upsert-empty-update-build-race.md) ⚠️ `P2002` на «Collecting page data» только на пустой БД: воркеры гоняются за создание singleton-строки
 - [nextjs-build-time-oidc-discovery-network-dependency](/.claude/docs/nextjs-build-time-oidc-discovery-network-dependency.md) ⚠️ билд hub-клиента бьёт в сеть на OIDC discovery
 - [nextjs-server-action-redirect-race](/.claude/docs/nextjs-server-action-redirect-race.md) гонка редиректа в server action
