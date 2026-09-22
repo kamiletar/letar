@@ -1,16 +1,12 @@
 'use client'
 
 import { Box, CloseButton, Drawer, Flex, IconButton, Link, Portal, Text, VStack } from '@chakra-ui/react'
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import { LuList } from 'react-icons/lu'
 
 import { scrollbarStyles } from '@/lib/constants'
 
-interface TocItem {
-  id: string
-  text: string
-  level: number
-}
+import { useTocScroll } from './use-toc-scroll'
 
 /**
  * Мобильный Table of Contents.
@@ -18,94 +14,10 @@ interface TocItem {
  * Показывается только на экранах < xl (1280px).
  */
 export function MobileTOC() {
-  const [headings, setHeadings] = useState<TocItem[]>([])
-  const [activeId, setActiveId] = useState<string>('')
-  const [progress, setProgress] = useState<number>(0)
+  // Без resetKey — сбор заголовков и scroll-spy запускаются один раз при монтировании
+  // (см. use-toc-scroll.ts), как и раньше.
+  const { headings, activeId, progress } = useTocScroll()
   const [open, setOpen] = useState(false)
-  const throttleIdRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  // Собираем заголовки и настраиваем scroll-обработчик
-  useEffect(() => {
-    const elements = Array.from(document.querySelectorAll('h2[id], h3[id], [id^="section-"], [id^="chapter-"]'))
-
-    const items: TocItem[] = elements.map((el) => {
-      let text: string
-
-      if (el.id.startsWith('section-') || el.id.startsWith('chapter-')) {
-        const heading = el.querySelector('h2, h3')
-        text = heading?.textContent || ''
-
-        if (el.id.startsWith('chapter-')) {
-          const badge = el.querySelector('[class*="badge"]')
-          const badgeText = badge?.textContent || ''
-          text = badgeText ? `${badgeText}. ${text}` : text
-        }
-      } else {
-        text = el.textContent || ''
-      }
-
-      return {
-        id: el.id,
-        text,
-        level: el.tagName === 'H2' || el.id.startsWith('section-') ? 2 : 3,
-      }
-    })
-
-    // Синхронизация с DOM (внешняя система) — заголовки собраны обходом дерева документа
-    // oxlint-disable-next-line react/set-state-in-effect
-    setHeadings(items)
-
-    // Scroll handler с throttle через setTimeout — прогресс чтения И активный пункт.
-    // НЕ requestAnimationFrame: rAF полностью замирает без фокуса окна (см.
-    // .claude/docs/raf-vs-timers-background-tab.md) — throttle на его основе может не срабатывать
-    // в реальных условиях. 50мс-таймер достаточен и не замирает, см. подробное объяснение в
-    // apps/pravda/src/app/_components/toc.tsx.
-    //
-    // Активный пункт: раньше считал IntersectionObserver, но Section оборачивает все свои
-    // Chapter целиком и остаётся "intersecting" всю прокрутку внутри раздела — порядок entries в
-    // колбэке произвольный, поэтому "последний entry с isIntersecting" давал недетерминированный/
-    // неверный результат. Фикс — последний (по порядку документа) заголовок, чей верхний край уже
-    // пересёк линию триггера (ACTIVE_THRESHOLD).
-    const ACTIVE_THRESHOLD = 80
-
-    const handleScroll = () => {
-      if (throttleIdRef.current !== null) {
-        return
-      }
-
-      throttleIdRef.current = setTimeout(() => {
-        const scrollTop = window.scrollY
-        const docHeight = document.documentElement.scrollHeight - window.innerHeight
-        const scrollProgress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0
-        setProgress(Math.min(100, Math.max(0, scrollProgress)))
-
-        let active = ''
-        for (const el of elements) {
-          if (el.getBoundingClientRect().top <= ACTIVE_THRESHOLD) {
-            active = el.id
-          }
-        }
-        setActiveId(active)
-
-        throttleIdRef.current = null
-      }, 50)
-    }
-
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    handleScroll()
-
-    return () => {
-      window.removeEventListener('scroll', handleScroll)
-      if (throttleIdRef.current !== null) {
-        clearTimeout(throttleIdRef.current)
-        // Сбрасываем ref после отмены — иначе после StrictMode double-invoke handleScroll()
-        // новой инстанции эффекта видит "устаревший" ненулевой id отменённого таймера и НАВСЕГДА
-        // пропускает планирование нового (ранний return по `throttleIdRef.current !== null`).
-        // Прогресс-бар застревал на 0%. См. тот же фикс в toc.tsx.
-        throttleIdRef.current = null
-      }
-    }
-  }, [])
 
   // Не показываем FAB если нет заголовков
   if (headings.length === 0) {

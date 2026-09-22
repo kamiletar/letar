@@ -2,58 +2,11 @@
 
 import { Box, Flex, Link, Text, VStack } from '@chakra-ui/react'
 import { usePathname } from 'next/navigation'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 
 import { HEADER_HEIGHT, scrollbarStyles } from '@/lib/constants'
 
-interface TocItem {
-  id: string
-  text: string
-  level: number
-}
-
-/**
- * Собирает заголовки документа из DOM (один проход querySelectorAll).
- * Вызывается только из useEffect (после коммита), НЕ из ленивого инициализатора useState —
- * так и пробовали: ленивый initializer читает `document` уже в первом клиентском рендере при
- * гидратации, из-за чего сервер (headings=[], nav=null) и клиент (headings=N, nav есть)
- * расходятся — React ловит это как hydration mismatch и на неудачных прогонах откатывается к
- * ПОЛНОМУ пересозданию поддерева `<body>` ("Hydration failed... this tree will be regenerated
- * on the client", см. .claude/docs/nextjs16-turbopack-default-emotion-hydration.md — тот же
- * класс бага, здесь источник другой: этот компонент, не Chakra Global). Клик, попавший в
- * середину такого remount, срабатывает на уже отсоединённом узле и теряется — так ломались
- * apps/pravda-e2e/src/bookmarks.spec.ts (webkit) и cross-refs.spec.ts «Переход по CrossRef
- * ссылке» (chromium+webkit). Гонка `.count()` в toc.spec.ts решена на уровне теста
- * (`toBeVisible()` перед чтением количества ссылок) — там она безопасна, act не провоцирует.
- */
-function collectHeadings(): TocItem[] {
-  const elements = Array.from(document.querySelectorAll('h2[id], h3[id], [id^="section-"], [id^="chapter-"]'))
-
-  return elements.map((el) => {
-    let text: string
-
-    // Для Section/Chapter ищем заголовок внутри
-    if (el.id.startsWith('section-') || el.id.startsWith('chapter-')) {
-      const heading = el.querySelector('h2, h3')
-      text = heading?.textContent || ''
-
-      // Для Chapter добавляем "Глава X" из Badge
-      if (el.id.startsWith('chapter-')) {
-        const badge = el.querySelector('[class*="badge"]')
-        const badgeText = badge?.textContent || ''
-        text = badgeText ? `${badgeText}. ${text}` : text
-      }
-    } else {
-      text = el.textContent || ''
-    }
-
-    return {
-      id: el.id,
-      text,
-      level: el.tagName === 'H2' || el.id.startsWith('section-') ? 2 : 3,
-    }
-  })
-}
+import { useTocScroll } from './use-toc-scroll'
 
 /**
  * Table of Contents - автоматически строится из h2/h3 на странице.
@@ -62,12 +15,9 @@ function collectHeadings(): TocItem[] {
  */
 export function TableOfContents() {
   const pathname = usePathname()
-  // Начальное состояние — [] на сервере И на клиенте (пока не сработает useEffect ниже).
-  // См. collectHeadings — почему НЕ ленивый инициализатор.
-  const [headings, setHeadings] = useState<TocItem[]>([])
-  const [activeId, setActiveId] = useState<string>('')
-  const [progress, setProgress] = useState<number>(0)
-  const throttleIdRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // pathname — resetKey хука: сброс и пересбор заголовков при клиентской навигации.
+  // Начальное состояние — [] на сервере И на клиенте (пока не сработает useEffect внутри хука).
+  const { headings, activeId, progress } = useTocScroll(pathname)
   const tocRef = useRef<HTMLElement>(null)
 
   // Автоскролл к активному пункту в TOC.
@@ -87,83 +37,6 @@ export function TableOfContents() {
       activeLink.scrollIntoView({ behavior: 'instant', block: 'nearest' })
     }
   }, [activeId])
-
-  // Объединённый эффект: заголовки, scroll handler (прогресс + активный пункт)
-  // pathname в зависимостях — перезапуск при клиентской навигации
-  useEffect(() => {
-    // Синхронизация с навигацией (внешняя система) — сброс состояния при смене страницы
-    // oxlint-disable-next-line react/set-state-in-effect
-    setActiveId('')
-    setProgress(0)
-
-    // 1. Собираем заголовки (один проход по DOM) — та же логика, что и в ленивом инициализаторе
-    const elements = Array.from(document.querySelectorAll('h2[id], h3[id], [id^="section-"], [id^="chapter-"]'))
-    setHeadings(collectHeadings())
-
-    // 2. Scroll handler с throttle через setTimeout — прогресс чтения И активный пункт.
-    // НЕ requestAnimationFrame: rAF полностью замирает без фокуса окна (см.
-    // .claude/docs/raf-vs-timers-background-tab.md и комментарий у автоскролла TOC выше про
-    // scrollIntoView) — Playwright-браузеры в CI обычно без реального фокуса, поэтому throttle на
-    // rAF никогда не срабатывал в webkit (стабильно) и иногда в firefox (флейково): прогресс-бар
-    // и активный пункт застревали на начальном значении. Визуальную плавность даёт CSS `transition`
-    // на самой полосе, точность до кадра здесь не нужна — 50мс-таймер достаточен и не замирает.
-    // Раньше активный пункт считал отдельный IntersectionObserver с rootMargin (-80px 0px -80%
-    // 0px). Он давал недетерминированный результат: Section оборачивает ВСЕ свои Chapter целиком
-    // (это огромный контейнер), поэтому остаётся "intersecting" всю прокрутку внутри раздела —
-    // одновременно с текущей вложенной Chapter. IntersectionObserver сообщает entries в
-    // произвольном порядке (не порядке DOM), а обработчик брал последний entry с
-    // isIntersecting=true — какой из двух одновременно пересекающихся элементов "победит",
-    // зависело от порядка callback, а не от реальной позиции скролла. Симптом: `aria-current`
-    // ставился на случайный/неверный пункт (напр. вложенную главу вместо раздела, к которому
-    // реально проскроллили).
-    // Фикс — детерминированный расчёт на основе `getBoundingClientRect().top`: активный пункт —
-    // последний (по порядку документа) заголовок, чей верхний край уже пересёк линию триггера
-    // (ACTIVE_THRESHOLD = HEADER_HEIGHT (60, scroll-padding-top в globals.css) + SCROLL_MARGIN_TOP
-    // (20, scroll-margin-top секций/глав/статей) — при scrollIntoView/переходе по #hash оба
-    // отступа складываются, см. комментарий у SCROLL_MARGIN_TOP в lib/constants.ts). Классический
-    // паттерн scroll-spy, устойчив к вложенности/размеру наблюдаемых контейнеров.
-    const ACTIVE_THRESHOLD = 80
-
-    const handleScroll = () => {
-      // Пропускаем если уже запланировано обновление
-      if (throttleIdRef.current !== null) {
-        return
-      }
-
-      throttleIdRef.current = setTimeout(() => {
-        const scrollTop = window.scrollY
-        const docHeight = document.documentElement.scrollHeight - window.innerHeight
-        const scrollProgress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0
-        setProgress(Math.min(100, Math.max(0, scrollProgress)))
-
-        let active = ''
-        for (const el of elements) {
-          if (el.getBoundingClientRect().top <= ACTIVE_THRESHOLD) {
-            active = el.id
-          }
-        }
-        setActiveId(active)
-
-        throttleIdRef.current = null
-      }, 50)
-    }
-
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    handleScroll() // Инициализируем значение
-
-    // Общий cleanup
-    return () => {
-      window.removeEventListener('scroll', handleScroll)
-      if (throttleIdRef.current !== null) {
-        clearTimeout(throttleIdRef.current)
-        // Сбрасываем ref после отмены — иначе после StrictMode double-invoke (или повторного
-        // запуска эффекта при смене pathname) handleScroll() новой инстанции эффекта видит
-        // "устаревший" ненулевой id отменённого таймера и НАВСЕГДА пропускает планирование
-        // нового (ранний return по `throttleIdRef.current !== null`). Прогресс-бар застревал на 0%.
-        throttleIdRef.current = null
-      }
-    }
-  }, [pathname])
 
   // ⚠️ НЕ `return null`, пока headings.length === 0. Раньше компонент до первого эффекта не
   // рендерил вообще ничего — колонка `.toc` (родитель в (docs)/layout.tsx) не резервировала
