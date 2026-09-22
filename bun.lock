@@ -616,7 +616,7 @@
     },
     "apps/domwellbes": {
       "name": "@letar/domwellbes",
-      "version": "0.308.3",
+      "version": "0.308.4",
       "dependencies": {
         "@gltf-transform/core": "^4.5.0",
         "@gltf-transform/extensions": "^4.5.0",
@@ -644,16 +644,19 @@
         "@letar/undo-toast": "workspace:*",
         "@letar/url-query-state": "workspace:*",
         "@modelcontextprotocol/server": "2.0.0",
+        "@serwist/next": "^9.5.12",
         "@tanstack/react-devtools": "^0.10.12",
         "@tanstack/react-form-devtools": "^0.2.34",
         "@tanstack/react-query": "^5.102.8",
         "@tanstack/react-query-devtools": "^5.102.8",
         "adm-zip": "^0.5.16",
         "iconv-lite": "^0.6.3",
+        "idb-keyval": "^6.3.0",
         "imapflow": "^1.7.1",
         "meshoptimizer": "^1.2.0",
         "pdfjs-dist": "^6.3.289",
         "polygon-clipping": "^0.15.7",
+        "serwist": "^9.5.12",
         "three": "^0.186.0",
         "tus-js-client": "^4.3.1",
         "web-ifc": "0.0.77",
@@ -676,7 +679,7 @@
     },
     "apps/driving-school": {
       "name": "driving-school",
-      "version": "0.240.35",
+      "version": "0.240.36",
       "dependencies": {
         "@letar/admin-ui": "workspace:*",
         "@letar/auth": "workspace:*",
@@ -705,7 +708,7 @@
     },
     "apps/dsperevod": {
       "name": "@letar/dsperevod",
-      "version": "0.6.36",
+      "version": "0.6.37",
       "dependencies": {
         "@better-auth/utils": "^0.4.2",
         "@chakra-ui/react": "*",
