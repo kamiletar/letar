@@ -207,13 +207,15 @@ export function HeroSection({ download }: HeroSectionProps) {
         animation="float 3s ease-in-out infinite"
         cursor="pointer"
         onClick={() =>
-          document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
+          document.getElementById('features')?.scrollIntoView({ behavior: 'instant' })}
         aria-label="Перейти к возможностям"
         role="button"
         tabIndex={0}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
-            document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })
+            // 'instant', не 'smooth' — без OS-фокуса окна анимация зависает навсегда
+            // (.claude/docs/scrollintoview-smooth-frozen-without-window-focus.md)
+            document.getElementById('features')?.scrollIntoView({ behavior: 'instant' })
           }
         }}
       >

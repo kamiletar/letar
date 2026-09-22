@@ -62,7 +62,9 @@ export function Navbar() {
   const handleNavClick = useCallback((id: string) => {
     setMobileOpen(false)
     const el = document.getElementById(id)
-    el?.scrollIntoView({ behavior: 'smooth' })
+    // 'instant', не 'smooth' — без OS-фокуса окна анимация зависает навсегда
+    // (.claude/docs/scrollintoview-smooth-frozen-without-window-focus.md)
+    el?.scrollIntoView({ behavior: 'instant' })
   }, [])
 
   return (
@@ -82,7 +84,7 @@ export function Navbar() {
       <Container maxW="7xl" px={{ base: 4, md: 8 }}>
         <Flex h="64px" align="center" justify="space-between">
           {/* Логотип */}
-          <HStack gap={2} cursor="pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+          <HStack gap={2} cursor="pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'instant' })}>
             <FaKeyboard size={20} color="#4dff7a" />
             <Text className="font-mono neon-text" fontSize="lg" fontWeight="700" letterSpacing="tight">
               KamiKeyThe
