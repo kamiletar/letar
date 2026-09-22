@@ -195,6 +195,7 @@
 - [theme-hardcode-gate-coverage](/.claude/docs/theme-hardcode-gate-coverage.md) гейт сырых цветов (`theme:check`), список считать грепом
 - [chakra-semantic-token-contract](/.claude/docs/chakra-semantic-token-contract.md) ⚠️ стоковые рецепты читают `bg.panel`/`fg.error` — не переопределил, провалил WCAG
 - [chakra-inverted-surface-color-contrast](/.claude/docs/chakra-inverted-surface-color-contrast.md) ⚠️ `Tooltip.Content` на `bg.inverted` — низкий контраст в одной теме
+- [chakra-font-token-var-declaration-scope](/.claude/docs/chakra-font-token-var-declaration-scope.md) ⚠️ класс `next/font` на `<body>` не доезжает до токенов `fonts.*` на `:root` — сайт молча рисуется системным шрифтом
 - [chakra-typegen-shared-node-modules-race](/.claude/docs/chakra-typegen-shared-node-modules-race.md) ⚠️ параллельный `theme:typegen` откатывает чужие варианты
 - [chakra-overflow-wrap-not-inherited](/.claude/docs/chakra-overflow-wrap-not-inherited.md) ⚠️ не наследуется через reset — фикс только `'& *'`
 - [chakra-heading-defaults-to-h2](/.claude/docs/chakra-heading-defaults-to-h2.md) ⚠️ страница может не иметь ни одного `<h1>`
@@ -292,6 +293,7 @@
 - [better-auth-1.7-oidc-provider-removed](/.claude/docs/better-auth-1.7-oidc-provider-removed.md) ⚠️ `bun update` в пределах `^1.6.x` убирает `oidcProvider`
 - [better-auth-1.7-account-issuer-field](/.claude/docs/better-auth-1.7-account-issuer-field.md) ⚠️ требуется поле `issuer`; коммит миграции ≠ её применение
 - [better-auth-organization-teams-schema-fields](/.claude/docs/better-auth-organization-teams-schema-fields.md) ⚠️ `teams` плагина organization требует новые поля — падение на старте
+- [better-auth-plugin-modelname-casing-schema-mismatch](/.claude/docs/better-auth-plugin-modelname-casing-schema-mismatch.md) ⚠️ `modelName` сверяется буквально с client-property casing, не с `@@map`
 - [better-auth-oauth-provider-schema-drift](/.claude/docs/better-auth-oauth-provider-schema-drift.md) ⚠️ своя схема плагина; 7-слойный прод-инцидент SSO
 - [runtime-invariant-missing-from-select](/.claude/docs/runtime-invariant-missing-from-select.md) ⚠️ отсутствующее поле неотличимо от легитимного отказа
 - [better-auth-vk-id-migration-and-linksocial-pitfalls](/.claude/docs/better-auth-vk-id-migration-and-linksocial-pitfalls.md) ⚠️ VK ID вместо legacy; `linkSocial()` молчит без `allowDifferentEmails`
