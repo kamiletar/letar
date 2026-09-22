@@ -74,11 +74,12 @@ export function Navbar() {
     return () => observer.disconnect()
   }, [])
 
-  // Плавный скролл к секции
+  // Скролл к секции. 'instant', не 'smooth' — без OS-фокуса окна анимация зависает
+  // навсегда (.claude/docs/scrollintoview-smooth-frozen-without-window-focus.md)
   const scrollToSection = (href: string) => {
     const element = document.querySelector(href)
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth' })
+      element.scrollIntoView({ behavior: 'instant' })
       setDrawerOpen(false)
     }
   }
