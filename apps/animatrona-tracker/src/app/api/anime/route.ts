@@ -8,6 +8,7 @@
  * GET /api/anime — Публичный каталог опубликованных аниме.
  */
 
+import type { RelationKind } from '@/generated/prisma'
 import { getAgeGroup, getAllowedRatings } from '@/lib/age-rating'
 import { buildAnimeMetadataFields, recreateEpisodes } from '@/lib/anime-upsert'
 import { verifyApiKey } from '@/lib/api-auth'
@@ -49,20 +50,28 @@ async function saveAnimeRelations(
   })
   const shikimoriToAnimeId = new Map(existingAnime.map((a) => [a.shikimoriId, a.id]))
 
-  // Удаляем старые связи и создаём новые (атомарно)
-  await prisma.$transaction([
-    prisma.animeRelation.deleteMany({ where: { animeId } }),
-    ...relations.map((r) =>
-      prisma.animeRelation.create({
-        data: {
-          animeId,
-          targetShikimoriId: r.targetShikimoriId,
-          targetAnimeId: shikimoriToAnimeId.get(r.targetShikimoriId) ?? null,
-          relationKind: r.relationKind,
-        },
-      })
-    ),
-  ])
+  // Удаляем старые связи и создаём новые (атомарно). Типизированная промежуточная переменная
+  // перед .map — tsgo TS2321 (Excessive stack depth), см.
+  // .claude/docs/tsgo-excessive-stack-depth-zenstack.md.
+  interface ResolvedRelation {
+    targetShikimoriId: number
+    relationKind: RelationKind
+  }
+  const resolvedRelations: ResolvedRelation[] = relations
+  const createOps = resolvedRelations.map((r) =>
+    prisma.animeRelation.create({
+      data: {
+        animeId,
+        targetShikimoriId: r.targetShikimoriId,
+        targetAnimeId: shikimoriToAnimeId.get(r.targetShikimoriId) ?? null,
+        relationKind: r.relationKind,
+      },
+    })
+  )
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- tsgo TS2321: excessive stack
+  // depth сравнивает вложенные ZenStack-типы внутри $transaction; сохранить транзакционность
+  // важнее точности типа на этой строке, см. tsgo-excessive-stack-depth-zenstack.md
+  await prisma.$transaction([prisma.animeRelation.deleteMany({ where: { animeId } }), ...createOps] as any[])
 
   // Обновляем чужие связи, указывающие на нас (targetShikimoriId = наш shikimoriId)
   // При первом импорте аниме-цели ещё нет в БД → targetAnimeId = null.

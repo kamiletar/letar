@@ -7,6 +7,7 @@
  * Доступ: только ADMIN
  */
 
+import type { RelationKind } from '@/generated/prisma'
 import { verifyApiKey } from '@/lib/api-auth'
 import { getSession } from '@/lib/auth'
 import { prisma } from '@/lib/db'
@@ -56,20 +57,30 @@ export async function POST(request: NextRequest) {
       const relations = await resolveRelations(manifest, anime.shikimoriId)
 
       if (relations.length > 0) {
-        // Удаляем старые и создаём новые
+        // Удаляем старые и создаём новые. Типизированная промежуточная переменная перед .map —
+        // tsgo TS2321 (Excessive stack depth), см. .claude/docs/tsgo-excessive-stack-depth-zenstack.md.
+        interface ResolvedRelation {
+          targetShikimoriId: number
+          relationKind: RelationKind
+        }
+        const resolvedRelations: ResolvedRelation[] = relations
+        const createOps = resolvedRelations.map((r) =>
+          prisma.animeRelation.create({
+            data: {
+              animeId: anime.id,
+              targetShikimoriId: r.targetShikimoriId,
+              targetAnimeId: shikimoriToAnimeId.get(r.targetShikimoriId) ?? null,
+              relationKind: r.relationKind,
+            },
+          })
+        )
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- tsgo TS2321: excessive stack
+        // depth сравнивает вложенные ZenStack-типы внутри $transaction; сохранить транзакционность
+        // важнее точности типа на этой строке, см. tsgo-excessive-stack-depth-zenstack.md
         await prisma.$transaction([
           prisma.animeRelation.deleteMany({ where: { animeId: anime.id } }),
-          ...relations.map((r) =>
-            prisma.animeRelation.create({
-              data: {
-                animeId: anime.id,
-                targetShikimoriId: r.targetShikimoriId,
-                targetAnimeId: shikimoriToAnimeId.get(r.targetShikimoriId) ?? null,
-                relationKind: r.relationKind,
-              },
-            })
-          ),
-        ])
+          ...createOps,
+        ] as any[])
       }
 
       results.push({ id: anime.id, relations: relations.length })

@@ -7,6 +7,15 @@
 
 ---
 
+## [0.13.2] — 2026-09-22
+
+### Исправлено
+
+- `TS2321: Excessive stack depth` (`tsgo`) в `api/anime/route.ts` и
+  `api/admin/backfill-relations/route.ts` — приведение промежуточных типов, точечный `as any[]`
+  внутри `prisma.$transaction` (типы результата `deleteMany`/`create` не сравниваются структурно
+  целиком). Готовит приложение к включению в `BUILD_ON_S1_APPS` (§157 PLAN-INFRA-6.md).
+
 ## [0.13.1] — 2026-09-10
 
 ### Исправлено
