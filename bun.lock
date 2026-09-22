@@ -482,7 +482,7 @@
     },
     "apps/animatrona-tracker": {
       "name": "@letar/animatrona-tracker",
-      "version": "0.13.1",
+      "version": "0.13.2",
       "dependencies": {
         "@letar/animatrona-franchise-graph": "workspace:*",
         "@letar/animatrona-types": "workspace:*",
