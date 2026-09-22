@@ -66,10 +66,13 @@ const dir = path.dirname(require.resolve('web-ifc/web-ifc-node.wasm'))
 ## Фикс
 
 Брать `createRequire` динамическим импортом — статический анализ его не видит, и оба механизма
-выключаются разом. Ни магические комментарии, ни глобальная правка парсера не нужны:
+выключаются разом. Ни магические комментарии, ни глобальная правка парсера не нужны. Но забирать
+его из результата импорта нужно **через `default`**, иначе получишь третье, ещё более тихое
+падение (разбор ниже):
 
 ```ts
-const { createRequire } = await import('node:module')
+const nodeModule = await import('node:module')
+const createRequire = nodeModule.createRequire ?? nodeModule.default.createRequire
 const dir = path.dirname(
   createRequire(import.meta.url).resolve(/* turbopackIgnore: true */ 'web-ifc/web-ifc-node.wasm'),
 )
@@ -77,6 +80,63 @@ const dir = path.dirname(
 
 `/* turbopackIgnore: true */` остаётся для dev-сборки (она по-прежнему на Turbopack) — там
 проблема другая и лечится именно комментарием.
+
+### ⚠️ Третий способ: деструктуризация `await import('node:module')` даёт `undefined`
+
+Первая редакция фикса выглядела естественно — и молча не работала в прод-сборке:
+
+```ts
+const { createRequire } = await import('node:module') // ← createRequire === undefined
+```
+
+`await import()` webpack собирает в `__webpack_require__.t(id, 23)` — построение ES-namespace из
+значения CommonJS-модуля. Свойства значения переносятся в namespace циклом, который выполняется,
+**только пока значение — объект**:
+
+```js
+for (
+  var current = mode & 2 && value;
+  typeof current == 'object' && !~leafPrototypes.indexOf(current);
+  current = getProto(current)
+) {
+  Object.getOwnPropertyNames(current).forEach((key) => def[key] = () => value[key])
+}
+def['default'] = () => value
+```
+
+`require('node:module')` возвращает **функцию** `Module`, а не объект. Цикл не выполняется ни
+разу, и в namespace попадает один `default`. Проверка эмуляцией рантайма webpack:
+
+```
+ключи namespace: default
+ns.createRequire: undefined
+ns.default.createRequire: function
+```
+
+Дальше всё тихо: сборка зелёная, typecheck зелёный (типы описывают настоящий ESM, а не то, что
+соберёт бандлер), dev на Turbopack работает — он строит namespace иначе. В проде минифицированный
+чанк падает `TypeError: d is not a function` — без имени модуля, без файла, а если вызов сидит в
+фоновой задаче, то и без стека в stdout. Ловится только живым прогоном сценария.
+
+`default` ведёт к тому же `Module` и под webpack, и под настоящим ESM Node.js (там `default` CJS-
+модуля — сам `module.exports`), а `createRequire` у него статический метод. Поэтому порядок
+`named ?? default.` работает в обеих средах.
+
+То же касается **любого** встроенного модуля, чей `module.exports` — функция, а не объект.
+Классические `node:path`, `node:fs`, `node:url` — объекты, их деструктуризация безопасна;
+`node:module` — исключение, которое выглядит ровно как они.
+
+Готовая обёртка (`createNodeRequire()`, с явным `TypeError` вместо «X is not a function», если
+бандлер снова сломает namespace) — `apps/domwellbes/src/lib/node-require.ts`.
+
+### Когда `createRequire` не нужен вовсе
+
+Если резолвится **сам пакет**, а не файл внутри него, статический `createRequire` не проблема, а
+лишняя сложность: webpack распознает его и просто забандлит пакет
+(`require('fontkit')` → `c(231560)` в чанке прод-сборки). Рантайм-резолва нет, строки `fontkit`
+в бандле тоже нет, `outputFileTracingIncludes` не нужен. Обёртка здесь ничего не даёт — см.
+`src/lib/ifc/glyph-text.ts`. Граница простая: **файл внутри пакета — обёртка, пакет целиком —
+обычный импорт**.
 
 Второй рабочий вариант — `config.module.parser.javascript.createRequire = false` в
 `next.config.mjs`, но он действует на **весь граф**, включая `node_modules`: библиотека, которая
@@ -99,3 +159,17 @@ const dir = path.dirname(
 `PLAN_PROCUREMENT.md` §8.5.3) — два места: `src/lib/ifc/web-ifc.ts` (`web-ifc`, громкое падение
 сборки) и `src/lib/drawings/pdf-text.ts` (`pdfjs-dist`, тихая подмена резолва). Второе нашлось
 только грепом по `require.resolve(` — само по себе оно сборку не роняет.
+
+Третий способ (деструктуризация namespace) нашёлся там же четырьмя днями позже, 2026-09-22, уже
+на развёрнутом стенде: сборка 3D-модели дома падала `TypeError: d is not a function` в
+`withIfcModel`.
+
+⚠️ Локальная прод-сборка (`next build --webpack` + `next start`) ту же модель при этом собирала
+целиком — запись в БД с настоящей геометрией (6354 треугольника, 36 648 байт GLB), не переиспользование
+прошлого результата. **Расхождение осталось необъяснённым**: форма namespace от версии Node не
+зависит (проверено эмуляцией рантайма на обеих), а локальная сборка к моменту разбора была
+затёрта dev-сервером. Единственное замеченное отличие — в контейнере модуль `node:module`
+(`598995`) зарегистрирован только в entry-бандлах (`instrumentation.js`, `app/**/page.js`) и ни в
+одном `chunks/*.js`. Практический вывод для следующего раза тот же, что дала эта история: зелёный
+локальный прогон прод-сборки **не** закрывает вопрос, закрывает только живой прогон на стенде —
+[prod-build-runtime-diagnosis-ladder](/.claude/docs/prod-build-runtime-diagnosis-ladder.md).

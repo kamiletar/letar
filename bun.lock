@@ -616,7 +616,7 @@
     },
     "apps/domwellbes": {
       "name": "@letar/domwellbes",
-      "version": "0.308.4",
+      "version": "0.308.5",
       "dependencies": {
         "@gltf-transform/core": "^4.5.0",
         "@gltf-transform/extensions": "^4.5.0",
@@ -848,7 +848,7 @@
     },
     "apps/label-printer-desktop": {
       "name": "@letar/label-printer-desktop",
-      "version": "0.5.19",
+      "version": "0.5.20",
       "dependencies": {
         "@letar/chakra-provider": "workspace:*",
         "@letar/electron-monorepo-updater": "workspace:*",
