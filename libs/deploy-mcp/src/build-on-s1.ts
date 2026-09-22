@@ -1,14 +1,17 @@
 /**
- * Актуальные `BUILD_ON_S1_APPS`, `E2E_GATED_APPS` и `HARD_GATED_APPS` на момент вызова — без рестарта
- * процесса MCP. (Имя файла историческое: сначала читался один `BUILD_ON_S1_APPS`, гейты добавлены позже.)
+ * Актуальные `BUILD_ON_S1_APPS` и `E2E_GATED_APPS` на момент вызова — без рестарта процесса MCP.
+ * (Имя файла историческое: сначала читался один `BUILD_ON_S1_APPS`, гейт добавлен позже. До
+ * 2026-09-22 гейтов было два — warn-only `E2E_GATED_APPS` и fail-closed `HARD_GATED_APPS`,
+ * строгое подмножество первого — схлопнуты в один `E2E_GATED_APPS`, теперь всегда fail-closed:
+ * владелец снял warn-only как промежуточную стадию, см. комментарий у константы в infra-config.)
  *
  * Зачем. `letar.ts` один раз импортирует `server.ts`, а тот — `@letar/infra-config`; массивы
  * вычисляются при первом импорте и живут в памяти до перезапуска сессии. Когда приложение добавляют в
  * `BUILD_ON_S1_APPS` (пилоты §157 PLAN-INFRA-6.md), уже запущенный процесс про него не знает:
  * `deploy_app` уходит на s2 и собирает образ на прод-хосте вместо s1. Обнаружено 2026-09-22 на mandala
  * (пилот 3): deploy-agent-dev сверял время старта процесса со временем коммита и останавливал деплой до
- * перезапуска сессии — так уже случалось в пилотах 1–3. С гейтами последствие хуже: приложение,
- * добавленное в `HARD_GATED_APPS` после старта процесса, деплоилось вообще без e2e-проверки (fail-open).
+ * перезапуска сессии — так уже случалось в пилотах 1–3. С гейтом последствие хуже: приложение,
+ * добавленное в `E2E_GATED_APPS` после старта процесса, деплоилось вообще без e2e-проверки (fail-open).
  *
  * Как. Файл `libs/infra-config/src/index.ts` читается текстом при КАЖДОМ production-деплое и массивы
  * разбираются сканером литералов — не `import()` с cache-busting: у Bun (рантайм `letar.ts`) и у
@@ -78,19 +81,17 @@ export function parseStringArrayConst(source: string, name: string): string[] {
   )
 }
 
-/** Списки `libs/infra-config`, от которых зависит production-деплой (маршрут и e2e-гейты). */
+/** Списки `libs/infra-config`, от которых зависит production-деплой (маршрут и e2e-гейт). */
 export interface DeployLists {
   /** `BUILD_ON_S1_APPS` — приложения, которые в production собираются на s1. */
   buildOnS1Apps: string[]
-  /** `E2E_GATED_APPS` — приложения под e2e-гейтом (warn-only, кроме hard-gated). */
+  /** `E2E_GATED_APPS` — приложения с fail-closed e2e-гейтом. */
   e2eGatedApps: string[]
-  /** `HARD_GATED_APPS` — приложения с fail-closed e2e-гейтом. */
-  hardGatedApps: string[]
 }
 
 /**
  * Читает актуальные списки из файла (при каждом вызове — без кеша). Файл читается один раз; бросает,
- * если он недоступен или хотя бы один из трёх списков не разобрался.
+ * если он недоступен или хотя бы один из двух списков не разобрался.
  */
 export function readDeployLists(path: string = INFRA_CONFIG_SOURCE): DeployLists {
   let source: string
@@ -102,6 +103,5 @@ export function readDeployLists(path: string = INFRA_CONFIG_SOURCE): DeployLists
   return {
     buildOnS1Apps: parseStringArrayConst(source, 'BUILD_ON_S1_APPS'),
     e2eGatedApps: parseStringArrayConst(source, 'E2E_GATED_APPS'),
-    hardGatedApps: parseStringArrayConst(source, 'HARD_GATED_APPS'),
   }
 }

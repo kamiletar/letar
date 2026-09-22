@@ -14,7 +14,6 @@ import {
   BUILD_ON_S1_APPS,
   type DeployTarget,
   E2E_GATED_APPS,
-  HARD_GATED_APPS,
   type InfraServer,
   resolveDeployServer,
   SERVER_APPS,
@@ -34,14 +33,14 @@ const serverEnum = z.enum(['s1', 's2'], {
 })
 const E2E_GATE_MAX_AGE_MS = 24 * 60 * 60 * 1000
 
-/** Форма ответа `/api/e2e/status` — то же поле, что читает и warn-, и hard-gate. */
+/** Форма ответа `/api/e2e/status` — то же поле, что читает e2e-гейт в deploy_app(production). */
 interface E2eStatusResponse {
   lastStatus: { commitSha: string; passed: boolean; timestamp: string } | null
 }
 
 /** Результат оценки e2e-гейта: причины (человекочитаемые) + решение блокировать или нет. */
 interface E2eGateResult {
-  /** true только для hard-gated приложения с хотя бы одной причиной — деплой должен отказать. */
+  /** true при хотя бы одной причине — деплой должен отказать (гейт всегда fail-closed). */
   blocked: boolean
   /** Причины без ведущего «⚠️»/форматирования — вызывающий код сам решает, как их показать. */
   reasons: string[]
@@ -103,11 +102,11 @@ function comparisonHint(
  *
  * Вызывается только для приложений из `E2E_GATED_APPS` (`@letar/infra-config`) — вызывающий код
  * (`deploy_app`) пропускает эту функцию целиком для остальных, у них нет staging-e2e инфры и
- * причины были бы чистым шумом (см. §126 PLAN-INFRA-4.md). Для приложений из `HARD_GATED_APPS`
- * (подмножество `E2E_GATED_APPS`, инвариант закреплён тестом; PLAN-INFRA.md §18.7, инцидент
- * archetest 2026-07-28) любая причина блокирует деплой (`blocked: true`, fail-closed). Для
- * остальных gated-приложений — те же причины остаются предупреждениями, деплой продолжается
- * (`blocked: false`) — старое warn-only поведение Фазы 2 не меняется.
+ * причины были бы чистым шумом (см. §126 PLAN-INFRA-4.md). Гейт всегда fail-closed: любая причина
+ * блокирует деплой (`blocked: true`; PLAN-INFRA.md §18.7, инцидент archetest 2026-07-28). До
+ * 2026-09-22 существовал отдельный warn-only режим для части gated-приложений (только
+ * предупреждал, не блокировал) — владелец снял его как постоянное состояние: «всё, что деплоится
+ * на прод, должно перед этим проходить e2e», см. комментарий у `E2E_GATED_APPS` в infra-config.
  *
  * Коммит e2e-прогона может расходиться с `origin/main` (несвязанные посторонние коммиты
  * прилетают в main постоянно — это нормальный режим монорепо, не аномалия) — тогда сверка
@@ -120,7 +119,6 @@ function comparisonHint(
  */
 export async function evaluateE2eGate(
   app: string,
-  hardGated: boolean,
   fetchStatus: (app: string) => Promise<AgentResponse<E2eStatusResponse>> = (a) =>
     agentRequest<E2eStatusResponse>('s1', { path: `/api/e2e/status?app=${encodeURIComponent(a)}`, timeoutMs: 10000 }),
   getHeadSha: () => string = originMainSha,
@@ -133,12 +131,12 @@ export async function evaluateE2eGate(
     const res = await fetchStatus(app)
     if (!res.success) {
       reasons.push(`не удалось получить статус e2e на s1 (${res.error ?? 'нет данных'})`)
-      return { blocked: hardGated, reasons }
+      return { blocked: true, reasons }
     }
     const last = res.data?.lastStatus ?? null
     if (!last) {
       reasons.push(`для ${app} ещё ни разу не прогонялся e2e на staging — нет данных для сверки`)
-      return { blocked: hardGated, reasons }
+      return { blocked: true, reasons }
     }
     if (!last.passed) {
       reasons.push(`последний e2e для ${app} (коммит ${last.commitSha.slice(0, 7)}, ${last.timestamp}) УПАЛ`)
@@ -168,12 +166,9 @@ export async function evaluateE2eGate(
         }
       }
     } catch {
-      // Не удалось определить локальный HEAD. Для warn-only приложений просто пропускаем сверку
-      // коммита. Для hard-gated это тоже повод отказать (fail-closed) — мы не можем подтвердить,
-      // что прошедший e2e относится к тому же коду, что сейчас деплоится.
-      if (hardGated) {
-        reasons.push('не удалось определить локальный HEAD для сверки коммита e2e-прогона')
-      }
+      // Не удалось определить локальный HEAD — повод отказать (fail-closed): мы не можем
+      // подтвердить, что прошедший e2e относится к тому же коду, что сейчас деплоится.
+      reasons.push('не удалось определить локальный HEAD для сверки коммита e2e-прогона')
     }
     const ageMs = Date.now() - new Date(last.timestamp).getTime()
     if (ageMs > E2E_GATE_MAX_AGE_MS) {
@@ -182,7 +177,7 @@ export async function evaluateE2eGate(
   } catch (err) {
     reasons.push(`ошибка проверки e2e-статуса (${err instanceof Error ? err.message : String(err)})`)
   }
-  const result: E2eGateResult = { blocked: hardGated && reasons.length > 0, reasons }
+  const result: E2eGateResult = { blocked: reasons.length > 0, reasons }
   if (reasons.length > 0 && compared) {
     result.hint = comparisonHint(app, compared.e2eSha, compared.targetSha, getChangedPaths)
   }
@@ -198,7 +193,6 @@ function listChangeNotes(app: string, fresh: DeployLists): string[] {
   const lists: Array<{ name: string; startup: readonly string[]; current: readonly string[]; effect: string }> = [
     { name: 'BUILD_ON_S1_APPS', startup: BUILD_ON_S1_APPS, current: fresh.buildOnS1Apps, effect: 'маршрут' },
     { name: 'E2E_GATED_APPS', startup: E2E_GATED_APPS, current: fresh.e2eGatedApps, effect: 'гейт' },
-    { name: 'HARD_GATED_APPS', startup: HARD_GATED_APPS, current: fresh.hardGatedApps, effect: 'гейт' },
   ]
   return lists.flatMap(({ name, startup, current, effect }) =>
     startup.includes(app) === current.includes(app)
@@ -213,9 +207,9 @@ function listChangeNotes(app: string, fresh: DeployLists): string[] {
 
 export interface DeployMcpOptions {
   /**
-   * Файл со списками `BUILD_ON_S1_APPS`/`E2E_GATED_APPS`/`HARD_GATED_APPS`, который `deploy_app`
-   * перечитывает при каждом production-деплое. По умолчанию — `libs/infra-config/src/index.ts`;
-   * в тестах указывает на временный файл.
+   * Файл со списками `BUILD_ON_S1_APPS`/`E2E_GATED_APPS`, который `deploy_app` перечитывает при
+   * каждом production-деплое. По умолчанию — `libs/infra-config/src/index.ts`; в тестах
+   * указывает на временный файл.
    */
   infraConfigPath?: string
 }
@@ -432,13 +426,13 @@ export function createDeployMcpServer(options: DeployMcpOptions = {}): McpServer
       'target: "production" (по умолчанию, → сервер приложения) или "staging" (→ s1, образ <app>:staging).',
       'Приложения из BUILD_ON_S1_APPS (libs/infra-config) собираются на s1 даже в production: запрос идёт на',
       's1, образ уходит в registry, релиз выполняется на s2 — deploy_status/deploy_wait смотри на server: "s1".',
-      'Списки BUILD_ON_S1_APPS, E2E_GATED_APPS и HARD_GATED_APPS перечитываются из libs/infra-config/src/index.ts',
-      'при каждом production-вызове: правка действует сразу, рестарт MCP не нужен; не смог прочитать — отказ,',
+      'Списки BUILD_ON_S1_APPS и E2E_GATED_APPS перечитываются из libs/infra-config/src/index.ts при каждом',
+      'production-вызове: правка действует сразу, рестарт MCP не нужен; не смог прочитать — отказ,',
       'а не молчаливый откат на s2 или деплой без гейта.',
       'seed: true → deploy-affected.sh --seed (nx run <app>:db:seed после успешного деплоя).',
       'Возвращает deployId — опрашивай прогресс через deploy_status({ server, deployId, sinceLine }).',
       '⚠️ Изменяет production. Перед деплоем убедись, что коммиты запушены (git_status).',
-      '⛔ Для приложений из HARD_GATED_APPS (libs/infra-config; актуальный список — в файле, здесь он не',
+      '⛔ Для приложений из E2E_GATED_APPS (libs/infra-config; актуальный список — в файле, здесь он не',
       'дублируется, чтобы не устаревать) production-деплой ОТКАЗЫВАЕТ без свежего зелёного e2e на staging',
       'для текущего коммита — не обходится флагом.',
     ].join('\n'),
@@ -457,7 +451,7 @@ export function createDeployMcpServer(options: DeployMcpOptions = {}): McpServer
     const staging = target === 'staging'
     // Списки маршрута и гейтов читаются из файла на КАЖДЫЙ production-вызов, а не берутся из значений,
     // вычисленных при старте процесса: иначе приложение, добавленное в BUILD_ON_S1_APPS после запуска MCP,
-    // уходило бы на s2 (сборка на прод-хосте), а добавленное в HARD_GATED_APPS — деплоилось бы без e2e-гейта.
+    // уходило бы на s2 (сборка на прод-хосте), а добавленное в E2E_GATED_APPS — деплоилось бы без e2e-гейта.
     // Прочитать не вышло — отказ, а не откат на s2 или «гейта нет» по умолчанию.
     // Для staging списки не нужны (там всегда s1 и нет гейта), поэтому битый файл staging не блокирует.
     let lists: DeployLists | undefined
@@ -467,7 +461,7 @@ export function createDeployMcpServer(options: DeployMcpOptions = {}): McpServer
       } catch (err) {
         return errorText(
           [
-            `⛔ deploy_app(${app}, production) отказал: не удалось определить актуальные BUILD_ON_S1_APPS / E2E_GATED_APPS / HARD_GATED_APPS.`,
+            `⛔ deploy_app(${app}, production) отказал: не удалось определить актуальные BUILD_ON_S1_APPS / E2E_GATED_APPS.`,
             err instanceof Error ? err.message : String(err),
             '',
             'От списков зависит, куда пойдёт сборка (s1 или s2) и есть ли блокирующий e2e-гейт, поэтому без них',
@@ -479,21 +473,16 @@ export function createDeployMcpServer(options: DeployMcpOptions = {}): McpServer
     }
     const server = resolveDeployServer(app, target as DeployTarget, lists?.buildOnS1Apps)
     const listChangedNote = lists ? listChangeNotes(app, lists) : []
-    const hardGated = lists?.hardGatedApps.includes(app) ?? false
-    // Приложение из HARD_GATED_APPS гейтится и тогда, когда в E2E_GATED_APPS его нет: инвариант «HARD ⊂ E2E»
-    // закреплён тестом в infra-config, но правка файла между запусками может его нарушить — блокировка
-    // от этого отключаться не должна.
-    const gated = hardGated || (lists?.e2eGatedApps.includes(app) ?? false)
     // e2e-gate: только для production и только для приложений из E2E_GATED_APPS — у остальных
-    // нет staging-e2e инфры, проверка была бы чистым шумом (§126 PLAN-INFRA-4.md). Внутри
-    // gated-приложений: HARD_GATED_APPS — fail-closed (блокирует деплой), остальные — старое
-    // warn-only поведение Фазы 2 (только предупреждает).
-    const gate = gated ? await evaluateE2eGate(app, hardGated) : { blocked: false, reasons: [] }
+    // нет staging-e2e инфры, проверка была бы чистым шумом (§126 PLAN-INFRA-4.md). Всегда
+    // fail-closed — с 2026-09-22 warn-only режима для gated-приложений больше нет.
+    const gated = lists?.e2eGatedApps.includes(app) ?? false
+    const gate = gated ? await evaluateE2eGate(app) : { blocked: false, reasons: [] }
     if (gate.blocked) {
       return errorText(
         [
           ...(listChangedNote.length > 0 ? [...listChangedNote, ''] : []),
-          `⛔ deploy_app(${app}, production) заблокирован hard e2e-gate:`,
+          `⛔ deploy_app(${app}, production) заблокирован e2e-gate:`,
           ...gate.reasons.map((r) => `- ${r}`),
           '',
           ...(gate.hint ? [...gate.hint, ''] : []),
@@ -502,12 +491,7 @@ export function createDeployMcpServer(options: DeployMcpOptions = {}): McpServer
         ].join('\n'),
       )
     }
-    const gatePrefix = [
-      ...(listChangedNote.length > 0 ? [...listChangedNote, ''] : []),
-      ...(gate.reasons.length > 0
-        ? [...gate.reasons.map((r) => `⚠️ e2e-gate: ${r}.`), '', ...(gate.hint ? [...gate.hint, ''] : [])]
-        : []),
-    ]
+    const gatePrefix = listChangedNote.length > 0 ? [...listChangedNote, ''] : []
     try {
       const res = await agentRequest(server, {
         method: 'POST',
@@ -603,7 +587,7 @@ export function createDeployMcpServer(options: DeployMcpOptions = {}): McpServer
       'если baseUrl случайно окажется недостижим/не тем, Playwright молча поднимет свой локальный',
       'dev-сервер (webServer.reuseExistingServer в playwright.config.ts) и результат прогона будет',
       'ложным — проверял не staging-контейнер, а cold dev-режим (PLAN.md §18.7, aboi 2026-07-19).',
-      "Результат пишется в .last-e2e-status/<app>.json и читается warn-gate'ом в deploy_app(production).",
+      'Результат пишется в .last-e2e-status/<app>.json и читается e2e-гейтом в deploy_app(production).',
       'Возвращает runId — опрашивай через e2e_status.',
       '',
       'grep — точечный прогон вместо всего набора (playwright test --grep): имя файла-спека, название',
@@ -688,7 +672,7 @@ export function createDeployMcpServer(options: DeployMcpOptions = {}): McpServer
     description: [
       'Статус e2e-прогона на s1 (GET /api/e2e/status). Без runId — последний прогон приложения.',
       'sinceLine — курсор лога. Всегда возвращает lastStatus (персистентный .last-e2e-status/<app>.json),',
-      'даже если сейчас ничего не запущено — это то, что читает warn-gate в deploy_app(production).',
+      'даже если сейчас ничего не запущено — это то, что читает e2e-гейт в deploy_app(production).',
     ].join('\n'),
     inputSchema: z.strictObject({
       app: z.string().optional().describe('Имя приложения (для lastStatus и последнего прогона)'),

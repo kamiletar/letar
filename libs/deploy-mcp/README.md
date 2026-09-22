@@ -17,7 +17,7 @@ MCP-сервер: структурированный слой над REST API da
 | `deploy_status({ server, deployId?, sinceLine?, grep?, regex?, context?, routeTable? })` | Статус деплоя + инкрементальные логи по курсору `sinceLine`; включает `phases[]`/`stalled`; `grep`/`routeTable` — поиск по логу, ответ ограничен ~30 тыс. символов ([ниже](#поиск-по-большому-логу-деплоя)) | `GET /api/deploy/status`  |
 | `deploy_wait({ server, deployId?, waitSeconds? })`                                       | Long-poll вместо ручного опроса по таймеру — отпускает раньше `waitSeconds` (≤120с) при терминальном статусе/смене фазы/смене `stalled`                                                                     | `GET /api/deploy/wait`    |
 | `deploy_cancel({ server })`                                                              | Отмена текущего деплоя (SIGTERM)                                                                                                                                                                            | `POST /api/deploy/cancel` |
-| `deploy_app({ app, target, seed? })`                                                     | Запуск деплоя (`target`: `production`\|`staging`, `seed`: `--seed`) + e2e-gate (warn-only, hard для `HARD_GATED_APPS`)                                                                                      | `POST /api/deploy/app`    |
+| `deploy_app({ app, target, seed? })`                                                     | Запуск деплоя (`target`: `production`\|`staging`, `seed`: `--seed`) + fail-closed e2e-gate для `E2E_GATED_APPS`                                                                                             | `POST /api/deploy/app`    |
 | `deploy_infra({ service, server })`                                                      | Деплой `infra/<service>` (Traefik, acme-dns, ...) — расшифровка `secrets/deploy.conf` + `docker compose up -d`, без e2e-gate (§18.8.1)                                                                      | `POST /api/deploy/infra`  |
 | `run_e2e({ app, baseUrl, project?, grep?, workers? })`                                   | Запуск Playwright e2e на s1 против `baseUrl`; `grep` — точечный прогон. Схема строгая: неизвестные аргументы (`extraArgs`) отвергаются                                                                      | `POST /api/e2e/run`       |
 | `e2e_status({ app?, runId?, sinceLine? })`                                               | Статус e2e-прогона + персистентный `lastStatus` (что читает gate)                                                                                                                                           | `GET /api/e2e/status`     |
@@ -29,29 +29,27 @@ MCP-сервер: структурированный слой над REST API da
 автоматически — в отличие от приложений, у infra-сервисов нет единого маппинга «сервис →
 сервер» (`traefik` живёт на s1, `acme-dns` — на s2), `server` в `deploy_infra` обязателен.
 
-### Куда пойдёт production-деплой и есть ли гейт: три списка перечитываются каждый раз
+### Куда пойдёт production-деплой и есть ли гейт: два списка перечитываются каждый раз
 
 `deploy_app` с `target: "production"` перед выбором сервера и e2e-гейта читает
-`libs/infra-config/src/index.ts` **текстом** и берёт оттуда `BUILD_ON_S1_APPS`, `E2E_GATED_APPS` и
-`HARD_GATED_APPS` (`src/build-on-s1.ts`, `readDeployLists`), а не значения, вычисленные при старте
-процесса. Приложение, добавленное в список (или убранное — откат пилота) после запуска MCP, действует
+`libs/infra-config/src/index.ts` **текстом** и берёт оттуда `BUILD_ON_S1_APPS` и `E2E_GATED_APPS`
+(`src/build-on-s1.ts`, `readDeployLists`), а не значения, вычисленные при старте процесса.
+Приложение, добавленное в список (или убранное — откат пилота) после запуска MCP, действует
 со следующего вызова, **перезапуск не нужен**. Если результат по актуальному списку отличается от того, что
 процесс помнил при старте, ответ начинается со строки «<СПИСОК> перечитан из файла…» (в том числе в отказе
 гейта).
 
 - ⛔ Файл не читается, объявления нет или массив записан не литералом строк (spread, константа,
   вычисление) — `deploy_app` отказывает с причиной и **не обращается к агенту**. Молчаливого отката на s2 и
-  молчаливого «гейта нет» нет: сборка на прод-хосте вместо s1 и деплой hard-gated приложения без e2e — именно
+  молчаливого «гейта нет» нет: сборка на прод-хосте вместо s1 и деплой gated-приложения без e2e — именно
   те дефекты, которые это чинит. Формат записи — контракт, он назван комментарием у `BUILD_ON_S1_APPS`;
-  охранный тест `build-on-s1.spec.ts` сверяет разбор реального файла с тремя импортированными константами.
-- Приложение из `HARD_GATED_APPS` гейтится, даже если в `E2E_GATED_APPS` его нет (инвариант «HARD ⊂ E2E»
-  закреплён тестом в `infra-config`, но правка файла не должна отключать блокировку).
+  охранный тест `build-on-s1.spec.ts` сверяет разбор реального файла с двумя импортированными константами.
 - `target: "staging"` списки не читает (всегда s1, без гейта) и битым файлом не блокируется.
 - Читается файл рабочего дерева, не `origin/main`; список, изменённый только удалённо без `git pull` в
   чекауте, не виден — но `deploy-affected.sh --remote-release` на s1 сам отказывает приложению вне списка.
 - Не перечитываются остальные константы `infra-config` (`SERVERS`, `SERVER_APPS`) — они фиксируются при
   старте процесса. Сам код `deploy-mcp` подхватывается перезапуском.
-- Описание инструмента `deploy_app` не перечисляет hard-gated приложения: оно регистрируется один раз при
+- Описание инструмента `deploy_app` не перечисляет gated-приложения: оно регистрируется один раз при
   старте, и список в нём устарел бы так же, как устаревал массив.
 - Путь к файлу — опция `createDeployMcpServer({ infraConfigPath })` (для тестов).
 
@@ -69,18 +67,18 @@ MCP-сервер: структурированный слой над REST API da
 сравнивалось»: оба полных SHA, источник каждого, число и первые пути изменённых файлов и команду
 `git diff --stat`.
 
-Два режима одновременно (`evaluateE2eGate()` в `server.ts`):
+Гейт (`evaluateE2eGate()` в `server.ts`) применяется только к приложениям из `E2E_GATED_APPS`
+(`@letar/infra-config` — актуальный состав и обоснование каждого приложения смотри там, здесь
+список намеренно не дублируется) и всегда **fail-closed** — любая причина **блокирует** деплой:
+инструмент возвращает `isError` до вызова `/api/deploy/app`, ни `deploy_app`, ни сам прод-деплой
+не выполняются. Обхода флагом нет (PLAN-INFRA.md §18.7, инцидент archetest 2026-07-28 —
+сломанный рендер, не пойманный HTTP-проверками деплоя).
 
-- **Warn-only** (по умолчанию) — деплой не блокируется, причины просто дописываются в начало
-  ответа как предупреждения.
-- **Hard gate** (fail-closed) — для приложений из `HARD_GATED_APPS` (`@letar/infra-config` —
-  актуальный состав и обоснование каждого приложения смотри там, здесь список намеренно не
-  дублируется: три раза уже расходился) любая причина **блокирует**
-  деплой: инструмент возвращает `isError` до вызова `/api/deploy/app`, ни `deploy_app`, ни
-  сам прод-деплой не выполняются. Обхода флагом нет (PLAN-INFRA.md §18.7, инцидент archetest
-  2026-07-28 — сломанный рендер, не пойманный HTTP-проверками деплоя). Для `grandslamcup` (§18.6
-  Фаза 3) hard gate — отдельное, ещё не принятое решение после недели warn-only; он в
-  `HARD_GATED_APPS` не входит.
+⚠️ До 2026-09-22 существовало два списка — `E2E_GATED_APPS` (warn-only, только предупреждал) и
+`HARD_GATED_APPS` (fail-closed, строгое подмножество первого). Владелец их схлопнул: «мы же
+договорились, что у нас теперь всё HARD_GATED_APPS без исключений» — раз ни одно приложение не
+должно годами сидеть в warn-only, держать для этого отдельный список смысла не было, только риск
+рассинхрона (история — комментарий у `E2E_GATED_APPS` в `infra-config`).
 
 Типичный staging-пайплайн (реальный HTTPS-домен — максимально близко к прод-окружению, `localhost`
 не годится для проверки cookie/CORS/OIDC-редиректов):
@@ -89,7 +87,7 @@ MCP-сервер: структурированный слой над REST API da
 deploy_app({ app: "grandslamcup", target: "staging" })                              // → образ на s1
 run_e2e({ app: "grandslamcup", baseUrl: "https://grandslamcup-stage.s1.letar.best" }) // → nx e2e против staging
 e2e_status({ app: "grandslamcup", sinceLine: 0 })                                    // поллинг + финальный lastStatus
-deploy_app({ app: "grandslamcup" })                                                  // production — покажет gate-warnings
+deploy_app({ app: "grandslamcup" })                                                  // production — гейт проверит зелёный прогон
 ```
 
 `baseUrl` — явный параметр (не выводится автоматически): единая конвенция
@@ -207,13 +205,9 @@ Env-override `DEPLOY_MCP_REPO_ROOT` — если cwd не корень репо.
 - **Модель доверия процедурная.** `.mcp.json` общий для всех сессий, поэтому `deploy_app`
   технически вызываем из любой сессии — как и SSH-ключ сегодня. По конвенции деплоит только
   BlackCove ([deploy-coordination](/.claude/rules/deploy-coordination.md)).
-- **e2e-gate warn-only для приложений вне `HARD_GATED_APPS`** — не блокирует деплой при
-  отсутствии/провале e2e-данных. Для `grandslamcup` (PLAN.md §18.6) hard gate — отдельное,
-  ещё не принятое решение после недели эксплуатации warn-only.
 - **`run_e2e`/`e2e_status` требуют живого dashboard-agent на s1** — до тех пор возвращают ошибку
-  туннеля/недоступности; для warn-only приложений `deploy_app(production)` при этом всё равно
-  работает (gate просто warn'ит про недоступность s1, не падает), для `HARD_GATED_APPS` —
-  недоступность s1 тоже блокирует (fail-closed).
+  туннеля/недоступности; для `E2E_GATED_APPS` недоступность s1 блокирует `deploy_app(production)`
+  (fail-closed).
 - **`run_e2e` таймаут 15 мин** (`apps/dashboard-agent/src/routes/e2e.ts`) — зависший Playwright-
   прогон останавливается (SIGTERM → SIGKILL) и явно пишется как `passed:false`, иначе гейт читал
   бы устаревший «зелёный» статус, не зная о зависшем прогоне.
