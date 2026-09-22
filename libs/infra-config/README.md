@@ -87,19 +87,21 @@ export function resolveDeployServer(app: string, target?: DeployTarget, buildOnS
 Подробности —
 [deployment.md](/.claude/docs/deployment.md#сборка-на-s1-релиз-на-s2-plan-infra-6md-157).
 
-### e2e-гейты
+### e2e-гейт
 
 ```typescript
-/** Реестр приложений на staging e2e-гейте. Warn-only, только реестр — не читается кодом гейта. */
-export const E2E_GATED_APPS: string[]
-
 /**
  * Fail-closed pre-deploy гейт: `deploy_app(production)` в libs/deploy-mcp ОТКАЗЫВАЕТ
  * в деплое приложения из этого списка, если e2e на staging не прошёл/не прогонялся/
  * устарел/не на том коммите.
  */
-export const HARD_GATED_APPS: string[] // archetest, dsperevod, svoichuzhie, aboi, aprel8008, studio, auth-hub
+export const E2E_GATED_APPS: string[] // archetest, dsperevod, svoichuzhie, aboi, aprel8008, studio, auth-hub, ...
 ```
+
+⚠️ До 2026-09-22 было два списка — этот (warn-only) и отдельный `HARD_GATED_APPS` (fail-closed,
+строгое подмножество). Владелец их схлопнул в один, всегда fail-closed: держать отдельный
+warn-only список для приложений, которые всё равно не должны там годами оставаться, было только
+риском рассинхрона (история — комментарий у константы в `src/index.ts`).
 
 ### Текущий сервер (рантайм внутри контейнера)
 
