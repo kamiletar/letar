@@ -743,7 +743,10 @@
     },
     "apps/form-develop-app-e2e": {
       "name": "form-develop-app-e2e",
-      "version": "0.0.1",
+      "version": "0.0.2",
+      "dependencies": {
+        "@letar/e2e-testing": "workspace:*",
+      },
     },
     "apps/form-develop-app-shadcn": {
       "name": "@letar/form-develop-app-shadcn",
@@ -1266,7 +1269,7 @@
     },
     "libs/forms": {
       "name": "@letar/forms",
-      "version": "2.15.2",
+      "version": "2.15.3",
       "dependencies": {
         "@letar/format-utils": "workspace:*",
         "@tanstack/react-table": "^9.2.4",
