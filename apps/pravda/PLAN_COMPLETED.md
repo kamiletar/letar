@@ -1,5 +1,21 @@
 # Pravda - Выполненные задачи
 
+## Фикс идентичного rAF-бага в mobile-toc.tsx (2026-09-22, v1.9.10)
+
+Реализация ранее заведённой находки из записи v1.9.9 ниже (был заведён отдельным чипом через
+`spawn_task`). Мобильная версия TOC (`mobile-toc.tsx`, Drawer с FAB) была скопирована из
+`toc.tsx` до фикса v1.9.9 и унаследовала тот же баг: throttle scroll-хэндлера (прогресс чтения +
+активный пункт) считался на `requestAnimationFrame`, который замирает без фокуса окна. Применён
+идентичный фикс — `rafIdRef`/`requestAnimationFrame`/`cancelAnimationFrame` заменены на
+`throttleIdRef`/`setTimeout(50мс)`/`clearTimeout`, комментарии синхронизированы с `toc.tsx`.
+
+typecheck:tsgo и lint зелёные. `bun.lock` синхронизирован с версией через
+`bun install --lockfile-only` (дерево было чистым кроме правки pravda). Мобильный viewport
+по-прежнему не покрыт e2e-тестами pravda-e2e (`test.setViewportSize` там всегда desktop
+1400x900) — фикс не подтверждён живым прогоном, только typecheck/lint. Добавление e2e-теста на
+мобильный viewport для прогресс-бара — не обязательно для этой задачи, оставлено на будущее в
+`PLAN.md`.
+
 ## Фикс третьего бага скролл-кластера — прогресс-бар TOC (2026-09-22, v1.9.9)
 
 Продолжение сессии v1.9.8 (тот же тред agent-mail `pravda-e2e-first-run-failures`, letar-dev
