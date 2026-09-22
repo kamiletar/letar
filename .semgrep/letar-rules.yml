@@ -299,3 +299,31 @@ rules:
     pattern-either:
       - pattern: ALLOW_DEV_SESSION=$X
       - pattern: DEV_SESSION_TOKEN=$X
+
+  # WARNING, не ERROR: не блокирует существующий код (14+ уже пофикшенных мест держат голый
+  # 'instant', см. CHANGELOG @letar/hooks 0.6.2) — новый прямой вызов 'smooth' должен быть виден
+  # в pre-commit, чтобы автор сознательно выбрал instant или scrollIntoViewSafe, не заново
+  # наступал на грабли. `pattern-regex`, не AST: объектный литерал `{ behavior: 'smooth', ... }`
+  # матчится по порядку ключей в семгреп-паттернах JS/TS (как и в letar-forms-правилах выше),
+  # regex надёжнее для «behavior где угодно внутри options».
+  - id: letar-scrollintoview-smooth-frozen-without-focus
+    languages: [generic]
+    severity: WARNING
+    paths:
+      include:
+        - '*.ts'
+        - '*.tsx'
+      exclude:
+        - libs/hooks/src/lib/browser/scroll-into-view-safe.ts
+        - libs/hooks/src/lib/browser/scroll-into-view-safe.spec.ts
+    message: >-
+      scrollIntoView({ behavior: 'smooth' })/window.scrollTo({ behavior: 'smooth' }) зависает
+      НАВСЕГДА (не медленно), если у окна нет OS-фокуса — Chromium анимирует 'smooth' через
+      requestAnimationFrame, который без фокуса не тикает вовсе. Особенно опасно в Playwright:
+      параллельные воркеры часто не держат реальный фокус окна. Если плавность не несёт
+      функциональной нагрузки (переход по якорю, автоскролл чата/лога, скролл к невалидному полю
+      формы — большинство случаев) — замени на behavior:'instant'. Если плавность осознанная
+      часть дизайна и окно обычно в фокусе — используй scrollIntoViewSafe из
+      @letar/hooks/browser, который сам переключается на instant при потере фокуса или
+      prefers-reduced-motion. См. .claude/docs/scrollintoview-smooth-frozen-without-window-focus.md.
+    pattern-regex: '(scrollIntoView|scrollTo)\(\s*\{[^}]*behavior:\s*[''"]smooth[''"]'
