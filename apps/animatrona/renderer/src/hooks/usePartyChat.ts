@@ -102,9 +102,11 @@ export function usePartyChat(): UsePartyChatReturn {
           setUnreadCount((prev) => prev + 1)
         }
 
-        // Автоскролл к последнему сообщению
+        // Автоскролл к последнему сообщению. 'instant', не 'smooth' — без OS-фокуса
+        // окна анимация зависает навсегда
+        // (.claude/docs/scrollintoview-smooth-frozen-without-window-focus.md)
         setTimeout(() => {
-          messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+          messagesEndRef.current?.scrollIntoView({ behavior: 'instant' })
         }, 100)
       })
     }
