@@ -616,7 +616,7 @@
     },
     "apps/domwellbes": {
       "name": "@letar/domwellbes",
-      "version": "0.308.0",
+      "version": "0.308.1",
       "dependencies": {
         "@gltf-transform/core": "^4.5.0",
         "@gltf-transform/extensions": "^4.5.0",
@@ -834,7 +834,7 @@
     },
     "apps/kami-key-the-landing": {
       "name": "@letar/kami-key-the-landing",
-      "version": "0.4.3",
+      "version": "0.4.4",
       "dependencies": {
         "@letar/glitchtip": "workspace:*",
       },
