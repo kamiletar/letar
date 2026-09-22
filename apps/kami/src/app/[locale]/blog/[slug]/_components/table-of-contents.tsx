@@ -110,7 +110,9 @@ export function TableOfContents({ items, locale }: Props) {
                 e.preventDefault()
                 const element = document.getElementById(item.id)
                 if (element) {
-                  element.scrollIntoView({ behavior: 'smooth' })
+                  // 'smooth' зависает навсегда без OS-фокуса окна — rAF-анимация не тикает
+                  // (.claude/docs/scrollintoview-smooth-frozen-without-window-focus.md)
+                  element.scrollIntoView({ behavior: 'instant' })
                   // Обновляем URL без перезагрузки
                   history.pushState(null, '', `#${item.id}`)
                 }

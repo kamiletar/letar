@@ -29,9 +29,11 @@ export function ChatMessages({ messages, isLoading, error }: ChatMessagesProps) 
   const t = useTranslations('chat')
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
-  // Автоскролл к последнему сообщению
+  // Автоскролл к последнему сообщению. 'instant', не 'smooth' — без OS-фокуса окна
+  // smooth-анимация зависает навсегда (rAF не тикает), см.
+  // .claude/docs/scrollintoview-smooth-frozen-without-window-focus.md
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    messagesEndRef.current?.scrollIntoView({ behavior: 'instant' })
   }, [messages])
 
   return (
