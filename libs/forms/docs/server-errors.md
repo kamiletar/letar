@@ -235,7 +235,10 @@ function MaterialForm() {
   своим post-submit `reset()` стирал бы только что применённые field-level ошибки раньше, чем
   пользователь успевал бы их увидеть. Вызывающему коду свой `try/catch` всё равно не нужен —
   `<Form>` сам ловит исключение из `onSubmit` там же, где уже ловит `throw` из
-  `middleware.onError`. При успехе `run` резолвится результатом `action`.
+  `middleware.onError`. При успехе `run` резолвится результатом `action` — если `action` обёрнута
+  в `catchActionFailure` (`T | ActionFailure`), тип результата и `onSuccess` сужен до `T`:
+  `ActionFailure` из типа исключена, потому что рантайм уже отсёк её выше (бросил
+  `ActionFailureError`, до этой точки такое значение не доходит).
 - `toaster` — опционален, минимальный контракт `{ create: (opts: { type: 'error' | 'success';
   title: string }) => void }`, совпадает с `createAppToaster()` из `@letar/ui`. Без него
   единственный канал ошибки — `<Form.Errors />` (для `formErrors`) и подсветка поля (для

@@ -4,6 +4,13 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.15.1] - 2026-09-22
+
+### Fixed
+
+- `useFormServerAction.run` сужает тип результата до `Exclude<TData, ActionFailure>` (реализация и
+  разбор — в `@letar/forms-react` 0.10.1).
+
 ## [2.15.0] - 2026-09-21
 
 ### Added

@@ -6,6 +6,31 @@
 
 ## Backlog (запросы от агентов)
 
+### ✅ [2026-09-22] `useFormServerAction.run` — сужение типа результата до `Exclude<TData, ActionFailure>` (закрыт forms-react 0.10.1 / forms 2.15.1, от координатора)
+
+- **Запросил:** `forms-coordinator-dev` (agent-mail, тред `form-action-result-extract`), задача #1819
+- **Описание:** после закрытия «Отказ Server Action значением» (пункт ниже) `run`'s тип результата
+  оставался `TData` целиком — для action, обёрнутой в `catchActionFailure` (`TData = T |
+  ActionFailure`), `onSuccess`/резолв `run` типизировались как union с `ActionFailure`, хотя
+  рантайм уже отсекал отказ (бросал `ActionFailureError` до `onSuccess`). Блокировало миграцию
+  domwellbes на импорты `@letar/forms` без ручного `as`/type guard на каждом вызове.
+- **Решение:** `run: <TData>(action, onSuccess?: (result: Exclude<TData, ActionFailure>) => void)
+  => Promise<Exclude<TData, ActionFailure>>`. Внутри — явное приведение `result as Exclude<TData,
+  ActionFailure>` после рантайм-проверки `isActionFailure`: TS не сужает неограниченный generic
+  `TData` через predicate внутри тела функции самостоятельно.
+- **Тест на типы:** `use-form-server-action.typetest.ts` (`expectTypeOf` + instantiation
+  expressions `run<...>`, TS 4.7+ — нужны, чтобы проверить поведение generic-метода на конкретном
+  `TData`) — 4 случая: `T | ActionFailure`, `TData` без пересечения с `ActionFailure` (старые
+  вызовы), `TData` структурно совпадающий с `ActionFailure` целиком без опционального `field`,
+  вырожденный `TData = ActionFailure` → `never`. Проверено вручную через `tsgo --noEmit -p
+  tsconfig.spec.json` (ни один типecheck-таргет `nx` не гоняет `tsconfig.spec.json` — то же самое
+  относится и к прежнему `context.typetest.ts`, известный, не новый разрыв покрытия).
+- **Проверено:** `nx test forms-react` (11 тестов, поведение не изменилось), `nx typecheck:tsgo
+  forms-react/forms/aboi` — зелёные; 4 формы входа aboi (Better Auth) не задеты (`Exclude` для их
+  `TData` — тождество). Демо/пример/гайд не трогали — `run(...)` там вызывается без `onSuccess`
+  или без обращения к свойствам результата.
+- **Статус:** ✅ закрыт
+
 ### [ ] [2026-09-22] `Form.Errors` — сводка показывает сырой ключ поля вместо подписи (от domwellbes)
 
 - **Запросил:** временная identity `BoldRobin` (сессия domwellbes, тред `forms-domwellbes-error-summary-field-key`)
