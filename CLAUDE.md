@@ -125,6 +125,7 @@
 - [content-block-edit-gate-not-wired](/.claude/docs/content-block-edit-gate-not-wired.md) ⚠️ кнопка рядом с блоком не доказывает, что блок читает её ключи
 - [faceted-catalog-pitfalls](/.claude/docs/faceted-catalog-pitfalls.md) фасетные фильтры каталога
 - [raf-vs-timers-background-tab](/.claude/docs/raf-vs-timers-background-tab.md) ⚠️ `rAF` замирает в фоновой вкладке, таймеры душатся
+- [scrollintoview-smooth-frozen-without-window-focus](/.claude/docs/scrollintoview-smooth-frozen-without-window-focus.md) ⚠️ `scrollIntoView(smooth)` зависает навсегда без OS-фокуса окна — та же природа, что и `rAF`
 - [react-use-transition-initial-pending-race](/.claude/docs/react-use-transition-initial-pending-race.md) ⚠️ `isPending` ещё `false`, когда данных уже нет
 - [sticky-actionbar-cookiebanner-zindex-race](/.claude/docs/sticky-actionbar-cookiebanner-zindex-race.md) ⚠️ баннер перехватывает клик по CTA на короткой странице
 
