@@ -118,6 +118,7 @@
 - [form-footer-formactions](/.claude/docs/form-footer-formactions.md) футер формы — только `FormActions`, не `Flex` руками
 - [images](/.claude/docs/images.md) · [upload-storage-backend](/.claude/docs/upload-storage-backend.md) `StorageBackend`, S3 не реализован
 - [font-cmap-coverage-verification](/.claude/docs/font-cmap-coverage-verification.md) покрытие символов — разбором `cmap`, не описанием шрифта
+- [nextjs-font-google-to-local-migration-pattern](/.claude/docs/nextjs-font-google-to-local-migration-pattern.md) `next/font/google`→`next/font/local`: скрипты, subset ДО instancer, что исключать
 - [sharp-raw-composite-alpha-pitfall](/.claude/docs/sharp-raw-composite-alpha-pitfall.md) ⚠️ `composite()` тихо добавляет alpha-канал
 - [sharp-svg-textpath-not-rendered](/.claude/docs/sharp-svg-textpath-not-rendered.md) ⚠️ `<textPath>` не рендерится вовсе, без ошибки
 - [sharp-svg-font-family-ignored](/.claude/docs/sharp-svg-font-family-ignored.md) ⚠️ `font-family`/`@font-face` не влияют на растр — нужны контуры глифов
