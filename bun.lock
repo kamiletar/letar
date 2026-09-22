@@ -1269,7 +1269,7 @@
     },
     "libs/forms": {
       "name": "@letar/forms",
-      "version": "2.15.3",
+      "version": "2.16.0",
       "dependencies": {
         "@letar/format-utils": "workspace:*",
         "@tanstack/react-table": "^9.2.4",
@@ -1329,7 +1329,7 @@
     },
     "libs/forms-react": {
       "name": "@letar/forms-react",
-      "version": "0.10.1",
+      "version": "0.11.0",
       "dependencies": {
         "@letar/forms-core": "workspace:*",
       },
