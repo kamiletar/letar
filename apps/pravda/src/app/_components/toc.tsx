@@ -70,7 +70,13 @@ export function TableOfContents() {
   const rafIdRef = useRef<number | null>(null)
   const tocRef = useRef<HTMLElement>(null)
 
-  // Автоскролл к активному пункту в TOC
+  // Автоскролл к активному пункту в TOC.
+  // `behavior: 'instant'`, не `'smooth'` — плавная анимация зависит от rAF-тика, а он не идёт,
+  // пока у окна нет фокуса (тот же класс проблемы, что и застывающий rAF в фоновой вкладке, см.
+  // .claude/docs/raf-vs-timers-background-tab.md): без фокуса `scrollIntoView({behavior:'smooth'})`
+  // не сдвигает скролл НИКОГДА, даже за много секунд, а не просто медленнее. Playwright-браузеры
+  // в CI регулярно без реального фокуса окна — ловило `toc.spec.ts` (автоскролл TOC к активному
+  // пункту, клик по пункту TOC) стабильно в chromium/firefox.
   useEffect(() => {
     if (!activeId || !tocRef.current) {
       return
@@ -78,7 +84,7 @@ export function TableOfContents() {
 
     const activeLink = tocRef.current.querySelector(`[data-toc-id="${activeId}"]`)
     if (activeLink) {
-      activeLink.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+      activeLink.scrollIntoView({ behavior: 'instant', block: 'nearest' })
     }
   }, [activeId])
 
@@ -106,8 +112,10 @@ export function TableOfContents() {
     // реально проскроллили).
     // Фикс — детерминированный расчёт на основе `getBoundingClientRect().top`: активный пункт —
     // последний (по порядку документа) заголовок, чей верхний край уже пересёк линию триггера
-    // (ACTIVE_THRESHOLD, совпадает с HEADER_HEIGHT/SCROLL_MARGIN_TOP). Классический паттерн
-    // scroll-spy, устойчив к вложенности/размеру наблюдаемых контейнеров.
+    // (ACTIVE_THRESHOLD = HEADER_HEIGHT (60, scroll-padding-top в globals.css) + SCROLL_MARGIN_TOP
+    // (20, scroll-margin-top секций/глав/статей) — при scrollIntoView/переходе по #hash оба
+    // отступа складываются, см. комментарий у SCROLL_MARGIN_TOP в lib/constants.ts). Классический
+    // паттерн scroll-spy, устойчив к вложенности/размеру наблюдаемых контейнеров.
     const ACTIVE_THRESHOLD = 80
 
     const handleScroll = () => {
@@ -267,7 +275,8 @@ export function TableOfContents() {
                     e.preventDefault()
                     const target = document.getElementById(heading.id)
                     if (target) {
-                      target.scrollIntoView({ behavior: 'smooth' })
+                      // 'instant', не 'smooth' — см. комментарий у автоскролла TOC выше
+                      target.scrollIntoView({ behavior: 'instant' })
                       // Обновляем URL без перезагрузки
                       window.history.pushState(null, '', `#${heading.id}`)
                     }

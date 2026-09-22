@@ -12,6 +12,25 @@
 - `vitest.config.mts`: убран избыточный alias `@letar/hooks` — пакет уже прямая зависимость,
   симлинк bun резолвит его без alias.
 
+## [1.9.8] - 2026-09-22
+
+### Fixed
+
+- `src/lib/constants.ts`: `SCROLL_MARGIN_TOP` (80px → 20px). `html { scroll-padding-top: 60px }`
+  (globals.css) и `scroll-margin-top` секций/глав/статей складываются при `scrollIntoView`/переходе
+  по `#hash` (поведение спеки CSS Scroll Snap) — реальный отступ элемента от верха вьюпорта был
+  140px, а не задуманные 80, на которые рассчитан `ACTIVE_THRESHOLD` в `toc.tsx`. Из-за этого
+  подсветка активного пункта TOC (`aria-current`) никогда не срабатывала после скролла/клика/
+  перехода по якорю — стабильный баг, не флейк, ловил `apps/pravda-e2e/src/toc.spec.ts:54`
+  («подсветка активного пункта при скролле») сразу во всех трёх браузерах.
+- `src/app/_components/toc.tsx`: клик по пункту TOC и автоскролл TOC к активному пункту —
+  `behavior: 'smooth'` → `'instant'`. Плавная анимация зависит от тика rAF, а он не идёт, пока у
+  окна нет фокуса (тот же класс проблемы, что застывающий rAF в фоновой вкладке, см.
+  `.claude/docs/raf-vs-timers-background-tab.md`): без фокуса `scrollIntoView({behavior:'smooth'})`
+  не сдвигает скролл вовсе, даже за много секунд, а не просто медленнее. Playwright-браузеры в CI
+  регулярно без реального фокуса окна — ловило `toc.spec.ts:105` (клик по TOC) в chromium
+  стабильно и `toc.spec.ts:144` (автоскролл TOC) флейково в chromium/firefox.
+
 ## [1.9.6] - 2026-09-10
 
 ### Fixed
