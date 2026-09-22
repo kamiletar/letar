@@ -147,6 +147,13 @@ export const E2E_GATED_APPS: string[] = [
   // apps/mandala/PLAN_COMPLETED.md § Раунд 7—8 (accountId в seed, ненадёжный сид согласия
   // баннеров, гонка гидратации при клике по SSR-ссылкам).
   'mandala',
+  // pravda добавлен 2026-09-22 после первого подтверждённого прогона на staging (коммит
+  // e61e2cbae, 223 passed / 9 failed / 5 flaky из 240). Все оставшиеся падения — в двух уже
+  // принятых владельцем кластерах, не новые баги: RSC-навигация Firefox/WebKit (апстрим-баг
+  // Next.js vercel/next.js#85374, включая bookmarks.spec.ts:132 — диагностирован как тот же
+  // кластер) и скролл/прогресс-кластер (решение владельца 2026-09-01 не диагностировать и не
+  // чинить). Разбор — apps/pravda/PLAN.md, тред agent-mail `pravda-e2e-first-run-failures`.
+  'pravda',
 ]
 
 /**
@@ -184,12 +191,12 @@ export const E2E_GATED_APPS: string[] = [
  *
  * Приложения БЕЗ staging-инфры/e2e-suite (пока не могут попасть ни в один из списков) —
  * `dashboard-agent`, `dashboard` (нет staging-compose и не может быть: перезапускают сами
- * себя), `umami` (сторонний продукт). Приложения с e2e-suite, но БЕЗ staging-compose —
- * `form-docs`, `animatrona-landing`, `animatrona-tracker`, `kami-key-the-landing`,
- * `letar-landing` — завести им `docker-compose.staging.yml` до включения в гейт: отдельная
- * задача, не входит в этот коммит. `pravda` — единственное исключение: и e2e-suite, и
- * staging-compose уже есть, но в `E2E_GATED_APPS` не заведено — тоже отдельным шагом, требует
- * первого подтверждённого прогона перед регистрацией.
+ * себя), `umami` (сторонний продукт). Приложения с e2e-suite и docker-compose.staging.yml
+ * (заведены 2026-09-22, коммит `11c63e014`), но БЕЗ подтверждённого зелёного прогона на s1 —
+ * `form-docs`, `animatrona-landing`, `kami-key-the-landing`, `letar-landing`. `animatrona-tracker`
+ * — есть e2e-suite, staging-compose не заведён (БД+Redis+Better Auth OIDC через Ключницу,
+ * отдельная проработка). `pravda` зарегистрирован в `E2E_GATED_APPS` 2026-09-22 после первого
+ * зелёного прогона (см. комментарий там) — в `HARD_GATED_APPS` не входит, ждёт истории прогонов.
  */
 export const HARD_GATED_APPS: string[] = [
   'archetest',
