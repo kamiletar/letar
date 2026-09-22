@@ -129,7 +129,12 @@ test.describe('Закладки', () => {
     expect(bookmarks).toHaveLength(0)
   })
 
-  test('закладки восстанавливаются после перезагрузки', async ({ page }) => {
+  test('закладки восстанавливаются после перезагрузки', async ({ page, browserName }) => {
+    // firefox: RSC-навигация не переживает reload в связке с client-side state — блокировано
+    // известным неисправленным багом Next.js 16.0-16.3 в output:'export' (vercel/next.js#85374,
+    // открыт на 2026-08-25). Владелец решил не чинить — см. apps/pravda/PLAN.md.
+    test.skip(browserName === 'firefox', 'известный баг апстрима Next.js RSC-навигации')
+
     // Добавляем закладку
     await page.goto('/constitution/')
     await page.waitForLoadState('domcontentloaded')

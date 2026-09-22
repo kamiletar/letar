@@ -94,6 +94,14 @@ test.describe('Клиентская навигация (RSC)', () => {
    * Это регрессионный тест для бага Next.js 16 с RSC payload'ами:
    * @see https://github.com/vercel/next.js/issues/85374
    */
+
+  // firefox: весь блок — известный неисправленный баг Next.js 16.0-16.3 RSC-навигации в
+  // output:'export' (vercel/next.js#85374, открыт на 2026-08-25). Владелец решил не чинить —
+  // см. apps/pravda/PLAN.md.
+  test.beforeEach(async ({ browserName }) => {
+    test.skip(browserName === 'firefox', 'известный баг апстрима Next.js RSC-навигации')
+  })
+
   test('навигация из Налогового кодекса в Семейный обновляет контент', async ({ page }) => {
     // Начинаем с Налогового кодекса
     await page.goto('/codes/tax/')

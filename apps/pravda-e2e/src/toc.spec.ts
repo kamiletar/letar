@@ -215,7 +215,12 @@ test.describe('Table of Contents (TOC)', () => {
     expect(Number(finalProgress)).toBeGreaterThan(80)
   })
 
-  test('TOC обновляется при клиентской навигации на другой документ', async ({ page }) => {
+  test('TOC обновляется при клиентской навигации на другой документ', async ({ page, browserName }) => {
+    // firefox: RSC-навигация не обновляет TOC — блокировано известным неисправленным багом
+    // Next.js 16.0-16.3 в output:'export' (vercel/next.js#85374, открыт на 2026-08-25). Владелец
+    // решил не чинить — см. apps/pravda/PLAN.md.
+    test.skip(browserName === 'firefox', 'известный баг апстрима Next.js RSC-навигации')
+
     await page.setViewportSize({ width: 1400, height: 900 })
 
     const toc = page.locator('nav[aria-label="Содержание документа"]')
