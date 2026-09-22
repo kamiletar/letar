@@ -92,6 +92,17 @@ export async function fillWithHydrationRetry(
  * завершилась, и `filechooser` просто не наступит (90с таймаут вместо потерянного `change`). Прямой
  * `setInputFiles()` на локаторе инпута с ретраем — единственный надёжный путь для Dropzone-паттерна
  * этого репозитория (скрытый input + видимый div-триггер).
+ *
+ * ⚠️ НЕ годится, если компонент дизейблит сам `<input>` на время загрузки (например
+ * `ImageUploadField` из `@letar/image-upload` прокидывает в `Dropzone` `disabled={isLoading}`).
+ * Ретрай внутри `toPass()` упирается в actionability-проверку Playwright («элемент должен быть
+ * enabled») и виснет в ожидании, пока инпут снова станет доступен — весь `timeoutMs` уходит на
+ * это ожидание, а не на то, чтобы дать первой (успешной) загрузке время дойти до конца. Симптом —
+ * стабильный `Timeout ...ms exceeded`, не флейк. Для такого паттерна нужен одноразовый
+ * `setInputFiles()` без ретрая (плюс `page.waitForLoadState('networkidle')` перед ним, если гонка
+ * вызвана донагрузкой JS формы, а не самой гидратацией) — см.
+ * `.claude/docs/e2e-testing.md` § «networkidle в dev-режиме Next.js», прецедент mandala
+ * (2026-09-22, найдено при попытке перенести этот хелпер туда — 2/2 падений).
  */
 export async function setInputFilesWithHydrationRetry(
   fileInput: Locator,

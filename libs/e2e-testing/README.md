@@ -105,6 +105,15 @@ staging используется отдельный staging-only роут `/api/
   )
   ```
 
+  ⚠️ **Не годится, если компонент дизейблит сам `<input>` на время загрузки** (например
+  `ImageUploadField` из `@letar/image-upload`, где `Dropzone` получает `disabled={isLoading}`).
+  Повторный `setInputFiles()` внутри ретрая упирается в actionability-проверку Playwright
+  («элемент должен быть enabled») и виснет в ожидании, съедая весь `timeoutMs` вместо того, чтобы
+  дать первой загрузке время завершиться — итог стабильный `Timeout ...ms exceeded`, не флейк.
+  Проверено на `mandala` (2026-09-22, 2/2 падений) — для таких Dropzone нужен одноразовый
+  `setInputFiles()` без ретрая, см. `.claude/docs/e2e-testing.md` § «networkidle в dev-режиме
+  Next.js».
+
 ## Пример
 
 ```ts
