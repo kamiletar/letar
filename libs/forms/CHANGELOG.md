@@ -4,6 +4,18 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.15.3] - 2026-09-22
+
+### Fixed
+
+- **`Form.Field.FileUpload` (image-варианты `button`/`dropzone`) крашился при выборе файла** —
+  `FileImageList` оборачивала превью в обычный `<HStack>` вместо `<FileUpload.ItemGroup>`
+  (в отличие от соседнего `FileList`, который делал это правильно). Ark-UI требует контекст
+  `FileUploadItemGroupPropsProvider` для рендера `FileUpload.Item` — без него `ContextError`
+  ловится `FieldErrorBoundary` и подменяет **всё поле целиком** (включая кнопку/дропзону) на
+  fallback. Найдено при работе над `form-develop-app-e2e` (`file-upload-demo.spec.ts`) — баг
+  ломал любой `accept="image/*"` upload с уже выбранным файлом, не только демо-страницу.
+
 ## [2.15.2] - 2026-09-22
 
 ### Fixed

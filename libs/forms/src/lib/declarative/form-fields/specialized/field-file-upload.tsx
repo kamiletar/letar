@@ -86,29 +86,31 @@ function FileImageList({ clearable }: { clearable?: boolean }) {
   }
 
   return (
-    <HStack wrap="wrap" gap="3" mt="2">
-      {fileUpload.acceptedFiles.map((file) => (
-        <FileUpload.Item key={file.name} file={file} p="2" width="auto" pos="relative">
-          {clearable && (
-            <Float placement="top-end">
-              <FileUpload.ItemDeleteTrigger asChild>
-                <IconButton size="2xs" variant="solid" colorPalette="red" rounded="full">
-                  <LuX />
-                </IconButton>
-              </FileUpload.ItemDeleteTrigger>
-            </Float>
-          )}
-          <FileUpload.ItemPreview type="image/*" asChild>
-            <FileUpload.ItemPreviewImage boxSize="16" rounded="md" objectFit="cover" />
-          </FileUpload.ItemPreview>
-          <FileUpload.ItemPreview type=".*" asChild>
-            <Icon fontSize="4xl" color="fg.muted">
-              <LuFile />
-            </Icon>
-          </FileUpload.ItemPreview>
-        </FileUpload.Item>
-      ))}
-    </HStack>
+    <FileUpload.ItemGroup asChild>
+      <HStack wrap="wrap" gap="3" mt="2">
+        {fileUpload.acceptedFiles.map((file) => (
+          <FileUpload.Item key={file.name} file={file} p="2" width="auto" pos="relative">
+            {clearable && (
+              <Float placement="top-end">
+                <FileUpload.ItemDeleteTrigger asChild>
+                  <IconButton size="2xs" variant="solid" colorPalette="red" rounded="full">
+                    <LuX />
+                  </IconButton>
+                </FileUpload.ItemDeleteTrigger>
+              </Float>
+            )}
+            <FileUpload.ItemPreview type="image/*" asChild>
+              <FileUpload.ItemPreviewImage boxSize="16" rounded="md" objectFit="cover" />
+            </FileUpload.ItemPreview>
+            <FileUpload.ItemPreview type=".*" asChild>
+              <Icon fontSize="4xl" color="fg.muted">
+                <LuFile />
+              </Icon>
+            </FileUpload.ItemPreview>
+          </FileUpload.Item>
+        ))}
+      </HStack>
+    </FileUpload.ItemGroup>
   )
 }
 

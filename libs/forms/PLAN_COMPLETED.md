@@ -1,5 +1,36 @@
 # Выполненные задачи — @letar/forms
 
+## 2026-09-22 (сессия form-develop-app-dev) — `FileImageList` не оборачивала превью в `FileUpload.ItemGroup`
+
+**Контекст:** задача — обернуть `setInputFiles()` в `apps/form-develop-app-e2e/src/file-upload-demo.spec.ts`
+в `setInputFilesWithHydrationRetry` (защита от гонки гидратации, найденной в domwellbes 2026-09-22).
+Прогон 5 повторов показал, что 5 из 7 целевых тестов падают **детерминированно**, не флаково —
+и вовсе не из-за гонки.
+
+**Root cause:** `FileImageList` (`field-file-upload.tsx`, вариант превью для `accept="image/*"`)
+оборачивала `FileUpload.Item` в обычный `<HStack>`, а не в `<FileUpload.ItemGroup>` — в отличие от
+соседнего `FileList` (не-image вариант), который использует `ItemGroup` правильно. Ark-UI требует
+контекст `FileUploadItemGroupPropsProvider` для рендера `Item`; без него `ContextError`
+(`useFileUploadItemGroupPropsContext returned undefined`) ловится `FieldErrorBoundary`
+(`create-field-primitives.tsx:313`, оборачивает ЦЕЛОЕ поле, не только список превью) и подменяет
+**всё поле** — включая кнопку "Upload avatar"/дропзону — на error fallback, как только выбран
+хотя бы один файл.
+
+**Фикс (2.15.3):** `FileImageList` оборачивает `<HStack>` в `<FileUpload.ItemGroup asChild>` —
+сохраняет вёрстку (`wrap`/`gap`), добавляет обязательный контекст.
+
+**Побочная находка (не баг библиотеки):** `FileImageList` показывает только превью-картинку
+(`alt="preview of <имя>"`) и delete-кнопку (`aria-label="delete file <имя>"`) — **не** текстовое
+имя файла. Тесты, ожидающие `getByText(filename)` для image-полей, всегда будут падать
+независимо от этого фикса — это разница в UI между `FileImageList`/`FileList`, а не регрессия.
+`file-upload-demo.spec.ts` обновлён на `getByAltText('preview of <имя>')` для image-тестов.
+
+**Не покрыто:** два теста в том же файле падают по НЕсвязанным причинам (не трогались —
+вне scope этой задачи, заведены отдельными чипами через `spawn_task`):
+`should display input variant with placeholder` (ожидает несуществующий текст плейсхолдера) и
+`should show validation error when required file is missing` (locator matches 3 элемента, strict
+mode violation).
+
 ## 2026-09-19 (сессия 8, forms-dev) — SSR-гидратация URL-хуков, `form.tooltip.*`, экранирование строк генератора
 
 **Контекст:** `/forms-dev`, две задачи `forms-coordinator-dev` + побочные находки по решению владельца.
