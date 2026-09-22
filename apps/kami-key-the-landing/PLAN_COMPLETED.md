@@ -1,5 +1,14 @@
 # Выполненные задачи
 
+## `scrollIntoView(smooth)` зависал без OS-фокуса окна (2026-09-22)
+
+Делегировано из сессии `pravda-dev` — репо-широкий грепа по паттерну, зависающему при фиксе TOC
+в `apps/pravda` (коммиты `e61e2cbae`/`0b68c95d0`). Здесь — три вхождения: стрелка-скролл к
+`#features` в hero-секции (клик и `onKeyDown`), клик по пункту навбара и клик по логотипу
+(`window.scrollTo`). Все — `behavior: 'smooth'` → `'instant'`, см.
+[scrollintoview-smooth-frozen-without-window-focus.md](/.claude/docs/scrollintoview-smooth-frozen-without-window-focus.md).
+Коммит `0b900b520`.
+
 ## Починка провалившегося деплоя — bun.lock drift (2026-09-13)
 
 Приложение само по себе не менялось — сессия целиком про доставку уже готового 0.4.3 в
