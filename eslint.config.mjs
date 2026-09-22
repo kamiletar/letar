@@ -36,6 +36,10 @@ export default [
   },
   {
     ignores: [
+      // Временные артефакты сессий агентов (.claude/rules/artifacts.md): папка в .gitignore,
+      // но flat-config ESLint сам по себе dot-каталоги не пропускает — без этой строки
+      // одноразовый отладочный скрипт даёт warning в логе линта приложения.
+      '**/.claude/artifacts/**',
       '**/dist',
       '**/build',
       '**/.next',
