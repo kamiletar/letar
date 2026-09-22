@@ -25,6 +25,18 @@ React-механизм (кандидат — hydration-mismatch recovery от к
 
 Коммиты: `f4be7f6cf` (тест), `59a47a7d1` (доки, вне `apps/mandala`).
 
+**Дополнение (2026-09-22, тот же день):** параллельная сессия (`domwellbes-dev`) вынесла общий
+хелпер `setInputFilesWithHydrationRetry` в `@letar/e2e-testing` (коммит `cec972e82`) для того же
+класса гонки. Попытка перенести на него `07-full-mandala-crud.admin.spec.ts` вместо
+`networkidle`-обхода дала 2/2 падений (`Timeout 45000ms exceeded`) — хелпер рассчитан на
+мгновенную DOM-мутацию и ретраит `setInputFiles()`, но `ImageUploadField` дизейблит сам `<input>`
+на время `isLoading`, и повторный `setInputFiles()` виснет на actionability-проверке Playwright,
+съедая весь таймаут. `networkidle`-обход из этой записи остаётся верным решением для mandala,
+менять не нужно. Разбор — `.claude/docs/e2e-testing.md` § «networkidle в dev-режиме Next.js»,
+JSDoc `setInputFilesWithHydrationRetry` в `libs/e2e-testing`. Коммиты: `17028876d`, `61827e366`
+(вне `apps/mandala` — правки только в `libs/e2e-testing` и `.claude/docs`, сам код mandala не
+менялся).
+
 ## Фикс безопасности: PIN-вход — cookie сессии, гонка попыток, auto-login токен (2026-09-14, v0.40.30)
 
 Три независимые находки в PIN-потоке (сверка с уже исправленным driving-school):
