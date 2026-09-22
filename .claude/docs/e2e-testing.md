@@ -256,6 +256,23 @@ await page.locator('input[type="file"]').first().setInputFiles(testImagePath)
 Прецедент и коммит фикса — `apps/mandala-e2e/src/tests/07-full-mandala-crud.admin.spec.ts`
 (`f4be7f6cf`, 2026-09-22).
 
+⚠️ **`setInputFilesWithHydrationRetry` (`@letar/e2e-testing`, тот же день) для ЭТОЙ гонки не
+годится — проверено эмпирически, 2/2 падений подряд.** Хелпер ретраит `setInputFiles()` в цикле
+`toPass()` до появления кнопки «Удалить», рассчитан на мгновенную DOM-мутацию (как
+`fillWithHydrationRetry`). Загрузка картинки — не мгновенная: `ImageUploadField`
+(`@letar/image-upload`) прокидывает в `Dropzone` `disabled={disabled || isLoading}`, и пока
+первый (успешный) upload летит на сервер, сам `<input type="file">` становится `disabled`.
+Второй `setInputFiles()` ретрая упирается в проверку actionability Playwright («элемент должен
+быть enabled») и виснет внутри неё в ожидании, пока инпут снова станет доступен — это съедает
+весь бюджет `toPass()`, а не даёт ассерту время увидеть завершившийся первый upload. Итог —
+`Timeout 45000ms exceeded`, стабильно, а не изредка. Единственный надёжный вариант для ЭТОГО
+паттерна (форма на `useFormPersistence` + `Dropzone`, которая блокирует свой инпут на время
+загрузки) — одноразовый `waitForLoadState('networkidle')` перед первым взаимодействием
+(код выше), не ретрай самого `setInputFiles`. Хелпер остаётся уместным там, где инпут не
+дизейблится на время загрузки (см. пример `supplier-quote-upload` в README `@letar/e2e-testing`) —
+перед переносом на новый Dropzone-компонент сверяй, не гасит ли он свой `<input>` на время
+`isLoading`.
+
 ### Гонка гидратации (SSR → hydrate race) при клике сразу после `page.goto()`
 
 Клик по интерактивному элементу сразу после `page.goto('/')` может попасть в окно между тем, как
