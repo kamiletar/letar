@@ -221,20 +221,22 @@ export function getCurrentServer(): InfraServer {
  * `['app-a', 'app-b']` — spread, константы и вычисления разбор отвергнет, и `deploy_app` откажет с
  * пояснением (не откатится молча на s2). Охранный тест — `build-on-s1.spec.ts` в deploy-mcp.
  *
- * Пилот 3 попытка 2 (2026-09-22, в процессе): `mandala` технически прошла (typecheck-фикс), но
- * критерий не подтверждён — обе кандидатные страницы (`mandalas/[slug]`, `shop/[slug]`) имеют
- * `export const dynamic = 'force-dynamic'`, поэтому `generateStaticParams` на рендер не влияет и
- * пререндера из БД там нет в принципе. Настоящий кандидат — `grandslamcup`: три страницы
- * (`[citySlug]/donate`, `/news`, `/rules`) тянут `prisma.city.findMany` в `generateStaticParams`
- * без `force-dynamic`/`headers()`/`auth()` в файле или родительских layout — подтверждено чтением
- * исходников перед добавлением в список.
- * Пилот 3 попытка 1 (2026-09-21): `kami` прошёл технически, но у него `/sitemap.xml` динамический —
- * чтение БД сборкой он не доказал.
+ * Пилот 3 (2026-09-22, пройден на 4-й попытке): `grandslamcup` — три страницы (`[citySlug]/donate`,
+ * `/news`, `/rules`) + главная/`bracket`/`organizers`/`presenters`/`scorers` тянут `prisma.city.findMany`
+ * в `generateStaticParams` без `force-dynamic`/`headers()`/`auth()` — доказано `●` SSG с реальными
+ * путями `/moskva/...`/`/spb/...` в таблице маршрутов сборки на s1. `kami` (попытка 1) и `mandala`
+ * (попытка 2) технически прошли, но критерий не подтвердили (динамический `/sitemap.xml` и
+ * `force-dynamic` на кандидатных страницах соответственно) — обе остались в списке, но пилот
+ * закрыт именно на grandslamcup. Разбор — `PLAN-INFRA-6.md` §157.
+ * Пилот 4 (2026-09-22, в процессе): `domwellbes` — первая живая проверка канала `dump`/
+ * `prisma migrate deploy` через туннель s1→s2. Прод-БД (`letar-db`, `domwellbes-prod`) подтверждает
+ * непримененную миграцию — гарантированно найдётся что применить, не гипотеза по файловой системе.
+ * Детали миграции — в приватном `apps/domwellbes/PLAN.md` (`public-repo-hygiene.md`).
  * Пилот 2 (2026-09-21, пройден): `time` — с БД, без пререндера из неё.
  * Пилот 1 (2026-09-21, пройден): `letar-landing` — приложение без БД. Аварийного однохостового пути нет:
  * при недоступности s1/registry деплой не выполняется, откат — убрать имя из списка.
  */
-export const BUILD_ON_S1_APPS: string[] = ['letar-landing', 'time', 'kami', 'mandala', 'grandslamcup']
+export const BUILD_ON_S1_APPS: string[] = ['letar-landing', 'time', 'kami', 'mandala', 'grandslamcup', 'domwellbes']
 
 /**
  * Собирается ли приложение в production на s1 (см. `BUILD_ON_S1_APPS`).
