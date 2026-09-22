@@ -4,6 +4,7 @@ import { render, screen } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { createElement } from 'react'
 import { describe, expect, it } from 'vitest'
+import { z } from 'zod/v4'
 import { DeclarativeFormContext } from './form-context'
 import { FormErrors } from './form-errors'
 import type { DeclarativeFormContextValue } from './types'
@@ -15,7 +16,12 @@ const TestWrapper = ({ children }: { children: ReactNode }) => (
 
 // Создаём мок контекста формы с Subscribe
 // Subscribe в реальном компоненте получает selector и передаёт результат в children
-function createMockFormContext(errors: unknown[] = [], submissionAttempts = 1): DeclarativeFormContextValue {
+function createMockFormContext(
+  errors: unknown[] = [],
+  submissionAttempts = 1,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  schema?: any,
+): DeclarativeFormContextValue {
   return {
     form: {
       Subscribe: ({
@@ -35,6 +41,7 @@ function createMockFormContext(errors: unknown[] = [], submissionAttempts = 1): 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any,
     apiState: undefined,
+    schema,
   }
 }
 
@@ -115,7 +122,7 @@ describe('FormErrors', () => {
   })
 
   describe('error extraction', () => {
-    it('извлекает ошибки из объекта полей', () => {
+    it('без схемы в контексте показывает только текст ошибки, без сырого ключа поля', () => {
       const context = createMockFormContext([
         {
           email: [{ message: 'Некорректный email' }],
@@ -126,8 +133,36 @@ describe('FormErrors', () => {
 
       render(<FormErrors />, { wrapper })
 
-      expect(screen.getByText(/email: Некорректный email/)).toBeInTheDocument()
-      expect(screen.getByText(/password: Минимум 8 символов/)).toBeInTheDocument()
+      expect(screen.getByText('Некорректный email')).toBeInTheDocument()
+      expect(screen.getByText('Минимум 8 символов')).toBeInTheDocument()
+      expect(screen.queryByText(/email:/)).not.toBeInTheDocument()
+      expect(screen.queryByText(/password:/)).not.toBeInTheDocument()
+    })
+
+    it('со схемой резолвит подпись поля из .meta({ ui: { title } }) вместо сырого ключа', () => {
+      const schema = z.object({
+        email: z.string().meta({ ui: { title: 'Email' } }),
+        password: z.string(),
+      })
+      const context = createMockFormContext(
+        [
+          {
+            email: [{ message: 'Некорректный email' }],
+            password: [{ message: 'Минимум 8 символов' }],
+          },
+        ],
+        1,
+        schema,
+      )
+      const wrapper = createContextWrapper(context)
+
+      render(<FormErrors />, { wrapper })
+
+      // У email есть подпись в схеме — показываем её
+      expect(screen.getByText('Email: Некорректный email')).toBeInTheDocument()
+      // У password подписи нет — только текст ошибки, без сырого ключа "password"
+      expect(screen.getByText('Минимум 8 символов')).toBeInTheDocument()
+      expect(screen.queryByText(/password:/)).not.toBeInTheDocument()
     })
 
     it('извлекает строковые ошибки', () => {

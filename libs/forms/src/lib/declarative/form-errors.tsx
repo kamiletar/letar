@@ -2,6 +2,7 @@
 
 import { Alert, Box, List, Text } from '@chakra-ui/react'
 import { resolveTranslation } from '@letar/forms-core/i18n'
+import { getFieldMeta } from '@letar/forms-core/schema'
 import { useFormI18n } from '@letar/forms-react'
 import type { ReactElement, ReactNode } from 'react'
 import { useDeclarativeForm } from './form-context'
@@ -59,10 +60,23 @@ interface ZodIssue {
 type FieldErrors = Record<string, ZodIssue[]>
 
 /**
+ * Резолвит подпись поля из Zod-схемы (`.meta({ ui: { title } })`) по пути ошибки — та же
+ * `getFieldMeta`, что уже используют колонки таблиц (`table-columns.ts`). Без схемы в контексте
+ * (`<Form>` без `schema`-пропа) или без `ui.title` у конкретного поля подписи не будет —
+ * `extractAllErrors` в этом случае показывает только текст ошибки, без технического ключа поля.
+ */
+function resolveFieldLabel(schema: unknown, fieldPath: string): string | undefined {
+  if (!schema) {
+    return undefined
+  }
+  return getFieldMeta(schema, fieldPath).ui?.title
+}
+
+/**
  * Extracts all error messages from TanStack Form + Zod structure
  * Format: { "field.path": [{ message: "...", code: "...", path: [...] }] }
  */
-function extractAllErrors(errors: unknown[]): string[] {
+function extractAllErrors(errors: unknown[], schema: unknown): string[] {
   const messages: string[] = []
 
   for (const error of errors) {
@@ -85,7 +99,8 @@ function extractAllErrors(errors: unknown[]): string[] {
         if (Array.isArray(issues)) {
           for (const issue of issues) {
             if (issue.message) {
-              messages.push(`${fieldPath}: ${issue.message}`)
+              const label = resolveFieldLabel(schema, fieldPath)
+              messages.push(label ? `${label}: ${issue.message}` : issue.message)
             }
           }
         }
@@ -112,7 +127,7 @@ function extractAllErrors(errors: unknown[]): string[] {
  * ```
  */
 export function FormErrors({ title, showBeforeSubmit = false }: FormErrorsProps): ReactElement | null {
-  const { form, apiState } = useDeclarativeForm()
+  const { form, apiState, schema } = useDeclarativeForm()
   const i18n = useFormI18n()
   const resolvedTitle = title ?? resolveDefaultErrorsTitle(i18n)
 
@@ -132,7 +147,7 @@ export function FormErrors({ title, showBeforeSubmit = false }: FormErrorsProps)
       {({ errors, submissionAttempts }: { errors: unknown[]; submissionAttempts: number }) => {
         // Do not show validation errors before first submit attempt (unless specified otherwise)
         const showValidationErrors = showBeforeSubmit || submissionAttempts > 0
-        const validErrors = showValidationErrors ? extractAllErrors(errors) : []
+        const validErrors = showValidationErrors ? extractAllErrors(errors, schema) : []
         const hasErrors = validErrors.length > 0 || serverErrorMessage
 
         if (!hasErrors) {
