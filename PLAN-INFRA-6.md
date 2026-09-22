@@ -4801,3 +4801,22 @@ Gitignore-спецификации.
 - [x] Проверено: `--validate` — 0 ошибок конфигурации; полный прогон по `apps libs` до/после —
       набор срабатываний (check_id+путь+строка) идентичен побайтово, 444/444 findings по всем 8
       активным правилам. Предупреждения исчезли. Коммит `99fe3024c`, не запушен.
+
+## §194 (2026-09-22) DRY трёх дублирующихся exclude-списков — не применимо, задокументировано
+
+Продолжение §193: три правила (`letar-forms-raw-select-combobox-outside-lib`,
+`letar-forms-native-select-deprecated`, `letar-forms-hand-rolled-footer-use-formactions`) держат
+дословно одинаковый список из 7 `exclude`-путей — кандидат на YAML-якорь (`&anchor`/`*alias`).
+
+- [x] Проверено эмпирически на минимальных тестовых конфигах (не на боевом файле): `&anchor`/
+      `*alias` на списке технически валидный YAML и реально исключает файлы на живом
+      `semgrep scan`, но `semgrep scan --config ... --validate` на алиасе падает
+      (`Expected a list for exclude`, exit 2), хотя тот же список литералом проходит `--validate`
+      чисто. Слияние alias + доп. элемент (нужно для третьего правила — те же 7 путей + `/libs/
+      ui/**`) ломается ещё жёстче: `is not of type 'string'` (semgrep не разворачивает вложенный
+      список из alias).
+- [x] Решение: не форсировать — `--validate` часть штатного ручного прогона (см. шапку
+      `.semgrep/letar-rules.yml`), расхождение между «сработает на скане» и «не пройдёт validate»
+      не стоит экономии на дублировании 7 строк. `.semgrep/letar-rules.yml` не тронут.
+      Разбор — [semgrep-yaml-anchor-exclude-invalid.md](/.claude/docs/semgrep-yaml-anchor-exclude-invalid.md),
+      ссылка в индексе `CLAUDE.md`. Коммиты `6cfc53f82` (доки), `2b48da8c7` (индекс), не запушены.
