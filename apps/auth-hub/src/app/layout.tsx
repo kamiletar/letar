@@ -2,11 +2,13 @@ import { ColorModeProvider, RootChakraProvider } from '@letar/chakra-provider'
 import { FormI18nProvider } from '@letar/forms'
 import { CookieBanner } from '@letar/ui'
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import localFont from 'next/font/local'
 import { UmamiScriptConsent } from './_components/umami-script-consent'
 
-const inter = Inter({
-  subsets: ['cyrillic', 'latin'],
+// Шрифт лежит файлом, а не тянется `next/font/google` — см. src/app/fonts/README.md
+const inter = localFont({
+  src: './fonts/Inter-cyrillic-latin.woff2',
+  weight: '400 700',
   variable: '--font-inter',
 })
 

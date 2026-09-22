@@ -4,6 +4,15 @@
 
 ## [Unreleased]
 
+## [0.7.24] - 2026-09-22
+
+### Changed
+
+- Inter переведён с `next/font/google` на `next/font/local` — сборка больше не ходит в сеть за
+  шрифтом при каждом прогоне (хрупкость загрузчика, разбор на domwellbes —
+  `apps/domwellbes/src/app/fonts/README.md`). Ось `wght` сужена до 400–700 (реально используемые
+  начертания), ось `opsz` оставлена вариативной. Рецепт и лицензия — `src/app/fonts/README.md`.
+
 ## [0.7.23] - 2026-09-22
 
 ### Fixed
