@@ -1,5 +1,28 @@
 # Выполненные задачи — @letar/forms
 
+## 2026-09-22 (сессия forms-dev) — form-steps.tsx: общий `walkStepsTree` вместо трёх дублирующих обходов дерева (forms 2.16.1)
+
+**Контекст:** прямая задача (не через agent-mail-backlog) — `countDeclaredSteps`,
+`assignDeclaredIndices` и `hasCompletedContentChild` в `form-steps.tsx` дублировали одинаковую
+форму рекурсии по `children` (`Children.forEach`/`map`, проверка `child.type`, рекурсия в
+`props.children`); `hasCompletedContentChild` добавлена 2026-09-22 при фиксе #1922 (см. запись
+выше), после чего дублирование стало третьим экземпляром одного паттерна.
+
+**Решение:** общий `walkStepsTree(children, visitor)` — перехват по типу узла
+(`onStep`/`onCompletedContent`), остальные элементы с `children` обходятся генерик-веткой
+(`cloneElement` + рекурсия). Три исходные функции стали тонкими обёртками над ним. Поведение и
+оба документированных инварианта (синхронный `count` на первом рендере, отсутствие вспышки
+пустого контента до прохода эффектов) сохранены бит-в-бит — чисто внутренний рефакторинг, без
+изменения публичного API.
+
+**Проверено:** `../../node_modules/.bin/vitest.exe run src/lib/declarative/form-steps` напрямую
+(обход известного OOM plugin-worker у `nx test`) — 38/38 зелёных; `nx e2e form-develop-app-e2e --
+--project=chromium --grep "Form.Steps Demo"` — 15/15 зелёных; `nx lint forms` и `nx typecheck:tsgo
+forms` — чистые.
+
+**Коммит:** `4d67a4283` — `refactor(forms): form-steps.tsx — общий walkStepsTree для трёх обходов
+дерева children`.
+
 ## 2026-09-22 (сессия forms-dev) — #1819/#1866/#1922: сужение типа `run()`, подпись поля в `Form.Errors`, `Form.Steps.CompletedContent`
 
 **Контекст:** `/forms-dev`, три задачи `forms-coordinator-dev` за одну сессию (agent-mail: `form-action-result-extract`, `forms-domwellbes-error-summary-field-key`, `form-steps-completed-content-unreachable`).
