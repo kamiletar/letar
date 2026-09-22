@@ -1,4 +1,5 @@
 import { defineRecipe, defineSlotRecipe } from '@chakra-ui/react'
+import { pressScale } from '@letar/ui'
 
 // ⚠️ `slots` здесь ОБЯЗАН перечислять слоты в том же порядке, что и настоящая anatomy
 // компонента (`menuAnatomy`/`tabsAnatomy`/... в `@chakra-ui/react/dist/esm/anatomy.js`), а не
@@ -35,6 +36,11 @@ const tabsAnatomyOrder = ['root', 'trigger', 'list', 'content', 'contentGroup', 
  * - BookmarkButton в статьях
  * - Кнопок в DocumentActions
  * - Иконок в Header (поиск, закладки)
+ *
+ * ⚠️ Raw-значения, не `pressScale` (`@letar/ui`) — icon-button под исключением «мелкие
+ * поверхности» из JSDoc `pressScale` (диапазон шкалы рассчитан на поверхности от размера обычной
+ * кнопки и крупнее, мелкому элементу та же относительная просадка читается как отсутствие
+ * обратной связи).
  */
 export const iconButtonRecipe = defineRecipe({
   base: {
@@ -79,7 +85,7 @@ export const accordionRecipe = defineSlotRecipe({
       transition: 'all 0.1s ease-out',
       _active: {
         bg: 'bg.subtle',
-        transform: 'scale(0.99)',
+        transform: pressScale['2xl'],
       },
     },
   },
@@ -98,7 +104,7 @@ export const menuRecipe = defineSlotRecipe({
       transition: 'all 0.1s ease-out',
       _active: {
         bg: 'bg.muted',
-        transform: 'scale(0.98)',
+        transform: pressScale.lg,
       },
     },
   },
@@ -113,7 +119,7 @@ export const tabsRecipe = defineSlotRecipe({
     trigger: {
       transition: 'all 0.1s ease-out',
       _active: {
-        transform: 'scale(0.95)',
+        transform: pressScale.xs,
       },
     },
   },
@@ -121,6 +127,9 @@ export const tabsRecipe = defineSlotRecipe({
 
 /**
  * Tag slot recipe с тактильной обратной связью для интерактивных тегов
+ *
+ * ⚠️ `closeTrigger` — raw-значение, не `pressScale`: мелкая поверхность (close-триггер тега),
+ * то же исключение JSDoc `pressScale`, что и `iconButtonRecipe` выше.
  */
 export const tagRecipe = defineSlotRecipe({
   slots: ['root', 'label', 'closeTrigger', 'startElement', 'endElement'],

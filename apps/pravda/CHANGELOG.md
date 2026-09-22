@@ -12,6 +12,18 @@
 - `vitest.config.mts`: убран избыточный alias `@letar/hooks` — пакет уже прямая зависимость,
   симлинк bun резолвит его без alias.
 
+## [1.9.13] - 2026-09-22
+
+### Changed
+
+- `src/theme/recipes/{slotRecipes,link,button}.ts`: аудит `_active: scale()` на общую шкалу
+  `pressScale` (`@letar/ui`) — задача из `.claude/docs/press-scale-audit-task.md`. Значения, точно
+  совпавшие с шагом шкалы, переведены на токен без изменения поведения (`accordionRecipe`,
+  `menuRecipe`, `tabsRecipe`, `linkRecipe`, часть `buttonRecipe`). `iconButtonRecipe` и
+  `tagRecipe.closeTrigger` оставлены raw — документированное исключение «мелкие поверхности».
+  `buttonRecipe.variants.size.xs`/`sm` (`scale(0.9)`) не переведены — не совпадают ни с одним
+  шагом и не подпадают под существующие исключения, решение за владельцем.
+
 ## [1.9.12] - 2026-09-22
 
 ### Fixed

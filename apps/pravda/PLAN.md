@@ -14,8 +14,18 @@
 
 ### 🟡 Тема
 
-- [ ] Аудит `_active: scale()` в `src/theme/recipes/*.ts` на `pressScale` (`@letar/ui`) — задача
-      описана в [press-scale-audit-task.md](/.claude/docs/press-scale-audit-task.md)
+- [x] Аудит `_active: scale()` в `src/theme/recipes/*.ts` на `pressScale` (`@letar/ui`) — задача
+      описана в [press-scale-audit-task.md](/.claude/docs/press-scale-audit-task.md). Переведено
+      на шкалу (значение уже совпадало с шагом, чисто рефакторинг без изменения поведения):
+      `accordionRecipe.itemTrigger` → `pressScale['2xl']`, `menuRecipe.item` → `pressScale.lg`,
+      `tabsRecipe.trigger` → `pressScale.xs`, `linkRecipe.base` → `pressScale.xs`,
+      `buttonRecipe.base`/`md` → `pressScale.xs`, `lg` → `pressScale.md`, `xl` → `pressScale.lg`.
+      Оставлено raw-значением с пояснением: `iconButtonRecipe` (все размеры) и
+      `tagRecipe.closeTrigger` — задокументированное исключение «мелкие поверхности». **Не решено:**
+      `buttonRecipe.variants.size.xs`/`sm` — `scale(0.9)`, глубже самого мелкого шага шкалы (`2xs` =
+      `0.94`), не подпадает ни под одно из двух документированных исключений и не совпадает с шагом
+      — решение, заводить ли третье исключение в `press-scale.ts` или это недосведённый hardcode,
+      за владельцем (по правилу задачи новый тип исключения не выдумывать самостоятельно).
 
 ### 🔴 Приоритетные баги — staging e2e (найдено BlackCove, §18.7 Тираж M1, 2026-07-22)
 
