@@ -1,5 +1,25 @@
 # Выполненные задачи — @letar/forms
 
+## 2026-09-22 (сессия forms-dev) — локализация подсказки `minChars` в Combobox/Autocomplete (forms 2.16.3)
+
+**Контекст:** прямая задача — `<Combobox.Empty>Enter at least {minChars} characters</Combobox.Empty>`
+литералом в `field-combobox.tsx` и `field-autocomplete.tsx`. Найдено при разборе формы материала в
+русскоязычном приложении: пустой список поставщиков объяснялся англоязычной строкой, причём на
+дефолтном `minChars: 1` ещё и с ошибкой числа (`1 characters`).
+
+**Решение:** общий резолвер `declarative/form-fields/selection/min-chars-hint.ts`
+(`resolveMinCharsHint` + хук `useMinCharsHint`), порядок тот же, что у `resolveDefaultErrorsTitle`
+в `form-errors.tsx`: `t('formSelection.minCharsHint', { minChars })` → встроенный словарь ru/en по
+`locale` → английский текст. Склонение существительного — `Intl.PluralRules`, формы взяты те же,
+что у constraint hints (`CHAR_PLURALS`). Подсказка считается в `useFieldState` обоих полей и
+приходит в `render` через `fieldState.minCharsHint`: `render` в `createField` — колбэк внутри
+`form.Field`, хуки там небезопасны (тот же приём, что у `locale` в `field-number-input.tsx`).
+Отсутствие `FormI18nProvider` намеренно оставлено прежним поведением (английский) — провайдер
+опционален, см. `.claude/docs/letar-forms-missing-i18nprovider-english-hints.md`.
+
+**Проверено:** `nx test forms` (новая `min-chars-hint.spec.ts` — 8/8), `nx lint forms`,
+`nx typecheck:tsgo forms`.
+
 ## 2026-09-22 (сессия forms-dev) — `extractFieldNames` — общая функция вместо дубля в form-when/form-steps-step (forms 2.16.2)
 
 **Контекст:** прямая задача (не через agent-mail-backlog) — рекурсивный обход `children` для

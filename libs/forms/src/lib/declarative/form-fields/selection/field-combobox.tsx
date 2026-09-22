@@ -15,6 +15,7 @@ import {
   useAsyncSearch,
   useGroupedOptions,
 } from '../base'
+import { useMinCharsHint } from './min-chars-hint'
 
 /**
  * Props for Form.Field.Combobox
@@ -144,6 +145,8 @@ interface ComboboxFieldState extends GroupedOptionsResult {
   isLoading: boolean
   options: GroupableOption[]
   resolvedClearable: boolean
+  /** Локализованная подсказка «введите ещё символов» для пустого списка */
+  minCharsHint: string
 }
 
 /**
@@ -273,6 +276,10 @@ export const FieldCombobox = createField<ComboboxFieldProps, string, ComboboxFie
     // Auto-determine clearable
     const resolvedClearable = componentProps.clearable ?? !resolved.required
 
+    // Подсказка резолвится здесь, а не в `render`: `render` — колбэк внутри `form.Field`,
+    // хуки там небезопасны (см. JSDoc `useMinCharsHint`)
+    const minCharsHint = useMinCharsHint(componentProps.minChars ?? 1)
+
     return {
       inputValue,
       setInputValue,
@@ -281,6 +288,7 @@ export const FieldCombobox = createField<ComboboxFieldProps, string, ComboboxFie
       collection,
       groups,
       resolvedClearable,
+      minCharsHint,
     }
   },
   render: ({ field, fullPath, resolved, hasError, errorMessage, componentProps, fieldState }): ReactElement => {
@@ -340,9 +348,7 @@ export const FieldCombobox = createField<ComboboxFieldProps, string, ComboboxFie
                 {!fieldState.isLoading
                   && fieldState.options.length === 0
                   && fieldState.inputValue.length < minChars
-                  && fieldState.inputValue.length > 0 && (
-                  <Combobox.Empty>Enter at least {minChars} characters</Combobox.Empty>
-                )}
+                  && fieldState.inputValue.length > 0 && <Combobox.Empty>{fieldState.minCharsHint}</Combobox.Empty>}
 
                 {/* Grouped options */}
                 {fieldState.groups

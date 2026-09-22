@@ -4,6 +4,23 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.16.3] - 2026-09-22
+
+### Fixed
+
+- **Подсказка о минимальной длине запроса в `Form.Field.Combobox` / `Form.Field.Autocomplete`
+  была жёстко зашита по-английски** (найдено в русском интерфейсе приложения: сотрудник не понял,
+  почему список поставщиков пуст, — под полем стояло `Enter at least 1 characters`). Текст пустого
+  состояния больше не литерал в JSX, а резолвится как заголовок `Form.Errors`: перевод приложения
+  по ключу `formSelection.minCharsHint` (параметр интерполяции `minChars`, если `FormI18nProvider`
+  получил `t`) → встроенный словарь ru/en по `locale` → английский текст. Без `FormI18nProvider`
+  в дереве поведение прежнее — английский, провайдер остаётся опциональным.
+  Существительное склоняется через `Intl.PluralRules` теми же формами, что у constraint hints
+  («Введите минимум 1 символ» / «2 символа» / «5 символов», `Enter at least 1 character`) —
+  прежний литерал давал `1 characters` на дефолтном `minChars: 1`.
+  Резолвер вынесен в `declarative/form-fields/selection/min-chars-hint.ts`
+  (`resolveMinCharsHint` + хук `useMinCharsHint`), покрыт `min-chars-hint.spec.ts`.
+
 ## [2.16.2] - 2026-09-22
 
 ### Changed

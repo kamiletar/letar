@@ -4,6 +4,7 @@ import { Combobox, createListCollection, Field, Portal, Spinner, useFilter } fro
 import { type ReactElement, useMemo } from 'react'
 import type { BaseFieldProps, FieldSize } from '../../types'
 import { type AsyncQueryFn, createField, FieldError, SelectionFieldLabel, useAsyncSearch } from '../base'
+import { useMinCharsHint } from './min-chars-hint'
 
 /**
  * Props for Form.Field.Autocomplete
@@ -86,6 +87,8 @@ interface AutocompleteFieldState {
   isLoading: boolean
   suggestions: AutocompleteItem[]
   collection: ReturnType<typeof createListCollection<AutocompleteItem>>
+  /** Локализованная подсказка «введите ещё символов» для пустого списка */
+  minCharsHint: string
 }
 
 /**
@@ -166,12 +169,17 @@ export const FieldAutocomplete = createField<AutocompleteFieldProps, string, Aut
       })
     }, [suggestions])
 
+    // Подсказка резолвится здесь, а не в `render`: `render` — колбэк внутри `form.Field`,
+    // хуки там небезопасны (см. JSDoc `useMinCharsHint`)
+    const minCharsHint = useMinCharsHint(componentProps.minChars ?? 1)
+
     return {
       inputValue,
       setInputValue,
       isLoading,
       suggestions,
       collection,
+      minCharsHint,
     }
   },
   render: ({ field, fullPath, resolved, hasError, errorMessage, componentProps, fieldState }): ReactElement => {
@@ -240,9 +248,7 @@ export const FieldAutocomplete = createField<AutocompleteFieldProps, string, Aut
                 {!fieldState.isLoading
                   && fieldState.suggestions.length === 0
                   && fieldState.inputValue.length < minChars
-                  && fieldState.inputValue.length > 0 && (
-                  <Combobox.Empty>Enter at least {minChars} characters</Combobox.Empty>
-                )}
+                  && fieldState.inputValue.length > 0 && <Combobox.Empty>{fieldState.minCharsHint}</Combobox.Empty>}
 
                 {/* Suggestions */}
                 {fieldState.suggestions.map((item) => (
