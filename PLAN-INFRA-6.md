@@ -2909,9 +2909,17 @@ read-only не годится для миграций, а для преренд�
       Не перенесены и не могут: `dashboard`/`dashboard-agent` (перезапускают сами себя по каналу
       деплоя), `umami` (стоковый образ `ghcr.io/umami-software/umami`, своей сборки нет).
       Остаются вне `E2E_GATED_APPS`/`HARD_GATED_APPS` за неготовностью staging-инфры (не входит
-      в эту волну, отдельная задача): `form-docs`, `animatrona-landing`, `animatrona-tracker`,
-      `kami-key-the-landing`, `letar-landing` — есть e2e-suite, нет `docker-compose.staging.yml`;
-      `pravda` — есть и то, и другое, но не заведена регистрация в `E2E_GATED_APPS`.
+      в эту волну, отдельная задача): `pravda` — есть и docker-compose.staging.yml, и e2e-suite,
+      но первый прогон (2026-09-22, runId `8184af64`) нашёл 12 упавших тестов — регистрация ждёт
+      фикса (`pravda-dev`, тред `pravda-e2e-first-run-failures`); `animatrona-tracker` — есть
+      e2e-suite, staging-инфры нет и не входит в эту волну (БД+Redis+Better Auth OIDC через
+      Ключницу — не однострочный тираж, нужна отдельная staging-БД и OIDC redirect).
+
+      ✅ 2026-09-22: `docker-compose.staging.yml`/`.env.staging.enc` заведены для `form-docs`,
+      `animatrona-landing`, `kami-key-the-landing`, `letar-landing` (коммит `11c63e014`, порты
+      3035–3038) — все 4 статические, без БД/auth, тираж по образцу `pravda`/`aira-web`. Staging
+      ещё не задеплоен и `run_e2e` не запускался — до регистрации в `E2E_GATED_APPS` нужен зелёный
+      прогон каждого на s1, как и для `pravda`.
 - [ ] Разрез скрипта: `deploy-affected.sh` (s3, build) + `deploy-release.sh` (s2, release);
       `deploy_status` показывает фазу. **Код написан 2026-09-21** (см. «Реализация» ниже), живьём
       не проверен — ждёт настройки канала s1→s2 и пилота 1
