@@ -1332,7 +1332,7 @@
     },
     "libs/forms-react": {
       "name": "@letar/forms-react",
-      "version": "0.11.0",
+      "version": "0.11.1",
       "dependencies": {
         "@letar/forms-core": "workspace:*",
       },
