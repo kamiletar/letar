@@ -170,6 +170,26 @@ export const E2E_GATED_APPS: string[] = [
  *
  * Инвариант «этот список — подмножество `E2E_GATED_APPS`» закреплён тестом в `index.spec.ts`.
  * Без теста он уже разъезжался: `studio` три недели был здесь, но не там.
+ *
+ * ⚠️ **2026-09-22: уравнен с `E2E_GATED_APPS` целиком** — владелец: «всё, что деплоится на
+ * прод, должно перед этим проходить e2e», warn-only как постоянное состояние для приложения
+ * с уже готовой staging-инфрой поэтому больше не держим. Добавлены `grandslamcup`, `time`,
+ * `aira-web`, `domwellbes`, `kami`, `form-example`, `driving-school`, `mandala` — у каждого уже
+ * есть `docker-compose.staging.yml` и как минимум один зелёный прогон на s1 (проверено перед
+ * правкой через `e2e_status`, часть прогонов на 2026-09-19 и раньше, `aboi` — 2026-09-21).
+ * Не значит «навсегда одним списком»: `HARD_GATED_APPS` остаётся строгим подмножеством
+ * `E2E_GATED_APPS` по инварианту теста, просто сейчас оба списка совпадают буквально —
+ * следующее приложение сначала попадает в `E2E_GATED_APPS` (набирает историю зелёных
+ * прогонов), потом уже сюда, см. комментарий у `E2E_GATED_APPS` выше.
+ *
+ * Приложения БЕЗ staging-инфры/e2e-suite (пока не могут попасть ни в один из списков) —
+ * `dashboard-agent`, `dashboard` (нет staging-compose и не может быть: перезапускают сами
+ * себя), `umami` (сторонний продукт). Приложения с e2e-suite, но БЕЗ staging-compose —
+ * `form-docs`, `animatrona-landing`, `animatrona-tracker`, `kami-key-the-landing`,
+ * `letar-landing` — завести им `docker-compose.staging.yml` до включения в гейт: отдельная
+ * задача, не входит в этот коммит. `pravda` — единственное исключение: и e2e-suite, и
+ * staging-compose уже есть, но в `E2E_GATED_APPS` не заведено — тоже отдельным шагом, требует
+ * первого подтверждённого прогона перед регистрацией.
  */
 export const HARD_GATED_APPS: string[] = [
   'archetest',
@@ -179,6 +199,14 @@ export const HARD_GATED_APPS: string[] = [
   'aprel8008',
   'studio',
   'auth-hub',
+  'grandslamcup',
+  'time',
+  'aira-web',
+  'domwellbes',
+  'kami',
+  'form-example',
+  'driving-school',
+  'mandala',
 ]
 
 /**
@@ -249,13 +277,16 @@ export function getCurrentServer(): InfraServer {
  * Native приложения, `dashboard`/`dashboard-agent` (см. предупреждение выше), приложения без
  * `docker-compose.production.yml`.
  *
- * ⚠️ **Всё `HARD_GATED_APPS` (`archetest`, `dsperevod`, `svoichuzhie`, `aboi`, `aprel8008`,
- * `studio`, `auth-hub`) сознательно НЕ добавлено в волну 1**, хотя typecheck у большинства тоже
- * чист. Тест `index.spec.ts` закрепляет инвариант: для hard-gated приложений
- * `resolveDeployServer(app, 'production')` обязан вернуть ровно `SERVER_APPS[app]` (сейчас
- * `s2`), не подчиняясь `BUILD_ON_S1_APPS`. Это осознанная защита самых дорогих коммерческих
- * приложений, а не забытый рефакторинг — решение о переносе их сборки на s1 (и обновление теста
- * под это) принимает владелец отдельно, не тиражом заодно.
+ * Волна 2 (2026-09-22, тот же день, отдельное решение владельца): «перенос сборки нужен для
+ * всех приложений» — добавлены оставшиеся 7 с собственным `Dockerfile.production` —
+ * `archetest`, `dsperevod`, `studio`, `aboi`, `svoichuzhie`, `aprel8008`, `auth-hub` (все семь —
+ * `HARD_GATED_APPS`, typecheck чист у каждого, проверено перед добавлением). Тест
+ * `index.spec.ts` — прежде закреплявший, что hard-gated приложения обязаны оставаться на
+ * `SERVER_APPS`-хосте — сужен: защита остаётся для будущих hard-gated приложений, которые ещё
+ * не прошли явное решение о переносе, а не для списка целиком (см. коммент у `HARD_GATED_APPS`
+ * выше). Не перенесены: `dashboard`/`dashboard-agent` (технически не могут — перезапускают сами
+ * себя по каналу деплоя), `umami` (стоковый образ `ghcr.io/umami-software/umami`, у нас нет
+ * своего `Dockerfile.production` — переносить нечего).
  */
 export const BUILD_ON_S1_APPS: string[] = [
   'letar-landing',
@@ -265,6 +296,13 @@ export const BUILD_ON_S1_APPS: string[] = [
   'grandslamcup',
   'domwellbes',
   'aira-web',
+  'archetest',
+  'dsperevod',
+  'studio',
+  'aboi',
+  'svoichuzhie',
+  'aprel8008',
+  'auth-hub',
   'animatrona-landing',
   'animatrona-tracker',
   'driving-school',

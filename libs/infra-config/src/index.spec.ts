@@ -13,7 +13,7 @@ import {
 } from './index'
 
 describe('HARD_GATED_APPS', () => {
-  it('содержит активные коммерческие приложения + auth-hub (PLAN-INFRA.md §18.7)', () => {
+  it('уравнен с E2E_GATED_APPS целиком — все прод-деплои проходят e2e (2026-09-22, PLAN-INFRA.md §18.7)', () => {
     expect(HARD_GATED_APPS).toEqual([
       'archetest',
       'dsperevod',
@@ -22,6 +22,14 @@ describe('HARD_GATED_APPS', () => {
       'aprel8008',
       'studio',
       'auth-hub',
+      'grandslamcup',
+      'time',
+      'aira-web',
+      'domwellbes',
+      'kami',
+      'form-example',
+      'driving-school',
+      'mandala',
     ])
   })
 
@@ -41,8 +49,17 @@ describe('HARD_GATED_APPS', () => {
 })
 
 describe('resolveDeployServer', () => {
-  it('production резолвится через SERVER_APPS для hard-gated приложений', () => {
+  it('hard-gated приложение вне BUILD_ON_S1_APPS остаётся на SERVER_APPS до отдельного решения', () => {
+    // Две независимые оси: HARD_GATED_APPS — только про обязательный зелёный e2e перед прод-деплоем
+    // (читает libs/deploy-mcp отдельно от resolveDeployServer). BUILD_ON_S1_APPS — только про то, ГДЕ
+    // собирается образ. С 2026-09-22 они пересекаются (grandslamcup/time/aira-web/domwellbes/kami/
+    // driving-school/mandala — в обоих: прошли отдельный пилот тиража §157 ДО расширения e2e-гейта) —
+    // это не отменяет защиту, а значит она применима только к тем hard-gated приложениям, для которых
+    // перенос сборки на s1 ещё не согласован владельцем отдельно.
     for (const app of HARD_GATED_APPS) {
+      if (BUILD_ON_S1_APPS.includes(app)) {
+        continue
+      }
       expect(resolveDeployServer(app, 'production')).toBe(SERVER_APPS[app])
     }
   })

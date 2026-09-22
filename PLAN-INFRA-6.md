@@ -2890,11 +2890,35 @@ read-only не годится для миграций, а для преренд�
          `'organizationInvitation'`. Рантайм-эффекта у бага не было — приложение ходит в эту
          таблицу напрямую через ZenStack-клиент, минуя org-invite API плагина.
       Три раунда деплоя, deployId `5a292cbf` — итоговый успех, коммит `d62604979`.
+- [x] **Волна 2 — `HARD_GATED_APPS` уравнен с `E2E_GATED_APPS`** (2026-09-22, `libs/infra-config`
+      0.3.9): владелец — «всё, что деплоится на прод, должно перед этим проходить e2e». Прежде
+      warn-only список (15 приложений) стал целиком fail-closed: добавлены `grandslamcup`, `time`,
+      `aira-web`, `domwellbes`, `kami`, `form-example`, `driving-school`, `mandala` (у каждого уже
+      был как минимум один зелёный прогон на s1 перед правкой). Это ось, независимая от
+      `BUILD_ON_S1_APPS` — гейт читает `libs/deploy-mcp` отдельно от `resolveDeployServer`.
+- [x] **Волна 3 — `BUILD_ON_S1_APPS` тиражирован на оставшиеся 7 `HARD_GATED_APPS`** (2026-09-22,
+      тот же день, отдельное решение владельца: «перенос сборки нужен для всех приложений»):
+      `archetest`, `dsperevod`, `studio`, `aboi`, `svoichuzhie`, `aprel8008`, `auth-hub` — у
+      каждого свой `Dockerfile.production`, typecheck чист, проверено перед добавлением. Тест
+      `infra-config/src/index.spec.ts`, ранее требовавший `resolveDeployServer(app, 'production')
+      === SERVER_APPS[app]` для ВСЕГО `HARD_GATED_APPS`, сужен: инвариант защищает только
+      hard-gated приложения, которые ещё не прошли отдельное решение о переносе — сейчас таких
+      нет, но защита остаётся для будущих hard-gated приложений.
+
+      **`BUILD_ON_S1_APPS` теперь включает все приложения с собственным `Dockerfile.production`.**
+      Не перенесены и не могут: `dashboard`/`dashboard-agent` (перезапускают сами себя по каналу
+      деплоя), `umami` (стоковый образ `ghcr.io/umami-software/umami`, своей сборки нет).
+      Остаются вне `E2E_GATED_APPS`/`HARD_GATED_APPS` за неготовностью staging-инфры (не входит
+      в эту волну, отдельная задача): `form-docs`, `animatrona-landing`, `animatrona-tracker`,
+      `kami-key-the-landing`, `letar-landing` — есть e2e-suite, нет `docker-compose.staging.yml`;
+      `pravda` — есть и то, и другое, но не заведена регистрация в `E2E_GATED_APPS`.
 - [ ] Разрез скрипта: `deploy-affected.sh` (s3, build) + `deploy-release.sh` (s2, release);
       `deploy_status` показывает фазу. **Код написан 2026-09-21** (см. «Реализация» ниже), живьём
       не проверен — ждёт настройки канала s1→s2 и пилота 1
-- [ ] Тираж на остальные (`HARD_GATED_APPS` — отдельное решение владельца), затем снятие
-      `node_modules`/`.nx` с s2 и замер освобождённого места
+- [x] Тираж на остальные — закрыт волнами 2 и 3 выше. Снятие `node_modules`/`.nx` с s2
+      **остаётся блокировано**: `libs/deploy-engine` на s2 по-прежнему запускается из
+      `node_modules` s2 (`yaml`, `zod`) — снять можно только после того, как CLI поедет на s2
+      отдельным бандлом. Замер освобождённого места — только после этого.
 - [ ] Обновить [deployment.md](/.claude/docs/deployment.md) — раздел «Где запускать деплой»
       описывает однохостовую модель, она перестаёт быть верной
 - [ ] Записать в `deployment.md`: при недоступности s3 деплой не выполняется (решение владельца),
