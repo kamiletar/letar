@@ -106,8 +106,10 @@ test.describe('Rating Demo', () => {
     const submitButton = page.getByRole('button', { name: /submit ratings/i })
     await submitButton.click()
 
-    // Should show validation error
-    await expect(page.locator('text=/rating|required/i')).toBeVisible({ timeout: 10000 })
+    // Should show validation error (сам productRating рендерится ещё в 4 size-variant демо с той же
+    // ошибкой — сужаем до группы "Product Rating", иначе несколько совпадений)
+    const productRatingGroup = page.getByRole('group').filter({ hasText: 'Product Rating' })
+    await expect(productRatingGroup.getByText('Please provide a rating')).toBeVisible({ timeout: 10000 })
   })
 
   test('should change rating via keyboard', async ({ page }) => {

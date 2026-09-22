@@ -185,7 +185,9 @@ test.describe('PinInput Demo', () => {
     // Blur to trigger validation
     await page.getByRole('button', { name: /verify all codes/i }).focus()
 
-    // Should show validation error about 4 digits required
-    await expect(page.locator('text=/4 (digits|characters|символ)/i')).toBeVisible({ timeout: 10000 })
+    // Should show validation error about 4 digits required (то же поле "pin" повторяется ещё в
+    // size-variant демо с той же ошибкой — сужаем до группы "PIN Code", иначе несколько совпадений)
+    const pinCodeGroup = page.getByRole('group').filter({ hasText: 'PIN Code' })
+    await expect(pinCodeGroup.getByText(/4 (digits|characters|символ)/i)).toBeVisible({ timeout: 10000 })
   })
 })
