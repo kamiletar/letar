@@ -22,7 +22,7 @@ export function MobileTOC() {
   const [activeId, setActiveId] = useState<string>('')
   const [progress, setProgress] = useState<number>(0)
   const [open, setOpen] = useState(false)
-  const rafIdRef = useRef<number | null>(null)
+  const throttleIdRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Собираем заголовки и настраиваем scroll-обработчик
   useEffect(() => {
@@ -55,21 +55,25 @@ export function MobileTOC() {
     // oxlint-disable-next-line react/set-state-in-effect
     setHeadings(items)
 
-    // Scroll handler с throttle — прогресс чтения И активный пункт.
-    // См. подробное объяснение в apps/pravda/src/app/_components/toc.tsx: раньше активный пункт
-    // считал IntersectionObserver, но Section оборачивает все свои Chapter целиком и остаётся
-    // "intersecting" всю прокрутку внутри раздела — порядок entries в колбэке произвольный,
-    // поэтому "последний entry с isIntersecting" давал недетерминированный/неверный результат.
-    // Фикс — последний (по порядку документа) заголовок, чей верхний край уже пересёк линию
-    // триггера (ACTIVE_THRESHOLD).
+    // Scroll handler с throttle через setTimeout — прогресс чтения И активный пункт.
+    // НЕ requestAnimationFrame: rAF полностью замирает без фокуса окна (см.
+    // .claude/docs/raf-vs-timers-background-tab.md) — throttle на его основе может не срабатывать
+    // в реальных условиях. 50мс-таймер достаточен и не замирает, см. подробное объяснение в
+    // apps/pravda/src/app/_components/toc.tsx.
+    //
+    // Активный пункт: раньше считал IntersectionObserver, но Section оборачивает все свои
+    // Chapter целиком и остаётся "intersecting" всю прокрутку внутри раздела — порядок entries в
+    // колбэке произвольный, поэтому "последний entry с isIntersecting" давал недетерминированный/
+    // неверный результат. Фикс — последний (по порядку документа) заголовок, чей верхний край уже
+    // пересёк линию триггера (ACTIVE_THRESHOLD).
     const ACTIVE_THRESHOLD = 80
 
     const handleScroll = () => {
-      if (rafIdRef.current !== null) {
+      if (throttleIdRef.current !== null) {
         return
       }
 
-      rafIdRef.current = requestAnimationFrame(() => {
+      throttleIdRef.current = setTimeout(() => {
         const scrollTop = window.scrollY
         const docHeight = document.documentElement.scrollHeight - window.innerHeight
         const scrollProgress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0
@@ -83,8 +87,8 @@ export function MobileTOC() {
         }
         setActiveId(active)
 
-        rafIdRef.current = null
-      })
+        throttleIdRef.current = null
+      }, 50)
     }
 
     window.addEventListener('scroll', handleScroll, { passive: true })
@@ -92,13 +96,13 @@ export function MobileTOC() {
 
     return () => {
       window.removeEventListener('scroll', handleScroll)
-      if (rafIdRef.current !== null) {
-        cancelAnimationFrame(rafIdRef.current)
+      if (throttleIdRef.current !== null) {
+        clearTimeout(throttleIdRef.current)
         // Сбрасываем ref после отмены — иначе после StrictMode double-invoke handleScroll()
-        // новой инстанции эффекта видит "устаревший" ненулевой id отменённого rAF и НАВСЕГДА
-        // пропускает планирование нового кадра (ранний return по `rafIdRef.current !== null`).
+        // новой инстанции эффекта видит "устаревший" ненулевой id отменённого таймера и НАВСЕГДА
+        // пропускает планирование нового (ранний return по `throttleIdRef.current !== null`).
         // Прогресс-бар застревал на 0%. См. тот же фикс в toc.tsx.
-        rafIdRef.current = null
+        throttleIdRef.current = null
       }
     }
   }, [])
