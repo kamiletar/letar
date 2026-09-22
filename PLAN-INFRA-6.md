@@ -2862,10 +2862,27 @@ read-only не годится для миграций, а для преренд�
       **С пилотом 4 все четыре канала двухфазного деплоя (build/release, туннель к прод-БД,
       SSG-пререндер из БД, живое применение миграции) подтверждены на реальных приложениях.**
       Открытым остаётся только тираж на остальные приложения (ниже).
+- [x] **Волна 1 тиража** (2026-09-22, `libs/infra-config` 0.3.8, коммит `12e236005`) — 8/9
+      приложений с чистым `typecheck:tsgo --skip-nx-cache` задеплоены через build-on-s1 без
+      новых пилотов: `aira-web`, `animatrona-landing`, `animatrona-tracker`, `form-docs`,
+      `form-example`, `kami-key-the-landing`, `pravda` — все на проде, здоровы.
+      `driving-school` **пропущен** — упал не из-за build-on-s1, а на реальном, независимом баге:
+      Better Auth `SCHEMA_MISMATCH` после апдейта `better-auth` 1.7.5 (2026-09-16, коммит
+      `5be68a11c`), молчавшем с последнего прод-деплоя (2026-09-05). Прод не пострадал (rollout
+      не прошёл `wait-healthy`, старый контейнер не остановлен — гарантия самого zero-downtime
+      механизма). Разбор и находка двух вероятных причин (stale `additionalFields` для
+      `cities`/`licenseCategories` в `auth.ts`, и новые поля `team.memberCount`/
+      `teamMember.membershipKey`, которых нет в `models/organizations.zmodel`) переданы
+      `driving-school-dev` (agent-mail, тред `driving-school-better-auth-schema-mismatch`) — не
+      чинил вслепую, это реальная миграция схемы мультитенантного прод-приложения, а не типовой
+      TS2321. `HARD_GATED_APPS` (archetest/dsperevod/svoichuzhie/aboi/aprel8008/studio/auth-hub)
+      сознательно не включены в волну — тест `infra-config/src/index.spec.ts` закрепляет, что их
+      production-сервер не подчиняется `BUILD_ON_S1_APPS`, трогать не без владельца.
 - [ ] Разрез скрипта: `deploy-affected.sh` (s3, build) + `deploy-release.sh` (s2, release);
       `deploy_status` показывает фазу. **Код написан 2026-09-21** (см. «Реализация» ниже), живьём
       не проверен — ждёт настройки канала s1→s2 и пилота 1
-- [ ] Тираж на остальные, затем снятие `node_modules`/`.nx` с s2 и замер освобождённого места
+- [ ] Тираж на остальные (`driving-school` — после починки схемы, `HARD_GATED_APPS` — отдельное
+      решение владельца), затем снятие `node_modules`/`.nx` с s2 и замер освобождённого места
 - [ ] Обновить [deployment.md](/.claude/docs/deployment.md) — раздел «Где запускать деплой»
       описывает однохостовую модель, она перестаёт быть верной
 - [ ] Записать в `deployment.md`: при недоступности s3 деплой не выполняется (решение владельца),
