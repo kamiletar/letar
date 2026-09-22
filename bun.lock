@@ -347,7 +347,7 @@
     },
     "apps/aboi": {
       "name": "@letar/aboi",
-      "version": "0.83.20",
+      "version": "0.83.21",
       "dependencies": {
         "@letar/admin-ui": "workspace:*",
         "@letar/analytics": "workspace:*",
@@ -518,7 +518,7 @@
     },
     "apps/aprel8008": {
       "name": "@letar/aprel8008",
-      "version": "0.31.5",
+      "version": "0.31.6",
       "dependencies": {
         "@letar/env-load": "workspace:*",
         "@letar/glitchtip": "workspace:*",
@@ -676,7 +676,7 @@
     },
     "apps/driving-school": {
       "name": "driving-school",
-      "version": "0.240.34",
+      "version": "0.240.35",
       "dependencies": {
         "@letar/admin-ui": "workspace:*",
         "@letar/auth": "workspace:*",
@@ -957,7 +957,7 @@
     },
     "apps/svoichuzhie": {
       "name": "@letar/svoichuzhie",
-      "version": "0.10.68",
+      "version": "0.10.69",
       "dependencies": {
         "@letar/admin-ui": "workspace:*",
         "@letar/api-server": "workspace:*",
