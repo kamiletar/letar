@@ -87,3 +87,13 @@ s2/s3/mail — kubo, relay, nginx-proxy-manager, maddy, все теперь git-
 починен, последний диагностический пункт — `ApiLog` на проде `driving-school` — проверен
 напрямую в БД, хвоста нет) и [§56](/PLAN-INFRA-3.md) (зомби-проверка cron-задач чистая, механизм
 ретира подтверждён на первом реальном случае §75). Следующий приоритет пока не выбран.
+
+- [ ] ⚠️ Открытый вопрос (2026-09-22): `bun.lock` разошёлся с `package.json` — 7 расхождений
+      (`@ai-sdk/anthropic`, `@ai-sdk/react`, `ai`, `jsdom` в корне; версии `apps/domwellbes`,
+      `apps/driving-school`, `libs/forms` в package.json опережают lock). `bun install
+      --frozen-lockfile` на сервере остановит деплой ВСЕХ приложений, пока это не
+      синхронизировано. Не чинил сам в этой сессии: рабочее дерево не чистое (агенты domwellbes и
+      pravda активно правят код параллельно) — `bun install --lockfile-only` в грязном дереве
+      рискует затянуть чужой WIP в lock ([разбор](/.claude/docs/bun-lock-drift-unpushed-commits-blocks-all-deploys.md)).
+      Нужно прогнать `bun install --lockfile-only` и закоммитить `bun.lock` отдельным коммитом,
+      когда дерево освободится (после того как domwellbes/driving-school/forms запушат свои SHA).
