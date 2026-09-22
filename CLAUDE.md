@@ -127,6 +127,7 @@
 ### Данные и состояние
 
 - [data-fetching](/.claude/docs/data-fetching.md) ⭐ React 19 хуки для форм, TanStack Query для списков
+- [redis-pubsub-cross-replica-registry-pattern](/.claude/docs/redis-pubsub-cross-replica-registry-pattern.md) фабрика + узкий интерфейс + fake-брокер вместо sticky-сессий
 - [tanstack-query-client-recreated-per-render](/.claude/docs/tanstack-query-client-recreated-per-render.md) ⚠️ клиент в теле провайдера — правки «не доезжают до экрана»
 - [pwa-offline](/.claude/docs/pwa-offline.md) Serwist, офлайн-формы, очередь синхронизации
 - [serwist-turbopack-stale-sw-artifact](/.claude/docs/serwist-turbopack-stale-sw-artifact.md) ⚠️ Serwist только с webpack, иначе отдаётся воркер прошлой сборки
