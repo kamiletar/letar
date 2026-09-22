@@ -597,7 +597,7 @@
     },
     "apps/dashboard-agent": {
       "name": "dashboard-agent",
-      "version": "0.18.0",
+      "version": "0.18.1",
       "dependencies": {
         "@fastify/cors": "^11.3.0",
         "@fastify/rate-limit": "^10",
@@ -616,7 +616,7 @@
     },
     "apps/domwellbes": {
       "name": "@letar/domwellbes",
-      "version": "0.297.2",
+      "version": "0.301.11",
       "dependencies": {
         "@gltf-transform/core": "^4.5.0",
         "@gltf-transform/extensions": "^4.5.0",
@@ -637,6 +637,7 @@
         "@letar/pg-url": "workspace:*",
         "@letar/pin-auth": "workspace:*",
         "@letar/query-provider": "workspace:*",
+        "@letar/redis-client": "workspace:*",
         "@letar/slug-resolver": "workspace:*",
         "@letar/theme-check": "workspace:*",
         "@letar/ui": "workspace:*",
@@ -1155,7 +1156,7 @@
     },
     "libs/deploy-mcp": {
       "name": "@letar/deploy-mcp",
-      "version": "0.7.1",
+      "version": "0.7.2",
       "dependencies": {
         "@letar/infra-config": "workspace:*",
         "@letar/mcp-server-kit": "workspace:*",
@@ -1265,7 +1266,7 @@
     },
     "libs/forms": {
       "name": "@letar/forms",
-      "version": "2.15.0",
+      "version": "2.15.1",
       "dependencies": {
         "@letar/format-utils": "workspace:*",
         "@tanstack/react-table": "^9.2.4",
@@ -1325,7 +1326,7 @@
     },
     "libs/forms-react": {
       "name": "@letar/forms-react",
-      "version": "0.10.0",
+      "version": "0.10.1",
       "dependencies": {
         "@letar/forms-core": "workspace:*",
       },
