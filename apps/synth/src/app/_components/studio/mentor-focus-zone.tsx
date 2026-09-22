@@ -14,7 +14,10 @@ export function MentorFocusZone({ active, children, ...props }: MentorFocusZoneP
 
   useEffect(() => {
     if (active) {
-      ref.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      // 'instant', не 'smooth' — MCP-инструмент focus_section может дёрнуть подсветку,
+      // пока окно студии в фоне без OS-фокуса, а без фокуса smooth-анимация зависает
+      // навсегда (.claude/docs/scrollintoview-smooth-frozen-without-window-focus.md)
+      ref.current?.scrollIntoView({ behavior: 'instant', block: 'center' })
     }
   }, [active])
 
