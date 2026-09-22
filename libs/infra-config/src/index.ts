@@ -98,6 +98,7 @@ export const SERVER_APPS: Record<string, InfraServer> = {
   'animatrona-tracker': 's2',
   umami: 's2',
   aboi: 's2',
+  'aira-web': 's2',
   svoichuzhie: 's2',
   aprel8008: 's2',
   'kami-key-the-landing': 's2',
@@ -228,15 +229,50 @@ export function getCurrentServer(): InfraServer {
  * (попытка 2) технически прошли, но критерий не подтвердили (динамический `/sitemap.xml` и
  * `force-dynamic` на кандидатных страницах соответственно) — обе остались в списке, но пилот
  * закрыт именно на grandslamcup. Разбор — `PLAN-INFRA-6.md` §157.
- * Пилот 4 (2026-09-22, в процессе): `domwellbes` — первая живая проверка канала `dump`/
- * `prisma migrate deploy` через туннель s1→s2. Прод-БД (`letar-db`, `domwellbes-prod`) подтверждает
- * непримененную миграцию — гарантированно найдётся что применить, не гипотеза по файловой системе.
+ * Пилот 4 (2026-09-22, пройден): `domwellbes` — первая живая проверка канала `dump`/
+ * `prisma migrate deploy` через туннель s1→s2 на реально отложенной миграции. Прод-БД (`letar-db`,
+ * `domwellbes-prod`) подтвердила непримененную миграцию заранее — гарантированно нашлось что
+ * применить, не гипотеза по файловой системе. Лог подтвердил применение конкретной миграции.
  * Детали миграции — в приватном `apps/domwellbes/PLAN.md` (`public-repo-hygiene.md`).
  * Пилот 2 (2026-09-21, пройден): `time` — с БД, без пререндера из неё.
  * Пилот 1 (2026-09-21, пройден): `letar-landing` — приложение без БД. Аварийного однохостового пути нет:
  * при недоступности s1/registry деплой не выполняется, откат — убрать имя из списка.
+ *
+ * Все четыре канала (build/release, туннель к прод-БД, SSG-пререндер из БД, живая миграция)
+ * подтверждены пилотами 1–4 — с этого момента список тиражируется на остальные приложения без
+ * новых пилотов, только по критерию «чистый `typecheck:tsgo --skip-nx-cache` локально».
+ *
+ * Волна 1 тиража (2026-09-22): 8 приложений с подтверждённым чистым typecheck —
+ * `aira-web`, `animatrona-landing`, `animatrona-tracker`, `driving-school`, `form-docs`,
+ * `form-example`, `kami-key-the-landing`, `pravda`. `animatrona-tracker` потребовал
+ * предварительного фикса TS2321 (коммит `ba8619f32`). Исключены из рассмотрения: Electron/React
+ * Native приложения, `dashboard`/`dashboard-agent` (см. предупреждение выше), приложения без
+ * `docker-compose.production.yml`.
+ *
+ * ⚠️ **Всё `HARD_GATED_APPS` (`archetest`, `dsperevod`, `svoichuzhie`, `aboi`, `aprel8008`,
+ * `studio`, `auth-hub`) сознательно НЕ добавлено в волну 1**, хотя typecheck у большинства тоже
+ * чист. Тест `index.spec.ts` закрепляет инвариант: для hard-gated приложений
+ * `resolveDeployServer(app, 'production')` обязан вернуть ровно `SERVER_APPS[app]` (сейчас
+ * `s2`), не подчиняясь `BUILD_ON_S1_APPS`. Это осознанная защита самых дорогих коммерческих
+ * приложений, а не забытый рефакторинг — решение о переносе их сборки на s1 (и обновление теста
+ * под это) принимает владелец отдельно, не тиражом заодно.
  */
-export const BUILD_ON_S1_APPS: string[] = ['letar-landing', 'time', 'kami', 'mandala', 'grandslamcup', 'domwellbes']
+export const BUILD_ON_S1_APPS: string[] = [
+  'letar-landing',
+  'time',
+  'kami',
+  'mandala',
+  'grandslamcup',
+  'domwellbes',
+  'aira-web',
+  'animatrona-landing',
+  'animatrona-tracker',
+  'driving-school',
+  'form-docs',
+  'form-example',
+  'kami-key-the-landing',
+  'pravda',
+]
 
 /**
  * Собирается ли приложение в production на s1 (см. `BUILD_ON_S1_APPS`).
