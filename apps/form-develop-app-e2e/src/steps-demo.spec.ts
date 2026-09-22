@@ -111,18 +111,6 @@ test.describe('Form.Steps Demo', () => {
     })
 
     test('should complete all steps and show completion content', async ({ page, browserName }) => {
-      // Реальный баг @letar/forms, не локатора: на последнем Step (isLastStep = currentStep ===
-      // stepCount - 1) Navigation сразу подменяет "Continue" на submit-кнопку ("Create Account"),
-      // а goToNext() в use-step-navigation.ts никогда не пускает currentStep дальше stepCount - 1 —
-      // Form.Steps.CompletedContent физически недостижим через обычный клик по кнопкам.
-      // Подтверждено вручную в браузере: клик "Create Account" сразу вызывает onSubmit, минуя
-      // экран "All steps complete!". Делегировано forms-coordinator-dev, tracking: PLAN.md
-      // form-develop-app-e2e. Не выключать test.skip webkit-логику — оставлено на случай, если
-      // фикс в libs/forms сделает тест снова живым.
-      test.fixme(
-        true,
-        'Form.Steps.CompletedContent недостижим — баг в @letar/forms, делегировано forms-coordinator-dev',
-      )
       test.skip(browserName === 'webkit', 'WebKit has timing issues with step transitions')
 
       // Step 1: Personal info
@@ -146,12 +134,6 @@ test.describe('Form.Steps Demo', () => {
     })
 
     test('should submit form after completing all steps', async ({ page, browserName }) => {
-      // Тот же баг @letar/forms, что и в предыдущем тесте: "All steps complete!" (CompletedContent)
-      // никогда не показывается, шаг 3 сразу отправляет форму по клику "Create Account".
-      test.fixme(
-        true,
-        'Form.Steps.CompletedContent недостижим — баг в @letar/forms, делегировано forms-coordinator-dev',
-      )
       test.skip(browserName === 'webkit', 'WebKit has timing issues with form submission')
 
       // Complete all steps
@@ -261,12 +243,15 @@ test.describe('Form.Steps Demo', () => {
       // атрибутом data-complete (пусто = true), а не значением "complete" в data-state — тот
       // хранит только "open"/"closed" текущей панели (steps.connect.mjs, getTriggerProps).
       //
-      // ⚠️ [data-part="trigger"] (кнопка-таб) после перехода на step 2 остаётся с устаревшими
-      // атрибутами первого рендера (data-current/data-state="open" на шаге 0) — подтверждено
-      // вручную в браузере. [data-part="indicator"] (кружок с номером/галочкой внутри триггера)
-      // обновляется корректно и синхронно с currentStep — используем его. Похоже на реальный баг
-      // Chakra Steps/zag-js-биндинга (стейл-пропсы триггера), отдельный от бага CompletedContent
-      // выше — тоже делегировано forms-coordinator-dev.
+      // ⚠️ Раньше здесь стоял комментарий про якобы «залипающий» [data-part="trigger"] — расследование
+      // #1922 (2026-09-22) показало, что реального бага в Chakra/zag-js нет: линейная форма на этой
+      // странице рендерится с `linear` (isClickable=false в FormStepsIndicator), поэтому
+      // `Steps.Trigger` для неё вообще не монтируется — на странице ЕСТЬ [data-part="trigger"],
+      // но ТОЛЬКО у второй, non-linear формы. Документ-wide локатор [data-part="trigger"] без
+      // scope на форму молча матчил чужой (нетронутый) виджет — классический паттерн из
+      // e2e-testing.md «unscoped-ассерты матчат чужой виджет». Используем [data-part="indicator"]
+      // не как обходной путь бага, а потому что это единственный part, который вообще существует
+      // в линейной форме.
       const firstStepIndicator = page.locator('[data-part="indicator"]').first()
       await expect(firstStepIndicator).toHaveAttribute('data-complete', '')
     })
@@ -274,7 +259,7 @@ test.describe('Form.Steps Demo', () => {
     test('should show current step as active', async ({ page }) => {
       // First step should be active/current — тот же механизм: текущий шаг помечен булевым
       // атрибутом data-current, не значением "active" в data-state. Используем
-      // [data-part="indicator"], не "trigger" — см. комментарий в предыдущем тесте.
+      // [data-part="indicator"] — см. комментарий в предыдущем тесте про причину.
       const firstStepIndicator = page.locator('[data-part="indicator"]').first()
       await expect(firstStepIndicator).toHaveAttribute('data-current', '')
     })
