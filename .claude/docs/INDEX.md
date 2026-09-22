@@ -291,6 +291,7 @@
 
 - [personal-data](/.claude/docs/personal-data.md) ⭐ 152-ФЗ, РКН, cookie
 - [upload-path-traversal](/.claude/docs/upload-path-traversal.md) почему `path.join`+`startsWith` не защищают
+- [file-scanner-unconfigured-rejects-all-uploads](/.claude/docs/file-scanner-unconfigured-rejects-all-uploads.md) ⚠️ `resolveFileScanner()` без `CLAMAV_HOST`/`ALLOW_FAKE_FILE_SCANNER` отдаёт fail-closed `UnavailableScanner`: **каждая** загрузка на стенде получает 422 «Файл не прошёл проверку», и это читается как придирка к формату файла. Сборка, типы и юнит-тесты зелёные, локально и на проде всё работает — ломается ровно окружение, чей compose отстал от прод-версии. Рядом с этим пропуском обычно живёт второй: несмонтированный том `private-uploads`
 - [client-bundle-data-leaks](/.claude/docs/client-bundle-data-leaks.md) ⚠️ JSON-справочник утёк в бандл; греп по имени ключа даёт ложноотрицательный результат
 - [advertising-law-boundaries](/.claude/docs/advertising-law-boundaries.md)
 - [tochka-acquiring-site-requirements](/.claude/docs/tochka-acquiring-site-requirements.md)

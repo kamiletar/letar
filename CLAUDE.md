@@ -283,6 +283,7 @@
 
 - [personal-data](/.claude/docs/personal-data.md) ⭐ 152-ФЗ, РКН, cookie
 - [upload-path-traversal](/.claude/docs/upload-path-traversal.md) почему `path.join`+`startsWith` не защищают
+- [file-scanner-unconfigured-rejects-all-uploads](/.claude/docs/file-scanner-unconfigured-rejects-all-uploads.md) ⚠️ стенд без `CLAMAV_HOST`/`ALLOW_FAKE_FILE_SCANNER` отвергает любую загрузку, маскируясь под отказ валидации формата
 - [client-bundle-data-leaks](/.claude/docs/client-bundle-data-leaks.md) ⚠️ греп по имени ключа даёт ложноотрицательный результат
 - [advertising-law-boundaries](/.claude/docs/advertising-law-boundaries.md) границы рекламного законодательства
 - [tochka-acquiring-site-requirements](/.claude/docs/tochka-acquiring-site-requirements.md) требования банка к сайту
