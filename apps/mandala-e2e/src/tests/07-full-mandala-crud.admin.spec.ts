@@ -30,6 +30,17 @@ test.describe('Админ: Полный CRUD мандалы', () => {
       // Ждём загрузки заголовка и формы
       await expect(adminPage.getByRole('heading', { name: /создать мандалу/i })).toBeVisible({ timeout: 10000 })
 
+      // Форма на этой странице использует useFormPersistence (@letar/forms) — в первые ~1-2с
+      // после первого интерактивного пейнта страница ещё дозагружает часть JS (networkidle),
+      // и в этом окне снятие файла через setInputFiles на скрытом input[type="file"] Dropzone
+      // (@letar/image-upload) молча теряется: onChange отрабатывает, но React откатывает
+      // локальный state компонента при подхвате отложенных чанков — превью и кнопка «Удалить»
+      // так и не появляются, без единой ошибки. Не специфично для этой страницы/компонента —
+      // тот же symptom воспроизведён и на domwellbes (supplier-quote-upload, supplier-price-
+      // import-form) на полностью свежем сервере. Дождаться networkidle ДО взаимодействия с
+      // dropzone — единственный найденный надёжный обход (3/3 против 3/3 без него).
+      await adminPage.waitForLoadState('networkidle')
+
       // Заполнение обязательного поля name (textbox с placeholder "Введите название")
       const nameInput = adminPage.getByPlaceholder(/введите название/i)
       await expect(nameInput).toBeVisible({ timeout: 10000 })
