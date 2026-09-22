@@ -4,6 +4,19 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.13.1] - 2026-09-22
+
+### Added
+
+- **`resolveStaticFormText(i18n, key, resolveBuiltin, params?)`** (`./i18n`, рядом с
+  `resolveTranslation`, который переиспользует внутри) — общая лестница резолва статичного
+  UI-текста форм: перевод приложения по ключу → встроенный дефолт по фактической `locale` →
+  встроенный дефолт по `DEFAULT_STATIC_TEXT_LOCALE` (`'en'`), если `FormI18nProvider` в дереве
+  нет вовсе. `resolveBuiltin(locale)` сам решает, что значит «встроенный дефолт» — словарь ru/en
+  с плюрализацией или фиксированный fallback-текст из пропов без своего словаря. Заменила три
+  независимо написанные копии в `@letar/forms` (`Form.Errors`, `minChars`-подсказка,
+  `form-persistence`) — см. `libs/forms/CHANGELOG.md` 2.16.5.
+
 ## [0.13.0] - 2026-09-21
 
 ### Added

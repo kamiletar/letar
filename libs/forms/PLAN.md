@@ -6,6 +6,28 @@
 
 ## Backlog (запросы от агентов)
 
+### ✅ [2026-09-22] Дублирование лестницы резолва статичных UI-строк в трёх местах — заголовок `Form.Errors`, `minChars`, `form-persistence` (закрыт forms-core 0.13.1 / forms 2.16.5, от пользователя)
+
+- **Запросил:** Ками напрямую — находка из сессии про локализацию `minChars` (2.16.3): три места
+  независимо повторяли один и тот же порядок «перевод приложения по ключу → встроенный словарь по
+  `locale` → английский/дефолт из пропов, если провайдера нет вовсе».
+- **Описание:** `resolveDefaultErrorsTitle` (`form-errors.tsx`), `resolveMinCharsHint`
+  (`min-chars-hint.ts`) и `localizeOrFallback` (`form-persistence.tsx`) — та же лестница, что уже
+  унифицировалась 2026-09-15 (запись «Дублирование fallback-логики i18n» ниже), только на уровень
+  выше: тогда извлекли внутренний примитив `resolveTranslation`, а порядок «i18n есть/нет →
+  перевод → builtin по locale» каждое из трёх мест всё равно собирало заново.
+- **Решение:** `resolveStaticFormText(i18n, key, resolveBuiltin, params?)` в
+  `libs/forms-core/src/lib/i18n/resolve-static-text.ts` (framework-free, переиспользует
+  `resolveTranslation` внутри). `resolveBuiltin(locale)` абстрагирует разницу между словарём с
+  плюрализацией (`minCharsHint`) и fallback-текстом из пропов без своего словаря
+  (`form-persistence`). Поведение всех трёх мест сохранено бит-в-бит. Параллельно (в той же
+  сессии, соседней веткой работы) резолвер сразу переиспользован для локализации дефолтов
+  `placeholder`/`loadingMessage`/`emptyMessage` Combobox/Autocomplete — см. запись ниже.
+- **Тесты:** новая `resolve-static-text.spec.ts` в `forms-core`; `min-chars-hint.spec.ts`,
+  `form-errors.spec.tsx`, `form-persistence.spec.tsx` — зелёные без правок ожиданий. `nx test
+  forms` 843/843, `nx test forms-core` 561/561.
+- **Статус:** ✅ закрыто, коммит `28297c82a`.
+
 ### ✅ [2026-09-22] Дефолты `placeholder`/`loadingMessage`/`emptyMessage` в Combobox/Autocomplete захардкожены по-английски (закрыт forms 2.16.4→2.16.5, от пользователя)
 
 - **Запросил:** пользователь напрямую, продолжение фикса подсказки `minChars` (2.16.3, см. запись
