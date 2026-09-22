@@ -1,53 +1,10 @@
 'use client'
 
-import {
-  Children,
-  type CSSProperties,
-  isValidElement,
-  type ReactNode,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-} from 'react'
+import { type CSSProperties, type ReactNode, useContext, useEffect, useMemo, useRef } from 'react'
 import { useFormGroup } from '../form-group'
+import { extractFieldNames } from './extract-field-names'
 import { useDeclarativeForm } from './form-context'
 import { FormStepsContext } from './form-steps/form-steps-context'
-
-/**
- * Extract field names from children recursively (for step validation integration)
- */
-function extractFieldNames(children: ReactNode, parentPath = ''): string[] {
-  const names: string[] = []
-
-  Children.forEach(children, (child) => {
-    if (!isValidElement(child)) {
-      return
-    }
-
-    const props = child.props as Record<string, unknown>
-
-    // Check if component has a name prop
-    if (typeof props.name === 'string') {
-      const fullName = parentPath ? `${parentPath}.${props.name}` : props.name
-      names.push(fullName)
-    }
-
-    // Check for Form.Group — it creates a namespace
-    const displayName = (child.type as { displayName?: string })?.displayName
-    if (displayName === 'FormGroupDeclarative' && typeof props.name === 'string') {
-      const groupPath = parentPath ? `${parentPath}.${props.name}` : props.name
-      if (props.children) {
-        names.push(...extractFieldNames(props.children as ReactNode, groupPath))
-      }
-    } // Recurse into children (except Form.Group.List — arrays are handled separately)
-    else if (props.children && displayName !== 'FormGroupListDeclarative') {
-      names.push(...extractFieldNames(props.children as ReactNode, parentPath))
-    }
-  })
-
-  return names
-}
 
 /**
  * Props for Form.When conditional rendering component

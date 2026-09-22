@@ -2,7 +2,8 @@
 
 import { Steps } from '@chakra-ui/react'
 import { AnimatePresence, motion, type Variants } from 'framer-motion'
-import { Children, isValidElement, type ReactNode, useEffect, useMemo, useRef, useState } from 'react'
+import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react'
+import { extractFieldNames } from '../extract-field-names'
 import { useDeclarativeForm } from '../form-context'
 import { FormGroupDeclarative } from '../form-group/form-group-declarative'
 import { type StepInfo, useFormStepsContext } from './form-steps-context'
@@ -61,42 +62,6 @@ export interface FormStepsStepProps {
    * автоматически клонированием дерева `children`.
    */
   __declaredIndex?: number
-}
-
-/**
- * Extract field names from children recursively
- * Looks for components with 'name' prop
- */
-function extractFieldNames(children: ReactNode, parentPath = ''): string[] {
-  const names: string[] = []
-
-  Children.forEach(children, (child) => {
-    if (!isValidElement(child)) {
-      return
-    }
-
-    const props = child.props as Record<string, unknown>
-
-    // Check if this is a field component with name prop
-    if (typeof props.name === 'string') {
-      const fullName = parentPath ? `${parentPath}.${props.name}` : props.name
-      names.push(fullName)
-    }
-
-    // Check for Form.Group - it creates a namespace
-    const displayName = (child.type as { displayName?: string })?.displayName
-    if (displayName === 'FormGroupDeclarative' && typeof props.name === 'string') {
-      const groupPath = parentPath ? `${parentPath}.${props.name}` : props.name
-      if (props.children) {
-        names.push(...extractFieldNames(props.children as ReactNode, groupPath))
-      }
-    } // Recurse into children (but not into Form.Group.List - arrays are handled differently)
-    else if (props.children && displayName !== 'FormGroupListDeclarative') {
-      names.push(...extractFieldNames(props.children as ReactNode, parentPath))
-    }
-  })
-
-  return names
 }
 
 /** Offset for slide animation in pixels */

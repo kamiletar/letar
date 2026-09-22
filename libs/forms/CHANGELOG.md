@@ -4,6 +4,16 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.16.2] - 2026-09-22
+
+### Changed
+
+- **Внутренний рефакторинг: дедуп `extractFieldNames`** — рекурсивный обход `children` для сбора
+  имён полей (namespace через `Form.Group`, пропуск рекурсии в `Form.Group.List`) был byte-for-byte
+  продублирован в `form-when.tsx` и `form-steps/form-steps-step.tsx`. Вынесен в общий
+  `declarative/extract-field-names.ts`, оба места импортируют его. Чисто внутреннее изменение, без
+  изменения публичного API и поведения, покрыто существующими тестами `src/lib/declarative`.
+
 ## [2.16.1] - 2026-09-22
 
 ### Changed
