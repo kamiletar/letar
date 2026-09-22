@@ -2,6 +2,14 @@
 
 Детальное описание реализованных функций.
 
+## `scrollIntoView(smooth)` зависал без OS-фокуса окна (2026-09-22)
+
+Делегировано из сессии `pravda-dev` — репо-широкий грепа по паттерну, зависающему при фиксе TOC
+в `apps/pravda` (коммиты `e61e2cbae`/`0b68c95d0`). `scrollToSection` в навбаре —
+`behavior: 'smooth'` → `'instant'`, см.
+[scrollintoview-smooth-frozen-without-window-focus.md](/.claude/docs/scrollintoview-smooth-frozen-without-window-focus.md).
+Коммит `ec7a3e84f`.
+
 ## Чистка `<Icon as={IconComponent}>` — semgrep `letar-chakra-as-prop-forbidden` (2026-08-26)
 
 Часть кросс-приложенческой инициативы §61 корневого `PLAN.md` (после `libs/video-player-react`
