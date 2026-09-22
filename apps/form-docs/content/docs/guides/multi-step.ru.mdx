@@ -81,6 +81,30 @@ import { SkinCodeFile } from '@/components/skin/skin-code-file'
 - Доступно с `@letar/forms` 2.14.22; те же пропсы есть в `@letar/forms-shadcn`, `@letar/forms-vue`
   и `@letar/forms-vue-shadcn`.
 
+## Экран после завершения
+
+`Form.Steps.CompletedContent` рендерит экран, показываемый после подтверждения последнего шага —
+сводку или панель «проверьте перед отправкой»:
+
+```tsx
+<Form.Steps validateOnNext>
+  <Form.Steps.Step title="Личные данные">...</Form.Steps.Step>
+  <Form.Steps.Step title="Адрес">...</Form.Steps.Step>
+
+  <Form.Steps.CompletedContent>
+    <p>Всё готово! Проверьте данные и нажмите «Отправить».</p>
+  </Form.Steps.CompletedContent>
+
+  <Form.Steps.Navigation />
+</Form.Steps>
+```
+
+Его присутствие в дереве меняет поведение кнопки на последнем шаге (`@letar/forms` 2.16.0+):
+Continue сначала переводит в состояние «завершено» (там рендерится `CompletedContent`), и только
+оттуда `Form.Steps.Navigation` переключается на Submit. Без `CompletedContent` последний шаг
+по-прежнему отправляет форму сразу — экран завершения подключается по желанию, существующие формы
+не затрагиваются.
+
 ## Сохранение шагов
 
 Шаги можно сохранять в localStorage для восстановления при перезагрузке страницы:

@@ -81,6 +81,29 @@ form-level, not a `Field`) with a smaller two-step schema — same mechanics, di
 - Available since `@letar/forms` 2.14.22; the same props exist in `@letar/forms-shadcn`,
   `@letar/forms-vue` and `@letar/forms-vue-shadcn`.
 
+## Completed screen
+
+`Form.Steps.CompletedContent` renders a screen shown after the last step is confirmed — a summary
+or "review before you submit" panel:
+
+```tsx
+<Form.Steps validateOnNext>
+  <Form.Steps.Step title="Personal Info">...</Form.Steps.Step>
+  <Form.Steps.Step title="Address">...</Form.Steps.Step>
+
+  <Form.Steps.CompletedContent>
+    <p>All done! Review your data and click Submit.</p>
+  </Form.Steps.CompletedContent>
+
+  <Form.Steps.Navigation />
+</Form.Steps>
+```
+
+Its presence in the tree changes what the last step's button does (`@letar/forms` 2.16.0+):
+Continue first moves into the completed state (where `CompletedContent` renders), and only there
+does `Form.Steps.Navigation` switch to Submit. Without `CompletedContent`, the last step still
+submits immediately — the completed screen is opt-in, existing forms are unaffected.
+
 ## Step Persistence
 
 Steps can be persisted to localStorage to survive page refreshes:
