@@ -1,0 +1,58 @@
+name: animatrona-landing-staging
+
+services:
+  app:
+    image: animatrona-landing:staging
+    container_name: animatrona-landing-staging-app
+    restart: unless-stopped
+    environment:
+      GLITCHTIP_DSN: ${GLITCHTIP_DSN}
+      GLITCHTIP_ENVIRONMENT: ${GLITCHTIP_ENVIRONMENT}
+      NEXT_PUBLIC_GLITCHTIP_DSN: ${NEXT_PUBLIC_GLITCHTIP_DSN}
+      NEXT_PUBLIC_GLITCHTIP_ENVIRONMENT: ${NEXT_PUBLIC_GLITCHTIP_ENVIRONMENT}
+      GLITCHTIP_RELEASE: ${GLITCHTIP_RELEASE}
+      NEXT_PUBLIC_GLITCHTIP_RELEASE: ${GLITCHTIP_RELEASE}
+      TZ: Europe/Moscow
+      NODE_ENV: production
+      # Внутренний PORT=3008 — из Dockerfile.production, тот же образ что и прод. Без БД и без
+      # auth (animatrona-landing — статический лендинг с GitHub API для релизов).
+      PORT: '3008'
+      # GitHub API для получения релизов (опционально) — без токена работает с rate limit 60/час
+      GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+      # Секрет instant revalidation кэша через GitHub Actions — на staging не используется
+      REVALIDATE_SECRET: ${REVALIDATE_SECRET:-}
+    ports:
+      # Хостовый 3037 — следующий свободный после domwellbes-staging(3031)/studio-staging(3032)/
+      # form-example-staging(3033)/kami-staging(3034)/form-docs-staging(3035)/
+      # letar-landing-staging(3036). Подтвердить перед первым деплоем.
+      #
+      # Публикация на хост оставлена намеренно, хотя маршрут уже идёт через Traefik: через неё
+      # ходит NPM, и это путь отката пилота (PLAN-INFRA.md §48 M1b). Убрать — после M2.
+      - '3037:3008'
+    networks:
+      - default
+      - traefik-network
+    labels:
+      # Маршрут описан здесь, а не в SQLite внутри NPM, — ради этого и затевался §48.
+      traefik.enable: 'true'
+      traefik.docker.network: 'traefik-network'
+      traefik.http.routers.animatrona-landing-stage.rule: 'Host(`animatrona-landing-stage.s1.letar.best`)'
+      traefik.http.routers.animatrona-landing-stage.entrypoints: 'websecure'
+      # ⛔ Без `certresolver` — сертификат уже выпущен (wildcard `*.s1.letar.best`), роутер его
+      # только использует. Свой резолвер здесь заказал бы точечный сертификат на это имя и
+      # упёрся бы в закрытую регистрацию acme-dns (`404`). Разбор — infra/traefik/README.md.
+      traefik.http.routers.animatrona-landing-stage.tls: 'true'
+      # Порт КОНТЕЙНЕРА, не хостовый: Traefik ходит напрямую по сети traefik-network
+      traefik.http.services.animatrona-landing-stage.loadbalancer.server.port: '3008'
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -q --spider http://0.0.0.0:3008/ || exit 1']
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 15s
+
+networks:
+  # Traefik маршрутизирует только контейнеры в своей сети: docker-провайдер читает label'ы
+  # контейнеров, а не адреса. Сеть создаётся один раз на сервере (docker network create).
+  traefik-network:
+    external: true
