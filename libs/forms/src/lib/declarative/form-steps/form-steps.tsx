@@ -2,7 +2,17 @@
 
 import { Steps } from '@chakra-ui/react'
 import { type StepPersistenceConfig, useStepNavigation, useStepPersistence, useStepState } from '@letar/forms-react'
-import { Children, cloneElement, isValidElement, type ReactNode, useCallback, useMemo, useRef, useState } from 'react'
+import {
+  Children,
+  cloneElement,
+  isValidElement,
+  type ReactElement,
+  type ReactNode,
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { useDeclarativeForm } from '../form-context'
 import { FormStepsCompletedContent } from './form-steps-completed'
 import { FormStepsContext, type FormStepsContextValue } from './form-steps-context'
@@ -25,18 +35,11 @@ export type { StepPersistenceConfig }
  */
 function countDeclaredSteps(children: ReactNode): number {
   let count = 0
-  Children.forEach(children, (child) => {
-    if (!isValidElement(child)) {
-      return
-    }
-    if (child.type === FormStepsStep) {
+  walkStepsTree(children, {
+    onStep: (child) => {
       count++
-      return
-    }
-    const props = child.props as { children?: ReactNode } | undefined
-    if (props?.children) {
-      count += countDeclaredSteps(props.children)
-    }
+      return child
+    },
   })
   return count
 }
@@ -48,20 +51,59 @@ function countDeclaredSteps(children: ReactNode): number {
  */
 function hasCompletedContentChild(children: ReactNode): boolean {
   let found = false
-  Children.forEach(children, (child) => {
-    if (found || !isValidElement(child)) {
-      return
-    }
-    if (child.type === FormStepsCompletedContent) {
+  walkStepsTree(children, {
+    onCompletedContent: () => {
       found = true
-      return
+    },
+  })
+  return found
+}
+
+interface StepsTreeVisitor {
+  /**
+   * Вызывается для каждого `Form.Steps.Step` — без дальнейшей рекурсии внутрь него (шаги не
+   * бывают вложенными друг в друга). Возвращает узел, которым он заменяется в пересобранном
+   * дереве. Не задан — `Form.Steps.Step` обходится как любой другой элемент (генерик-ветка ниже),
+   * это сохраняет поведение `hasCompletedContentChild`, которому не нужно перехватывать `Step`.
+   */
+  onStep?: (child: ReactElement<FormStepsStepProps>) => ReactNode
+  /**
+   * Вызывается для каждого `Form.Steps.CompletedContent` — без рекурсии внутрь него. Не задан —
+   * обходится генерик-веткой, как в `countDeclaredSteps`/`assignDeclaredIndices`.
+   */
+  onCompletedContent?: (child: ReactElement) => void
+}
+
+/**
+ * Общий рекурсивный обход дерева `children` `<Form.Steps>`, на котором держатся три функции
+ * ниже: `countDeclaredSteps`, `hasCompletedContentChild`, `assignDeclaredIndices`. Каждая из них
+ * перехватывает свой тип узла через `visitor`, остальные элементы с `children` обходятся
+ * генериком (`cloneElement` с рекурсивно обработанными детьми) — так функции, которым нужен
+ * только подсчёт/поиск (результат `walkStepsTree` отбрасывается), и функция, которой нужна
+ * трансформация дерева (`assignDeclaredIndices`, результат используется как есть), не
+ * расходятся в самой логике спуска по дереву. Порядок обхода — глубина-сначала, слева направо,
+ * как и в исходных раздельных реализациях.
+ */
+function walkStepsTree(children: ReactNode, visitor: StepsTreeVisitor): ReactNode {
+  return Children.map(children, (child) => {
+    if (!isValidElement(child)) {
+      return child
+    }
+    if (child.type === FormStepsStep && visitor.onStep) {
+      return visitor.onStep(child as ReactElement<FormStepsStepProps>)
+    }
+    if (child.type === FormStepsCompletedContent && visitor.onCompletedContent) {
+      visitor.onCompletedContent(child)
+      return child
     }
     const props = child.props as { children?: ReactNode } | undefined
     if (props?.children) {
-      found = found || hasCompletedContentChild(props.children)
+      return cloneElement(child, {
+        children: walkStepsTree(props.children, visitor),
+      } as Partial<{ children: ReactNode }>)
     }
+    return child
   })
-  return found
 }
 
 /**
@@ -80,12 +122,9 @@ function hasCompletedContentChild(children: ReactNode): boolean {
  * (типичный случай) это покрывает 100% шагов.
  */
 function assignDeclaredIndices(children: ReactNode, counter: { next: number; stopped: boolean }): ReactNode {
-  return Children.map(children, (child) => {
-    if (!isValidElement(child)) {
-      return child
-    }
-    if (child.type === FormStepsStep) {
-      const stepProps = child.props as FormStepsStepProps
+  return walkStepsTree(children, {
+    onStep: (child) => {
+      const stepProps = child.props
       if (counter.stopped || stepProps.when) {
         counter.stopped = true
         return child
@@ -93,14 +132,7 @@ function assignDeclaredIndices(children: ReactNode, counter: { next: number; sto
       const declaredIndex = counter.next
       counter.next += 1
       return cloneElement(child, { __declaredIndex: declaredIndex } as Partial<FormStepsStepProps>)
-    }
-    const props = child.props as { children?: ReactNode } | undefined
-    if (props?.children) {
-      return cloneElement(child, {
-        children: assignDeclaredIndices(props.children, counter),
-      } as Partial<{ children: ReactNode }>)
-    }
-    return child
+    },
   })
 }
 

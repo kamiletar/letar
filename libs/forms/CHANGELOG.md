@@ -4,6 +4,17 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.16.1] - 2026-09-22
+
+### Changed
+
+- **Внутренний рефакторинг `form-steps.tsx`** — `countDeclaredSteps`, `hasCompletedContentChild`
+  и `assignDeclaredIndices` (три отдельные рекурсии по дереву `children` с одинаковой формой
+  обхода) сведены к общему `walkStepsTree(children, visitor)`. Чисто внутреннее изменение, без
+  изменения публичного API и поведения — оба документированных инварианта (синхронный `count` на
+  первом рендере, отсутствие вспышки пустого контента до прохода эффектов) сохранены бит-в-бит,
+  покрыто существующими тестами `form-steps.spec.tsx` и e2e `steps-demo.spec.ts`.
+
 ## [2.16.0] - 2026-09-22
 
 ### Fixed
