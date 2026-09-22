@@ -93,3 +93,23 @@ data: {
 - Паттерн `*Kopecks Int` встречается в схемах и других приложений монорепо — при добавлении
   нового денежного поля или увеличении верхней границы существующего сверяться с INT4_MAX сразу,
   не откладывать до прод-инцидента.
+- **`studio` — аудит 13 полей `*Kopecks Int`, 2026-09-22, ничего не переведено на `BigInt`.**
+  Проверены `Client.rateKopecks`, `Project.rateKopecks`/`advanceKopecks`/`advanceUsedKopecks`,
+  `TimeEntry.rateKopecks`/`costKopecks`, `ProjectExpense.amountKopecks`,
+  `InvoiceRequest.pendingAmountKopecks`, `Payment.feeKopecks`, `ReferralCommission.amountKopecks`,
+  `ReferralPayout.amountKopecks`, `StudioSettings.defaultRateKopecks`, `Client.paidRevenueKopecks`
+  (`@computed`, не физическая колонка). Ни одно поле формы/API не имеет `.max()` — как и
+  `basePriceKopecks` до фикса, — но реальные максимумы на проде (`studio-prod`, 2026-09-22) на
+  2–3 порядка ниже INT4_MAX: `Invoice.total` 13 400 000 коп. (0,62% лимита), `Project.advanceKopecks`
+  8 000 000 (0,37%), `Project.advanceUsedKopecks` 7 000 000, `Payment.amount`/`Project.budget`
+  2 100 000, `ProjectExpense.amountKopecks` 800 000, ставочные поля (`rateKopecks`,
+  `defaultRateKopecks`) — 200 000–500 000 (2000–5000 ₽/час, по конструкции поля — ставка за час,
+  не итоговая сумма, поэтому даже грубая опечатка на порядок не подводит к лимиту).
+  `TimeEntry.costKopecks`/`InvoiceRequest.pendingAmountKopecks`/`ReferralCommission.amountKopecks`/
+  `ReferralPayout.amountKopecks` — данных на проде ещё нет (реферальная программа и поле
+  «себестоимость подрядчика» не задействованы), но по смыслу поля ограничены той же величиной, что
+  и уже проверенные суммы (доля/слепок одного платежа или ставки), риск такой же низкий. Критерий
+  тот же, что различил `basePriceKopecks` (45% лимита → фикс) и `HouseOption`/`HouseExtra` (два
+  порядка ниже → не фикс) в `domwellbes`: решает не факт отсутствия `.max()` (он универсален —
+  бьёт по каждому денежному полю в этой схеме), а реальная близость к лимиту. У studio её нет ни
+  у одного поля — небольшая веб-студия, суммы по проектам в разы, не в сотни раз, ниже INT4_MAX.
