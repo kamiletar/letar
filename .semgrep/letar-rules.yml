@@ -189,13 +189,13 @@ rules:
       include:
         - '*.tsx'
       exclude:
-        - libs/forms/**
-        - libs/forms-core/**
-        - libs/forms-react/**
-        - libs/forms-shadcn/**
-        - libs/forms-vue/**
-        - libs/forms-vue-shadcn/**
-        - libs/forms-angular/**
+        - /libs/forms/**
+        - /libs/forms-core/**
+        - /libs/forms-react/**
+        - /libs/forms-shadcn/**
+        - /libs/forms-vue/**
+        - /libs/forms-vue-shadcn/**
+        - /libs/forms-angular/**
     message: >-
       Сырой Chakra NativeSelect.Root/Select.Root/Combobox.Root вне @letar/forms — даже готовые
       внутренние Select/Combobox для extraSelects/extraComboboxes (см. образец
@@ -213,13 +213,13 @@ rules:
       include:
         - '*.tsx'
       exclude:
-        - libs/forms/**
-        - libs/forms-core/**
-        - libs/forms-react/**
-        - libs/forms-shadcn/**
-        - libs/forms-vue/**
-        - libs/forms-vue-shadcn/**
-        - libs/forms-angular/**
+        - /libs/forms/**
+        - /libs/forms-core/**
+        - /libs/forms-react/**
+        - /libs/forms-shadcn/**
+        - /libs/forms-vue/**
+        - /libs/forms-vue-shadcn/**
+        - /libs/forms-angular/**
     message: >-
       Form.Field.NativeSelect устарел — используй Form.Field.Select, он закрывает те же случаи,
       включая мобильный UX, собственным стилем библиотеки. NativeSelect остаётся только ради
@@ -238,14 +238,14 @@ rules:
       include:
         - '*.tsx'
       exclude:
-        - libs/forms/**
-        - libs/forms-core/**
-        - libs/forms-react/**
-        - libs/forms-shadcn/**
-        - libs/forms-vue/**
-        - libs/forms-vue-shadcn/**
-        - libs/forms-angular/**
-        - libs/ui/**
+        - /libs/forms/**
+        - /libs/forms-core/**
+        - /libs/forms-react/**
+        - /libs/forms-shadcn/**
+        - /libs/forms-vue/**
+        - /libs/forms-vue-shadcn/**
+        - /libs/forms-angular/**
+        - /libs/ui/**
     message: >-
       Футер формы собран руками (Flex/Box/HStack прямо над Button.Submit). Используй FormActions из
       @letar/ui: основное действие справа, дополнительное («Удалить», «Отмена») — в проп secondary,
@@ -314,8 +314,8 @@ rules:
         - '*.ts'
         - '*.tsx'
       exclude:
-        - libs/hooks/src/lib/browser/scroll-into-view-safe.ts
-        - libs/hooks/src/lib/browser/scroll-into-view-safe.spec.ts
+        - /libs/hooks/src/lib/browser/scroll-into-view-safe.ts
+        - /libs/hooks/src/lib/browser/scroll-into-view-safe.spec.ts
     message: >-
       scrollIntoView({ behavior: 'smooth' })/window.scrollTo({ behavior: 'smooth' }) зависает
       НАВСЕГДА (не медленно), если у окна нет OS-фокуса — Chromium анимирует 'smooth' через
