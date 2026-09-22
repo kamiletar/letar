@@ -97,3 +97,6 @@ it('...', async () => {
   соседний класс: shared-строка настроек, а не захардкоженный lookup-ключ.
 - [unit-testing.md](/.claude/docs/unit-testing.md) — общие правила интеграционных тестов на
   реальной dev-БД (без моков), почему параллелизм файлов вообще создаёт эти окна гонки.
+- [vitest-cross-file-db-race-file-parallelism.md](/.claude/docs/vitest-cross-file-db-race-file-parallelism.md) —
+  2026-09-22: когда точечных фиксов по этому паттерну становится много (масштаб вырос на всё
+  приложение), системный фикс — отключить файловый параллелизм в `vitest.config.mts`.

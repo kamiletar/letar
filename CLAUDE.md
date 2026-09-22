@@ -217,6 +217,7 @@
 - [vitest-alias-redundant-vs-transitive](/.claude/docs/vitest-alias-redundant-vs-transitive.md) когда alias избыточен, а когда обязателен
 - [vitest-shared-singleton-row-race](/.claude/docs/vitest-shared-singleton-row-race.md) ⚠️ общая singleton-строка настроек — редкий флак на общей БД
 - [vitest-serializable-transaction-cross-file-flake](/.claude/docs/vitest-serializable-transaction-cross-file-flake.md) ⚠️ Postgres SSI `40001` без пересечения данных
+- [vitest-cross-file-db-race-file-parallelism](/.claude/docs/vitest-cross-file-db-race-file-parallelism.md) ⭐ когда узких гонок за общую БД становится много — системный фикс `fileParallelism: false`, не point-патчи
 - [ci-real-postgres-unit-test-isolation](/.claude/docs/ci-real-postgres-unit-test-isolation.md) настоящая БД в CI: `test.env` перебивает job-level
 - [hardcoded-unique-lookup-key-test-race](/.claude/docs/hardcoded-unique-lookup-key-test-race.md) ⚠️ захардкоженный `@unique`-ключ делит один ряд между spec-файлами
 - [zod-computed-key-index-access-pitfall](/.claude/docs/zod-computed-key-index-access-pitfall.md) ⚠️ TS7053 зависит от формы callback'а

@@ -72,6 +72,16 @@ dev-БД (не мокается, см. [unit-testing.md](/.claude/docs/unit-test
 менять другие тестовые файлы того же приложения — не специфично для domwellbes или для
 `ShopSettings` конкретно.
 
+## ✅ 2026-09-22: промотировано в системный фикс на весь domwellbes
+
+Точечные фиксы ниже остаются полезны, но масштаб проблемы (4-11 из 392 файлов флакует почти на
+каждом полном прогоне, плюс обнаружен четвёртый класс — широкий recipient/role-запрос как
+псевдо-singleton) вывел за пределы «лечить по файлу». Системный фикс —
+`fileParallelism: false` в `vitest.config.mts`, эмпирически подтверждено: 0/2723 падений при
+полной сериализации против 4-11 файлов при параллелизме. Разбор, замеры и рассмотренные
+альтернативы (частичное снижение `maxWorkers`, изоляция БД по воркеру, retry на 40001) —
+[vitest-cross-file-db-race-file-parallelism.md](/.claude/docs/vitest-cross-file-db-race-file-parallelism.md).
+
 ## Ссылки
 
 - [unit-testing.md](/.claude/docs/unit-testing.md) — общие правила интеграционных тестов на
@@ -80,3 +90,5 @@ dev-БД (не мокается, см. [unit-testing.md](/.claude/docs/unit-test
   [vitest-unlinked-workspace-lib-imports.md](/.claude/docs/vitest-unlinked-workspace-lib-imports.md) —
   соседние vitest-ловушки этого репозитория, другой класс проблемы (резолв модулей, не гонка
   данных).
+- [vitest-cross-file-db-race-file-parallelism.md](/.claude/docs/vitest-cross-file-db-race-file-parallelism.md) —
+  сводный root cause и системный фикс, когда этот класс гонки перестаёт быть редким исключением.
