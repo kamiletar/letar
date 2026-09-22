@@ -616,7 +616,7 @@
     },
     "apps/domwellbes": {
       "name": "@letar/domwellbes",
-      "version": "0.307.0",
+      "version": "0.308.0",
       "dependencies": {
         "@gltf-transform/core": "^4.5.0",
         "@gltf-transform/extensions": "^4.5.0",
@@ -924,7 +924,7 @@
     },
     "apps/studio": {
       "name": "@letar/studio",
-      "version": "0.69.21",
+      "version": "0.69.22",
       "dependencies": {
         "@letar/admin-ui": "workspace:*",
         "@letar/consent": "workspace:*",
