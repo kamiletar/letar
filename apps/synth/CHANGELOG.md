@@ -4,6 +4,12 @@
 
 ---
 
+## [0.22.9] — 2026-09-24
+
+### Changed
+
+- Провайдер собран из `DarkOnlyChakraProvider` (`@letar/chakra-provider/next`) вместо ручной связки `EmotionRegistry` + `ColorModeProvider` + `RootChakraProvider`. Поведение прежнее: принудительная тёмная тема, реестр Emotion снаружи.
+
 ## [0.22.8] — 2026-09-24
 
 ### Changed
