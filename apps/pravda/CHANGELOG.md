@@ -12,6 +12,13 @@
 - `vitest.config.mts`: убран избыточный alias `@letar/hooks` — пакет уже прямая зависимость,
   симлинк bun резолвит его без alias.
 
+## [1.9.15] - 2026-09-24
+
+### Fixed
+
+- `useBookmarks`: `getServerSnapshot` отдавал новый `[]` на каждый вызов — в dev React писал в консоль «The result of getServerSnapshot should be cached to avoid an infinite loop» на любой странице документа. Пустой список теперь — модульная константа `EMPTY_BOOKMARKS`; её же отдают ветки без `window` и с битым JSON в `localStorage`.
+- `useBookmarks`: при битом JSON следующий вызов возвращал закладки, закешированные до порчи данных (кеш строки обновлялся раньше разбора, а кеш списка — нет).
+
 ## [1.9.14] - 2026-09-24
 
 ### Fixed

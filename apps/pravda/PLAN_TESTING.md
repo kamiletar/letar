@@ -26,6 +26,9 @@
 - Инициализация — 1 тест
 - CRUD операции — 6 тестов
 - localStorage — 3 теста
+- Стабильность snapshot `useSyncExternalStore` — гидратация (`getServerSnapshot`) и ветка битого
+  JSON без предупреждения React «should be cached» (тест гидратации обязан идти первым: флаг
+  предупреждения в React взводится один раз на модуль)
 
 ### src/hooks/use-search.test.ts
 
