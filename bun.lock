@@ -597,7 +597,7 @@
     },
     "apps/dashboard-agent": {
       "name": "dashboard-agent",
-      "version": "0.18.2",
+      "version": "0.18.3",
       "dependencies": {
         "@fastify/cors": "^11.3.0",
         "@fastify/rate-limit": "^10",
@@ -616,7 +616,7 @@
     },
     "apps/domwellbes": {
       "name": "@letar/domwellbes",
-      "version": "0.309.23",
+      "version": "0.309.25",
       "dependencies": {
         "@gltf-transform/core": "^4.5.0",
         "@gltf-transform/extensions": "^4.5.0",
@@ -1692,7 +1692,7 @@
     },
     "libs/undo-toast": {
       "name": "@letar/undo-toast",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "peerDependencies": {
         "@chakra-ui/react": ">=3.0.0",
         "react": ">=19.0.0",

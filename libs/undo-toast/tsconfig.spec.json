@@ -3,6 +3,7 @@
   "compilerOptions": {
     "outDir": "./out-tsc/spec",
     "types": ["vitest/globals", "node"],
+    "lib": ["es2022", "dom"],
     "rootDir": "."
   },
   "include": ["vitest.config.mts", "src/**/*.ts", "src/**/*.d.ts"]
