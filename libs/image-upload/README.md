@@ -173,8 +173,12 @@ return (
 
 ### useFileDragDrop
 
-Только drag-n-drop, без привязки к изображениям — `acceptTypes` принимает любой
-MIME-шаблон (`'audio/*'`, `'application/pdf'`).
+Только drag-n-drop, без привязки к изображениям — `acceptTypes` принимает тот же
+синтаксис, что HTML-атрибут `accept`: точный MIME (`'application/pdf'`), MIME-wildcard
+(`'audio/*'`), расширение (`.csv`) и список через запятую. Текст ошибки в `error`
+(«Файл должен быть изображением»/«...аудио») зависит от того, начинается ли `acceptTypes`
+с `'image'`/`'audio'` — для списка или расширения он нейтральный
+(«Неподдерживаемый тип файла»).
 
 ### useImagePreviewUrl
 

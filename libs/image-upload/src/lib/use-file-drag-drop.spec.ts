@@ -393,5 +393,37 @@ describe('useFileDragDrop', () => {
       // acceptTypes начинается с 'image' → сообщение 'Файл должен быть изображением'
       expect(result.current.error).toBe('Файл должен быть изображением')
     })
+
+    it('должен принять файл по списку MIME-типов через запятую (общий матчер с Dropzone)', async () => {
+      const onUpload = vi.fn().mockResolvedValue(undefined)
+      const { result } = renderHook(() => useFileDragDrop({ onUpload, acceptTypes: 'image/png,image/jpeg' }))
+
+      const file = createMockFile('image/jpeg')
+      const event = createMockDragEvent([file])
+
+      await act(async () => {
+        result.current.dragHandlers.onDrop(event)
+      })
+
+      expect(onUpload).toHaveBeenCalledWith(file)
+      expect(result.current.error).toBeNull()
+    })
+
+    it('должен принять файл по расширению из accept, даже если MIME пуст', async () => {
+      const onUpload = vi.fn().mockResolvedValue(undefined)
+      const { result } = renderHook(() => useFileDragDrop({ onUpload, acceptTypes: '.csv,.xlsx' }))
+
+      const file = createMockFile('', 'прайс.xlsx')
+      const event = createMockDragEvent([file])
+
+      await act(async () => {
+        result.current.dragHandlers.onDrop(event)
+      })
+
+      expect(onUpload).toHaveBeenCalledWith(file)
+      // acceptTypes не начинается с 'image'/'audio' → нейтральное сообщение (тут не проверяем,
+      // файл принят и до сообщения об ошибке дело не доходит)
+      expect(result.current.error).toBeNull()
+    })
   })
 })

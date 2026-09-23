@@ -4,6 +4,7 @@ import type { BoxProps } from '@chakra-ui/react'
 import { Box, Icon, Text, VStack } from '@chakra-ui/react'
 import { type DragEvent, type ReactNode, useCallback, useRef, useState } from 'react'
 import { LuImagePlus, LuUpload } from 'react-icons/lu'
+import { isFileAccepted } from './accept-match'
 
 export interface DropzoneProps extends Omit<BoxProps, 'onChange'> {
   /**
@@ -39,41 +40,6 @@ export interface DropzoneProps extends Omit<BoxProps, 'onChange'> {
 }
 
 const REJECTED_FORMAT_REASON = 'Неподдерживаемый формат файла'
-
-/**
- * Проверяет файл на соответствие одному шаблону из `accept`: точный MIME-тип
- * (`image/png`), MIME-категория со звёздочкой (`image/`, звёздочка), расширение
- * (`.pdf`) либо один из шаблонов «принять всё» (одна звёздочка или её MIME-форма).
- */
-function matchesAcceptPattern(file: File, pattern: string): boolean {
-  if (pattern === '*' || pattern === '*/*') {
-    return true
-  }
-  if (pattern.startsWith('.')) {
-    return file.name.toLowerCase().endsWith(pattern.toLowerCase())
-  }
-  if (pattern.endsWith('/*')) {
-    return file.type.startsWith(pattern.slice(0, -1))
-  }
-  return file.type === pattern
-}
-
-/**
- * Проверяет файл на соответствие `accept` — списку шаблонов через запятую,
- * как в одноимённом HTML-атрибуте. Пустой/отсутствующий `accept` пропускает всё.
- */
-function isFileAccepted(file: File, accept: string): boolean {
-  const patterns = accept
-    .split(',')
-    .map((pattern) => pattern.trim())
-    .filter(Boolean)
-
-  if (patterns.length === 0) {
-    return true
-  }
-
-  return patterns.some((pattern) => matchesAcceptPattern(file, pattern))
-}
 
 /**
  * Собирает объект, совместимый с `FileList` (индексы, `length`, `item()`), из

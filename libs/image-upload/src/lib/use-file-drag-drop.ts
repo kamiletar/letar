@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useState } from 'react'
+import { isFileAccepted } from './accept-match'
 
 /**
  * Опции для хука useFileDragDrop.
@@ -75,22 +76,22 @@ export function useFileDragDrop(options: UseFileDragDropOptions): UseFileDragDro
   const [error, setError] = useState<string | null>(null)
 
   /**
-   * Валидирует файл по MIME типу.
+   * Валидирует файл по `accept` — тот же матчер, что у `Dropzone` (точный MIME,
+   * MIME-wildcard, расширение, список через запятую).
    */
   const validateFile = useCallback(
-    (file: File): boolean => {
-      // Парсим acceptTypes: 'image/*' → 'image', 'audio/mp3' → 'audio/mp3'
-      if (acceptTypes.endsWith('/*')) {
-        const baseType = acceptTypes.replace('/*', '')
-        return file.type.startsWith(baseType + '/')
-      }
-      return file.type === acceptTypes
-    },
+    (file: File): boolean => isFileAccepted(file, acceptTypes),
     [acceptTypes],
   )
 
   /**
    * Получает сообщение об ошибке для типа файла.
+   *
+   * Завязано на `acceptTypes`, начинающийся с bare-MIME-категории (`'image/*'`,
+   * `'audio/*'`) — единственные значения, с которыми хук вызывают на практике
+   * (см. `useImageUpload`). Список через запятую или расширение сюда не матчится
+   * и получает нейтральный текст ниже — это не потеря точности, а то же самое,
+   * что было до расширения `validateFile` через общий матчер.
    */
   const getTypeErrorMessage = useCallback((): string => {
     if (acceptTypes.startsWith('image')) {
