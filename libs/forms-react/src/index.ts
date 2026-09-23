@@ -79,6 +79,11 @@ export { FormI18nProvider, getLocalizedValue, useFormI18n, useLocalizedOptions }
 export type { LocalizableOption, TranslateFunction, TranslateParams } from './lib/i18n'
 
 // Form.Steps — общая логика навигации/состояния/персистенции шагов (framework-free, без UI)
+export {
+  FormStepsFieldRegistryContext,
+  type FormStepsFieldRegistryContextValue,
+  useFormStepsFieldRegistry,
+} from './lib/steps/step-field-registry'
 export type { StepDirection, StepInfo } from './lib/steps/step-types'
 export {
   useStepNavigation,

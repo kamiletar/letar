@@ -4,6 +4,20 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.11.2] - 2026-09-23
+
+### Fixed
+
+- **`useDeclarativeField` теперь регистрирует смонтированное поле в текущем шаге `Form.Steps`**
+  через новый `FormStepsFieldRegistryContext`/`useFormStepsFieldRegistry` — раньше единственным
+  источником `fieldNames` шага был статический обход JSX `children` (`extractFieldNames` в
+  `@letar/forms`), который не видит поля, спрятанные внутри кастомного nullary-компонента
+  (`function BasicFields() { return <Field.String name="name" /> }`): у `<BasicFields />` как
+  элемента нет собственного `props.children`, обход не может узнать, что рендерит функция, без
+  её вызова. Контекст — no-op вне `Form.Steps` (значение `null`), поведение форм без шагов не
+  меняется. Закрывает пропуск валидации `Form.Steps.Navigation` (см. запись в CHANGELOG
+  `@letar/forms`).
+
 ## [0.11.1] - 2026-09-22
 
 ### Fixed

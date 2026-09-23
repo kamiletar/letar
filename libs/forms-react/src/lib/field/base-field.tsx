@@ -3,8 +3,10 @@
 import { getZodConstraints, type ZodConstraints } from '@letar/forms-core/schema'
 import { getFieldMeta } from '@letar/forms-core/schema'
 import type { FieldUIMeta } from '@letar/forms-core/schema'
+import { useEffect } from 'react'
 import { useDeclarativeForm } from '../context/form-context'
 import { useFormGroup } from '../context/form-group'
+import { useFormStepsFieldRegistry } from '../steps/step-field-registry'
 
 /**
  * Hook to get full field path, form instance, UI meta, required status, and constraints for declarative fields
@@ -46,6 +48,17 @@ export function useDeclarativeField(name?: string): {
 
   // Extract constraints from schema (min, max, minLength, maxLength, etc.)
   const constraints = getZodConstraints(schema, fullPath)
+
+  // Регистрация в текущем шаге Form.Steps (если поле смонтировано внутри одного) — см.
+  // докстринг `step-field-registry.ts`. Вне Form.Steps контекст отсутствует, эффект — no-op.
+  const fieldRegistry = useFormStepsFieldRegistry()
+  useEffect(() => {
+    if (!fieldRegistry) {
+      return
+    }
+    fieldRegistry.registerField(fullPath)
+    return () => fieldRegistry.unregisterField(fullPath)
+  }, [fieldRegistry, fullPath])
 
   return {
     form,
