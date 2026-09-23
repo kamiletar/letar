@@ -7,7 +7,16 @@ const OTHER_SHA = 'b'.repeat(40)
 const FRESH_TIMESTAMP = new Date().toISOString()
 const STALE_TIMESTAMP = new Date(Date.now() - 25 * 60 * 60 * 1000).toISOString()
 
-function okStatus(overrides: Partial<{ commitSha: string; passed: boolean; timestamp: string }> = {}) {
+function okStatus(
+  overrides: Partial<{
+    commitSha: string
+    passed: boolean
+    timestamp: string
+    filtered: boolean
+    grep: string
+    project: string
+  }> = {},
+) {
   return {
     success: true as const,
     data: {
@@ -38,6 +47,34 @@ describe('evaluateE2eGate', () => {
     const result = await evaluateE2eGate('archetest', fetchStatus, () => HEAD)
     expect(result.blocked).toBe(true)
     expect(result.reasons.some((r) => r.includes('УПАЛ'))).toBe(true)
+  })
+
+  it('блокирует зелёный статус от фильтрованного прогона (grep/project) — набор был неполным', async () => {
+    const fetchStatus = async () => okStatus({ filtered: true, grep: 'sales-funnel-won', project: 'chromium' })
+    const result = await evaluateE2eGate('domwellbes', fetchStatus, () => HEAD)
+    expect(result.blocked).toBe(true)
+    expect(result.reasons.some((r) => r.includes('фильтрованным') && r.includes('grep=sales-funnel-won'))).toBe(
+      true,
+    )
+  })
+
+  it('упавший фильтрованный прогон блокирует и называет фильтры в причине', async () => {
+    const fetchStatus = async () => okStatus({ passed: false, filtered: true, project: 'chromium' })
+    const result = await evaluateE2eGate('domwellbes', fetchStatus, () => HEAD)
+    expect(result.blocked).toBe(true)
+    expect(result.reasons.some((r) => r.includes('УПАЛ') && r.includes('project=chromium'))).toBe(true)
+  })
+
+  it('статус без поля filtered (записан до 2026-09-23) читается как полный прогон', async () => {
+    const fetchStatus = async () => okStatus()
+    const result = await evaluateE2eGate('archetest', fetchStatus, () => HEAD)
+    expect(result).toEqual({ blocked: false, reasons: [] })
+  })
+
+  it('filtered: false (полный прогон) не блокирует', async () => {
+    const fetchStatus = async () => okStatus({ filtered: false })
+    const result = await evaluateE2eGate('archetest', fetchStatus, () => HEAD)
+    expect(result).toEqual({ blocked: false, reasons: [] })
   })
 
   it('блокирует приложение, если e2e прогонялся не на том коммите И приложение affected (§51)', async () => {

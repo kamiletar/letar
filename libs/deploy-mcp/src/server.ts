@@ -35,7 +35,19 @@ const E2E_GATE_MAX_AGE_MS = 24 * 60 * 60 * 1000
 
 /** Форма ответа `/api/e2e/status` — то же поле, что читает e2e-гейт в deploy_app(production). */
 interface E2eStatusResponse {
-  lastStatus: { commitSha: string; passed: boolean; timestamp: string } | null
+  lastStatus: {
+    commitSha: string
+    passed: boolean
+    timestamp: string
+    /**
+     * true — статус записан прогоном с `grep`/`project` (неполный набор). dashboard-agent с
+     * 0.18.4 пишет такие статусы только как `passed: false`; поля нет в файлах, записанных раньше,
+     * — отсутствие читается как полный прогон.
+     */
+    filtered?: boolean
+    grep?: string
+    project?: string
+  } | null
 }
 
 /** Результат оценки e2e-гейта: причины (человекочитаемые) + решение блокировать или нет. */
@@ -138,8 +150,25 @@ export async function evaluateE2eGate(
       reasons.push(`для ${app} ещё ни разу не прогонялся e2e на staging — нет данных для сверки`)
       return { blocked: true, reasons }
     }
+    // Фильтрованный прогон (grep/project) проверил не весь набор — зелёным для гейта не считается
+    // (инцидент domwellbes 2026-09-23: точечный прогон одного теста записал passed:true).
+    // dashboard-agent такой статус больше не пишет; проверка здесь — вторая линия на случай
+    // старого агента или другого писателя файла.
+    const filterNote = last.filtered
+      ? ` (фильтрованный прогон: ${
+        [last.project ? `project=${last.project}` : '', last.grep ? `grep=${last.grep}` : ''].filter(Boolean).join(', ')
+        || 'фильтры не указаны'
+      })`
+      : ''
     if (!last.passed) {
-      reasons.push(`последний e2e для ${app} (коммит ${last.commitSha.slice(0, 7)}, ${last.timestamp}) УПАЛ`)
+      reasons.push(
+        `последний e2e для ${app} (коммит ${last.commitSha.slice(0, 7)}, ${last.timestamp}) УПАЛ${filterNote}`,
+      )
+    } else if (last.filtered) {
+      reasons.push(
+        `статус e2e для ${app} записан фильтрованным прогоном${filterNote} — для прод-деплоя нужен полный `
+          + 'run_e2e без grep и project',
+      )
     }
     compared = { e2eSha: last.commitSha, targetSha: null }
     try {
@@ -588,6 +617,9 @@ export function createDeployMcpServer(options: DeployMcpOptions = {}): McpServer
       'dev-сервер (webServer.reuseExistingServer в playwright.config.ts) и результат прогона будет',
       'ложным — проверял не staging-контейнер, а cold dev-режим (PLAN.md §18.7, aboi 2026-07-19).',
       'Результат пишется в .last-e2e-status/<app>.json и читается e2e-гейтом в deploy_app(production).',
+      '⚠️ Для гейта годится только ПОЛНЫЙ прогон (без grep и project; workers можно). Фильтрованный',
+      'прогон может статус только ухудшить: зелёный в файл не пишется (остаётся прошлый полный),',
+      'красный пишется как passed:false — упавший тест блокирует прод-деплой до нового полного прогона.',
       'Возвращает runId — опрашивай через e2e_status.',
       '',
       'grep — точечный прогон вместо всего набора (playwright test --grep): имя файла-спека, название',
@@ -611,7 +643,13 @@ export function createDeployMcpServer(options: DeployMcpOptions = {}): McpServer
             + 'https://<app>-stage.s1.letar.best (иначе Playwright поднимет свой dev-сервер и прогон будет ложным)',
         })
         .describe('Публичный HTTPS-домен staging на s1, например https://aboi-stage.s1.letar.best (НЕ localhost)'),
-      project: z.string().optional().describe('Playwright project (chromium/firefox/webkit/shard-*); по умолчанию все'),
+      project: z
+        .string()
+        .optional()
+        .describe(
+          'Playwright project (chromium/firefox/webkit/shard-*); по умолчанию все. '
+            + 'С project зелёный итог не засчитывается прод-гейту (неполный набор).',
+        ),
       grep: z
         .string()
         .max(200, 'grep слишком длинный (макс. 200 символов)')
@@ -621,7 +659,8 @@ export function createDeployMcpServer(options: DeployMcpOptions = {}): McpServer
         .optional()
         .describe(
           'Точечный прогон вместо всего набора: имя файла-спека (например "03-admin-products.admin.spec.ts") '
-            + 'или подстрока/regex названия теста, передаётся в `playwright test --grep`. Без него — весь набор.',
+            + 'или подстрока/regex названия теста, передаётся в `playwright test --grep`. Без него — весь набор. '
+            + 'С grep зелёный итог не засчитывается прод-гейту.',
         ),
       workers: z
         .number()
@@ -656,6 +695,11 @@ export function createDeployMcpServer(options: DeployMcpOptions = {}): McpServer
         [
           `🧪 E2E для **${app}** запущен на **s1**.`,
           `Фильтры: ${applied.length > 0 ? applied.join(', ') : 'не заданы — идёт весь набор'}.`,
+          ...(project || grep
+            ? [
+              '⚠️ Прогон с project/grep — неполный: зелёный итог прод-гейт не засчитает, красный — заблокирует деплой.',
+            ]
+            : []),
           '',
           `Опрашивай прогресс: \`e2e_status({ app: "${app}", runId: "${data?.runId ?? ''}", sinceLine: 0 })\``,
           '',
