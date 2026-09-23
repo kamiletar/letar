@@ -23,7 +23,7 @@
 - [agent-skills-mirror](/.claude/docs/agent-skills-mirror.md) зеркало `.claude/skills/` для Codex
 - [nextjs16-agent-guide-files](/.claude/docs/nextjs16-agent-guide-files.md) `next dev` сам пишет `AGENTS.md`
 - [llms-txt-pattern](/.claude/docs/llms-txt-pattern.md) `llms.txt`: статика vs роут, юридические запреты
-- [git-multi-agent-incidents](/.claude/docs/git-multi-agent-incidents.md) ⭐ почему правила git такие строгие; ⚠️ две сессии под одной identity + `Write` + смешанный индекс = коммит с непарсящимся файлом
+- [git-multi-agent-incidents](/.claude/docs/git-multi-agent-incidents.md) ⭐ почему правила git такие строгие; ⚠️ две сессии под одной identity → коммит непарсящегося файла
 - [semgrep-per-submodule-rules-pattern](/.claude/docs/semgrep-per-submodule-rules-pattern.md) кастомные правила для приватного submodule — в его собственном `.semgrep/`, не в корневом
 - [semgrep-yaml-anchor-exclude-invalid](/.claude/docs/semgrep-yaml-anchor-exclude-invalid.md) ⚠️ YAML-якорь в `paths.exclude` ломает `--validate`, дублирование списков — не трогать
 - [git-pathspec-commit-worktree-not-index](/.claude/docs/git-pathspec-commit-worktree-not-index.md) ⚠️ `commit -- <path>` берёт рабочее дерево, не индекс
@@ -82,7 +82,7 @@
 - [zenstack-self-only-user-policy-staff-picker](/.claude/docs/zenstack-self-only-user-policy-staff-picker.md) ⚠️ self-only политика режет staff-lookup до одной записи
 - [zenstack-required-relation-nested-select-null](/.claude/docs/zenstack-required-relation-nested-select-null.md) ⚠️ обязательная relation тихо резолвится в `null`
 - [zenstack-relation-traversal-fk-repoint-bypass](/.claude/docs/zenstack-relation-traversal-fk-repoint-bypass.md) ⚠️ политика по relation не видит переставленный FK
-- [zenstack-version-scoped-fk-immutable-pattern](/.claude/docs/zenstack-version-scoped-fk-immutable-pattern.md) ⚠️ FK на copy-on-write версию нужен `@deny` даже без условия в policy — иммутабельность держит только app-хелпер
+- [zenstack-version-scoped-fk-immutable-pattern](/.claude/docs/zenstack-version-scoped-fk-immutable-pattern.md) ⚠️ FK на copy-on-write версию: иммутабельность держит только app-хелпер, нужен `@deny`
 - [zenstack-field-level-allow-does-not-narrow](/.claude/docs/zenstack-field-level-allow-does-not-narrow.md) ⚠️ field-level `@allow` только добавляет право, сужает лишь `@deny`
 - [role-gate-vs-model-policy-drift](/.claude/docs/role-gate-vs-model-policy-drift.md) ⚠️ `requireRole` шире `@@allow` модели — отказ на записи вместо гейта
 - [tree-model-parent-select](/.claude/docs/tree-model-parent-select.md) self-referencing `parentId`
@@ -128,7 +128,7 @@
 - [content-block-edit-gate-not-wired](/.claude/docs/content-block-edit-gate-not-wired.md) ⚠️ кнопка рядом с блоком не доказывает, что блок читает её ключи
 - [faceted-catalog-pitfalls](/.claude/docs/faceted-catalog-pitfalls.md) фасетные фильтры каталога
 - [raf-vs-timers-background-tab](/.claude/docs/raf-vs-timers-background-tab.md) ⚠️ `rAF` замирает в фоновой вкладке, таймеры душатся
-- [scrollintoview-smooth-frozen-without-window-focus](/.claude/docs/scrollintoview-smooth-frozen-without-window-focus.md) ⚠️ `scrollIntoView(smooth)` зависает навсегда без OS-фокуса окна — та же природа, что и `rAF`
+- [scrollintoview-smooth-frozen-without-window-focus](/.claude/docs/scrollintoview-smooth-frozen-without-window-focus.md) ⚠️ `scrollIntoView(smooth)` без фокуса окна зависает навсегда, как `rAF`
 - [react-use-transition-initial-pending-race](/.claude/docs/react-use-transition-initial-pending-race.md) ⚠️ `isPending` ещё `false`, когда данных уже нет
 - [sticky-actionbar-cookiebanner-zindex-race](/.claude/docs/sticky-actionbar-cookiebanner-zindex-race.md) ⚠️ баннер перехватывает клик по CTA на короткой странице
 
@@ -142,7 +142,7 @@
 - [serwist-domwellbes-webpack-build-blocked](/.claude/docs/serwist-domwellbes-webpack-build-blocked.md) ✅ снято 2026-09-22; ⚠️ `webpackBuildWorker` глохнет от своего же `webpack()`-хука
 - [react-effect-stable-ref-pitfall](/.claude/docs/react-effect-stable-ref-pitfall.md) ⚠️ эффект с deps на ref/DOM не перезапускается
 - [route-announcer-persistent-layout-required](/.claude/docs/route-announcer-persistent-layout-required.md) ⚠️ `RouteAnnouncer` вне persistent layout молчит
-- [undo-toast-immediate-vs-deferred-commit-split](/.claude/docs/undo-toast-immediate-vs-deferred-commit-split.md) ⚠️ единый `onCommit`/`onUndo`-контракт не покрыл немедленный commit+restore, typecheck упал на чужом файле
+- [undo-toast-immediate-vs-deferred-commit-split](/.claude/docs/undo-toast-immediate-vs-deferred-commit-split.md) ⚠️ один `onCommit`/`onUndo`-контракт не покрыл немедленный commit+restore
 
 ### Next.js — ловушки
 
@@ -154,13 +154,13 @@
 - [nextjs-standalone-tracing](/.claude/docs/nextjs-standalone-tracing.md) ⚠️ ECONNREFUSED/ERR_DLOPEN_FAILED при зелёном билде
 - [nextjs-stale-dotnext-types-tsgo-ts6305](/.claude/docs/nextjs-stale-dotnext-types-tsgo-ts6305.md) ⚠️ TS6305 от устаревшего `.next/types`, бисекция не ловит
 - [nextjs-dynamic-fs-path-tracing](/.claude/docs/nextjs-dynamic-fs-path-tracing.md) ⚠️ рантайм-путь в `fs` утаскивает весь проект в standalone
-- [nextjs-tracing-excludes-windows-backslash](/.claude/docs/nextjs-tracing-excludes-windows-backslash.md) ⚠️ `outputFileTracingExcludes` молча не работает при сборке под Windows — на проде (linux) работает
-- [prisma-upsert-empty-update-build-race](/.claude/docs/prisma-upsert-empty-update-build-race.md) ⚠️ `P2002` на «Collecting page data» только на пустой БД: воркеры гоняются за создание singleton-строки
+- [nextjs-tracing-excludes-windows-backslash](/.claude/docs/nextjs-tracing-excludes-windows-backslash.md) ⚠️ `outputFileTracingExcludes` молча не работает при сборке под Windows
+- [prisma-upsert-empty-update-build-race](/.claude/docs/prisma-upsert-empty-update-build-race.md) ⚠️ `P2002` на «Collecting page data» на пустой БД: воркеры гоняются за singleton
 - [nextjs-build-time-oidc-discovery-network-dependency](/.claude/docs/nextjs-build-time-oidc-discovery-network-dependency.md) ⚠️ билд hub-клиента бьёт в сеть на OIDC discovery
 - [nextjs-server-action-redirect-race](/.claude/docs/nextjs-server-action-redirect-race.md) гонка редиректа в server action
 - [nextjs-server-action-decimal-serialization](/.claude/docs/nextjs-server-action-decimal-serialization.md) ⚠️ «Only plain objects can be passed»
-- [nextjs-server-action-thrown-error-message-stripped](/.claude/docs/nextjs-server-action-thrown-error-message-stripped.md) ⚠️ текст `throw` из Server Action в production стирается — отказ возвращать значением
-- [action-failure-value-silent-success](/.claude/docs/action-failure-value-silent-success.md) ⚠️ `ActionFailure` — значение успешного `resolve`, голый `await action()` без `unwrapActionResult`/`isActionFailure` не видит отказ
+- [nextjs-server-action-thrown-error-message-stripped](/.claude/docs/nextjs-server-action-thrown-error-message-stripped.md) ⚠️ текст `throw` в production стирается — отказ возвращать значением
+- [action-failure-value-silent-success](/.claude/docs/action-failure-value-silent-success.md) ⚠️ `ActionFailure` приходит успешным `resolve`, голый `await action()` не видит отказ
 - [nextjs-static-export-rsc-paths](/.claude/docs/nextjs-static-export-rsc-paths.md) статический экспорт и пути RSC
 - [nextjs-ssr-browser-only-libs](/.claude/docs/nextjs-ssr-browser-only-libs.md) ⚠️ `self is not defined`
 - [nextjs-dynamic-ssr-false-still-server-compiled](/.claude/docs/nextjs-dynamic-ssr-false-still-server-compiled.md) ⚠️ `dynamic(ssr:false)` не исключает модуль из server-резолва
@@ -199,7 +199,7 @@
 - [theme-hardcode-gate-coverage](/.claude/docs/theme-hardcode-gate-coverage.md) гейт сырых цветов (`theme:check`), список считать грепом
 - [chakra-semantic-token-contract](/.claude/docs/chakra-semantic-token-contract.md) ⚠️ стоковые рецепты читают `bg.panel`/`fg.error` — не переопределил, провалил WCAG
 - [chakra-inverted-surface-color-contrast](/.claude/docs/chakra-inverted-surface-color-contrast.md) ⚠️ `Tooltip.Content` на `bg.inverted` — низкий контраст в одной теме
-- [chakra-font-token-var-declaration-scope](/.claude/docs/chakra-font-token-var-declaration-scope.md) ⚠️ класс `next/font` на `<body>` не доезжает до токенов `fonts.*` на `:root` — сайт молча рисуется системным шрифтом
+- [chakra-font-token-var-declaration-scope](/.claude/docs/chakra-font-token-var-declaration-scope.md) ⚠️ класс `next/font` на `<body>` не доезжает до `fonts.*` на `:root` — системный шрифт
 - [chakra-typegen-shared-node-modules-race](/.claude/docs/chakra-typegen-shared-node-modules-race.md) ⚠️ параллельный `theme:typegen` откатывает чужие варианты
 - [chakra-overflow-wrap-not-inherited](/.claude/docs/chakra-overflow-wrap-not-inherited.md) ⚠️ не наследуется через reset — фикс только `'& *'`
 - [chakra-heading-defaults-to-h2](/.claude/docs/chakra-heading-defaults-to-h2.md) ⚠️ страница может не иметь ни одного `<h1>`
@@ -220,7 +220,7 @@
 - [vitest-alias-redundant-vs-transitive](/.claude/docs/vitest-alias-redundant-vs-transitive.md) когда alias избыточен, а когда обязателен
 - [vitest-shared-singleton-row-race](/.claude/docs/vitest-shared-singleton-row-race.md) ⚠️ общая singleton-строка настроек — редкий флак на общей БД
 - [vitest-serializable-transaction-cross-file-flake](/.claude/docs/vitest-serializable-transaction-cross-file-flake.md) ⚠️ Postgres SSI `40001` без пересечения данных
-- [vitest-cross-file-db-race-file-parallelism](/.claude/docs/vitest-cross-file-db-race-file-parallelism.md) ⭐ когда узких гонок за общую БД становится много — системный фикс `fileParallelism: false`, не point-патчи
+- [vitest-cross-file-db-race-file-parallelism](/.claude/docs/vitest-cross-file-db-race-file-parallelism.md) ⭐ много гонок за общую БД — фикс `fileParallelism: false`, не point-патчи
 - [ci-real-postgres-unit-test-isolation](/.claude/docs/ci-real-postgres-unit-test-isolation.md) настоящая БД в CI: `test.env` перебивает job-level
 - [hardcoded-unique-lookup-key-test-race](/.claude/docs/hardcoded-unique-lookup-key-test-race.md) ⚠️ захардкоженный `@unique`-ключ делит один ряд между spec-файлами
 - [zod-computed-key-index-access-pitfall](/.claude/docs/zod-computed-key-index-access-pitfall.md) ⚠️ TS7053 зависит от формы callback'а
@@ -254,7 +254,7 @@
 
 - [deployment](/.claude/docs/deployment.md) ⭐ как устроен деплой
 - [verification-pitfalls](/.claude/docs/verification-pitfalls.md) ⭐ проверки, которые врут в успокаивающую (и одна — в тревожную) сторону
-- [prod-build-runtime-diagnosis-ladder](/.claude/docs/prod-build-runtime-diagnosis-ladder.md) dev → next start → standalone → контейнер: какая ступень что отсекает; ⚠️ проверка резолва не проверяет цепочку
+- [prod-build-runtime-diagnosis-ladder](/.claude/docs/prod-build-runtime-diagnosis-ladder.md) dev → next start → standalone → контейнер; ⚠️ проверка резолва не проверяет цепочку
 - [dev-session-screenshot-bypass](/.claude/docs/dev-session-screenshot-bypass.md) живая проверка за admin-гейтом через Playwright-скрипт: скриншот и сбор консоли (гидратация, черновик формы)
 - [docker-bind-mount-pitfalls](/.claude/docs/docker-bind-mount-pitfalls.md) ⚠️ `compose up -d` не перечитывает смонтированный конфиг
 - [nextjs-standalone-bind-mount-wrong-cwd](/.claude/docs/nextjs-standalone-bind-mount-wrong-cwd.md) ⚠️ `process.chdir()` — байты уходят в writable-слой мимо хоста
@@ -292,7 +292,7 @@
 
 - [personal-data](/.claude/docs/personal-data.md) ⭐ 152-ФЗ, РКН, cookie
 - [upload-path-traversal](/.claude/docs/upload-path-traversal.md) почему `path.join`+`startsWith` не защищают
-- [file-scanner-unconfigured-rejects-all-uploads](/.claude/docs/file-scanner-unconfigured-rejects-all-uploads.md) ⚠️ стенд без `CLAMAV_HOST`/`ALLOW_FAKE_FILE_SCANNER` отвергает любую загрузку, маскируясь под отказ валидации формата
+- [file-scanner-unconfigured-rejects-all-uploads](/.claude/docs/file-scanner-unconfigured-rejects-all-uploads.md) ⚠️ без `CLAMAV_HOST`/`ALLOW_FAKE_FILE_SCANNER` стенд отвергает любую загрузку
 - [client-bundle-data-leaks](/.claude/docs/client-bundle-data-leaks.md) ⚠️ греп по имени ключа даёт ложноотрицательный результат
 - [advertising-law-boundaries](/.claude/docs/advertising-law-boundaries.md) границы рекламного законодательства
 - [tochka-acquiring-site-requirements](/.claude/docs/tochka-acquiring-site-requirements.md) требования банка к сайту
@@ -327,7 +327,7 @@
 - [electron-shared-runtime-and-settings-patterns](/.claude/docs/electron-shared-runtime-and-settings-patterns.md) `shared/`-рантайм и единый объект настроек — общий паттерн Electron-приложений
 - [electron-window-controls-overlay-pattern](/.claude/docs/electron-window-controls-overlay-pattern.md) `titleBarOverlay` вместо `frame: false`
 - [native-win32-ui-verification-screenshot](/.claude/docs/native-win32-ui-verification-screenshot.md) проверка UI вне Browser pane; ⚠️ двоение — чужая прод-копия
-- [claude-desktop-msix-container-virtualization](/.claude/docs/claude-desktop-msix-container-virtualization.md) ⚠️ шелл агента в MSIX-контейнере: HKCU и новые каталоги виртуализируются, живые тесты — через `schtasks`
+- [claude-desktop-msix-container-virtualization](/.claude/docs/claude-desktop-msix-container-virtualization.md) ⚠️ шелл агента в MSIX-контейнере: HKCU и новые каталоги виртуализируются
 - [windows-user-away-detection](/.claude/docs/windows-user-away-detection.md) ⚠️ «пользователь отошёл»: флаг экрана без админа, служба не видит ввод
 - [vite-dev-letar-ui-barrel-process-undefined](/.claude/docs/vite-dev-letar-ui-barrel-process-undefined.md) ⚠️ баррель `@letar/ui` тянет `next/*`, `process` не определён
 - [react-native-087-breaking-changes](/.claude/docs/react-native-087-breaking-changes.md) ⚠️ миграция RN 0.85→0.87, тихое ломание declaration merging
