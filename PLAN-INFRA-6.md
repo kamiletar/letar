@@ -4926,3 +4926,30 @@ major bump (осознанное решение, не тронуто).
       (`react-native-blob-util`/`-safe-area-context`/`-screens`) заблокированы штатным поведением
       semver у `~`/0.x-`^` диапазонов, не отдельным пином — не путать с зарегистрированной
       группой «react-native» на 0.87.1 в `intentional-pins.json`.
+
+## §198 (2026-09-23) Bind-mount каталоги загрузок: EACCES на s1/s2 и staging без `uploads`
+
+Next.js-образы бегут от `nextjs` (uid 1001), а хостовые `uploads/`/`private-uploads/` принадлежали
+`deploy` (1000) или root (каталог создал сам compose) — любая запись из контейнера падала EACCES.
+Разбор — [docker-bind-mount-uid-gid-mismatch](/.claude/docs/docker-bind-mount-uid-gid-mismatch.md),
+[staging-compose-mount-parity](/.claude/docs/staging-compose-mount-parity.md).
+
+- [x] `scripts/ensure-writable-mounts.sh` перед rollout в `deploy-affected.sh` и
+      `scripts/deploy-release.sh`: `mkdir -p` от deploy, chown чужих объектов на uid пользователя
+      образа через одноразовый контейнер из того же образа, проба записи. Только относительные RW
+      bind-mount сервиса `app`. Провал пробы — стоп деплоя приложения. Проверено на s1 во
+      временном каталоге с настоящим образом (`21371cba8`, `9623bc126`).
+- [x] Аудит записи всех bind-mount в `apps/*` на s1 и s2: ещё 4 прод-приложения на s2 не писали
+      в `uploads/` (EACCES в логах за 30 дней — ноль, дефект скрытый). Починены от root, запись
+      проверена изнутри контейнеров.
+- [x] Три приватных staging-compose без `uploads` (у одного — ещё без второго каталога) —
+      монтирования добавлены коммитами внутри submodule.
+- [x] Gate `compose-mount-parity` в `check-all.mjs`: RW bind-mount сервиса `app` production ⊆
+      staging (`532756507`). Доки обновлены (`576357c2d`).
+- [ ] ⚠️ Открытый вопрос: **push не сделан** — передан сессии `domwellbes-dev` (тред Agent Mail
+      `bind-mount-eacces-2026-09-23`, там порядок команд), потому что у неё шли e2e, а push
+      перезапускает CI/e2e. Порядок: push трёх submodule → bump SHA в letar → push letar. В одном
+      из submodule под моим коммитом лежит чужой незапушенный коммит, автор (identity retired)
+      не предупреждён — пушить его или нет, решает владелец.
+- [ ] ⚠️ Первый релиз на s2 после push пройдёт ещё без шага: `deploy-release.sh` уже прочитан до
+      своего `git pull`. Шаг заработает со второго релиза приложения.
