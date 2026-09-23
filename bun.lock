@@ -673,7 +673,7 @@
     },
     "apps/domwellbes-e2e": {
       "name": "@letar/domwellbes-e2e",
-      "version": "0.0.37",
+      "version": "0.0.38",
       "dependencies": {
         "@letar/e2e-testing": "workspace:*",
         "@letar/env-load": "workspace:*",
