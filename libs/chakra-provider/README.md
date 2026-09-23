@@ -13,10 +13,11 @@ import {
   ColorModeSelect,
   RootChakraProvider,
   useColorMode,
+  useIosActiveFix,
 } from '@letar/chakra-provider'
 
 // Только Next.js App Router — отдельный подпуть
-import { EmotionRegistry } from '@letar/chakra-provider/next'
+import { DarkOnlyChakraProvider, EmotionRegistry } from '@letar/chakra-provider/next'
 ```
 
 ## Точки входа
@@ -24,7 +25,7 @@ import { EmotionRegistry } from '@letar/chakra-provider/next'
 | Подпуть                       | Что внутри                                  | Кому                                  |
 | ----------------------------- | ------------------------------------------- | ------------------------------------- |
 | `@letar/chakra-provider`      | провайдеры, переключатели темы, хуки        | всем, включая Electron/Vite-рендереры |
-| `@letar/chakra-provider/next` | `EmotionRegistry` (тянет `next/navigation`) | только Next.js App Router             |
+| `@letar/chakra-provider/next` | `EmotionRegistry`, `DarkOnlyChakraProvider` | только Next.js App Router             |
 
 Подпуть требует отдельной строки в `paths` каждого tsconfig-потребителя — см.
 `.claude/docs/lib-entry-points.md`.
@@ -35,7 +36,8 @@ import { EmotionRegistry } from '@letar/chakra-provider/next'
 
 #### `RootChakraProvider`
 
-Обёртка над `ChakraProvider` с поддержкой кастомной темы.
+Обёртка над `ChakraProvider` с поддержкой кастомной темы. Заодно включает `:active` на iOS
+(см. [`useIosActiveFix`](#useiosactivefix)) — приложению ничего подключать не нужно.
 
 ```tsx
 // app/layout.tsx
@@ -110,6 +112,24 @@ export function Providers({ children }: PropsWithChildren) {
 Реестр копит правила (`cache.compat = true`) и отдаёт их в поток через `useServerInsertedHTML`.
 Разбор — `.claude/docs/emotion-streaming-inline-style-hydration-418.md`.
 
+#### `DarkOnlyChakraProvider` (`@letar/chakra-provider/next`)
+
+Готовый корневой провайдер для приложений с одной тёмной темой (лендинги, витрины):
+`EmotionRegistry` + `ColorModeProvider` (`forcedTheme="dark"`, без системной темы) +
+`RootChakraProvider`. Порядок слоёв зашит внутри, поэтому забыть реестр нельзя.
+
+```tsx
+'use client'
+import { system } from '@/lib/theme'
+import { DarkOnlyChakraProvider } from '@letar/chakra-provider/next'
+
+export function Provider({ children }: PropsWithChildren) {
+  return <DarkOnlyChakraProvider value={system}>{children}</DarkOnlyChakraProvider>
+}
+```
+
+Нужна тема, которую можно переключать, — собирай слои вручную, как в примере `EmotionRegistry`.
+
 ### Хуки
 
 #### `useColorMode()`
@@ -159,6 +179,30 @@ function Card() {
   return <div style={{ background: bg }}>...</div>
 }
 ```
+
+#### `useIosActiveFix()`
+
+Включает `:active` (в Chakra — `_active`) на iOS. Safari не применяет `:active`, пока на документе
+нет ни одного `touchstart`-листенера, поэтому хук вешает на `document` пустой пассивный. Листенер
+снимается при размонтировании (в StrictMode dev эффект выполняется дважды — без снятия копились бы
+дубли). На скролл не влияет (`passive: true`), на десктопе и в Electron ничего не меняет.
+
+`RootChakraProvider` вызывает хук сам. Явный вызов нужен только приложению на голом `ChakraProvider`
+из `@chakra-ui/react`:
+
+```tsx
+'use client'
+import { ChakraProvider } from '@chakra-ui/react'
+import { useIosActiveFix } from '@letar/chakra-provider'
+
+export function Provider({ children }: PropsWithChildren) {
+  useIosActiveFix()
+  return <ChakraProvider value={system}>{children}</ChakraProvider>
+}
+```
+
+⚠️ Не копируй фикс в приложение руками (`useEffect` + `addEventListener` без cleanup) — до
+2026-09-24 такая копия жила в 10 корневых провайдерах.
 
 ### Компоненты
 

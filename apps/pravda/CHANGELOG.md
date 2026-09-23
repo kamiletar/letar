@@ -5,7 +5,12 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 проект придерживается [Semantic Versioning](https://semver.org/lang/ru/).
 
-## [Unreleased]
+## [1.9.16] - 2026-09-24
+
+### Fixed
+
+- `vitest.config.mts`: добавлен alias `@letar/ui` — пакет только в `nx.implicitDependencies`, симлинка bun нет, а `src/theme/recipes/*` с коммита `f1ba9dfb7` импортируют `pressScale`. Без alias набор `bookmark-button.test.tsx` падал на сборке (`Failed to resolve import "@letar/ui"`).
+- `toc.test.tsx`: два устаревших ожидания — клик по пункту вызывает `scrollIntoView({ behavior: 'instant' })` (не `'smooth'`), а размонтирование останавливает опрос через `clearInterval` (не `removeEventListener('scroll')`). Код TOC менялся в e61e2cbae / dd516304c, тесты не обновили.
 
 ### Changed
 

@@ -77,6 +77,12 @@
       "@letar/demo-protection": [
         "../../libs/demo-protection/src/index.ts"
       ],
+      "@letar/chakra-provider": [
+        "../../libs/chakra-provider/src/index.ts"
+      ],
+      "@letar/chakra-provider/next": [
+        "../../libs/chakra-provider/src/next.ts"
+      ],
       "@letar/analytics": [
         "../../libs/analytics/src/index.ts"
       ],

@@ -1,6 +1,6 @@
 {
   "name": "@letar/kami-key-the-landing",
-  "version": "0.4.4",
+  "version": "0.4.6",
   "private": true,
   "nx": {
     "name": "kami-key-the-landing",
@@ -15,6 +15,7 @@
     ]
   },
   "dependencies": {
+    "@letar/chakra-provider": "workspace:*",
     "@letar/glitchtip": "workspace:*"
   }
 }

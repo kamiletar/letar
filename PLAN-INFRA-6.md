@@ -4992,8 +4992,66 @@ Next.js-образы бегут от `nextjs` (uid 1001), а хостовые `u
 - [x] `bun.lock` был записан с закоммиченной версией приложения, у которого в рабочем дереве лежал
       чужой незакоммиченный bump (коммит с `GIT_SKIP_DEPS_INTEGRITY`). Та сессия закоммитила bump и
       обновила lock сама (`678e004c3`).
+- [x] Лендинги на Chakra без библиотеки — `letar-landing`, `kami-key-the-landing`,
+      `animatrona-landing`, `form-example` — переведены на `@letar/chakra-provider` и реестр
+      (решение владельца 2026-09-24: «да, все четыре», `986a310da`). Три лендинга: своя обвязка
+      `next-themes` + `ChakraProvider` заменена на `ColorModeProvider` (`forcedTheme="dark"`,
+      `enableSystem={false}` — поведение прежнее) + `RootChakraProvider`. `form-example`:
+      только `RootChakraProvider`, `ColorModeProvider` не добавлялся (режима цвета там не было).
+      `workspace:*` в `dependencies`, `paths` на библиотеку и подпуть, версии patch, CHANGELOG.
+      `typecheck:tsgo` и `lint` по четырём зелёные, `lib-subpath-paths` зелёный. В dev на
+      всех четырёх: в сыром HTML три `<style data-emotion>`, все в `<head>`, в `<body>` — 0,
+      ошибок в консоли нет, тема тёмная как раньше. ⚠️ Коммит с `GIT_SKIP_DEPS_INTEGRITY=1`: параллельная
+      сессия (`useIosActiveFix`) держала 12 незакоммиченных/невыровненных версий в lock
+      (в т.ч. `libs/chakra-provider` 0.2.0 против 0.1.0); мои четыре строки в `bun.lock`
+      корректны, остальное — за той сессией.
 - [ ] ⚠️ Открытый вопрос: подключать ли реестр вне охвата задачи — `label-printer-desktop` и
-      `animatrona/renderer` собираются в `output: 'standalone'` (живой Next-сервер со стримингом);
-      лендинги на Chakra без библиотеки (`letar-landing`, `kami-key-the-landing`,
-      `animatrona-landing`, `form-example`) — им сначала нужен `@letar/chakra-provider`. Решение
+      `animatrona/renderer` собираются в `output: 'standalone'` (живой Next-сервер со
+      стримингом); демо-страницы `form-docs` со своим `ChakraProvider` на странице. Решение
       владельца; до появления #418 там — не срочно.
+
+## §200 (2026-09-24) `useIosActiveFix` → `@letar/chakra-provider`, снятие 10 копий iOS-фикса `:active`
+
+Без `touchstart`-листенера на документе Safari на iOS не применяет `:active` (`_active` в Chakra).
+Один и тот же `useEffect` жил в корневых провайдерах 10 приложений и не снимал листенер в cleanup
+(в StrictMode dev он навешивался дважды).
+
+- [x] Хук `useIosActiveFix()` (пассивный `touchstart`, снятие в cleanup) в
+      `libs/chakra-provider/src/lib/use-ios-active-fix.ts`, экспорт из общего баррелья (без `next/*`).
+      `RootChakraProvider` вызывает его сам, версия либы 0.2.0. Тесты (jsdom): вешается пассивный,
+      снимается тот же, StrictMode не оставляет дублей, `RootChakraProvider` применяет фикс.
+- [x] Копии удалены из 10 корневых провайдеров (6 публичных приложений + 4 приватных submodule);
+      два приложения на голом `ChakraProvider` вызывают хук явно. Версии (patch), CHANGELOG, README
+      либы, `bun.lock` (`GIT_SKIP_DEPS_INTEGRITY=1`: параллельная сессия успела поднять версию
+      submodule, позднее выровнена ею же).
+- [x] Оценка риска: опциональный проп не нужен — пустой пассивный слушатель на десктопе и в
+      Electron ничего не меняет. Побочный эффект — приложения на `RootChakraProvider`, где фикса не
+      было (в т.ч. Electron-рендереры), получили `_active` на iOS; это желаемое поведение.
+- [x] Проверка: тесты либы, dprint, lint зелёные по 12 проектам. `typecheck:tsgo`: два красных
+      проекта с давними ошибками вне правки (TS2321 ZenStack; чужой незакоммиченный файл).
+- [ ] ⚠️ Открытый вопрос: **push не сделан, ждёт одобрения владельца.** Порядок: 4 submodule →
+      letar. Проверка — `bash scripts/check-submodule-push-state.sh`.
+- [ ] ⚠️ Открытый вопрос: без фикса остались провайдеры вне охвата задачи — `apps/animatrona`
+      (`renderer`, `mobile-ui`) и демо-страницы `form-docs` на голом `ChakraProvider`. Решается
+      вместе с открытым вопросом §199 про реестр Emotion в этих приложениях.
+
+## §201 (2026-09-24) `DarkOnlyChakraProvider` → `@letar/chakra-provider/next`, три лендинга на одну строку
+
+Три `provider.tsx` (`letar-landing`, `kami-key-the-landing`, `animatrona-landing`) стали побайтно
+одинаковыми (`EmotionRegistry` + `ColorModeProvider` с принудительной тёмной темой +
+`RootChakraProvider`), отличался только импорт `system`. Ещё две близкие копии — `apps/synth`
+и публичная часть `studio` (без `defaultTheme`/`enableSystem`, при `forcedTheme` это одно и то же).
+
+- [x] `DarkOnlyChakraProvider` (проп `value`) в `libs/chakra-provider/src/lib/dark-only-chakra-provider.tsx`,
+      экспорт из подпути `./next` (не из общего барреля: `EmotionRegistry` тянет `next/navigation`,
+      баррель используют Electron/Vite-рендереры). Порядок слоёв зашит внутри — забыть реестр
+      снаружи, а с ним получить #418, больше нельзя. Версия либы 0.3.0, README, два теста (node-окружение:
+      в `<body>` нет `<style>`, стили уходят в `useServerInsertedHTML`; работает без `value`).
+- [x] Три лендинга: `provider.tsx` — одна строка, версии (patch), CHANGELOG, `bun.lock`.
+- [x] Проверка: тесты либы (10), lint и `typecheck:tsgo` по 4 проектам зелёные; в dev сырой HTML всех
+      трёх без `<style data-emotion>` в `<body>`, после гидратации `<html class="dark">`, ошибок нет.
+- [x] Перевод `apps/synth` (0.22.9) и публичной части `studio` (0.69.25, коммит в submodule) на тот же
+      компонент. Проверено: lint и `typecheck:tsgo` зелёные, в dev сырой HTML без `<style data-emotion>`
+      в `<body>`, `<html class="dark">`, ошибок консоли нет. Осталось: push submodule `studio`, затем
+      bump SHA + `bun.lock` (`bun install --lockfile-only` в чистом дереве) — ждёт одобрения push.
+- [ ] ⚠️ Открытый вопрос: **push не сделан, ждёт одобрения владельца.**

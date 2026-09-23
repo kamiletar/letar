@@ -5,6 +5,12 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 версионирование следует [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.27.22] - 2026-09-24
+
+### Changed
+
+- Фикс `:active` на iOS (пустой пассивный `touchstart` на `document`) вынесен в `useIosActiveFix` из `@letar/chakra-provider`. Локальная копия удалена: `RootChakraProvider` применяет фикс сам, а листенер теперь снимается при размонтировании (в StrictMode dev он навешивался дважды).
+
 ## [0.27.21] - 2026-09-24
 
 ### Fixed

@@ -2,6 +2,12 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.1.25] - 2026-09-24
+
+### Changed
+
+- Корневой провайдер: `ChakraProvider` заменён на `RootChakraProvider` из `@letar/chakra-provider`, снаружи — `EmotionRegistry` из `@letar/chakra-provider/next`: стили SSR уходят в поток через `useServerInsertedHTML`, а не инлайн-`<style>` перед элементами. Защита от плавающей ошибки гидратации React #418. Режим цвета не менялся (`ColorModeProvider` не добавлялся).
+
 ## [0.1.24] - 2026-09-21
 
 ### Added

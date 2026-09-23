@@ -4,7 +4,6 @@ import { ColorModeProvider, RootChakraProvider } from '@letar/chakra-provider'
 import { EmotionRegistry } from '@letar/chakra-provider/next'
 import { FormI18nProvider } from '@letar/forms'
 import type { PropsWithChildren } from 'react'
-import { useEffect } from 'react'
 
 import { system } from '@/theme'
 
@@ -16,11 +15,6 @@ import { system } from '@/theme'
  * - Поддержку тёмной/светлой темы
  */
 export function Providers({ children }: PropsWithChildren) {
-  // iOS-фикс: без touchstart-листенера :active не срабатывает
-  useEffect(() => {
-    document.addEventListener('touchstart', () => undefined, { passive: true })
-  }, [])
-
   return (
     <EmotionRegistry>
       <ColorModeProvider>

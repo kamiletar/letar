@@ -2,6 +2,18 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.5.5] - 2026-09-24
+
+### Changed
+
+- Корневой провайдер сведён к одной строке: `DarkOnlyChakraProvider` из `@letar/chakra-provider/next` (0.3.0) вместо собственной сборки `EmotionRegistry` + `ColorModeProvider` + `RootChakraProvider`. Поведение прежнее: принудительно тёмная тема, реестр Emotion снаружи.
+
+## [0.5.4] - 2026-09-24
+
+### Changed
+
+- Корневой провайдер переведён на `@letar/chakra-provider` (`ColorModeProvider`/`RootChakraProvider`) вместо своей обвязки `next-themes` + `ChakraProvider` (тема по-прежнему принудительно тёмная). Снаружи — `EmotionRegistry` из `@letar/chakra-provider/next`: стили SSR уходят в поток через `useServerInsertedHTML`, а не инлайн-`<style>` перед элементами. Защита от плавающей ошибки гидратации React #418, если появятся `loading.tsx`/`<Suspense>`.
+
 ## [0.5.3] - 2026-09-02
 
 ### Added
