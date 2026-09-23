@@ -42,6 +42,6 @@
     "@letar/video-player-react": "workspace:*"
   },
   "devDependencies": {
-    "electron": "44.4.3"
+    "electron": "44.4.5"
   }
 }

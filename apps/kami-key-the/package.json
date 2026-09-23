@@ -16,6 +16,6 @@
     "@letar/electron-monorepo-updater": "workspace:*"
   },
   "devDependencies": {
-    "electron": "44.4.3"
+    "electron": "44.4.5"
   }
 }
