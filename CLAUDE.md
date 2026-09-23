@@ -231,6 +231,7 @@
 - [persistent-e2e-user-resource-exhaustion](/.claude/docs/persistent-e2e-user-resource-exhaustion.md) ⚠️ фиксированная identity исчерпывает per-identity ресурс
 - [playwright-testmatch-absolute-path-regex-anchor](/.claude/docs/playwright-testmatch-absolute-path-regex-anchor.md) ⚠️ якорный `^` в `testMatch` никогда не совпадает
 - [unit-testing](/.claude/docs/unit-testing.md) ⚠️ обязательный `tsconfig.spec.json`
+- [dual-use-engine-browser-safe-import-guard](/.claude/docs/dual-use-engine-browser-safe-import-guard.md) regex-тест на запрещённые серверные импорты в чистом движке, общем для клиента и сервера
 - [vitest-jsdom-formdata-request-hang](/.claude/docs/vitest-jsdom-formdata-request-hang.md) ⚠️ `request.formData()` зависает под jsdom
 - [vitest-server-only-mock-pattern](/.claude/docs/vitest-server-only-mock-pattern.md) ⚠️ `import 'server-only'` падает под vitest — мок глобально в `vitest.setup`
 - [dprint-worktree-submodule-scope](/.claude/docs/dprint-worktree-submodule-scope.md) ⚠️ dprint не видит границ worktree/submodule
