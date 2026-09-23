@@ -287,6 +287,20 @@ const CHECKS = [
     doc: 'PLAN-INFRA-6.md §157',
   },
   {
+    id: 'compose-mount-parity',
+    group: 'deploy',
+    title: 'bind-mount на запись сервиса app из production есть и в staging-compose',
+    run: ['bun', ['scripts/check-compose-mount-parity.mjs']],
+    // gate: без bind-mount ничего не падает — staging пишет в writable-слой контейнера, e2e
+    // зелёный, а поломки прав каталога (EACCES) staging больше не ловит. Находили трижды по
+    // одному приложению, чинили точечно. Долга нет (на регистрации 2026-09-23 чисто после
+    // починки трёх staging-compose). partial: большинство staging-compose лежит в приватных
+    // submodule, в CI их не видно.
+    severity: 'gate',
+    ci: 'partial',
+    doc: '.claude/docs/staging-compose-mount-parity.md',
+  },
+  {
     id: 'submodule-gitignore',
     group: 'submodule',
     title: 'шаблоны .gitignore во всех submodule',

@@ -259,6 +259,7 @@
 - [docker-bind-mount-pitfalls](/.claude/docs/docker-bind-mount-pitfalls.md) ⚠️ `compose up -d` не перечитывает смонтированный конфиг
 - [nextjs-standalone-bind-mount-wrong-cwd](/.claude/docs/nextjs-standalone-bind-mount-wrong-cwd.md) ⚠️ `process.chdir()` — байты уходят в writable-слой мимо хоста
 - [docker-bind-mount-uid-gid-mismatch](/.claude/docs/docker-bind-mount-uid-gid-mismatch.md) ⚠️ EACCES по uid/gid при верном пути монтирования; деплой чинит владельца сам (`ensure-writable-mounts.sh`)
+- [staging-compose-mount-parity](/.claude/docs/staging-compose-mount-parity.md) ⚠️ staging без `uploads` из production: e2e зелёный, файлы пропадают; gate `compose-mount-parity`
 - [docker-bare-bun-workspace-deps](/.claude/docs/docker-bare-bun-workspace-deps.md) workspace-зависимости в образе
 - [alpine-cdn-unreachable-s3](/.claude/docs/alpine-cdn-unreachable-s3.md) ⚠️ с s3 нет пути до `dl-cdn.alpinelinux.org`, `nc` даёт ложный FAIL
 - [docker-network-endpoint-corruption-diskfull](/.claude/docs/docker-network-endpoint-corruption-diskfull.md) ⚠️ полный диск рвёт endpoint: рестарт БД строго до приложения
