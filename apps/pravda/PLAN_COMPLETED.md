@@ -1,5 +1,22 @@
 # Pravda - Выполненные задачи
 
+## Стабильный snapshot в `useBookmarks` (2026-09-24, v1.9.15)
+
+В dev на любой странице документа React писал в консоль «The result of getServerSnapshot should be
+cached to avoid an infinite loop»: третий аргумент `useSyncExternalStore` был `() => []`, то есть
+новый массив на каждый вызов. Пустой список вынесен в модульную константу `EMPTY_BOOKMARKS`, её
+отдают `getServerBookmarks`, ветка без `window`, ветка `catch` и начальное значение кеша.
+
+Попутный баг: при битом JSON `cachedJson` обновлялся до `JSON.parse`, а `cachedBookmarks` — нет,
+поэтому следующий вызов возвращал закладки, закешированные до порчи данных. В `catch` кеш списка
+теперь сбрасывается.
+
+Тест: `renderHook(..., { hydrate: true })` + проверка `console.error`. ⚠️ Флаг предупреждения
+`didWarnUncachedGetSnapshot` в React общий для `getSnapshot` и `getServerSnapshot` и взводится один
+раз на модуль. Первая версия теста была зелёной и до фикса: флаг раньше взводил тест с битым JSON.
+Поэтому тест гидратации стоит первым в `describe`. Проверено вживую в `next dev`: `/constitution`,
+добавление закладки, `/bookmarks` — консоль чистая.
+
 ## ESLint игнорирует сгенерированные Serwist-бандлы (2026-09-23)
 
 Кросс-приложенческая инфра-задача (найдена в domwellbes при ночном прогоне `nx lint`): flat-config

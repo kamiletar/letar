@@ -27,6 +27,17 @@
       — решение, заводить ли третье исключение в `press-scale.ts` или это недосведённый hardcode,
       за владельцем (по правилу задачи новый тип исключения не выдумывать самостоятельно).
 
+### 🟡 Закладки и тесты
+
+- [x] `useBookmarks`: стабильный `getServerSnapshot` — в dev консоль писала «The result of
+      getServerSnapshot should be cached to avoid an infinite loop» на любой странице документа
+      (v1.9.15, детали в `PLAN_COMPLETED.md`).
+- [ ] `bookmark-button.test.tsx` не запускается: vitest не резолвит `@letar/ui` из
+      `src/theme/recipes/button.ts` (импорт `pressScale` с коммита `f1ba9dfb7`, 2026-09-22). Нужен
+      alias в `vitest.config.mts` или прямая зависимость — см.
+      [vitest-unlinked-workspace-lib-imports](/.claude/docs/vitest-unlinked-workspace-lib-imports.md).
+      Заведено отдельной задачей 2026-09-24.
+
 ### 🔴 Приоритетные баги — staging e2e (найдено BlackCove, §18.7 Тираж M1, 2026-07-22)
 
 **Раунд 2026-08-12 (214/240 passed, 18 failed, 5 flaky) — частично закрыто:**
