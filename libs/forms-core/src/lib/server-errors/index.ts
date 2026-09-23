@@ -25,6 +25,7 @@ export {
   isActionFailure,
   isActionFailureError,
   isDbErrorCode,
+  isFkViolation,
   isUniqueViolation,
   uniqueFieldsFromConstraint,
   unwrapActionResult,

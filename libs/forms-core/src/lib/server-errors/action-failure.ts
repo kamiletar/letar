@@ -125,6 +125,20 @@ export function isUniqueViolation(error: unknown, constraintNameFragment?: strin
 }
 
 /**
+ * Нарушение внешнего ключа (`23503`) — попытка удалить (или изменить FK у) запись, на которую
+ * ссылается другая таблица. `constraintNameFragment` — часть имени нарушенного ограничения.
+ */
+export function isFkViolation(error: unknown, constraintNameFragment?: string): boolean {
+  if (!isDbErrorCode(error, '23503')) {
+    return false
+  }
+  if (!constraintNameFragment) {
+    return true
+  }
+  return constraintName(error)?.includes(constraintNameFragment) ?? false
+}
+
+/**
  * Поле из имени unique-ограничения Postgres, только когда оно однозначно.
  *
  * Prisma называет ограничение `<Table>_<field>[_<field>…]_key`. Разделитель — тот же `_`, что
@@ -148,6 +162,11 @@ const GENERIC_UNIQUE_MESSAGE = {
   en: 'This record already exists',
 } as const
 
+const GENERIC_FK_MESSAGE = {
+  ru: 'Нельзя удалить — есть связанные записи',
+  en: 'Cannot delete — related records exist',
+} as const
+
 export type CatchActionFailureOptions = {
   /**
    * Свои сообщения при дубле уникального значения: ключ — поле (`slug`) или поля через `_` для
@@ -155,27 +174,45 @@ export type CatchActionFailureOptions = {
    * (`…_<ключ>_key`), при нескольких подходящих берётся самый длинный. Приоритетнее общего.
    */
   uniqueMessages?: Record<string, string>
-  /** Язык общего сообщения при дубле. По умолчанию `ru`. */
+  /**
+   * Свои сообщения при нарушении внешнего ключа: ключ — поле связи (`groupId` для
+   * `HouseOption_groupId_fkey`). Ключ сверяется с хвостом имени ограничения (`…_<ключ>_fkey`),
+   * при нескольких подходящих берётся самый длинный. Приоритетнее общего.
+   */
+  fkMessages?: Record<string, string>
+  /** Язык общего сообщения при дубле/FK-нарушении. По умолчанию `ru`. */
   locale?: keyof typeof GENERIC_UNIQUE_MESSAGE
 }
 
-function findUniqueMessage(constraint: string | undefined, messages: Record<string, string> | undefined) {
+function findConstraintMessage(
+  constraint: string | undefined,
+  messages: Record<string, string> | undefined,
+  suffix: string,
+) {
   if (!constraint || !messages) {
     return undefined
   }
   let best: string | undefined
   for (const key of Object.keys(messages)) {
-    if (constraint.endsWith(`_${key}_key`) && (best === undefined || key.length > best.length)) {
+    if (constraint.endsWith(`_${key}${suffix}`) && (best === undefined || key.length > best.length)) {
       best = key
     }
   }
   return best === undefined ? undefined : messages[best]
 }
 
+function findUniqueMessage(constraint: string | undefined, messages: Record<string, string> | undefined) {
+  return findConstraintMessage(constraint, messages, '_key')
+}
+
+function findFkMessage(constraint: string | undefined, messages: Record<string, string> | undefined) {
+  return findConstraintMessage(constraint, messages, '_fkey')
+}
+
 /**
  * Серверная сторона: выполняет работу и превращает ожидаемые отказы в `ActionFailure`.
- * Ловит только `UserFacingError` и нарушение unique (`23505`); остальное — настоящая
- * неполадка, её пробрасываем как раньше (в логи и трекер ошибок).
+ * Ловит только `UserFacingError`, нарушение unique (`23505`) и внешнего ключа (`23503`);
+ * остальное — настоящая неполадка, её пробрасываем как раньше (в логи и трекер ошибок).
  */
 export async function catchActionFailure<T>(
   work: () => Promise<T>,
@@ -192,6 +229,12 @@ export async function catchActionFailure<T>(
       const message = findUniqueMessage(constraint, options.uniqueMessages)
         ?? GENERIC_UNIQUE_MESSAGE[options.locale ?? 'ru']
       return actionFailure(message, uniqueFieldsFromConstraint(constraint)[0])
+    }
+    if (isFkViolation(error)) {
+      const constraint = constraintName(error)
+      const message = findFkMessage(constraint, options.fkMessages)
+        ?? GENERIC_FK_MESSAGE[options.locale ?? 'ru']
+      return actionFailure(message)
     }
     throw error
   }

@@ -4,6 +4,21 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.14.0] - 2026-09-23
+
+### Added
+
+- **`catchActionFailure` (`./server-errors`): распознаёт нарушение внешнего ключа (`23503`),**
+  не только unique (`23505`). Раньше FK-нарушение (типичный случай — удаление записи, ещё
+  используемой другими) пробрасывалось дальше вместе с реальными неполадками, и в production
+  Next.js стирал текст ошибки (`.claude/docs/nextjs-server-action-thrown-error-message-stripped.md`)
+  — клиент видел generic-сообщение вместо причины отказа. Новая ветка: `isFkViolation(error)` →
+  `ActionFailure` с текстом «Нельзя удалить — есть связанные записи» (или своим текстом из новой
+  опции `fkMessages`, ключ — часть имени ограничения `…_<ключ>_fkey`, по аналогии с
+  `uniqueMessages`). Экспортирована и `isFkViolation` отдельно. Найдено при аудите
+  delete-экшенов `domwellbes` — продолжение находки в `PLAN_CROSSCUTTING.md` § «Тот же класс
+  бага шире: сырой startTransition без try/catch».
+
 ## [0.13.2] - 2026-09-23
 
 ### Fixed

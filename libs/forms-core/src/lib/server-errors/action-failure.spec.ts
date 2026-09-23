@@ -6,6 +6,7 @@ import {
   catchActionFailure,
   isActionFailure,
   isDbErrorCode,
+  isFkViolation,
   isUniqueViolation,
   uniqueFieldsFromConstraint,
   unwrapActionResult,
@@ -18,6 +19,14 @@ import { parseActionFailureError, parseActionResultError } from './parsers'
 function uniqueError(constraint?: string) {
   return Object.assign(new Error('unique'), {
     dbErrorCode: '23505',
+    ...(constraint ? { cause: { constraint } } : {}),
+  })
+}
+
+/** То же для нарушения внешнего ключа. */
+function fkError(constraint?: string) {
+  return Object.assign(new Error('fk'), {
+    dbErrorCode: '23503',
     ...(constraint ? { cause: { constraint } } : {}),
   })
 }
@@ -90,6 +99,19 @@ describe('isDbErrorCode / isUniqueViolation', () => {
     expect(isUniqueViolation(uniqueError('Counterparty_inn_key'), 'inn')).toBe(true)
     expect(isUniqueViolation(uniqueError('Counterparty_inn_key'), 'slug')).toBe(false)
     expect(isUniqueViolation(uniqueError(), 'inn')).toBe(false)
+  })
+})
+
+describe('isFkViolation', () => {
+  it('читает SQLSTATE 23503, не путает с unique 23505', () => {
+    expect(isFkViolation(fkError())).toBe(true)
+    expect(isFkViolation(uniqueError())).toBe(false)
+  })
+
+  it('фильтр по фрагменту имени ограничения', () => {
+    expect(isFkViolation(fkError('HouseOption_groupId_fkey'), 'groupId')).toBe(true)
+    expect(isFkViolation(fkError('HouseOption_groupId_fkey'), 'slug')).toBe(false)
+    expect(isFkViolation(fkError(), 'groupId')).toBe(false)
   })
 })
 
@@ -211,6 +233,37 @@ describe('catchActionFailure', () => {
         throw new Error('connection reset')
       }),
     ).rejects.toThrow('connection reset')
+  })
+
+  it('FK-нарушение без своих сообщений → общий текст, без поля', async () => {
+    const result = await catchActionFailure(async () => {
+      throw fkError('HouseOption_groupId_fkey')
+    })
+    expect(result).toEqual({ success: false, error: 'Нельзя удалить — есть связанные записи' })
+  })
+
+  it('FK-нарушение: общий текст по locale', async () => {
+    const result = await catchActionFailure(async () => {
+      throw fkError('HouseOption_groupId_fkey')
+    }, { locale: 'en' })
+    expect(result).toEqual({ success: false, error: 'Cannot delete — related records exist' })
+  })
+
+  it('FK-нарушение: своё сообщение по хвосту имени ограничения', async () => {
+    const result = await catchActionFailure(
+      async () => {
+        throw fkError('HouseOption_groupId_fkey')
+      },
+      { fkMessages: { groupId: 'Нельзя удалить группу — в ней есть опции' } },
+    )
+    expect(result).toEqual({ success: false, error: 'Нельзя удалить группу — в ней есть опции' })
+  })
+
+  it('FK-нарушение без имени ограничения → общее сообщение', async () => {
+    const result = await catchActionFailure(async () => {
+      throw fkError()
+    })
+    expect(result).toEqual({ success: false, error: 'Нельзя удалить — есть связанные записи' })
   })
 })
 
