@@ -8,19 +8,19 @@ MCP-сервер: Claude Code агент сам пишет время работ
 
 ## Инструменты
 
-| Инструмент                                                                       | Действие                                                                                                             | Эндпоинт studio                            |
-| -------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
-| `time_start({ app, description, kind?, idempotencyKey?, sessionRef?, stage? })`  | Останавливает предыдущий активный таймер ЭТОЙ сессии (если был) и стартует новый — резолв проекта по `repoSlug`      | `POST /api/mcp/time/start`                 |
-| `time_switch({ app, description, kind?, idempotencyKey?, sessionRef?, stage? })` | То же самое, что `time_start` — обязательный механизм смены контекста (§11.5): сессия ≠ проект                       | `POST /api/mcp/time/switch`                |
-| `time_stop({ sessionRef? })`                                                     | Останавливает активный таймер ЭТОЙ сессии                                                                            | `POST /api/mcp/time/stop`                  |
-| `time_pause({ sessionRef? })`                                                    | **Пауза**: запись остаётся открытой, время перестаёт капать (§11.19)                                                 | `POST /api/mcp/time/pause`                 |
-| `time_resume({ sessionRef? })`                                                   | Снимает паузу — время снова идёт (§11.19)                                                                            | `POST /api/mcp/time/resume`                |
-| `time_discard({ sessionRef? })`                                                  | Останавливает таймер и помечает запись небиллируемой (`INTERNAL`) — выключатель для «копаюсь без цели» (§11.16)      | `POST /api/mcp/time/discard`               |
-| `time_note({ description, sessionRef? })`                                        | Уточняет описание активной записи ЭТОЙ сессии без остановки                                                          | `POST /api/mcp/time/note`                  |
-| `time_status({ sessionRef? })`                                                   | Что идёт сейчас у ЭТОЙ сессии: проект, описание, с какого времени                                                    | `GET /api/mcp/time/status`                 |
-| `time_log({ app, minutes, description, kind?, idempotencyKey? })`                | Запись задним числом, не трогает активный таймер                                                                     | `POST /api/mcp/time/log`                   |
-| `time_stage_close({ app, stage })`                                               | Закрывает открытый этап проекта (`ProjectStage.isDone = true`) по названию (§11 «S»)                                 | `POST /api/mcp/time/stage/close`           |
-| `time_fix_internal_billable()`                                                   | Массово переводит записи некоммерческих проектов (`isCommercial = false`), ещё не в счёте, в небиллируемые (§11 «S») | `POST /api/mcp/time/fix-internal-billable` |
+| Инструмент                                                                               | Действие                                                                                                             | Эндпоинт studio                            |
+| ---------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| `time_start({ app, description, kind?, idempotencyKey?, sessionRef?, stage? })`          | Останавливает предыдущий активный таймер ЭТОЙ сессии (если был) и стартует новый — резолв проекта по `repoSlug`      | `POST /api/mcp/time/start`                 |
+| `time_switch({ app, description, kind?, idempotencyKey?, sessionRef?, stage? })`         | То же самое, что `time_start` — обязательный механизм смены контекста (§11.5): сессия ≠ проект                       | `POST /api/mcp/time/switch`                |
+| `time_stop({ sessionRef? })`                                                             | Останавливает активный таймер ЭТОЙ сессии                                                                            | `POST /api/mcp/time/stop`                  |
+| `time_pause({ sessionRef? })`                                                            | **Пауза**: запись остаётся открытой, время перестаёт капать (§11.19)                                                 | `POST /api/mcp/time/pause`                 |
+| `time_resume({ sessionRef? })`                                                           | Снимает паузу — время снова идёт (§11.19)                                                                            | `POST /api/mcp/time/resume`                |
+| `time_discard({ sessionRef? })`                                                          | Останавливает таймер и помечает запись небиллируемой (`INTERNAL`) — выключатель для «копаюсь без цели» (§11.16)      | `POST /api/mcp/time/discard`               |
+| `time_note({ description, sessionRef? })`                                                | Уточняет описание активной записи ЭТОЙ сессии без остановки                                                          | `POST /api/mcp/time/note`                  |
+| `time_status({ sessionRef? })`                                                           | Что идёт сейчас у ЭТОЙ сессии: проект, описание, с какого времени                                                    | `GET /api/mcp/time/status`                 |
+| `time_log({ app, minutes?, startedAt?, endedAt?, description, kind?, idempotencyKey? })` | Запись задним числом, не трогает активный таймер; интервал — см. ниже                                                | `POST /api/mcp/time/log`                   |
+| `time_stage_close({ app, stage })`                                                       | Закрывает открытый этап проекта (`ProjectStage.isDone = true`) по названию (§11 «S»)                                 | `POST /api/mcp/time/stage/close`           |
+| `time_fix_internal_billable()`                                                           | Массово переводит записи некоммерческих проектов (`isCommercial = false`), ещё не в счёте, в небиллируемые (§11 «S») | `POST /api/mcp/time/fix-internal-billable` |
 
 Записи от MCP всегда `source: MCP`, `status: DRAFT` — владелец утверждает их в `/owner/time`
 перед выставлением клиенту.
@@ -40,6 +40,21 @@ MCP-сервер: Claude Code агент сам пишет время работ
 
 Передавать `sessionRef` вручную обычно не нужно — MCP-сервер сам подставляет его из окружения
 Claude Code.
+
+### Интервал `time_log`
+
+Любые два из трёх: `startedAt`, `endedAt`, `minutes`. Только `minutes` — `[сейчас − minutes,
+сейчас]` (прежнее поведение), только `startedAt` — до текущего момента. `startedAt`/`endedAt` —
+ISO-8601 (`2026-09-23T21:06`); без зоны — **московское время**, с `Z`/`+03:00` — как есть.
+
+Проверки (studio, `resolveLogInterval`): конец не в будущем (допуск 60 с на рассинхрон часов),
+длительность > 0 и ≤ 1440 мин; все три параметра сразу — отказ. Отказ приходит `isError` с
+причиной. Пересечение с другими записями того же исполнителя (в т.ч. с идущим таймером) не
+блокирует запись — приходит строкой `⚠️` в ответе.
+
+⚠️ Знаешь реальное время события — передавай `startedAt`/`endedAt`. `minutes` ставит запись на
+момент вызова: созвон 21:06–22:29, записанный в 22:42, встал на 21:19–22:42 и перекрыл идущий с
+22:30 таймер (2026-09-23).
 
 ### Идемпотентность
 
