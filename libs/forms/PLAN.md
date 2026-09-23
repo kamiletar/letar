@@ -6,6 +6,61 @@
 
 ## Backlog (запросы от агентов)
 
+### ✅ [2026-09-23] Persistence-черновик воскресал сразу после успешного сабмита (закрыт forms 2.16.8, от пользователя)
+
+- **Запросил:** пользователь напрямую — находка из domwellbes (`NIGHT_QUEUE_2026-09-22.md` §B3,
+  `PLAN_OPEN_QUESTIONS.md:129-136`), воспроизводилась у владельца на форме дома.
+- **Приоритет:** high — задевает любую форму с `persistence`, где пользователь не сразу уходит со
+  страницы после успешного сабмита.
+- **Причина:** `handleSubmit()` чистит черновик (`clearSavedData()`), но библиотека сама следом
+  вызывает `form.reset(dataToSubmit)` (`usePostSubmitResetGuard`). Уведомление стора от `reset()`
+  не совпадало с baseline-снимком времени монтирования (`subscribeToFormChanges`) — guard
+  пропускал его как правку и debounced-запись писала только что отправленные данные обратно в тот
+  же localStorage-ключ.
+- **Решение:** `updateBaselineAfterClear()` в `use-form-features.ts`, детали и подтверждение
+  red→green — `PLAN_COMPLETED.md`.
+- **Статус:** ✅ закрыто.
+
+### ⚠️ [2026-09-23] Открытый вопрос: TanStack Form откатывает значения к `initialValue` на любом re-render после `reset()`, если форма untouched
+
+- **Найдено:** побочно, при написании интеграционного теста к задаче выше (`<Form>` через
+  настоящий TanStack Form, не изолированный `renderHook`).
+- **Механизм:** `FormApi.update()` (`@tanstack/form-core`) сравнивает новый `options.defaultValues`
+  с СОБСТВЕННЫМ предыдущим `defaultValues` формы — а `form.reset(dataToSubmit)` только что
+  перезаписал этот внутренний `defaultValues` на `dataToSubmit`. Если форма untouched, любой
+  следующий re-render (даже без смены React-ссылки `initialValue`) откатывает `state.values`
+  обратно к пропу `initialValue`. `usePostSubmitResetGuard` не ловит этот случай: его
+  корректирующий эффект сам зависит от смены ссылки `initialValue`, а `clearSavedData()`'ы
+  `setState` внутри `useFormPersistence` вызывают именно такой «пустой» re-render.
+- **Кому решать:** нужно архитектурное решение (правка `usePostSubmitResetGuard`, либо не
+  полагаться на `reset(dataToSubmit)` вовсе) — передано `forms-coordinator-dev`/`forms-dev` через
+  agent-mail (thread `forms-persistence-fix`, 2026-09-23), решение по приоритету за координатором.
+- **Почему не решено сейчас:** отдельная, более крупная задача не по теме B3; нужен тест на
+  реальном TanStack Form и явная договорённость о желаемом поведении (это уже вторая, независимая
+  ловушка одного семейства — см. `letar-forms-post-submit-reset-stale-initialvalue.md`).
+
+### ✅ [2026-09-23] `Form.Steps.Navigation` пропускала валидацию, если поля шага вынесены в компонент (закрыт forms-react 0.11.2 / forms 2.16.9, от пользователя)
+
+- **Запросил:** пользователь напрямую — репро на domwellbes `/admin/houses/new`: клик «Далее» на
+  пустом шаге 1 (обязательные «Название»/«Slug») пропускал переход без единой ошибки валидации.
+- **Приоритет:** high — задевает любую wizard-форму, где поля шага вынесены в отдельный
+  компонент (`function BasicFields() { return <Field.String name="name" /> }`).
+- **Причина:** `extractFieldNames` — статический обход JSX `children` шага — не видит поля
+  внутри такого nullary-компонента: у `<BasicFields />` как элемента нет своего `props.children`.
+  `fieldNames` шага оказывался пустым, `validateCurrentStep` считал шаг непроверяемым и
+  пропускал его безусловно. Паттерн системный — так устроены все wizard-формы domwellbes (дом,
+  работа, материал, программа финансирования) и onboarding driving-school, не только house-form.
+- **Решение:** динамическая регистрация полей — `FormStepsFieldRegistryContext`
+  (`@letar/forms-react`, no-op вне `Form.Steps`) + `useDeclarativeField` сообщает свой `fullPath`
+  при монтировании; `FormStepsStep` объединяет эти пути со статическим списком (`mergeFieldNames`)
+  и перерегистрирует шаг. Аддитивно, без изменений в потребителях (house-form.tsx и другие формы
+  не тронуты).
+- **Тесты:** 2 новых в `form-steps.spec.tsx` (блокировка на пустых required-полях, штатный
+  переход на валидных) + полный прогон `nx test forms` 853/853, `nx test forms-react` 125/125.
+- **Живая проверка:** domwellbes `/admin/houses/new`, dev-session `admin@domwellbes.ru` — пустой
+  шаг 1 теперь блокируется сводкой ошибок, валидный переходит на «Классификация» как раньше.
+- **Статус:** ✅ закрыто.
+
 ### ✅ [2026-09-22] Хардкод-дефолты `placeholder` вне Combobox/Autocomplete — 7 полей (закрыт forms 2.16.6, от пользователя)
 
 - **Запросил:** пользователь напрямую, продолжение фикса Combobox/Autocomplete (2.16.4→2.16.5,

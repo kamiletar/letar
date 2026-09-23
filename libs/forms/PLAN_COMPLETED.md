@@ -1,5 +1,39 @@
 # Выполненные задачи — @letar/forms
 
+## 2026-09-23 (временная identity, `forms-dev` был занят параллельной задачей) — persistence-черновик воскресал после успешного сабмита (forms 2.16.8)
+
+**Контекст:** находка из domwellbes (`NIGHT_QUEUE_2026-09-22.md` §B3, `PLAN_OPEN_QUESTIONS.md:129-136`,
+воспроизводилась у владельца на форме дома, `apps/domwellbes/.../house-form.tsx`) — после
+успешного сабмита формы с `persistence` черновик в localStorage иногда воскресал теми же данными,
+что только что были отправлены и очищены, и при следующем открытии формы показывался ложный
+диалог восстановления.
+
+**Причина:** `handleSubmit()` (`use-form-features.ts`) чистит черновик (`clearSavedData()`), но
+библиотека сама следом вызывает `form.reset(dataToSubmit)` (`usePostSubmitResetGuard`). Уведомление
+стора от этого `reset()` не совпадало с baseline-снимком, взятым один раз при монтировании
+(`subscribeToFormChanges`) — guard пропускал его как «настоящую правку», и debounced-запись писала
+только что отправленные данные обратно в тот же ключ.
+
+**Решение:** `updateBaselineAfterClear()` в `use-form-features.ts` — синхронизирует
+`baselineSnapshotRef` сразу после `clearSavedData()` в обеих точках (`offlineOnlineSubmit`,
+`handleSubmit`), той же логикой omit чувствительных полей, что и сама подписка.
+
+**Проверено:** новый изолированный `renderHook`-тест на `useFormFeatures`
+(`use-form-features-post-submit-persistence-baseline.spec.tsx`) — вручную подтверждён красным без
+фикса и зелёным с ним. `nx test forms` (850/850), `nx lint forms`, `nx typecheck:tsgo forms`.
+
+**⚠️ Побочная находка, не чинилась (вне scope задачи)** — интеграционный тест через настоящий
+`<Form>`/TanStack Form вскрыл отдельный, более глубокий баг: `FormApi.update()` откатывает
+`state.values` к текущему `initialValue`-пропу на **любом** re-render формы после `reset()`, если
+форма untouched — сравнение идёт с СОБСТВЕННЫМ предыдущим `defaultValues` формы (который
+`reset(dataToSubmit)` только что перезаписал на `dataToSubmit`), а не со сменой React-ссылки
+`initialValue`. `usePostSubmitResetGuard` этот случай не ловит, поскольку его эффект сам зависит
+именно от смены ссылки `initialValue` — а `clearSavedData()`'ы `setState` внутри
+`useFormPersistence` сами вызывают такой re-render без смены ссылки. Для форм со стабильным
+(не пересоздаваемым) `initialValue` данные на экране могут визуально откатиться к дефолту сразу
+после успешного сабмита с включённой persistence. Передано `forms-dev`/`forms-coordinator-dev`
+через agent-mail (thread `forms-persistence-fix`) — решение по приоритету за координатором форм.
+
 ## 2026-09-22 (параллельная сессия, `forms-dev` был занят) — локализация оставшихся хардкод-дефолтов placeholder (forms 2.16.6)
 
 **Контекст:** повторная сверка `grep -rnE "\?\? '[A-Z][a-zA-Z ]{3,}'"` по `form-fields/` после
