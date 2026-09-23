@@ -79,3 +79,27 @@ API. Безопасны: seed-скрипты, server actions и route handlers (
 
 При добавлении нового «ленивого singleton» (`getSettings()`, `getOrCreate*()`) в приложение —
 сразу делай слой 1; если он читается из layout/страницы — реши, нужен ли слой 2.
+
+## ⚠️ ZenStack v3 ORM (`@zenstackhq/orm`): `.upsert()` вообще без нативного `ON CONFLICT`
+
+В отличие от classic `@prisma/client` (иногда переводит `upsert` в нативный
+`INSERT ... ON CONFLICT`, см. условия выше), `.upsert()` у ZenStack v3 ORM (`libs`/`apps` на нём,
+не на голом `@prisma/client`) — **всегда** read-then-write: `UPDATE ... WHERE <where>`, при 0
+затронутых строк отдельный `.create()`. Под настоящей гонкой двух параллельных транзакций это
+даёт **duplicate key на `create()`**, не тихий retry — подтверждено экспериментально
+(`domwellbes`, `resolveWarehouseZone`, 2026-09-23): два параллельных
+`tx.storageLocation.upsert({ where: { warehouseId_kind: {...} }, create: {...}, update: {} })` на
+один ещё не существующий `[warehouseId, kind]` — один падает `23505` вместо того, чтобы получить
+уже созданную соседом строку.
+
+Если запись должна быть устойчива к реальной гонке (не билд-воркеры конкретно, а два request'а
+почти одновременно) — не полагайся на `.upsert()` ORM вообще, бери raw
+`INSERT ... ON CONFLICT (...) DO UPDATE ... RETURNING` (см.
+`apps/domwellbes/src/lib/sales-document/number.ts`,
+`apps/domwellbes/src/lib/procurement/document-number.ts`,
+`apps/domwellbes/src/lib/stock/inventory-position.ts` — три независимых места одного приёма).
+`id`, если у модели нет DB-level `DEFAULT` (Prisma `@default(cuid())` — клиентский, не
+БД-дефолт), должен быть **случайным при каждой попытке INSERT**, не вычисленным детерминированно
+из данных строки — иначе конкурирующие попытки словят конфликт ещё и на PRIMARY KEY, а его
+`ON CONFLICT (<бизнес-ключ>)` не перехватывает (Postgres ловит только конфликт по указанному
+арбитру).
