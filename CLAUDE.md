@@ -160,6 +160,7 @@
 - [nextjs-server-action-redirect-race](/.claude/docs/nextjs-server-action-redirect-race.md) гонка редиректа в server action
 - [nextjs-server-action-decimal-serialization](/.claude/docs/nextjs-server-action-decimal-serialization.md) ⚠️ «Only plain objects can be passed»
 - [nextjs-server-action-thrown-error-message-stripped](/.claude/docs/nextjs-server-action-thrown-error-message-stripped.md) ⚠️ текст `throw` из Server Action в production стирается — отказ возвращать значением
+- [action-failure-value-silent-success](/.claude/docs/action-failure-value-silent-success.md) ⚠️ `ActionFailure` — значение успешного `resolve`, голый `await action()` без `unwrapActionResult`/`isActionFailure` не видит отказ
 - [nextjs-static-export-rsc-paths](/.claude/docs/nextjs-static-export-rsc-paths.md) статический экспорт и пути RSC
 - [nextjs-ssr-browser-only-libs](/.claude/docs/nextjs-ssr-browser-only-libs.md) ⚠️ `self is not defined`
 - [nextjs-dynamic-ssr-false-still-server-compiled](/.claude/docs/nextjs-dynamic-ssr-false-still-server-compiled.md) ⚠️ `dynamic(ssr:false)` не исключает модуль из server-резолва
