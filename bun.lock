@@ -681,7 +681,7 @@
     },
     "apps/driving-school": {
       "name": "driving-school",
-      "version": "0.240.38",
+      "version": "0.240.39",
       "dependencies": {
         "@letar/admin-ui": "workspace:*",
         "@letar/auth": "workspace:*",
