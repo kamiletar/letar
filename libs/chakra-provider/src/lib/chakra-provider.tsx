@@ -5,13 +5,19 @@ import { ChakraProvider, defaultSystem } from '@chakra-ui/react'
 import { ThemeProvider, type ThemeProviderProps } from 'next-themes'
 import type { ReactNode } from 'react'
 
+import { useIosActiveFix } from './use-ios-active-fix'
+
 export interface RootChakraProviderProps {
   children: ReactNode
 }
 
 type ValueProp = Partial<Pick<ChakraProviderProps, 'value'>>
 
+/**
+ * Корневой провайдер Chakra. Заодно включает `:active` на iOS ({@link useIosActiveFix}).
+ */
 export function RootChakraProvider({ children, value }: RootChakraProviderProps & ValueProp) {
+  useIosActiveFix()
   return <ChakraProvider value={value || defaultSystem}>{children}</ChakraProvider>
 }
 
