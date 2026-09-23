@@ -348,7 +348,7 @@
     },
     "apps/aboi": {
       "name": "@letar/aboi",
-      "version": "0.83.23",
+      "version": "0.83.24",
       "dependencies": {
         "@letar/admin-ui": "workspace:*",
         "@letar/analytics": "workspace:*",
@@ -381,7 +381,7 @@
     },
     "apps/aira-web": {
       "name": "@letar/aira-web",
-      "version": "0.3.9",
+      "version": "0.3.10",
       "dependencies": {
         "@letar/glitchtip": "workspace:*",
         "@letar/i18n-proxy": "workspace:*",
@@ -483,7 +483,7 @@
     },
     "apps/animatrona-tracker": {
       "name": "@letar/animatrona-tracker",
-      "version": "0.13.2",
+      "version": "0.13.3",
       "dependencies": {
         "@letar/animatrona-franchise-graph": "workspace:*",
         "@letar/animatrona-types": "workspace:*",
@@ -519,7 +519,7 @@
     },
     "apps/aprel8008": {
       "name": "@letar/aprel8008",
-      "version": "0.31.7",
+      "version": "0.31.8",
       "dependencies": {
         "@letar/env-load": "workspace:*",
         "@letar/glitchtip": "workspace:*",
@@ -533,7 +533,7 @@
     },
     "apps/archetest": {
       "name": "@letar/archetest",
-      "version": "0.27.20",
+      "version": "0.27.21",
       "dependencies": {
         "@letar/env-load": "workspace:*",
         "@letar/forms": "workspace:*",
@@ -548,7 +548,7 @@
     },
     "apps/auth-hub": {
       "name": "auth-hub",
-      "version": "0.7.24",
+      "version": "0.7.25",
       "dependencies": {
         "@letar/api-server": "workspace:*",
         "@letar/auth": "workspace:*",
@@ -578,7 +578,7 @@
     },
     "apps/dashboard": {
       "name": "@letar/dashboard",
-      "version": "1.27.2",
+      "version": "1.27.3",
       "dependencies": {
         "@letar/admin-ui": "workspace:*",
         "@letar/analytics": "workspace:*",
@@ -617,7 +617,7 @@
     },
     "apps/domwellbes": {
       "name": "@letar/domwellbes",
-      "version": "0.309.43",
+      "version": "0.309.44",
       "dependencies": {
         "@gltf-transform/core": "^4.5.0",
         "@gltf-transform/extensions": "^4.5.0",
@@ -680,7 +680,7 @@
     },
     "apps/driving-school": {
       "name": "driving-school",
-      "version": "0.240.36",
+      "version": "0.240.37",
       "dependencies": {
         "@letar/admin-ui": "workspace:*",
         "@letar/auth": "workspace:*",
@@ -709,7 +709,7 @@
     },
     "apps/dsperevod": {
       "name": "@letar/dsperevod",
-      "version": "0.6.37",
+      "version": "0.6.38",
       "dependencies": {
         "@better-auth/utils": "^0.4.2",
         "@chakra-ui/react": "*",
@@ -738,7 +738,7 @@
     },
     "apps/form-develop-app": {
       "name": "form-develop-app",
-      "version": "0.1.21",
+      "version": "0.1.22",
       "dependencies": {
         "@letar/env-load": "workspace:*",
         "@letar/forms-core": "workspace:*",
@@ -788,7 +788,7 @@
     },
     "apps/grandslamcup": {
       "name": "@letar/grandslamcup",
-      "version": "3.39.21",
+      "version": "3.39.22",
       "dependencies": {
         "@letar/api-server": "workspace:*",
         "@letar/env-load": "workspace:*",
@@ -803,7 +803,7 @@
     },
     "apps/kami": {
       "name": "kami",
-      "version": "0.35.4",
+      "version": "0.35.5",
       "dependencies": {
         "@letar/auth": "workspace:*",
         "@letar/email": "workspace:*",
@@ -877,7 +877,7 @@
     },
     "apps/mandala": {
       "name": "@letar/mandala",
-      "version": "0.40.33",
+      "version": "0.40.34",
       "dependencies": {
         "@letar/admin-ui": "workspace:*",
         "@letar/api-server": "workspace:*",
@@ -916,7 +916,7 @@
     },
     "apps/pravda": {
       "name": "@letar/pravda",
-      "version": "1.9.13",
+      "version": "1.9.14",
       "dependencies": {
         "@letar/glitchtip": "workspace:*",
         "@letar/hooks": "workspace:*",
@@ -928,7 +928,7 @@
     },
     "apps/studio": {
       "name": "@letar/studio",
-      "version": "0.69.22",
+      "version": "0.69.24",
       "dependencies": {
         "@letar/admin-ui": "workspace:*",
         "@letar/consent": "workspace:*",
@@ -961,7 +961,7 @@
     },
     "apps/svoichuzhie": {
       "name": "@letar/svoichuzhie",
-      "version": "0.10.70",
+      "version": "0.10.71",
       "dependencies": {
         "@letar/admin-ui": "workspace:*",
         "@letar/api-server": "workspace:*",
@@ -988,7 +988,7 @@
     },
     "apps/synth": {
       "name": "@letar/synth",
-      "version": "0.22.6",
+      "version": "0.22.7",
       "dependencies": {
         "@letar/format-utils": "workspace:*",
         "@letar/hooks": "workspace:*",
@@ -998,7 +998,7 @@
     },
     "apps/time": {
       "name": "@letar/time",
-      "version": "0.5.17",
+      "version": "0.5.18",
       "dependencies": {
         "@letar/api-server": "workspace:*",
         "@letar/env-load": "workspace:*",
@@ -1124,7 +1124,7 @@
     },
     "libs/chakra-provider": {
       "name": "@letar/chakra-provider",
-      "version": "0.0.1",
+      "version": "0.1.0",
       "dependencies": {
         "@letar/hooks": "workspace:*",
       },
