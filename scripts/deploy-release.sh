@@ -204,6 +204,13 @@ do_release() {
   export NEXT_PUBLIC_GLITCHTIP_RELEASE="$SHA"
 
   phase_marker rollout start
+  # Bind-mount каталоги сервиса app — владельцем рантайм-пользователь образа (nextjs, uid 1001).
+  # Тот же шаг, что в deploy-affected.sh; без него запись в uploads/ падает EACCES
+  # (.claude/docs/docker-bind-mount-uid-gid-mismatch.md). cwd здесь уже каталог приложения.
+  if ! bash "$WORKSPACE_ROOT/scripts/ensure-writable-mounts.sh" "$PWD" "$COMPOSE_FILE" "${APP}:${SHA}"; then
+    phase_marker rollout fail
+    die "${APP}: bind-mount каталоги не пишутся рантайм-пользователем образа — релиз остановлен"
+  fi
   local ok=false
   if grep -vE '^[[:space:]]*#' "$COMPOSE_FILE" 2>/dev/null | grep -qE "letar\.rollout:[[:space:]]*['\"]?true['\"]?"; then
     echo -e "${YELLOW}🔀 ${APP}: label letar.rollout=true — zero-downtime rollout (libs/deploy-engine)${NC}"

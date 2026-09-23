@@ -1525,6 +1525,22 @@ for app in $AFFECTED_APPS; do
   # даёт systemd-run, создающий transient-unit в system.slice (или user.slice), полностью
   # отдельной от cgroup докера.
   phase_marker rollout start
+
+  # Bind-mount каталоги сервиса app (uploads/, private-uploads/…) — владельцем рантайм-пользователь
+  # образа (nextjs, uid 1001), а не deploy (1000) или root (если каталог создал сам compose).
+  # Иначе любая запись из контейнера падает EACCES — так на domwellbes молча ломались выпуск КП
+  # (staging, s1) и загрузка картинок в админке (прод, s2). Разбор:
+  # .claude/docs/docker-bind-mount-uid-gid-mismatch.md. Провал — стоп деплоя приложения: старый
+  # контейнер пишет в тот же каталог и сломан так же, а предупреждение в логе никто не читает.
+  if ! bash "$WORKSPACE_ROOT/scripts/ensure-writable-mounts.sh" "$WORKSPACE_ROOT/$APP_DIR" "$COMPOSE_FILE" "$DOCKER_IMAGE"; then
+    echo -e "${RED}❌ ${app}: bind-mount каталоги не пишутся рантайм-пользователем образа — деплой остановлен${NC}"
+    phase_marker rollout fail
+    FAILED_APPS+=("$app")
+    cd "$WORKSPACE_ROOT"
+    echo ""
+    continue
+  fi
+
   DEPLOY_SUCCEEDED=false
   if [ "$app" = "dashboard" ] || [ "$app" = "dashboard-agent" ]; then
     echo -e "${YELLOW}⚠️  ${app} self-deploy: detached restart через systemd-run (переживает уничтожение cgroup собственного контейнера)${NC}"
