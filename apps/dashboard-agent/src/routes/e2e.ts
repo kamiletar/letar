@@ -4,7 +4,8 @@
  * Запуск Playwright e2e-прогона на s1 (единственный e2e-раннер, см. e2e-testing.md)
  * против staging-контейнера приложения и чтение персистентного статуса. Часть
  * staging-gated пайплайна (PLAN.md §18 Сессия D): deploy-mcp читает
- * `.last-e2e-status/<app>.json` перед production-деплоем (warn-only gate).
+ * `.last-e2e-status/<app>.json` перед production-деплоем (fail-closed gate). Фильтрованный
+ * прогон (`grep`/`project`) может записать туда только `passed: false` — см. lib/e2e-last-status.ts.
  *
  * baseUrl передаётся явно из POST body (не хардкодится) — все playwright.config.ts
  * в монорепо читают `process.env.BASE_URL` (единая конвенция, см. любой apps/*-e2e).
@@ -21,6 +22,7 @@ import type { FastifyInstance } from 'fastify'
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs'
 import path from 'path'
 import { errorResponse } from '../lib/api-handler'
+import { buildLastStatusUpdate, describeRunScope, type LastE2eStatus } from '../lib/e2e-last-status'
 import { getCurrentCommit } from '../lib/git'
 import { hostShellArgs } from '../lib/host-exec'
 import { getHostLock, releaseHostLock, tryAcquireHostLock } from '../lib/host-lock'
@@ -57,14 +59,6 @@ interface E2eRun {
   output: string[]
   truncatedLines: number
   error?: string
-}
-
-/** Персистентный результат последнего прогона — читает warn-gate в deploy-mcp. */
-interface LastE2eStatus {
-  commitSha: string
-  passed: boolean
-  timestamp: string
-  durationMs: number
 }
 
 const e2eHistory: E2eRun[] = []
@@ -106,6 +100,35 @@ function readLastStatus(app: string): LastE2eStatus | undefined {
     return JSON.parse(readFileSync(file, 'utf8')) as LastE2eStatus
   } catch {
     return undefined
+  }
+}
+
+/**
+ * Пишет статус гейта через buildLastStatusUpdate: фильтрованный (grep/project) зелёный прогон
+ * файл не трогает, иначе точечная проверка одного теста выглядела бы для прод-гейта как полный
+ * зелёный прогон (domwellbes, 2026-09-23). Решение логируется в вывод прогона.
+ */
+function recordLastStatus(
+  run: E2eRun,
+  status: Omit<Parameters<typeof buildLastStatusUpdate>[0], 'scope'>,
+): void {
+  const scope = { project: run.project, grep: run.grep, workers: run.workers }
+  const update = buildLastStatusUpdate({ ...status, scope })
+  if (!update) {
+    appendOutput(
+      run,
+      `ℹ️ Фильтрованный прогон (${
+        describeRunScope(scope)
+      }) зелёный, но .last-e2e-status/${run.app}.json не обновлён — прод-гейту нужен полный прогон без grep/project`,
+    )
+    return
+  }
+  writeLastStatus(run.app, update)
+  if (update.filtered) {
+    appendOutput(
+      run,
+      `⚠️ Фильтрованный прогон (${describeRunScope(scope)}) упал — .last-e2e-status/${run.app}.json = passed:false`,
+    )
   }
 }
 
@@ -159,7 +182,7 @@ export async function e2eRoutes(fastify: FastifyInstance): Promise<void> {
    *   sinceLine — курсор лога (как в /api/deploy/status)
    *
    * Всегда возвращает lastStatus (персистентный .last-e2e-status/<app>.json), даже если сейчас
-   * ничего не запущено — это то, что читает warn-gate deploy-mcp перед production-деплоем.
+   * ничего не запущено — это то, что читает e2e-гейт deploy-mcp перед production-деплоем.
    */
   fastify.get<{ Querystring: { app?: string; runId?: string; sinceLine?: string } }>(
     '/api/e2e/status',
@@ -212,7 +235,8 @@ export async function e2eRoutes(fastify: FastifyInstance): Promise<void> {
    * 2026-08-08). `1` — не гарантированный дефолт для всех приложений, задаётся по запросу.
    *
    * Асинхронный: возвращает runId сразу, клиент опрашивает /api/e2e/status.
-   * По завершении пишет `.last-e2e-status/<app>.json` — читается warn-gate'ом deploy_app(production).
+   * По завершении пишет `.last-e2e-status/<app>.json` — читается e2e-гейтом deploy_app(production).
+   * ⚠️ С grep/project зелёный итог в файл не пишется (неполный набор), красный — пишется.
    */
   fastify.post<{ Body: { app: string; baseUrl: string; project?: string; grep?: string; workers?: number } }>(
     '/api/e2e/run',
@@ -417,7 +441,7 @@ export async function e2eRoutes(fastify: FastifyInstance): Promise<void> {
         }
 
         const durationMs = run.startTime ? Date.now() - new Date(run.startTime).getTime() : 0
-        writeLastStatus(app, { commitSha, passed, timestamp: run.endTime, durationMs })
+        recordLastStatus(run, { commitSha, passed, timestamp: run.endTime, durationMs })
 
         currentProcess = null
         releaseHostLock()
@@ -433,7 +457,7 @@ export async function e2eRoutes(fastify: FastifyInstance): Promise<void> {
         // выполниться) должен блокировать hard-gated приложения так же, как явный fail —
         // без записи lastStatus гейт продолжил бы читать старый (возможно зелёный) статус.
         const durationMs = run.startTime ? Date.now() - new Date(run.startTime).getTime() : 0
-        writeLastStatus(app, { commitSha, passed: false, timestamp: run.endTime, durationMs })
+        recordLastStatus(run, { commitSha, passed: false, timestamp: run.endTime, durationMs })
         currentProcess = null
         releaseHostLock()
       })
