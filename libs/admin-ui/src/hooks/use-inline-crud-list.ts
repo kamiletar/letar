@@ -19,6 +19,12 @@ export interface UseInlineCrudListOptions<TItem, TFormData> {
   onDelete: (id: string) => Promise<void>
   /** Вызывается после каждой успешной мутации — например, router.refresh(), если серверные пропсы страницы зависят от этого списка */
   afterMutate?: () => void
+  /**
+   * Вызывается, если onCreate/onUpdate/onDelete бросили исключение (уникальный конфликт,
+   * отказ политики доступа ZenStack, FK при удалении). Без неё исключение гасится молча —
+   * кнопка выглядит нажатой, но ни успеха, ни ошибки пользователь не видит.
+   */
+  onError?: (error: unknown, action: 'create' | 'update' | 'delete') => void
 }
 
 const DEFAULT_CONFIRM_MESSAGE = 'Удалить? Это действие необратимо.'
@@ -39,6 +45,7 @@ export function useInlineCrudList<TItem, TFormData>({
   onUpdate,
   onDelete,
   afterMutate,
+  onError,
 }: UseInlineCrudListOptions<TItem, TFormData>) {
   const [items, setItems] = useState(initialItems)
   const [editingId, setEditingId] = useState<string | 'new' | null>(null)
@@ -53,24 +60,40 @@ export function useInlineCrudList<TItem, TFormData>({
       return
     }
     startTransition(async () => {
-      await onDelete(id)
-      setItems((prev) => prev.filter((item) => getId(item) !== id))
-      afterMutate?.()
+      try {
+        await onDelete(id)
+        setItems((prev) => prev.filter((item) => getId(item) !== id))
+        afterMutate?.()
+      } catch (error) {
+        onError?.(error, 'delete')
+      }
     })
   }
 
   async function handleCreate(data: TFormData) {
-    const created = await onCreate(data)
-    setItems((prev) => sortItems([...prev, created]))
-    setEditingId(null)
-    afterMutate?.()
+    try {
+      const created = await onCreate(data)
+      setItems((prev) => sortItems([...prev, created]))
+      setEditingId(null)
+      afterMutate?.()
+    } catch (error) {
+      onError?.(error, 'create')
+      // Форма (DomWellbesForm/@letar/forms) ждёт rejection, чтобы не сбрасывать dirty-state
+      // и не выглядеть так, будто сохранение прошло — см. form-with-api.tsx.
+      throw error
+    }
   }
 
   async function handleUpdate(id: string, data: TFormData) {
-    const updated = await onUpdate(id, data)
-    setItems((prev) => sortItems(prev.map((item) => (getId(item) === id ? updated : item))))
-    setEditingId(null)
-    afterMutate?.()
+    try {
+      const updated = await onUpdate(id, data)
+      setItems((prev) => sortItems(prev.map((item) => (getId(item) === id ? updated : item))))
+      setEditingId(null)
+      afterMutate?.()
+    } catch (error) {
+      onError?.(error, 'update')
+      throw error
+    }
   }
 
   return {

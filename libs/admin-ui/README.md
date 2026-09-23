@@ -69,6 +69,13 @@ Server Action пишется вызывающим кодом и возвраща
 `InlineEditableTable` строит саму разметку — колонки и обе формы (create/edit) остаются за
 вызывающей секцией, у каждой свой набор полей и Zod-схема.
 
+⚠️ **`onError` — не опциональная деталь, а обязательная часть контракта.** Без неё исключение из
+`onCreate`/`onUpdate`/`onDelete` (уникальный конфликт, отказ ZenStack-политики, FK при удалении)
+гасится молча — кнопка выглядит нажатой, но ни успеха, ни ошибки пользователь не видит. Если
+`onCreate`/`onUpdate` уже роняют ошибку в форму через `unwrapActionResult` +
+`<Form.Errors />`/`middleware.onError` — в `onError` показывай тост только для `action ===
+'delete'`, иначе пользователь увидит одну и ту же ошибку дважды (тост + текст в форме).
+
 ```tsx
 import { InlineEditableTable, useInlineCrudList } from '@letar/admin-ui'
 
@@ -79,6 +86,13 @@ const list = useInlineCrudList({
   onCreate: (data) => createHouseExtra(houseId, data),
   onUpdate: (id, data) => updateHouseExtra(houseId, id, data),
   onDelete: (id) => deleteHouseExtra(houseId, id),
+  onError: (error, action) => {
+    adminToaster.create({
+      title: action === 'delete' ? 'Не удалось удалить позицию' : 'Не удалось сохранить позицию',
+      description: error instanceof Error ? error.message : undefined,
+      type: 'error',
+    })
+  },
 })
 
 <InlineEditableTable
@@ -371,6 +385,17 @@ export default function AdminLayout({ children }) {
 ```
 
 ## Бэклог
+
+### [2026-09-23] `useInlineCrudList` — обработка ошибок onCreate/onUpdate/onDelete
+
+Хук вызывал Server Actions без try/catch — брошенное исключение (уникальный конфликт, отказ
+ZenStack-политики, FK при удалении) улетало необработанным promise rejection, кнопка молчала.
+Добавлен `onError?: (error, action: 'create' | 'update' | 'delete') => void` в
+`UseInlineCrudListOptions`; `handleCreate`/`handleUpdate` пробрасывают исключение дальше после
+вызова `onError` (иначе форма выглядела бы сохранённой — TanStack Form снимает dirty-state только
+на успехе), `handleDelete` гасит исключение сам (там нет формы-получателя). Все 11 потребителей
+в `apps/domwellbes` подключили `onError`. Разбор, включая почему `catchActionFailure` не
+покрывает FK-констрейнты — `apps/domwellbes/PLAN_CROSSCUTTING.md` § «Тот же класс бага шире».
 
 ### [2026-08-12→2026-08-13] CRUD-inline-list — извлечён как `InlineEditableTable` + `useInlineCrudList`
 
