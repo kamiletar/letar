@@ -234,7 +234,7 @@
 - [playwright-testmatch-absolute-path-regex-anchor](/.claude/docs/playwright-testmatch-absolute-path-regex-anchor.md) ⚠️ якорный `^` в `testMatch` никогда не совпадает
 - [e2e-rate-limit-shared-runner-ip](/.claude/docs/e2e-rate-limit-shared-runner-ip.md) ⚠️ подмена `x-forwarded-for` не изолирует rate-limit — все тесты с s1 делят один бакет
 - [playwright-topass-click-disabled-hang](/.claude/docs/playwright-topass-click-disabled-hang.md) ⚠️ `toPass(click)` по гаснущей кнопке висит до таймаута теста — повторять только активную
-- [run-e2e-staging-pitfalls](/.claude/docs/run-e2e-staging-pitfalls.md) ⚠️ `run_e2e` не пуллит s1, `deploy_cancel` оставляет `next build`, 12 воркеров против однопоточного staging
+- [run-e2e-staging-pitfalls](/.claude/docs/run-e2e-staging-pitfalls.md) ⚠️ `run_e2e` не пуллит s1, `deploy_cancel` оставляет `next build`, 12 воркеров против однопоточного staging, `grep`/`project` не засчитывается гейтом
 - [unit-testing](/.claude/docs/unit-testing.md) ⚠️ обязательный `tsconfig.spec.json`
 - [dual-use-engine-browser-safe-import-guard](/.claude/docs/dual-use-engine-browser-safe-import-guard.md) regex-тест на запрещённые серверные импорты в чистом движке, общем для клиента и сервера
 - [vitest-jsdom-formdata-request-hang](/.claude/docs/vitest-jsdom-formdata-request-hang.md) ⚠️ `request.formData()` зависает под jsdom
