@@ -3,6 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { ReactNode } from 'react'
 import { describe, expect, it, vi } from 'vitest'
+import { z } from 'zod/v4'
 import { Form } from './'
 import { FormWhen } from './form-when'
 
@@ -375,6 +376,205 @@ describe('FormWhen', () => {
       await waitFor(() => {
         expect(screen.getByTestId('notification-settings')).toBeInTheDocument()
       })
+    })
+  })
+
+  describe('интеграция с Form.Steps: скрытое условием required-поле не блокирует «Далее»', () => {
+    // Изначальная гипотеза (перед этим набором тестов): `Form.When` со единственным ребёнком —
+    // кастомным nullary-компонентом (`function CompanyFields() { return <Form.Field.String ... />
+    // }`, тот же паттерн, что в form-steps.spec.tsx) — ломается так же, как когда-то `Form.Steps.
+    // Step` без FormStepsFieldRegistryContext: статический `extractFieldNames(children, parentPath)`
+    // (form-when.tsx) не видит внутрь `<CompanyFields />`, fieldNames пустой,
+    // `hideFieldsFromValidation([])` — no-op. Тест ниже это НЕ воспроизводит: пока поле скрыто, оно
+    // просто не смонтировано — `useDeclarativeField` не регистрирует его в
+    // `FormStepsFieldRegistryContext`, и `FormStepsStep` не включает его в `stepInfo.fieldNames`
+    // вовсе, независимо от того, сработал ли `hideFieldsFromValidation`. Оставлен как регрессионный
+    // тест на этот (рабочий) путь.
+    //
+    // Реальный баг обнаружился на СОСЕДНЕМ пути — прямое поле, БЕЗ helper-компонента. Там
+    // `extractFieldNames` на уровне `Form.Steps.Step` статически видит `companyName` внутри
+    // `Form.When` (обход не различает семантику `Form.When`, просто спускается в `props.children`)
+    // — то есть `stepInfo.fieldNames` ВСЕГДА содержит `companyName`, скрыто оно или нет.
+    // Единственное, что должно исключать его из валидации, — `hiddenFields` через
+    // `hideFieldsFromValidation`/`showFieldsForValidation`. А это оказалось сломано: `fieldNames`
+    // в `FormWhenContent` пересчитывался в новый МАССИВ на каждый посторонний ре-рендер (нестабильная
+    // JSX-ссылка `children`), эффект видел "изменившуюся" зависимость, гонял cleanup (который при
+    // `!shouldRender` спонтанно вызывал `showFieldsForValidation`, "рассекречивая" поле) — а
+    // следующий проход эффекта не восстанавливал hidden-статус из-за асимметрии
+    // `isFirstMount`/`prevShouldRender`. Итог — `hiddenFields` пустой, required-поле блокирует
+    // «Далее», хотя пользователь его не видит. Фикс — content-based стабилизация `fieldNames`
+    // (form-when.tsx), тот же приём, что уже применён к `fieldNamesRef` в `form-steps-step.tsx`.
+    function CompanyFields() {
+      return <Form.Field.String name="companyName" />
+    }
+
+    const schema = z.object({
+      type: z.string(),
+      companyName: z.string().min(2),
+    }).strip()
+
+    it('не блокирует «Далее», когда required-поле скрыто условием и обёрнуто в helper-компонент', async () => {
+      const onSubmit = vi.fn()
+      const user = userEvent.setup()
+
+      render(
+        <TestWrapper>
+          <Form schema={schema} initialValue={{ type: 'individual', companyName: '' }} onSubmit={onSubmit}>
+            <Form.Steps>
+              <Form.Steps.Step title="Основное">
+                <Form.When field="type" is="company">
+                  <CompanyFields />
+                </Form.When>
+              </Form.Steps.Step>
+              <Form.Steps.Step title="Классификация">
+                <div>Классификация — шаг 2</div>
+              </Form.Steps.Step>
+              <Form.Steps.Navigation nextLabel="Далее" />
+            </Form.Steps>
+          </Form>
+        </TestWrapper>,
+      )
+
+      await user.click(screen.getByRole('button', { name: 'Далее' }))
+
+      await waitFor(() => {
+        expect(screen.getByText('Классификация — шаг 2')).toBeVisible()
+      })
+    })
+
+    it('блокирует «Далее», когда то же required-поле видимо (условие true) и пусто', async () => {
+      const onSubmit = vi.fn()
+      const user = userEvent.setup()
+
+      render(
+        <TestWrapper>
+          <Form schema={schema} initialValue={{ type: 'company', companyName: '' }} onSubmit={onSubmit}>
+            <Form.Steps>
+              <Form.Steps.Step title="Основное">
+                <Form.When field="type" is="company">
+                  <CompanyFields />
+                </Form.When>
+              </Form.Steps.Step>
+              <Form.Steps.Step title="Классификация">
+                <div>Классификация — шаг 2</div>
+              </Form.Steps.Step>
+              <Form.Steps.Navigation nextLabel="Далее" />
+            </Form.Steps>
+          </Form>
+        </TestWrapper>,
+      )
+
+      await user.click(screen.getByRole('button', { name: 'Далее' }))
+
+      await waitFor(() => {
+        expect(screen.getByText('Классификация — шаг 2')).not.toBeVisible()
+      })
+    })
+
+    it('не блокирует «Далее» и без helper-компонента — прямое required-поле, скрытое условием (регресс: hiddenFields терялся из-за нестабильного fieldNames)', async () => {
+      const onSubmit = vi.fn()
+      const user = userEvent.setup()
+
+      render(
+        <TestWrapper>
+          <Form schema={schema} initialValue={{ type: 'individual', companyName: '' }} onSubmit={onSubmit}>
+            <Form.Steps>
+              <Form.Steps.Step title="Основное">
+                <Form.When field="type" is="company">
+                  <Form.Field.String name="companyName" />
+                </Form.When>
+              </Form.Steps.Step>
+              <Form.Steps.Step title="Классификация">
+                <div>Классификация — шаг 2</div>
+              </Form.Steps.Step>
+              <Form.Steps.Navigation nextLabel="Далее" />
+            </Form.Steps>
+          </Form>
+        </TestWrapper>,
+      )
+
+      await user.click(screen.getByRole('button', { name: 'Далее' }))
+
+      // Регресс без фикса: клик остаётся на шаге 1 — `stepInfo.fieldNames` статически содержит
+      // `companyName` (Form.When не мешает extractFieldNames видеть прямого потомка), а
+      // `hiddenFields` пуст из-за спонтанного show/hide-цикла — required-поле блокирует переход,
+      // хотя пользователь его не видит и не может заполнить.
+      await waitFor(() => {
+        expect(screen.getByText('Классификация — шаг 2')).toBeVisible()
+      })
+    })
+
+    it('блокирует «Далее» и без helper-компонента, когда то же прямое поле видимо и пусто', async () => {
+      const onSubmit = vi.fn()
+      const user = userEvent.setup()
+
+      render(
+        <TestWrapper>
+          <Form schema={schema} initialValue={{ type: 'company', companyName: '' }} onSubmit={onSubmit}>
+            <Form.Steps>
+              <Form.Steps.Step title="Основное">
+                <Form.When field="type" is="company">
+                  <Form.Field.String name="companyName" />
+                </Form.When>
+              </Form.Steps.Step>
+              <Form.Steps.Step title="Классификация">
+                <div>Классификация — шаг 2</div>
+              </Form.Steps.Step>
+              <Form.Steps.Navigation nextLabel="Далее" />
+            </Form.Steps>
+          </Form>
+        </TestWrapper>,
+      )
+
+      await user.click(screen.getByRole('button', { name: 'Далее' }))
+
+      await waitFor(() => {
+        expect(screen.getByText('Классификация — шаг 2')).not.toBeVisible()
+      })
+    })
+
+    it('финальный сабмит по-прежнему валидируется по полной Zod-схеме — это контракт, не баг', async () => {
+      // `hiddenFields`/`Form.When` влияют только на `validateCurrentStep` (навигацию «Далее» между
+      // шагами Form.Steps) — form-level `onChange`/`onSubmit`-валидатор (form-validators.ts) гоняет
+      // ВСЮ схему против `state.values` независимо от видимости полей. Если поле физически может
+      // остаться скрытым (и невидимым) до конца визарда, но при этом обязательно по схеме
+      // безусловно — это тупик без way out для пользователя. Правильный путь — делать схемное
+      // поле опциональным/условно обязательным сами (`.optional()` + `.superRefine()` по
+      // соседнему полю), а не полагаться на то, что `Form.When` тихо ослабит Zod-схему. Этот тест
+      // фиксирует текущий контракт, чтобы будущий "фикс" не сломал его в обратную сторону —
+      // молча выключив required для скрытых полей везде, включая случаи, когда поле правда нужно
+      // на сабмите.
+      const onSubmit = vi.fn()
+      const user = userEvent.setup()
+
+      render(
+        <TestWrapper>
+          <Form schema={schema} initialValue={{ type: 'individual', companyName: '' }} onSubmit={onSubmit}>
+            <Form.Steps>
+              <Form.Steps.Step title="Основное">
+                <Form.When field="type" is="company">
+                  <Form.Field.String name="companyName" />
+                </Form.When>
+              </Form.Steps.Step>
+              <Form.Steps.Step title="Классификация">
+                <div>Классификация — шаг 2</div>
+              </Form.Steps.Step>
+              <Form.Steps.Navigation nextLabel="Далее" />
+            </Form.Steps>
+          </Form>
+        </TestWrapper>,
+      )
+
+      await user.click(screen.getByRole('button', { name: 'Далее' }))
+      await waitFor(() => {
+        expect(screen.getByText('Классификация — шаг 2')).toBeVisible()
+      })
+
+      await user.click(screen.getByRole('button', { name: 'Submit' }))
+
+      // Форма не отправляется — companyName пуст, а схема требует его безусловно.
+      await new Promise((resolve) => setTimeout(resolve, 50))
+      expect(onSubmit).not.toHaveBeenCalled()
     })
   })
 })

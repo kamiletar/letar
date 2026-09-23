@@ -115,47 +115,86 @@ function FormWhenContent({
   parentPath: string
 }): ReactNode {
   const stepsContext = useContext(FormStepsContext)
-  const prevShouldRender = useRef<boolean | null>(null)
 
   const containerRef = useRef<HTMLDivElement>(null)
   const focusAnchorRef = useRef<HTMLSpanElement>(null)
   const wasFocusInsideRef = useRef(false)
   const prevShouldRenderForFocus = useRef(shouldRender)
 
-  // Memoize field names — recalculate only when children change
-  const fieldNames = useMemo(() => extractFieldNames(children, parentPath), [children, parentPath])
+  // `children` — нестабильная JSX-ссылка (пересоздаётся на каждый ре-рендер родителя), поэтому
+  // `extractFieldNames` тоже пересчитывает НОВЫЙ массив на каждый ре-рендер, даже когда его
+  // содержимое не изменилось. Стабилизируем по содержимому — тот же приём, что уже применён к
+  // `fieldNamesRef` в `form-steps-step.tsx`.
+  const rawFieldNames = useMemo(() => extractFieldNames(children, parentPath), [children, parentPath])
+  const fieldNamesRef = useRef<string[]>(rawFieldNames)
+  // oxlint-disable-next-line react/refs
+  const fieldNamesChanged = rawFieldNames.length !== fieldNamesRef.current.length
+    // oxlint-disable-next-line react/refs
+    || rawFieldNames.some((name, i) => name !== fieldNamesRef.current[i])
+  if (fieldNamesChanged) {
+    // oxlint-disable-next-line react/refs
+    fieldNamesRef.current = rawFieldNames
+  }
+  // oxlint-disable-next-line react/refs
+  const fieldNames = fieldNamesRef.current
 
-  // Single useEffect for managing field visibility in validation
+  // Текущее состояние "поля скрыты от валидации" — источник истины для синхронизации ниже,
+  // НЕ cleanup-функция эффекта. Стабилизировать одну только идентичность `fieldNames` оказалось
+  // недостаточно: `stepsContext` (значение `useContext(FormStepsContext)`) тоже меняет ссылку
+  // на каждый ре-рендер, пока регистрируются соседние `Form.Steps.Step` (`contextValue` в
+  // form-steps.tsx пересобирается вместе с растущим `stepCount`) — и эффект с `stepsContext` в
+  // deps перезапускается для КАЖДОГО такого чужого ре-рендера, а не только когда реально меняется
+  // `shouldRender`. Прежняя реализация полагалась на cleanup-функцию эффекта как на "отмену"
+  // предыдущего hide/show — но React вызывает cleanup при КАЖДОМ пересоздании эффекта, включая
+  // эти посторонние срабатывания, и cleanup при `!shouldRender` безусловно вызывал
+  // `showFieldsForValidation`, "рассекречивая" уже скрытое поле. Следующий проход эффекта не
+  // восстанавливал hidden-статус (асимметрия `isFirstMount`/`prevShouldRender` — обе ветки
+  // "стало скрыто"/"стало видимо" не срабатывали, если предыдущее значение уже было `false`).
+  // Итог — `hiddenFields` пустеет уже после первого постороннего ре-рендера, а required-поле,
+  // скрытое условием, продолжает блокировать `validateCurrentStep` (кнопку «Далее»
+  // `Form.Steps.Navigation`) — тупик, не зависящий от того, обёрнуто ли поле в кастомный
+  // nullary-компонент, воспроизводится и на прямом потомке `Form.When`.
+  //
+  // Фикс: эффект синхронизации идемпотентен и НЕ имеет cleanup-функции — он просто сверяет
+  // `shouldRender` с уже известным `isHiddenRef.current` и вызывает hide/show только на РЕАЛЬНОЕ
+  // изменение. Восстановление на настоящий unmount вынесено в отдельный эффект с пустым массивом
+  // зависимостей — его cleanup гарантированно срабатывает только при размонтировании компонента,
+  // не при ре-рендере с новым `stepsContext`.
+  const isHiddenRef = useRef(false)
+  const stepsContextRef = useRef(stepsContext)
+  const fieldNamesForUnmountRef = useRef(fieldNames)
+  // oxlint-disable-next-line react/refs
+  stepsContextRef.current = stepsContext
+  // oxlint-disable-next-line react/refs
+  fieldNamesForUnmountRef.current = fieldNames
+
   useEffect(() => {
-    // No steps context or fields — nothing to do
     if (!stepsContext || fieldNames.length === 0) {
       return
     }
 
-    const isFirstMount = prevShouldRender.current === null
-
-    if (isFirstMount) {
-      // First mount: if hidden — immediately exclude from validation
-      if (!shouldRender) {
-        stepsContext.hideFieldsFromValidation(fieldNames)
-      }
-    } else if (shouldRender && !prevShouldRender.current) {
-      // Fields became visible — show for validation
-      stepsContext.showFieldsForValidation(fieldNames)
-    } else if (!shouldRender && prevShouldRender.current) {
-      // Fields became hidden — exclude from validation
+    if (!shouldRender && !isHiddenRef.current) {
       stepsContext.hideFieldsFromValidation(fieldNames)
-    }
-
-    prevShouldRender.current = shouldRender
-
-    // Cleanup: on unmount restore fields back
-    return () => {
-      if (!shouldRender && fieldNames.length > 0) {
-        stepsContext.showFieldsForValidation(fieldNames)
-      }
+      isHiddenRef.current = true
+    } else if (shouldRender && isHiddenRef.current) {
+      stepsContext.showFieldsForValidation(fieldNames)
+      isHiddenRef.current = false
     }
   }, [shouldRender, stepsContext, fieldNames])
+
+  useEffect(() => {
+    return () => {
+      const context = stepsContextRef.current
+      const namesOnUnmount = fieldNamesForUnmountRef.current
+      if (isHiddenRef.current && context && namesOnUnmount.length > 0) {
+        context.showFieldsForValidation(namesOnUnmount)
+      }
+    }
+    // Намеренно пустой массив зависимостей: этот эффект нужен только ради своего cleanup на
+    // настоящий unmount компонента, не на каждое изменение shouldRender/stepsContext/fieldNames
+    // (см. докстринг выше). Актуальные значения читаются из рефов, синхронизируемых в теле
+    // рендера — ESLint это видит и не требует их в deps.
+  }, [])
 
   // Следим, находится ли текущий фокус внутри блока — по document-level 'focusin', а не по
   // 'focusout' контейнера: удаление сфокусированного узла из DOM само по себе синхронно вызывает
