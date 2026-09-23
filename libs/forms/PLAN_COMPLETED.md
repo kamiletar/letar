@@ -1,5 +1,69 @@
 # Выполненные задачи — @letar/forms
 
+## 2026-09-23 (`forms-coordinator-dev`) — откат значений к устаревшему `initialValue` при стабильной ссылке (forms 2.16.10)
+
+**Контекст:** побочная находка предыдущей задачи (persistence-черновик, forms 2.16.8) —
+переданная `forms-coordinator-dev`/`forms-dev` через agent-mail (thread `forms-persistence-fix`) —
+задокументирована как «Известный пробел фикса» в
+`letar-forms-post-submit-reset-stale-initialvalue.md`.
+
+**Механизм (уточнён по исходникам `@tanstack/form-core`/`@tanstack/react-form` 1.33.5):**
+
+1. `useForm`'s layout effect (`useIsomorphicLayoutEffect(() => { formApi.update(opts) })`) не
+   имеет dependency array — вызывает `formApi.update()` на **каждом** рендере компонента,
+   вызвавшего `useForm`/`useAppForm` (`FormSimple`/`FormWithApi`), а не только при смене пропов.
+2. `FormApi.update()` (`FormApi.cjs:92-98`) сравнивает `options.defaultValues` текущего рендера с
+   СОБСТВЕННЫМ предыдущим `this.options.defaultValues` — полем формы, не со значением из
+   прошлого рендера React. При расхождении и `!this.state.isTouched` — переписывает
+   `state.values` на текущий `options.defaultValues` (проп `initialValue`).
+3. `FormApi.reset(values)` (`FormApi.cjs:129-155`) БЕЗ второго аргумента всегда выполняет
+   `this.options = { ...this.options, defaultValues: values }` — то есть `commitPostSubmitReset`'ов
+   `form.reset(dataToSubmit)` сам создаёт рассинхрон: с этого момента `this.options.defaultValues`
+   = `dataToSubmit`, а проп `initialValue` (если приложение не мемоизирует его синхронно с
+   отправленными данными) остаётся прежним — и **любой** следующий рендер формы (по любой
+   причине, не только смена `initialValue`) заново триггерит `update()` → откат.
+4. `usePostSubmitResetGuard`'ов корректирующий `useEffect` был завязан на
+   `[watchedDefaultValues]` (проп `initialValue`) — перепроверял состояние только при смене
+   ССЫЛКИ этого пропа. Ре-рендер `FormSimple`/`FormWithApi`, вызванный НЕ сменой `initialValue`
+   (обнаруженный кейс — `clearSavedData()`'ы `setState` внутри `useFormPersistence`,
+   `use-form-features.ts`), этот эффект не перезапускал — откат оставался неисправленным.
+
+**Почему одиночная перепроверка на каждом рендере (без смены архитектуры) недостаточна:**
+первая попытка фикса — убрать `[watchedDefaultValues]` из deps эффекта, оставив «одноразовый»
+`lastSubmittedRef`, обнуляемый после первой проверки — не прошла новый интеграционный тест:
+трассировка (временные `console.log`) показала, что после ОДНОЙ успешной коррекции гвардом
+следует ЕЩЁ один рендер (тот же persistence-каскад), на котором `update()` откатывает значения
+ЗАНОВО — а `lastSubmittedRef.current` уже `null`, повторной коррекции не происходит. Причина —
+`form.reset(submitted)` САМОГО гварда тоже перезаписывает `this.options.defaultValues`, заново
+создавая рассинхрон с неизменным `initialValue`.
+
+**Решение (устраняет корень, не только симптом):** `commitPostSubmitReset` вызывает
+`form.reset(dataToSubmit, { keepDefaultValues: true })` — официальный параметр
+`FormApi.reset()` (`@tanstack/form-core`, задокументирован в `.d.ts`). Он снимает dirty-состояние
+(`isTouched`/`isDirty` вычисляются из `fieldMeta`, который `reset()` сбрасывает независимо от
+этого флага) и подставляет `dataToSubmit` в `state.values`, но НЕ трогает
+`this.options.defaultValues` — тот остаётся тем, чем был до сабмита (актуальным `initialValue`
+на тот момент). На любом следующем рендере `update()` сравнивает `opts.defaultValues` с ЭТИМ ЖЕ
+значением — совпадение по построению, `shouldUpdateValues` не срабатывает, откату неоткуда
+взяться. Легитимные будущие изменения `initialValue`/`defaultValues` (например, перезагруженные
+данные записи в `FormWithApi` после мутации) синхронизируются `update()` как обычно — фикс их не
+блокирует, он устраняет только рассинхрон, который создавал сам `reset()`.
+
+Корректирующий `useEffect` в `usePostSubmitResetGuard` оставлен как защита от края (без
+dependency array — перепроверка на каждом рендере, не только при смене ссылки `initialValue`),
+но с новым `keepDefaultValues: true` он на практике больше не находит расхождений — рассинхрону
+неоткуда взяться.
+
+**Проверено:** новый интеграционный regression-тест на настоящем `<Form>`
+(`post-submit-reset-persistence-stable-initialvalue.spec.tsx`) — красный без фикса (откат к
+`'Исходное'`), зелёный с ним. Оба существующих regression-теста семейства
+(`post-submit-reset-stale-initialvalue.spec.tsx`,
+`use-form-features-post-submit-persistence-baseline.spec.tsx`) остались зелёными. `nx test forms`
+— 857/859 (2 падения в `form-when.spec.tsx` — незакоммиченный WIP параллельной сессии в
+`form-when.tsx`/`form-when.spec.tsx`, подтверждено baseline-прогоном на исходном `HEAD` без
+правок этой задачи — не регрессия). `nx typecheck:tsgo forms` — зелёный. `oxlint` точечно по
+изменённым файлам — чисто (полный `nx lint forms` падает на том же чужом WIP `form-when.tsx`).
+
 ## 2026-09-23 (временная identity, `forms-dev` был занят параллельной задачей) — persistence-черновик воскресал после успешного сабмита (forms 2.16.8)
 
 **Контекст:** находка из domwellbes (`NIGHT_QUEUE_2026-09-22.md` §B3, `PLAN_OPEN_QUESTIONS.md:129-136`,

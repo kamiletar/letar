@@ -21,23 +21,24 @@
   red→green — `PLAN_COMPLETED.md`.
 - **Статус:** ✅ закрыто.
 
-### ⚠️ [2026-09-23] Открытый вопрос: TanStack Form откатывает значения к `initialValue` на любом re-render после `reset()`, если форма untouched
+### ✅ [2026-09-23] TanStack Form откатывал значения к `initialValue` на любом re-render после `reset()`, если форма untouched (закрыт forms 2.16.10)
 
 - **Найдено:** побочно, при написании интеграционного теста к задаче выше (`<Form>` через
   настоящий TanStack Form, не изолированный `renderHook`).
 - **Механизм:** `FormApi.update()` (`@tanstack/form-core`) сравнивает новый `options.defaultValues`
-  с СОБСТВЕННЫМ предыдущим `defaultValues` формы — а `form.reset(dataToSubmit)` только что
-  перезаписал этот внутренний `defaultValues` на `dataToSubmit`. Если форма untouched, любой
-  следующий re-render (даже без смены React-ссылки `initialValue`) откатывает `state.values`
-  обратно к пропу `initialValue`. `usePostSubmitResetGuard` не ловит этот случай: его
-  корректирующий эффект сам зависит от смены ссылки `initialValue`, а `clearSavedData()`'ы
+  с СОБСТВЕННЫМ предыдущим `defaultValues` формы — а `form.reset(dataToSubmit)` без опций
+  перезаписывал этот внутренний `defaultValues` на `dataToSubmit`. Если форма untouched, любой
+  следующий re-render (даже без смены React-ссылки `initialValue`) откатывал `state.values`
+  обратно к пропу `initialValue`. `usePostSubmitResetGuard` не ловил этот случай: его
+  корректирующий эффект сам зависел от смены ссылки `initialValue`, а `clearSavedData()`'ы
   `setState` внутри `useFormPersistence` вызывают именно такой «пустой» re-render.
-- **Кому решать:** нужно архитектурное решение (правка `usePostSubmitResetGuard`, либо не
-  полагаться на `reset(dataToSubmit)` вовсе) — передано `forms-coordinator-dev`/`forms-dev` через
-  agent-mail (thread `forms-persistence-fix`, 2026-09-23), решение по приоритету за координатором.
-- **Почему не решено сейчас:** отдельная, более крупная задача не по теме B3; нужен тест на
-  реальном TanStack Form и явная договорённость о желаемом поведении (это уже вторая, независимая
-  ловушка одного семейства — см. `letar-forms-post-submit-reset-stale-initialvalue.md`).
+- **Решение:** корневая причина устранена в `commitPostSubmitReset` — `form.reset(dataToSubmit,
+  { keepDefaultValues: true })` снимает dirty-состояние, не перезаписывая
+  `this.options.defaultValues`, поэтому рассинхрону с пропом `initialValue` неоткуда взяться.
+  Корректирующий `useEffect` оставлен как защита от края, переведён на перепроверку на каждом
+  рендере (без dependency array). Детали, red→green прогон нового интеграционного теста —
+  `PLAN_COMPLETED.md`.
+- **Статус:** ✅ закрыто, forms 2.16.10.
 
 ### ✅ [2026-09-23] `Form.Steps.Navigation` пропускала валидацию, если поля шага вынесены в компонент (закрыт forms-react 0.11.2 / forms 2.16.9, от пользователя)
 

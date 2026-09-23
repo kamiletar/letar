@@ -4,6 +4,24 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.16.10] - 2026-09-23
+
+### Fixed
+
+- **`usePostSubmitResetGuard` не ловил откат значений на re-render со стабильным `initialValue`**
+  (например вызванный `clearSavedData()`'ов `setState` внутри `useFormPersistence`) — открытый
+  вопрос от 2.16.8, задокументированный в `letar-forms-post-submit-reset-stale-initialvalue.md`.
+  Корень: `form.reset(dataToSubmit)` без опций перезаписывает `this.options.defaultValues`
+  (`@tanstack/form-core`) на `dataToSubmit` — на КАЖДОМ следующем рендере TanStack Form
+  сравнивает текущий проп `initialValue` с этим перезаписанным значением, а не с прошлым
+  рендером React, и при расхождении тихо откатывает `state.values`, пока форма не touched. Фикс —
+  `form.reset(dataToSubmit, { keepDefaultValues: true })` в `commitPostSubmitReset`: снимает
+  dirty-состояние, не трогая `this.options.defaultValues` — рассинхрон с пропом `initialValue`
+  никогда не возникает, откату неоткуда взяться. Корректирующий `useEffect` в
+  `usePostSubmitResetGuard` оставлен как защита от края (эффект переведён с зависимости от смены
+  ссылки `initialValue` на перепроверку на каждом рендере). Новый интеграционный тест на реальном
+  `<Form>` — `post-submit-reset-persistence-stable-initialvalue.spec.tsx`.
+
 ## [2.16.9] - 2026-09-23
 
 ### Fixed

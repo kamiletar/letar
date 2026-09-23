@@ -87,19 +87,57 @@ Form успел откатить `state.values` к чужому `initialValue`, 
 для новых форм — сам фикс лечит симптом на уровне библиотеки, а не корневую причину (per-render
 sync `defaultValues` в `@tanstack/react-form`, вне контроля `@letar/forms`).
 
-## ⚠️ Известный пробел фикса (найден 2026-09-23, не закрыт)
+## ✅ Пробел фикса закрыт (найден 2026-09-23, закрыт в тот же день, forms 2.16.10)
 
-`usePostSubmitResetGuard`'ов корректирующий эффект сам зависит от смены **ссылки**
-`watchedDefaultValues` (`initialValue`) — `useEffect(() => {...}, [watchedDefaultValues])`.
-Если между рендером, где случился `reset(dataToSubmit)`, и следующим рендером формы `initialValue`
-не пересоздаётся (стабильная ссылка — распространённый и в остальном правильный паттерн), этот
-эффект **не перезапускается** и откат к устаревшему `initialValue` (тот же механизм `FormApi.update()`,
-описанный выше) остаётся неисправленным.
+`usePostSubmitResetGuard`'ов корректирующий эффект был завязан на смену **ссылки**
+`watchedDefaultValues` (`initialValue`) — `useEffect(() => {...}, [watchedDefaultValues])`. Если
+между рендером, где случился `reset(dataToSubmit)`, и следующим рендером формы `initialValue` не
+пересоздавался (стабильная ссылка — распространённый и в остальном правильный паттерн), этот
+эффект **не перезапускался**, и откат к устаревшему `initialValue` (тот же механизм
+`FormApi.update()`, описанный выше) оставался неисправленным.
 
 Такой «пустой» re-render без смены `initialValue` возникает не только гипотетически: `handleSubmit()`
 с включённой `persistence` вызывает `clearSavedData()`, чьи `setState` внутри `useFormPersistence`
-сами перерендеривают форму — и именно на этом рендере `FormApi.update()` откатывает значения, а
-guard уже не перепроверяет. Найдено при написании интеграционного теста к
-[исправлению воскресающего persistence-черновика](/libs/forms/PLAN_COMPLETED.md) (forms 2.16.8) —
-сама эта задача была про localStorage, а не про откат значений, поэтому не чинилось в её рамках.
-Передано `forms-coordinator-dev` через agent-mail (thread `forms-persistence-fix`, 2026-09-23).
+сами перерендеривают форму — и именно на этом рендере `FormApi.update()` откатывал значения, а
+guard не перепроверял. Найдено при написании интеграционного теста к
+[исправлению воскресающего persistence-черновика](/libs/forms/PLAN_COMPLETED.md) (forms 2.16.8).
+
+### Корневая причина — глубже, чем «неверные deps у эффекта»
+
+`FormApi.reset(values)` (`@tanstack/form-core`) **без второго аргумента** всегда выполняет
+`this.options = { ...this.options, defaultValues: values }` — то есть сам вызов
+`form.reset(dataToSubmit)` в `commitPostSubmitReset` создаёт рассинхрон: `this.options.defaultValues`
+становится `dataToSubmit`, а проп `initialValue` (если приложение не мемоизирует его синхронно с
+отправленными данными) остаётся прежним. `useForm`'s layout effect
+(`useIsomorphicLayoutEffect(() => { formApi.update(opts) })`) не имеет dependency array — вызывает
+`formApi.update()` на **каждом** рендере компонента, а не только при смене пропов. Значит **любой**
+следующий рендер формы (по любой причине, не только смена `initialValue`) заново триггерит откат.
+
+Первая попытка фикса — просто убрать `[watchedDefaultValues]` из deps эффекта, оставив
+«одноразовый» `lastSubmittedRef`, обнуляемый после первой проверки — не прошла новый
+интеграционный тест: после ОДНОЙ успешной коррекции гвардом следовал ЕЩЁ один рендер (тот же
+persistence-каскад), на котором `update()` откатывал значения ЗАНОВО, а `lastSubmittedRef.current`
+был уже `null` — повторной коррекции не происходило. Причина — `form.reset(submitted)` САМОГО
+гварда тоже перезаписывал `this.options.defaultValues`, заново создавая рассинхрон с неизменным
+`initialValue`.
+
+### Решение — устраняет корень, не только симптом
+
+`commitPostSubmitReset` теперь вызывает `form.reset(dataToSubmit, { keepDefaultValues: true })` —
+официальный параметр `FormApi.reset()`, задокументированный в `.d.ts` пакета. Он снимает
+dirty-состояние (`isTouched`/`isDirty` вычисляются из `fieldMeta`, который `reset()` сбрасывает
+независимо от этого флага) и подставляет `dataToSubmit` в `state.values`, но **не трогает**
+`this.options.defaultValues` — тот остаётся тем, чем был до сабмита. На любом следующем рендере
+`update()` сравнивает текущий `initialValue` с ЭТИМ ЖЕ значением — совпадение по построению,
+`shouldUpdateValues` не срабатывает, откату неоткуда взяться. Легитимные будущие изменения
+`initialValue`/`defaultValues` (например, перезагруженные данные записи в `FormWithApi` после
+мутации) синхронизируются `update()` как обычно — фикс их не блокирует.
+
+Корректирующий `useEffect` в `usePostSubmitResetGuard` оставлен как защита от края — переведён с
+зависимости от смены ссылки `initialValue` на перепроверку на каждом рендере (без dependency
+array) — но с `keepDefaultValues: true` он на практике больше не находит расхождений.
+
+Регресс-тест на настоящем `<Form>` (стабильный `initialValue`, включённая `persistence`,
+успешный сабмит) —
+[post-submit-reset-persistence-stable-initialvalue.spec.tsx](/libs/forms/src/lib/declarative/form-root/post-submit-reset-persistence-stable-initialvalue.spec.tsx).
+Полный разбор — `PLAN_COMPLETED.md` (запись 2026-09-23, forms 2.16.10).

@@ -171,7 +171,7 @@ export function FormWithApi<TData extends object>({
 
   // Защита от отката поля к устаревшему initialValue после post-submit reset() —
   // см. use-post-submit-reset-guard.ts
-  const { commitPostSubmitReset } = usePostSubmitResetGuard<TData>(form, defaultValues)
+  const { commitPostSubmitReset } = usePostSubmitResetGuard<TData>(form)
 
   // Подписка на изменения полей (onFieldChange)
   useFieldChangeListeners(form, onFieldChange)
