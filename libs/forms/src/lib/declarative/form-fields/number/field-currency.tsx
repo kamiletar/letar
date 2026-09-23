@@ -80,7 +80,7 @@ export const FieldCurrency = createField<CurrencyFieldProps, number | undefined,
   },
 
   render: ({ field, fullPath, resolved, hasError, errorMessage, componentProps, fieldState }): ReactElement => {
-    const { step = 0.01, size, minorUnitScale = 1 } = componentProps
+    const { step = 0.01, size, minorUnitScale = 1, clampValueOnBlur = true } = componentProps
     const { constraints } = resolved
 
     // Props take priority over Zod-derived constraints — тот же принцип, что в Form.Field.Number.
@@ -115,7 +115,7 @@ export const FieldCurrency = createField<CurrencyFieldProps, number | undefined,
           step={step}
           formatOptions={formatOptions}
           locale={locale}
-          clampValueOnBlur
+          clampValueOnBlur={clampValueOnBlur}
           size={size}
         >
           <NumberInput.Control>

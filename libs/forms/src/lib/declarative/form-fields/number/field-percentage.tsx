@@ -76,7 +76,7 @@ export const FieldPercentage = createField<PercentageFieldProps, number | undefi
   },
 
   render: ({ field, fullPath, resolved, hasError, errorMessage, componentProps, fieldState }): ReactElement => {
-    const { min = 0, max = 100, step = 1, size, minorUnitScale = 1 } = componentProps
+    const { min = 0, max = 100, step = 1, size, minorUnitScale = 1, clampValueOnBlur = true } = componentProps
 
     const { formatOptions, locale, displayedValue, resetKey, markInternalChange } = fieldState
 
@@ -103,7 +103,7 @@ export const FieldPercentage = createField<PercentageFieldProps, number | undefi
           step={step}
           formatOptions={formatOptions}
           locale={locale}
-          clampValueOnBlur
+          clampValueOnBlur={clampValueOnBlur}
           size={size}
         >
           <NumberInput.Control>

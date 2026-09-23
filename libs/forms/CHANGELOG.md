@@ -4,6 +4,20 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.16.7] - 2026-09-23
+
+### Fixed
+
+- **`Field.Percentage`/`Field.Currency` не давали отключить `clampValueOnBlur`** —
+  `NumberInput.Root` получал булев проп жёстко (`clampValueOnBlur` без значения, то есть всегда
+  `true`), в отличие от `Field.NumberInput`, где `componentProps.clampValueOnBlur ?? true` уже
+  позволял потребителю переопределить дефолт. С зажатым min/max поле нельзя было очистить через
+  blur без стороннего workaround (`setFieldValue(name, undefined)` в обход blur) — найдено в
+  domwellbes при работе с материалами (поле процента/цены, которое должно уметь оставаться
+  пустым). Добавлен проп `clampValueOnBlur?: boolean` (default `true`, обратной совместимости не
+  нарушает) в `PercentageFieldProps`/`CurrencyFieldProps`, оба поля теперь читают
+  `componentProps.clampValueOnBlur ?? true` тем же способом, что `Field.NumberInput`.
+
 ## [2.16.6] - 2026-09-22
 
 ### Fixed

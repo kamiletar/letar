@@ -182,6 +182,8 @@ export interface CurrencyFieldProps extends BaseFieldProps {
   max?: number
   /** Change step (default: 0.01) */
   step?: number
+  /** Clamp value to min/max on blur (default: true) */
+  clampValueOnBlur?: boolean
   /** Size */
   size?: 'xs' | 'sm' | 'md' | 'lg'
   /**
@@ -213,6 +215,8 @@ export interface PercentageFieldProps extends BaseFieldProps {
   step?: number
   /** Number of decimal places (default: 0) */
   decimalScale?: number
+  /** Clamp value to min/max on blur (default: true) */
+  clampValueOnBlur?: boolean
   /** Size */
   size?: 'xs' | 'sm' | 'md' | 'lg'
   /**
