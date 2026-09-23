@@ -287,6 +287,7 @@
 - [nginx-proxy-manager](/infra/nginx-proxy-manager/README.md) ⛔ снят с s2 и s3 — история, не текущее состояние
 - [acme-dns](/infra/acme-dns/README.md) ⭐ wildcard-TLS без API регистратора
 - [traefik](/infra/traefik/README.md) боевой на s2 и s3
+- [traefik-node-keepalive-502-race](/.claude/docs/traefik-node-keepalive-502-race.md) ⚠️ пачки 502 на чанках и server actions при живом контейнере: keep-alive Node 5 с < 90 с Traefik
 
 ### Безопасность и право
 
@@ -364,6 +365,7 @@
 - [time-tracking](/.claude/rules/time-tracking.md) ⚠️ когда стартовать и останавливать таймер studio
 - [time-tracker-drift-incidents](/.claude/docs/time-tracker-drift-incidents.md) ⚠️ четыре способа потерять время; `autoClosedIdle` хуки не ловят
 - [formatting](/.claude/rules/formatting.md) ⚠️ голая `nx format` молча зашита на Prettier
+- [heavy-work-off-main-thread](/.claude/rules/heavy-work-off-main-thread.md) ⭐ CPU-работа дольше ~50 мс — в воркер; ⚠️ `@letar/jobs` крутит задачи в том же процессе
 
 ## Быстрый старт
 
