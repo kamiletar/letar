@@ -13,6 +13,13 @@
 
 Библиотека `@letar/chakra-provider` экспортирует `RootChakraProvider`, который оборачивает провайдер Chakra с value prop для кастомной системы.
 
+⚠️ **Корневой провайдер Next-приложения оборачивается в `EmotionRegistry`** из подпути
+`@letar/chakra-provider/next` (снаружи `ColorModeProvider`/`RootChakraProvider`). Без реестра
+Chakra рендерит инлайн-`<style>` перед каждым элементом, и поздний потоковый сегмент
+(`loading.tsx`, `<Suspense>`) плавающе ломает гидратацию (#418, пересборка корня). В общий
+баррель компонент не входит: баррель тянут Electron/Vite-рендереры. Разбор —
+[emotion-streaming-inline-style-hydration-418](/.claude/docs/emotion-streaming-inline-style-hydration-418.md).
+
 ## ⚠️ КРИТИЧНО - Предотвращение FOUC (мигание темы)
 
 При использовании тёмной темы с `next-themes` может возникать **Flash of Unstyled Content (FOUC)** — мигание светлого фона при загрузке страницы с тёмной системной темой.

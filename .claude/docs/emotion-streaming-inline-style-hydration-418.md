@@ -55,19 +55,62 @@
 Первый блок попадает в `<head>`, следующие — между `<script>` потока на уровне `<body>`, вне
 дерева React. Обёртка — снаружи `ColorModeProvider`/`RootChakraProvider`.
 
-Пилот — `apps/domwellbes/src/app/_components/emotion-registry.tsx`. CSS кладётся обычными
-children `<style>`, без вставки сырого HTML-пропом: React 19 внутри `<style>` экранирует только
-`<style`/`</style`. Зависимость `@emotion/cache` объявлена в корневом `package.json`: раньше она
-была только транзитивной, а при изолированном линкере bun такое не резолвится.
+Живёт в библиотеке: `EmotionRegistry` из подпути `@letar/chakra-provider/next`
+([libs/chakra-provider/src/lib/emotion-registry.tsx](/libs/chakra-provider/src/lib/emotion-registry.tsx)).
+Подпуть отдельный, в общий баррель компонент не входит: баррель используют и Electron/Vite-рендереры,
+им `next/navigation` не нужен. CSS кладётся обычными children `<style>`, без вставки сырого
+HTML-пропом: React 19 внутри `<style>` экранирует только `<style`/`</style`. Зависимость
+`@emotion/cache` объявлена в корневом `package.json`: раньше она была только транзитивной, а при
+изолированном линкере bun такое не резолвится.
 
-⚠️ **Затронуто любое Next-приложение на Chakra с потоковыми сегментами**, а в репо реестра
-нет ни у кого, кроме пилота. Перенос в `@letar/chakra-provider` отдельным подпутём (баррель
-библиотеки используют и Electron-приложения, им `next/navigation` не нужен) — отдельная задача:
-подпуть требует `paths` в tsconfig каждого потребителя
-([lib-entry-points](/.claude/docs/lib-entry-points.md), `scripts/add-lib-tsconfig-path.mjs`).
+```tsx
+'use client'
+import { ColorModeProvider, RootChakraProvider } from '@letar/chakra-provider'
+import { EmotionRegistry } from '@letar/chakra-provider/next'
+
+export function Providers({ children }: PropsWithChildren) {
+  return (
+    <EmotionRegistry>
+      <ColorModeProvider>
+        <RootChakraProvider value={system}>{children}</RootChakraProvider>
+      </ColorModeProvider>
+    </EmotionRegistry>
+  )
+}
+```
+
+**Охват (2026-09-24):** подключён в корневом провайдере всех веб-приложений на Next — потребителей
+`@letar/chakra-provider` (19 штук, включая приватные submodule). Первым был пилот в одном
+приложении, 2026-09-24 компонент перенесён в библиотеку, локальная копия удалена. Серверный layout
+(как в `auth-hub`) оборачивается так же: клиентский компонент рендерится из серверного без
+обёртки. Если в приложении несколько взаимоисключающих корневых провайдеров по группам маршрутов,
+реестр ставится в каждый.
+
+Не подключён — и почему:
+
+- **Electron-рендереры** (`animatrona/renderer`, `animatrona-folder-player`, `animatrona-ipfs-player`,
+  `label-printer-desktop`, `poster-microtext-desktop`). У `output: 'export'` HTML готов целиком до
+  инициализации кеша, потоковых сегментов нет. ⚠️ Но `label-printer-desktop` и
+  `animatrona/renderer` собираются в `output: 'standalone'`, то есть это живой Next-сервер со
+  стримингом. Если #418 всплывёт там — подключать так же, `paths` на подпуть у них уже есть.
+- **Next-приложения на Chakra без этой библиотеки** (`letar-landing`, `kami-key-the-landing`,
+  `animatrona-landing`, `form-example`) и демо-страницы `form-docs` со своим `ChakraProvider`
+  на странице. Им сначала нужен `@letar/chakra-provider` в зависимостях. Без `loading.tsx` и
+  `<Suspense>` баг не проявляется.
+
+Тест — [emotion-registry.spec.tsx](/libs/chakra-provider/src/lib/emotion-registry.spec.tsx):
+`renderToString` с подставленным `ServerInsertedHTMLContext`. Контрольный случай «без реестра —
+инлайн-`<style>` в разметке есть» держит тест честным. ⚠️ Файл обязан идти под
+`// @vitest-environment node`: под jsdom Emotion видит `document`, уходит в браузерную ветку и
+кладёт стили в `document.head`, инлайн-`<style>` не появляется даже без реестра — тест позеленел
+бы на сломанном коде.
 
 Проверка после фикса: в сыром HTML страницы нет `<style data-emotion="css …">` внутри
-разметки сегментов. На staging — 20 загрузок проблемной карточки в свежих контекстах без #418.
+разметки сегментов. С реестром такие теги стоят только в `<head>` и в точках вставки между
+`<script>` потока (перед ними `</script>`, после — `<script>`/`<link>`), а не перед элементом
+компонента. В dev при переносе в библиотеку (2026-09-24) так выглядели четыре приложения с
+разной схемой подключения: инлайн-стилей перед элементами 0, ошибок гидратации в консоли нет.
+На staging пилота — 20 загрузок проблемной карточки в свежих контекстах без #418.
 
 Смежное: [nextjs16-turbopack-default-emotion-hydration](/.claude/docs/nextjs16-turbopack-default-emotion-hydration.md)
 — другой mismatch от Emotion (`<Global>` + Turbopack), лечится `--webpack`;
