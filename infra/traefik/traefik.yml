@@ -21,6 +21,15 @@ api:
   # с basicAuth поверх TLS.
   insecure: false
 
+# Простаивающее соединение к бэкенду Traefik закрывает РАНЬШЕ, чем Node (`server.keepAliveTimeout`
+# = 5с по умолчанию, Next.js standalone его не меняет без `KEEP_ALIVE_TIMEOUT`). С дефолтом Traefik
+# (90с) он отправлял запрос в сокет, который Node только что закрыл, и отдавал клиенту 502 за
+# десятки миллисекунд — пачками, на JS-чанки и server actions, при живом контейнере: 225 ответов за
+# 3 часа e2e на staging 2026-09-23. Разбор — .claude/docs/traefik-node-keepalive-502-race.md.
+serversTransport:
+  forwardingTimeouts:
+    idleConnTimeout: 4s
+
 entryPoints:
   web:
     address: ':80'
