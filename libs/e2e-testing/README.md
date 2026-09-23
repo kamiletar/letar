@@ -67,6 +67,23 @@ staging используется отдельный staging-only роут `/api/
   await fillWithHydrationRetry(page.locator('#email'), 'user@example.com')
   ```
 
+- `fillStable(fields, timeoutMs?)` — заполняет несколько полей одной формы и выходит, только когда
+  **все** держат значение одновременно. WebKit сбрасывает ранее заполненный controlled-инпут при
+  заполнении соседнего поля — последовательные `fillWithHydrationRetry` по каждому полю (даже с
+  повторным проходом перед сабмитом) этого не гарантируют: последний `fill()` может стереть первое
+  поле. Найдено 2026-08-08 в aboi, переоткрыто в domwellbes (2026-09-23) и dsperevod — все три
+  ручных обхода сведены сюда 2026-09-24. Для одного поля (гонка гидратации) хватает
+  `fillWithHydrationRetry`.
+
+  ```ts
+  import { fillStable } from '@letar/e2e-testing'
+
+  await fillStable([
+    [page.locator('#email'), email],
+    [page.locator('#password'), password],
+  ])
+  ```
+
 - `checkWithHydrationRetry(clickTarget, checkboxLocator, timeoutMs?)` — устанавливает
   checked-состояние controlled-чекбокса с ретраем, идемпотентным относительно уже достигнутого
   состояния (перед каждой попыткой проверяет `isChecked()`, кликает только если ещё не checked —
