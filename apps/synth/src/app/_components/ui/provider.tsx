@@ -2,6 +2,7 @@
 
 import { system } from '@/theme'
 import { ColorModeProvider, RootChakraProvider } from '@letar/chakra-provider'
+import { EmotionRegistry } from '@letar/chakra-provider/next'
 import type { PropsWithChildren } from 'react'
 import { useEffect } from 'react'
 
@@ -13,8 +14,10 @@ export function Provider({ children }: PropsWithChildren) {
   }, [])
 
   return (
-    <ColorModeProvider forcedTheme="dark">
-      <RootChakraProvider value={system}>{children}</RootChakraProvider>
-    </ColorModeProvider>
+    <EmotionRegistry>
+      <ColorModeProvider forcedTheme="dark">
+        <RootChakraProvider value={system}>{children}</RootChakraProvider>
+      </ColorModeProvider>
+    </EmotionRegistry>
   )
 }

@@ -2,6 +2,12 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.40.34] - 2026-09-24
+
+### Fixed
+
+- Реестр кеша Emotion (`EmotionRegistry` из `@letar/chakra-provider/next`) в корневом провайдере: стили SSR уходят в поток через `useServerInsertedHTML`, а не инлайн-`<style>` перед элементами. Инлайн-стиль позднего потокового сегмента ломал гидратацию (плавающая ошибка React #418).
+
 ## [0.40.33] - 2026-09-22
 
 ### Fixed

@@ -1,6 +1,7 @@
 'use client'
 
 import { ColorModeProvider, RootChakraProvider } from '@letar/chakra-provider'
+import { EmotionRegistry } from '@letar/chakra-provider/next'
 import { FormI18nProvider } from '@letar/forms'
 import { QueryProvider } from '@letar/query-provider'
 import type { PropsWithChildren } from 'react'
@@ -15,12 +16,14 @@ export function Providers({ children }: PropsWithChildren) {
   }, [])
 
   return (
-    <QueryProvider preset="standard">
-      <ColorModeProvider>
-        <RootChakraProvider value={system}>
-          <FormI18nProvider locale="ru">{children}</FormI18nProvider>
-        </RootChakraProvider>
-      </ColorModeProvider>
-    </QueryProvider>
+    <EmotionRegistry>
+      <QueryProvider preset="standard">
+        <ColorModeProvider>
+          <RootChakraProvider value={system}>
+            <FormI18nProvider locale="ru">{children}</FormI18nProvider>
+          </RootChakraProvider>
+        </ColorModeProvider>
+      </QueryProvider>
+    </EmotionRegistry>
   )
 }

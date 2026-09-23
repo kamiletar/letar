@@ -3,6 +3,7 @@
 import { system } from '@/app/theme'
 import { ChakraProvider } from '@chakra-ui/react'
 import { ColorModeProvider, type ColorModeProviderProps } from '@letar/chakra-provider'
+import { EmotionRegistry } from '@letar/chakra-provider/next'
 
 /**
  * Главный провайдер приложения
@@ -13,8 +14,10 @@ import { ColorModeProvider, type ColorModeProviderProps } from '@letar/chakra-pr
  */
 export function Provider(props: ColorModeProviderProps) {
   return (
-    <ChakraProvider value={system}>
-      <ColorModeProvider {...props} />
-    </ChakraProvider>
+    <EmotionRegistry>
+      <ChakraProvider value={system}>
+        <ColorModeProvider {...props} />
+      </ChakraProvider>
+    </EmotionRegistry>
   )
 }

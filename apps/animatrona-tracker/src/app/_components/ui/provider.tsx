@@ -9,6 +9,7 @@ import {
   defineSlotRecipe,
 } from '@chakra-ui/react'
 import { ColorModeProvider, type ColorModeProviderProps } from '@letar/chakra-provider'
+import { EmotionRegistry } from '@letar/chakra-provider/next'
 import { FormI18nProvider } from '@letar/forms'
 import { pressableConfig, pressScale } from '@letar/ui'
 import { useEffect } from 'react'
@@ -252,10 +253,12 @@ export function Provider(props: ColorModeProviderProps) {
   }, [])
 
   return (
-    <ChakraProvider value={system}>
-      <FormI18nProvider locale="ru">
-        <ColorModeProvider {...props} />
-      </FormI18nProvider>
-    </ChakraProvider>
+    <EmotionRegistry>
+      <ChakraProvider value={system}>
+        <FormI18nProvider locale="ru">
+          <ColorModeProvider {...props} />
+        </FormI18nProvider>
+      </ChakraProvider>
+    </EmotionRegistry>
   )
 }

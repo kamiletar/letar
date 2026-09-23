@@ -2,6 +2,7 @@
 
 import { createSystem, defaultConfig, defineConfig, defineRecipe } from '@chakra-ui/react'
 import { RootChakraProvider } from '@letar/chakra-provider'
+import { EmotionRegistry } from '@letar/chakra-provider/next'
 import { pressableConfig } from '@letar/ui'
 import type { NextFont } from 'next/dist/compiled/@next/font'
 import type { PropsWithChildren } from 'react'
@@ -227,5 +228,9 @@ export const ThemeProvider = ({ children, fonts }: Props) => {
     document.addEventListener('touchstart', () => undefined, { passive: true })
   }, [])
 
-  return <RootChakraProvider value={system}>{children}</RootChakraProvider>
+  return (
+    <EmotionRegistry>
+      <RootChakraProvider value={system}>{children}</RootChakraProvider>
+    </EmotionRegistry>
+  )
 }

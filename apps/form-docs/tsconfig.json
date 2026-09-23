@@ -112,7 +112,8 @@
       ],
       "@letar/forms-react/testing": [
         "../../libs/forms-react/src/lib/testing/index.ts"
-      ]
+      ],
+      "@letar/chakra-provider/next": ["../../libs/chakra-provider/src/next.ts"]
     }
   },
   "include": [
