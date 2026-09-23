@@ -1,4 +1,4 @@
-import { fillWithHydrationRetry } from '@letar/e2e-testing'
+import { fillStable } from '@letar/e2e-testing'
 import { expect, test } from '@playwright/test'
 import {
   createTestAdmin,
@@ -35,11 +35,12 @@ test.describe.serial('admin: audit-log регрессия (AuditLog.metadata Jso
     const emailInput = page.getByPlaceholder('admin@dsperevod.ru')
     // placeholder у поля пароля на /sign-in больше нет (форма на @letar/forms) — ищем по типу
     const passwordInput = page.locator('input[type="password"]')
-    await fillWithHydrationRetry(emailInput, adminEmail)
-    await fillWithHydrationRetry(passwordInput, adminPassword)
-    // Повторное подтверждение прямо перед submit — WebKit мог сбросить email за время,
-    // пока заполнялся password.
-    await fillWithHydrationRetry(emailInput, adminEmail)
+    // WebKit сбрасывает email, пока заполняется password, — `fillStable` выходит, только когда оба
+    // поля держат значение одновременно.
+    await fillStable([
+      [emailInput, adminEmail],
+      [passwordInput, adminPassword],
+    ])
     await page.getByRole('button', { name: 'Войти' }).click()
     await expect(page).not.toHaveURL(/\/sign-in/, { timeout: 15000 })
 
