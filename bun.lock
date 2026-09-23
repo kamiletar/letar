@@ -616,7 +616,7 @@
     },
     "apps/domwellbes": {
       "name": "@letar/domwellbes",
-      "version": "0.308.7",
+      "version": "0.309.23",
       "dependencies": {
         "@gltf-transform/core": "^4.5.0",
         "@gltf-transform/extensions": "^4.5.0",
@@ -1272,7 +1272,7 @@
     },
     "libs/forms": {
       "name": "@letar/forms",
-      "version": "2.16.6",
+      "version": "2.16.7",
       "dependencies": {
         "@letar/format-utils": "workspace:*",
         "@tanstack/react-table": "^9.2.4",
@@ -1502,7 +1502,7 @@
     },
     "libs/image-upload": {
       "name": "@letar/image-upload",
-      "version": "0.1.4",
+      "version": "0.1.5",
       "peerDependencies": {
         "@chakra-ui/react": ">=3.0.0",
         "react": ">=18.0.0",
