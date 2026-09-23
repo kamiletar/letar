@@ -4890,3 +4890,39 @@ RCE в `next/og` `ImageResponse`. В репо был установлен уяз
 - [ ] Не сделано в этой сессии (не блокирует security-фикс, требует отдельного решения):
       `bun audit fix --latest` для транзитивных зависимостей `nx`/`prisma`/`satori` (cross-major,
       нужна отдельная проверка сборки); `adm-zip` в `apps/domwellbes`.
+
+## §197 (2026-09-23) `/infra:deps-update` — in-range минорные/патч + electron-drift синхронизация
+
+Продолжение §196 по запросу «проверь, что ещё можно обновить, может минорные». `bun outdated`
+разделил список на то, что уже покрыто существующими `^`-диапазонами (safe), и то, что требует
+major bump (осознанное решение, не тронуто).
+
+- [x] `bun update` (без `--latest`) — 30 пакетов в пределах уже объявленных диапазонов:
+      `@zenstackhq/*` (orm/plugin-policy/schema/server/zod + dev cli/language/sdk/tanstack-query)
+      `3.9.4` → `3.9.5`, `@ai-sdk/anthropic`, `@ai-sdk/react`, `ai`, `electron` `44.4.3` →
+      `44.4.5`, `framer-motion`, `fumadocs-core`/`fumadocs-ui`, `music-metadata`,
+      `@tanstack/react-devtools` (dev), `puppeteer` (dev), `satori` (dev) + транзитивные
+      (`node-releases`, `electron-to-chromium`, `ipfs-unixfs`, `motion`/`motion-dom`, `cn`,
+      `magic-string`, `ignore`, `@exodus/bytes`, `fs-extra`).
+- [x] `electron` `44.4.3` → `44.4.5` в корне разошёлся с `electron-drift` — синхронизирован точный
+      пин в 6 приложениях: `animatrona`, `animatrona-folder-player`, `animatrona-ipfs-player`,
+      `kami-key-the`, `label-printer-desktop` (публичный репо) и `poster-microtext-desktop`
+      (приватный submodule, отдельный коммит `fd8b1a0` внутри него — **ещё не запушен**, см. ниже).
+      `bun install --lockfile-only` в чистом дереве, `check-lock-workspace-versions.mjs` зелёный.
+- [x] `check-all.mjs --group=deps` — все gate зелёные, `peer-deps` без новых строк (тот же
+      фоновый шум eslint 10.x/three.js minor). `typecheck:tsgo` на потребителях ZenStack
+      (driving-school, auth-hub, kami, dashboard) — чисто после regenerate схемы.
+- [ ] **`apps/poster-microtext-desktop` submodule не запушен** — `check-submodule-push-state.sh`
+      подтвердил: коммит `fd8b1a0` (sync electron pin) есть только локально. Push submodule
+      обязателен ДО push корня (иначе `not our ref` на любом деплое,
+      [git-multi-agent-incidents.md](/.claude/docs/git-multi-agent-incidents.md)). `apps/domwellbes`
+      тоже не запушен, но это не из этой сессии — чужой незавершённый коммит.
+- [ ] Осознанно не тронуты (cross-major/RC, требуют отдельного решения и явного тестового прогона,
+      список см. `bun outdated`): `typescript` 6→7, `prisma` 7.10.0→8.0.0-rc.15 (**release
+      candidate**, не для прод), `nodemailer` 9→10, `imapflow` 1→2, `googleapis` 178→181,
+      `dotenv` (dev) 17→18, `fast-check` (dev) 3→4, `size-limit`/`@size-limit/file` (dev) 13→14,
+      `@babel/*` 7→8. `@types/node` (dev) 24→26 — **намеренно пропущен**: `CLAUDE.md` фиксирует
+      Node 24 как рантайм монорепо, типы не должны обгонять фактическую версию Node. RN-пакеты
+      (`react-native-blob-util`/`-safe-area-context`/`-screens`) заблокированы штатным поведением
+      semver у `~`/0.x-`^` диапазонов, не отдельным пином — не путать с зарегистрированной
+      группой «react-native» на 0.87.1 в `intentional-pins.json`.
