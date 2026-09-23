@@ -86,3 +86,20 @@ Form успел откатить `state.values` к чужому `initialValue`, 
 `initialValue` с учётом `pendingSubmit`) больше не обязателен, но остаётся более надёжной практикой
 для новых форм — сам фикс лечит симптом на уровне библиотеки, а не корневую причину (per-render
 sync `defaultValues` в `@tanstack/react-form`, вне контроля `@letar/forms`).
+
+## ⚠️ Известный пробел фикса (найден 2026-09-23, не закрыт)
+
+`usePostSubmitResetGuard`'ов корректирующий эффект сам зависит от смены **ссылки**
+`watchedDefaultValues` (`initialValue`) — `useEffect(() => {...}, [watchedDefaultValues])`.
+Если между рендером, где случился `reset(dataToSubmit)`, и следующим рендером формы `initialValue`
+не пересоздаётся (стабильная ссылка — распространённый и в остальном правильный паттерн), этот
+эффект **не перезапускается** и откат к устаревшему `initialValue` (тот же механизм `FormApi.update()`,
+описанный выше) остаётся неисправленным.
+
+Такой «пустой» re-render без смены `initialValue` возникает не только гипотетически: `handleSubmit()`
+с включённой `persistence` вызывает `clearSavedData()`, чьи `setState` внутри `useFormPersistence`
+сами перерендеривают форму — и именно на этом рендере `FormApi.update()` откатывает значения, а
+guard уже не перепроверяет. Найдено при написании интеграционного теста к
+[исправлению воскресающего persistence-черновика](/libs/forms/PLAN_COMPLETED.md) (forms 2.16.8) —
+сама эта задача была про localStorage, а не про откат значений, поэтому не чинилось в её рамках.
+Передано `forms-coordinator-dev` через agent-mail (thread `forms-persistence-fix`, 2026-09-23).
