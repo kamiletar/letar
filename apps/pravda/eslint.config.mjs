@@ -7,8 +7,8 @@ export default [
   ...baseConfig,
   ...nx.configs['flat/react-typescript'],
   {
-    // public/sw.js и swe-worker — сгенерированные Serwist бандлы (минифицированные)
-    ignores: ['.next/**/*', '**/out-tsc', 'out/**/*', 'public/sw.js', 'public/swe-worker-*.js'],
+    // public/sw.js, public/swe-worker-*.js — в общем ignores корневого eslint.config.mjs
+    ignores: ['.next/**/*', '**/out-tsc', 'out/**/*'],
   },
   {
     files: ['**/*.ts', '**/*.tsx'],

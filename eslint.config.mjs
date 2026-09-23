@@ -40,6 +40,14 @@ export default [
       // но flat-config ESLint сам по себе dot-каталоги не пропускает — без этой строки
       // одноразовый отладочный скрипт даёт warning в логе линта приложения.
       '**/.claude/artifacts/**',
+      // public/sw.js, public/swe-worker-*.js — сгенерированные Serwist build-артефакты
+      // (@serwist/next, withSerwistInit в next.config.mjs). ESLint flat-config не читает
+      // .gitignore (.claude/docs/eslint-flat-config-ignores-not-gitignore.md), поэтому файлы
+      // нужно игнорировать здесь явно. Централизовано 2026-09-23 из пяти дублирующих записей
+      // в apps/{archetest,domwellbes,grandslamcup,pravda,studio}/eslint.config.mjs — заводишь
+      // приложение с Serwist, отдельная запись в его eslint.config.mjs больше не нужна.
+      '**/public/sw.js',
+      '**/public/swe-worker-*.js',
       '**/dist',
       '**/build',
       '**/.next',
