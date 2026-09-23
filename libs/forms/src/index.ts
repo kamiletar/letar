@@ -253,6 +253,7 @@ export {
   catchActionFailure,
   isActionFailure,
   isDbErrorCode,
+  isFkViolation,
   isUniqueViolation,
   mapServerErrors,
   unwrapActionResult,

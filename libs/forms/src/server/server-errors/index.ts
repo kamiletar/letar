@@ -31,6 +31,7 @@ export {
   isActionFailure,
   isActionFailureError,
   isDbErrorCode,
+  isFkViolation,
   isUniqueViolation,
   mapServerErrors,
   uniqueFieldsFromConstraint,
