@@ -5009,3 +5009,28 @@ Next.js-образы бегут от `nextjs` (uid 1001), а хостовые `u
       `animatrona/renderer` собираются в `output: 'standalone'` (живой Next-сервер со
       стримингом); демо-страницы `form-docs` со своим `ChakraProvider` на странице. Решение
       владельца; до появления #418 там — не срочно.
+
+## §200 (2026-09-24) `useIosActiveFix` → `@letar/chakra-provider`, снятие 10 копий iOS-фикса `:active`
+
+Без `touchstart`-листенера на документе Safari на iOS не применяет `:active` (`_active` в Chakra).
+Один и тот же `useEffect` жил в корневых провайдерах 10 приложений и не снимал листенер в cleanup
+(в StrictMode dev он навешивался дважды).
+
+- [x] Хук `useIosActiveFix()` (пассивный `touchstart`, снятие в cleanup) в
+      `libs/chakra-provider/src/lib/use-ios-active-fix.ts`, экспорт из общего баррелья (без `next/*`).
+      `RootChakraProvider` вызывает его сам, версия либы 0.2.0. Тесты (jsdom): вешается пассивный,
+      снимается тот же, StrictMode не оставляет дублей, `RootChakraProvider` применяет фикс.
+- [x] Копии удалены из 10 корневых провайдеров (6 публичных приложений + 4 приватных submodule);
+      два приложения на голом `ChakraProvider` вызывают хук явно. Версии (patch), CHANGELOG, README
+      либы, `bun.lock` (`GIT_SKIP_DEPS_INTEGRITY=1`: параллельная сессия успела поднять версию
+      submodule, позднее выровнена ею же).
+- [x] Оценка риска: опциональный проп не нужен — пустой пассивный слушатель на десктопе и в
+      Electron ничего не меняет. Побочный эффект — приложения на `RootChakraProvider`, где фикса не
+      было (в т.ч. Electron-рендереры), получили `_active` на iOS; это желаемое поведение.
+- [x] Проверка: тесты либы, dprint, lint зелёные по 12 проектам. `typecheck:tsgo`: два красных
+      проекта с давними ошибками вне правки (TS2321 ZenStack; чужой незакоммиченный файл).
+- [ ] ⚠️ Открытый вопрос: **push не сделан, ждёт одобрения владельца.** Порядок: 4 submodule →
+      letar. Проверка — `bash scripts/check-submodule-push-state.sh`.
+- [ ] ⚠️ Открытый вопрос: без фикса остались провайдеры вне охвата задачи — `apps/animatrona`
+      (`renderer`, `mobile-ui`) и демо-страницы `form-docs` на голом `ChakraProvider`. Решается
+      вместе с открытым вопросом §199 про реестр Emotion в этих приложениях.
