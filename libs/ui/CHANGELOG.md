@@ -1,5 +1,14 @@
 # Changelog — @letar/ui
 
+## [0.22.2] — 2026-09-23
+
+### Fixed
+
+- `UserMenu` — триггер меню стал настоящим `<button type="button">` вместо `HStack` (`div`) с
+  `tabIndex`. Zag вешает на триггер `aria-expanded`/`aria-haspopup`, на `div` без роли это
+  нарушение axe `aria-allowed-attr` (critical, ловил e2e a11y-скан админки), а Enter/Space с
+  клавиатуры `div` не нажимали. Имя пользователя — `<span>` вместо `<p>` внутри кнопки.
+
 ## [0.22.1] — 2026-09-17
 
 ### Fixed

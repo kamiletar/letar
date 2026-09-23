@@ -119,29 +119,37 @@ export function UserMenu({
 
   return (
     <Menu.Root>
+      {
+        /* Триггер — настоящий <button>: Zag вешает на триггер aria-expanded/aria-haspopup, а на
+          `div` без роли они недопустимы (axe `aria-allowed-attr`, critical), и Enter/Space с
+          клавиатуры на `div` не нажимают его. Текст внутри — <span>: <p> в <button> недопустим. */
+      }
       <Menu.Trigger cursor="pointer" asChild>
         <HStack
+          asChild
           gap={2}
           px={2}
           py={1}
           borderRadius="full"
           _hover={{ bg: 'bg.subtle' }}
           transition="background 0.15s"
-          tabIndex={0}
         >
-          <OptimizedAvatar src={session.image} name={displayName} size="xs" />
-          <Text
-            fontSize="sm"
-            fontWeight="medium"
-            display={{ base: 'none', lg: 'block' }}
-            whiteSpace="nowrap"
-            maxW="150px"
-            truncate
-          >
-            {displayName}
-          </Text>
-          {triggerSlot}
-          <LuChevronDown size={14} />
+          <button type="button">
+            <OptimizedAvatar src={session.image} name={displayName} size="xs" />
+            <Text
+              asChild
+              fontSize="sm"
+              fontWeight="medium"
+              display={{ base: 'none', lg: 'block' }}
+              whiteSpace="nowrap"
+              maxW="150px"
+              truncate
+            >
+              <span>{displayName}</span>
+            </Text>
+            {triggerSlot}
+            <LuChevronDown size={14} />
+          </button>
         </HStack>
       </Menu.Trigger>
 
