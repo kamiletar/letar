@@ -45,7 +45,13 @@ export { SortablePhotoGrid, type SortablePhotoGridProps, type SortablePhotoItem 
 export { SeoField, SlugField } from './form-fields'
 
 // Hooks
-export { useInlineCrudList, type UseInlineCrudListOptions, useSelection } from './hooks'
+export {
+  type RunActionWithToastOptions,
+  useActionWithToast,
+  useInlineCrudList,
+  type UseInlineCrudListOptions,
+  useSelection,
+} from './hooks'
 
 // Jobs (крон-задачи, PLAN-INFRA §75)
 export { JobsTable, type JobsTableProps, type JobStatusItem } from './jobs'
