@@ -1,5 +1,15 @@
 # Pravda - Выполненные задачи
 
+## ESLint игнорирует сгенерированные Serwist-бандлы (2026-09-23)
+
+Кросс-приложенческая инфра-задача (найдена в domwellbes при ночном прогоне `nx lint`): flat-config
+ESLint не читает `.gitignore`, поэтому `public/sw.js`/`public/swe-worker-*.js` (минифицированные
+build-артефакты `next build` через `@serwist/next`) линтовались как обычный код. У archetest/
+grandslamcup/studio `ignores` на эти файлы уже стоял, у pravda — нет. Добавлен в
+[eslint.config.mjs](../eslint.config.mjs): `'public/sw.js', 'public/swe-worker-*.js'`. Проверено
+`nx build pravda` → `nx lint pravda`: `sw.js` реально сгенерировался, линт чистый (0 ошибок).
+Подробности и список всех затронутых приложений — `apps/domwellbes/CHIP_TASKS_2026-09-23.md` #13.
+
 ## Прогресс-бар TOC — опрос вместо scroll-события + skip остатка кластера (2026-09-22, v1.9.12–1.9.13 + pravda-e2e)
 
 Продолжение фикса скролл-кластера (v1.9.9–1.9.11 ниже). Живой прогон на staging после v1.9.11
