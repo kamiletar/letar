@@ -82,6 +82,23 @@ describe('FieldSelect', () => {
       const trigger = screen.getByRole('combobox')
       expect(trigger).toHaveTextContent('Select...')
     })
+
+    it('показывает опцию с пустым значением, если она есть в списке («Все категории»)', () => {
+      render(
+        <TestWrapper>
+          <Form initialValue={{ framework: '' }} onSubmit={vi.fn()}>
+            <Form.Field.Select
+              name="framework"
+              placeholder="Select..."
+              options={[{ label: 'Все фреймворки', value: '' }, ...testOptions]}
+            />
+          </Form>
+        </TestWrapper>,
+      )
+
+      const trigger = screen.getByRole('combobox')
+      expect(trigger).toHaveTextContent('Все фреймворки')
+    })
   })
 
   // Примечание: тесты открытия dropdown пропущены из-за ResizeObserver в jsdom

@@ -164,6 +164,12 @@ export const chakraUIKit: ChakraUIKit = {
     // Здесь остаётся только Chakra-специфичная обвязка (`createListCollection`).
     const groups = useMemo(() => groupOptions(options), [options])
 
+    // `''` — «ничего не выбрано», если такой опции нет, и настоящее значение, если есть
+    // («Все категории» в фильтрах). Прежнее `value ? [value] : []` превращало его в `[]`, и
+    // селект оставался пустым при выбранной опции.
+    const hasEmptyOption = options.some((opt) => opt.value === '')
+    const selected = value !== undefined && value !== null && (value !== '' || hasEmptyOption) ? [value] : []
+
     const collection = useMemo(
       () =>
         createListCollection({
@@ -181,7 +187,7 @@ export const chakraUIKit: ChakraUIKit = {
         collection={collection}
         size={(size as 'sm' | 'md' | 'lg') ?? 'md'}
         variant={(variant as 'outline' | 'subtle') ?? 'outline'}
-        value={value ? [value] : []}
+        value={selected}
         onValueChange={(details) => onValueChange(details.value[0] as string | undefined)}
         onInteractOutside={onBlur}
         disabled={disabled}
