@@ -597,7 +597,7 @@
     },
     "apps/dashboard-agent": {
       "name": "dashboard-agent",
-      "version": "0.18.3",
+      "version": "0.18.4",
       "dependencies": {
         "@fastify/cors": "^11.3.0",
         "@fastify/rate-limit": "^10",
@@ -1162,7 +1162,7 @@
     },
     "libs/deploy-mcp": {
       "name": "@letar/deploy-mcp",
-      "version": "0.7.2",
+      "version": "0.7.3",
       "dependencies": {
         "@letar/infra-config": "workspace:*",
         "@letar/mcp-server-kit": "workspace:*",
