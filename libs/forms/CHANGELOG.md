@@ -4,6 +4,25 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.16.9] - 2026-09-23
+
+### Fixed
+
+- **`Form.Steps.Navigation` пропускала «Далее» без валидации, если поля шага были вынесены в
+  отдельный компонент** (`function BasicFields() { return <Form.Field.String name="name" /> }`,
+  затем `<Form.Steps.Step><BasicFields /></Form.Steps.Step>`) — этот паттерн используют все
+  wizard-формы `domwellbes` (дом, работа, материал, программа финансирования) и onboarding
+  `driving-school`. `FormStepsStep` вычислял `fieldNames` шага статическим обходом JSX
+  `children` (`extractFieldNames`), который не разворачивает кастомные компоненты без их
+  вызова — `fieldNames` шага оказывался пустым, и `validateCurrentStep`
+  (`@letar/forms-react`) считал шаг непроверяемым, пропуская переход без единой ошибки даже
+  при пустых required-полях. Воспроизведено вживую: `domwellbes` → «Дома» → «Добавить дом» →
+  клик «Далее» на пустых «Название»/«Slug» переводил на шаг «Классификация» без ошибок.
+  Добавлена динамическая регистрация полей через `FormStepsFieldRegistryContext`
+  (`@letar/forms-react` 0.11.2) — каждое смонтированное поле сообщает свой `fullPath`
+  напрямую, `FormStepsStep` объединяет эти пути со статическим списком
+  (`mergeFieldNames`). Юнит-тест — `form-steps.spec.tsx`.
+
 ## [2.16.8] - 2026-09-23
 
 ### Fixed

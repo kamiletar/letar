@@ -2,6 +2,7 @@ import { ChakraProvider, defaultSystem } from '@chakra-ui/react'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
+import { z } from 'zod/v4'
 
 import { Form } from '../'
 
@@ -126,5 +127,83 @@ describe('FormSteps — CompletedContent достижим обычной нав�
 
     await user.click(screen.getByRole('button', { name: 'Submit' }))
     await waitFor(() => expect(onSubmit).toHaveBeenCalled())
+  })
+})
+
+describe('FormSteps — валидация видит поля внутри кастомного nullary-компонента шага', () => {
+  // Паттерн, которым во всём монорепо (все wizard-формы domwellbes, onboarding driving-school)
+  // оборачивают поля шага: `function BasicFields() { return <Form.Field.String ... /> }`.
+  // `Form.Steps.Step` получает `<BasicFields />` как единственного ребёнка — статический обход
+  // JSX не видит внутрь чужого компонента без его вызова, и раньше `fieldNames` шага оказывался
+  // пустым, из-за чего `validateCurrentStep` считал шаг непроверяемым и пропускал «Далее» без
+  // единой ошибки, даже когда required-поля были пустыми.
+  function BasicFields() {
+    return (
+      <>
+        <Form.Field.String name="name" />
+        <Form.Field.String name="slug" />
+      </>
+    )
+  }
+
+  it('не пускает на следующий шаг, пока required-поля внутри helper-компонента не заполнены', async () => {
+    const onSubmit = vi.fn()
+    const user = userEvent.setup()
+    const schema = z.object({
+      name: z.string().min(2),
+      slug: z.string().min(2),
+    }).strip()
+
+    render(
+      <Form schema={schema} initialValue={{ name: '', slug: '' }} onSubmit={onSubmit}>
+        <Form.Steps>
+          <Form.Steps.Step title="Основное">
+            <BasicFields />
+          </Form.Steps.Step>
+          <Form.Steps.Step title="Классификация">
+            <div>Классификация — шаг 2</div>
+          </Form.Steps.Step>
+          <Form.Steps.Navigation nextLabel="Далее" />
+        </Form.Steps>
+      </Form>,
+      { wrapper: TestWrapper },
+    )
+
+    await user.click(screen.getByRole('button', { name: 'Далее' }))
+
+    // Регресс без фикса: переход на шаг 2 происходит немедленно, без единой ошибки.
+    await waitFor(() => {
+      expect(screen.getByText('Классификация — шаг 2')).not.toBeVisible()
+    })
+  })
+
+  it('пускает на следующий шаг, когда required-поля внутри helper-компонента заполнены', async () => {
+    const onSubmit = vi.fn()
+    const user = userEvent.setup()
+    const schema = z.object({
+      name: z.string().min(2),
+      slug: z.string().min(2),
+    }).strip()
+
+    render(
+      <Form schema={schema} initialValue={{ name: 'Сосновый', slug: 'sosnovyj' }} onSubmit={onSubmit}>
+        <Form.Steps>
+          <Form.Steps.Step title="Основное">
+            <BasicFields />
+          </Form.Steps.Step>
+          <Form.Steps.Step title="Классификация">
+            <div>Классификация — шаг 2</div>
+          </Form.Steps.Step>
+          <Form.Steps.Navigation nextLabel="Далее" />
+        </Form.Steps>
+      </Form>,
+      { wrapper: TestWrapper },
+    )
+
+    await user.click(screen.getByRole('button', { name: 'Далее' }))
+
+    await waitFor(() => {
+      expect(screen.getByText('Классификация — шаг 2')).toBeVisible()
+    })
   })
 })

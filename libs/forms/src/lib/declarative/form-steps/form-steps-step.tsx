@@ -1,12 +1,29 @@
 'use client'
 
 import { Steps } from '@chakra-ui/react'
+import { FormStepsFieldRegistryContext, type FormStepsFieldRegistryContextValue } from '@letar/forms-react'
 import { AnimatePresence, motion, type Variants } from 'framer-motion'
-import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react'
+import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { extractFieldNames } from '../extract-field-names'
 import { useDeclarativeForm } from '../form-context'
 import { FormGroupDeclarative } from '../form-group/form-group-declarative'
 import { type StepInfo, useFormStepsContext } from './form-steps-context'
+
+/**
+ * Объединяет статический список полей (обход JSX `children`) с полями, реально
+ * зарегистрировавшимися во время монтирования (см. `FormStepsFieldRegistryContext`) —
+ * второй источник закрывает слепую зону первого (кастомные nullary-компоненты полей).
+ */
+function mergeFieldNames(staticNames: string[], dynamicNames: Set<string>): string[] {
+  if (dynamicNames.size === 0) {
+    return staticNames
+  }
+  const merged = new Set(staticNames)
+  for (const name of dynamicNames) {
+    merged.add(name)
+  }
+  return [...merged]
+}
 
 /**
  * Step display condition
@@ -186,6 +203,23 @@ export function FormStepsStep({
   }
   const wasVisibleRef = useRef(isVisible)
 
+  // Поля, реально зарегистрировавшиеся во время монтирования — см. `mergeFieldNames` выше и
+  // докстринг `FormStepsFieldRegistryContext`. Ref, не state: обновляется из `registerField`/
+  // `unregisterField` ниже, которые сами триггерят перерегистрацию шага через `registerStep`.
+  const dynamicFieldsRef = useRef<Set<string>>(new Set())
+  const titleRef = useRef(title)
+  const descriptionRef = useRef(description)
+  const onEnterRef = useRef(onEnter)
+  const onLeaveRef = useRef(onLeave)
+  // oxlint-disable-next-line react/refs
+  titleRef.current = title
+  // oxlint-disable-next-line react/refs
+  descriptionRef.current = description
+  // oxlint-disable-next-line react/refs
+  onEnterRef.current = onEnter
+  // oxlint-disable-next-line react/refs
+  onLeaveRef.current = onLeave
+
   // Subscribe to when field changes
   useEffect(() => {
     if (!when) {
@@ -237,7 +271,9 @@ export function FormStepsStep({
 
     // IMPORTANT: fieldNames извлекаются ОДИН раз при mount
     // children НЕ включены в deps — они меняются каждый рендер
-    const fieldNames = extractFieldNames(children, fieldExtractionPath)
+    // dynamicFieldsRef на этот момент уже заполнен: эффекты дочерних полей (registerField)
+    // коммитятся раньше эффекта родительского Step — см. докстринг mergeFieldNames.
+    const fieldNames = mergeFieldNames(extractFieldNames(children, fieldExtractionPath), dynamicFieldsRef.current)
 
     const stepInfo: StepInfo = {
       index: indexRef.current,
@@ -319,13 +355,64 @@ export function FormStepsStep({
         title,
         description,
         icon: iconRef.current,
-        fieldNames: fieldNamesRef.current,
+        fieldNames: mergeFieldNames(fieldNamesRef.current, dynamicFieldsRef.current),
         onEnter,
         onLeave,
       }
       registerStep(stepInfo)
     }
   }, [title, description, registerStep, onEnter, onLeave, isVisible, fieldExtractionPath])
+
+  // Реестр полей текущего шага — см. `FormStepsFieldRegistryContext`. Поле само сообщает свой
+  // `fullPath` при монтировании/размонтировании; шаг объединяет эти пути со статическим
+  // списком (`mergeFieldNames`) и перерегистрируется в `FormStepsContext`, чтобы
+  // `validateCurrentStep` (`use-step-navigation.ts`) видел реальные поля, даже когда они
+  // спрятаны внутри кастомного nullary-компонента, невидимого статическому обходу JSX.
+  const registerField = useCallback(
+    (fullPath: string) => {
+      if (dynamicFieldsRef.current.has(fullPath)) {
+        return
+      }
+      dynamicFieldsRef.current.add(fullPath)
+      if (indexRef.current >= 0) {
+        registerStep({
+          index: indexRef.current,
+          title: titleRef.current,
+          description: descriptionRef.current,
+          icon: iconRef.current,
+          fieldNames: mergeFieldNames(fieldNamesRef.current, dynamicFieldsRef.current),
+          onEnter: onEnterRef.current,
+          onLeave: onLeaveRef.current,
+        })
+      }
+    },
+    [registerStep],
+  )
+
+  const unregisterField = useCallback(
+    (fullPath: string) => {
+      if (!dynamicFieldsRef.current.delete(fullPath)) {
+        return
+      }
+      if (indexRef.current >= 0) {
+        registerStep({
+          index: indexRef.current,
+          title: titleRef.current,
+          description: descriptionRef.current,
+          icon: iconRef.current,
+          fieldNames: mergeFieldNames(fieldNamesRef.current, dynamicFieldsRef.current),
+          onEnter: onEnterRef.current,
+          onLeave: onLeaveRef.current,
+        })
+      }
+    },
+    [registerStep],
+  )
+
+  const fieldRegistryValue = useMemo<FormStepsFieldRegistryContextValue>(
+    () => ({ registerField, unregisterField }),
+    [registerField, unregisterField],
+  )
 
   // ⚠️ Задокументированное исключение: индекс шага — источник истины, намеренно живущий
   // в ref (claimedIndicesRef — shared mutable Set между сиблингами), а не в state, именно
@@ -375,29 +462,37 @@ export function FormStepsStep({
 
   // If animations are disabled — render regular Steps.Content
   if (!animated) {
-    return <Steps.Content index={index}>{wrappedChildren}</Steps.Content>
+    return (
+      <Steps.Content index={index}>
+        <FormStepsFieldRegistryContext.Provider value={fieldRegistryValue}>
+          {wrappedChildren}
+        </FormStepsFieldRegistryContext.Provider>
+      </Steps.Content>
+    )
   }
 
   // With animations — wrap in AnimatePresence + motion.div
   return (
     <Steps.Content index={index}>
-      <AnimatePresence mode="wait" initial={false}>
-        {isActive && (
-          <motion.div
-            key={`step-${index}`}
-            initial="initial"
-            animate="animate"
-            exit="exit"
-            variants={slideVariants}
-            transition={{
-              duration: animationDuration,
-              ease: 'easeInOut',
-            }}
-          >
-            {wrappedChildren}
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <FormStepsFieldRegistryContext.Provider value={fieldRegistryValue}>
+        <AnimatePresence mode="wait" initial={false}>
+          {isActive && (
+            <motion.div
+              key={`step-${index}`}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              variants={slideVariants}
+              transition={{
+                duration: animationDuration,
+                ease: 'easeInOut',
+              }}
+            >
+              {wrappedChildren}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </FormStepsFieldRegistryContext.Provider>
     </Steps.Content>
   )
 }
