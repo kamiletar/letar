@@ -5050,5 +5050,8 @@ Next.js-образы бегут от `nextjs` (uid 1001), а хостовые `u
 - [x] Три лендинга: `provider.tsx` — одна строка, версии (patch), CHANGELOG, `bun.lock`.
 - [x] Проверка: тесты либы (10), lint и `typecheck:tsgo` по 4 проектам зелёные; в dev сырой HTML всех
       трёх без `<style data-emotion>` в `<body>`, после гидратации `<html class="dark">`, ошибок нет.
-- [ ] Перевод `apps/synth` и публичной части `studio` (приватный submodule) на тот же компонент.
+- [x] Перевод `apps/synth` (0.22.9) и публичной части `studio` (0.69.25, коммит в submodule) на тот же
+      компонент. Проверено: lint и `typecheck:tsgo` зелёные, в dev сырой HTML без `<style data-emotion>`
+      в `<body>`, `<html class="dark">`, ошибок консоли нет. Осталось: push submodule `studio`, затем
+      bump SHA + `bun.lock` (`bun install --lockfile-only` в чистом дереве) — ждёт одобрения push.
 - [ ] ⚠️ Открытый вопрос: **push не сделан, ждёт одобрения владельца.**
