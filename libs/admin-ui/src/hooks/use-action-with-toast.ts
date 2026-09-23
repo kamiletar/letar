@@ -3,13 +3,17 @@
 import type { CreateToasterReturn } from '@chakra-ui/react'
 import { useCallback, useTransition } from 'react'
 
+import { isActionFailure } from '@letar/forms'
+
 export interface RunActionWithToastOptions<TResult> {
   /** Текст тоста, если action бросил исключение (не вернул ожидаемую бизнес-ошибку значением). */
   errorTitle: string
   /**
    * Достаёт бизнес-ошибку из успешно вернувшегося результата (`result.error`,
    * `'error' in result ? result.error : undefined` и т.п.) — если у action нет такого канала
-   * (кидает исключение вместо возврата `{error}`), опусти опцию.
+   * (кидает исключение вместо возврата `{error}`), опусти опцию. `ActionFailure` от
+   * `catchActionFailure` (`@letar/forms/server-errors`) распознаётся автоматически ещё до этой
+   * опции — задавать `getError` под неё отдельно не нужно.
    */
   getError?: (result: TResult) => string | null | undefined
   /** Вызывается, если бизнес-ошибки/исключения не было — refresh/push/обновление локального состояния. */
@@ -43,7 +47,7 @@ export function useActionWithToast(toaster: CreateToasterReturn) {
     startTransition(async () => {
       try {
         const result = await action()
-        const businessError = getError?.(result)
+        const businessError = isActionFailure(result) ? result.error : getError?.(result)
         if (businessError) {
           onError?.()
           toaster.create({ title: businessError, type: 'error' })

@@ -1,6 +1,8 @@
 import { act, renderHook, waitFor } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 
+import { actionFailure } from '@letar/forms'
+
 import { useInlineCrudList } from './use-inline-crud-list'
 
 interface Item {
@@ -63,6 +65,29 @@ describe('useInlineCrudList', () => {
 
     await expect(result.current.handleUpdate('1', { id: '1' })).rejects.toThrow('policy denial')
     expect(onError).toHaveBeenCalledWith(new Error('policy denial'), 'update')
+    expect(result.current.items).toEqual([{ id: '1' }])
+  })
+
+  it('вызывает onError и не убирает элемент, если onDelete вернул ActionFailure значением', async () => {
+    vi.spyOn(window, 'confirm').mockReturnValue(true)
+    const onError = vi.fn()
+    const { result } = renderHook(() =>
+      useInlineCrudList<Item, Item>({
+        initialItems: [{ id: '1' }],
+        getId: (item) => item.id,
+        onCreate: vi.fn(),
+        onUpdate: vi.fn(),
+        onDelete: vi.fn().mockResolvedValue(actionFailure('Нельзя удалить — есть связанные записи')),
+        onError,
+      })
+    )
+
+    act(() => {
+      result.current.handleDelete('1')
+    })
+
+    await waitFor(() => expect(onError).toHaveBeenCalled())
+    expect(onError.mock.calls[0][1]).toBe('delete')
     expect(result.current.items).toEqual([{ id: '1' }])
   })
 

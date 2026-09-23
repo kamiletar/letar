@@ -2,6 +2,8 @@ import type { CreateToasterReturn } from '@chakra-ui/react'
 import { act, renderHook, waitFor } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 
+import { actionFailure } from '@letar/forms'
+
 import { useActionWithToast } from './use-action-with-toast'
 
 function fakeToaster() {
@@ -42,6 +44,24 @@ describe('useActionWithToast', () => {
     })
 
     await waitFor(() => expect(toaster.create).toHaveBeenCalledWith({ title: 'Такое имя уже занято', type: 'error' }))
+    expect(onSuccess).not.toHaveBeenCalled()
+  })
+
+  it('показывает ActionFailure автоматически, без getError', async () => {
+    const toaster = fakeToaster()
+    const onSuccess = vi.fn()
+    const { result } = renderHook(() => useActionWithToast(toaster))
+
+    act(() => {
+      result.current.run(() => Promise.resolve(actionFailure('Нельзя удалить — есть связанные записи')), {
+        errorTitle: 'Не удалось удалить',
+        onSuccess,
+      })
+    })
+
+    await waitFor(() =>
+      expect(toaster.create).toHaveBeenCalledWith({ title: 'Нельзя удалить — есть связанные записи', type: 'error' })
+    )
     expect(onSuccess).not.toHaveBeenCalled()
   })
 

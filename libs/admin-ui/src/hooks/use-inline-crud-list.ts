@@ -2,6 +2,8 @@
 
 import { useState, useTransition } from 'react'
 
+import { type ActionFailure, unwrapActionResult } from '@letar/forms'
+
 export interface UseInlineCrudListOptions<TItem, TFormData> {
   /** Начальный список элементов (из серверных пропсов страницы) */
   initialItems: TItem[]
@@ -15,8 +17,12 @@ export interface UseInlineCrudListOptions<TItem, TFormData> {
   onCreate: (data: TFormData) => Promise<TItem>
   /** Server Action обновления — возвращает элемент в форме, готовой для отображения в списке */
   onUpdate: (id: string, data: TFormData) => Promise<TItem>
-  /** Server Action удаления */
-  onDelete: (id: string) => Promise<void>
+  /**
+   * Server Action удаления — может вернуть `ActionFailure` значением вместо throw
+   * (`catchActionFailure`, например при FK-нарушении). `handleDelete` разворачивает его сам, так
+   * что вызывающему компоненту не нужно оборачивать каждый `onDelete` в `unwrapActionResult`.
+   */
+  onDelete: (id: string) => Promise<void | ActionFailure>
   /** Вызывается после каждой успешной мутации — например, router.refresh(), если серверные пропсы страницы зависят от этого списка */
   afterMutate?: () => void
   /**
@@ -61,7 +67,7 @@ export function useInlineCrudList<TItem, TFormData>({
     }
     startTransition(async () => {
       try {
-        await onDelete(id)
+        unwrapActionResult(await onDelete(id))
         setItems((prev) => prev.filter((item) => getId(item) !== id))
         afterMutate?.()
       } catch (error) {

@@ -386,6 +386,27 @@ export default function AdminLayout({ children }) {
 
 ## Бэклог
 
+### [2026-09-23, второй проход] `useInlineCrudList`/`useActionWithToast` — `ActionFailure` больше не тихий успех
+
+`catchActionFailure` (`@letar/forms-core` 0.14.0) теперь распознаёт и FK-нарушение (`23503`), не
+только unique — значит `onDelete`/`action`, обёрнутые в него, могут вернуть `ActionFailure`
+**значением**, а не бросить исключение. Оба хука проверяли только throw: `useInlineCrudList`
+удалял элемент из локального списка сразу после `await onDelete(id)` без проверки результата,
+`useActionWithToast` показывал ошибку лишь если её нашёл `getError` (который для новых
+FK-обёрнутых actions никто не передавал). В обоих случаях UI показывал успешное удаление, хотя
+FK-констрейнт реально заблокировал операцию на сервере — тот же класс молчаливого успеха, что и
+ниже (запись про `onError`), только на стороне «результат есть, но это отказ», а не «исключения
+не было вовсе».
+
+Фикс: `useInlineCrudList.handleDelete` разворачивает `onDelete` через `unwrapActionResult`
+(`onDelete` теперь типизирован `Promise<void | ActionFailure>`) — отказ идёт в тот же `onError`,
+что и раньше ловил throw. `useActionWithToast.run` проверяет `isActionFailure(result)` раньше
+пользовательского `getError` — задавать `getError` под `ActionFailure` отдельно не нужно.
+Третий хук с тем же паттерном, `useDeleteWithUndoRedirect` (`@letar/undo-toast`), пофикшен тем же
+способом — детали в его README. Разбор аудита всех ~40 delete-экшенов `domwellbes` и что из них
+осталось намеренно не тронутым (soft-delete, `deleteSupplierAction` с уже своей FK-обработкой) —
+`apps/domwellbes/PLAN_CROSSCUTTING.md` § «Тот же класс бага шире».
+
 ### [2026-09-23] `useInlineCrudList` — обработка ошибок onCreate/onUpdate/onDelete
 
 Хук вызывал Server Actions без try/catch — брошенное исключение (уникальный конфликт, отказ
@@ -395,7 +416,8 @@ ZenStack-политики, FK при удалении) улетало необр
 вызова `onError` (иначе форма выглядела бы сохранённой — TanStack Form снимает dirty-state только
 на успехе), `handleDelete` гасит исключение сам (там нет формы-получателя). Все 11 потребителей
 в `apps/domwellbes` подключили `onError`. Разбор, включая почему `catchActionFailure` не
-покрывает FK-констрейнты — `apps/domwellbes/PLAN_CROSSCUTTING.md` § «Тот же класс бага шире».
+покрывает FK-констрейнты — `apps/domwellbes/PLAN_CROSSCUTTING.md` § «Тот же класс бага шире»
+(⚠️ на момент этой записи ещё не покрывал — закрыто следующим проходом выше).
 
 ### [2026-08-12→2026-08-13] CRUD-inline-list — извлечён как `InlineEditableTable` + `useInlineCrudList`
 
