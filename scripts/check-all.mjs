@@ -414,6 +414,8 @@ const CHECKS = [
     // файла) до разделения на два уровня 2026-09-16. CLAUDE.md и .claude/docs/
     // целиком публичные, поэтому в CI видны без изъятий (в отличие от проверок,
     // которым нужны приватные submodule) — покрытие полное всегда.
+    // Та же проверка стоит и на коммит-пути — scripts/hooks/pre-commit-docs-index.sh, но в
+    // режиме --staged (индекс git, не рабочее дерево) и в обход раннера: он флаги не прокидывает.
     severity: 'gate',
     ci: 'full',
     doc: '.claude/docs/documentation-guidelines.md',

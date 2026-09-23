@@ -28,9 +28,22 @@
 // нужно: CLAUDE.md и .claude/docs/ целиком публичные, в CI видны без изъятий,
 // в отличие от проверок, которым нужны приватные submodule.
 //
-// Использование: bun scripts/check-docs-index-integrity.mjs
+// Использование:
+//   bun scripts/check-docs-index-integrity.mjs            # рабочее дерево (CI, check-all)
+//   bun scripts/check-docs-index-integrity.mjs --staged   # индекс git (pre-commit)
 // Зарегистрирована в check-all.mjs уровнем `gate`.
+//
+// ⚠️ Режим --staged читает ИНДЕКС, а не диск: тексты CLAUDE.md/INDEX.md — через
+// `git show :<путь>`, список доков и существование целей ссылок — через
+// `git ls-files`. Рабочее дерево на коммит-пути врёт в обе стороны: запись в
+// INDEX.md, сделанная на диске, но не застейдженная, даёт ложный пропуск (ровно
+// инцидент 2026-09-23 — док уехал в main без записи), а чужой неотслеживаемый
+// док в .claude/docs/ — ложный блок чужого коммита. При `git commit -- <пути>`
+// git подсовывает временный индекс через GIT_INDEX_FILE, дочерние `git` его
+// наследуют — проверяется ровно то, что закоммитится
+// (.claude/docs/git-multi-agent-incidents.md, разбор pre-commit-syntax-check).
 
+import { execFileSync } from 'node:child_process'
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -40,7 +53,44 @@ const docsDir = join(repoRoot, '.claude', 'docs')
 const claudeMdPath = join(repoRoot, 'CLAUDE.md')
 const indexMdPath = join(docsDir, 'INDEX.md')
 
+const STAGED = process.argv.includes('--staged')
+
 const LINE_LIMIT = 200
+
+function git(args) {
+  return execFileSync('git', ['-C', repoRoot, ...args], {
+    encoding: 'utf8',
+    maxBuffer: 64 * 1024 * 1024,
+  })
+}
+
+// Источник входа: либо рабочее дерево, либо индекс — остальная логика общая.
+function createSource() {
+  if (!STAGED) {
+    return {
+      read: (absPath) => readFileSync(absPath, 'utf8'),
+      docNames: () =>
+        readdirSync(docsDir, { withFileTypes: true })
+          .filter((d) => d.isFile() && d.name.endsWith('.md'))
+          .map((d) => d.name),
+      exists: (relPath) => existsSync(join(repoRoot, relPath)),
+    }
+  }
+  // Индекс: пути в нём всегда с прямыми слэшами и регистрозависимы — как в CI на
+  // linux, в отличие от existsSync на Windows.
+  const indexed = new Set(git(['ls-files', '-z']).split('\0').filter(Boolean))
+  const DOC_PATH_RE = /^\.claude\/docs\/([^/]+\.md)$/
+  return {
+    read: (absPath) => {
+      const rel = absPath.slice(repoRoot.length + 1).replaceAll('\\', '/')
+      return git(['show', `:${rel}`])
+    },
+    docNames: () => [...indexed].map((p) => DOC_PATH_RE.exec(p)?.[1]).filter(Boolean),
+    exists: (relPath) => indexed.has(relPath),
+  }
+}
+
+const source = createSource()
 
 function lineNumberAt(text, index) {
   return text.slice(0, index).split('\n').length
@@ -51,12 +101,11 @@ let warnings = 0
 
 // ─── Загрузка входа ────────────────────────────────────────────────────────
 
-const claudeMdText = readFileSync(claudeMdPath, 'utf8')
-const indexMdText = readFileSync(indexMdPath, 'utf8')
+const claudeMdText = source.read(claudeMdPath)
+const indexMdText = source.read(indexMdPath)
 
-const docFiles = readdirSync(docsDir, { withFileTypes: true })
-  .filter((d) => d.isFile() && d.name.endsWith('.md') && d.name !== 'INDEX.md')
-  .map((d) => d.name)
+const docFiles = source.docNames()
+  .filter((name) => name !== 'INDEX.md')
   .sort()
 
 // ─── 1. Каждый док упомянут в обоих файлах ─────────────────────────────────
@@ -89,8 +138,7 @@ const LOCAL_LINK_RE = /\]\(\/([^)#\s]+\.(?:md|yml|yaml))(?:#[^)]*)?\)/g
 function checkBrokenLinks(text, sourceLabel) {
   for (const m of text.matchAll(LOCAL_LINK_RE)) {
     const relPath = m[1]
-    const abs = join(repoRoot, relPath)
-    if (!existsSync(abs)) {
+    if (!source.exists(relPath)) {
       console.error(
         `❌ ${sourceLabel}:${lineNumberAt(text, m.index)} — битая ссылка на /${relPath}`,
       )
@@ -120,7 +168,7 @@ for (let i = 0; i < claudeLines.length; i++) {
 
 // ─── Итог ───────────────────────────────────────────────────────────────────
 
-console.log(`\nПроверено доков: ${docFiles.length}`)
+console.log(`\nПроверено доков: ${docFiles.length}${STAGED ? ' (индекс git)' : ''}`)
 if (warnings > 0) { console.log(`Предупреждений о длине строки: ${warnings}`) }
 
 if (gateErrors > 0) {
