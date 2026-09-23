@@ -992,7 +992,7 @@
     },
     "apps/synth": {
       "name": "@letar/synth",
-      "version": "0.22.8",
+      "version": "0.22.9",
       "dependencies": {
         "@letar/format-utils": "workspace:*",
         "@letar/hooks": "workspace:*",
