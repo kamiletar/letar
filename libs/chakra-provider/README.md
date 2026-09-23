@@ -14,7 +14,20 @@ import {
   RootChakraProvider,
   useColorMode,
 } from '@letar/chakra-provider'
+
+// Только Next.js App Router — отдельный подпуть
+import { EmotionRegistry } from '@letar/chakra-provider/next'
 ```
+
+## Точки входа
+
+| Подпуть                       | Что внутри                                  | Кому                                  |
+| ----------------------------- | ------------------------------------------- | ------------------------------------- |
+| `@letar/chakra-provider`      | провайдеры, переключатели темы, хуки        | всем, включая Electron/Vite-рендереры |
+| `@letar/chakra-provider/next` | `EmotionRegistry` (тянет `next/navigation`) | только Next.js App Router             |
+
+Подпуть требует отдельной строки в `paths` каждого tsconfig-потребителя — см.
+`.claude/docs/lib-entry-points.md`.
 
 ## API
 
@@ -69,6 +82,33 @@ export default function RootLayout({ children }) {
 ```
 
 **Props:** Наследует все props от `ThemeProviderProps` (next-themes).
+
+#### `EmotionRegistry` (`@letar/chakra-provider/next`)
+
+Реестр кеша Emotion для App Router. **Обязателен** в корневом провайдере Next-приложения, снаружи
+`ColorModeProvider`/`RootChakraProvider`:
+
+```tsx
+'use client'
+import { ColorModeProvider, RootChakraProvider } from '@letar/chakra-provider'
+import { EmotionRegistry } from '@letar/chakra-provider/next'
+
+export function Providers({ children }: PropsWithChildren) {
+  return (
+    <EmotionRegistry>
+      <ColorModeProvider>
+        <RootChakraProvider value={system}>{children}</RootChakraProvider>
+      </ColorModeProvider>
+    </EmotionRegistry>
+  )
+}
+```
+
+Без него Chakra на SSR рендерит инлайн-`<style data-emotion>` перед каждым элементом. Стиль
+позднего потокового сегмента (`loading.tsx`, `<Suspense>`) остаётся в теле страницы, гидратация
+находит `<style>` вместо элемента и плавающе падает с ошибкой React #418, пересобирая корень.
+Реестр копит правила (`cache.compat = true`) и отдаёт их в поток через `useServerInsertedHTML`.
+Разбор — `.claude/docs/emotion-streaming-inline-style-hydration-418.md`.
 
 ### Хуки
 
@@ -173,4 +213,4 @@ function Settings() {
 
 ---
 
-**Последнее обновление:** 2026-01-03
+**Последнее обновление:** 2026-09-24
