@@ -2,6 +2,30 @@
 
 Детальное описание всех реализованных фич.
 
+## Cron-эндпоинт `anonymize-retail-customers` (domwellbes) не был в реестре (2026-09-23, `0.18.2`)
+
+Владелец указал на два cron-эндпоинта domwellbes, не зарегистрированных в мониторинге
+dashboard-agent (по образцу `.claude/docs/cron-endpoint-registration-checklist.md`):
+`poll-rfq-email-replies` и `anonymize-retail-customers`.
+
+Проверка по чек-листу показала: `poll-rfq-email-replies` уже зарегистрирован
+(`domwellbes-poll-rfq-email-replies` в `DEFAULT_CRON_JOBS`) — вводная была устаревшей, задача
+закрыта раньше. `anonymize-retail-customers` (обезличивание `RetailCustomer` через 3-летний
+grace period после последнего заказа, маршрут заведён 2026-09-23) реально отсутствовал в списке
+— `verifyCronSecret()` и роут написаны, но планировщик его никогда не вызывал.
+
+Два других пункта чек-листа (секрет `CRON_SECRET` в `.env.docker.enc`, монтирование
+`/secrets/domwellbes.env` в `dashboard-agent/docker-compose.production.yml`, порт/host в
+`APP_PORTS`/`APP_HOSTS`) уже были на месте — их использует полдюжины других cron-задач
+domwellbes. Правка точечная: одна запись в `DEFAULT_CRON_JOBS` (`cron-default-jobs.ts`),
+`0 5 * * *` — рядом по времени с соседними задачами анонимизации приложения
+(`cleanup-personal-data` 03:00, `anonymize-archived-clients` 04:00).
+
+Побочная находка при прогоне `nx test dashboard-agent`: `server-config.guard.spec.ts` падает —
+`SERVER_APPS` в `server-config.ts` не содержит `aira-web`, хотя канон `libs/infra-config` его
+имеет. Не связано с этой правкой, не трогалось — заведён чип (`task_3aa0e0d3`), открытый вопрос
+в `PLAN.md`.
+
 ## Таблица маршрутов деплоя отдельно от капнутого лога (2026-09-22, `0.18.1`)
 
 Открытый вопрос `PLAN-INFRA-6.md` §157: `MAX_OUTPUT_LINES = 2000`, а деплой с s1-сборкой даёт
