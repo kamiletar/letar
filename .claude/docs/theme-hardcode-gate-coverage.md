@@ -20,7 +20,11 @@
 grep -rl '"theme:check"' apps/*/project.json
 ```
 
-<!-- doc-count: {"cmd": "grep -rl 'theme:check' apps/*/project.json | wc -l", "expect": 6} -->
+<!-- doc-count: {"cmd": "grep -rl 'theme:check' apps/*/project.json | wc -l", "expect": 7} -->
+
+⚠️ **Сверка 2026-09-23 дала 7, а не 6:** `animatrona-tracker` подключён 2026-09-08 (коммит
+`10b979a94`) и в этом файле не упоминался, поэтому `dsperevod` ниже — седьмое приложение, а не
+шестое.
 
 ⚠️ **Ещё раз устарело 2026-09-06** — подключён `kami` (пятое приложение), см. разбор его
 «особого случая» ниже: тезис «нет `src/theme/` → всё вне темы» оказался неточным — роль темы

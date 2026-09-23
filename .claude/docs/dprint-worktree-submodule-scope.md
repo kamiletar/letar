@@ -116,8 +116,8 @@ grep -l '"format"' libs/*/project.json | wc -l
 grep -l '"format"' apps/*/project.json | wc -l
 ```
 
-<!-- doc-count: {"cmd": "grep -l '\"format\"' libs/*/project.json | wc -l", "expect": 68} -->
-<!-- doc-count: {"cmd": "grep -l '\"format\"' apps/*/project.json | wc -l", "expect": 53} -->
+<!-- doc-count: {"cmd": "grep -l '\"format\"' libs/*/project.json | wc -l", "expect": 78} -->
+<!-- doc-count: {"cmd": "grep -l '\"format\"' apps/*/project.json | wc -l", "expect": 56} -->
 
 ### Что с этим сделано (2026-08-06, решение владельца)
 
