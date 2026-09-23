@@ -171,6 +171,7 @@
 - [nextjs-rsc-aspectratio-children-only](/.claude/docs/nextjs-rsc-aspectratio-children-only.md) ⚠️ `AspectRatio` в Server Component → 500 при целой картинке
 - [ssr-hydration-persisted-state](/.claude/docs/ssr-hydration-persisted-state.md) ⚠️ localStorage в инициализаторе `useState` — тихо неработающий клик
 - [react19-svg-title-array-children-hydration](/.claude/docs/react19-svg-title-array-children-hydration.md) ⚠️ `<title>` с массивом children рвёт гидратацию и ломает соседние клики
+- [react19-streaming-hydration-replay-false-418](/.claude/docs/react19-streaming-hydration-replay-false-418.md) ⚠️ плавающий #418 на прод-сборке при одинаковом HTML — баг React, корень пересобирается
 - [nextjs-public-env-build-time-inlining](/.claude/docs/nextjs-public-env-build-time-inlining.md) ⚠️ `NEXT_PUBLIC_*` литералом в compose не попадает в бандл
 - [nextjs-root-notfound-no-root-layout](/.claude/docs/nextjs-root-notfound-no-root-layout.md) ⚠️ дублирование `<html>` на невалидном сегменте локали
 - [nextjs-streaming-soft-404-loading-boundary](/.claude/docs/nextjs-streaming-soft-404-loading-boundary.md) ⚠️ любой `loading.tsx` выше по дереву превращает 404 в 200
