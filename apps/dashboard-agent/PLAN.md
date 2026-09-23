@@ -246,11 +246,14 @@ success/error, вычисляемым из полей результата, ос
 хвосты imot/premium-rosstil, надёжность deploy-истории, cron-логи, метрики, безопасность) —
 `PLAN_COMPLETED.md`.
 
-- [ ] ⚠️ Открытый вопрос: `nx test dashboard-agent` падает на `server-config.guard.spec.ts` —
-      локальная копия `SERVER_APPS` (`src/lib/server-config.ts`) не содержит ключ `aira-web`,
-      хотя канон `libs/infra-config` его имеет (найдено 2026-09-23 при прогоне тестов после
-      регистрации `anonymize-retail-customers`, не связано с этой правкой). Заведён чип
-      (`task_3aa0e0d3`) — не применялось автоматически.
+- [x] `nx test dashboard-agent` падал на `server-config.guard.spec.ts` — локальная копия
+      `SERVER_APPS` (`src/lib/server-config.ts`) не содержала ключ `aira-web`, хотя канон
+      `libs/infra-config` его имеет (найдено 2026-09-23 при прогоне тестов после регистрации
+      `anonymize-retail-customers`). Исправлено 2026-09-23 (commit `51e54da82`, параллельной
+      сессией из чипа `task_3aa0e0d3`, пока эта же задача проверялась второй сессией — обе
+      пришли к одному однострочному фиксу). Сверка полного канона (`APP_PORTS`/`APP_HOSTS`)
+      расхождений больше не нашла. `nx test dashboard-agent` зелёный: 23 файла, 169 passed / 1
+      skipped.
 
 - [ ] ⚠️ Открытый вопрос: распространить per-app канарейку доставки email (2026-09-06, по
       образцу `domwellbes-email-canary-check`) на другие приложения с собственным SMTP? У
