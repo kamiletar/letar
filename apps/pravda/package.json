@@ -1,6 +1,6 @@
 {
   "name": "@letar/pravda",
-  "version": "1.9.15",
+  "version": "1.9.16",
   "private": true,
   "scripts": {
     "generate:og": "tsx scripts/generate-og-images.ts",

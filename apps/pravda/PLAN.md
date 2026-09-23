@@ -32,11 +32,9 @@
 - [x] `useBookmarks`: стабильный `getServerSnapshot` — в dev консоль писала «The result of
       getServerSnapshot should be cached to avoid an infinite loop» на любой странице документа
       (v1.9.15, детали в `PLAN_COMPLETED.md`).
-- [ ] `bookmark-button.test.tsx` не запускается: vitest не резолвит `@letar/ui` из
-      `src/theme/recipes/button.ts` (импорт `pressScale` с коммита `f1ba9dfb7`, 2026-09-22). Нужен
-      alias в `vitest.config.mts` или прямая зависимость — см.
-      [vitest-unlinked-workspace-lib-imports](/.claude/docs/vitest-unlinked-workspace-lib-imports.md).
-      Заведено отдельной задачей 2026-09-24.
+- [x] `bookmark-button.test.tsx` не запускался: vitest не резолвил `@letar/ui` из
+      `src/theme/recipes/button.ts` (импорт `pressScale` с коммита `f1ba9dfb7`). Добавлен alias в
+      `vitest.config.mts` (v1.9.16); заодно починены 2 устаревших теста `toc.test.tsx`.
 
 ### 🔴 Приоритетные баги — staging e2e (найдено BlackCove, §18.7 Тираж M1, 2026-07-22)
 
