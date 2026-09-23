@@ -28,6 +28,62 @@ export interface DropzoneProps extends Omit<BoxProps, 'onChange'> {
    * Кастомный контент
    */
   children?: ReactNode
+  /**
+   * Callback при перетаскивании файлов, не прошедших `accept`.
+   *
+   * Нативный диалог выбора файла фильтрует формат сам (браузер подсказывает по
+   * `accept`), а drag-and-drop — нет: без этого колбэка отклонённые файлы
+   * просто не попадают в `onFilesSelected`, без уведомления пользователя.
+   */
+  onRejected?: (files: File[], reason: string) => void
+}
+
+const REJECTED_FORMAT_REASON = 'Неподдерживаемый формат файла'
+
+/**
+ * Проверяет файл на соответствие одному шаблону из `accept`: точный MIME-тип
+ * (`image/png`), MIME-категория со звёздочкой (`image/`, звёздочка), расширение
+ * (`.pdf`) либо один из шаблонов «принять всё» (одна звёздочка или её MIME-форма).
+ */
+function matchesAcceptPattern(file: File, pattern: string): boolean {
+  if (pattern === '*' || pattern === '*/*') {
+    return true
+  }
+  if (pattern.startsWith('.')) {
+    return file.name.toLowerCase().endsWith(pattern.toLowerCase())
+  }
+  if (pattern.endsWith('/*')) {
+    return file.type.startsWith(pattern.slice(0, -1))
+  }
+  return file.type === pattern
+}
+
+/**
+ * Проверяет файл на соответствие `accept` — списку шаблонов через запятую,
+ * как в одноимённом HTML-атрибуте. Пустой/отсутствующий `accept` пропускает всё.
+ */
+function isFileAccepted(file: File, accept: string): boolean {
+  const patterns = accept
+    .split(',')
+    .map((pattern) => pattern.trim())
+    .filter(Boolean)
+
+  if (patterns.length === 0) {
+    return true
+  }
+
+  return patterns.some((pattern) => matchesAcceptPattern(file, pattern))
+}
+
+/**
+ * Собирает объект, совместимый с `FileList` (индексы, `length`, `item()`), из
+ * обычного массива — без него нечем заменить `dataTransfer.files` после
+ * фильтрации: `FileList` нельзя создать напрямую вне `DataTransfer`.
+ */
+function toFileList(files: File[]): FileList {
+  return Object.assign(files, {
+    item: (index: number) => files[index] ?? null,
+  }) as unknown as FileList
 }
 
 /**
@@ -51,6 +107,7 @@ export function Dropzone({
   accept = 'image/*',
   disabled = false,
   children,
+  onRejected,
   colorPalette = 'blue',
   ...boxProps
 }: DropzoneProps) {
@@ -85,11 +142,29 @@ export function Dropzone({
       }
 
       const { files } = e.dataTransfer
-      if (files && files.length > 0) {
-        onFilesSelected(files)
+      if (!files || files.length === 0) {
+        return
+      }
+
+      const accepted: File[] = []
+      const rejected: File[] = []
+      for (const file of Array.from(files)) {
+        if (isFileAccepted(file, accept)) {
+          accepted.push(file)
+        } else {
+          rejected.push(file)
+        }
+      }
+
+      if (rejected.length > 0) {
+        onRejected?.(rejected, REJECTED_FORMAT_REASON)
+      }
+
+      if (accepted.length > 0) {
+        onFilesSelected(toFileList(accepted))
       }
     },
-    [disabled, onFilesSelected],
+    [disabled, accept, onFilesSelected, onRejected],
   )
 
   const handleClick = useCallback(() => {
