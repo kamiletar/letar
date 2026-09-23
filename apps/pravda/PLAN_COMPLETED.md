@@ -1,5 +1,22 @@
 # Pravda - Выполненные задачи
 
+## vitest резолвит `@letar/ui` + актуальные тесты TOC (2026-09-24, v1.9.16)
+
+`bookmark-button.test.tsx` не собирался: `Failed to resolve import "@letar/ui" from
+"src/theme/recipes/button.ts"`. Причина — `@letar/ui` есть в `nx.implicitDependencies`, но не в
+`dependencies`, симлинка bun нет, а vitest резолвит bare-импорт обычным Node-алгоритмом без
+`customConditions`. Импорт `pressScale` в `theme/recipes/*` появился с коммита `f1ba9dfb7`.
+Выбран alias в `vitest.config.mts` (как в `aboi`), а не прямая зависимость: та потребовала бы правки
+`bun.lock` ради тестового резолва, тогда как Next и tsgo `@letar/ui` и так резолвят.
+
+После починки всплыли два устаревших теста в `toc.test.tsx`: код TOC уже перешёл на
+`scrollIntoView({ behavior: 'instant' })` (e61e2cbae) и опрос на `setInterval` (dd516304c), а тесты
+ждали `'smooth'` и `removeEventListener('scroll')`. Ожидания обновлены, код не менялся.
+
+Итог: `nx test pravda` — 9 наборов, 90 тестов зелёные. ⚠️ Одна ошибка резолва в логе не значит одну
+недостающую либу — здесь цепочка реэкспортов оказалась чистой, но проверять надо полным прогоном.
+Заметка в `.claude/docs/vitest-alias-redundant-vs-transitive.md` дополнена.
+
 ## Стабильный snapshot в `useBookmarks` (2026-09-24, v1.9.15)
 
 В dev на любой странице документа React писал в консоль «The result of getServerSnapshot should be
