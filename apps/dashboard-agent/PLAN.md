@@ -218,7 +218,9 @@ success/error, вычисляемым из полей результата, ос
 
 **[ ] ⚠️ Открытый вопрос: push и деплой `0.18.4` (фильтрованный `run_e2e`, 2026-09-23).**
 Коммиты `3923898af`/`6b4966528`/`27e99d9a8`/`6aa028565` лежат локально — push ждёт одобрения
-владельца, затем `deploy-request: dashboard-agent` к deploy-agent-dev. Пока на s1 старый агент,
+владельца, затем `deploy-request: dashboard-agent` к deploy-agent-dev.
+**Обновление 2026-09-24:** коммиты запушены, `deploy-request: dashboard-agent` отправлен
+deploy-agent-dev (тред `deploy-dashboard-agent-0.18.4`). Вопрос закрыть, когда придёт ответ об успехе. Пока на s1 старый агент,
 частичный прогон по-прежнему пишет `passed: true` без поля `filtered`. Отдельно: текущий
 `.last-e2e-status/domwellbes.json` (`d5dbfe99…`) — от частичного прогона, но без поля
 `filtered`; перед продом domwellbes нужен полный прогон (domwellbes-dev уведомлён, тред
