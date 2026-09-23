@@ -456,7 +456,7 @@
     },
     "apps/animatrona-landing": {
       "name": "@letar/animatrona-landing",
-      "version": "0.4.10",
+      "version": "0.4.11",
       "dependencies": {
         "@letar/chakra-provider": "workspace:*",
         "@letar/glitchtip": "workspace:*",
@@ -840,7 +840,7 @@
     },
     "apps/kami-key-the-landing": {
       "name": "@letar/kami-key-the-landing",
-      "version": "0.4.5",
+      "version": "0.4.6",
       "dependencies": {
         "@letar/chakra-provider": "workspace:*",
         "@letar/glitchtip": "workspace:*",
@@ -869,7 +869,7 @@
     },
     "apps/letar-landing": {
       "name": "@letar/letar-landing",
-      "version": "0.5.4",
+      "version": "0.5.5",
       "dependencies": {
         "@letar/chakra-provider": "workspace:*",
         "@letar/glitchtip": "workspace:*",
@@ -1128,7 +1128,7 @@
     },
     "libs/chakra-provider": {
       "name": "@letar/chakra-provider",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "dependencies": {
         "@letar/hooks": "workspace:*",
       },

@@ -2,6 +2,12 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.4.6] - 2026-09-24
+
+### Changed
+
+- Корневой провайдер сведён к одной строке: `DarkOnlyChakraProvider` из `@letar/chakra-provider/next` (0.3.0) вместо собственной сборки `EmotionRegistry` + `ColorModeProvider` + `RootChakraProvider`. Поведение прежнее: принудительно тёмная тема, реестр Emotion снаружи.
+
 ## [0.4.5] - 2026-09-24
 
 ### Changed

@@ -17,7 +17,7 @@ import {
 } from '@letar/chakra-provider'
 
 // Только Next.js App Router — отдельный подпуть
-import { EmotionRegistry } from '@letar/chakra-provider/next'
+import { DarkOnlyChakraProvider, EmotionRegistry } from '@letar/chakra-provider/next'
 ```
 
 ## Точки входа
@@ -25,7 +25,7 @@ import { EmotionRegistry } from '@letar/chakra-provider/next'
 | Подпуть                       | Что внутри                                  | Кому                                  |
 | ----------------------------- | ------------------------------------------- | ------------------------------------- |
 | `@letar/chakra-provider`      | провайдеры, переключатели темы, хуки        | всем, включая Electron/Vite-рендереры |
-| `@letar/chakra-provider/next` | `EmotionRegistry` (тянет `next/navigation`) | только Next.js App Router             |
+| `@letar/chakra-provider/next` | `EmotionRegistry`, `DarkOnlyChakraProvider` | только Next.js App Router             |
 
 Подпуть требует отдельной строки в `paths` каждого tsconfig-потребителя — см.
 `.claude/docs/lib-entry-points.md`.
@@ -111,6 +111,24 @@ export function Providers({ children }: PropsWithChildren) {
 находит `<style>` вместо элемента и плавающе падает с ошибкой React #418, пересобирая корень.
 Реестр копит правила (`cache.compat = true`) и отдаёт их в поток через `useServerInsertedHTML`.
 Разбор — `.claude/docs/emotion-streaming-inline-style-hydration-418.md`.
+
+#### `DarkOnlyChakraProvider` (`@letar/chakra-provider/next`)
+
+Готовый корневой провайдер для приложений с одной тёмной темой (лендинги, витрины):
+`EmotionRegistry` + `ColorModeProvider` (`forcedTheme="dark"`, без системной темы) +
+`RootChakraProvider`. Порядок слоёв зашит внутри, поэтому забыть реестр нельзя.
+
+```tsx
+'use client'
+import { system } from '@/lib/theme'
+import { DarkOnlyChakraProvider } from '@letar/chakra-provider/next'
+
+export function Provider({ children }: PropsWithChildren) {
+  return <DarkOnlyChakraProvider value={system}>{children}</DarkOnlyChakraProvider>
+}
+```
+
+Нужна тема, которую можно переключать, — собирай слои вручную, как в примере `EmotionRegistry`.
 
 ### Хуки
 

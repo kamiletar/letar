@@ -2,6 +2,12 @@
 
 Все изменения в проекте animatrona-landing документируются в этом файле.
 
+## [0.4.11] - 2026-09-24
+
+### Changed
+
+- Корневой провайдер сведён к одной строке: `DarkOnlyChakraProvider` из `@letar/chakra-provider/next` (0.3.0) вместо собственной сборки `EmotionRegistry` + `ColorModeProvider` + `RootChakraProvider`. Поведение прежнее: принудительно тёмная тема, реестр Emotion снаружи.
+
 ## [0.4.10] - 2026-09-24
 
 ### Changed
