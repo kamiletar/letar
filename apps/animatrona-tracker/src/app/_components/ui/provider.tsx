@@ -8,11 +8,10 @@ import {
   defineRecipe,
   defineSlotRecipe,
 } from '@chakra-ui/react'
-import { ColorModeProvider, type ColorModeProviderProps } from '@letar/chakra-provider'
+import { ColorModeProvider, type ColorModeProviderProps, useIosActiveFix } from '@letar/chakra-provider'
 import { EmotionRegistry } from '@letar/chakra-provider/next'
 import { FormI18nProvider } from '@letar/forms'
 import { pressableConfig, pressScale } from '@letar/ui'
-import { useEffect } from 'react'
 import { radioRecipe } from './slotRecipes'
 
 // ─── Recipes с :active тактильной обратной связью ──────────────────────
@@ -247,10 +246,8 @@ const animatronaConfig = defineConfig({
 const system = createSystem(defaultConfig, animatronaConfig)
 
 export function Provider(props: ColorModeProviderProps) {
-  // iOS-фикс: без touchstart-листенера :active не срабатывает
-  useEffect(() => {
-    document.addEventListener('touchstart', () => undefined, { passive: true })
-  }, [])
+  // iOS: без touchstart-листенера :active не срабатывает (голый ChakraProvider, фикс — явно)
+  useIosActiveFix()
 
   return (
     <EmotionRegistry>

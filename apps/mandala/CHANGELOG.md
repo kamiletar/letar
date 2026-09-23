@@ -2,6 +2,12 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.40.35] - 2026-09-24
+
+### Added
+
+- На iOS включён `:active` (нажатие кнопок и ссылок): хук `useIosActiveFix` из `@letar/chakra-provider` вызывается в корневом провайдере (голый `ChakraProvider`). Раньше без пассивного `touchstart`-листенера Safari не применял `_active`.
+
 ## [0.40.34] - 2026-09-24
 
 ### Fixed

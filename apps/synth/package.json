@@ -1,6 +1,6 @@
 {
   "name": "@letar/synth",
-  "version": "0.22.7",
+  "version": "0.22.8",
   "private": true,
   "dependencies": {
     "zod": "4.6.5",
