@@ -80,7 +80,7 @@ export function Providers({ children }: PropsWithChildren) {
 ```
 
 **Охват (2026-09-24):** подключён в корневом провайдере всех веб-приложений на Next — потребителей
-`@letar/chakra-provider` (19 штук, включая приватные submodule). Первым был пилот в одном
+`@letar/chakra-provider` (19 штук, включая приватные submodule) и четырёх бывших без библиотеки (см. ниже). Первым был пилот в одном
 приложении, 2026-09-24 компонент перенесён в библиотеку, локальная копия удалена. Серверный layout
 (как в `auth-hub`) оборачивается так же: клиентский компонент рендерится из серверного без
 обёртки. Если в приложении несколько взаимоисключающих корневых провайдеров по группам маршрутов,
@@ -93,10 +93,16 @@ export function Providers({ children }: PropsWithChildren) {
   инициализации кеша, потоковых сегментов нет. ⚠️ Но `label-printer-desktop` и
   `animatrona/renderer` собираются в `output: 'standalone'`, то есть это живой Next-сервер со
   стримингом. Если #418 всплывёт там — подключать так же, `paths` на подпуть у них уже есть.
-- **Next-приложения на Chakra без этой библиотеки** (`letar-landing`, `kami-key-the-landing`,
-  `animatrona-landing`, `form-example`) и демо-страницы `form-docs` со своим `ChakraProvider`
-  на странице. Им сначала нужен `@letar/chakra-provider` в зависимостях. Без `loading.tsx` и
-  `<Suspense>` баг не проявляется.
+- **Демо-страницы `form-docs`** со своим `ChakraProvider` на странице: нет корневого
+  провайдера, куда ставить реестр. Без `loading.tsx` и `<Suspense>` баг не проявляется.
+
+Лендинги на Chakra без библиотеки (`letar-landing`, `kami-key-the-landing`,
+`animatrona-landing`) и `form-example` подключены 2026-09-24 по решению владельца — ради
+единообразия и защиты на случай появления `loading.tsx`/`<Suspense>`, сам баг у них не
+проявлялся. Для этого в `dependencies` добавлен `@letar/chakra-provider: workspace:*`, свои
+`next-themes` + `ChakraProvider` заменены на `ColorModeProvider`/`RootChakraProvider` (у
+лендингов — `forcedTheme="dark"`, `enableSystem={false}`, у `form-example` режим цвета не
+добавлялся). В dev в сыром HTML все `<style data-emotion>` в `<head>`.
 
 Тест — [emotion-registry.spec.tsx](/libs/chakra-provider/src/lib/emotion-registry.spec.tsx):
 `renderToString` с подставленным `ServerInsertedHTMLContext`. Контрольный случай «без реестра —

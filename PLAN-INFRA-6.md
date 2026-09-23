@@ -4992,8 +4992,20 @@ Next.js-образы бегут от `nextjs` (uid 1001), а хостовые `u
 - [x] `bun.lock` был записан с закоммиченной версией приложения, у которого в рабочем дереве лежал
       чужой незакоммиченный bump (коммит с `GIT_SKIP_DEPS_INTEGRITY`). Та сессия закоммитила bump и
       обновила lock сама (`678e004c3`).
+- [x] Лендинги на Chakra без библиотеки — `letar-landing`, `kami-key-the-landing`,
+      `animatrona-landing`, `form-example` — переведены на `@letar/chakra-provider` и реестр
+      (решение владельца 2026-09-24: «да, все четыре», `986a310da`). Три лендинга: своя обвязка
+      `next-themes` + `ChakraProvider` заменена на `ColorModeProvider` (`forcedTheme="dark"`,
+      `enableSystem={false}` — поведение прежнее) + `RootChakraProvider`. `form-example`:
+      только `RootChakraProvider`, `ColorModeProvider` не добавлялся (режима цвета там не было).
+      `workspace:*` в `dependencies`, `paths` на библиотеку и подпуть, версии patch, CHANGELOG.
+      `typecheck:tsgo` и `lint` по четырём зелёные, `lib-subpath-paths` зелёный. В dev на
+      всех четырёх: в сыром HTML три `<style data-emotion>`, все в `<head>`, в `<body>` — 0,
+      ошибок в консоли нет, тема тёмная как раньше. ⚠️ Коммит с `GIT_SKIP_DEPS_INTEGRITY=1`: параллельная
+      сессия (`useIosActiveFix`) держала 12 незакоммиченных/невыровненных версий в lock
+      (в т.ч. `libs/chakra-provider` 0.2.0 против 0.1.0); мои четыре строки в `bun.lock`
+      корректны, остальное — за той сессией.
 - [ ] ⚠️ Открытый вопрос: подключать ли реестр вне охвата задачи — `label-printer-desktop` и
-      `animatrona/renderer` собираются в `output: 'standalone'` (живой Next-сервер со стримингом);
-      лендинги на Chakra без библиотеки (`letar-landing`, `kami-key-the-landing`,
-      `animatrona-landing`, `form-example`) — им сначала нужен `@letar/chakra-provider`. Решение
+      `animatrona/renderer` собираются в `output: 'standalone'` (живой Next-сервер со
+      стримингом); демо-страницы `form-docs` со своим `ChakraProvider` на странице. Решение
       владельца; до появления #418 там — не срочно.
