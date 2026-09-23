@@ -83,6 +83,18 @@ export function useFormFeatures<TData extends object>({
   // Hook persistence (if не вkeyён — используем disabled key)
   const persistenceResult = useFormPersistence<TData>(persistence ?? { key: '__disabled__' })
 
+  // После clearSavedData() библиотека сама вызывает form.reset(dataToSubmit)
+  // (usePostSubmitResetGuard) — это уведомление от стора нужно распознать как «не правка»,
+  // иначе guard в subscribeToFormChanges сравнит его со снимком времени монтирования, не
+  // совпадёт и тут же перезапишет черновик только что отправленными данными
+  const updateBaselineAfterClear = useCallback(
+    (value: TData) => {
+      const safeValue = sensitivePaths.length > 0 ? omitAtPaths(value, sensitivePaths) : value
+      baselineSnapshotRef.current = safeJsonSnapshot(safeValue)
+    },
+    [sensitivePaths],
+  )
+
   // Wrapper для онлайн-отправки с очисткой persistence
   const offlineOnlineSubmit = useCallback(
     async (value: TData) => {
@@ -91,13 +103,14 @@ export function useFormFeatures<TData extends object>({
         // Clear persistence on successful submit
         if (isPersistenceEnabled) {
           persistenceResult.clearSavedData()
+          updateBaselineAfterClear(value)
         }
         return { success: true }
       } catch (error) {
         return { success: false, error: error instanceof Error ? error.message : 'Error отправки' }
       }
     },
-    [onlineSubmit, isPersistenceEnabled, persistenceResult],
+    [onlineSubmit, isPersistenceEnabled, persistenceResult, updateBaselineAfterClear],
   )
 
   // Hook offline (if вkeyён)
@@ -137,10 +150,11 @@ export function useFormFeatures<TData extends object>({
         // Clear persistence on success
         if (isPersistenceEnabled) {
           persistenceResult.clearSavedData()
+          updateBaselineAfterClear(value)
         }
       }
     },
-    [isOfflineEnabled, offlineForm, onlineSubmit, isPersistenceEnabled, persistenceResult],
+    [isOfflineEnabled, offlineForm, onlineSubmit, isPersistenceEnabled, persistenceResult, updateBaselineAfterClear],
   )
 
   // Подписка на изменения form для persistence
