@@ -5034,3 +5034,21 @@ Next.js-образы бегут от `nextjs` (uid 1001), а хостовые `u
 - [ ] ⚠️ Открытый вопрос: без фикса остались провайдеры вне охвата задачи — `apps/animatrona`
       (`renderer`, `mobile-ui`) и демо-страницы `form-docs` на голом `ChakraProvider`. Решается
       вместе с открытым вопросом §199 про реестр Emotion в этих приложениях.
+
+## §201 (2026-09-24) `DarkOnlyChakraProvider` → `@letar/chakra-provider/next`, три лендинга на одну строку
+
+Три `provider.tsx` (`letar-landing`, `kami-key-the-landing`, `animatrona-landing`) стали побайтно
+одинаковыми (`EmotionRegistry` + `ColorModeProvider` с принудительной тёмной темой +
+`RootChakraProvider`), отличался только импорт `system`. Ещё две близкие копии — `apps/synth`
+и публичная часть `studio` (без `defaultTheme`/`enableSystem`, при `forcedTheme` это одно и то же).
+
+- [x] `DarkOnlyChakraProvider` (проп `value`) в `libs/chakra-provider/src/lib/dark-only-chakra-provider.tsx`,
+      экспорт из подпути `./next` (не из общего барреля: `EmotionRegistry` тянет `next/navigation`,
+      баррель используют Electron/Vite-рендереры). Порядок слоёв зашит внутри — забыть реестр
+      снаружи, а с ним получить #418, больше нельзя. Версия либы 0.3.0, README, два теста (node-окружение:
+      в `<body>` нет `<style>`, стили уходят в `useServerInsertedHTML`; работает без `value`).
+- [x] Три лендинга: `provider.tsx` — одна строка, версии (patch), CHANGELOG, `bun.lock`.
+- [x] Проверка: тесты либы (10), lint и `typecheck:tsgo` по 4 проектам зелёные; в dev сырой HTML всех
+      трёх без `<style data-emotion>` в `<body>`, после гидратации `<html class="dark">`, ошибок нет.
+- [ ] Перевод `apps/synth` и публичной части `studio` (приватный submodule) на тот же компонент.
+- [ ] ⚠️ Открытый вопрос: **push не сделан, ждёт одобрения владельца.**
