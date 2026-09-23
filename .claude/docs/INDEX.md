@@ -98,6 +98,7 @@
 - [forms](/.claude/docs/forms.md) ⭐
 - [react-duplicate-responsive-dom](/.claude/docs/react-duplicate-responsive-dom.md) ⚠️ два JSX-блока на `display={{ base:/md: }}` с одинаковым интерактивным контентом — дубль в DOM, не адаптивность
 - [chakra-flexwrap-column-direction-overflow](/.claude/docs/chakra-flexwrap-column-direction-overflow.md) ⚠️ `flexWrap="wrap"` безусловный рядом с `direction={{ base: 'column', sm: 'row' }}` — на mobile `wrap` идёт по cross-axis, при `column` это горизонталь, лишние элементы уезжают вбок, а не вниз; фикс — `flexWrap={{ base: 'nowrap', sm: 'wrap' }}`
+- [chakra-select-flex-item-maxw-collapse](/.claude/docs/chakra-select-flex-item-maxw-collapse.md) ⚠️ `<Box maxW>` вокруг `Field.Select` в `HStack`/`Flex`: ширина flex-элемента считается от содержимого, триггер Chakra занимает 100% родителя, подпись обрезается — обёртка сжимается до ширины стрелки; фикс — `w="240px" maxW="full"` (или `flex="1" minW="0"`)
 - [form-analytics-goals](/.claude/docs/form-analytics-goals.md) цели формы в Метрике/Umami через `useFormAnalytics`, consent-aware бесплатно
 - [tristate-cascade-boolean-pattern](/.claude/docs/tristate-cascade-boolean-pattern.md) nullable boolean с явным «наследовать» через строковый энум + NativeSelect
 - [letar-forms-tabs-error-pattern](/.claude/docs/letar-forms-tabs-error-pattern.md) ⚠️ Chakra `Tabs.Content` по умолчанию монтирует все панели сразу — обязательное поле на неактивной вкладке проваливает валидацию незаметно; решение — `useFormErrorTab` (пока один клиент, domwellbes)

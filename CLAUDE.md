@@ -97,6 +97,7 @@
 - [forms](/.claude/docs/forms.md) ⭐ `@letar/forms` — единственный подход к формам
 - [react-duplicate-responsive-dom](/.claude/docs/react-duplicate-responsive-dom.md) ⚠️ два JSX-блока на `display={{base:/md:}}` — дубль в DOM
 - [chakra-flexwrap-column-direction-overflow](/.claude/docs/chakra-flexwrap-column-direction-overflow.md) ⚠️ безусловный `flexWrap` при `direction: column` уводит элементы вбок
+- [chakra-select-flex-item-maxw-collapse](/.claude/docs/chakra-select-flex-item-maxw-collapse.md) ⚠️ обёртка `Field.Select` только с `maxW` в flex-строке схлопывается до стрелки
 - [form-analytics-goals](/.claude/docs/form-analytics-goals.md) цели формы в Метрике/Umami через `useFormAnalytics`
 - [tristate-cascade-boolean-pattern](/.claude/docs/tristate-cascade-boolean-pattern.md) nullable boolean с явным «наследовать»
 - [letar-forms-tabs-error-pattern](/.claude/docs/letar-forms-tabs-error-pattern.md) ⚠️ ошибка на скрытой вкладке `Tabs.Content` невидима без `useFormErrorTab`
