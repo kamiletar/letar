@@ -1,6 +1,7 @@
 'use client'
 
 import type { CreateToasterReturn } from '@chakra-ui/react'
+import { unwrapActionResult } from '@letar/forms-core/server-errors'
 import { useRouter } from 'next/navigation'
 import { useCallback } from 'react'
 import { triggerDeferredUndoableAction } from '../lib/undo-toast'
@@ -13,6 +14,11 @@ export interface DeleteWithUndoRedirectOptions {
   redirectTo: string
   message: string
   errorTitle: string
+  /**
+   * Server Action удаления — может вернуть `ActionFailure` значением вместо throw
+   * (`catchActionFailure`, например при FK-нарушении). `onCommit` разворачивает его сам через
+   * `unwrapActionResult`, так что отказ доходит до `onError`, а не тонет как молчаливый успех.
+   */
   deleteAction: (id: string) => Promise<unknown>
 }
 
@@ -35,7 +41,7 @@ export function useDeleteWithUndoRedirect(options: DeleteWithUndoRedirectOptions
     triggerDeferredUndoableAction(toaster, {
       message,
       onCommit: async () => {
-        await deleteAction(id)
+        unwrapActionResult(await deleteAction(id))
       },
       onUndo: () => {},
       onError: () => toaster.create({ title: errorTitle, type: 'error' }),

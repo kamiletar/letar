@@ -172,6 +172,15 @@ const handleDelete = useDeleteWithUndoRedirect({
 локальное оптимистичное поверх списка, а не переход на другую страницу — используют
 `triggerDeferredUndoableAction` напрямую, и это правильно, не недосмотр.
 
+**Обновление 2026-09-23 (третий проход):** `deleteAction`/`onCommit` может вернуть `ActionFailure`
+значением вместо throw (`catchActionFailure` из `@letar/forms-core`, например при FK-нарушении на
+удалении) — `onCommit` внутри `useDeleteWithUndoRedirect` разворачивает такой результат сам через
+`unwrapActionResult` **до** того, как передать его дальше в `triggerDeferredUndoableAction`; без
+этого отказ значением тихо считался успешным коммитом (запись выглядела удалённой, хотя удаление
+на сервере не прошло) — тот же класс бага, что и в `useInlineCrudList`/`useActionWithToast`
+(`@letar/admin-ui`), см. `apps/domwellbes/PLAN_CROSSCUTTING.md`. Добавлена реальная зависимость
+`@letar/forms-core` в `package.json` библиотеки.
+
 ## Команды
 
 ```bash

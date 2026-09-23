@@ -1,6 +1,9 @@
 // @vitest-environment jsdom
 import { renderHook } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+
+import { actionFailure } from '@letar/forms-core/server-errors'
+
 import { useDeleteWithUndoRedirect } from './use-delete-with-undo-redirect'
 
 const mockPush = vi.fn()
@@ -96,6 +99,30 @@ describe('useDeleteWithUndoRedirect', () => {
   it('ошибка deleteAction показывает errorTitle отдельным тостом', async () => {
     const toaster = createMockToaster()
     const deleteAction = vi.fn().mockRejectedValue(new Error('boom'))
+
+    const { result } = renderHook(() =>
+      useDeleteWithUndoRedirect({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        toaster: toaster as any,
+        id: 'vac-1',
+        redirectTo: '/admin/vacancies/',
+        message: 'Вакансия удалена',
+        errorTitle: 'Не удалось удалить вакансию',
+        deleteAction,
+      })
+    )
+
+    result.current()
+    await vi.advanceTimersByTimeAsync(5000)
+
+    expect(toaster.create).toHaveBeenCalledWith(
+      expect.objectContaining({ title: 'Не удалось удалить вакансию', type: 'error' }),
+    )
+  })
+
+  it('ActionFailure значением от deleteAction — тоже отдельный тост-ошибка, не тихий успех', async () => {
+    const toaster = createMockToaster()
+    const deleteAction = vi.fn().mockResolvedValue(actionFailure('Нельзя удалить — есть связанные записи'))
 
     const { result } = renderHook(() =>
       useDeleteWithUndoRedirect({
