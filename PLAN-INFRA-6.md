@@ -5055,3 +5055,32 @@ Next.js-образы бегут от `nextjs` (uid 1001), а хостовые `u
       в `<body>`, `<html class="dark">`, ошибок консоли нет. Осталось: push submodule `studio`, затем
       bump SHA + `bun.lock` (`bun install --lockfile-only` в чистом дереве) — ждёт одобрения push.
 - [ ] ⚠️ Открытый вопрос: **push не сделан, ждёт одобрения владельца.**
+
+## §202 (2026-09-24) `fillStable` → `@letar/e2e-testing`, ручные обходы сброса полей WebKit сведены в один хелпер
+
+WebKit сбрасывает ранее заполненный controlled-инпут, когда следом заполняется соседнее поле той
+же формы. Хелпер `fillStable` (дозаполнение, пока все поля не совпадут одновременно) жил локально в
+`domwellbes-e2e`; `aboi-e2e` и `dsperevod-e2e` обходили ту же ловушку повторным проходом
+`fillWithHydrationRetry` по каждому полю — это одновременности не гарантирует.
+
+- [x] `fillStable(fields, timeoutMs?)` в `libs/e2e-testing/src/lib/fill-stable.ts`, разбор обоих
+      находок в JSDoc, README, версия либы 0.2.0. Попутно JSDoc `checkWithHydrationRetry` возвращён
+      к своей функции (стоял над `setInputFilesWithHydrationRetry`).
+- [x] Потребители: `domwellbes-e2e` (7 файлов, локальная копия удалена, инлайн-повтор заметки в
+      `sales-funnel-manual-bank-case` → `fillStable([[noteInput, note]])`), `aboi-e2e`
+      (`email-verification`), `dsperevod-e2e` (`admin-audit-log`). Раздел в `.claude/docs/e2e-testing.md`.
+- [x] Проверка: dprint, `nx lint @letar/e2e-testing`, `tsgo --noEmit` либы, aboi-e2e, dsperevod-e2e
+      зелёные. У `domwellbes-e2e` одна ошибка вне правок — `helpers/db/retail.helpers.ts:17` (TS2322,
+      вывод типа Prisma-клиента), была до сессии.
+- [x] Оценено и **не перенесено** (единственный потребитель — domwellbes-e2e): `selectChakraOption`/
+      `selectFirstChakraOption`/`openTab`, `openDisclosure`. В других наборах самописных версий нет —
+      `aria-expanded` в svoichuzhie/kami-key-the-landing и `<details>` в letar-landing проверяют
+      поведение UI, а не хелперы. Переносить, когда появится второй потребитель.
+- [ ] ⚠️ Открытый вопрос: **push letar не сделан** (решение владельца 2026-09-24) — коммиты либы,
+      dsperevod-e2e, доков, bump SHA `domwellbes-e2e`/`aboi-e2e` и `bun.lock` лежат локально;
+      submodule уже запушены. После push — точечный `run_e2e` domwellbes с `grep`
+      `sales-funnel-manual-bank-case` (сначала `git pull` + `submodule update` на s1, раннер сам не
+      пуллит — `.claude/docs/run-e2e-staging-pitfalls.md`).
+- [ ] ⚠️ Открытый вопрос: `bun.lock` закоммичен с `GIT_SKIP_DEPS_INTEGRITY=1` — единственное
+      оставшееся расхождение `apps/studio` 0.69.25 vs 0.69.24 принадлежит §201 (bump studio ждёт push
+      submodule), в чужую строку не вмешивался.
