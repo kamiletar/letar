@@ -142,6 +142,7 @@
 - [serwist-domwellbes-webpack-build-blocked](/.claude/docs/serwist-domwellbes-webpack-build-blocked.md) ✅ снято 2026-09-22; ⚠️ `webpackBuildWorker` глохнет от своего же `webpack()`-хука
 - [react-effect-stable-ref-pitfall](/.claude/docs/react-effect-stable-ref-pitfall.md) ⚠️ эффект с deps на ref/DOM не перезапускается
 - [route-announcer-persistent-layout-required](/.claude/docs/route-announcer-persistent-layout-required.md) ⚠️ `RouteAnnouncer` вне persistent layout молчит
+- [undo-toast-immediate-vs-deferred-commit-split](/.claude/docs/undo-toast-immediate-vs-deferred-commit-split.md) ⚠️ единый `onCommit`/`onUndo`-контракт не покрыл немедленный commit+restore, typecheck упал на чужом файле
 
 ### Next.js — ловушки
 
