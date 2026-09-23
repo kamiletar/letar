@@ -1636,7 +1636,7 @@
     },
     "libs/studio-time-mcp": {
       "name": "@letar/studio-time-mcp",
-      "version": "0.5.0",
+      "version": "0.6.0",
       "dependencies": {
         "@letar/mcp-server-kit": "workspace:*",
         "@modelcontextprotocol/server": "2.0.0",
