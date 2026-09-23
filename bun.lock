@@ -597,7 +597,7 @@
     },
     "apps/dashboard-agent": {
       "name": "dashboard-agent",
-      "version": "0.18.3",
+      "version": "0.18.2",
       "dependencies": {
         "@fastify/cors": "^11.3.0",
         "@fastify/rate-limit": "^10",
@@ -1502,7 +1502,7 @@
     },
     "libs/image-upload": {
       "name": "@letar/image-upload",
-      "version": "0.1.5",
+      "version": "0.1.6",
       "peerDependencies": {
         "@chakra-ui/react": ">=3.0.0",
         "react": ">=18.0.0",
