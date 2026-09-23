@@ -327,3 +327,37 @@ rules:
       @letar/hooks/browser, который сам переключается на instant при потере фокуса или
       prefers-reduced-motion. См. .claude/docs/scrollintoview-smooth-frozen-without-window-focus.md.
     pattern-regex: '(scrollIntoView|scrollTo)\(\s*\{[^}]*behavior:\s*[''"]smooth[''"]'
+
+  # ⚠️ Ловит только литерал прямо в аргументе (`() => []`, `() => ({...})`, `new Map()`), а не
+  # именованную функцию, которая возвращает новый объект в какой-то из веток, — до этого
+  # статическому анализу не добраться, там спасает только регрессионный тест гидратации
+  # (`renderHook(..., { hydrate: true })`). Примитивы (`() => 0`, `() => false`, `() => null`,
+  # `() => 'pending'`) сравниваются через Object.is по значению и безопасны — правило их не
+  # трогает. Тест правила — .semgrep/letar-rules.ts (`semgrep --test --config .semgrep/letar-rules.yml .semgrep/letar-rules.ts`), сам он исключён из
+  # сканирования: содержит намеренные нарушения.
+  - id: letar-use-sync-external-store-uncached-snapshot
+    languages: [typescript, javascript]
+    severity: ERROR
+    paths:
+      exclude:
+        - /.semgrep/**
+    message: >-
+      useSyncExternalStore: getSnapshot/getServerSnapshot возвращает НОВЫЙ массив или объект на
+      каждый вызов. React сравнивает snapshot по ссылке (Object.is): на гидратации в dev —
+      «The result of getServerSnapshot should be cached to avoid an infinite loop», на клиенте
+      getSnapshot с новой ссылкой — бесконечный цикл ререндеров. Вынеси значение в модульную
+      константу (`const EMPTY: Item[] = []`, `() => EMPTY`); ветки catch и «нет window» внутри
+      именованного snapshot-а тоже обязаны отдавать стабильную ссылку. Регрессионный тест
+      гидратации должен идти первым в файле — флаг предупреждения React взводится один раз на
+      модуль. См. .claude/docs/react-use-sync-external-store-uncached-snapshot.md.
+    pattern-either:
+      - pattern: useSyncExternalStore($SUB, $GET, () => [...])
+      - pattern: useSyncExternalStore($SUB, $GET, () => ({...}))
+      - pattern: useSyncExternalStore($SUB, $GET, () => new $C(...))
+      - pattern: useSyncExternalStore($SUB, () => [...], ...)
+      - pattern: useSyncExternalStore($SUB, () => ({...}), ...)
+      - pattern: useSyncExternalStore($SUB, () => new $C(...), ...)
+      - pattern: React.useSyncExternalStore($SUB, $GET, () => [...])
+      - pattern: React.useSyncExternalStore($SUB, $GET, () => ({...}))
+      - pattern: React.useSyncExternalStore($SUB, () => [...], ...)
+      - pattern: React.useSyncExternalStore($SUB, () => ({...}), ...)

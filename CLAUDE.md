@@ -144,6 +144,7 @@
 - [react-effect-stable-ref-pitfall](/.claude/docs/react-effect-stable-ref-pitfall.md) ⚠️ эффект с deps на ref/DOM не перезапускается
 - [route-announcer-persistent-layout-required](/.claude/docs/route-announcer-persistent-layout-required.md) ⚠️ `RouteAnnouncer` вне persistent layout молчит
 - [undo-toast-immediate-vs-deferred-commit-split](/.claude/docs/undo-toast-immediate-vs-deferred-commit-split.md) ⚠️ один `onCommit`/`onUndo`-контракт не покрыл немедленный commit+restore
+- [react-use-sync-external-store-uncached-snapshot](/.claude/docs/react-use-sync-external-store-uncached-snapshot.md) ⚠️ `() => []` в snapshot — «should be cached»; тест через spy зеленеет до фикса, флаг React общий на модуль
 
 ### Next.js — ловушки
 
