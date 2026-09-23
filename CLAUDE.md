@@ -402,6 +402,9 @@ bash scripts/hooks/install.sh
 - `pre-commit-deps-integrity.sh` — целостность зависимостей (патчи + peer-диапазоны), запускается
   **только** если в staged-наборе есть `bun.lock`/`package.json`; обычный коммит по коду не платит
   ничего. См. раздел «Проверки целостности» ниже.
+- `pre-commit-docs-index.sh` — gate `docs-index-integrity` («новый док → две записи»: `CLAUDE.md` +
+  `INDEX.md`, ссылки живы), **только** если в коммите есть `.claude/docs/*.md` или `CLAUDE.md`;
+  проверяет **индекс**, незастейдженная запись не считается. Обход — `GIT_SKIP_DOCS_INDEX=1`.
 - `pre-commit-sops.sh` — авто-шифрует `.env.docker` → `.env.docker.enc`, если доступен sops +
   age-ключ; подробнее — [secret-manager](/.claude/docs/secret-manager.md).
 - `pre-push-submodule-check.sh` — блокирует push letar, если записанный SHA submodule ещё не
@@ -426,8 +429,8 @@ bun scripts/check-all.mjs
 режим CI. Уровень **gate** роняет прогон, **warn** (накопленный долг) и **отчёт** — нет; до
 2026-08-28 это различие существовало только в комментариях внутри самих скриптов.
 
-Запускается автоматически в двух точках: pre-commit (узко — см. `pre-commit-deps-integrity.sh`
-выше) и шаг `Integrity checks` в [ci.yml](/.github/workflows/ci.yml).
+Запускается автоматически в двух точках: pre-commit (узко — см. `pre-commit-deps-integrity.sh` и
+`pre-commit-docs-index.sh` выше) и шаг `Integrity checks` в [ci.yml](/.github/workflows/ci.yml).
 
 ⚠️ **Зелёный CI на этих проверках ≠ зелено везде.** Приватные submodule в CI намеренно не
 выкачиваются, поэтому `electron-drift` не видит `poster-microtext-desktop`, а `lib-subpath-paths` —
