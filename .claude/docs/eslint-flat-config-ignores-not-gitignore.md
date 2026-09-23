@@ -36,6 +36,19 @@ Flat config (`eslint.config.mjs`, ESLint 9+) игнорирует по умол�
 ignores: ['.next*/**/*', '**/out-tsc', 'public/decoders/**'],
 ```
 
+### 3. `public/sw.js`, `public/swe-worker-*.js` — сгенерированные Serwist-бандлы
+
+Приложения с `@serwist/next` (`withSerwistInit` в `next.config.mjs`) генерируют `public/sw.js` и
+`public/swe-worker-<hash>.js` при `nx build` — минифицированный код, который линтер топит
+десятками ошибок (`prefer-const`, `no-unused-expressions` и т.п.), если не игнорировать явно.
+До 2026-09-23 запись дублировалась в `ignores` каждого из пяти приложений
+(archetest, domwellbes, grandslamcup, pravda, studio) по отдельности — шестое приложение с
+Serwist получило бы линт-ошибки на первом же `nx build`, если бы кто-то забыл скопировать строку.
+
+Централизовано в корневом `eslint.config.mjs` (`'**/public/sw.js'`, `'**/public/swe-worker-*.js'`
+в общем блоке `ignores`, с ведущим `**/` — см. правило ниже). Заводишь приложение с Serwist —
+отдельная запись в его `eslint.config.mjs` больше не нужна.
+
 ## Как не наступить
 
 - Завёл каталог, который прячешь через `.gitignore`, — **сразу проверь, покрыт ли он `ignores`
@@ -53,3 +66,5 @@ ignores: ['.next*/**/*', '**/out-tsc', 'public/decoders/**'],
 создал каталог: имя файла (`types/validator.ts`) не указывает ни на приложение, ни на виновника.
 
 Разобрано на `domwellbes` 2026-09-22 (v0.307.1) при чистке восьми накопившихся предупреждений.
+Случай 3 централизован 2026-09-23 — практически проверено: без корневой записи `archetest:lint`
+падает на `public/sw.js`/`swe-worker-*.js` (82 ошибки), с ней — чисто на всех пяти приложениях.
