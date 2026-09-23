@@ -473,6 +473,21 @@ export const DEFAULT_CRON_JOBS: CronJob[] = [
     server: 's2',
   },
   {
+    id: 'domwellbes-anonymize-retail-customers',
+    name: 'Retail Customer Anonymization (domwellbes)',
+    app: 'domwellbes',
+    endpoint: '/api/cron/anonymize-retail-customers',
+    // Ежедневно, как соседние по смыслу задачи анонимизации domwellbes (cleanup-personal-data —
+    // 03:00, anonymize-archived-clients — 04:00) — накопление кандидатов за сутки не критично.
+    schedule: '0 5 * * *',
+    description: 'Автоанонимизация ПДн розничного покупателя (RetailCustomer) через 3-летний grace period '
+      + 'после последнего заказа, без блокеров (незавершённый заказ, открытая заявка на возврат) — '
+      + '152-ФЗ, решение владельца 22.09.2026 (PLAN_OPEN_QUESTIONS.md), единственный путь '
+      + 'обезличивания этой модели (нет ручной кнопки, в отличие от anonymize-archived-clients)',
+    enabled: true,
+    server: 's2',
+  },
+  {
     id: 'jobs-observer-check',
     name: 'Jobs Observer Check',
     app: 'dashboard-agent',
