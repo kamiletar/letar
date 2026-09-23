@@ -110,6 +110,7 @@ const noMatch = []
 const skippedAlready = []
 const updated = []
 const invalidJson = []
+const unparsedWithAnchor = []
 
 for (const tsconfigPath of tsconfigFiles) {
   const text = readFileSync(tsconfigPath, 'utf8')
@@ -118,7 +119,14 @@ for (const tsconfigPath of tsconfigFiles) {
   try {
     parsed = JSON.parse(text)
   } catch {
-    // не валидный JSON до правки — не наш случай, пропускаем молча
+    // JSONC (комментарии, висячие запятые) — разбирать не беремся. Но если якорь в файле есть,
+    // молчаливый пропуск оставил бы потребителя без подпути (так вышло с
+    // animatrona-folder-player/renderer), поэтому такие файлы перечисляются в отчете.
+    if (text.includes(`"${packageName}"`)) {
+      skippedAlready.push(tsconfigPath)
+    } else if (text.includes(`"${anchorPackage}"`)) {
+      unparsedWithAnchor.push(tsconfigPath)
+    }
     continue
   }
 
@@ -232,4 +240,12 @@ if (noMatch.length > 0) {
   for (const f of noMatch) { console.log(`  ❓ ${rel(f)}`) }
 }
 
-if (invalidJson.length > 0) { process.exit(1) }
+if (unparsedWithAnchor.length > 0) {
+  console.log(
+    `
+⚠️  Упоминают "${anchorPackage}", но не разбираются как JSON (комментарии?) — добавь строку руками: ${unparsedWithAnchor.length}`,
+  )
+  for (const f of unparsedWithAnchor) { console.log(`  ✋ ${rel(f)}`) }
+}
+
+if (invalidJson.length > 0 || unparsedWithAnchor.length > 0) { process.exit(1) }
