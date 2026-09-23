@@ -4848,3 +4848,45 @@ dist/google/loader.js:122`) при полностью доступном Google 
       (variable, wght 400–700) + Cousine (static Regular/Bold), без дополнительных символов —
       единственный найденный вне-диапазона глиф (`→`) оказался внутри серверного `console.error`, не
       рендерится. Детали — `apps/label-printer-desktop/renderer/app/_fonts/fonts/README.md`.
+
+## §196 (2026-09-23) Next.js 16.3.5 → 16.3.6 — security-патч `next/og` RCE + полный `/infra:deps-update`
+
+Триггер — релиз v16.3.6 закрывает [GHSA-vcvr-r3jv-pc5j](https://github.com/vercel/next.js/security/advisories/GHSA-vcvr-r3jv-pc5j),
+RCE в `next/og` `ImageResponse`. В репо был установлен уязвимый `16.3.5`, а `next/og`
+используется в 22 файлах, включая публичные незалогиненные роуты (`opengraph-image.tsx`,
+`icon.tsx`) в aboi, aira-web, animatrona-landing, svoichuzhie, grandslamcup, letar-landing и др.
+
+- [x] Подняты `next` и связанные пины в корневом `package.json`: `@next/env`, `@next/mdx`,
+      `@next/bundle-analyzer`, `@next/eslint-plugin-next`, `eslint-config-next` — все `^16.3.5` →
+      `^16.3.6`. `bun install`, `check-lock-workspace-versions.mjs` зелёный. Коммит `ecfe3eaa4`.
+- [x] Typecheck приложений с `next/og` на публичных роутах (aboi, letar-landing,
+      animatrona-landing, svoichuzhie, aira-web, grandslamcup) — чисто, кроме одной
+      pre-existing ошибки `grandslamcup:typecheck:tsgo` (TS2321, известный баг ZenStack-типов,
+      см. [tsgo-excessive-stack-depth-zenstack.md](/.claude/docs/tsgo-excessive-stack-depth-zenstack.md)),
+      не связанной с этим bump'ом.
+- [x] По следам — полный чеклист `/infra:deps-update`:
+      - `bun audit` — 12 известных уязвимостей на момент прогона (8 high, 3 moderate, 1 low), все
+      транзитивные, не прямые пины root `package.json`.
+      - `bun audit fix` — пофиксил 1 из 12 (`esbuild` в пределах диапазона). Оставшиеся 11
+      упираются в диапазоны, которые объявляют сами родительские пакеты (`@serwist/next` →
+      `browserslist`, `@prisma/config` → `deepmerge-ts`, `satori` → `fflate`, `prisma` →
+      `mysql2`, `nx` → `smol-toml`, `meow` → `trim-newlines`, `apps/domwellbes` → `adm-zip`) —
+      не root-пины, которые можно свободно поднять; требуют либо `--latest` (cross-major, риск
+      поломки на ~30 приложениях сразу через `nx`/`prisma`), либо апдейта самого родительского
+      пакета апстримом. Не форсировал — все затронутые пакеты либо build-time/dev-tool
+      (`esbuild`, `browserslist`, `smol-toml`, `trim-newlines`, `nx`-транзитивный), либо DoS/
+      downgrade-класс без прямого пути от пользовательского ввода в проде в нашем использовании.
+      `adm-zip` (domwellbes, `apps/domwellbes/package.json` → `^0.5.16`) — единственный кандидат
+      с потенциальной прод-релевантностью (обработка ZIP), не тронут в этой сессии (приватный
+      submodule, отдельный scope) — стоит проверить отдельно при следующей сессии domwellbes.
+      - `bun scripts/check-all.mjs --group=deps` — все gate-проверки зелёные
+      (`patched-deps`/`peer-deps`/`intentional-pins`/`lock-versions`/`pin-drift`/
+      `implicit-deps`/`nx-graph-deps`/`electron-drift`). `peer-deps` без новых строк против
+      прежнего фонового шума (eslint 10.x vs eslint-plugin-\*, three.js minor).
+      - `implicit-deps`/`nx-graph-deps` отчёт нашёл pre-existing долг (не из этого bump'а, не
+      трогал): 21 связка непривязанных `@letar/*`-импортов в vitest-спеках `domwellbes`/
+      `pravda` + `domwellbes` импортирует `@letar/forms-core` без записи в `dependencies`/
+      `implicitDependencies` — см. [vitest-unlinked-workspace-lib-imports.md](/.claude/docs/vitest-unlinked-workspace-lib-imports.md).
+- [ ] Не сделано в этой сессии (не блокирует security-фикс, требует отдельного решения):
+      `bun audit fix --latest` для транзитивных зависимостей `nx`/`prisma`/`satori` (cross-major,
+      нужна отдельная проверка сборки); `adm-zip` в `apps/domwellbes`.
