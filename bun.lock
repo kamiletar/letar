@@ -456,8 +456,9 @@
     },
     "apps/animatrona-landing": {
       "name": "@letar/animatrona-landing",
-      "version": "0.4.9",
+      "version": "0.4.10",
       "dependencies": {
+        "@letar/chakra-provider": "workspace:*",
         "@letar/glitchtip": "workspace:*",
       },
     },
@@ -774,8 +775,9 @@
     },
     "apps/form-example": {
       "name": "form-example",
-      "version": "0.1.24",
+      "version": "0.1.25",
       "dependencies": {
+        "@letar/chakra-provider": "workspace:*",
         "@letar/demo-protection": "workspace:*",
         "@letar/forms-core": "workspace:*",
         "@letar/glitchtip": "workspace:*",
@@ -838,8 +840,9 @@
     },
     "apps/kami-key-the-landing": {
       "name": "@letar/kami-key-the-landing",
-      "version": "0.4.4",
+      "version": "0.4.5",
       "dependencies": {
+        "@letar/chakra-provider": "workspace:*",
         "@letar/glitchtip": "workspace:*",
       },
     },
@@ -866,8 +869,9 @@
     },
     "apps/letar-landing": {
       "name": "@letar/letar-landing",
-      "version": "0.5.3",
+      "version": "0.5.4",
       "dependencies": {
+        "@letar/chakra-provider": "workspace:*",
         "@letar/glitchtip": "workspace:*",
       },
     },
