@@ -597,7 +597,7 @@
     },
     "apps/dashboard-agent": {
       "name": "dashboard-agent",
-      "version": "0.18.1",
+      "version": "0.18.2",
       "dependencies": {
         "@fastify/cors": "^11.3.0",
         "@fastify/rate-limit": "^10",
