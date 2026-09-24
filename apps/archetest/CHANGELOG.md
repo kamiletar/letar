@@ -5,6 +5,13 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 версионирование следует [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.28.35] - 2026-09-24
+
+### Changed
+
+- `/dev/presentation`: синий акцент (бейдж и акцентная строка) заменён на токены `brand` — страница
+  печати выровнена с остальным интерфейсом.
+
 ## [0.28.34] - 2026-09-24
 
 ### Changed

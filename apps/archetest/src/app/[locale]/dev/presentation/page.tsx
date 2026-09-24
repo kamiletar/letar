@@ -197,7 +197,7 @@ export default function PresentationDevPage() {
             Ранний доступ к нормативной аналитике по мере роста выборки (ретест-надёжность, α-метрики, перцентили).
           </Bullet>
           <HStack gap={3} pt={2} flexWrap="wrap">
-            <Badge size="lg" colorPalette="blue" variant="solid" px={4} py={2} borderRadius="md">
+            <Badge size="lg" colorPalette="brand" variant="solid" px={4} py={2} borderRadius="md">
               /for-professionals — лид-форма
             </Badge>
             <Badge size="lg" colorPalette="gray" variant="outline" px={4} py={2} borderRadius="md">
@@ -250,7 +250,7 @@ function Stat({ value, label }: { value: string; label: string }) {
 function Bullet({ children }: { children: React.ReactNode }) {
   return (
     <HStack align="start" gap={3}>
-      <Text color="blue.500" fontWeight="bold" lineHeight="tall">
+      <Text color="brand.fg" fontWeight="bold" lineHeight="tall">
         •
       </Text>
       <Text lineHeight="tall">{children}</Text>
