@@ -2,6 +2,13 @@ import { resolveFieldMeta, useAppFormContext, withFieldValidation } from '@letar
 import { defineComponent, onErrorCaptured, type PropType, ref } from 'vue'
 import { rekaUIKit } from '../uikit/uikit-reka'
 
+/**
+ * Reka `SelectItem` запрещает `value=""` (пустая строка у `SelectRoot` — «сбросить выбор и
+ * показать placeholder») и бросает ошибку при рендере. Опция «Все категории» со значением `''`
+ * внутри примитива подменяется служебным токеном; наружу (в форму) всегда уходит настоящее `''`.
+ */
+const EMPTY_OPTION_TOKEN = '__letar_empty_option__'
+
 export interface FieldSelectOption {
   value: string
   label: string
@@ -45,7 +52,10 @@ export const FieldSelect = defineComponent({
 
       return withFieldValidation(form, fullPath, fieldSchema, (field, hasError, errorMessage) => {
         const clearable = props.clearable ?? !required
-        const value = (field.state.value as string | undefined) || undefined
+        const hasEmptyOption = props.options.some((opt) => opt.value === '')
+        const rawValue = field.state.value as string | undefined
+        // `''` при наличии опции с пустым значением — выбранная опция, а не «пусто»
+        const value = rawValue === '' && hasEmptyOption ? EMPTY_OPTION_TOKEN : rawValue || undefined
 
         // `Select` рисует свою метку сам (см. `uikit/primitives/select.ts`) — в отличие от
         // остальных полей, здесь не `FieldWrapper` (он бы продублировал `FieldLabel`), а
@@ -56,9 +66,11 @@ export const FieldSelect = defineComponent({
           children: [
             rekaUIKit.Select({
               value,
-              onValueChange: (next) => field.handleChange(next ?? ''),
+              onValueChange: (next) => field.handleChange(next === EMPTY_OPTION_TOKEN ? '' : next ?? ''),
               onBlur: field.handleBlur,
-              options: props.options,
+              options: hasEmptyOption
+                ? props.options.map((opt) => (opt.value === '' ? { ...opt, value: EMPTY_OPTION_TOKEN } : opt))
+                : props.options,
               label,
               placeholder,
               clearable,
