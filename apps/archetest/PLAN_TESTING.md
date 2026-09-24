@@ -66,15 +66,15 @@ nx typecheck:tsgo archetest    # Проверка типов
 
 ## Фаза 1: Unit-тесты server actions
 
-| Тест                             | Описание                                                                | Статус                                   |
-| -------------------------------- | ----------------------------------------------------------------------- | ---------------------------------------- |
-| quiz.action — submitQuiz         | Отправка квиза, расчёт баллов, нормализация                             | ⏳ Планируется                           |
-| quiz.action — startSession       | Создание сессии, стратифицированная выборка                             | ⏳ Планируется                           |
-| achievements — правила           | 18 ачивок достижимы, пороги, порядок сессий, только шкалы ядра          | ✅ `achievement-rules.test.ts` (14)      |
-| leaderboard.action — recalcEntry | Только фильтр `isValid` (UI убран 5.9.1)                                | ⏳ Пул 2026-09-24, волна 6               |
-| stratified-shuffle               | Полнота порции, ≥1 на шкалу, пропорции ± 1, срезанные слоты не теряются | ✅ `stratified-shuffle.test.ts` (5)      |
-| scoring — normalization          | Raw → 0-100% нормализация, уровни достоверности                         | ✅ покрыт `scoring-core.test.ts` (5.6.5) |
-| cabinet — psychologist actions   | Привязка/отвязка, заметки, список клиентов                              | ⏳ Планируется                           |
+| Тест                            | Описание                                                                   | Статус                                      |
+| ------------------------------- | -------------------------------------------------------------------------- | ------------------------------------------- |
+| quiz.action — submitQuiz (вход) | unauthorized, 5 видов невалидного тела → validation_error без записи       | ✅ `quiz-selection-leaderboard.test.ts` (6) |
+| quiz.action — выборка вопросов  | 48 + 2 attention-check, исключение отвеченных/пропущенных, повтор проверок | ✅ `quiz-selection-leaderboard.test.ts` (4) |
+| achievements — правила          | 18 ачивок достижимы, пороги, порядок сессий, только шкалы ядра             | ✅ `achievement-rules.test.ts` (14)         |
+| leaderboard — recalcEntry       | XP только по `isValid`, гранула — UTC-сутки                                | ✅ `quiz-selection-leaderboard.test.ts` (1) |
+| stratified-shuffle              | Полнота порции, ≥1 на шкалу, пропорции ± 1, срезанные слоты не теряются    | ✅ `stratified-shuffle.test.ts` (5)         |
+| scoring — normalization         | Raw → 0-100% нормализация, уровни достоверности                            | ✅ покрыт `scoring-core.test.ts` (5.6.5)    |
+| cabinet — действия психолога    | Гейт роли, валидация/strip, отказ без активной связи, последний ответ      | ✅ `cabinet.action.test.ts` (8)             |
 
 ## Фаза 2: E2E тесты
 

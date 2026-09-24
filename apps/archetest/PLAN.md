@@ -609,13 +609,32 @@ attention-check, он без баллов намеренно); расхожде�
 > Тесты ядра спринта (скоринг, экспресс-выборка, merge, E2E express) перенесены
 > в этап 5.8 — они пишутся вместе с кодом Фазы 5, а не после феста.
 
-- [ ] Unit-тесты server actions (quiz, achievements, cabinet; от leaderboard — только фильтр `isValid` в `recalcLeaderboardEntry`, UI убран в 5.9.1)
+- [x] Unit-тесты server actions (quiz, achievements, cabinet; от leaderboard — только фильтр `isValid` в `recalcLeaderboardEntry`, UI убран в 5.9.1)
       - [x] achievements ✅ 2026-09-24 v0.28.44: правила вынесены в `_lib/achievement-rules.ts` (чистые, без prisma),
       `achievement-rules.test.ts` (14): у каждой из 18 ачивок есть достижимое правило, границы порогов,
       порядок сессий. **Найден и исправлен баг:** `DOMINANT_80`/`BALANCED` учитывали скрытые экспериментальные
       шкалы (RES_PHYS/RES_AFF/SPEC_INT) — ачивка за невидимую пользователю доминанту. ⚠️ `NIGHT_OWL`/`EARLY_BIRD`
       считают час по времени сервера, не пользователя (в контейнере — UTC): отдельная задача, нужен часовой
       пояс клиента в submit.
+  - [x] quiz / cabinet / leaderboard ✅ 2026-09-24 v0.28.45 (моки prisma и сессии): `quiz-selection-leaderboard.test.ts`
+        (11) — порция 48 + 2 attention-check, исключение отвеченных/пропущенных, повтор attention-check, вход
+        `submitQuizAction` (unauthorized, 5 видов невалидного тела без записи), XP только по `isValid`;
+        `cabinet.action.test.ts` (8) — гейт роли на всех действиях, валидация и `.strip()`, отказ без активной
+        связи, баллы по последнему ответу. **Безопасность:** с `leaderboard.action.ts` снят `'use server'` —
+        `recalcLeaderboardEntry(userId)` был публичным эндпоинтом (пересчёт чужого кэша через raw prisma).
+- [ ] **Политики ZenStack: закрыть три пробела defense-in-depth** (ревью `auth-policy-validator` 2026-09-24,
+      проверено вручную). Сегодня **не эксплуатируются**: HTTP-обработчика ZenStack в приложении нет, все записи
+      enhanced-клиентом идут с фиксированными полями, у `roles` в Better Auth `input: false`. Сработают при первом
+      коде, который передаст пользовательские поля в enhanced `update`:
+      1. `User` `@@allow('update', auth() == this)` без ограничения полей → пользователь может выдать себе `roles`
+      (`schema.zmodel:81`). Нужен запрет смены `roles` владельцем (в v3 — `post-update`/`before()`, не `future()`).
+      2. `ClientPsychologistLink` update клиентом и психологом без ограничения полей → перестановка
+      `clientId`/`psychologistId` (`:283`, `:285`); create не проверяет, что `psychologistId` — психолог (`:281`,
+      проверка только в `linkPsychologistAction`).
+      3. `PsychologistNote` не смотрит на `link.status` (`:302`) → по отозванной связи психолог пишет/читает свои
+      заметки. Данные клиента после отзыва закрыты правильно (`QuizSession`/`QuizAnswer` требуют ACTIVE).
+      Решение Kami: чинить сейчас (генерация + деплой) или при первом «открытом» `update`. Для (3) — продуктовый
+      вопрос: доступны ли психологу его заметки после отзыва (чтение да, запись нет — вероятный ответ).
 - [x] Unit-тесты стратифицированной выборки ✅ 2026-09-24 v0.28.43 (пул, волна 6) — `stratified-shuffle.test.ts` (5):
       полнота и уникальность порции, минимум 1 на шкалу, пропорциональность ± 1 на всём банке. **Найден и
       исправлен баг:** слоты, срезанные по размеру маленькой корзины, терялись — при почти исчерпанных
