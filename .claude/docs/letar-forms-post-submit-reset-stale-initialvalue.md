@@ -141,3 +141,8 @@ array) — но с `keepDefaultValues: true` он на практике боль
 успешный сабмит) —
 [post-submit-reset-persistence-stable-initialvalue.spec.tsx](/libs/forms/src/lib/declarative/form-root/post-submit-reset-persistence-stable-initialvalue.spec.tsx).
 Полный разбор — `PLAN_COMPLETED.md` (запись 2026-09-23, forms 2.16.10).
+
+⚠️ **Парная ловушка — 2.16.13:** после сабмита с ошибкой черновик правильно остаётся, но раньше не
+удалялся, если значения затем вернули к исходным (окно восстановления на равных данных). Теперь
+`useFormFeatures` удаляет такой черновик и при возврате значений, и при монтировании. Разбор —
+`PLAN_COMPLETED.md` (запись 2026-09-24).
