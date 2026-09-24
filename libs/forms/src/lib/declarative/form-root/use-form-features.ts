@@ -2,7 +2,7 @@
 
 import { omitAtPaths } from '@letar/forms-core/security'
 import { useSensitiveFieldPaths } from '@letar/forms-react'
-import { useCallback, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { type FormOfflineConfig, useOfflineForm } from '../../offline'
 import { type FormPersistenceConfig, useFormPersistence } from '../form-persistence'
 import type { FormOfflineState } from '../types'
@@ -14,6 +14,14 @@ function safeJsonSnapshot(values: unknown): string | null {
   } catch {
     return null
   }
+}
+
+/** Убирает из значений ключи верхнего уровня, которые persistence никогда не пишет в черновик */
+function omitExcludedFields<TData extends object>(values: TData, excludeFields: string[] | undefined): TData {
+  if (!excludeFields?.length || typeof values !== 'object' || values === null) {
+    return values
+  }
+  return Object.fromEntries(Object.entries(values).filter(([key]) => !excludeFields.includes(key))) as TData
 }
 
 /**
@@ -79,9 +87,47 @@ export function useFormFeatures<TData extends object>({
   // замыкании подписки: эффект подписки перезапускается при смене `features`, и снимок,
   // взятый заново, оказался бы уже правленными значениями
   const baselineSnapshotRef = useRef<string | null>(null)
+  const excludeFields = persistence?.excludeFields
 
   // Hook persistence (if не вkeyён — используем disabled key)
   const persistenceResult = useFormPersistence<TData>(persistence ?? { key: '__disabled__' })
+
+  // Снимок значений в том виде, в каком они попали бы в черновик: без чувствительных путей и
+  // без `excludeFields`. Одна функция для baseline, живых значений и загруженного черновика —
+  // иначе черновик (без исключённых полей) никогда не совпал бы с значениями формы (с ними)
+  const toSnapshot = useCallback(
+    (values: TData): string | null => {
+      const safe = sensitivePaths.length > 0 ? omitAtPaths(values, sensitivePaths) : values
+      return safeJsonSnapshot(omitExcludedFields(safe, excludeFields))
+    },
+    [sensitivePaths, excludeFields],
+  )
+
+  // Актуальное состояние черновика для обработчика стора: он живёт в замыкании подписки и не
+  // должен перезапускаться на каждый рендер ради чтения этих флагов
+  const draftStateRef = useRef({ hasSavedData: false, isDialogOpen: false, shouldRestore: false })
+  useEffect(() => {
+    draftStateRef.current = {
+      hasSavedData: persistenceResult.hasSavedData,
+      isDialogOpen: persistenceResult.isDialogOpen,
+      shouldRestore: persistenceResult.shouldRestore,
+    }
+  }, [persistenceResult.hasSavedData, persistenceResult.isDialogOpen, persistenceResult.shouldRestore])
+
+  // Черновик, равный исходным значениям формы, — не черновик (правку вернули как было, а старая
+  // запись после неудачного сабмита осталась). Удаляем молча, диалог не открываем.
+  // Ждём baseline: он берётся при первой подписке; черновик приходит из localStorage позже.
+  const { savedData, isDialogOpen, clearSavedData } = persistenceResult
+  useEffect(() => {
+    if (!isPersistenceEnabled || !isDialogOpen || !savedData || baselineSnapshotRef.current === null) {
+      return
+    }
+    const draftSnapshot = toSnapshot(savedData)
+    if (draftSnapshot !== null && draftSnapshot === baselineSnapshotRef.current) {
+      clearSavedData()
+      persistenceResult.closeDialog()
+    }
+  }, [isPersistenceEnabled, isDialogOpen, savedData, toSnapshot, clearSavedData, persistenceResult])
 
   // После clearSavedData() библиотека сама вызывает form.reset(dataToSubmit)
   // (usePostSubmitResetGuard) — это уведомление от стора нужно распознать как «не правка»,
@@ -89,10 +135,9 @@ export function useFormFeatures<TData extends object>({
   // совпадёт и тут же перезапишет черновик только что отправленными данными
   const updateBaselineAfterClear = useCallback(
     (value: TData) => {
-      const safeValue = sensitivePaths.length > 0 ? omitAtPaths(value, sensitivePaths) : value
-      baselineSnapshotRef.current = safeJsonSnapshot(safeValue)
+      baselineSnapshotRef.current = toSnapshot(value)
     },
-    [sensitivePaths],
+    [toSnapshot],
   )
 
   // Wrapper для онлайн-отправки с очисткой persistence
@@ -171,9 +216,7 @@ export function useFormFeatures<TData extends object>({
       // может оказаться уже сама правка пользователя
       if (baselineSnapshotRef.current === null) {
         const initial = form.state.values as TData
-        baselineSnapshotRef.current = safeJsonSnapshot(
-          sensitivePaths.length > 0 ? omitAtPaths(initial, sensitivePaths) : initial,
-        )
+        baselineSnapshotRef.current = toSnapshot(initial)
       }
 
       const subscription = form.store.subscribe(() => {
@@ -183,8 +226,16 @@ export function useFormFeatures<TData extends object>({
         // Стор формы шумит и без правок пользователя (монтирование, валидация, фокус/blur).
         // Значения при этом равны исходным — писать такой «черновик» нельзя: при следующем
         // открытии формы он вылезает диалогом «Восстановить сохранённые данные?» на пустом месте
-        const snapshot = safeJsonSnapshot(safeValues)
+        const snapshot = toSnapshot(values)
         if (snapshot !== null && snapshot === baselineSnapshotRef.current) {
+          // Значения вернулись к исходным — ранее записанный черновик (правка → неудачный сабмит →
+          // возврат поля) устарел, иначе форма при следующем открытии предложит восстановить
+          // данные, равные исходным. Пока диалог восстановления открыт, черновик ещё не принят
+          // пользователем и шум стора его удалять не вправе
+          const draft = draftStateRef.current
+          if (draft.hasSavedData && !draft.isDialogOpen && !draft.shouldRestore) {
+            persistenceResult.clearSavedData()
+          }
           return
         }
 
@@ -197,7 +248,7 @@ export function useFormFeatures<TData extends object>({
       }
       return () => subscription.unsubscribe()
     },
-    [isPersistenceEnabled, persistenceResult, sensitivePaths],
+    [isPersistenceEnabled, persistenceResult, sensitivePaths, toSnapshot],
   )
 
   // Восстановление данных из persistence
