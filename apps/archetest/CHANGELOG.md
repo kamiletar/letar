@@ -5,6 +5,14 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 версионирование следует [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.28.21] - 2026-09-24
+
+### Changed
+
+- **Авторский EN-банк, партия №401–500** (пул, волна 3): сценарии и варианты написаны по
+  `docs/en-bank-style.md`, баллы и порядок вариантов не тронуты. Прогресс **EN: 400/1565**,
+  храповик `EN_UNTRANSLATED_MAX` = 1165. До БД доедет через `nx db:seed archetest -- --sync-texts`.
+
 ## [0.28.20] - 2026-09-24
 
 ### Changed
