@@ -307,7 +307,11 @@ export function PersonalityRadarChart({
       </Heading>
       <Box w="100%" aspectRatio="1 / 1" maxH="560px" mx="auto" maxW="560px">
         <ResponsiveContainer width="100%" height="100%">
-          <RadarChart data={points} cx="50%" cy="50%" outerRadius={outerRadius}>
+          {
+            /* accessibilityLayer: фокус Tab на диаграмме, стрелки переключают оси и открывают тултип.
+              В recharts 3 это умолчание, флаг стоит явно — чтобы смена умолчания не прошла тихо */
+          }
+          <RadarChart data={points} cx="50%" cy="50%" outerRadius={outerRadius} accessibilityLayer>
             <PolarGrid stroke={resolvedBorder} />
             <PolarAngleAxis
               dataKey="code"

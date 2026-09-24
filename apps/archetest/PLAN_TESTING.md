@@ -44,6 +44,7 @@ nx typecheck:tsgo archetest    # Проверка типов
 | Индекс «Тёмное ядро» (Фаза 3) | Ядро/вкусы/структура, «n=0 ≠ ноль баллов», границы порогов, тождество чувствительности к NAR, MAS вне ядра, полнота языков | ✅ `dark-core.test.ts` (24)                |
 | Геометрия гексаграммы (5.2)   | Вершины/углы, S-вектор, Jaccard-инвариант 0.5, аура, клиппинг                                                              | ✅ `hexagram-geometry.test.ts` (18)        |
 | Выборка express               | 8 шкал гексаграммы × 3 вопроса, детерминированность                                                                        | ✅ `express-select.test.ts` (6)            |
+| Радар с клавиатуры (аудит)    | `accessibilityLayer`: поверхность фокусируется (tabindex 0, role application), стрелка открывает тултип оси                | ✅ `personality-radar-chart.spec.tsx` (2)  |
 | Клиентский скоринг            | `computeClientScores`: нормализация, actual_max, игнор мусора                                                              | ✅ `client-scoring.test.ts` (8)            |
 | Merge гостевой сессии         | Пересчёт на сервере из ответов, отклонение подделок                                                                        | ✅ `scoring-core.test.ts` (сценарий) + E2E |
 | E2E: express-флоу             | Intro → согласие → 24 вопроса → гексаграмма → QR/CTA, restore                                                              | ✅ `express.spec.ts` (2)                   |

@@ -5,6 +5,13 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 версионирование следует [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.28.36] - 2026-09-24
+
+### Changed
+
+- Радар профиля: `accessibilityLayer` выставлен явно (фокус по Tab, оси — стрелками, тултип
+  открывается с клавиатуры). Новый компонентный тест `personality-radar-chart.spec.tsx` (2).
+
 ## [0.28.35] - 2026-09-24
 
 ### Changed
