@@ -5,6 +5,15 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 версионирование следует [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.28.17] - 2026-09-24
+
+### Added
+
+- `docs/question-review/question-review-rare.xlsx` + раздел «Редкие шкалы» в `INSTRUCTIONS.md`
+  (`INTRO_RARE` в генераторе). Волна 2 пула закрыта: ревьюеру готовы пять таблиц — adhd, hh,
+  attachment, rare, audit-b; в PLAN — пункт действия Kami (передать пакеты, решить место
+  СДВГ и привязанности в продукте).
+
 ## [0.28.16] - 2026-09-24
 
 ### Added
