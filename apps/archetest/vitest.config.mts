@@ -29,6 +29,8 @@ export default defineConfig({
       // баррель резолвится через paths Next; в тестах он мокается (тянет `next/*`), но vi.mock
       // требует, чтобы модуль вообще резолвился
       { find: /^@letar\/ui$/, replacement: resolve(import.meta.dirname, '../../libs/ui/src/index.ts') },
+      // Лёгкий баррель без next/*: резолвим настоящий модуль, мок не нужен
+      { find: /^@letar\/hooks$/, replacement: resolve(import.meta.dirname, '../../libs/hooks/src/index.ts') },
     ],
   },
 })

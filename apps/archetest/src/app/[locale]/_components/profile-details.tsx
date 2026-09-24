@@ -11,6 +11,7 @@ import type { IpsativeScale } from '../_lib/ipsative'
 import { computeIpsativeRanking } from '../_lib/ipsative'
 import type { ScaleConfidence } from '../_lib/scoring-core'
 import { DevelopmentalProfileCard } from './developmental-profile-card'
+import { useScaleConfidenceLabel } from './use-scale-confidence-label'
 
 interface ProfileDetailsProps {
   scores: Record<PersonalityTypeCode, number>
@@ -18,9 +19,6 @@ interface ProfileDetailsProps {
   /** Число отвеченных релевантных вопросов по шкалам — включает ipsative-интервалы (5.6) */
   relevantCounts?: Record<PersonalityTypeCode, number> | null
 }
-
-/** Шкалы с малым числом ответов получают подпись; остальные — без неё */
-const CONFIDENCE_LABELED = new Set<ScaleConfidence>(['insufficient', 'low'])
 
 /**
  * Текстовые детали профиля: топ-3 типа, суперсила, взаимодействие, модификаторы.
@@ -30,6 +28,7 @@ export function ProfileDetails({ scores, confidence, relevantCounts }: ProfileDe
   const locale = useLocale()
   const isRu = locale === 'ru'
   const t = useTranslations('profileDetails')
+  const confidenceLabel = useScaleConfidenceLabel()
   const showClinical = useShowClinicalNames()
 
   // Ipsative-ранжирование (5.6): ранги внутри профиля + 95%-интервалы точности.
@@ -67,7 +66,7 @@ export function ProfileDetails({ scores, confidence, relevantCounts }: ProfileDe
       )}
       {top3.map((type, i) => {
         const conf = confidence?.[type.code]
-        const confLabel = conf && CONFIDENCE_LABELED.has(conf) ? t(`confidence.${conf}`) : null
+        const confLabel = confidenceLabel(conf)
         // Перекрывающиеся интервалы соседей = статистически неразличимы: честно говорим,
         // что порядок условен, вместо ложной точности «61,2% > 60,8%»
         const next = top3[i + 1]

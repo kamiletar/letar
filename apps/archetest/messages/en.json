@@ -78,6 +78,10 @@
       "q1": "Are you mentally healthy?",
       "q2": "Only ~17% of people reach midlife having never met the criteria for a mental disorder — yet almost everyone answers \"yes\". How come?",
       "source": "Dunedin longitudinal cohort: Schaefer et al., 2017, Journal of Abnormal Psychology"
+    },
+    "container": {
+      "noAnswersTitle": "No answers",
+      "noAnswersText": "Answer at least one question."
     }
   },
   "quiz": {
@@ -192,6 +196,9 @@
       "loadErrorTitle": "Loading error",
       "loadErrorText": "Failed to load new questions",
       "loadingMore": "Loading new questions..."
+    },
+    "progressBar": {
+      "total": "Total: {totalAnswered} / {totalQuestions}"
     }
   },
   "cabinet": {
@@ -391,10 +398,6 @@
     "subtitle": "A guide for clinical psychologists, psychotherapists, and psychiatrists."
   },
   "profileDetails": {
-    "confidence": {
-      "insufficient": "Insufficient data",
-      "low": "Low accuracy"
-    },
     "advice": "Advice",
     "strengths": "Strengths",
     "dynamic": "Dynamic",
@@ -429,5 +432,48 @@
     "skip": "Skip",
     "title": "How are you feeling?",
     "hint": "Pick the closest state. This helps separate stable traits from momentary mood."
+  },
+  "hexagram": {
+    "darkTriad": "Dark triad",
+    "lightTriad": "Light triad",
+    "constructiveArchitect": "Constructive Architect",
+    "ariaLabel": "Hexagram of the Light and Dark triads",
+    "integrationZone": "Integration zone: {integrationPercent}% — a visual metaphor of triad overlap, not a psychometric metric",
+    "symbolNote": "The hexagram (Shatkona) is an ancient symbol of sacred geometry: two interlocking triangles joining opposites (fire and water, spirit and matter). Here it overlays the Light and Dark triads of your personality.",
+    "independenceNote": "The Light and Dark triads are independent dimensions, not two ends of one axis: high scores on both are normal in the data, not a paradox."
+  },
+  "highContrast": {
+    "label": "High contrast"
+  },
+  "psychologistLink": {
+    "linked": "Psychologist linked!",
+    "canSee": "Your psychologist {psychologistName} can see these results",
+    "title": "Share with psychologist",
+    "hint": "Link a psychologist by email — they will see your profile and dynamics.",
+    "emailLabel": "Psychologist email"
+  },
+  "radar": {
+    "abbreviations": "Abbreviations",
+    "legendBold": "Bold codes — 40% and above",
+    "legendFaded": ", faded — few answers",
+    "lowConfidence": "Few answers — rough estimate"
+  },
+  "scaleConfidence": {
+    "insufficient": "Insufficient data",
+    "low": "Low accuracy"
+  },
+  "statesBlock": {
+    "title": "States",
+    "intro": "Unlike traits, states are not permanent — they come and go. This is not a personality type but a feature of mood that responds to care. A high score here is a reason to check in with yourself, not a diagnosis."
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "description": "How Archetest processes personal data",
+    "notMedical": "Archetest is a self-discovery and development tool. It is not a diagnostic tool or a medical device."
+  },
+  "meta": {
+    "siteName": "Archetest",
+    "title": "Archetest — Personality Type Test",
+    "description": "Discover your personality archetype. {totalQuestions} questions, {coreScales} scales — 50 per session, at your own pace."
   }
 }

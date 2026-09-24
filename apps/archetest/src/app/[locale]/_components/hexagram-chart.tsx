@@ -1,7 +1,7 @@
 'use client'
 
 import { Badge, Box, Heading, HStack, SimpleGrid, Text, useToken, VStack } from '@chakra-ui/react'
-import { useLocale } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { type RefObject, useEffect, useRef, useState } from 'react'
 
 import { prefersReducedMotion } from '@letar/hooks'
@@ -217,6 +217,7 @@ export function HexagramChart({
 }: HexagramChartProps) {
   const locale = useLocale()
   const isRu = locale === 'ru'
+  const t = useTranslations('hexagram')
 
   const animatedScores = useAnimatedScores(scores)
   const svgRef = useRef<SVGSVGElement>(null)
@@ -259,7 +260,7 @@ export function HexagramChart({
           viewBox={`0 0 ${VIEWBOX_WIDTH} ${DEFAULT_SIZE + PAD_Y * 2}`}
           width="100%"
           role="img"
-          aria-label={isRu ? 'Гексаграмма Светлой и Тёмной триад' : 'Hexagram of the Light and Dark triads'}
+          aria-label={t('ariaLabel')}
         >
           <g transform={`translate(${PAD_X}, ${PAD_Y})`}>
             {/* Сетка: концентрические окружности 25/50/75/100% */}
@@ -362,16 +363,14 @@ export function HexagramChart({
         {/* Метка Конструктивного Архитектора (высокие MAC + KAN смещают S-вектор) */}
         {geometry.isConstructiveArchitect && (
           <Badge colorPalette="teal" variant="subtle" fontSize="sm">
-            {isRu ? 'Конструктивный Архитектор' : 'Constructive Architect'}
+            {t('constructiveArchitect')}
           </Badge>
         )}
 
         {/* Индекс интеграции — с явной оговоркой про метафору */}
         {showIntegrationIndex && (
           <Text fontSize="sm" color="fg.muted" textAlign="center">
-            {isRu
-              ? `Зона интеграции: ${integrationPercent}% — визуальная метафора наложения триад, не психометрическая метрика`
-              : `Integration zone: ${integrationPercent}% — a visual metaphor of triad overlap, not a psychometric metric`}
+            {t('integrationZone', { integrationPercent })}
           </Text>
         )}
 
@@ -379,7 +378,7 @@ export function HexagramChart({
         <SimpleGrid columns={{ base: 1, sm: 2 }} columnGap={8} rowGap={1} w="100%" maxW="520px" mt={1}>
           <VStack align="stretch" gap={1}>
             <Text fontSize="xs" fontWeight="semibold" color="fg.muted" textTransform="uppercase" letterSpacing="wide">
-              {isRu ? 'Светлая триада' : 'Light triad'}
+              {t('lightTriad')}
             </Text>
             {LIGHT_TRIAD_CODES.map((code) => (
               <LegendRow
@@ -393,7 +392,7 @@ export function HexagramChart({
           </VStack>
           <VStack align="stretch" gap={1} mt={{ base: 2, sm: 0 }}>
             <Text fontSize="xs" fontWeight="semibold" color="fg.muted" textTransform="uppercase" letterSpacing="wide">
-              {isRu ? 'Тёмная триада' : 'Dark triad'}
+              {t('darkTriad')}
             </Text>
             {DARK_TRIAD_CODES.map((code) => (
               <LegendRow
@@ -438,14 +437,10 @@ export function HexagramChart({
         {showNarrative && (
           <VStack gap={1} maxW="600px">
             <Text fontSize="xs" color="fg.muted" textAlign="center">
-              {isRu
-                ? 'Гексаграмма (Шаткона) — древний символ сакральной геометрии: два встречных треугольника как соединение противоположностей (огонь и вода, дух и материя). Здесь — наложение Светлой и Тёмной триад твоей личности.'
-                : 'The hexagram (Shatkona) is an ancient symbol of sacred geometry: two interlocking triangles joining opposites (fire and water, spirit and matter). Here it overlays the Light and Dark triads of your personality.'}
+              {t('symbolNote')}
             </Text>
             <Text fontSize="xs" color="fg.muted" textAlign="center">
-              {isRu
-                ? 'Светлая и Тёмная триады — независимые измерения, а не концы одной оси: высокие баллы по обеим — норма данных, не парадокс.'
-                : 'The Light and Dark triads are independent dimensions, not two ends of one axis: high scores on both are normal in the data, not a paradox.'}
+              {t('independenceNote')}
             </Text>
           </VStack>
         )}

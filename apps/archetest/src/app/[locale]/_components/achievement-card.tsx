@@ -41,7 +41,7 @@ export function AchievementCard({ code, unlocked, unlockedAt }: AchievementCardP
         </Text>
         {unlocked && unlockedAt && (
           <Text fontSize="xs" color="fg.subtle">
-            {new Date(unlockedAt).toLocaleDateString(isRu ? 'ru-RU' : 'en-US')}
+            {new Date(unlockedAt).toLocaleDateString(locale)}
           </Text>
         )}
         <Text fontSize="xs" color="brand.fg" fontWeight="medium">

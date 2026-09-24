@@ -1,7 +1,7 @@
 'use client'
 
 import { IconButton } from '@chakra-ui/react'
-import { useLocale } from 'next-intl'
+import { useTranslations } from 'next-intl'
 import { LuContrast } from 'react-icons/lu'
 
 import { useHighContrast } from '@/app/_hooks/use-high-contrast'
@@ -12,9 +12,8 @@ import { useHighContrast } from '@/app/_hooks/use-high-contrast'
  */
 export function HighContrastToggle() {
   const { enabled, toggle } = useHighContrast()
-  const locale = useLocale()
-  const isRu = locale === 'ru'
-  const label = isRu ? 'Высокий контраст' : 'High contrast'
+  const t = useTranslations('highContrast')
+  const label = t('label')
 
   return (
     <IconButton

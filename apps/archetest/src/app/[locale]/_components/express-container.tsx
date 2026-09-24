@@ -42,6 +42,7 @@ interface StoredExpressResult {
  */
 export function ExpressContainer({ questions, isAuthenticated }: ExpressContainerProps) {
   const t = useTranslations('express')
+  const te = useTranslations('express.container')
   const locale = useLocale()
   const isRu = locale === 'ru'
 
@@ -167,8 +168,8 @@ export function ExpressContainer({ questions, isAuthenticated }: ExpressContaine
   const handleFinish = useCallback(() => {
     if (answers.size === 0) {
       toaster.error({
-        title: isRu ? 'Нет ответов' : 'No answers',
-        description: isRu ? 'Ответьте хотя бы на один вопрос.' : 'Answer at least one question.',
+        title: te('noAnswersTitle'),
+        description: te('noAnswersText'),
       })
       setState('intro')
       return

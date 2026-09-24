@@ -47,12 +47,11 @@ describe('кабинет: строки блоков из messages', () => {
   })
 
   it.each(['ru', 'en'] as const)('%s: блоки без MISSING_MESSAGE и сырых ключей', (locale) => {
-    for (
-      const ui of [
-        <DarkCoreBlock index={index} />,
-        <ExperimentalScalesBlock scores={{} as Record<ScaleCode, number>} />,
-      ]
-    ) {
+    const blocks = [
+      <DarkCoreBlock key="dark" index={index} />,
+      <ExperimentalScalesBlock key="exp" scores={{} as Record<ScaleCode, number>} />,
+    ]
+    for (const ui of blocks) {
       const { onError, container, unmount } = renderIn(locale, ui)
       expect(onError).not.toHaveBeenCalled()
       expect(container.textContent).not.toMatch(/cabinet\.\w/)

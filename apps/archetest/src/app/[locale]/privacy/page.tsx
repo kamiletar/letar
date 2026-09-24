@@ -1,6 +1,6 @@
 import { Box, Container, Heading, Link as ChakraLink, Text, VStack } from '@chakra-ui/react'
 import type { Metadata } from 'next'
-import { setRequestLocale } from 'next-intl/server'
+import { getTranslations, setRequestLocale } from 'next-intl/server'
 
 type Props = { params: Promise<{ locale: string }> }
 
@@ -11,11 +11,10 @@ const RKN_REGISTRY_NUMBER = '77-26-555440'
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params
   const isRu = locale === 'ru'
+  const t = await getTranslations({ locale, namespace: 'privacy' })
   return {
-    title: isRu ? 'Политика конфиденциальности' : 'Privacy Policy',
-    description: isRu
-      ? 'Как Archetest обрабатывает персональные данные (152-ФЗ)'
-      : 'How Archetest processes personal data',
+    title: t('title'),
+    description: t('description'),
     alternates: {
       canonical: isRu ? '/privacy' : '/en/privacy',
       languages: { ru: '/privacy', en: '/en/privacy' },
@@ -148,12 +147,14 @@ export default async function PrivacyPage({ params }: Props) {
   const { locale } = await params
   setRequestLocale(locale)
   const isRu = locale === 'ru'
+  const t = await getTranslations({ locale, namespace: 'privacy' })
+  // Текст самой политики — юридический документ, живёт в коде страницы, а не в messages
   const sections = buildSections(isRu)
 
   return (
     <Container maxW="3xl" py={12}>
       <VStack gap={6} align="stretch">
-        <Heading size="xl">{isRu ? 'Политика конфиденциальности' : 'Privacy Policy'}</Heading>
+        <Heading size="xl">{t('title')}</Heading>
 
         {sections.map((section) => (
           <Box key={section.title}>
@@ -173,9 +174,7 @@ export default async function PrivacyPage({ params }: Props) {
         {/* Обязательный дисклеймер для псевдомедицинской тематики */}
         <Box mt={4} p={4} borderRadius="lg" borderWidth="1px" borderColor="border" bg="bg.subtle">
           <Text fontSize="sm" fontWeight="semibold">
-            {isRu
-              ? 'Archetest — инструмент самопознания и развития. Не является диагностическим инструментом и медицинским изделием.'
-              : 'Archetest is a self-discovery and development tool. It is not a diagnostic tool or a medical device.'}
+            {t('notMedical')}
           </Text>
         </Box>
       </VStack>

@@ -3,7 +3,7 @@
 import { Link } from '@/i18n/navigation'
 import { useSession } from '@/lib/auth-client'
 import { Alert, Button, Card, HStack, Input, Text, VStack } from '@chakra-ui/react'
-import { useLocale } from 'next-intl'
+import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useState } from 'react'
 import { LuLink, LuSettings, LuShieldCheck, LuUser } from 'react-icons/lu'
 import { getMyLinkedPsychologistsAction, linkPsychologistAction } from '../_actions/psychologist.action'
@@ -13,8 +13,7 @@ import { getMyLinkedPsychologistsAction, linkPsychologistAction } from '../_acti
  */
 export function PsychologistLinkBlock() {
   const { data: session } = useSession()
-  const locale = useLocale()
-  const isRu = locale === 'ru'
+  const t = useTranslations('psychologistLink')
 
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
@@ -58,7 +57,7 @@ export function PsychologistLinkBlock() {
     if (result.error) {
       setMessage({ type: 'error', text: result.error })
     } else {
-      setMessage({ type: 'success', text: isRu ? 'Психолог привязан!' : 'Psychologist linked!' })
+      setMessage({ type: 'success', text: t('linked') })
       setEmail('')
       setHasActiveLink(true)
       setPsychologistName(result.data?.psychologistName || result.data?.psychologistEmail || null)
@@ -73,9 +72,7 @@ export function PsychologistLinkBlock() {
           <HStack gap={2}>
             <LuShieldCheck size={16} />
             <Text fontSize="sm">
-              {isRu
-                ? `Ваш психолог ${psychologistName} видит эти результаты`
-                : `Your psychologist ${psychologistName} can see these results`}
+              {t('canSee', { psychologistName: psychologistName ?? '' })}
             </Text>
             <Button asChild variant="ghost" size="xs">
               <Link href="/settings">
@@ -96,18 +93,16 @@ export function PsychologistLinkBlock() {
           <HStack gap={2}>
             <LuUser size={16} />
             <Text fontSize="sm" fontWeight="bold">
-              {isRu ? 'Поделиться с психологом' : 'Share with psychologist'}
+              {t('title')}
             </Text>
           </HStack>
           <Text fontSize="xs" color="fg.muted">
-            {isRu
-              ? 'Привяжите психолога по email — он сможет видеть ваш профиль и динамику.'
-              : 'Link a psychologist by email — they will see your profile and dynamics.'}
+            {t('hint')}
           </Text>
           <HStack w="100%" gap={2}>
             <Input
               size="sm"
-              placeholder={isRu ? 'Email психолога' : 'Psychologist email'}
+              placeholder={t('emailLabel')}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleLink()}

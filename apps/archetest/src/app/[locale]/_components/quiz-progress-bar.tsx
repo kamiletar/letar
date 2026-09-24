@@ -1,7 +1,7 @@
 'use client'
 
 import { Box, HStack, Progress, Text } from '@chakra-ui/react'
-import { useLocale, useTranslations } from 'next-intl'
+import { useTranslations } from 'next-intl'
 
 interface QuizProgressBarProps {
   current: number
@@ -16,8 +16,7 @@ interface QuizProgressBarProps {
 
 export function QuizProgressBar({ current, total, answered, globalProgress }: QuizProgressBarProps) {
   const t = useTranslations('quiz')
-  const locale = useLocale()
-  const isRu = locale === 'ru'
+  const tp = useTranslations('quiz.progressBar')
 
   // Глобальный процент покрытия
   const globalPercent = globalProgress
@@ -44,9 +43,10 @@ export function QuizProgressBar({ current, total, answered, globalProgress }: Qu
       {globalProgress && (
         <HStack justify="space-between" mt={2}>
           <Text fontSize="xs" color="fg.subtle">
-            {isRu
-              ? `Всего: ${globalProgress.totalAnswered} / ${globalProgress.totalQuestions}`
-              : `Total: ${globalProgress.totalAnswered} / ${globalProgress.totalQuestions}`}
+            {tp('total', {
+              totalAnswered: globalProgress.totalAnswered,
+              totalQuestions: globalProgress.totalQuestions,
+            })}
           </Text>
           <Text fontSize="xs" color="brand.fg" fontWeight="bold">
             {globalPercent}%

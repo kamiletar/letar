@@ -2,7 +2,7 @@
 
 import { useShowClinicalNames } from '@/app/_hooks/use-psychologist'
 import { Box, Collapsible, Heading, HStack, SimpleGrid, Text, useToken } from '@chakra-ui/react'
-import { useLocale } from 'next-intl'
+import { useTranslations } from 'next-intl'
 import { useEffect, useMemo, useState } from 'react'
 import { LuChevronDown } from 'react-icons/lu'
 import { PolarAngleAxis, PolarGrid, Radar, RadarChart, ResponsiveContainer, Tooltip } from 'recharts'
@@ -135,12 +135,11 @@ function AxisTick({
 function RadarTooltip({
   active,
   payload,
-  isRu,
 }: {
   active?: boolean
   payload?: ReadonlyArray<{ name?: unknown; value?: unknown; color?: string; payload?: RadarPoint }>
-  isRu: boolean
 }) {
+  const t = useTranslations('radar')
   const point = payload?.[0]?.payload
   if (!active || !point) {
     return null
@@ -183,7 +182,7 @@ function RadarTooltip({
       ))}
       {point.lowConfidence && (
         <Text fontSize="xs" color="fg.subtle" mt={1}>
-          {isRu ? 'Мало ответов — оценка приблизительная' : 'Few answers — rough estimate'}
+          {t('lowConfidence')}
         </Text>
       )}
     </Box>
@@ -196,13 +195,13 @@ function RadarTooltip({
  */
 function RadarLegend({
   points,
-  isRu,
   hasComparison,
 }: {
   points: RadarPoint[]
-  isRu: boolean
   hasComparison: boolean
 }) {
+  const t = useTranslations('radar')
+
   return (
     <Collapsible.Root mt={3}>
       <Collapsible.Trigger asChild>
@@ -220,7 +219,7 @@ function RadarLegend({
           css={{ '&[data-state=open] svg': { transform: 'rotate(180deg)' } }}
         >
           <button type="button">
-            {isRu ? 'Расшифровка сокращений' : 'Abbreviations'}
+            {t('abbreviations')}
             <LuChevronDown />
           </button>
         </HStack>
@@ -267,7 +266,7 @@ export function PersonalityRadarChart({
 }: PersonalityRadarChartProps) {
   const showClinical = useShowClinicalNames()
   const isMobile = useIsMobile()
-  const isRu = useLocale() === 'ru'
+  const t = useTranslations('radar')
 
   // Резолвим токены для SVG-обводок/заливок
   const [resolvedColor, resolvedComparisonColor, resolvedBorder] = useToken('colors', [
@@ -326,7 +325,6 @@ export function PersonalityRadarChart({
                   payload={payload as ReadonlyArray<
                     { name?: unknown; value?: unknown; color?: string; payload?: RadarPoint }
                   >}
-                  isRu={isRu}
                 />
               )}
               cursor={{ stroke: resolvedBorder }}
@@ -369,11 +367,11 @@ export function PersonalityRadarChart({
           </>
         )}
         <Text color="fg.subtle" textAlign="center">
-          {isRu ? 'Жирные коды — 40% и выше' : 'Bold codes — 40% and above'}
-          {hasLowConfidence && (isRu ? ', бледные — мало ответов' : ', faded — few answers')}
+          {t('legendBold')}
+          {hasLowConfidence && t('legendFaded')}
         </Text>
       </HStack>
-      <RadarLegend points={points} isRu={isRu} hasComparison={!!comparisonData} />
+      <RadarLegend points={points} hasComparison={!!comparisonData} />
     </Box>
   )
 }

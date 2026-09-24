@@ -2,7 +2,7 @@ import { UmamiScript } from '@letar/analytics'
 import { AnalyticsGate } from '@letar/ui'
 import type { Metadata, Viewport } from 'next'
 import { NextIntlClientProvider } from 'next-intl'
-import { getMessages, setRequestLocale } from 'next-intl/server'
+import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server'
 import type { ReactNode } from 'react'
 
 import { Providers } from '@/app/_components/providers'
@@ -20,11 +20,10 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   const { locale } = await params
   const isRu = locale === 'ru'
 
-  const siteName = isRu ? 'Архетест' : 'Archetest'
-  const title = isRu ? 'Архетест — Тест типа личности' : 'Archetest — Personality Type Test'
-  const description = isRu
-    ? `Узнайте свой архетип личности. ${TOTAL_QUESTIONS} вопросов, ${CORE_SCALE_COUNT} шкалы — по 50 за сессию, в удобном темпе.`
-    : `Discover your personality archetype. ${TOTAL_QUESTIONS} questions, ${CORE_SCALE_COUNT} scales — 50 per session, at your own pace.`
+  const t = await getTranslations({ locale, namespace: 'meta' })
+  const siteName = t('siteName')
+  const title = t('title')
+  const description = t('description', { totalQuestions: TOTAL_QUESTIONS, coreScales: CORE_SCALE_COUNT })
 
   // Без metadataBase Next.js строит OpenGraph-ссылки и canonical относительными,
   // а соцсети и поисковики требуют абсолютных
