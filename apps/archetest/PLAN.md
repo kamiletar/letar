@@ -2,7 +2,7 @@
 
 > **📖 Начни с главного README:** [README.md](./README.md) — обзор проекта, быстрый старт, навигация по документации
 >
-> **Версия:** 0.28.38 | **Обновлено:** 2026-09-24 (пул, волна 5: группа 1 (for-professionals))
+> **Версия:** 0.28.39 | **Обновлено:** 2026-09-24 (пул, волна 5: группа 2 (кабинет)))
 >
 > **Связанные документы:**
 >
@@ -26,7 +26,7 @@
 | 2     | Пакеты ревьюеру ✅: СДВГ, привязанность, часть B аудита, редкие шкалы — 5 таблиц в `docs/question-review/` | ✅     |
 | 3     | Авторский EN-банк №101–1665 ✅ **EN: 1565/1565**, аудит: 0 непереведённых                                  | ✅     |
 | 4     | UI-хвосты ✅: `/dev/presentation` → brand, клавиатура радара (+тест), `theme:check` в `lint`               | ✅     |
-| 5     | `isRu ? … : …` → `messages` — **осталось 103 литеральных в 23 файлах** (группа 1 ✅)                       | 🔄     |
+| 5     | `isRu ? … : …` → `messages` — **осталось 78 литеральных в 19 файлах** (группы 1–2 ✅)                      | 🔄     |
 | 6     | Тесты Фазы 4: stratified-shuffle, server actions, E2E квиз/кабинет                                         | ⏳     |
 | 7     | Фичи Фазы 3: `relevantCounts` + динамика ядра, карта стабильности, фильтр, уведомления, сообщения, PDF     | ⏳     |
 
@@ -878,6 +878,10 @@ CAT/IRT. ✅ Подтверждено Kami: разделение ASD → ASD + D
       **Метрика с группы 1 — литеральные тернарии** (`isRu ? '…' : '…'`, выбор полей `label`/`labelEn`
       не считается): **осталось 103 в 23 файлах**. Прежний замер строк `grep -rc` (175 → 148) смешивал
       строки UI с выбором полей данных.
+      **Группа 2 ✅ v0.28.39:** кабинет — `dark-core-block` (+ ICU `select` «выше/ниже», подписи покрытия
+      банка), `experimental-scales-block`, `session-dynamics-chart` (дата — `toLocaleDateString(locale)`),
+      `cabinet/[clientId]/page` → `cabinet.{darkCore,experimental,dynamicsChart}`; тест
+      `cabinet-blocks-i18n.spec.tsx` (6). **Осталось 78 в 19 файлах.**
       Больше всего: `for-professionals/page.tsx` 34, `cabinet/[clientId]/_components/dark-core-block.tsx` 17,
       `profile-details.tsx` 14, `quiz-container.tsx` 11, `developmental-profile-card.tsx` 11,
       `experimental-scales-block.tsx` 10, `safety-net-block.tsx` 9, `disclaimer-consent.tsx` 7,

@@ -1,7 +1,7 @@
 'use client'
 
 import { Box, Heading, HStack, Text, VStack } from '@chakra-ui/react'
-import { useLocale } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { useCallback, useState } from 'react'
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import type { PersonalityTypeCode } from '../../../_data/personality-types'
@@ -25,6 +25,7 @@ interface SessionDynamicsChartProps {
 export function SessionDynamicsChart({ sessions }: SessionDynamicsChartProps) {
   const locale = useLocale()
   const isRu = locale === 'ru'
+  const t = useTranslations('cabinet.dynamicsChart')
   const [hiddenScales, setHiddenScales] = useState<Set<string>>(new Set())
 
   const toggleScale = useCallback((code: string) => {
@@ -49,7 +50,7 @@ export function SessionDynamicsChart({ sessions }: SessionDynamicsChartProps) {
     .map((s, i) => {
       const date = s.completedAt ? new Date(s.completedAt) : new Date(s.createdAt)
       const entry: Record<string, string | number> = {
-        name: `#${i + 1} (${date.toLocaleDateString(isRu ? 'ru-RU' : 'en-US', { day: 'numeric', month: 'short' })})`,
+        name: `#${i + 1} (${date.toLocaleDateString(locale, { day: 'numeric', month: 'short' })})`,
       }
       for (const type of PERSONALITY_TYPES) {
         entry[type.code] = s.scores![type.code] ?? 0
@@ -63,7 +64,7 @@ export function SessionDynamicsChart({ sessions }: SessionDynamicsChartProps) {
 
   return (
     <VStack align="start" gap={3} w="100%">
-      <Heading size="md">{isRu ? 'Динамика результатов' : 'Results Dynamics'}</Heading>
+      <Heading size="md">{t('title')}</Heading>
 
       {/* Toggle шкал */}
       <HStack flexWrap="wrap" gap={1}>
@@ -118,7 +119,7 @@ export function SessionDynamicsChart({ sessions }: SessionDynamicsChartProps) {
       </Box>
 
       <Text fontSize="xs" color="fg.muted">
-        {isRu ? 'Кликните на код шкалы чтобы скрыть/показать линию' : 'Click a scale code to toggle its line'}
+        {t('toggleHint')}
       </Text>
     </VStack>
   )

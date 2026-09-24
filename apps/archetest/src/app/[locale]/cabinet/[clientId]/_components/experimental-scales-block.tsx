@@ -1,7 +1,7 @@
 'use client'
 
 import { Badge, Box, Card, Heading, HStack, Text, VStack } from '@chakra-ui/react'
-import { useLocale } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { ScoreBar } from '../../../_components/score-bar'
 import { CORE_SCALE_COUNT } from '../../../_data/bank-stats'
 import { EXPERIMENTAL_SCALES, type ScaleCode } from '../../../_data/personality-types'
@@ -25,6 +25,7 @@ interface ExperimentalScalesBlockProps {
  */
 export function ExperimentalScalesBlock({ scores, relevantCounts }: ExperimentalScalesBlockProps) {
   const isRu = useLocale() === 'ru'
+  const t = useTranslations('cabinet.experimental')
 
   const phys = scores.RES_PHYS ?? 0
   const aff = scores.RES_AFF ?? 0
@@ -42,15 +43,13 @@ export function ExperimentalScalesBlock({ scores, relevantCounts }: Experimental
     <Card.Root w="100%" variant="outline" borderColor="purple.300">
       <Card.Body>
         <HStack mb={1} gap={2}>
-          <Heading size="md">{isRu ? 'Экспериментальные шкалы' : 'Experimental scales'}</Heading>
+          <Heading size="md">{t('title')}</Heading>
           <Badge colorPalette="purple" variant="subtle" size="sm">
-            {isRu ? 'бета' : 'beta'}
+            {t('beta')}
           </Badge>
         </HStack>
         <Text fontSize="xs" color="fg.subtle" mb={4}>
-          {isRu
-            ? `Авторские / прототипные конструкты вне ядра из ${CORE_SCALE_COUNT} шкал. Не показываются клиенту, не входят в экспресс и «ведущие черты». Интерпретировать осторожно — валидация не завершена.`
-            : `Author / prototype constructs outside the ${CORE_SCALE_COUNT}-scale core. Not shown to the client, excluded from the express test and “leading traits”. Interpret cautiously — validation is not complete.`}
+          {t('intro', { coreScales: CORE_SCALE_COUNT })}
         </Text>
 
         <VStack gap={4} align="stretch">
@@ -83,7 +82,7 @@ export function ExperimentalScalesBlock({ scores, relevantCounts }: Experimental
                     : scale.descriptionEn}
                 </Text>
                 <Text fontSize="2xs" color="fg.subtle" mt={1}>
-                  {isRu ? 'Прототип: ' : 'Prototype: '}
+                  {t('prototype')}
                   {isRu ? scale.prototype : scale.prototypeEn}
                 </Text>
               </Box>
@@ -96,7 +95,7 @@ export function ExperimentalScalesBlock({ scores, relevantCounts }: Experimental
           <Box mt={5} p={3} bg="bg.subtle" borderRadius="md">
             <HStack gap={2} mb={1}>
               <Text fontWeight="bold" fontSize="sm">
-                {isRu ? 'Индекс «Броня и Радар»: ' : 'Armor & Radar index: '}
+                {t('armorRadar')}
                 {isRu ? armorRadar.label : armorRadar.labelEn}
               </Text>
             </HStack>
@@ -104,7 +103,7 @@ export function ExperimentalScalesBlock({ scores, relevantCounts }: Experimental
               {isRu ? armorRadar.description : armorRadar.descriptionEn}
             </Text>
             <Text fontSize="xs" color="orange.500">
-              {isRu ? 'На что обратить внимание: ' : 'Attention: '}
+              {t('attention')}
               {isRu ? armorRadar.attention : armorRadar.attentionEn}
             </Text>
           </Box>

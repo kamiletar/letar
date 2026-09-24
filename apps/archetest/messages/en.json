@@ -209,7 +209,43 @@
     "dynamics": "Results Dynamics",
     "totalAnswered": "Total answers",
     "sessions": "Sessions completed",
-    "backToList": "← Back to clients"
+    "backToList": "← Back to clients",
+    "darkCore": {
+      "profileRank": "Within the profile: dark scales rank {meanRank} on average out of {totalScales}, {inTopN} of them in the top {topN}. The core is {direction, select, above {above} other {below}} the profile’s own baseline by {gap} points.",
+      "confidence": {
+        "insufficient": "minimal item coverage",
+        "low": "low item coverage",
+        "moderate": "moderate item coverage",
+        "high": "high item coverage"
+      },
+      "points": "points",
+      "interval": "interval",
+      "coreLevel": "Core level: ",
+      "answers": "Answers: ",
+      "extrapolated": "extrapolated",
+      "attention": "Attention: ",
+      "intro": "The common factor of four dark scales (Machiavellianism, narcissism, psychopathy, sadism) and its decomposition into “flavors” per Bader et al. (2023). Not shown to the client. Cumulative across all answers — no per-session dynamics here.",
+      "withoutNarcissism": "Without narcissism the core would be {coreWithoutNarcissism}% (difference {narcissismDelta}). Narcissistic “admiration” is an agentic, essentially non-aversive component, and it represents the common core worst of all (Hilbig et al., 2023). Read the estimate with that in mind.",
+      "intervalPrefix": "interval ",
+      "notMeasured": "Not measured (too few answers): ",
+      "spread": "Spread across scales: ",
+      "badge": "D approximation",
+      "title": "Dark core"
+    },
+    "experimental": {
+      "attention": "Attention: ",
+      "prototype": "Prototype: ",
+      "beta": "beta",
+      "title": "Experimental scales",
+      "intro": "Author / prototype constructs outside the {coreScales}-scale core. Not shown to the client, excluded from the express test and “leading traits”. Interpret cautiously — validation is not complete.",
+      "armorRadar": "Armor & Radar index: "
+    },
+    "dynamicsChart": {
+      "title": "Results Dynamics",
+      "toggleHint": "Click a scale code to toggle its line"
+    },
+    "personalityArchitecture": "Personality Architecture",
+    "cumulativeProfile": "Cumulative Profile"
   },
   "settings": {
     "title": "Settings",

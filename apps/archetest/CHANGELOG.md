@@ -5,6 +5,14 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 версионирование следует [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.28.39] - 2026-09-24
+
+### Changed
+
+- Кабинет психолога: строки блоков «Тёмное ядро», «Экспериментальные шкалы», графика динамики и
+  заголовков карточки клиента перенесены в `messages` (`cabinet.darkCore/experimental/dynamicsChart`).
+  «Выше/ниже» — ICU `select`, подписи покрытия банка — ключи `confidence.*`. Тест блоков (6).
+
 ## [0.28.38] - 2026-09-24
 
 ### Changed

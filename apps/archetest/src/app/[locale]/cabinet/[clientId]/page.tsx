@@ -212,7 +212,7 @@ export default function ClientDetailPage({ params }: { params: Promise<{ clientI
         {chartData.length > 0 && (
           <PersonalityRadarChart
             data={chartData}
-            title={isRu ? 'Кумулятивный профиль' : 'Cumulative Profile'}
+            title={t('cumulativeProfile')}
             color="green.500"
           />
         )}
@@ -223,7 +223,7 @@ export default function ClientDetailPage({ params }: { params: Promise<{ clientI
             <Card.Body>
               <HexagramChart
                 scores={detail.cumulativeScores}
-                title={isRu ? 'Архитектура личности' : 'Personality Architecture'}
+                title={t('personalityArchitecture')}
               />
             </Card.Body>
           </Card.Root>
