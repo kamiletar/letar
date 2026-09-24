@@ -18,6 +18,7 @@ import {
 import { computeDarkCore } from '../../_lib/dark-core'
 import { computeIpsativeRanking } from '../../_lib/ipsative'
 import { DarkCoreBlock } from './_components/dark-core-block'
+import { DarkCoreDynamicsChart } from './_components/dark-core-dynamics-chart'
 import { ExperimentalScalesBlock } from './_components/experimental-scales-block'
 import { PsychologistNotes } from './_components/psychologist-notes'
 import { SessionDynamicsChart } from './_components/session-dynamics-chart'
@@ -243,6 +244,9 @@ export default function ClientDetailPage({ params }: { params: Promise<{ clientI
 
         {/* Тёмное ядро (Фаза 3) — гейт вычислен модулем, не условием «балл > 0» */}
         {darkCore && darkCore.structure !== 'insufficient' && <DarkCoreBlock index={darkCore} />}
+
+        {/* Динамика ядра по сессиям — пересчёт по ответам каждой порции (волна 7.1) */}
+        <DarkCoreDynamicsChart sessions={detail.sessionsHistory} />
 
         {/* Динамика по сессиям */}
         <SessionDynamicsChart sessions={detail.sessionsHistory} />

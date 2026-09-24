@@ -4,8 +4,8 @@ import { getSession } from '@/lib/auth'
 import { getEnhancedPrisma, prisma } from '@/lib/db'
 import { z } from 'zod/v4'
 import type { ScaleCode } from '../_data/personality-types'
-import type { ScaleConfidence } from '../_lib/scoring-core'
-import { calculateScores } from './quiz.action'
+import { computeScoresCore, type QuizOptionData, type ScaleConfidence } from '../_lib/scoring-core'
+import { buildSessionDynamics, type QuestionScoringRow } from '../_lib/session-dynamics'
 
 /** Проверить, что текущий пользователь — психолог */
 async function requirePsychologist() {
@@ -88,11 +88,26 @@ export async function getClientDetailAction(clientId: string) {
     return { error: 'Клиент не найден или доступ отозван' }
   }
 
-  // Все ответы клиента
+  // Все ответы клиента (с сессией — для динамики по сессиям)
   const answeredData = await db.quizAnswer.findMany({
     where: { session: { userId: clientId } },
-    select: { questionId: true, selectedOption: true },
+    select: { sessionId: true, questionId: true, selectedOption: true },
   })
+
+  // Вопросы банка — один запрос и для кумулятивного профиля, и для пересчёта сессий
+  const questionIds = [...new Set(answeredData.map((a) => a.questionId).filter((id): id is string => !!id))]
+  const questionRows = questionIds.length > 0
+    ? await db.quizQuestion.findMany({
+      where: { id: { in: questionIds } },
+      select: { id: true, sortOrder: true, options: true },
+    })
+    : []
+  const questions: QuestionScoringRow[] = questionRows.map((q) => ({
+    id: q.id,
+    sortOrder: q.sortOrder,
+    options: JSON.parse(q.options) as QuizOptionData[],
+  }))
+  const questionById = new Map(questions.map((q) => [q.id, q]))
 
   // Уникальные ответы (берём последний)
   const uniqueAnswered = new Map<string, number>()
@@ -110,23 +125,23 @@ export async function getClientDetailAction(clientId: string) {
   let scoreRelevantCounts: Record<ScaleCode, number> | null = null
   let scoreConfidence: Record<ScaleCode, ScaleConfidence> | null = null
   if (uniqueAnswered.size > 0) {
-    const answersArray = Array.from(uniqueAnswered.entries()).map(([questionId, selectedOption]) => ({
-      questionId,
-      selectedOption,
-    }))
-    const scores = await calculateScores(answersArray, db)
+    const answered = [...uniqueAnswered].flatMap(([questionId, selectedOption]) => {
+      const q = questionById.get(questionId)
+      return q ? [{ sortOrder: q.sortOrder, selectedOption, options: q.options }] : []
+    })
+    const scores = computeScoresCore(answered)
     cumulativeScores = scores.normalized
     scoreRelevantCounts = scores.relevantCounts
     scoreConfidence = scores.confidence
   }
 
-  // История сессий для графика динамики (questionBankVersion — чтобы график
-  // не сравнивал молча сессии несопоставимых версий банка)
+  // История сессий для графиков динамики. Только валидные протоколы: невалидные не идут
+  // в динамику (schema.zmodel, QuizSession.isValid). questionBankVersion — чтобы график
+  // не сравнивал молча сессии несопоставимых версий банка
   const sessions = await db.quizSession.findMany({
-    where: { userId: clientId, completedAt: { not: null } },
+    where: { userId: clientId, completedAt: { not: null }, isValid: true },
     select: {
       id: true,
-      scores: true,
       answeredCount: true,
       completedAt: true,
       createdAt: true,
@@ -135,14 +150,9 @@ export async function getClientDetailAction(clientId: string) {
     orderBy: { completedAt: 'asc' },
   })
 
-  const sessionsHistory = sessions.map((s) => ({
-    id: s.id,
-    scores: s.scores ? (JSON.parse(s.scores) as Record<ScaleCode, number>) : null,
-    answeredCount: s.answeredCount,
-    completedAt: s.completedAt,
-    createdAt: s.createdAt,
-    questionBankVersion: s.questionBankVersion,
-  }))
+  // Баллы и индекс ядра каждой сессии — пересчётом по её ответам (в scores лежат сырые
+  // баллы, несравнимые между сессиями), см. _lib/session-dynamics.ts
+  const sessionsHistory = buildSessionDynamics(sessions, answeredData, questions)
 
   return {
     data: {

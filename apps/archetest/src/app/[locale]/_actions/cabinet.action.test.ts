@@ -11,9 +11,10 @@ const st = vi.hoisted(() => ({
   session: null as null | { user: { id: string } },
   roles: [] as string[],
   link: null as null | Record<string, unknown>,
-  answers: [] as { questionId: string | null; selectedOption: number }[],
+  answers: [] as { sessionId: string; questionId: string | null; selectedOption: number }[],
   writes: [] as string[],
-  scored: undefined as unknown,
+  questionQueries: 0,
+  sessionsWhere: undefined as unknown,
 }))
 
 vi.mock('@/lib/auth', () => ({ getSession: async () => st.session }))
@@ -31,7 +32,26 @@ vi.mock('@/lib/db', () => {
       },
     },
     quizAnswer: { findMany: async () => st.answers },
-    quizSession: { findMany: async () => [] },
+    // Вопрос 1 (sortOrder 0) — настоящий из банка: вариант i даёт i баллов по PAR
+    quizQuestion: {
+      findMany: async () => {
+        st.questionQueries++
+        const options = [0, 1, 2, 3].map((i) => ({ text: '', textEn: '', scoring: i ? { PAR: i } : {} }))
+        return ['q1', 'q2'].map((id, i) => ({ id, sortOrder: i, options: JSON.stringify(options) }))
+      },
+    },
+    quizSession: {
+      findMany: async ({ where }: { where: unknown }) => {
+        st.sessionsWhere = where
+        return [{
+          id: 's1',
+          answeredCount: 2,
+          completedAt: new Date(0),
+          createdAt: new Date(0),
+          questionBankVersion: 1,
+        }]
+      },
+    },
     psychologistNote: {
       create: async ({ data }: { data: unknown }) => {
         st.writes.push('note.create')
@@ -55,12 +75,6 @@ vi.mock('@/lib/db', () => {
     },
   }
 })
-vi.mock('./quiz.action', () => ({
-  calculateScores: async (answers: unknown) => {
-    st.scored = answers
-    return { normalized: { PAR: 10 }, relevantCounts: { PAR: 1 }, confidence: { PAR: 'low' } }
-  },
-}))
 
 const cabinet = await import('./cabinet.action')
 
@@ -70,7 +84,8 @@ beforeEach(() => {
   st.link = null
   st.answers = []
   st.writes = []
-  st.scored = undefined
+  st.questionQueries = 0
+  st.sessionsWhere = undefined
 })
 
 describe('гейт роли', () => {
@@ -123,32 +138,43 @@ describe('валидация ввода', () => {
 
 describe('getClientDetailAction', () => {
   it('без активной связи — ошибка, ответы клиента не читаются', async () => {
-    st.answers = [{ questionId: 'q1', selectedOption: 0 }]
+    st.answers = [{ sessionId: 's1', questionId: 'q1', selectedOption: 0 }]
     expect(await cabinet.getClientDetailAction('c1')).toEqual({ error: 'Клиент не найден или доступ отозван' })
-    expect(st.scored).toBeUndefined()
+    expect(st.questionQueries).toBe(0)
   })
 
-  it('кумулятивные баллы — по последнему ответу на каждый вопрос', async () => {
+  it('кумулятивные баллы — по последнему ответу на каждый вопрос; вопросы грузятся один раз', async () => {
     st.link = { id: 'l1', displayName: null, createdAt: new Date(), client: { id: 'c1' }, notes: [] }
     st.answers = [
-      { questionId: 'q1', selectedOption: 0 },
-      { questionId: 'q2', selectedOption: 1 },
-      { questionId: 'q1', selectedOption: 3 },
-      { questionId: null, selectedOption: 2 },
+      { sessionId: 's1', questionId: 'q1', selectedOption: 0 },
+      { sessionId: 's1', questionId: 'q2', selectedOption: 1 },
+      { sessionId: 's1', questionId: 'q1', selectedOption: 3 },
+      { sessionId: 's1', questionId: null, selectedOption: 2 },
     ]
     const res = await cabinet.getClientDetailAction('c1')
-    expect(st.scored).toEqual([
-      { questionId: 'q1', selectedOption: 3 },
-      { questionId: 'q2', selectedOption: 1 },
-    ])
-    expect(res).toMatchObject({
-      data: { totalAnswered: 2, cumulativeScores: { PAR: 10 }, scoreConfidence: { PAR: 'low' } },
-    })
+    expect(res).toMatchObject({ data: { totalAnswered: 2 } })
+    // последний ответ на q1 — вариант 3, а не 0: иначе PAR был бы ниже
+    const data = (res as { data: { cumulativeScores: Record<string, number> } }).data
+    expect(data.cumulativeScores.PAR).toBeGreaterThan(0)
+    expect(st.questionQueries).toBe(1)
   })
 
-  it('клиент без ответов — баллов нет, а не нули', async () => {
+  it('динамика — только валидные завершённые сессии, по баллам самой сессии', async () => {
+    st.link = { id: 'l1', displayName: null, createdAt: new Date(), client: { id: 'c1' }, notes: [] }
+    st.answers = [{ sessionId: 's1', questionId: 'q1', selectedOption: 3 }]
+    const res = await cabinet.getClientDetailAction('c1')
+    expect(st.sessionsWhere).toEqual({ userId: 'c1', completedAt: { not: null }, isValid: true })
+    const history =
+      (res as { data: { sessionsHistory: { id: string; normalized: Record<string, number> | null }[] } }).data
+        .sessionsHistory
+    expect(history.map((h) => h.id)).toEqual(['s1'])
+    expect(history[0].normalized?.PAR).toBeGreaterThan(0)
+  })
+
+  it('клиент без ответов — баллов нет, а не нули; банк не запрашивается', async () => {
     st.link = { id: 'l1', displayName: null, createdAt: new Date(), client: { id: 'c1' }, notes: [] }
     const res = await cabinet.getClientDetailAction('c1')
     expect(res).toMatchObject({ data: { totalAnswered: 0, cumulativeScores: null, scoreRelevantCounts: null } })
+    expect(st.questionQueries).toBe(0)
   })
 })

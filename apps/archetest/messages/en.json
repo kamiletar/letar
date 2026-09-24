@@ -264,7 +264,13 @@
       "toggleHint": "Click a scale code to toggle its line"
     },
     "personalityArchitecture": "Personality Architecture",
-    "cumulativeProfile": "Cumulative Profile"
+    "cumulativeProfile": "Cumulative Profile",
+    "darkCoreDynamics": {
+      "title": "Dark core over time",
+      "hint": "Core level in each session with its interval. Overlapping intervals between neighbouring sessions are likely batch noise rather than a real shift. Sessions with too few tetrad answers are not shown.",
+      "core": "Core",
+      "interval": "Interval"
+    }
   },
   "settings": {
     "title": "Settings",

@@ -9,7 +9,8 @@ import { PERSONALITY_TYPES } from '../../../_data/personality-types'
 
 interface SessionData {
   id: string
-  scores: Record<PersonalityTypeCode, number> | null
+  /** Нормализованные баллы сессии (пересчёт по её ответам); null — ответы не распознаны */
+  normalized: Record<PersonalityTypeCode, number> | null
   answeredCount: number
   completedAt: Date | null
   createdAt: Date
@@ -20,7 +21,9 @@ interface SessionDynamicsChartProps {
 }
 
 /**
- * График динамики результатов по сессиям (LineChart)
+ * График динамики результатов по сессиям (LineChart). Точки — нормализованные баллы (%):
+ * раньше график рисовал сырые баллы сессии на оси 0–100, а они зависят от того, сколько
+ * релевантных вопросов шкалы попало в порцию, и между сессиями несравнимы.
  */
 export function SessionDynamicsChart({ sessions }: SessionDynamicsChartProps) {
   const locale = useLocale()
@@ -46,14 +49,14 @@ export function SessionDynamicsChart({ sessions }: SessionDynamicsChartProps) {
 
   // Готовим данные для графика
   const chartData = sessions
-    .filter((s) => s.scores)
+    .filter((s) => s.normalized)
     .map((s, i) => {
       const date = s.completedAt ? new Date(s.completedAt) : new Date(s.createdAt)
       const entry: Record<string, string | number> = {
         name: `#${i + 1} (${date.toLocaleDateString(locale, { day: 'numeric', month: 'short' })})`,
       }
       for (const type of PERSONALITY_TYPES) {
-        entry[type.code] = s.scores![type.code] ?? 0
+        entry[type.code] = s.normalized![type.code] ?? 0
       }
       return entry
     })
