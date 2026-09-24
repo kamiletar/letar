@@ -1,14 +1,14 @@
 'use client'
 
 import { useIsPsychologist } from '@/app/_hooks/use-psychologist'
-import { Link } from '@/i18n/navigation'
 import { useSession } from '@/lib/auth-client'
-import { Badge, Box, Button, Card, Container, Heading, HStack, Spinner, Table, Text, VStack } from '@chakra-ui/react'
+import { Button, Card, Container, Heading, HStack, Spinner, Text, VStack } from '@chakra-ui/react'
 import { useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
 import { LuBriefcase, LuUsers } from 'react-icons/lu'
 import { getClientsListAction } from '../_actions/cabinet.action'
 import { becomePsychologistAction } from '../_actions/psychologist.action'
+import { FilteredClientsTable } from './_components/filtered-clients-table'
 
 type ClientItem = Awaited<ReturnType<typeof getClientsListAction>>['data'][number]
 
@@ -110,40 +110,7 @@ export default function CabinetPage() {
               </Card.Body>
             </Card.Root>
           )
-          : (
-            <Table.Root size="sm" w="100%">
-              <Table.Header>
-                <Table.Row>
-                  <Table.ColumnHeader>{t('clientName')}</Table.ColumnHeader>
-                  <Table.ColumnHeader>{t('clientEmail')}</Table.ColumnHeader>
-                  <Table.ColumnHeader>{t('status')}</Table.ColumnHeader>
-                  <Table.ColumnHeader>{t('linkedAt')}</Table.ColumnHeader>
-                </Table.Row>
-              </Table.Header>
-              <Table.Body>
-                {clients.map((client) => (
-                  <Table.Row key={client.id}>
-                    <Table.Cell>
-                      {client.status === 'ACTIVE'
-                        ? (
-                          <Box asChild fontWeight="bold" color="fg" _hover={{ textDecoration: 'underline' }}>
-                            <Link href={`/cabinet/${client.clientId}`}>{client.clientName}</Link>
-                          </Box>
-                        )
-                        : <Text color="fg.muted">{client.clientName}</Text>}
-                    </Table.Cell>
-                    <Table.Cell color="fg.muted">{client.clientEmail}</Table.Cell>
-                    <Table.Cell>
-                      <Badge colorPalette={client.status === 'ACTIVE' ? 'green' : 'gray'}>
-                        {client.status === 'ACTIVE' ? t('active') : t('revoked')}
-                      </Badge>
-                    </Table.Cell>
-                    <Table.Cell color="fg.muted">{new Date(client.createdAt).toLocaleDateString()}</Table.Cell>
-                  </Table.Row>
-                ))}
-              </Table.Body>
-            </Table.Root>
-          )}
+          : <FilteredClientsTable clients={clients} />}
       </VStack>
     </Container>
   )

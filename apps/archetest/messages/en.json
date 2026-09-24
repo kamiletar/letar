@@ -284,6 +284,17 @@
       "moodNoDiff": "No notable difference between low-mood and good-mood sessions.",
       "moodHint": "Mean score: low mood ({low} sess.) → good mood ({high} sess.). A hypothesis for discussion, not a conclusion.",
       "moodRow": "{code}: {low}% → {high}%"
+    },
+    "filter": {
+      "search": "Search",
+      "searchPlaceholder": "Name or email",
+      "status": "Status",
+      "anyStatus": "Any",
+      "since": "Linked since",
+      "rank": "Rank",
+      "anyRank": "Any",
+      "empty": "No clients match the filters.",
+      "shown": "Showing {shown} of {total}"
     }
   },
   "settings": {

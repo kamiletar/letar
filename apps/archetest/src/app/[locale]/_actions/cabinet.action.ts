@@ -4,6 +4,7 @@ import { getSession } from '@/lib/auth'
 import { getEnhancedPrisma, prisma } from '@/lib/db'
 import { z } from 'zod/v4'
 import type { ScaleCode } from '../_data/personality-types'
+import { RANKS } from '../_data/ranks'
 import { computeScoresCore, type QuizOptionData, type ScaleConfidence } from '../_lib/scoring-core'
 import { buildSessionDynamics, type QuestionScoringRow } from '../_lib/session-dynamics'
 
@@ -46,6 +47,17 @@ export async function getClientsListAction() {
   })
   const byId = new Map(clients.map((c) => [c.id, c]))
 
+  // Ранг (для фильтра) — только по активным связям: у отозвавшего доступ клиента данные его
+  // активности психологу больше не принадлежат. Кэш лидерборда — raw prisma, как и запись в него
+  const activeIds = links.filter((l) => l.status === 'ACTIVE').map((l) => l.clientId)
+  const entries = activeIds.length > 0
+    ? await prisma.quizLeaderboardEntry.findMany({
+      where: { userId: { in: activeIds } },
+      select: { userId: true, rankCode: true },
+    })
+    : []
+  const tierByUser = new Map(entries.map((e) => [e.userId, RANKS.find((r) => r.code === e.rankCode)?.tier ?? null]))
+
   return {
     data: links.flatMap((link) => {
       const client = byId.get(link.clientId)
@@ -61,6 +73,7 @@ export async function getClientsListAction() {
         displayName: link.displayName,
         status: link.status,
         createdAt: link.createdAt,
+        rankTier: link.status === 'ACTIVE' ? tierByUser.get(client.id) ?? null : null,
       }]
     }),
   }

@@ -14,6 +14,7 @@ const st = vi.hoisted(() => ({
   answers: [] as { sessionId: string; questionId: string | null; selectedOption: number }[],
   writes: [] as string[],
   questionQueries: 0,
+  rankQueryIds: undefined as unknown,
   sessionsWhere: undefined as unknown,
 }))
 
@@ -72,6 +73,12 @@ vi.mock('@/lib/db', () => {
           { id: 'c2', name: 'Maria', email: 'c2@example.test', image: null },
         ],
       },
+      quizLeaderboardEntry: {
+        findMany: async ({ where }: { where: { userId: { in: string[] } } }) => {
+          st.rankQueryIds = where.userId.in
+          return [{ userId: 'c1', rankCode: 'EXPLORER_II' }, { userId: 'c2', rankCode: 'MASTER_I' }]
+        },
+      },
     },
   }
 })
@@ -111,6 +118,12 @@ describe('getClientsListAction', () => {
       ['c1@example.test', 'c1@example.test', 'ACTIVE'],
       ['Мария', 'c2@example.test', 'REVOKED'],
     ])
+  })
+
+  it('уровень ранга — только у активной связи; ранг отозвавшего клиента не запрашивается', async () => {
+    const { data } = await cabinet.getClientsListAction()
+    expect(data.map((c) => c.rankTier)).toEqual(['EXPLORER', null])
+    expect(st.rankQueryIds).toEqual(['c1'])
   })
 })
 
