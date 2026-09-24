@@ -259,3 +259,11 @@ esbuild через `main/tsconfig.json` `paths` (см.
   приложения переведены на общий импорт, локальный файл `animatrona` удалён. Детали —
   `CHANGELOG.md` v0.55.64.
   Осталось документально развести в UI/доках плеера — код обеих фич не конфликтует.
+
+## UpdateDrawer: Drawer.Positioner + Portal (2026-09-24, v0.56.3)
+
+- Drawer обновления был собран без `Drawer.Positioner` и `Portal`: `Content` рендерился в потоке
+  родителя, а fixed-`Backdrop` маскировал проблему. Анатомия исправлена, поиск подобных мест по
+  репо (включая приватные submodule) пуст. Разбор —
+  `.claude/docs/chakra-drawer-missing-positioner-inline-render.md`. Живая проверка окна
+  обновления в Electron не выполнялась (GUI недоступен в сессии агента).
