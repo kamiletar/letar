@@ -1,5 +1,6 @@
-'use server'
-
+// Без 'use server': функция внутренняя (вызывается только из submitQuizAction). С директивой
+// каждый экспорт становится публичным эндпоинтом — любой клиент мог запустить пересчёт кэша
+// для произвольного userId через raw prisma (обход политик).
 import { prisma } from '@/lib/db'
 import { ACHIEVEMENTS_MAP } from '../_data/achievements'
 import { calculateXp, countUniqueUtcDays, getRankByXp } from '../_data/ranks'

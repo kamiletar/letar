@@ -5,6 +5,14 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 версионирование следует [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.28.45] - 2026-09-24
+
+### Fixed
+
+- Тесты server actions: выборка вопросов и вход `submitQuizAction`, XP лидерборда, действия кабинета
+  психолога (19). Внутренний пересчёт лидерборда больше не публичный server action: `recalcLeaderboardEntry`
+  с произвольным `userId` мог вызвать любой клиент.
+
 ## [0.28.44] - 2026-09-24
 
 ### Fixed
