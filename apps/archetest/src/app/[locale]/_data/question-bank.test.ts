@@ -33,7 +33,7 @@ const questions = questionsRaw as QuestionDump[]
  * сценарий или хоть один вариант не переведён. Снижается с каждой партией авторского EN;
  * рост — регрессия (например, merge батча без EN). Цель — 0.
  */
-const EN_UNTRANSLATED_MAX = 1565
+const EN_UNTRANSLATED_MAX = 1465
 const perQuestionMax = (maxScoresData as { per_question_max: Record<string, Record<string, number>> }).per_question_max
 
 /**
