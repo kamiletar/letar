@@ -41,6 +41,7 @@ const exampleCategories = [
       { href: '/examples/table-editor', label: 'Table Editor' },
       { href: '/examples/data-grid', label: 'Data Grid' },
       { href: '/examples/matrix-choice', label: 'Matrix Choice' },
+      { href: '/examples/create-option', label: 'Create Option' },
     ],
   },
   {

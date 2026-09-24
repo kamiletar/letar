@@ -2,6 +2,13 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.1.26] - 2026-09-24
+
+### Added
+
+- `examples/create-option`: `onCreate` у `Form.Field.Select` и `Form.Field.Combobox` — создание записи
+  справочника прямо из поля (пункт «+ Add…», путь с `null`), ссылка в сайдбаре (группа FIELDS).
+
 ## [0.1.25] - 2026-09-24
 
 ### Changed
