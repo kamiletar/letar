@@ -2,7 +2,7 @@
 
 > **📖 Начни с главного README:** [README.md](./README.md) — обзор проекта, быстрый старт, навигация по документации
 >
-> **Версия:** 0.28.40 | **Обновлено:** 2026-09-24 (пул, волна 5: группа 3 (профиль, квиз))))
+> **Версия:** 0.28.41 | **Обновлено:** 2026-09-24 (пул, волна 5: группа 4 (компоненты без isRu)))))
 >
 > **Связанные документы:**
 >
@@ -26,7 +26,7 @@
 | 2     | Пакеты ревьюеру ✅: СДВГ, привязанность, часть B аудита, редкие шкалы — 5 таблиц в `docs/question-review/` | ✅     |
 | 3     | Авторский EN-банк №101–1665 ✅ **EN: 1565/1565**, аудит: 0 непереведённых                                  | ✅     |
 | 4     | UI-хвосты ✅: `/dev/presentation` → brand, клавиатура радара (+тест), `theme:check` в `lint`               | ✅     |
-| 5     | `isRu ? … : …` → `messages` — **осталось 52 литеральных в 16 файлах** (группы 1–3 ✅)                      | 🔄     |
+| 5     | `isRu ? … : …` → `messages` — **осталось 38 литеральных в 13 файлах** (группы 1–4 ✅)                      | 🔄     |
 | 6     | Тесты Фазы 4: stratified-shuffle, server actions, E2E квиз/кабинет                                         | ⏳     |
 | 7     | Фичи Фазы 3: `relevantCounts` + динамика ядра, карта стабильности, фильтр, уведомления, сообщения, PDF     | ⏳     |
 
@@ -886,6 +886,11 @@ CAT/IRT. ✅ Подтверждено Kami: разделение ASD → ASD + D
       `quiz-container` (тосты → `quiz.container.*`, `isRu` в deps колбэков заменён на `tc`). Поймана и
       исправлена склейка ICU-переменных (`label`/`labelEn` в одно имя) — конвертер теперь падает на ней;
       тест `profile-details-i18n.spec.tsx` (4). **Осталось 52 в 16 файлах.**
+      **Группа 4 ✅ v0.28.41:** проп `isRu` убран у `SafetyNetBlock`, `DarkReassuranceNote`, `DisclaimerSummary`,
+      `DisclaimerConsentCheckbox`, `MoodCheckIn`, `ProfessionalLeadForm` — локаль берут из next-intl сами.
+      Строки → `disclaimer`, `moodCheckIn`, `leadForm`; «текст + ссылка» из двух ключей заменён одним
+      `t.rich` (порядок слов живёт в переводе). Тексты safety-net и дисклеймера — данные `_data/*`, не
+      тронуты. Тест `prop-free-locale-i18n.spec.tsx` (4). **Осталось 38 в 13 файлах.**
       Больше всего: `for-professionals/page.tsx` 34, `cabinet/[clientId]/_components/dark-core-block.tsx` 17,
       `profile-details.tsx` 14, `quiz-container.tsx` 11, `developmental-profile-card.tsx` 11,
       `experimental-scales-block.tsx` 10, `safety-net-block.tsx` 9, `disclaimer-consent.tsx` 7,

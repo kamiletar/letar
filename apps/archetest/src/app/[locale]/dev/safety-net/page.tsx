@@ -1,7 +1,6 @@
 'use client'
 
 import { Box, Container, Heading, Text, VStack } from '@chakra-ui/react'
-import { useLocale } from 'next-intl'
 
 import { DarkReassuranceNote, SafetyNetBlock } from '../../_components/safety-net-block'
 
@@ -10,9 +9,6 @@ import { DarkReassuranceNote, SafetyNetBlock } from '../../_components/safety-ne
  * Показывает оба блока в текущей локали (кризисный + мягкая формулировка).
  */
 export default function SafetyNetDevPage() {
-  const locale = useLocale()
-  const isRu = locale === 'ru'
-
   return (
     <Container maxW="2xl" py={8}>
       <VStack gap={6} align="stretch">
@@ -22,14 +18,14 @@ export default function SafetyNetDevPage() {
           <Text fontWeight="bold" mb={2}>
             SafetyNetBlock (DPR/BAR/BOR ≥ 60%)
           </Text>
-          <SafetyNetBlock isRu={isRu} />
+          <SafetyNetBlock />
         </Box>
 
         <Box>
           <Text fontWeight="bold" mb={2}>
             DarkReassuranceNote (тёмные шкалы ≥ 60%)
           </Text>
-          <DarkReassuranceNote isRu={isRu} />
+          <DarkReassuranceNote />
         </Box>
       </VStack>
     </Container>

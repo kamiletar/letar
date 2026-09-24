@@ -168,7 +168,7 @@ export function ExpressResults({ scores, seed, answers, isAuthenticated, onRetak
         <ScaleTeaser isRu={isRu} />
 
         {/* Мягкая формулировка при высоких «тёмных» шкалах (5.6.4) */}
-        {needsDarkReassurance(scores) && <DarkReassuranceNote isRu={isRu} />}
+        {needsDarkReassurance(scores) && <DarkReassuranceNote />}
 
         {/* CTA: полный тест + QR */}
         <Card.Root w="100%" variant="subtle">

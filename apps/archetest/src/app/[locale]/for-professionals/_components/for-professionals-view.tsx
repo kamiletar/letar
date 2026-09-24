@@ -280,7 +280,7 @@ export function ForProfessionalsView({ locale }: { locale: string }) {
           </Text>
           <Box id="lead" w="100%">
             <Suspense fallback={null}>
-              <ProfessionalLeadForm isRu={isRu} />
+              <ProfessionalLeadForm />
             </Suspense>
           </Box>
         </Section>

@@ -411,5 +411,23 @@
     "range": "range {ciLow}–{ciHigh}%",
     "beta": "beta",
     "trap": "The trap"
+  },
+  "disclaimer": {
+    "close": "Close",
+    "informedConsent": "Informed consent",
+    "learnMore": "Learn more",
+    "consent": "I have read and agree to the <link>privacy policy</link>"
+  },
+  "leadForm": {
+    "thanks": "Thank you! We will contact you by email.",
+    "submitError": "Failed to submit the request",
+    "name": "Name",
+    "consent": "I agree to the <link>personal data processing policy</link>",
+    "submit": "Submit request"
+  },
+  "moodCheckIn": {
+    "skip": "Skip",
+    "title": "How are you feeling?",
+    "hint": "Pick the closest state. This helps separate stable traits from momentary mood."
   }
 }

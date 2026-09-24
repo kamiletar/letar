@@ -1,6 +1,7 @@
 'use client'
 
 import { Alert, Box, HStack, Link as ChakraLink, Text, VStack } from '@chakra-ui/react'
+import { useLocale } from 'next-intl'
 import { LuHeartPulse, LuPhone } from 'react-icons/lu'
 import { CRISIS_HELPLINES, DARK_REASSURANCE_COPY, SAFETY_NET_COPY } from '../_data/crisis-resources'
 
@@ -9,18 +10,15 @@ function telHref(phone: string): string {
   return `tel:${phone.replace(/[^\d+]/g, '')}`
 }
 
-interface SafetyNetBlockProps {
-  /** Русская локаль (иначе английская) */
-  isRu: boolean
-}
-
 /**
  * Кризисный блок safety-net (этап 5.6.4): мягкое сообщение + телефоны доверия.
  * Показывается при выраженных баллах шкал состояния (DPR/BAR/BOR) — решение
  * о показе принимает вызывающий через `needsSafetyNet`. Тон заботливый,
  * без «диагноза». Взрослая линия МЧС первой, детская — с пометкой аудитории.
  */
-export function SafetyNetBlock({ isRu }: SafetyNetBlockProps) {
+export function SafetyNetBlock() {
+  const isRu = useLocale() === 'ru'
+
   return (
     <Alert.Root status="info" variant="outline" borderRadius="lg" w="100%">
       <Alert.Indicator>
@@ -66,7 +64,9 @@ export function SafetyNetBlock({ isRu }: SafetyNetBlockProps) {
  * Показывается при высоком балле тёмной шкалы — решение принимает вызывающий
  * через `needsDarkReassurance`. Developmental-тон: черта = ресурс, не приговор.
  */
-export function DarkReassuranceNote({ isRu }: SafetyNetBlockProps) {
+export function DarkReassuranceNote() {
+  const isRu = useLocale() === 'ru'
+
   return (
     <Box w="100%" p={4} borderRadius="lg" bg="bg.subtle" borderWidth="1px" borderColor="border">
       <Text fontWeight="semibold" fontSize="sm" mb={1}>

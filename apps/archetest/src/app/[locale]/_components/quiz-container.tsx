@@ -447,7 +447,7 @@ export function QuizContainer({
 
   // MOOD CHECK-IN (5.9.2) — перед каждой новой порцией вопросов
   if (state === 'mood') {
-    return <MoodCheckIn isRu={isRu} onSubmit={(value) => handleMoodDone(value)} onSkip={() => handleMoodDone(null)} />
+    return <MoodCheckIn onSubmit={(value) => handleMoodDone(value)} onSkip={() => handleMoodDone(null)} />
   }
 
   // Нет вопросов в БД — показываем сообщение

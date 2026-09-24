@@ -200,7 +200,7 @@ export function QuizResults({
         )}
 
         {/* Safety-net: кризисный блок с телефонами доверия (5.6.4) */}
-        {showSafetyNet && <SafetyNetBlock isRu={isRu} />}
+        {showSafetyNet && <SafetyNetBlock />}
 
         {/* Предупреждения BAR-фильтра */}
         {warnings.map((w, i) => (
@@ -243,7 +243,7 @@ export function QuizResults({
         )}
 
         {/* Мягкая формулировка при высоких «тёмных» шкалах (5.6.4) */}
-        {showDarkReassurance && <DarkReassuranceNote isRu={isRu} />}
+        {showDarkReassurance && <DarkReassuranceNote />}
 
         {/* Детали профиля: топ-3 ведущих ЧЕРТ в developmental-фрейме (ipsative-ранжирование), взаимодействие, модификатор PAG */}
         <ProfileDetails scores={scores} confidence={confidence} relevantCounts={relevantCounts} />

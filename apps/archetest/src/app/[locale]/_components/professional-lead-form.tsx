@@ -4,7 +4,7 @@ import { toaster } from '@/app/_components/ui/toaster'
 import { ArchetestForm } from '@/archetest-form'
 import { Link } from '@/i18n/navigation'
 import { Box, Checkbox, Link as ChakraLink, Text, VStack } from '@chakra-ui/react'
-import { useLocale } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 import { submitProfessionalLeadAction } from '../_actions/professional-lead.action'
@@ -14,8 +14,9 @@ import { submitProfessionalLeadAction } from '../_actions/professional-lead.acti
  * согласие на обработку ПДн. Источник (`source`) берётся из query-параметра
  * `?source=` — проставляется CTA с экрана экспресс-результатов.
  */
-export function ProfessionalLeadForm({ isRu }: { isRu: boolean }) {
+export function ProfessionalLeadForm() {
   const locale = useLocale()
+  const t = useTranslations('leadForm')
   const searchParams = useSearchParams()
   const source = searchParams.get('source') ?? 'direct'
   const [consentPdn, setConsentPdn] = useState(false)
@@ -25,7 +26,7 @@ export function ProfessionalLeadForm({ isRu }: { isRu: boolean }) {
     return (
       <Box w="100%" p={5} borderRadius="lg" borderWidth="1px" borderColor="border" bg="bg.subtle">
         <Text fontWeight="semibold">
-          {isRu ? 'Спасибо! Мы свяжемся с вами по email.' : 'Thank you! We will contact you by email.'}
+          {t('thanks')}
         </Text>
       </Box>
     )
@@ -38,7 +39,7 @@ export function ProfessionalLeadForm({ isRu }: { isRu: boolean }) {
         const result = await submitProfessionalLeadAction({ ...value, consentPdn, locale, source })
         if ('error' in result) {
           toaster.create({
-            title: isRu ? 'Не удалось отправить заявку' : 'Failed to submit the request',
+            title: t('submitError'),
             type: 'error',
           })
           return
@@ -47,24 +48,27 @@ export function ProfessionalLeadForm({ isRu }: { isRu: boolean }) {
       }}
     >
       <VStack align="stretch" gap={4} w="100%" maxW="md">
-        <ArchetestForm.Field.String name="name" label={isRu ? 'Имя' : 'Name'} required />
+        <ArchetestForm.Field.String name="name" label={t('name')} required />
         <ArchetestForm.Field.String name="email" label="Email" required />
 
         <Checkbox.Root checked={consentPdn} onCheckedChange={(e) => setConsentPdn(!!e.checked)}>
           <Checkbox.HiddenInput />
           <Checkbox.Control />
           <Checkbox.Label fontSize="sm">
-            {isRu ? 'Я согласен с ' : 'I agree to the '}
-            <ChakraLink asChild color="brand.fg" textDecoration="underline">
-              <Link href="/privacy" target="_blank" rel="noopener noreferrer">
-                {isRu ? 'политикой обработки персональных данных' : 'personal data processing policy'}
-              </Link>
-            </ChakraLink>
+            {t.rich('consent', {
+              link: (chunks) => (
+                <ChakraLink asChild color="brand.fg" textDecoration="underline">
+                  <Link href="/privacy" target="_blank" rel="noopener noreferrer">
+                    {chunks}
+                  </Link>
+                </ChakraLink>
+              ),
+            })}
           </Checkbox.Label>
         </Checkbox.Root>
 
         <ArchetestForm.Button.Submit disabled={!consentPdn}>
-          {isRu ? 'Оставить заявку' : 'Submit request'}
+          {t('submit')}
         </ArchetestForm.Button.Submit>
       </VStack>
     </ArchetestForm>

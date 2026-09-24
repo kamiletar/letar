@@ -2,13 +2,9 @@
 
 import { Link } from '@/i18n/navigation'
 import { Box, Button, Checkbox, Dialog, Link as ChakraLink, Portal, Text } from '@chakra-ui/react'
+import { useLocale, useTranslations } from 'next-intl'
 import { useState } from 'react'
 import { DISCLAIMER_EN, DISCLAIMER_RU, DISCLAIMER_SUMMARY_EN, DISCLAIMER_SUMMARY_RU } from '../_data/disclaimer'
-
-interface DisclaimerSummaryProps {
-  /** Русская локаль (иначе английская) */
-  isRu: boolean
-}
 
 /**
  * Короткая сводка дисклеймера (этап 5.6.3, UX-фикс 2026-07-29) + ссылка «Подробнее»,
@@ -17,7 +13,9 @@ interface DisclaimerSummaryProps {
  * увидеть чекбокс (замечание Kami: «чекбокс за пределами экрана и непонятно, что
  * делать»). Полный текст никуда не делся — просто не блокирует экран по умолчанию.
  */
-export function DisclaimerSummary({ isRu }: DisclaimerSummaryProps) {
+export function DisclaimerSummary() {
+  const isRu = useLocale() === 'ru'
+  const t = useTranslations('disclaimer')
   const [open, setOpen] = useState(false)
 
   return (
@@ -26,7 +24,7 @@ export function DisclaimerSummary({ isRu }: DisclaimerSummaryProps) {
         {isRu ? DISCLAIMER_SUMMARY_RU : DISCLAIMER_SUMMARY_EN}{' '}
         <ChakraLink asChild color="brand.fg" textDecoration="underline">
           <button type="button" onClick={() => setOpen(true)}>
-            {isRu ? 'Подробнее' : 'Learn more'}
+            {t('learnMore')}
           </button>
         </ChakraLink>
       </Text>
@@ -37,7 +35,7 @@ export function DisclaimerSummary({ isRu }: DisclaimerSummaryProps) {
           <Dialog.Positioner>
             <Dialog.Content>
               <Dialog.Header>
-                <Dialog.Title>{isRu ? 'Информированное согласие' : 'Informed consent'}</Dialog.Title>
+                <Dialog.Title>{t('informedConsent')}</Dialog.Title>
               </Dialog.Header>
               <Dialog.Body>
                 <Text fontSize="sm" color="fg.muted" whiteSpace="pre-line">
@@ -45,7 +43,7 @@ export function DisclaimerSummary({ isRu }: DisclaimerSummaryProps) {
                 </Text>
               </Dialog.Body>
               <Dialog.Footer>
-                <Button onClick={() => setOpen(false)}>{isRu ? 'Закрыть' : 'Close'}</Button>
+                <Button onClick={() => setOpen(false)}>{t('close')}</Button>
               </Dialog.Footer>
               <Dialog.CloseTrigger />
             </Dialog.Content>
@@ -61,8 +59,6 @@ interface DisclaimerConsentCheckboxProps {
   accepted: boolean
   /** Колбэк смены состояния чекбокса */
   onChange: (accepted: boolean) => void
-  /** Русская локаль (иначе английская) */
-  isRu: boolean
 }
 
 /**
@@ -72,7 +68,9 @@ interface DisclaimerConsentCheckboxProps {
  * «отметил → кнопка включилась» видна без скролла. `size="lg"` — увеличенный
  * тач-таргет (WCAG 2.5.5), см. техдолг «низкая заметность чекбокса» в PLAN.md.
  */
-export function DisclaimerConsentCheckbox({ accepted, onChange, isRu }: DisclaimerConsentCheckboxProps) {
+export function DisclaimerConsentCheckbox({ accepted, onChange }: DisclaimerConsentCheckboxProps) {
+  const t = useTranslations('disclaimer')
+
   return (
     <Checkbox.Root
       checked={accepted}
@@ -83,12 +81,15 @@ export function DisclaimerConsentCheckbox({ accepted, onChange, isRu }: Disclaim
       <Checkbox.HiddenInput />
       <Checkbox.Control data-testid="disclaimer-consent-checkbox" />
       <Checkbox.Label fontSize="sm" textAlign="left">
-        {isRu ? 'Подтверждаю ознакомление и согласие с ' : 'I have read and agree to the '}
-        <ChakraLink asChild color="brand.fg" textDecoration="underline">
-          <Link href="/privacy" target="_blank" rel="noopener noreferrer">
-            {isRu ? 'политикой конфиденциальности' : 'privacy policy'}
-          </Link>
-        </ChakraLink>
+        {t.rich('consent', {
+          link: (chunks) => (
+            <ChakraLink asChild color="brand.fg" textDecoration="underline">
+              <Link href="/privacy" target="_blank" rel="noopener noreferrer">
+                {chunks}
+              </Link>
+            </ChakraLink>
+          ),
+        })}
       </Checkbox.Label>
     </Checkbox.Root>
   )

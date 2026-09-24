@@ -2,6 +2,7 @@
 
 import { Box, Button, Container, Heading, SimpleGrid, Text, VStack } from '@chakra-ui/react'
 import { Pressable, StickyActionBar } from '@letar/ui'
+import { useLocale, useTranslations } from 'next-intl'
 
 import { STICKY_BAR_BLEED } from './sticky-bar-bleed'
 
@@ -15,7 +16,6 @@ export interface MoodValue {
 interface MoodCheckInProps {
   onSubmit: (mood: MoodValue) => void
   onSkip: () => void
-  isRu: boolean
 }
 
 /** Сетка 3×3 циркумплекса Рассела: строки — энергия (высокая → низкая), столбцы — валентность (нег → поз) */
@@ -37,15 +37,16 @@ const GRID: { valence: number; energy: number; emoji: string; label: string; lab
  * даёт психологу «профиль в грусти vs профиль в ресурсе» и фундамент для будущей
  * карты стабильности (Фаза 3). Мягкая механика — пропуск доступен без friction.
  */
-export function MoodCheckIn({ onSubmit, onSkip, isRu }: MoodCheckInProps) {
+export function MoodCheckIn({ onSubmit, onSkip }: MoodCheckInProps) {
+  const isRu = useLocale() === 'ru'
+  const t = useTranslations('moodCheckIn')
+
   return (
     <Container maxW="md" pt={16} pb={8}>
       <VStack gap={6} textAlign="center">
-        <Heading size="xl">{isRu ? 'Как вы сейчас?' : 'How are you feeling?'}</Heading>
+        <Heading size="xl">{t('title')}</Heading>
         <Text color="fg.muted" maxW="sm">
-          {isRu
-            ? 'Выберите ближайшее состояние. Это поможет отличить устойчивые черты характера от сиюминутного настроения.'
-            : 'Pick the closest state. This helps separate stable traits from momentary mood.'}
+          {t('hint')}
         </Text>
 
         <SimpleGrid columns={3} gap={3} w="100%">
@@ -94,7 +95,7 @@ export function MoodCheckIn({ onSubmit, onSkip, isRu }: MoodCheckInProps) {
       }
       <StickyActionBar bg="bg" {...STICKY_BAR_BLEED} contentProps={{ justify: 'center' }}>
         <Button variant="ghost" size="sm" onClick={onSkip}>
-          {isRu ? 'Пропустить' : 'Skip'}
+          {t('skip')}
         </Button>
       </StickyActionBar>
     </Container>

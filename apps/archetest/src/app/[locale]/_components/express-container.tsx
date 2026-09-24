@@ -255,14 +255,14 @@ export function ExpressContainer({ questions, isAuthenticated }: ExpressContaine
           </Box>
 
           {/* Сводка дисклеймера (5.6.3); чекбокс — в StickyActionBar ниже */}
-          {!disclaimerAccepted && <DisclaimerSummary isRu={isRu} />}
+          {!disclaimerAccepted && <DisclaimerSummary />}
         </VStack>
 
         {/* Липкая панель: чекбокс согласия (пока не принято) + CTA, всегда вместе на экране */}
         <StickyActionBar bg="bg" {...STICKY_BAR_BLEED}>
           <VStack gap={3} w="100%">
             {!disclaimerAccepted && (
-              <DisclaimerConsentCheckbox accepted={disclaimerAccepted} onChange={handleConsentChange} isRu={isRu} />
+              <DisclaimerConsentCheckbox accepted={disclaimerAccepted} onChange={handleConsentChange} />
             )}
             <HStack justify="center" w="100%">
               <Button

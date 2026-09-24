@@ -5,6 +5,14 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 версионирование следует [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.28.41] - 2026-09-24
+
+### Changed
+
+- Проп `isRu` убран у шести компонентов (safety-net, дисклеймер, mood check-in, лид-форма психолога):
+  локаль они берут из next-intl сами. Строки — в `messages` (`disclaimer`, `moodCheckIn`, `leadForm`),
+  согласия со ссылкой — одним `t.rich`. Тест (4).
+
 ## [0.28.40] - 2026-09-24
 
 ### Changed

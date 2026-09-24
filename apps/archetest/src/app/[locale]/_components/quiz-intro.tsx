@@ -147,7 +147,7 @@ export function QuizIntro({ onStart, progress, initialDisclaimerAccepted }: Quiz
         </VStack>
 
         {/* Сводка дисклеймера (скрываем если уже принято ранее); чекбокс — в StickyActionBar ниже */}
-        {!disclaimerAccepted && <DisclaimerSummary isRu={isRu} />}
+        {!disclaimerAccepted && <DisclaimerSummary />}
 
         {/* Накопительный профиль */}
         {showProfile && chartData && (
@@ -178,7 +178,7 @@ export function QuizIntro({ onStart, progress, initialDisclaimerAccepted }: Quiz
       <StickyActionBar bg="bg" {...STICKY_BAR_BLEED}>
         <VStack gap={3} w="100%">
           {!disclaimerAccepted && (
-            <DisclaimerConsentCheckbox accepted={disclaimerAccepted} onChange={setDisclaimerAccepted} isRu={isRu} />
+            <DisclaimerConsentCheckbox accepted={disclaimerAccepted} onChange={setDisclaimerAccepted} />
           )}
           {
             /* На телефоне кнопки делят ширину поровну (flex: 1): прежний `w=100%` у первой
