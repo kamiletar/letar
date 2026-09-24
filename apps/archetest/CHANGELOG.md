@@ -5,6 +5,13 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 версионирование следует [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.28.37] - 2026-09-24
+
+### Added
+
+- Подключён гейт `theme:check` (`@letar/theme-check`, в `dependsOn` у `lint`). Allowlist: metadata
+  `themeColor`, satori-иконка, категориальная палитра шкал для recharts — с пояснениями в скрипте.
+
 ## [0.28.36] - 2026-09-24
 
 ### Changed

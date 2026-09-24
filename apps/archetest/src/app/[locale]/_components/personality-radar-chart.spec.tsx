@@ -31,7 +31,7 @@ function renderChart() {
   return render(
     <ChakraProvider value={defaultSystem}>
       <NextIntlClientProvider locale="ru" messages={ruMessages}>
-        <PersonalityRadarChart data={data} title="Профиль" color="#805AD5" />
+        <PersonalityRadarChart data={data} title="Профиль" color="currentColor" />
       </NextIntlClientProvider>
     </ChakraProvider>,
   )

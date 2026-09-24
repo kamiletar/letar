@@ -2,7 +2,7 @@
 
 > **📖 Начни с главного README:** [README.md](./README.md) — обзор проекта, быстрый старт, навигация по документации
 >
-> **Версия:** 0.28.36 | **Обновлено:** 2026-09-24 (пул, волна 4: радар с клавиатуры)
+> **Версия:** 0.28.37 | **Обновлено:** 2026-09-24 (пул, волна 4 закрыта: theme:check)
 >
 > **Связанные документы:**
 >
@@ -25,7 +25,7 @@
 | 1     | `--sync-texts` ✅ v0.28.5, храповик EN ✅ v0.28.6, стайлгайд EN ✅ v0.28.7 (`docs/en-bank-style.md`)       | ✅     |
 | 2     | Пакеты ревьюеру ✅: СДВГ, привязанность, часть B аудита, редкие шкалы — 5 таблиц в `docs/question-review/` | ✅     |
 | 3     | Авторский EN-банк №101–1665 ✅ **EN: 1565/1565**, аудит: 0 непереведённых                                  | ✅     |
-| 4     | UI-хвосты: `/dev/presentation` → brand, клавиатура радара, `theme:check`                                   | ⏳     |
+| 4     | UI-хвосты ✅: `/dev/presentation` → brand, клавиатура радара (+тест), `theme:check` в `lint`               | ✅     |
 | 5     | `isRu ? … : …` → `messages` — **осталось 175 в 27 файлах**                                                 | ⏳     |
 | 6     | Тесты Фазы 4: stratified-shuffle, server actions, E2E квиз/кабинет                                         | ⏳     |
 | 7     | Фичи Фазы 3: `relevantCounts` + динамика ядра, карта стабильности, фильтр, уведомления, сообщения, PDF     | ⏳     |
@@ -931,10 +931,11 @@ CAT/IRT. ✅ Подтверждено Kami: разделение ASD → ASD + D
       небольшая систематическая ошибка нормализации. Разобрать вместе с ревьюером,
       раз он всё равно будет смотреть банк.
 
-## Техдолг: подключить theme:check
+## ✅ theme:check подключён (2026-09-24, v0.28.37)
 
-Гейт сырых цветов/теней/transition в UI-коде (`nx g @letar/generators:theme-check-integrate
-archetest`, генератор `libs/generators`, обёртка над `@letar/theme-check`) пока не подключён. Уже
-подключено: domwellbes, studio, aboi. Подключать по одному, не пакетно — allowlist легитимных
-исключений собирается руками при первом прогоне. Разбор —
-`.claude/docs/theme-hardcode-gate-coverage.md` в родительском монорепо `letar`.
+Гейт сырых цветов/теней/transition (`nx g @letar/generators:theme-check-integrate archetest`) стоит в
+`dependsOn` у `lint`. Первый прогон — 30 находок, реальных багов нет; allowlist в
+`scripts/check-theme-hardcodes.mjs` с пояснениями: `themeColor` во viewport (metadata), `apple-icon`
+(satori), категориальная палитра шкал в `_data/personality-types.ts` (цвет-идентичность шкалы, идёт в
+`stroke` recharts, где токены не резолвятся). Фикстура теста радара переведена на `currentColor`.
+Новая шкала со своим цветом → дописать HEX в allowlist (гейт напомнит сам).
