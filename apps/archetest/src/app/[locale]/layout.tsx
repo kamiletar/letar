@@ -54,7 +54,12 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 }
 
 export const viewport: Viewport = {
-  themeColor: '#7C3AED',
+  // Цвет адресной строки — фон страницы (`bg` = gray.50 / gray.900) по системной теме.
+  // Ручной выбор темы в приложении сюда не доезжает: `<meta>` читается до гидратации.
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#FAFAFA' },
+    { media: '(prefers-color-scheme: dark)', color: '#18181B' },
+  ],
   width: 'device-width',
   initialScale: 1,
 }

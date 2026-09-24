@@ -5,6 +5,18 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 версионирование следует [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.28.3] - 2026-09-24
+
+### Changed
+
+- `themeColor` в `viewport` — пара значений по `prefers-color-scheme` (фон страницы `bg`:
+  `#FAFAFA` / `#18181B`) вместо одного фиолетового. Ручной выбор темы в приложении в `<meta>`
+  не попадает: он читается до гидратации.
+- `achievement-card.tsx`: `transition="all 0.2s"` заменён явным `transitionProperty`
+  (opacity, background-color, border-color).
+- Гексаграмма: компактнее раскладка — кольца ауры 1.06/1.12 (было 1.08/1.16), подписи на 1.2
+  радиуса (было 1.3), поля viewBox `PAD_X` 70 → 50. Звезда на телефоне занимает больше ширины.
+
 ## [0.28.2] - 2026-09-24
 
 ### Changed

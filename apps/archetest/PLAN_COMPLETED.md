@@ -1,5 +1,15 @@
 # Выполненные задачи: Archetest
 
+## Хвосты аудита дизайна (v0.28.3, 2026-09-24)
+
+- [x] `themeColor` — пара значений по `prefers-color-scheme` (`#FAFAFA` / `#18181B`); проверено
+      по `<meta name="theme-color">` в живой странице.
+- [x] `achievement-card.tsx` — явный `transitionProperty` вместо `all`.
+- [x] Гексаграмма — компактная раскладка колец и подписей; на 375px подписи вершин целы
+      (`/dev/presentation`), `viewBox` 500×432.
+- Радар с клавиатуры не реализован отдельно: `accessibilityLayer` у `RadarChart` в recharts 3.10.1
+  включён по умолчанию; вживую не проверено (нужна сессия с результатами).
+
 ## Перенос UI-строк quiz-results / quiz-intro в messages (v0.28.2, 2026-09-24)
 
 - [x] `quiz-results.tsx` и `quiz-intro.tsx`: инлайн-тернарники `isRu ? … : …` заменены на

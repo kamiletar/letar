@@ -24,7 +24,7 @@ const ANIMATION_MS = 700
  * Подписи — короткие коды, поэтому поля узкие: чем меньше viewBox, тем крупнее текст
  * на экране. С полными названиями (PAD_X 115) на телефоне подписи ужимались до ~7px.
  */
-const PAD_X = 70
+const PAD_X = 50
 const PAD_Y = 16
 /** Ширина viewBox — от неё считается масштаб SVG на экране */
 const VIEWBOX_WIDTH = DEFAULT_SIZE + PAD_X * 2
@@ -238,9 +238,9 @@ export function HexagramChart({
   const intersectionPoints = geometry.intersectionPolygon.map((p) => `${p.x},${p.y}`).join(' ')
 
   // Радиусы колец ауры и подписей — за пределами вершин
-  const sadRingRadius = maxRadius * 1.08
-  const masRingRadius = maxRadius * 1.16
-  const labelRadius = maxRadius * 1.3
+  const sadRingRadius = maxRadius * 1.06
+  const masRingRadius = maxRadius * 1.12
+  const labelRadius = maxRadius * 1.2
 
   const integrationPercent = Math.round(geometry.integrationIndex * 100)
   const masBeta = getPersonalityType('MAS').beta
