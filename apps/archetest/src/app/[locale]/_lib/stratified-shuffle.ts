@@ -10,7 +10,7 @@ const perQuestionMax = maxScoresData.per_question_max as Record<string, Record<s
  * Доминантная шкала — та, для которой вопрос даёт максимальный балл.
  * Если несколько шкал дают одинаковый макс — берём первую по порядку SCORED_SCALE_CODES.
  */
-function getDominantScale(sortOrder: number): ScaleCode | null {
+export function getDominantScale(sortOrder: number): ScaleCode | null {
   const qId = String(sortOrder + 1) // sortOrder 0-based → questionNumber 1-based
   const qMax = perQuestionMax[qId]
   if (!qMax) {
@@ -115,11 +115,31 @@ export function stratifiedSelect<T extends StratifiableQuestion>(questions: T[],
   }
 
   // Не превышаем размер корзины
+  let cut = 0
   for (const code of SCORED_SCALE_CODES) {
     const bucket = buckets.get(code)!
     const slotCount = slots.get(code)!
     if (slotCount > bucket.length) {
+      cut += slotCount - bucket.length
       slots.set(code, bucket.length)
+    }
+  }
+
+  // Срезанные слоты отдаём шкалам с запасом вопросов — по одному, начиная с самой большой
+  // свободной корзины. Без этого порция на поздней стадии прохождения (редкие шкалы почти
+  // исчерпаны) выходила короче заявленной: 46 вопросов вместо 50
+  while (cut > 0) {
+    const spare = SCORED_SCALE_CODES.filter((code) => buckets.get(code)!.length > slots.get(code)!)
+    if (spare.length === 0) {
+      break
+    }
+    spare.sort((a, b) => buckets.get(b)!.length - slots.get(b)! - (buckets.get(a)!.length - slots.get(a)!))
+    for (const code of spare) {
+      if (cut === 0) {
+        break
+      }
+      slots.set(code, slots.get(code)! + 1)
+      cut--
     }
   }
 
