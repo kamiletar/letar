@@ -21,7 +21,7 @@ function render(children: ReactNode) {
 describe('DarkOnlyChakraProvider', () => {
   it('стили Emotion не попадают в разметку — реестр стоит снаружи', () => {
     const { html, inserted } = render(<Box color="red.500">текст</Box>)
-    expect(html).not.toContain('<style')
+    expect(html).not.toMatch(/<style[^>]*data-emotion/)
     expect(html).toContain('текст')
     expect(inserted()).toMatch(/<style data-emotion="css [^"]+"/)
   })

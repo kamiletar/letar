@@ -13,15 +13,11 @@ import { system } from '@/theme'
  * Включает:
  * - Chakra UI с кастомной темой
  * - Поддержку тёмной/светлой темы
- *
- * `enableColorScheme={false}`: `color-scheme` задаёт тема (`globalCss` в `@/theme`),
- * иначе инлайновый `color-scheme: light` от next-themes разрешил бы браузеру
- * авто-затемнять светлую тему.
  */
 export function Providers({ children }: PropsWithChildren) {
   return (
     <EmotionRegistry>
-      <ColorModeProvider enableColorScheme={false}>
+      <ColorModeProvider>
         <RootChakraProvider value={system}>
           <FormI18nProvider locale="ru">{children}</FormI18nProvider>
         </RootChakraProvider>

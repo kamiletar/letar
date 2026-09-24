@@ -23,21 +23,21 @@ next-themes (`ColorModeProvider` из `@letar/chakra-provider`) по умолч�
 
 ## Фикс
 
-Ключевое слово `only` запрещает браузеру подменять схему:
+Ключевое слово `only` запрещает браузеру подменять схему. Правило живёт в
+`ColorModeProvider` (`@letar/chakra-provider`, с 0.5.0) и включено по умолчанию:
 
-```ts
-// theme/index.ts → defineConfig({ globalCss })
-'html.light': { colorScheme: 'only light' },
-'html.dark': { colorScheme: 'dark' },
-```
+- рендерит `<style>` с `html.light{color-scheme:only light}html.dark{color-scheme:dark}` —
+  обычный CSS в потоке SSR, действует до гидратации, без вспышки;
+- передаёт next-themes `enableColorScheme={false}`: его инлайновый `style="color-scheme: …"`
+  перебил бы это правило;
+- селекторы строятся по `attribute`/`value` провайдера (`class`, `data-*`, карта значений);
+- `lockColorScheme={false}` возвращает прежнее поведение next-themes.
 
-```tsx
-// providers.tsx — иначе инлайновый style от next-themes перебьёт правило темы
-<ColorModeProvider enableColorScheme={false}>
-```
+Приложению делать ничего не нужно. Не дублируй `colorScheme` в `globalCss` темы и не передавай
+`enableColorScheme` вручную — вернёшь старую проблему.
 
-После фикса тот же прогон с принудительным затемнением даёт настоящую светлую страницу,
-вычисленный `color-scheme` — `light only`.
+После фикса прогон с принудительным затемнением даёт настоящую светлую страницу, вычисленный
+`color-scheme` у `<html>` — `light only`.
 
 ## Как проверить у себя
 
@@ -56,5 +56,12 @@ chromium.launch({ args: ['--enable-features=WebContentsForceDark', '--blink-sett
 
 ## Охват
 
-Сейчас фикс только в archetest. `ColorModeProvider` общий для всех приложений с тёмной темой —
-перенос в `@letar/chakra-provider` (опция или поведение по умолчанию) не сделан.
+Закрыто для всех приложений на `ColorModeProvider` из `@letar/chakra-provider` (проверено
+2026-09-24 в Playwright с принудительным затемнением: archetest и grandslamcup — `light only`,
+светлый снимок; при снятом правиле тот же снимок тёмный). `DarkOnlyChakraProvider` (лендинги,
+synth) не затронут: там всегда `forcedTheme="dark"`, вычисленный `color-scheme` — `dark`, как и был.
+
+⚠️ Не покрыты приложения со **своим** `ThemeProvider` из `next-themes`, минуя `ColorModeProvider`
+(по грепу импортов `next-themes` на 2026-09-24 — `animatrona/renderer`, `mandala`): там инлайновый `color-scheme: light` остаётся. Переводить на общий провайдер
+или добавлять правило руками — по мере надобности; Electron-рендереры авто-затемнением Chrome
+Android не страдают.
