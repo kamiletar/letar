@@ -1,0 +1,332 @@
+[
+  {
+    "scenario": "Коллега, который вечно всех поучает, при всех перепутал простой факт и покраснел.",
+    "scenarioEn": "A colleague who's always lecturing everyone gets a simple fact wrong in front of the team and goes red.",
+    "options": [
+      {
+        "text": "Смакую момент — и не спешу выручать",
+        "textEn": "I savour the moment — and take my time coming to the rescue",
+        "scoring": {
+          "SAD": 3,
+          "NAR": 1
+        }
+      },
+      {
+        "text": "Тихо подскажу верный ответ, чтобы замять",
+        "textEn": "I quietly offer the right answer to smooth it over",
+        "scoring": {
+          "HUM": 2
+        }
+      },
+      {
+        "text": "Поправлю вслух: факты важнее неловкости",
+        "textEn": "I correct it out loud: facts matter more than awkwardness",
+        "scoring": {
+          "DIR": 2,
+          "OBC": 1
+        }
+      },
+      {
+        "text": "Отмечу про себя «так ему и надо», но вида не подам",
+        "textEn": "I think \"serves them right\", but I don't let it show",
+        "scoring": {
+          "SAD": 1,
+          "PAG": 2
+        }
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "Вы учите новичка, и он в пятый раз ошибается в одном и том же.",
+    "scenarioEn": "You're training a newcomer, and they make the same mistake for the fifth time.",
+    "options": [
+      {
+        "text": "Объясняю ещё раз, другими словами",
+        "textEn": "I explain it again, in different words",
+        "scoring": {
+          "HUM": 1,
+          "KAN": 1
+        }
+      },
+      {
+        "text": "Говорю «ничего страшного», а сам(а) чуть растягиваю паузу, глядя, как он мучается",
+        "textEn": "I say \"no problem\", but I let the pause drag on a little, watching them squirm",
+        "scoring": {
+          "SAD": 3
+        }
+      },
+      {
+        "text": "Проще сделать самому (самой)",
+        "textEn": "It's easier to do it myself",
+        "scoring": {
+          "NAR": 1,
+          "OBC": 1
+        }
+      },
+      {
+        "text": "Жёстко отчитываю: пусть запомнит",
+        "textEn": "I give them a hard telling-off so it sticks",
+        "scoring": {
+          "ANT": 1,
+          "SAD": 1
+        }
+      }
+    ]
+  },
+  {
+    "scenario": "Друг до ужаса боится пауков. На даче вы находите огромного паука.",
+    "scenarioEn": "A friend of yours is terrified of spiders. At the weekend cabin you find a huge one.",
+    "options": [
+      {
+        "text": "Позову друга «посмотреть кое-что интересное» — его реакция будет бесценна",
+        "textEn": "I'll call my friend over to \"see something cool\" — their reaction will be priceless",
+        "scoring": {
+          "SAD": 3,
+          "HIS": 1
+        }
+      },
+      {
+        "text": "Выношу паука подальше, пока друг не увидел",
+        "textEn": "I carry the spider far away before my friend sees it",
+        "scoring": {
+          "HUM": 2
+        }
+      },
+      {
+        "text": "Фотографирую: паук правда интересный",
+        "textEn": "I take a photo: the spider really is fascinating",
+        "scoring": {
+          "SZT": 1,
+          "ASD": 1
+        }
+      },
+      {
+        "text": "Предупреждаю друга, чтобы обходил это место",
+        "textEn": "I warn my friend to steer clear of that spot",
+        "scoring": {
+          "KAN": 1,
+          "HUM": 1
+        }
+      }
+    ]
+  },
+  {
+    "scenario": "На переговорах вы видите, что человек напротив загнан в угол и нервничает.",
+    "scenarioEn": "In a negotiation you can see that the person across the table is cornered and nervous.",
+    "options": [
+      {
+        "text": "Дожимаю медленно, без спешки: мне нравится этот момент",
+        "textEn": "I press slowly, without hurrying: I enjoy this moment",
+        "scoring": {
+          "SAD": 3,
+          "MAC": 1
+        }
+      },
+      {
+        "text": "Беру своё и даю ему сохранить лицо",
+        "textEn": "I get what I need and let them save face",
+        "scoring": {
+          "MAC": 1,
+          "HUM": 1
+        }
+      },
+      {
+        "text": "Иду навстречу: давить на слабого неприятно",
+        "textEn": "I meet them halfway: pushing someone who's weak feels wrong",
+        "scoring": {
+          "HUM": 2
+        }
+      },
+      {
+        "text": "Фиксирую условия письменно — эмоции меня не касаются",
+        "textEn": "I put the terms in writing — emotions aren't my concern",
+        "scoring": {
+          "OBC": 2
+        }
+      }
+    ]
+  },
+  {
+    "scenario": "Человек в очереди громко скандалит и явно выставляет себя на посмешище.",
+    "scenarioEn": "Someone in a queue is loudly making a scene and clearly making a fool of themselves.",
+    "options": [
+      {
+        "text": "Снимаю на телефон — выложу, пусть посмеются все",
+        "textEn": "I film it on my phone — I'll post it so everyone can laugh",
+        "scoring": {
+          "SAD": 3,
+          "ANT": 1
+        }
+      },
+      {
+        "text": "Отворачиваюсь: неловко за человека",
+        "textEn": "I look away: I feel embarrassed for them",
+        "scoring": {
+          "HUM": 1,
+          "AVD": 1
+        }
+      },
+      {
+        "text": "Пытаюсь его успокоить",
+        "textEn": "I try to calm them down",
+        "scoring": {
+          "HUM": 2
+        }
+      },
+      {
+        "text": "Раздражаюсь: зачем устраивать шоу",
+        "textEn": "I get irritated: why put on a show",
+        "scoring": {
+          "PAG": 1,
+          "OBC": 1
+        }
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "Бывший партнёр, расставшийся с вами некрасиво, пишет, что у него(неё) всё рушится.",
+    "scenarioEn": "An ex who ended things with you badly writes that their life is falling apart.",
+    "options": [
+      {
+        "text": "Отвечаю вежливо и сухо, а внутри — тихое удовольствие от каждой подробности",
+        "textEn": "I reply politely and briefly, but inside I quietly enjoy every detail",
+        "scoring": {
+          "SAD": 3
+        }
+      },
+      {
+        "text": "Сочувствую искренне: прошлое прошло",
+        "textEn": "I'm genuinely sympathetic: the past is the past",
+        "scoring": {
+          "HUM": 2,
+          "FAI": 1
+        }
+      },
+      {
+        "text": "Не отвечаю: это больше не моя история",
+        "textEn": "I don't reply: it's not my story any more",
+        "scoring": {
+          "SZD": 1,
+          "AVD": 1
+        }
+      },
+      {
+        "text": "Отвечаю колко: сам(а) виноват(а)",
+        "textEn": "I reply with a jab: they brought it on themselves",
+        "scoring": {
+          "PAG": 2,
+          "SAD": 1
+        }
+      }
+    ]
+  },
+  {
+    "scenario": "Настольная игра с друзьями. Один из них очень переживает, когда проигрывает.",
+    "scenarioEn": "A board game with friends. One of them gets really upset when they lose.",
+    "options": [
+      {
+        "text": "Играю против него особенно жёстко: его досада — лучшая часть вечера",
+        "textEn": "I play especially hard against them: their frustration is the best part of the evening",
+        "scoring": {
+          "SAD": 3
+        }
+      },
+      {
+        "text": "Иногда подыгрываю, чтобы всем было весело",
+        "textEn": "Sometimes I go easy so everyone has fun",
+        "scoring": {
+          "HUM": 2
+        }
+      },
+      {
+        "text": "Играю как обычно: игра есть игра",
+        "textEn": "I play as usual: a game is a game",
+        "scoring": {
+          "KAN": 1
+        }
+      },
+      {
+        "text": "Предлагаю командный режим — без проигравших",
+        "textEn": "I suggest playing in teams — no losers",
+        "scoring": {
+          "HUM": 1,
+          "FAI": 1
+        }
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "Знакомый просит отзыв на свой рассказ — рассказ откровенно слабый.",
+    "scenarioEn": "An acquaintance asks for feedback on their short story — and it's frankly weak.",
+    "options": [
+      {
+        "text": "Пишу подробный и безжалостный разбор — это же честная обратная связь",
+        "textEn": "I write a detailed, merciless critique — that's honest feedback, after all",
+        "scoring": {
+          "SAD": 3,
+          "DIR": 1
+        }
+      },
+      {
+        "text": "Отмечаю сильные стороны и пару главных точек роста",
+        "textEn": "I point out the strengths and a couple of key things to work on",
+        "scoring": {
+          "HUM": 2
+        }
+      },
+      {
+        "text": "Говорю, что всё отлично: не хочу расстраивать",
+        "textEn": "I say it's great: I don't want to upset them",
+        "scoring": {
+          "DEP": 1,
+          "AVD": 1
+        }
+      },
+      {
+        "text": "Пишу коротко и по делу",
+        "textEn": "I keep it short and to the point",
+        "scoring": {
+          "DIR": 2
+        }
+      }
+    ]
+  },
+  {
+    "scenario": "Вы видите, как кто-то неловко пытается познакомиться и получает отказ.",
+    "scenarioEn": "You watch someone awkwardly try to chat someone up and get turned down.",
+    "options": [
+      {
+        "text": "Смотрю с удовольствием: чужой провал — лучшее кино",
+        "textEn": "I watch with pleasure: someone else's flop is the best show",
+        "scoring": {
+          "SAD": 3
+        }
+      },
+      {
+        "text": "Сочувствую: сам(а) бывал(а) в такой ситуации",
+        "textEn": "I feel for them: I've been there myself",
+        "scoring": {
+          "HUM": 2
+        }
+      },
+      {
+        "text": "Отвожу взгляд, чтобы не смущать",
+        "textEn": "I look away so as not to embarrass them",
+        "scoring": {
+          "HUM": 1,
+          "AVD": 1
+        }
+      },
+      {
+        "text": "Мысленно разбираю, что он(а) сделал(а) не так",
+        "textEn": "In my head I go over what they did wrong",
+        "scoring": {
+          "MAC": 1
+        }
+      }
+    ]
+  }
+]

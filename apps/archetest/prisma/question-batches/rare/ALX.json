@@ -1,0 +1,214 @@
+[
+  {
+    "scenario": "Друг спрашивает, почему вы вчера так резко ушли с вечеринки.",
+    "scenarioEn": "A friend asks why you left the party so abruptly yesterday.",
+    "options": [
+      {
+        "text": "Пытаюсь объяснить — и понимаю, что сам(а) не знаю: просто стало «как-то не так»",
+        "textEn": "I try to explain — and realise I don't know myself: it just felt \"off\" somehow",
+        "scoring": {
+          "ALX": 3
+        }
+      },
+      {
+        "text": "Честно говорю: меня задела одна фраза",
+        "textEn": "I say honestly that one remark got to me",
+        "scoring": {
+          "DIR": 1
+        }
+      },
+      {
+        "text": "Придумываю вежливую причину",
+        "textEn": "I make up a polite reason",
+        "scoring": {
+          "AVD": 1,
+          "MAC": 1
+        }
+      },
+      {
+        "text": "Говорю, что устал(а), и не углубляюсь",
+        "textEn": "I say I was tired and leave it there",
+        "scoring": {
+          "ALX": 1,
+          "SZD": 1
+        }
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "После тяжёлого разговора с начальником коллега спрашивает: «Ты как?»",
+    "scenarioEn": "After a tough conversation with your boss, a colleague asks: \"How are you doing?\"",
+    "options": [
+      {
+        "text": "Пересказываю по фактам: он сказал это, я ответил(а) то — разбирать разговор легче, чем чувства",
+        "textEn": "I recount the facts: they said this, I said that — analysing the conversation is easier than feelings",
+        "scoring": {
+          "ALX": 3
+        }
+      },
+      {
+        "text": "Говорю, что обидно и тревожно",
+        "textEn": "I say I feel hurt and anxious",
+        "scoring": {}
+      },
+      {
+        "text": "«Нормально» — и меняю тему",
+        "textEn": "\"Fine\" — and I change the subject",
+        "scoring": {
+          "ALX": 2,
+          "AVD": 1
+        }
+      },
+      {
+        "text": "Злюсь вслух на начальника",
+        "textEn": "I vent my anger at the boss",
+        "scoring": {
+          "PAG": 1,
+          "ANT": 1
+        }
+      }
+    ]
+  },
+  {
+    "scenario": "У вас без видимой причины колотится сердце и сжимается желудок.",
+    "scenarioEn": "For no obvious reason your heart is pounding and your stomach is in a knot.",
+    "options": [
+      {
+        "text": "Думаю, что что-то с телом, — о чувствах вспоминаю в последнюю очередь",
+        "textEn": "I assume it's something physical — emotions are the last thing that occurs to me",
+        "scoring": {
+          "ALX": 3
+        }
+      },
+      {
+        "text": "Понимаю: волнуюсь из-за завтрашнего",
+        "textEn": "I realise I'm nervous about tomorrow",
+        "scoring": {}
+      },
+      {
+        "text": "Иду проверяться к врачу",
+        "textEn": "I go and get checked by a doctor",
+        "scoring": {
+          "OBC": 1,
+          "PAR": 1
+        }
+      },
+      {
+        "text": "Не обращаю внимания — пройдёт",
+        "textEn": "I ignore it — it'll pass",
+        "scoring": {
+          "MAS": 1,
+          "ALX": 1
+        }
+      }
+    ]
+  },
+  {
+    "scenario": "Нужно написать тёплое поздравление близкому человеку.",
+    "scenarioEn": "You need to write a warm message to someone close to you.",
+    "options": [
+      {
+        "text": "Сижу над пустым листом: нужных слов о чувствах просто нет",
+        "textEn": "I sit in front of a blank page: the words for feelings just aren't there",
+        "scoring": {
+          "ALX": 3
+        }
+      },
+      {
+        "text": "Пишу легко — слова приходят сами",
+        "textEn": "I write easily — the words just come",
+        "scoring": {
+          "HIS": 1
+        }
+      },
+      {
+        "text": "Беру готовое поздравление из интернета",
+        "textEn": "I copy a ready-made message from the internet",
+        "scoring": {
+          "SZD": 1,
+          "ALX": 1
+        }
+      },
+      {
+        "text": "Пишу коротко — и этого достаточно",
+        "textEn": "I keep it short — that's enough",
+        "scoring": {
+          "DIR": 1,
+          "SZD": 1
+        }
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "Близкий человек говорит: «Ты сегодня какой-то не такой».",
+    "scenarioEn": "Someone close to you says: \"You don't seem yourself today.\"",
+    "options": [
+      {
+        "text": "«Да нет, всё как обычно» — и правда не замечаю в себе ничего особенного",
+        "textEn": "\"No, everything's normal\" — and I genuinely don't notice anything different in myself",
+        "scoring": {
+          "ALX": 3
+        }
+      },
+      {
+        "text": "Задумываюсь и понимаю, что с утра расстроен(а)",
+        "textEn": "I think about it and realise I've been upset since the morning",
+        "scoring": {}
+      },
+      {
+        "text": "Раздражаюсь, что лезут в душу",
+        "textEn": "I get annoyed that they're prying",
+        "scoring": {
+          "AVD": 1,
+          "PAG": 1
+        }
+      },
+      {
+        "text": "Спрашиваю, что именно заметили",
+        "textEn": "I ask what exactly they noticed",
+        "scoring": {
+          "DEP": 1
+        }
+      }
+    ]
+  },
+  {
+    "scenario": "Вы разбираете старые семейные фотографии.",
+    "scenarioEn": "You're sorting through old family photos.",
+    "options": [
+      {
+        "text": "Узнаю людей и места, но внутри почти ничего не шевелится",
+        "textEn": "I recognise the people and places, but inside hardly anything stirs",
+        "scoring": {
+          "ALX": 3,
+          "SZD": 1
+        }
+      },
+      {
+        "text": "Накатывает ностальгия, иногда до слёз",
+        "textEn": "Nostalgia washes over me, sometimes to the point of tears",
+        "scoring": {
+          "HIS": 1
+        }
+      },
+      {
+        "text": "Раскладываю их по годам и подписываю",
+        "textEn": "I sort them by year and label them",
+        "scoring": {
+          "OBC": 2,
+          "ASD": 1
+        }
+      },
+      {
+        "text": "Становится грустно, и я их убираю",
+        "textEn": "I feel sad and put them away",
+        "scoring": {
+          "AVD": 1,
+          "DPR": 1
+        }
+      }
+    ]
+  }
+]

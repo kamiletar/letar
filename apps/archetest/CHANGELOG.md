@@ -5,6 +5,18 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 версионирование следует [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.28.16] - 2026-09-24
+
+### Added
+
+- Батч добора редких шкал ядра `prisma/question-batches/rare/` — SAD 9, ASD 8, MAS 7, ALX 6
+  (reverse 3/3/3/2), стиль и вторичные баллы как в 5.1. Два сюжета переписаны из-за дублей банка
+  (анекдот, над которым все смеются; ресторан с не тем блюдом). **В банк не влито** — это ядро,
+  вливание только с бампом `QUESTION_BANK_VERSION`.
+- `merge-question-batch.ts`: `perScale`/`minReverse` принимают карту по шкалам (для `rare` с
+  разным дефицитом); конфиг `rare` с `allowedScoringCodes: CORE_CODES`. `--dry-run` зелёный для
+  rare/adhd/attachment/hh.
+
 ## [0.28.15] - 2026-09-24
 
 ### Added

@@ -60,10 +60,10 @@ interface BatchConfig {
   dir: string
   /** Порядок шкал (фиксирован — от него зависят sortOrder новых вопросов) */
   order: string[]
-  /** Ожидаемое число вопросов в каждом файле шкалы */
-  perScale: number
-  /** Минимум reverse-вопросов на шкалу (≥ 1/3) */
-  minReverse: number
+  /** Ожидаемое число вопросов в файле шкалы — одно на все или своё для каждой шкалы */
+  perScale: number | Record<string, number>
+  /** Минимум reverse-вопросов на шкалу (≥ 1/3) — одно на все или своё для каждой шкалы */
+  minReverse: number | Record<string, number>
   /** Коды, которыми варианты вправе скорить (изоляция ядра для экспериментальных) */
   allowedScoringCodes: string[]
 }
@@ -97,6 +97,16 @@ const CONFIGS: Record<string, BatchConfig> = {
     perScale: 15,
     minReverse: 5,
     allowedScoringCodes: ['HON'],
+  },
+  // Добор редких шкал ядра до порога high=30 (docs/rare-scales-brief.md). ⚠️ Это ЯДРО:
+  // вливание сдвигает actual_max SAD/ASD/MAS/ALX и вторичных шкал → только с бампом
+  // QUESTION_BANK_VERSION, пачкой, после вердиктов ревьюера. До того — только `--dry-run`.
+  rare: {
+    dir: 'rare',
+    order: ['SAD', 'ASD', 'MAS', 'ALX'],
+    perScale: { SAD: 9, ASD: 8, MAS: 7, ALX: 6 },
+    minReverse: { SAD: 3, ASD: 3, MAS: 3, ALX: 2 },
+    allowedScoringCodes: CORE_CODES,
   },
   // СДВГ-скрининг: INA — невнимательность, HYI — гиперактивность/импульсивность
   // (docs/adhd-screening-brief.md). ⚠️ НЕ вливать до вердиктов ревьюера и решения Kami
@@ -178,12 +188,14 @@ for (const scale of config.order) {
   const qs = all.filter((q) => (updateMode ? q._updateOf : !q._updateOf))
 
   if (!updateMode) {
-    if (qs.length !== config.perScale) {
-      throw new Error(`${scale}: ожидалось ${config.perScale} вопросов, получено ${qs.length}`)
+    const expected = typeof config.perScale === 'number' ? config.perScale : config.perScale[scale]
+    const minReverse = typeof config.minReverse === 'number' ? config.minReverse : config.minReverse[scale]
+    if (qs.length !== expected) {
+      throw new Error(`${scale}: ожидалось ${expected} вопросов, получено ${qs.length}`)
     }
     const reverseCount = qs.filter((q) => q._reverse).length
-    if (reverseCount < config.minReverse) {
-      throw new Error(`${scale}: reverse-вопросов ${reverseCount} < ${config.minReverse} (нужно ≥ 1/3)`)
+    if (reverseCount < minReverse) {
+      throw new Error(`${scale}: reverse-вопросов ${reverseCount} < ${minReverse} (нужно ≥ 1/3)`)
     }
   }
 

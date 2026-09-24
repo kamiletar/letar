@@ -1,0 +1,280 @@
+[
+  {
+    "scenario": "Друг просит «заскочить ненадолго».",
+    "scenarioEn": "A friend asks you to \"drop by for a bit\".",
+    "options": [
+      {
+        "text": "Уточняю: «ненадолго» — это сколько минут?",
+        "textEn": "I check: \"a bit\" — how many minutes is that?",
+        "scoring": {
+          "ASD": 3,
+          "OBC": 1
+        }
+      },
+      {
+        "text": "Заезжаю, как получится",
+        "textEn": "I drop by whenever it works out",
+        "scoring": {
+          "HIS": 1
+        }
+      },
+      {
+        "text": "Понятно, минут на двадцать — так обычно и бывает",
+        "textEn": "Fine — twenty minutes or so, that's how it usually goes",
+        "scoring": {
+          "FAI": 1
+        }
+      },
+      {
+        "text": "Соглашаюсь, но планирую уйти через час",
+        "textEn": "I agree, but plan to leave after an hour",
+        "scoring": {
+          "OBC": 1
+        }
+      }
+    ]
+  },
+  {
+    "scenario": "В любимом кафе сменили меню и расставили столы по-новому.",
+    "scenarioEn": "Your favourite café has changed its menu and rearranged the tables.",
+    "options": [
+      {
+        "text": "Выбит(а) из колеи: теперь это будто чужое место",
+        "textEn": "I'm thrown: now it feels like somebody else's place",
+        "scoring": {
+          "ASD": 3,
+          "AVD": 1
+        }
+      },
+      {
+        "text": "Интересно — попробую новое",
+        "textEn": "Interesting — I'll try something new",
+        "scoring": {
+          "HIS": 1,
+          "FAI": 1
+        }
+      },
+      {
+        "text": "Замечаю, но мне всё равно",
+        "textEn": "I notice, but I don't care",
+        "scoring": {
+          "SZD": 1
+        }
+      },
+      {
+        "text": "Пишу отзыв: раньше было лучше",
+        "textEn": "I write a review: it used to be better",
+        "scoring": {
+          "PAG": 1,
+          "OBC": 1
+        }
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "Небольшая компания, общий разговор легко перескакивает с темы на тему.",
+    "scenarioEn": "A small group; the conversation hops easily from one topic to the next.",
+    "options": [
+      {
+        "text": "Заранее держу в голове пару тем и фраз — без «сценария» теряюсь",
+        "textEn": "I keep a couple of topics and lines ready in advance — without a \"script\" I get lost",
+        "scoring": {
+          "ASD": 3
+        }
+      },
+      {
+        "text": "Подхватываю легко",
+        "textEn": "I pick it up easily",
+        "scoring": {
+          "HIS": 1
+        }
+      },
+      {
+        "text": "Молчу и слушаю",
+        "textEn": "I stay quiet and listen",
+        "scoring": {
+          "SZD": 1,
+          "AVD": 1
+        }
+      },
+      {
+        "text": "Жду повода заговорить о своей теме",
+        "textEn": "I wait for a chance to bring up my own topic",
+        "scoring": {
+          "ASD": 2,
+          "NAR": 1
+        }
+      }
+    ]
+  },
+  {
+    "scenario": "Вы собираете мебель по инструкции, а в ней явная ошибка в нумерации деталей.",
+    "scenarioEn": "You're assembling furniture from the instructions, and the part numbering has an obvious mistake.",
+    "options": [
+      {
+        "text": "Не успокоюсь, пока не найду, где именно ошибка, и не отмечу её в инструкции",
+        "textEn": "I can't let it go until I find exactly where the mistake is and mark it in the instructions",
+        "scoring": {
+          "ASD": 3,
+          "OBC": 1
+        }
+      },
+      {
+        "text": "Собираю по картинке — нумерация неважна",
+        "textEn": "I go by the pictures — the numbering doesn't matter",
+        "scoring": {}
+      },
+      {
+        "text": "Злюсь на производителя и пишу жалобу",
+        "textEn": "I get angry at the manufacturer and write a complaint",
+        "scoring": {
+          "PAG": 2
+        }
+      },
+      {
+        "text": "Прошу кого-нибудь помочь",
+        "textEn": "I ask someone to help",
+        "scoring": {
+          "DEP": 2
+        }
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "Вечер пятницы. Друзья зовут в бар, где вы ещё не бывали.",
+    "scenarioEn": "Friday evening. Friends invite you to a bar you've never been to.",
+    "options": [
+      {
+        "text": "Соглашаюсь, но заранее смотрю фото зала, меню и как добираться — так спокойнее",
+        "textEn": "I say yes, but first I look up photos of the place, the menu and how to get there — it's calmer that way",
+        "scoring": {
+          "ASD": 3
+        }
+      },
+      {
+        "text": "Иду с удовольствием — люблю новые места",
+        "textEn": "I'm happy to go — I love new places",
+        "scoring": {
+          "HIS": 2
+        }
+      },
+      {
+        "text": "Не пойду: вечер пятницы — моё время",
+        "textEn": "I'm not going: Friday night is my time",
+        "scoring": {
+          "SZD": 2
+        }
+      },
+      {
+        "text": "Пойду, если там будет кто-то из близких",
+        "textEn": "I'll go if someone close to me will be there",
+        "scoring": {
+          "DEP": 1,
+          "AVD": 1
+        }
+      }
+    ]
+  },
+  {
+    "scenario": "Вас просят «сделать как обычно, только немного лучше».",
+    "scenarioEn": "You're asked to \"do it the usual way, just a bit better\".",
+    "options": [
+      {
+        "text": "Теряюсь: «лучше» — это по каким параметрам?",
+        "textEn": "I'm stuck: \"better\" by which measures?",
+        "scoring": {
+          "ASD": 3
+        }
+      },
+      {
+        "text": "Интуитивно понимаю, что имеется в виду, и делаю",
+        "textEn": "I intuitively get what they mean and do it",
+        "scoring": {}
+      },
+      {
+        "text": "Делаю по-своему — я лучше знаю",
+        "textEn": "I do it my way — I know best",
+        "scoring": {
+          "NAR": 2
+        }
+      },
+      {
+        "text": "Боюсь не угадать и переделываю несколько раз",
+        "textEn": "I'm afraid of getting it wrong and redo it several times",
+        "scoring": {
+          "DEP": 2
+        }
+      }
+    ]
+  },
+  {
+    "scenario": "Вы долго объясняли собеседнику устройство интересной вам системы. Он зевнул.",
+    "scenarioEn": "You've spent a long time explaining to someone how a system you love works. They yawn.",
+    "options": [
+      {
+        "text": "Замечаю зевок задним числом — увлёкся(лась) и не следил(а) за реакцией",
+        "textEn": "I only notice the yawn afterwards — I got carried away and wasn't watching their reaction",
+        "scoring": {
+          "ASD": 3
+        }
+      },
+      {
+        "text": "Сразу сворачиваюсь: вижу, что неинтересно",
+        "textEn": "I wrap up at once: I can see they're not interested",
+        "scoring": {}
+      },
+      {
+        "text": "Обижаюсь: мог бы и послушать",
+        "textEn": "I'm offended: they could at least listen",
+        "scoring": {
+          "NAR": 1,
+          "PAG": 1
+        }
+      },
+      {
+        "text": "Упрощаю объяснение",
+        "textEn": "I simplify the explanation",
+        "scoring": {
+          "HUM": 1
+        }
+      }
+    ]
+  },
+  {
+    "_reverse": true,
+    "scenario": "Коллега пишет в чат: «Глянешь мой отчёт, когда будет минутка?»",
+    "scenarioEn": "A colleague messages: \"Could you look over my report when you've got a minute?\"",
+    "options": [
+      {
+        "text": "Отвечаю «гляну» и ставлю напоминание на конкретное время: «когда будет минутка» мне ничего не говорит",
+        "textEn": "I say \"will do\" and set a reminder for a specific time: \"when you've got a minute\" means nothing to me",
+        "scoring": {
+          "ASD": 3,
+          "OBC": 1
+        }
+      },
+      {
+        "text": "Посмотрю, когда освобожусь",
+        "textEn": "I'll look when I'm free",
+        "scoring": {}
+      },
+      {
+        "text": "Бросаю всё и смотрю: вдруг срочно",
+        "textEn": "I drop everything and look: what if it's urgent",
+        "scoring": {
+          "DEP": 1,
+          "AVD": 1
+        }
+      },
+      {
+        "text": "Уточняю, к какому сроку нужно",
+        "textEn": "I ask when they need it by",
+        "scoring": {
+          "OBC": 1
+        }
+      }
+    ]
+  }
+]
