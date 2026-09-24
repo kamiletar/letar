@@ -12,6 +12,13 @@ import { createField } from '../uikit/primitives'
 import { shadcnUIKit } from '../uikit/uikit-shadcn'
 import type { SelectFieldProps } from './types'
 
+/**
+ * Radix Select трактует `''` как «ничего не выбрано» (показывает placeholder), поэтому опция
+ * «Все категории» со значением `''` не могла отображаться выбранной. Внутри примитива такое
+ * значение подменяется служебным токеном, наружу (в форму) всегда уходит настоящее `''`.
+ */
+const EMPTY_OPTION_TOKEN = '__letar_empty_option__'
+
 interface NormalizedOption {
   label: React.ReactNode
   value: string
@@ -21,6 +28,8 @@ interface NormalizedOption {
 interface SelectFieldState {
   normalizedOptions: NormalizedOption[]
   resolvedClearable: boolean
+  /** В списке есть опция с пустым значением (`''`) */
+  hasEmptyOption: boolean
   /** Добавляет опцию, возвращённую `onCreate`, в локальный список */
   addCreatedOption: (option: CreatedOption) => void
   /** `true`, пока `onCreate` не завершился (повторный выбор пункта игнорируется) */
@@ -47,7 +56,7 @@ export const FieldSelect = createField<SelectFieldProps, string | number, Select
       const merged = mergeCreatedOptions(sourceOptions, createdOptions)
       const normalized: NormalizedOption[] = merged.map((opt) => ({
         label: opt.label,
-        value: String(opt.value),
+        value: String(opt.value) === '' ? EMPTY_OPTION_TOKEN : String(opt.value),
         disabled: opt.disabled,
       }))
       // Служебный пункт: перехватывается в onValueChange, в форму не попадает
@@ -56,17 +65,22 @@ export const FieldSelect = createField<SelectFieldProps, string | number, Select
 
     const resolvedClearable = componentProps.clearable ?? !resolved.required
 
-    return { normalizedOptions, resolvedClearable, addCreatedOption, creatingRef }
+    const hasEmptyOption = normalizedOptions.some((opt) => opt.value === EMPTY_OPTION_TOKEN)
+
+    return { normalizedOptions, resolvedClearable, hasEmptyOption, addCreatedOption, creatingRef }
   },
   render: ({ field, fullPath, resolved, hasError, errorMessage, componentProps, fieldState }): ReactElement => {
     const currentValue = field.state.value
-    const stringValue = currentValue !== null && currentValue !== undefined ? String(currentValue) : undefined
+    const rawValue = currentValue !== null && currentValue !== undefined ? String(currentValue) : undefined
+    // `''` при наличии опции с пустым значением — это выбранная опция, а не «пусто»
+    const stringValue = rawValue === '' && fieldState.hasEmptyOption ? EMPTY_OPTION_TOKEN : rawValue
 
     return (
       <shadcnUIKit.FieldRoot invalid={hasError} required={resolved.required} disabled={resolved.disabled}>
         <shadcnUIKit.Select
           value={stringValue}
-          onValueChange={(newStringValue) => {
+          onValueChange={(pickedValue) => {
+            const newStringValue = pickedValue === EMPTY_OPTION_TOKEN ? '' : pickedValue
             const applyValue = (raw: string | undefined) => {
               if (componentProps.valueType === 'number') {
                 field.handleChange(raw ? Number(raw) : 0)
