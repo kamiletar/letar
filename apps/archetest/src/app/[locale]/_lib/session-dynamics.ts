@@ -36,6 +36,8 @@ export interface SessionMeta {
   createdAt: Date
   answeredCount: number
   questionBankVersion: number | null
+  /** Mood check-in сессии: 1 — негативная валентность, 3 — позитивная; null — пропущен */
+  moodValence: number | null
 }
 
 /** Индекс «Тёмное ядро» сессии — только то, что нужно графику */
@@ -49,6 +51,8 @@ export interface SessionDarkCore {
 export interface SessionDynamicsPoint extends SessionMeta {
   /** Нормализованные баллы сессии; null — ни один ответ не распознан */
   normalized: Record<ScaleCode, number> | null
+  /** Релевантных ответов по шкалам в сессии — вход для интервалов карты стабильности */
+  relevantCounts: Record<ScaleCode, number> | null
   /** null — мало ответов по тетраде в этой порции (индекс не считается) */
   darkCore: SessionDarkCore | null
 }
@@ -77,7 +81,7 @@ export function buildSessionDynamics(
   return sessions.map((s) => {
     const answered = bySession.get(s.id)
     if (!answered?.length) {
-      return { ...s, normalized: null, darkCore: null }
+      return { ...s, normalized: null, relevantCounts: null, darkCore: null }
     }
     const scores = computeScoresCore(answered)
     const index = computeDarkCore({
@@ -88,6 +92,7 @@ export function buildSessionDynamics(
     return {
       ...s,
       normalized: scores.normalized,
+      relevantCounts: scores.relevantCounts,
       darkCore: index.structure === 'insufficient'
         ? null
         : { core: index.core, coreCiLow: index.coreCiLow, coreCiHigh: index.coreCiHigh, structure: index.structure },

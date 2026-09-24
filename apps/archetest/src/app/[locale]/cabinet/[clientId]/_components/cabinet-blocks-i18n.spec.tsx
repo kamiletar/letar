@@ -6,11 +6,12 @@ import { describe, expect, it, vi } from 'vitest'
 import enMessages from '../../../../../../messages/en.json'
 import ruMessages from '../../../../../../messages/ru.json'
 import { CORE_SCALE_COUNT } from '../../../_data/bank-stats'
-import type { ScaleCode } from '../../../_data/personality-types'
+import { ALL_SCALE_CODES, type ScaleCode } from '../../../_data/personality-types'
 import { computeDarkCore } from '../../../_lib/dark-core'
 import type { IpsativeScale } from '../../../_lib/ipsative'
 import { DarkCoreBlock } from './dark-core-block'
 import { ExperimentalScalesBlock } from './experimental-scales-block'
+import { StabilityMapBlock } from './stability-map-block'
 
 /** Нарциссизм выше остальных → анализ чувствительности; ranking → абзац «внутри профиля» */
 const ranking: IpsativeScale[] = [
@@ -81,5 +82,32 @@ describe('кабинет: строки блоков из messages', () => {
     renderIn('ru', <ExperimentalScalesBlock scores={{} as Record<ScaleCode, number>} />)
     expect(screen.getByRole('heading', { name: 'Экспериментальные шкалы' })).toBeTruthy()
     expect(screen.getByText(new RegExp(`вне ядра из ${CORE_SCALE_COUNT} шкал`))).toBeTruthy()
+  })
+
+  it.each(['ru', 'en'] as const)(
+    '%s: карта стабильности — меняющаяся шкала, plural недостающих, разбивка по настроению',
+    (locale) => {
+      const all = (v: number) => Object.fromEntries(ALL_SCALE_CODES.map((c) => [c, v])) as Record<ScaleCode, number>
+      // PAR сильно меняется при большом n; SAD без ответов — «мало сессий»; валентности 1,1,3,3
+      const session = (par: number, valence: number) => ({
+        normalized: { ...all(40), PAR: par },
+        relevantCounts: { ...all(40), SAD: 0 },
+        moodValence: valence,
+      })
+      const { onError, container } = renderIn(
+        locale,
+        <StabilityMapBlock sessions={[session(10, 1), session(15, 1), session(85, 3), session(90, 3)]} />,
+      )
+      expect(onError).not.toHaveBeenCalled()
+      expect(container.textContent).not.toMatch(/cabinet\.\w/)
+      expect(container.textContent).toMatch(/PAR 10–90%/)
+      expect(container.textContent).toMatch(locale === 'ru' ? /1 шкала — мало сессий/ : /1 scale: too few sessions/)
+      expect(container.textContent).toMatch(/PAR: 12\.5% → 87\.5%/)
+    },
+  )
+
+  it('карта стабильности не показывается меньше чем с трёх сессий', () => {
+    const { container } = renderIn('ru', <StabilityMapBlock sessions={[]} />)
+    expect(container.textContent).toBe('')
   })
 })

@@ -146,6 +146,7 @@ export async function getClientDetailAction(clientId: string) {
       completedAt: true,
       createdAt: true,
       questionBankVersion: true,
+      moodValence: true,
     },
     orderBy: { completedAt: 'asc' },
   })

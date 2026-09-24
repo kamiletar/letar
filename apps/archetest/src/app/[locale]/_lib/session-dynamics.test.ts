@@ -34,6 +34,7 @@ const session = (id: string, day: number) => ({
   createdAt: new Date(2026, 0, day),
   answeredCount: 48,
   questionBankVersion: 1,
+  moodValence: null,
 })
 
 /** Ответы сессии: один и тот же вариант на все вопросы (0 — максимум, 1 — ноль) */

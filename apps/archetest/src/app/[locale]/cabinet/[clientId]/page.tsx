@@ -22,6 +22,7 @@ import { DarkCoreDynamicsChart } from './_components/dark-core-dynamics-chart'
 import { ExperimentalScalesBlock } from './_components/experimental-scales-block'
 import { PsychologistNotes } from './_components/psychologist-notes'
 import { SessionDynamicsChart } from './_components/session-dynamics-chart'
+import { StabilityMapBlock } from './_components/stability-map-block'
 
 type ClientDetail = NonNullable<Awaited<ReturnType<typeof getClientDetailAction>>['data']>
 
@@ -250,6 +251,9 @@ export default function ClientDetailPage({ params }: { params: Promise<{ clientI
 
         {/* Динамика по сессиям */}
         <SessionDynamicsChart sessions={detail.sessionsHistory} />
+
+        {/* Карта стабильности и «в грусти / в ресурсе» — с трёх сессий (волна 7.2) */}
+        <StabilityMapBlock sessions={detail.sessionsHistory} />
 
         {/* Текстовые детали профиля — с relevantCounts включается ipsative-ранжирование */}
         {detail.cumulativeScores && (

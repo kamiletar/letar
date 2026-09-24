@@ -270,6 +270,20 @@
       "hint": "Core level in each session with its interval. Overlapping intervals between neighbouring sessions are likely batch noise rather than a real shift. Sessions with too few tetrad answers are not shown.",
       "core": "Core",
       "interval": "Interval"
+    },
+    "stability": {
+      "title": "Stability map",
+      "beta": "beta",
+      "intro": "Across {sessions} sessions. “Shifting” marks a scale whose session intervals do not overlap: no single trait value explains every batch. Variation within the intervals is batch noise (2–3 items per scale), not a change of state.",
+      "shifting": "Shifts between sessions",
+      "noShifting": "No scale changes beyond batch noise.",
+      "stable": "Stable within precision",
+      "insufficient": "{count, plural, one {# scale} other {# scales}}: too few sessions with enough answers.",
+      "moodTitle": "Low mood vs. good mood",
+      "moodUnavailable": "Needs at least two sessions each with negative and positive check-in mood (currently {low} and {high}).",
+      "moodNoDiff": "No notable difference between low-mood and good-mood sessions.",
+      "moodHint": "Mean score: low mood ({low} sess.) → good mood ({high} sess.). A hypothesis for discussion, not a conclusion.",
+      "moodRow": "{code}: {low}% → {high}%"
     }
   },
   "settings": {
