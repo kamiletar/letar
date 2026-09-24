@@ -1,0 +1,314 @@
+[
+  {
+    "_facet": "Чувствительность к сигналам",
+    "scenario": "Партнёр весь вечер отвечает на ваши сообщения коротко и без смайликов.",
+    "scenarioEn": "All evening your partner has been replying to your messages briefly, without a single emoji.",
+    "options": [
+      {
+        "text": "Начинаю перебирать, что сделал(а) не так, и не могу успокоиться, пока не спрошу",
+        "textEn": "I start going over what I might have done wrong and can't settle until I ask",
+        "scoring": {
+          "AAX": 3
+        }
+      },
+      {
+        "text": "Наверное, устал(а) или занят(а) — поговорим, когда увидимся",
+        "textEn": "They're probably tired or busy — we'll talk when we see each other",
+        "scoring": {}
+      },
+      {
+        "text": "Тоже отвечаю коротко",
+        "textEn": "I keep my replies short too",
+        "scoring": {}
+      },
+      {
+        "text": "Пишу «Всё в порядке?» — и дальше не переживаю",
+        "textEn": "I write \"Everything OK?\" and then stop worrying about it",
+        "scoring": {
+          "AAX": 1
+        }
+      }
+    ]
+  },
+  {
+    "_facet": "Потребность в подтверждении",
+    "scenario": "Близкий человек редко говорит о чувствах словами — зато заботится делами.",
+    "scenarioEn": "Someone close to you rarely puts their feelings into words — they show they care through what they do.",
+    "options": [
+      {
+        "text": "Дела для меня важнее слов",
+        "textEn": "Actions matter more to me than words",
+        "scoring": {}
+      },
+      {
+        "text": "Иногда прошу сказать это вслух — и мне достаточно",
+        "textEn": "Now and then I ask them to say it out loud — and that's enough for me",
+        "scoring": {
+          "AAX": 1
+        }
+      },
+      {
+        "text": "Мне этого мало: без слов я то и дело сомневаюсь, что меня ещё любят",
+        "textEn": "That isn't enough for me: without the words I keep doubting that I'm still loved",
+        "scoring": {
+          "AAX": 3
+        }
+      },
+      {
+        "text": "Сам(а) тоже не любитель говорить о чувствах",
+        "textEn": "I'm not one for talking about feelings either",
+        "scoring": {}
+      }
+    ]
+  },
+  {
+    "_facet": "Разлука",
+    "scenario": "Партнёр на неделю уходит в поход в горы — связи там почти не будет.",
+    "scenarioEn": "Your partner is off hiking in the mountains for a week — there'll be hardly any signal.",
+    "options": [
+      {
+        "text": "Всё в порядке: отдохну и займусь своими делами",
+        "textEn": "I'm fine: I'll have a rest and catch up on my own things",
+        "scoring": {}
+      },
+      {
+        "text": "Первые дни скучаю, потом втягиваюсь",
+        "textEn": "I miss them for the first few days, then I settle in",
+        "scoring": {}
+      },
+      {
+        "text": "Прошу выходить на связь при любой возможности — без вестей места себе не нахожу",
+        "textEn": "I ask them to get in touch whenever they can — without news I can't settle",
+        "scoring": {
+          "AAX": 2
+        }
+      },
+      {
+        "text": "Всю неделю внутри тревожно: вдруг там, без меня, он(а) поймёт, что так даже лучше",
+        "textEn": "All week I'm uneasy inside: what if, away from me, they realise it's better that way",
+        "scoring": {
+          "AAX": 3
+        }
+      }
+    ]
+  },
+  {
+    "_facet": "Протестное поведение",
+    "_reverse": true,
+    "scenario": "После ссоры партнёр ушёл в другую комнату и молчит уже час.",
+    "scenarioEn": "After an argument, your partner went into another room and has been silent for an hour.",
+    "options": [
+      {
+        "text": "Иду мириться первым(ой) — не хочу, чтобы ссора остывала в тишине",
+        "textEn": "I go to make up first — I don't want the argument to cool off in silence",
+        "scoring": {}
+      },
+      {
+        "text": "Делаю вид, что мне всё равно, но прислушиваюсь к каждому звуку из-за двери",
+        "textEn": "I act as if I don't care, but I'm listening to every sound from behind the door",
+        "scoring": {
+          "AAX": 3
+        }
+      },
+      {
+        "text": "Даю время остыть — вернёмся к разговору позже",
+        "textEn": "I give them time to cool off — we'll come back to it later",
+        "scoring": {}
+      },
+      {
+        "text": "Занимаюсь своими делами — так мне даже спокойнее",
+        "textEn": "I get on with my own things — honestly, it's calmer that way",
+        "scoring": {
+          "AAV": 1
+        }
+      }
+    ]
+  },
+  {
+    "_facet": "Самоценность через отношения",
+    "scenario": "Близкий человек не спросил, как прошёл ваш важный день, хотя вы говорили о нём всю неделю.",
+    "scenarioEn": "Someone close to you didn't ask how your big day went, even though you'd talked about it all week.",
+    "options": [
+      {
+        "text": "Рассказываю сам(а) — наверное, просто забыл(а)",
+        "textEn": "I tell them myself — they probably just forgot",
+        "scoring": {}
+      },
+      {
+        "text": "Кажется, я для этого человека не так уж важен(на), — и от этого тяжело",
+        "textEn": "It feels like I don't matter that much to them — and that's hard",
+        "scoring": {
+          "AAX": 3
+        }
+      },
+      {
+        "text": "Немного обидно, но не придаю значения",
+        "textEn": "A bit hurtful, but I don't read much into it",
+        "scoring": {}
+      },
+      {
+        "text": "Жду, вспомнит ли сам(а), — и с каждым часом тревожнее",
+        "textEn": "I wait to see whether they'll remember — and get more anxious by the hour",
+        "scoring": {
+          "AAX": 2
+        }
+      }
+    ]
+  },
+  {
+    "_facet": "Гипербдительность",
+    "_reverse": true,
+    "scenario": "Партнёр говорит, что вечером задержится с коллегами.",
+    "scenarioEn": "Your partner says they'll be late tonight — out with colleagues.",
+    "options": [
+      {
+        "text": "Хорошо, проведу вечер по-своему",
+        "textEn": "Fine — I'll spend the evening my own way",
+        "scoring": {}
+      },
+      {
+        "text": "Прошу написать, когда поедет домой",
+        "textEn": "I ask them to text when they're heading home",
+        "scoring": {}
+      },
+      {
+        "text": "Расстраиваюсь и говорю об этом прямо",
+        "textEn": "I get upset and say so directly",
+        "scoring": {
+          "AAX": 1
+        }
+      },
+      {
+        "text": "Говорю «конечно, хорошо тебе провести время», а потом весь вечер проверяю, когда он(а) был(а) в сети",
+        "textEn": "I say \"of course, have a good time\", and then spend all evening checking when they were last online",
+        "scoring": {
+          "AAX": 3
+        }
+      }
+    ]
+  },
+  {
+    "_facet": "Страх покинутости",
+    "scenario": "Партнёр говорит: «Мне нужно побыть наедине с собой в эти выходные».",
+    "scenarioEn": "Your partner says: \"I need some time on my own this weekend.\"",
+    "options": [
+      {
+        "text": "Понимаю — мне это тоже бывает нужно",
+        "textEn": "I get it — I need that sometimes too",
+        "scoring": {}
+      },
+      {
+        "text": "Внутри всё обрывается: кажется, это начало конца",
+        "textEn": "Something drops inside me: it feels like the beginning of the end",
+        "scoring": {
+          "AAX": 3
+        }
+      },
+      {
+        "text": "Немного обидно, но переживу",
+        "textEn": "A bit hurtful, but I'll live",
+        "scoring": {
+          "AAX": 1
+        }
+      },
+      {
+        "text": "Отлично, у меня как раз свои планы",
+        "textEn": "Great — I've got my own plans anyway",
+        "scoring": {}
+      }
+    ]
+  },
+  {
+    "_facet": "Сравнение",
+    "_reverse": true,
+    "scenario": "Партнёр с теплотой вспоминает, как весело было в студенческой компании — ещё до знакомства с вами.",
+    "scenarioEn": "Your partner fondly remembers how much fun their student crowd was — back before they met you.",
+    "options": [
+      {
+        "text": "Улыбаюсь и киваю, а потом весь вечер прокручиваю, не было ли ему(ей) тогда лучше, чем сейчас со мной",
+        "textEn": "I smile and nod, but afterwards I spend the whole evening wondering whether they were happier then than they are now with me",
+        "scoring": {
+          "AAX": 3
+        }
+      },
+      {
+        "text": "Спрашиваю полушутя: «А сейчас скучно?»",
+        "textEn": "I ask, half-joking: \"So is it boring now?\"",
+        "scoring": {
+          "AAX": 1
+        }
+      },
+      {
+        "text": "С интересом слушаю — хорошие были времена",
+        "textEn": "I listen with interest — sounds like good times",
+        "scoring": {}
+      },
+      {
+        "text": "Рассказываю в ответ свои студенческие истории",
+        "textEn": "I share my own student stories in return",
+        "scoring": {}
+      }
+    ]
+  },
+  {
+    "_facet": "Тревога в затишье",
+    "scenario": "В отношениях уже месяц всё ровно: без ссор, но и без особых событий.",
+    "scenarioEn": "For a month, things in your relationship have been steady: no arguments, but nothing special either.",
+    "options": [
+      {
+        "text": "Хорошо — спокойствие и значит, что всё в порядке",
+        "textEn": "Good — calm means everything's fine",
+        "scoring": {}
+      },
+      {
+        "text": "Предлагаю что-то новое — поездку, общее дело",
+        "textEn": "I suggest something new — a trip, a shared project",
+        "scoring": {}
+      },
+      {
+        "text": "Становится тревожно: затишье кажется подозрительным, хочется проверить, что чувства на месте",
+        "textEn": "I get anxious: the lull feels suspicious, and I want to check the feelings are still there",
+        "scoring": {
+          "AAX": 3
+        }
+      },
+      {
+        "text": "Скучновато, но это нормально",
+        "textEn": "A bit dull, but that's normal",
+        "scoring": {}
+      }
+    ]
+  },
+  {
+    "_facet": "Страх разочаровать",
+    "_reverse": true,
+    "scenario": "Вы сделали близкому человеку приятное, а благодарность прозвучала сдержанно.",
+    "scenarioEn": "You did something nice for someone close to you, and their thanks sounded rather reserved.",
+    "options": [
+      {
+        "text": "Мне не нужны бурные реакции — главное, что порадовал(а)",
+        "textEn": "I don't need a big reaction — what matters is that I made them happy",
+        "scoring": {}
+      },
+      {
+        "text": "Спрашиваю, понравилось ли на самом деле",
+        "textEn": "I ask whether they really liked it",
+        "scoring": {
+          "AAX": 1
+        }
+      },
+      {
+        "text": "В следующий раз придумаю что-то другое",
+        "textEn": "Next time I'll come up with something different",
+        "scoring": {}
+      },
+      {
+        "text": "Говорю себе, что это неважно, но потом ещё долго гадаю, не разочаровал(а) ли",
+        "textEn": "I tell myself it doesn't matter, but for a long time afterwards I wonder whether I let them down",
+        "scoring": {
+          "AAX": 3
+        }
+      }
+    ]
+  }
+]

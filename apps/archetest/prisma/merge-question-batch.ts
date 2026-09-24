@@ -109,6 +109,15 @@ const CONFIGS: Record<string, BatchConfig> = {
     minReverse: 3,
     allowedScoringCodes: ['INA', 'HYI'],
   },
+  // Привязанность (прототип ECR-R): AAX — тревога, AAV — избегание (docs/attachment-brief.md).
+  // ⚠️ Только `--dry-run` до вердиктов ревьюера и решения Kami (экспериментальный блок или ядро).
+  attachment: {
+    dir: 'attachment',
+    order: ['AAX', 'AAV'],
+    perScale: 10,
+    minReverse: 4,
+    allowedScoringCodes: ['AAX', 'AAV'],
+  },
 }
 
 interface BatchOption {

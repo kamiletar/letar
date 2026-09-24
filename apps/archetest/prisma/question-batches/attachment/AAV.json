@@ -1,0 +1,316 @@
+[
+  {
+    "_facet": "Откровенность",
+    "scenario": "Партнёр просит рассказать, что вас на самом деле тревожит последнее время.",
+    "scenarioEn": "Your partner asks you to tell them what's really been worrying you lately.",
+    "options": [
+      {
+        "text": "Рассказываю — с близким можно",
+        "textEn": "I tell them — with someone close, I can",
+        "scoring": {}
+      },
+      {
+        "text": "Отшучиваюсь или говорю «всё нормально» — делиться таким мне неуютно",
+        "textEn": "I laugh it off or say \"it's all fine\" — sharing things like that feels uncomfortable",
+        "scoring": {
+          "AAV": 3
+        }
+      },
+      {
+        "text": "Рассказываю частично, самое личное оставляю при себе",
+        "textEn": "I tell them part of it and keep the most personal bits to myself",
+        "scoring": {
+          "AAV": 1
+        }
+      },
+      {
+        "text": "Расскажу, когда сам(а) созрею, — пока нет",
+        "textEn": "I'll talk when I'm ready — and I'm not yet",
+        "scoring": {}
+      }
+    ]
+  },
+  {
+    "_facet": "Опора на себя",
+    "scenario": "Вы несколько дней лежите с температурой, и близкий человек предлагает приехать и помочь.",
+    "scenarioEn": "You've been in bed with a fever for a few days, and someone close offers to come over and help.",
+    "options": [
+      {
+        "text": "С радостью соглашаюсь",
+        "textEn": "I gladly accept",
+        "scoring": {}
+      },
+      {
+        "text": "Прошу только привезти лекарства",
+        "textEn": "I just ask them to bring some medicine",
+        "scoring": {}
+      },
+      {
+        "text": "Соглашаюсь, хотя мне неловко",
+        "textEn": "I accept, though it makes me uncomfortable",
+        "scoring": {
+          "AAV": 1
+        }
+      },
+      {
+        "text": "Отказываюсь: справлюсь сам(а), не люблю быть обузой и чувствовать себя обязанным(ой)",
+        "textEn": "I say no: I'll manage on my own — I don't like being a burden or owing anyone",
+        "scoring": {
+          "AAV": 3
+        }
+      }
+    ]
+  },
+  {
+    "_facet": "Дистанция при сближении",
+    "scenario": "Отношения развиваются хорошо, и партнёр предлагает съехаться.",
+    "scenarioEn": "The relationship is going well, and your partner suggests moving in together.",
+    "options": [
+      {
+        "text": "Радуюсь — давно этого хотел(а)",
+        "textEn": "I'm glad — I've wanted this for a while",
+        "scoring": {}
+      },
+      {
+        "text": "Обсуждаем, как будем делить пространство и быт",
+        "textEn": "We talk through how we'll share the space and the chores",
+        "scoring": {}
+      },
+      {
+        "text": "Чем серьёзнее всё становится, тем сильнее хочется притормозить и отступить",
+        "textEn": "The more serious things get, the more I want to slow down and step back",
+        "scoring": {
+          "AAV": 3
+        }
+      },
+      {
+        "text": "Соглашаюсь, но выговариваю себе отдельную комнату",
+        "textEn": "I agree, but I negotiate a room of my own",
+        "scoring": {
+          "AAV": 1
+        }
+      }
+    ]
+  },
+  {
+    "_facet": "Эмоциональная сдержанность",
+    "_reverse": true,
+    "scenario": "Партнёр плачет после тяжёлого разговора с родителями.",
+    "scenarioEn": "Your partner is crying after a hard conversation with their parents.",
+    "options": [
+      {
+        "text": "Обнимаю и просто побуду рядом",
+        "textEn": "I hug them and just stay close",
+        "scoring": {}
+      },
+      {
+        "text": "Предлагаю дельные решения — так от меня больше пользы, чем от объятий",
+        "textEn": "I offer practical solutions — I'm more useful that way than with hugs",
+        "scoring": {
+          "AAV": 3
+        }
+      },
+      {
+        "text": "Мне неловко, хочется выйти из комнаты",
+        "textEn": "I feel awkward and want to leave the room",
+        "scoring": {
+          "AAV": 2
+        }
+      },
+      {
+        "text": "Спрашиваю, чем могу помочь",
+        "textEn": "I ask how I can help",
+        "scoring": {}
+      }
+    ]
+  },
+  {
+    "_facet": "Личное пространство",
+    "scenario": "Партнёр хочет проводить вместе все выходные подряд.",
+    "scenarioEn": "Your partner wants to spend every weekend together.",
+    "options": [
+      {
+        "text": "Здорово, мне тоже этого хочется",
+        "textEn": "Great — I want that too",
+        "scoring": {}
+      },
+      {
+        "text": "Договариваемся: день вместе, день каждый по-своему",
+        "textEn": "We agree on one day together and one day each doing our own thing",
+        "scoring": {}
+      },
+      {
+        "text": "Через пару дней вместе начинаю задыхаться и ищу повод побыть в одиночестве",
+        "textEn": "After a couple of days together I start to feel suffocated and look for a reason to be alone",
+        "scoring": {
+          "AAV": 3
+        }
+      },
+      {
+        "text": "Соглашаюсь, но заранее придумываю себе дела",
+        "textEn": "I agree, but make up plans for myself in advance",
+        "scoring": {
+          "AAV": 2
+        }
+      }
+    ]
+  },
+  {
+    "_facet": "Разговоры о будущем",
+    "_reverse": true,
+    "scenario": "Партнёр заводит разговор о планах на пять лет вперёд: дети, ипотека, переезд.",
+    "scenarioEn": "Your partner starts talking about plans five years ahead: kids, a mortgage, a move.",
+    "options": [
+      {
+        "text": "С интересом обсуждаю",
+        "textEn": "I'm keen to talk it through",
+        "scoring": {}
+      },
+      {
+        "text": "Честно говорю, что пока не готов(а) к таким планам",
+        "textEn": "I say honestly that I'm not ready for plans like that yet",
+        "scoring": {
+          "AAV": 1
+        }
+      },
+      {
+        "text": "Предлагаю вернуться к этому, когда прояснится с работой",
+        "textEn": "I suggest coming back to it once work is more settled",
+        "scoring": {}
+      },
+      {
+        "text": "Говорю, что загадывать так далеко бессмысленно, — хотя на самом деле от таких разговоров мне просто не по себе",
+        "textEn": "I say there's no point planning that far ahead — though really, conversations like this just make me uneasy",
+        "scoring": {
+          "AAV": 3
+        }
+      }
+    ]
+  },
+  {
+    "_facet": "Неприятие зависимости",
+    "scenario": "Близкий человек всё чаще советуется с вами по любому поводу и явно на вас опирается.",
+    "scenarioEn": "Someone close to you keeps asking your advice about everything and clearly leans on you.",
+    "options": [
+      {
+        "text": "Мне приятно быть опорой",
+        "textEn": "I like being someone they can lean on",
+        "scoring": {}
+      },
+      {
+        "text": "Меня это напрягает: не люблю, когда от меня так зависят",
+        "textEn": "It bothers me: I don't like people depending on me that much",
+        "scoring": {
+          "AAV": 3
+        }
+      },
+      {
+        "text": "Поддерживаю, но мягко подталкиваю к самостоятельности",
+        "textEn": "I support them, but gently nudge them towards independence",
+        "scoring": {}
+      },
+      {
+        "text": "Помогаю, но начинаю отвечать всё реже",
+        "textEn": "I help, but start replying less and less often",
+        "scoring": {
+          "AAV": 2
+        }
+      }
+    ]
+  },
+  {
+    "_facet": "Уход от выяснения",
+    "_reverse": true,
+    "scenario": "Партнёр хочет обсудить то, что давно назревало в отношениях.",
+    "scenarioEn": "Your partner wants to talk about something that's been brewing in the relationship for a while.",
+    "options": [
+      {
+        "text": "Соглашаюсь: давно пора",
+        "textEn": "I agree: it's overdue",
+        "scoring": {}
+      },
+      {
+        "text": "Предлагаю сначала каждому спокойно всё обдумать — и потом так и не возвращаюсь к разговору",
+        "textEn": "I suggest we each think it over calmly first — and then never quite come back to it",
+        "scoring": {
+          "AAV": 3
+        }
+      },
+      {
+        "text": "Ухожу от темы и переключаюсь на дела",
+        "textEn": "I steer away from the topic and busy myself with other things",
+        "scoring": {
+          "AAV": 2
+        }
+      },
+      {
+        "text": "Прошу назначить время, чтобы подготовиться",
+        "textEn": "I ask us to set a time so I can prepare",
+        "scoring": {}
+      }
+    ]
+  },
+  {
+    "_facet": "Телесная близость",
+    "scenario": "Партнёр любит держаться за руки и обниматься на людях.",
+    "scenarioEn": "Your partner likes to hold hands and hug in public.",
+    "options": [
+      {
+        "text": "Мне это тоже нравится",
+        "textEn": "I like it too",
+        "scoring": {}
+      },
+      {
+        "text": "Нравится, но не на людях",
+        "textEn": "I like it, just not in public",
+        "scoring": {}
+      },
+      {
+        "text": "Мягко высвобождаюсь и перевожу всё в шутку",
+        "textEn": "I gently slip away and turn it into a joke",
+        "scoring": {
+          "AAV": 2
+        }
+      },
+      {
+        "text": "Терплю, но внутренне сжимаюсь — слишком много близости",
+        "textEn": "I put up with it, but inside I tense up — it's too much closeness",
+        "scoring": {
+          "AAV": 3
+        }
+      }
+    ]
+  },
+  {
+    "_facet": "Самодостаточность",
+    "_reverse": true,
+    "scenario": "На работе трудный период, и вечером близкий человек спрашивает, как у вас дела.",
+    "scenarioEn": "You're going through a tough patch at work, and in the evening someone close asks how you're doing.",
+    "options": [
+      {
+        "text": "Рассказываю — мне становится легче",
+        "textEn": "I tell them — it makes me feel better",
+        "scoring": {}
+      },
+      {
+        "text": "Говорю, что справляюсь, — и справляюсь; зачем грузить близких",
+        "textEn": "I say I'm handling it — and I am; why load it onto the people I love",
+        "scoring": {
+          "AAV": 3
+        }
+      },
+      {
+        "text": "Жалуюсь от души",
+        "textEn": "I have a good long moan",
+        "scoring": {}
+      },
+      {
+        "text": "Рассказываю, но только когда всё уже решено",
+        "textEn": "I tell them, but only once it's all sorted",
+        "scoring": {
+          "AAV": 2
+        }
+      }
+    ]
+  }
+]
