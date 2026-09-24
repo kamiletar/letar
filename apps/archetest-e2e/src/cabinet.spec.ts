@@ -76,5 +76,14 @@ test.describe('кабинет психолога', () => {
     const revokedRow = psy.getByRole('row').filter({ hasText: CLIENT_EMAIL })
     await expect(revokedRow.getByText('Отозван')).toBeVisible({ timeout: 30_000 })
     await expect(revokedRow.getByRole('link')).toHaveCount(0)
+
+    // 5. Фильтр списка: поиск сужает таблицу, состояние живёт в URL и переживает перезагрузку
+    await psy.getByLabel('Поиск').fill('нет-такого-клиента')
+    await expect(psy.getByText('Под фильтр никто не попал.')).toBeVisible({ timeout: 30_000 })
+    await expect(psy).toHaveURL(/search=/, { timeout: 30_000 })
+    await psy.reload()
+    await expect(psy.getByText('Под фильтр никто не попал.')).toBeVisible({ timeout: 30_000 })
+    await psy.getByLabel('Поиск').fill(RUN)
+    await expect(psy.getByRole('row').filter({ hasText: CLIENT_EMAIL })).toBeVisible({ timeout: 30_000 })
   })
 })
