@@ -1,7 +1,13 @@
 'use client'
 
+import {
+  CREATE_OPTION_VALUE,
+  type CreatedOption,
+  isCreateOptionValue,
+  mergeCreatedOptions,
+} from '@letar/forms-core/uikit'
 import type { ReactElement } from 'react'
-import { useMemo } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import { createField } from '../uikit/primitives'
 import { shadcnUIKit } from '../uikit/uikit-shadcn'
 import type { SelectFieldProps } from './types'
@@ -15,6 +21,10 @@ interface NormalizedOption {
 interface SelectFieldState {
   normalizedOptions: NormalizedOption[]
   resolvedClearable: boolean
+  /** Добавляет опцию, возвращённую `onCreate`, в локальный список */
+  addCreatedOption: (option: CreatedOption) => void
+  /** `true`, пока `onCreate` не завершился (повторный выбор пункта игнорируется) */
+  creatingRef: { current: boolean }
 }
 
 /** Form.Field.Select — shadcn-скин. */
@@ -23,19 +33,30 @@ export const FieldSelect = createField<SelectFieldProps, string | number, Select
   useFieldState: (componentProps, resolved): SelectFieldState => {
     const sourceOptions = componentProps.options ?? resolved.options ?? []
 
-    const normalizedOptions: NormalizedOption[] = useMemo(
-      () =>
-        sourceOptions.map((opt) => ({
-          label: opt.label,
-          value: String(opt.value),
-          disabled: opt.disabled,
-        })),
-      [sourceOptions],
-    )
+    // Опции, созданные через `onCreate`, живут локально, пока поле смонтировано
+    const [createdOptions, setCreatedOptions] = useState<CreatedOption[]>([])
+    const addCreatedOption = useCallback((option: CreatedOption) => {
+      setCreatedOptions((prev) => [...prev, option])
+    }, [])
+    const creatingRef = useRef(false)
+    const hasOnCreate = !!componentProps.onCreate
+    const createLabel = componentProps.createLabel ?? 'Добавить…'
+
+    const normalizedOptions: NormalizedOption[] = useMemo(() => {
+      // Опция приложения сильнее созданной с тем же значением — дубля после перезагрузки нет
+      const merged = mergeCreatedOptions(sourceOptions, createdOptions)
+      const normalized: NormalizedOption[] = merged.map((opt) => ({
+        label: opt.label,
+        value: String(opt.value),
+        disabled: opt.disabled,
+      }))
+      // Служебный пункт: перехватывается в onValueChange, в форму не попадает
+      return hasOnCreate ? [...normalized, { label: `+ ${createLabel}`, value: CREATE_OPTION_VALUE }] : normalized
+    }, [sourceOptions, createdOptions, hasOnCreate, createLabel])
 
     const resolvedClearable = componentProps.clearable ?? !resolved.required
 
-    return { normalizedOptions, resolvedClearable }
+    return { normalizedOptions, resolvedClearable, addCreatedOption, creatingRef }
   },
   render: ({ field, fullPath, resolved, hasError, errorMessage, componentProps, fieldState }): ReactElement => {
     const currentValue = field.state.value
@@ -46,11 +67,31 @@ export const FieldSelect = createField<SelectFieldProps, string | number, Select
         <shadcnUIKit.Select
           value={stringValue}
           onValueChange={(newStringValue) => {
-            if (componentProps.valueType === 'number') {
-              field.handleChange(newStringValue ? Number(newStringValue) : 0)
-            } else {
-              field.handleChange(newStringValue ?? '')
+            const applyValue = (raw: string | undefined) => {
+              if (componentProps.valueType === 'number') {
+                field.handleChange(raw ? Number(raw) : 0)
+              } else {
+                field.handleChange(raw ?? '')
+              }
             }
+
+            if (isCreateOptionValue(newStringValue)) {
+              // Служебный пункт: значение не применяется. Ошибки `onCreate` — забота приложения,
+              // всплывают как unhandled rejection, здесь не глотаются
+              if (componentProps.onCreate && !fieldState.creatingRef.current) {
+                fieldState.creatingRef.current = true
+                void componentProps.onCreate('').then((created) => {
+                  if (created) {
+                    fieldState.addCreatedOption(created)
+                    applyValue(String(created.value))
+                  }
+                }).finally(() => {
+                  fieldState.creatingRef.current = false
+                })
+              }
+              return
+            }
+            applyValue(newStringValue)
           }}
           onBlur={field.handleBlur}
           options={fieldState.normalizedOptions}

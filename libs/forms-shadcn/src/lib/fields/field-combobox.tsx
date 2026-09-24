@@ -1,7 +1,14 @@
 'use client'
 
+import {
+  CREATE_OPTION_VALUE,
+  type CreatedOption,
+  isCreateOptionValue,
+  mergeCreatedOptions,
+  shouldOfferCreate,
+} from '@letar/forms-core/uikit'
 import type { ReactElement } from 'react'
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import { createField, FieldWrapper } from '../uikit/primitives'
 import { shadcnUIKit } from '../uikit/uikit-shadcn'
 import type { ComboboxFieldProps } from './types'
@@ -16,6 +23,12 @@ interface ComboboxFieldState {
   inputValue: string
   setInputValue: (value: string) => void
   filteredOptions: NormalizedOption[]
+  /** Подпись служебного пункта «+ Добавить "<поиск>"» (пусто, если пункт сейчас не предлагается) */
+  createItemLabel: string
+  /** Добавляет опцию, возвращённую `onCreate`, в локальный список */
+  addCreatedOption: (option: CreatedOption) => void
+  /** `true`, пока `onCreate` не завершился (повторный выбор пункта игнорируется) */
+  creatingRef: { current: boolean }
 }
 
 /**
@@ -30,12 +43,25 @@ export const FieldCombobox = createField<ComboboxFieldProps, string, ComboboxFie
   displayName: 'FieldCombobox',
   useFieldState: (componentProps): ComboboxFieldState => {
     const [inputValue, setInputValue] = useState('')
+    // Опции, созданные через `onCreate`, живут локально, пока поле смонтировано
+    const [createdOptions, setCreatedOptions] = useState<CreatedOption[]>([])
+    const addCreatedOption = useCallback((option: CreatedOption) => {
+      setCreatedOptions((prev) => [...prev, option])
+    }, [])
+    const creatingRef = useRef(false)
+    const hasOnCreate = !!componentProps.onCreate
+
     const normalized: NormalizedOption[] = useMemo(
       () =>
-        componentProps.options.map((opt) => ({ label: opt.label, value: String(opt.value), disabled: opt.disabled })),
-      [componentProps.options],
+        // Опция приложения сильнее созданной с тем же значением — дубля после перезагрузки нет
+        mergeCreatedOptions(componentProps.options, createdOptions).map((opt) => ({
+          label: opt.label,
+          value: String(opt.value),
+          disabled: (opt as { disabled?: boolean }).disabled,
+        })),
+      [componentProps.options, createdOptions],
     )
-    const filteredOptions = useMemo(() => {
+    const matchedOptions = useMemo(() => {
       const minChars = componentProps.minChars ?? 0
       if (inputValue.length < minChars) { return [] }
       if (!inputValue) { return normalized }
@@ -43,9 +69,22 @@ export const FieldCombobox = createField<ComboboxFieldProps, string, ComboboxFie
       return normalized.filter((opt) => String(opt.label).toLowerCase().includes(needle))
     }, [normalized, inputValue, componentProps.minChars])
 
-    return { inputValue, setInputValue, filteredOptions }
+    // Служебный пункт «+ Добавить "<поиск>"» — в конце списка; в форму не попадает
+    const search = inputValue.trim()
+    const createItemLabel = hasOnCreate && shouldOfferCreate(search, normalized.map((opt) => String(opt.label)))
+      ? `+ ${componentProps.createLabel ?? 'Добавить'} "${search}"`
+      : ''
+    const filteredOptions = useMemo(
+      () =>
+        createItemLabel
+          ? [...matchedOptions, { label: createItemLabel, value: CREATE_OPTION_VALUE }]
+          : matchedOptions,
+      [matchedOptions, createItemLabel],
+    )
+
+    return { inputValue, setInputValue, filteredOptions, createItemLabel, addCreatedOption, creatingRef }
   },
-  render: ({ field, fullPath, resolved, hasError, errorMessage, fieldState }): ReactElement => {
+  render: ({ field, fullPath, resolved, hasError, errorMessage, fieldState, componentProps }): ReactElement => {
     const currentValue = (field.state.value as string) || undefined
 
     return (
@@ -54,7 +93,25 @@ export const FieldCombobox = createField<ComboboxFieldProps, string, ComboboxFie
           value={currentValue}
           inputValue={fieldState.inputValue}
           onInputChange={fieldState.setInputValue}
-          onValueChange={(value) => field.handleChange(value ?? '')}
+          onValueChange={(value) => {
+            if (isCreateOptionValue(value)) {
+              // Ошибки `onCreate` — забота приложения: всплывают как unhandled rejection, не глотаются
+              if (componentProps.onCreate && !fieldState.creatingRef.current) {
+                fieldState.creatingRef.current = true
+                void componentProps.onCreate(fieldState.inputValue.trim()).then((created) => {
+                  if (created) {
+                    fieldState.addCreatedOption(created)
+                    field.handleChange(String(created.value))
+                    fieldState.setInputValue(created.label)
+                  }
+                }).finally(() => {
+                  fieldState.creatingRef.current = false
+                })
+              }
+              return
+            }
+            field.handleChange(value ?? '')
+          }}
           options={fieldState.filteredOptions}
           placeholder={resolved.placeholder ?? 'Поиск...'}
           disabled={resolved.disabled}

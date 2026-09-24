@@ -3,6 +3,7 @@
 import type { AddressProvider } from '@letar/forms-core/address'
 import type { PhoneCountry } from '@letar/forms-core/phone'
 import type { FileSecurityConfig } from '@letar/forms-core/security'
+import type { CreateOptionHandler } from '@letar/forms-core/uikit'
 import type { BaseFieldProps } from '@letar/forms-react'
 import type { ReactNode } from 'react'
 import type { ToolbarButton } from './rich-text-toolbar-config'
@@ -89,6 +90,16 @@ export interface SelectFieldProps extends BaseFieldProps {
   options?: SelectOption[]
   /** Value type: 'string' (by default) or 'number' */
   valueType?: 'string' | 'number'
+  /**
+   * Создать запись справочника, не уходя из формы. В конец списка добавляется пункт «+ Добавить…»;
+   * его выбор вызывает `onCreate('')`. Приложение открывает своё окно создания и возвращает
+   * `{ label, value }` — опция добавляется в список и выбирается — либо `null` (значение остаётся).
+   * Созданная опция живёт, пока поле смонтировано; когда `options` приложения уже содержат то же
+   * значение (справочник перезагружен), побеждает опция приложения — дубля нет.
+   */
+  onCreate?: CreateOptionHandler
+  /** Текст пункта создания после «+ » (по умолчанию «Добавить…») */
+  createLabel?: string
   /** Show clear button (auto-determined: true if optional, false if required) */
   clearable?: boolean
 }
@@ -218,6 +229,15 @@ export interface ComboboxFieldProps extends BaseFieldProps {
   options: SelectOption[]
   /** Минимум символов для показа списка (по умолчанию 0 — показывать сразу) */
   minChars?: number
+  /**
+   * Создать запись справочника, не уходя из формы. Пока текст поиска непустой и точного
+   * совпадения нет, список заканчивается пунктом «+ Добавить "<текст>"»; его выбор вызывает
+   * `onCreate(текст)`. Приложение открывает своё окно создания и возвращает `{ label, value }` —
+   * опция добавляется и выбирается — либо `null` (значение остаётся, текст поиска сохраняется).
+   */
+  onCreate?: CreateOptionHandler
+  /** Глагол пункта создания: «+ <createLabel> "<текст>"» (по умолчанию «Добавить») */
+  createLabel?: string
 }
 
 /**
