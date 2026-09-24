@@ -1,4 +1,5 @@
 import { ChakraProvider, defaultSystem } from '@chakra-ui/react'
+import { FormI18nProvider } from '@letar/forms-react'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { ReactNode } from 'react'
@@ -278,6 +279,78 @@ describe('DirtyGuard', () => {
         expect(screen.getByText('Да, уйти')).toBeInTheDocument()
         expect(screen.getByText('Нет, остаться')).toBeInTheDocument()
       })
+    })
+  })
+
+  describe('i18n', () => {
+    function renderWithLocale(ui: ReactNode, locale: string, t?: (key: string) => string) {
+      const context = createMockFormContext(true)
+      const Wrapper = createContextWrapper(context)
+      return render(
+        <Wrapper>
+          <FormI18nProvider locale={locale} t={t}>
+            {ui}
+          </FormI18nProvider>
+        </Wrapper>,
+      )
+    }
+
+    async function openDialog() {
+      await userEvent.click(screen.getByText('Link'))
+    }
+
+    const content = (
+      <div>
+        <DirtyGuard />
+        <a href="/other-page">Link</a>
+      </div>
+    )
+
+    it('без провайдера тексты английские', async () => {
+      const context = createMockFormContext(true)
+      render(content, { wrapper: createContextWrapper(context) })
+
+      await openDialog()
+
+      expect(await screen.findByText('Unsaved changes')).toBeInTheDocument()
+      expect(screen.getByText('Stay')).toBeInTheDocument()
+      expect(screen.getByText('Leave')).toBeInTheDocument()
+    })
+
+    it('locale=ru — встроенный русский словарь', async () => {
+      renderWithLocale(content, 'ru')
+
+      await openDialog()
+
+      expect(await screen.findByText('Несохранённые изменения')).toBeInTheDocument()
+      expect(screen.getByText('Остаться')).toBeInTheDocument()
+      expect(screen.getByText('Уйти')).toBeInTheDocument()
+    })
+
+    it('перевод приложения по ключу formDirtyGuard.* побеждает словарь', async () => {
+      const t = (key: string) => (key === 'formDirtyGuard.dialogTitle' ? 'Свой заголовок' : '')
+      renderWithLocale(content, 'ru', t)
+
+      await openDialog()
+
+      expect(await screen.findByText('Свой заголовок')).toBeInTheDocument()
+      // Ключи без перевода приложения — встроенный словарь
+      expect(screen.getByText('Остаться')).toBeInTheDocument()
+    })
+
+    it('явный проп сильнее i18n', async () => {
+      renderWithLocale(
+        <div>
+          <DirtyGuard dialogTitle="Проп" />
+          <a href="/other-page">Link</a>
+        </div>,
+        'ru',
+      )
+
+      await openDialog()
+
+      expect(await screen.findByText('Проп')).toBeInTheDocument()
+      expect(screen.queryByText('Несохранённые изменения')).not.toBeInTheDocument()
     })
   })
 

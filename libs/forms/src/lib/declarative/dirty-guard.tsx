@@ -1,8 +1,43 @@
 'use client'
 
+import { resolveStaticFormText } from '@letar/forms-core/i18n'
+import { useFormI18n } from '@letar/forms-react'
 import { useRouter } from 'next/navigation'
 import { type ReactElement, useCallback, useEffect, useRef, useState } from 'react'
 import { useDeclarativeForm } from './form-context'
+
+type DirtyGuardTextKey = 'message' | 'dialogTitle' | 'dialogDescription' | 'confirmText' | 'cancelText'
+
+/** Ключи `FormI18nProvider` для текстов защиты от ухода: `formDirtyGuard.<имя пропа>` */
+const DIRTY_GUARD_KEY_PREFIX = 'formDirtyGuard.'
+
+const DEFAULT_DIRTY_GUARD_TEXTS: Record<DirtyGuardTextKey, string> = {
+  message: 'You have unsaved changes. Are you sure you want to leave?',
+  dialogTitle: 'Unsaved changes',
+  dialogDescription: 'You have unsaved changes. Are you sure you want to leave this page?',
+  confirmText: 'Leave',
+  cancelText: 'Stay',
+}
+
+/**
+ * Встроенный словарь текстов `Form.DirtyGuard` по языку. Языка нет в словаре — английский.
+ * Отдельный от `validation.*`: это статичный UI, а не сообщение об ошибке валидации.
+ */
+const BUILTIN_DIRTY_GUARD_TEXTS: Record<string, Record<DirtyGuardTextKey, string>> = {
+  en: DEFAULT_DIRTY_GUARD_TEXTS,
+  ru: {
+    message: 'Есть несохранённые изменения. Вы уверены, что хотите уйти?',
+    dialogTitle: 'Несохранённые изменения',
+    dialogDescription: 'Есть несохранённые изменения. Вы уверены, что хотите покинуть страницу?',
+    confirmText: 'Уйти',
+    cancelText: 'Остаться',
+  },
+}
+
+function resolveDirtyGuardBuiltin(key: DirtyGuardTextKey, locale: string): string {
+  const lang = locale.split('-')[0] ?? locale
+  return (BUILTIN_DIRTY_GUARD_TEXTS[lang] ?? DEFAULT_DIRTY_GUARD_TEXTS)[key]
+}
 
 /**
  * Props for DirtyGuard component
@@ -11,26 +46,27 @@ export interface DirtyGuardProps {
   /**
    * Message to show in browser's native beforeunload dialog
    * Note: Most modern browsers ignore custom messages and show their own
+   * @default встроенный текст по языку `FormI18nProvider` (ru/en), ключ `formDirtyGuard.message`
    */
   message?: string
   /**
    * Title for the confirmation dialog
-   * @default "Unsaved changes"
+   * @default встроенный текст по языку `FormI18nProvider` (ru/en), ключ `formDirtyGuard.dialogTitle`
    */
   dialogTitle?: string
   /**
    * Description for the confirmation dialog
-   * @default "You have unsaved changes. Are you sure you want to leave this page?"
+   * @default встроенный текст по языку `FormI18nProvider` (ru/en), ключ `formDirtyGuard.dialogDescription`
    */
   dialogDescription?: string
   /**
    * Text for the confirm button
-   * @default "Leave"
+   * @default встроенный текст по языку `FormI18nProvider` (ru/en), ключ `formDirtyGuard.confirmText`
    */
   confirmText?: string
   /**
    * Text for the cancel button
-   * @default "Stay"
+   * @default встроенный текст по языку `FormI18nProvider` (ru/en), ключ `formDirtyGuard.cancelText`
    */
   cancelText?: string
   /**
@@ -76,15 +112,25 @@ export interface DirtyGuardProps {
  * ```
  */
 export function DirtyGuard({
-  message = 'You have unsaved changes. Are you sure you want to leave?',
-  dialogTitle = 'Unsaved changes',
-  dialogDescription = 'You have unsaved changes. Are you sure you want to leave this page?',
-  confirmText = 'Leave',
-  cancelText = 'Stay',
+  message: messageProp,
+  dialogTitle: dialogTitleProp,
+  dialogDescription: dialogDescriptionProp,
+  confirmText: confirmTextProp,
+  cancelText: cancelTextProp,
   enabled = true,
   onBlock,
 }: DirtyGuardProps): ReactElement | null {
   const { form } = useDeclarativeForm()
+  const i18n = useFormI18n()
+  // Проп приложения — самое сильное; иначе перевод по ключу → словарь ru/en → английский
+  const resolveText = (key: DirtyGuardTextKey, override: string | undefined): string =>
+    override
+      ?? resolveStaticFormText(i18n, DIRTY_GUARD_KEY_PREFIX + key, (locale) => resolveDirtyGuardBuiltin(key, locale))
+  const message = resolveText('message', messageProp)
+  const dialogTitle = resolveText('dialogTitle', dialogTitleProp)
+  const dialogDescription = resolveText('dialogDescription', dialogDescriptionProp)
+  const confirmText = resolveText('confirmText', confirmTextProp)
+  const cancelText = resolveText('cancelText', cancelTextProp)
   const router = useRouter()
   const [showDialog, setShowDialog] = useState(false)
   const pendingHref = useRef<string | null>(null)

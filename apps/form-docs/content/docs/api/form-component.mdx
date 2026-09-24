@@ -368,11 +368,23 @@ Interactive JSON inspector showing real-time form values:
 
 ## Form.DirtyGuard
 
-Warns user about unsaved changes when navigating away:
+Warns user about unsaved changes when navigating away (tab close, refresh, click on an internal link):
 
 ```tsx
-<Form.DirtyGuard title="Unsaved changes" message="You have unsaved changes. Are you sure you want to leave?" />
+<Form.DirtyGuard />
 ```
+
+Texts (`dialogTitle`, `dialogDescription`, `confirmText`, `cancelText`, `message`) resolve in this order:
+prop → app translation by key `formDirtyGuard.<prop>` (`FormI18nProvider` with `t`) → built-in ru/en
+dictionary by `locale` → English when there is no provider. Props override everything:
+
+```tsx
+<Form.DirtyGuard dialogTitle="Leaving?" confirmText="Yes, leave" cancelText="No, stay" />
+```
+
+Not caught: programmatic `router.push()` / `router.replace()` and the browser Back/Forward buttons
+(`popstate` fires after the address has already changed and cannot be cancelled). For programmatic
+navigation check `form.state.isDirty` yourself before calling `router.push`.
 
 ## Form.Subscribe
 

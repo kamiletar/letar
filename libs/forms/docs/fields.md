@@ -101,6 +101,24 @@
 
 Скины Vue, Vue-shadcn и Angular пока без `onCreate`.
 
+**Своя обёртка над Select/Combobox должна пробрасывать `onCreate` (и `createLabel`).** Обёртка,
+которая собирает `options` сама (`useQuery`, async-Combobox) и принимает узкий набор пропсов,
+молча теряет `onCreate` — поле рендерится без пункта «+ Добавить…», ошибки нет. Пробрасывайте
+остаток пропсов и не перезаписывайте `options`, полученные из запроса:
+
+```tsx
+function CategoryCombobox({ name, ...rest }: CategoryComboboxProps) {
+  const { data = [] } = useQuery(categoriesQuery)
+  const options = data.map((c) => ({ label: c.name, value: c.id }))
+  // ...rest содержит onCreate/createLabel; после создания приложение инвалидирует запрос,
+  // и в списке остаётся одна запись — опция приложения побеждает созданную локально
+  return <Form.Field.Combobox name={name} options={options} {...rest} />
+}
+```
+
+Для фабрики async-Combobox (`createActionCombobox` и подобные) правило то же: пропсы поля,
+которых фабрика не знает, идут в поле без изменений.
+
 ## Множественный выбор
 
 | Компонент                 | Описание                   |

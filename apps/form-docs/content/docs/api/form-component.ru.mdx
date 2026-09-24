@@ -207,11 +207,23 @@ description: Главный составной компонент Form и его
 
 ## Form.DirtyGuard
 
-Предупреждение о несохранённых изменениях при уходе со страницы:
+Предупреждение о несохранённых изменениях при уходе со страницы (закрытие вкладки, обновление, клик по внутренней ссылке):
 
 ```tsx
-<Form.DirtyGuard title="Несохранённые изменения" message="Вы уверены?" />
+<Form.DirtyGuard />
 ```
+
+Тексты (`dialogTitle`, `dialogDescription`, `confirmText`, `cancelText`, `message`) резолвятся так: проп →
+перевод приложения по ключу `formDirtyGuard.<проп>` (`FormI18nProvider` с `t`) → встроенный словарь ru/en по
+`locale` → английский, если провайдера нет. Проп сильнее всего:
+
+```tsx
+<Form.DirtyGuard dialogTitle="Уйти?" confirmText="Да, уйти" cancelText="Нет, остаться" />
+```
+
+Не ловится: программный `router.push()` / `router.replace()` и кнопки «Назад»/«Вперёд» браузера (`popstate`
+приходит уже после смены адреса, отменить его нельзя). Для программной навигации проверяйте
+`form.state.isDirty` сами перед `router.push`.
 
 ## Form.Subscribe
 

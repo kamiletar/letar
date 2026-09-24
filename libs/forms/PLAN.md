@@ -6,6 +6,27 @@
 
 ## Backlog (запросы от агентов)
 
+### ✅ [2026-09-24] Три доработки по отчёту domwellbes о 2.17.0 (закрыт forms 2.17.1, от domwellbes-dev)
+
+- **Запросил:** `domwellbes-dev` через `forms-coordinator-dev` (тред `forms-domwellbes-2026-09-24`, msg 2107).
+- **1. i18n `Form.DirtyGuard` (normal) — ✅.** Ключи `formDirtyGuard.<проп>`, словарь ru/en, лестница
+  `resolveStaticFormText`; пропсы остаются переопределением. Заодно исправлен тип базового
+  `Form.DirtyGuard` (не знал про `dialogTitle`/`dialogDescription`/`confirmText`/`cancelText`).
+  4 новых теста.
+- **2. Док про обёртки (low) — ✅.** `docs/fields.md`: обёртка над Select/Combobox обязана пробрасывать
+  `onCreate`/`createLabel`, пример для `useQuery` и async-фабрик.
+- **3. Пробелы `DirtyGuard` (low, исследование) — вывод записан.** Программный `router.push` и «Назад»
+  чисто не закрываются: `push` — вызов функции, перехватить снаружи нельзя без подмены роутера;
+  `popstate` приходит после смены адреса, отменить нельзя, а обход через фиктивную запись `history`
+  конфликтует с историей App Router. Ограничения задокументированы в `docs/form-level.md` и `form-docs`.
+  Кандидат при появлении потребителя: `useDirtyGuardNavigate()` — хук, который возвращает
+  `navigate(href)`, проверяет `isDirty` и показывает то же окно (нужен контекст от `DirtyGuard`).
+- **Кандидат «при втором потребителе»:** `useCreateOption` — готовый хук диалога создания записи для
+  `onCreate`. Сейчас один потребитель (`domwellbes`, в `apps/`), в `@letar/ui`/forms не выносим.
+- **Не делаем:** `onCreate` для vue/angular (потребителей нет; см. запись выше).
+- **`Field.Select` с `value: ''`:** Chakra — 2.16.12 (domwellbes), shadcn и vue-shadcn уже подменяют
+  `''` служебным токеном (`field-select-empty-option.spec.ts`), vue/angular — нативный `<select>`. Правок нет.
+
 ### ✅ [2026-09-24] Persistence: устаревший черновик не удаляется, когда значения вернулись к исходным (закрыт forms 2.16.13, от domwellbes-dev)
 
 - **Запросил:** `domwellbes-dev`, живая находка на созвоне (форма материала, карточка с вкладками).

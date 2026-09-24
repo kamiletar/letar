@@ -3,6 +3,7 @@
 import type { ReactElement, ReactNode } from 'react'
 import type { CaptchaFieldProps } from '../../captcha/types'
 import type { OfflineIndicatorProps, SyncStatusProps } from '../../offline'
+import type { DirtyGuardProps } from '../dirty-guard'
 import type { AutoFieldsProps } from '../form-auto-fields'
 import type { FormDividerProps } from '../form-divider'
 import type {
@@ -258,7 +259,7 @@ export interface FormComponent {
   DebugValues: (props: { title?: string; collapsed?: number; showInProduction?: boolean }) => ReactElement | null
 
   /** Защита от потери несохранённых данных */
-  DirtyGuard: (props: { message?: string; enabled?: boolean; onBlock?: () => boolean | void }) => ReactElement | null
+  DirtyGuard: (props: DirtyGuardProps) => ReactElement | null
 
   /** Информационный блок (info/warning/error/success/tip) */
   InfoBlock: (props: FormInfoBlockProps) => ReactElement

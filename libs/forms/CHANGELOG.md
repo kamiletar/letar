@@ -4,6 +4,27 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.17.1] - 2026-09-24
+
+### Added
+
+- **i18n для `Form.DirtyGuard`** (domwellbes-dev, `forms-domwellbes-2026-09-24`). Тексты окна и
+  `beforeunload` (`dialogTitle`, `dialogDescription`, `confirmText`, `cancelText`, `message`) резолвятся
+  через общую лестницу `resolveStaticFormText`: проп → перевод приложения по ключу
+  `formDirtyGuard.<проп>` → встроенный словарь ru/en по `locale` → английский без провайдера. Обёртка с
+  русскими пропсами больше не нужна; пропсы остаются переопределением.
+
+### Fixed
+
+- Тип `Form.DirtyGuard` базового `Form` не знал про `dialogTitle`/`dialogDescription`/`confirmText`/
+  `cancelText` (в `createForm()` они были) — теперь оба типа берутся из `DirtyGuardProps`.
+
+### Docs
+
+- `docs/form-level.md`: раздел `Form.DirtyGuard` с таблицей пропсов и ограничениями (программный
+  `router.push` и «Назад» не ловятся — причины и обход).
+- `docs/fields.md`: обёртка над Select/Combobox должна пробрасывать `onCreate`/`createLabel`.
+
 ## [2.17.0] - 2026-09-24
 
 ### Added
