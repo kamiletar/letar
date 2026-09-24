@@ -203,6 +203,8 @@
 - [chakra-semantic-token-contract](/.claude/docs/chakra-semantic-token-contract.md) ⚠️ стоковые рецепты читают `bg.panel`/`fg.error` — не переопределил, провалил WCAG
 - [chakra-inverted-surface-color-contrast](/.claude/docs/chakra-inverted-surface-color-contrast.md) ⚠️ `Tooltip.Content` на `bg.inverted` — низкий контраст в одной теме
 - [chakra-font-token-var-declaration-scope](/.claude/docs/chakra-font-token-var-declaration-scope.md) ⚠️ класс `next/font` на `<body>` не доезжает до `fonts.*` на `:root` — системный шрифт
+- [browser-auto-dark-light-theme-override](/.claude/docs/browser-auto-dark-light-theme-override.md) ⚠️ «темы не различаются»: авто-затемнение браузера, фикс `color-scheme: only light`
+- [chakra-drawer-missing-positioner-inline-render](/.claude/docs/chakra-drawer-missing-positioner-inline-render.md) ⚠️ Drawer без `Positioner`/`Portal` рендерится внутри шапки
 - [chakra-typegen-shared-node-modules-race](/.claude/docs/chakra-typegen-shared-node-modules-race.md) ⚠️ параллельный `theme:typegen` откатывает чужие варианты
 - [chakra-overflow-wrap-not-inherited](/.claude/docs/chakra-overflow-wrap-not-inherited.md) ⚠️ не наследуется через reset — фикс только `'& *'`
 - [chakra-heading-defaults-to-h2](/.claude/docs/chakra-heading-defaults-to-h2.md) ⚠️ страница может не иметь ни одного `<h1>`
