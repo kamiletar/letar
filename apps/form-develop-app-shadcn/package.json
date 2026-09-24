@@ -1,6 +1,6 @@
 {
   "name": "@letar/form-develop-app-shadcn",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "private": true,
   "nx": {
     "name": "form-develop-app-shadcn",

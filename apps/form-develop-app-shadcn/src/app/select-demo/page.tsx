@@ -21,12 +21,23 @@ const CITIES_BY_COUNTRY: Record<string, { label: string; value: string }[]> = {
   kz: [{ label: 'Алматы', value: 'alm' }, { label: 'Астана', value: 'ast' }],
 }
 
+/** Имитация окна создания записи в приложении: задержка вместо диалога и серверного действия */
+function fakeCreateDialog(name: string): Promise<{ label: string; value: string }> {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({ label: name.trim() || 'Новая запись', value: `new-${Math.random().toString(36).slice(2, 8)}` })
+    }, 400)
+  })
+}
+
 interface SelectValues {
   framework: string
   country: string
   frameworkSearch: string
   shippingCountry: string
   shippingCity: string
+  createSelect: string
+  createCombobox: string
 }
 
 const defaultValues: SelectValues = {
@@ -35,6 +46,8 @@ const defaultValues: SelectValues = {
   frameworkSearch: '',
   shippingCountry: '',
   shippingCity: '',
+  createSelect: '',
+  createCombobox: '',
 }
 
 export default function SelectDemoPage() {
@@ -68,6 +81,27 @@ export default function SelectDemoPage() {
           dependsOn="shippingCountry"
           loadOptions={async (country) => CITIES_BY_COUNTRY[country ?? ''] ?? []}
           placeholderWhenDisabled="Сначала выберите страну"
+        />
+        {/* onCreate: создание записи справочника из поля (только статические опции) */}
+        <FieldSelect
+          name="createSelect"
+          label="Фреймворк (с пунктом «Добавить…»)"
+          options={frameworkOptions}
+          placeholder="Выберите"
+          createLabel="Добавить фреймворк…"
+          onCreate={async () => fakeCreateDialog('Новый фреймворк')}
+        />
+        <FieldCombobox
+          name="createCombobox"
+          label="Поиск фреймворка (с созданием)"
+          options={frameworkOptions}
+          onCreate={async (text) => {
+            // Путь «пользователь закрыл окно»: null — ничего не меняется
+            if (text.trim().toLowerCase().startsWith('отмена')) {
+              return null
+            }
+            return fakeCreateDialog(text)
+          }}
         />
 
         <button

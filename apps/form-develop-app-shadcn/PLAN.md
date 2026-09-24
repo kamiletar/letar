@@ -91,6 +91,11 @@ RichText.
       командой — окружение без слинкованных `node_modules` даёт «Could not find the Next.js
       package» независимо от содержимого.
 
+## onCreate у Select и Combobox ✅ (2026-09-24)
+
+- [x] `select-demo`: `FieldSelect` и `FieldCombobox` с `onCreate` (статические опции; async-поиска в
+      shadcn-скине нет), путь `null`, `createLabel` у Select.
+
 ## Бэклог
 
 - [ ] `createForm()`/`Form`-root для `@letar/forms-shadcn` (если понадобится за пределами этого
