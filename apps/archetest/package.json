@@ -1,6 +1,6 @@
 {
   "name": "@letar/archetest",
-  "version": "0.28.23",
+  "version": "0.28.24",
   "private": true,
   "nx": {
     "name": "archetest",
