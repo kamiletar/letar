@@ -16,6 +16,7 @@ export type SelectionStringKey =
   | 'formSelection.autocomplete.placeholder'
   | 'formSelection.autocomplete.loadingMessage'
   | 'formSelection.autocomplete.emptyMessage'
+  | 'formSelection.createOption'
 
 /**
  * Встроенный словарь дефолтов — отдельный от `min-chars-hint.ts` (та подсказка требует
@@ -28,6 +29,8 @@ const BUILTIN_SELECTION_STRINGS: Record<SelectionStringKey, Record<string, strin
   'formSelection.autocomplete.placeholder': { en: 'Start typing...', ru: 'Начните вводить...' },
   'formSelection.autocomplete.loadingMessage': { en: 'Loading...', ru: 'Загрузка...' },
   'formSelection.autocomplete.emptyMessage': { en: 'No suggestions', ru: 'Нет подсказок' },
+  // Глагол пункта «+ Добавить…» (`onCreate` у Select/Combobox); знаки «+», «…» и текст поиска дописывает поле
+  'formSelection.createOption': { en: 'Add', ru: 'Добавить' },
 }
 
 function buildBuiltinString(key: SelectionStringKey, locale: string): string {

@@ -21,10 +21,15 @@ describe('resolveSelectionString', () => {
       expect(resolveSelectionString(null, 'formSelection.autocomplete.placeholder')).toBe('Start typing...')
       expect(resolveSelectionString(null, 'formSelection.autocomplete.loadingMessage')).toBe('Loading...')
       expect(resolveSelectionString(null, 'formSelection.autocomplete.emptyMessage')).toBe('No suggestions')
+      expect(resolveSelectionString(null, 'formSelection.createOption')).toBe('Add')
     })
   })
 
   describe('встроенный словарь по locale (провайдер без своего t)', () => {
+    it('переводит глагол пункта «Добавить» на русский', () => {
+      expect(resolveSelectionString(i18nContext('ru'), 'formSelection.createOption')).toBe('Добавить')
+    })
+
     it('переводит строки Combobox на русский', () => {
       expect(resolveSelectionString(i18nContext('ru'), 'formSelection.combobox.placeholder')).toBe('Поиск...')
       expect(resolveSelectionString(i18nContext('ru'), 'formSelection.combobox.loadingMessage')).toBe('Загрузка...')

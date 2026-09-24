@@ -1,8 +1,16 @@
 'use client'
 
 import { Combobox, Field, Portal, Spinner, useFilter } from '@chakra-ui/react'
+import {
+  CREATE_OPTION_VALUE,
+  type CreatedOption,
+  type CreateOptionHandler,
+  isCreateOptionValue,
+  mergeCreatedOptions,
+  shouldOfferCreate,
+} from '@letar/forms-core/uikit'
 import { useStore } from '@tanstack/react-form'
-import { type ReactElement, type ReactNode, useEffect, useMemo, useRef } from 'react'
+import { type ReactElement, type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { BaseFieldProps, FieldSize, GroupableOption } from '../../types'
 import {
   type AsyncQueryFn,
@@ -117,6 +125,33 @@ export interface ComboboxFieldProps<T = string, TData = unknown> extends BaseFie
   allowCustomValue?: boolean
 
   /**
+   * Create a dictionary record without leaving the form. While the search text is non-empty and
+   * matches no option exactly, the list ends with «+ Добавить "<text>"»; picking it calls
+   * `onCreate(text)`. The app opens its own creation dialog (and calls its server action) and
+   * returns `{ label, value }` — the option is added to the list and selected — or `null` if the
+   * user cancelled (the value stays as it was, the search text is kept).
+   *
+   * Works with static `options` and with `useQuery`. The created option lives while the field is
+   * mounted; once the app's own list contains the same value, the app's option wins (no duplicate).
+   *
+   * @example
+   * ```tsx
+   * <Form.Field.Combobox
+   *   name="categoryId"
+   *   options={categories}
+   *   onCreate={async (name) => {
+   *     const created = await openCategoryDialog({ name })
+   *     return created ? { label: created.name, value: created.id } : null
+   *   }}
+   * />
+   * ```
+   */
+  onCreate?: CreateOptionHandler
+
+  /** Text of the create item: «+ <createLabel> "<search>"» (default: localized «Add» / «Добавить») */
+  createLabel?: string
+
+  /**
    * Component size
    */
   size?: FieldSize
@@ -154,6 +189,12 @@ interface ComboboxFieldState extends GroupedOptionsResult {
   defaultLoadingMessage: string
   /** Локализованный дефолт `emptyMessage`, когда проп не задан */
   defaultEmptyMessage: string
+  /** Подпись служебного пункта «+ Добавить "<поиск>"» (пусто, если пункт сейчас не предлагается) */
+  createItemLabel: string
+  /** Добавляет опцию, возвращённую `onCreate`, в локальный список */
+  addCreatedOption: (option: CreatedOption) => void
+  /** `true`, пока `onCreate` не завершился (повторный выбор пункта игнорируется) */
+  creatingRef: { current: boolean }
 }
 
 /**
@@ -240,16 +281,33 @@ export const FieldCombobox = createField<ComboboxFieldProps, string, ComboboxFie
     // Filter for static options
     const { contains } = useFilter({ sensitivity: 'base' })
 
+    // Опции, созданные через `onCreate`, живут локально, пока поле смонтировано
+    const [createdOptions, setCreatedOptions] = useState<CreatedOption[]>([])
+    const addCreatedOption = useCallback((option: CreatedOption) => {
+      setCreatedOptions((prev) => [...prev, option])
+    }, [])
+    const creatingRef = useRef(false)
+    const hasOnCreate = !!componentProps.onCreate
+    const createVerb = useSelectionString('formSelection.createOption')
+
     // Build options from static or async source
-    const options = useMemo((): GroupableOption[] => {
+    const baseOptions = useMemo((): GroupableOption[] => {
+      // Опция приложения сильнее созданной с тем же значением — после перезагрузки справочника
+      // дубля нет. Созданные опции фильтруются по тексту поиска так же, как остальные
+      const withCreated = (list: GroupableOption[]): GroupableOption[] => {
+        // Значения Combobox — строки: числовое значение из `onCreate` приводится к строке
+        const visibleCreated = createdOptions
+          .filter((opt) => !inputValue || contains(opt.label, inputValue))
+          .map((opt): GroupableOption => ({ label: opt.label, value: String(opt.value) }))
+        return mergeCreatedOptions(list, visibleCreated)
+      }
+
       if (componentProps.options) {
         // Filtering static options by input value
-        if (!inputValue) {
-          return componentProps.options
-        }
-        return componentProps.options.filter((opt) => {
-          return contains(getOptionLabel(opt), inputValue)
-        })
+        const filtered = inputValue
+          ? componentProps.options.filter((opt) => contains(getOptionLabel(opt), inputValue))
+          : componentProps.options
+        return withCreated(filtered)
       }
 
       if (queryData && componentProps.getLabel && componentProps.getValue) {
@@ -257,15 +315,15 @@ export const FieldCombobox = createField<ComboboxFieldProps, string, ComboboxFie
         const getValue = componentProps.getValue
         const getGroup = componentProps.getGroup
         const getDisabled = componentProps.getDisabled
-        return (queryData as unknown[]).map((item) => ({
+        return withCreated((queryData as unknown[]).map((item) => ({
           label: getLabel(item),
           value: getValue(item),
           group: getGroup?.(item),
           disabled: getDisabled?.(item),
-        }))
+        })))
       }
 
-      return []
+      return withCreated([])
     }, [
       componentProps.options,
       queryData,
@@ -275,7 +333,20 @@ export const FieldCombobox = createField<ComboboxFieldProps, string, ComboboxFie
       componentProps.getDisabled,
       inputValue,
       contains,
+      createdOptions,
     ])
+
+    // Служебный пункт «+ Добавить "<поиск>"» — в конце списка, вне групп. Значение перехватывается
+    // в `onValueChange` и в форму не попадает
+    const search = inputValue.trim()
+    const createItemLabel = hasOnCreate && shouldOfferCreate(search, baseOptions.map((opt) => getOptionLabel(opt)))
+      ? `+ ${componentProps.createLabel ?? createVerb} "${search}"`
+      : ''
+    const options = useMemo(
+      (): GroupableOption[] =>
+        createItemLabel ? [...baseOptions, { label: createItemLabel, value: CREATE_OPTION_VALUE }] : baseOptions,
+      [baseOptions, createItemLabel],
+    )
 
     // Create collection with grouping via shared hook
     const { collection, groups } = useGroupedOptions(options)
@@ -302,6 +373,9 @@ export const FieldCombobox = createField<ComboboxFieldProps, string, ComboboxFie
       defaultPlaceholder,
       defaultLoadingMessage,
       defaultEmptyMessage,
+      createItemLabel,
+      addCreatedOption,
+      creatingRef,
     }
   },
   render: ({ field, fullPath, resolved, hasError, errorMessage, componentProps, fieldState }): ReactElement => {
@@ -316,9 +390,32 @@ export const FieldCombobox = createField<ComboboxFieldProps, string, ComboboxFie
           variant={componentProps.variant ?? 'outline'}
           value={currentValue ? [currentValue] : []}
           inputValue={fieldState.inputValue}
-          onInputValueChange={(details) => fieldState.setInputValue(details.inputValue)}
+          onInputValueChange={(details) => {
+            // Выбор служебного пункта подставил бы его подпись в инпут — текст поиска остаётся
+            if (fieldState.createItemLabel && details.inputValue === fieldState.createItemLabel) {
+              return
+            }
+            fieldState.setInputValue(details.inputValue)
+          }}
           onValueChange={(details) => {
             const newValue = details.value[0] as string | undefined
+            if (isCreateOptionValue(newValue)) {
+              // Ошибки `onCreate` — забота приложения: всплывают как unhandled rejection
+              // (GlitchTip), здесь не глотаются
+              if (componentProps.onCreate && !fieldState.creatingRef.current) {
+                fieldState.creatingRef.current = true
+                void componentProps.onCreate(fieldState.inputValue.trim()).then((created) => {
+                  if (created) {
+                    fieldState.addCreatedOption(created)
+                    field.handleChange(String(created.value))
+                    fieldState.setInputValue(created.label)
+                  }
+                }).finally(() => {
+                  fieldState.creatingRef.current = false
+                })
+              }
+              return
+            }
             field.handleChange(newValue ?? '')
           }}
           onInteractOutside={() => field.handleBlur()}
