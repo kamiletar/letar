@@ -1,0 +1,220 @@
+[
+  {
+    "_facet": "Удержание внимания",
+    "scenario": "Коллега пятнадцать минут объясняет по телефону, как оформить документы, — скучно, но важно.",
+    "scenarioEn": "A colleague spends fifteen minutes on the phone explaining how to fill in some paperwork — dull, but important.",
+    "options": [
+      {
+        "text": "Где-то на середине ловлю себя на том, что думаю о своём, и прошу повторить",
+        "textEn": "Somewhere in the middle I realise my mind has wandered off, and I ask them to repeat it",
+        "scoring": {
+          "INA": 3
+        }
+      },
+      {
+        "text": "Слушаю и параллельно записываю ключевые шаги",
+        "textEn": "I listen and jot down the key steps as we go",
+        "scoring": {}
+      },
+      {
+        "text": "Прошу прислать то же самое письмом — так надёжнее",
+        "textEn": "I ask them to send the same thing by email — that's safer",
+        "scoring": {
+          "INA": 1
+        }
+      },
+      {
+        "text": "Дослушиваю и задаю пару уточняющих вопросов",
+        "textEn": "I hear them out and ask a couple of follow-up questions",
+        "scoring": {}
+      }
+    ]
+  },
+  {
+    "_facet": "Доведение до конца",
+    "scenario": "Дома копятся незаконченные дела: полусобранная полка, начатый онлайн-курс, одна переклеенная стена. Как обычно складываются такие проекты у вас?",
+    "scenarioEn": "Unfinished things pile up at home: a half-assembled shelf, an online course you started, one wall you re-papered. How do projects like these usually go for you?",
+    "options": [
+      {
+        "text": "Если начал(а), довожу — пусть медленно",
+        "textEn": "If I've started, I finish — even if slowly",
+        "scoring": {}
+      },
+      {
+        "text": "Начинаю с азартом, но как только становится рутинно — бросаю ради нового",
+        "textEn": "I start with a lot of excitement, but once it turns routine I drop it for something new",
+        "scoring": {
+          "INA": 3
+        }
+      },
+      {
+        "text": "Незаконченного почти нет: редко берусь за то, что не успею",
+        "textEn": "There's hardly anything unfinished: I rarely take on what I can't get done",
+        "scoring": {}
+      },
+      {
+        "text": "Доделываю, только когда кто-то ждёт результат или горит срок",
+        "textEn": "I only finish when someone is waiting for the result or a deadline is looming",
+        "scoring": {
+          "INA": 1
+        }
+      }
+    ]
+  },
+  {
+    "_facet": "Организация",
+    "_reverse": true,
+    "scenario": "В один день нужно оплатить квитанцию, забрать посылку, записаться к врачу и вернуть книгу в библиотеку.",
+    "scenarioEn": "In a single day you need to pay a bill, pick up a parcel, book a doctor's appointment and return a library book.",
+    "options": [
+      {
+        "text": "Держу всё в голове и спокойно успеваю",
+        "textEn": "I keep it all in my head and get through it calmly",
+        "scoring": {}
+      },
+      {
+        "text": "Выстраиваю маршрут, чтобы всё было по пути",
+        "textEn": "I plan a route so everything is on the way",
+        "scoring": {}
+      },
+      {
+        "text": "Пишу список и ставлю напоминание на каждый пункт — без них половина точно выпадет",
+        "textEn": "I write a list and set a reminder for each item — without them half of it would definitely slip",
+        "scoring": {
+          "INA": 3
+        }
+      },
+      {
+        "text": "Делаю одно-два дела, остальное как-то само переезжает на потом",
+        "textEn": "I do one or two things, and the rest somehow drifts to later",
+        "scoring": {
+          "INA": 2
+        }
+      }
+    ]
+  },
+  {
+    "_facet": "Забывчивость",
+    "scenario": "Друг напоминает: «Ты обещал(а) вернуть зарядку ещё на прошлой неделе».",
+    "scenarioEn": "A friend reminds you: \"You promised to give my charger back last week.\"",
+    "options": [
+      {
+        "text": "Извиняюсь: закрутился(ась), со мной такое бывает редко",
+        "textEn": "I apologise: things got hectic, that rarely happens to me",
+        "scoring": {}
+      },
+      {
+        "text": "Помню, просто было неудобно заехать",
+        "textEn": "I remembered, it just wasn't convenient to drop by",
+        "scoring": {}
+      },
+      {
+        "text": "Тут же ставлю напоминание в телефон, иначе забуду снова",
+        "textEn": "I set a reminder on my phone right away, or I'll forget again",
+        "scoring": {
+          "INA": 1
+        }
+      },
+      {
+        "text": "Опять вылетело из головы — со мной это постоянно, хотя я правда собирался(ась)",
+        "textEn": "It slipped my mind again — that happens to me all the time, even though I really meant to",
+        "scoring": {
+          "INA": 3
+        }
+      }
+    ]
+  },
+  {
+    "_facet": "Потеря вещей",
+    "_reverse": true,
+    "scenario": "Утро, вы выходите из дома.",
+    "scenarioEn": "Morning, you're heading out of the house.",
+    "options": [
+      {
+        "text": "Просто беру всё нужное и выхожу",
+        "textEn": "I just grab what I need and go",
+        "scoring": {}
+      },
+      {
+        "text": "Минут десять ищу ключи или телефон — обычное утро",
+        "textEn": "I spend ten minutes looking for my keys or phone — a normal morning",
+        "scoring": {
+          "INA": 2
+        }
+      },
+      {
+        "text": "Проверяю, выключены ли плита и утюг",
+        "textEn": "I check that the stove and the iron are off",
+        "scoring": {}
+      },
+      {
+        "text": "У меня жёсткое правило: ключи, кошелёк, телефон — всегда в одном месте, иначе начинаются поиски",
+        "textEn": "I have a strict rule: keys, wallet and phone always go in the same spot — otherwise the hunt begins",
+        "scoring": {
+          "INA": 3
+        }
+      }
+    ]
+  },
+  {
+    "_facet": "Отвлекаемость",
+    "scenario": "Вы пишете отчёт в опенспейсе: рядом обсуждают чей-то отпуск, у кого-то звонит телефон.",
+    "scenarioEn": "You're writing a report in an open-plan office: nearby, people are discussing someone's holiday and a phone keeps ringing.",
+    "options": [
+      {
+        "text": "Надеваю наушники и продолжаю",
+        "textEn": "I put on headphones and keep going",
+        "scoring": {}
+      },
+      {
+        "text": "Шум мне не мешает, даже наоборот",
+        "textEn": "Noise doesn't bother me — if anything, it helps",
+        "scoring": {}
+      },
+      {
+        "text": "Каждая фраза рядом выдёргивает меня — к концу часа написано два абзаца",
+        "textEn": "Every snippet of conversation pulls me out — by the end of the hour I've written two paragraphs",
+        "scoring": {
+          "INA": 3
+        }
+      },
+      {
+        "text": "Ухожу в переговорку потише",
+        "textEn": "I move to a quieter meeting room",
+        "scoring": {}
+      }
+    ]
+  },
+  {
+    "_facet": "Внимание к деталям",
+    "_reverse": true,
+    "scenario": "Вы заполняете заявление на двадцать полей: даты, номера документов, адреса.",
+    "scenarioEn": "You're filling in an application with twenty fields: dates, document numbers, addresses.",
+    "options": [
+      {
+        "text": "Перечитываю дважды: знаю, что иначе пропущу опечатку, не ту дату или вложение",
+        "textEn": "I reread it twice: I know that otherwise I'll miss a typo, a wrong date or the attachment",
+        "scoring": {
+          "INA": 3
+        }
+      },
+      {
+        "text": "Отправляю сразу — обычно всё в порядке",
+        "textEn": "I send it straight away — it's usually fine",
+        "scoring": {}
+      },
+      {
+        "text": "Прошу кого-нибудь глянуть, если дело важное",
+        "textEn": "If it matters, I ask someone to look it over",
+        "scoring": {}
+      },
+      {
+        "text": "Замечаю ошибку уже после отправки — со мной это частая история",
+        "textEn": "I notice the mistake only after I've sent it — that's a familiar story for me",
+        "scoring": {
+          "INA": 2
+        }
+      }
+    ]
+  }
+]

@@ -85,7 +85,7 @@ const CONFIGS: Record<string, BatchConfig> = {
     allowedScoringCodes: EXPERIMENTAL_CODES,
   },
   // Новая шкала «Доброжелательность» (HEXACO Honesty-Humility).
-  // ⚠️ НЕ вливать до возврата вердиктов ревьюера (дедлайн 02.08) и до того,
+  // ⚠️ НЕ вливать до возврата вердиктов ревьюера и до того,
   // как HON появится в ALL_SCALE_CODES приложения. Сейчас конфиг нужен для
   // `--dry-run`: он прогоняет батч через ту же валидацию, что и боевой merge.
   // Изоляция скоринга (только HON) — методологическое требование, см.
@@ -97,6 +97,17 @@ const CONFIGS: Record<string, BatchConfig> = {
     perScale: 15,
     minReverse: 5,
     allowedScoringCodes: ['HON'],
+  },
+  // СДВГ-скрининг: INA — невнимательность, HYI — гиперактивность/импульсивность
+  // (docs/adhd-screening-brief.md). ⚠️ НЕ вливать до вердиктов ревьюера и решения Kami
+  // о месте в продукте; до того конфиг нужен только для `--dry-run`. Скоринг изолирован
+  // на двух кодах — ядро и его `actual_max` не затрагиваются.
+  adhd: {
+    dir: 'adhd',
+    order: ['INA', 'HYI'],
+    perScale: 7,
+    minReverse: 3,
+    allowedScoringCodes: ['INA', 'HYI'],
   },
 }
 
