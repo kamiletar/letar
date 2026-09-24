@@ -17,7 +17,8 @@ EN «Light / Auto / Dark», переключение меняет класс `<h
 **Темы.** Код тем исправен — в чистом Chromium переключались. Причина жалобы воспроизведена
 флагом `WebContentsForceDark`: авто-затемнение браузера перекрашивает страницу, объявившую
 `color-scheme: light` (инлайн от next-themes). Фикс — `color-scheme: only light` для
-`html.light` в `globalCss` + `enableColorScheme={false}` у `ColorModeProvider`. Вторая половина
+`html.light`; сперва app-level, затем перенесён в `ColorModeProvider` (`@letar/chakra-provider` 0.5.0,
+для всех приложений), в archetest дубль убран. Вторая половина
 жалобы — кнопка высокого контраста ◐ на месте переключателя темы в мобильной шапке: заменена на
 ☀/☾, контраст уехал в меню подписанным свитчем. `useHighContrast` переведён на
 `useSyncExternalStore` — переключатели в шапке и меню больше не расходятся.
