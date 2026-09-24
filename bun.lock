@@ -534,7 +534,7 @@
     },
     "apps/archetest": {
       "name": "@letar/archetest",
-      "version": "0.28.7",
+      "version": "0.28.17",
       "dependencies": {
         "@letar/env-load": "workspace:*",
         "@letar/forms": "workspace:*",
