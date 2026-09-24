@@ -4,7 +4,8 @@
  * Запуск:
  *   npx tsx --env-file=.env.local apps/archetest/prisma/seed-questions.ts          # безопасный append
  *   npx tsx --env-file=.env.local apps/archetest/prisma/seed-questions.ts --fresh  # полная пересборка
- * Или через Nx target: nx db:seed archetest
+ *   npx tsx --env-file=.env.local apps/archetest/prisma/seed-questions.ts --sync-texts [--dry-run]
+ * Или через Nx target: nx db:seed archetest [-- --sync-texts]
  *
  * Режимы:
  * - **append (по умолчанию)**: вставляет только вопросы, которых ещё нет в БД (по id).
@@ -14,11 +15,18 @@
  *   или пересобираемой базы: QuizAnswer.questionId → ON DELETE SET NULL (обнулит связи
  *   ответов), QuizSkippedQuestion.questionId → ON DELETE RESTRICT (delete упадёт при
  *   наличии пропусков). На проде с данными пользователей НЕ использовать.
+ * - **--sync-texts**: обновляет у существующих вопросов только формулировки (`scenario`,
+ *   `scenarioEn`, тексты вариантов) из дампа — EN-перевод, вердикты ревьюера «Править».
+ *   Если у вопроса в дампе изменились баллы, число или порядок вариантов, не пишет НИЧЕГО
+ *   и завершается с ошибкой (баллы — решение с бампом QUESTION_BANK_VERSION, см.
+ *   scripts/sync-texts-lib.ts). `--dry-run` — только отчёт. Безопасен для прода: id и связи
+ *   ответов не меняются.
  */
 import { parsePostgresUrl } from '@letar/pg-url'
 import { ZenStackClient } from '@zenstackhq/orm'
 import { PostgresDialect } from 'kysely'
 import { Pool } from 'pg'
+import { planTextSync } from '../scripts/sync-texts-lib'
 import { schema } from '../src/generated/schema'
 import questionsRaw from './questions-dump.json'
 
@@ -68,9 +76,47 @@ async function insertBatched(records: QuestionDump[]) {
   return inserted
 }
 
+async function syncTexts(questions: QuestionDump[], dryRun: boolean) {
+  const dbRows = await db.quizQuestion.findMany({
+    select: { id: true, scenario: true, scenarioEn: true, options: true },
+  })
+  const plan = planTextSync(dbRows, questions)
+
+  console.log(
+    `[--sync-texts] в дампе ${questions.length}: к обновлению ${plan.updates.length}, `
+      + `без изменений ${plan.unchanged}, отказов ${plan.rejects.length}, нет в БД ${plan.missingInDb.length}`,
+  )
+  if (plan.missingInDb.length > 0) {
+    console.log(`  нет в БД (это работа append-режима без флагов): ${plan.missingInDb.length}`)
+  }
+  if (plan.rejects.length > 0) {
+    for (const reject of plan.rejects.slice(0, 20)) {
+      console.error(`  ⛔ ${reject.id}: ${reject.reason}`)
+    }
+    throw new Error(`Синхронизация отменена целиком: ${plan.rejects.length} вопрос(ов) меняют не только тексты`)
+  }
+  if (dryRun || plan.updates.length === 0) {
+    console.log(dryRun ? '[--dry-run] В БД ничего не записано.' : 'Тексты в БД актуальны.')
+    return
+  }
+
+  await db.$transaction(async (tx) => {
+    for (const update of plan.updates) {
+      await tx.quizQuestion.update({ where: { id: update.id }, data: update.data })
+    }
+  })
+  console.log(`Готово! Обновлены тексты ${plan.updates.length} вопросов (баллы не тронуты).`)
+}
+
 async function main() {
   const fresh = process.argv.includes('--fresh')
   const questions = questionsRaw as QuestionDump[]
+
+  if (process.argv.includes('--sync-texts')) {
+    if (fresh) { throw new Error('--sync-texts и --fresh несовместимы') }
+    await syncTexts(questions, process.argv.includes('--dry-run'))
+    return
+  }
 
   if (fresh) {
     // ⚠️ Пересборка: удаляет всё и заливает дамп целиком. Только пустая/пересобираемая база.
