@@ -33,25 +33,36 @@ export async function getClientsListAction() {
 
   const links = await db.clientPsychologistLink.findMany({
     where: { psychologistId: session.user.id },
-    include: {
-      client: {
-        select: { id: true, name: true, email: true, image: true },
-      },
-    },
     orderBy: { createdAt: 'desc' },
   })
 
+  // Клиентов дочитываем raw-клиентом узким select: политика User открывает психологу только
+  // АКТИВНЫХ клиентов, и через include отозвавший доступ клиент приходил null — список
+  // падал целиком после первого же отзыва (.claude/docs/zenstack-required-relation-nested-select-null.md).
+  // Имя и email отозванной связи психолог видел и раньше; данные прохождений закрыты политиками.
+  const clients = await prisma.user.findMany({
+    where: { id: { in: [...new Set(links.map((l) => l.clientId))] } },
+    select: { id: true, name: true, email: true, image: true },
+  })
+  const byId = new Map(clients.map((c) => [c.id, c]))
+
   return {
-    data: links.map((link) => ({
-      id: link.id,
-      clientId: link.client.id,
-      clientName: link.displayName || link.client.name || link.client.email,
-      clientEmail: link.client.email,
-      clientImage: link.client.image,
-      displayName: link.displayName,
-      status: link.status,
-      createdAt: link.createdAt,
-    })),
+    data: links.flatMap((link) => {
+      const client = byId.get(link.clientId)
+      if (!client) {
+        return []
+      }
+      return [{
+        id: link.id,
+        clientId: client.id,
+        clientName: link.displayName || client.name || client.email,
+        clientEmail: client.email,
+        clientImage: client.image,
+        displayName: link.displayName,
+        status: link.status,
+        createdAt: link.createdAt,
+      }]
+    }),
   }
 }
 

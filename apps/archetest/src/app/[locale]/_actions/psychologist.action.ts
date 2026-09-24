@@ -136,13 +136,27 @@ export async function getMyLinkedPsychologistsAction() {
   const dbUser = await getDbUser(session)
   const db = getEnhancedPrisma(dbUser)
 
+  // Свои связи — через enhanced-клиент (политика гарантирует clientId == auth().id)
   const links = await db.clientPsychologistLink.findMany({
     where: { clientId: session.user.id },
-    include: {
-      psychologist: { select: { id: true, name: true, email: true, image: true } },
-    },
     orderBy: { createdAt: 'desc' },
   })
 
-  return { data: links }
+  // Психолога дочитываем raw-клиентом узким select: политика User разрешает читать только
+  // себя, и через include психолог у клиента приходил null — страница настроек падала сразу
+  // после привязки (.claude/docs/zenstack-required-relation-nested-select-null.md).
+  // Расширять read-политику User на чужие строки ради имени и email не нужно.
+  const psychologists = await prisma.user.findMany({
+    where: { id: { in: [...new Set(links.map((l) => l.psychologistId))] } },
+    select: { id: true, name: true, email: true, image: true },
+  })
+  const byId = new Map(psychologists.map((p) => [p.id, p]))
+
+  return {
+    data: links.flatMap((link) => {
+      const psychologist = byId.get(link.psychologistId)
+      // Удалённый аккаунт психолога: связь без него показывать нечем
+      return psychologist ? [{ ...link, psychologist }] : []
+    }),
+  }
 }

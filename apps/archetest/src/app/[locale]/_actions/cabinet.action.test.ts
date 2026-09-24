@@ -20,6 +20,11 @@ vi.mock('@/lib/auth', () => ({ getSession: async () => st.session }))
 vi.mock('@/lib/db', () => {
   const enhanced = {
     clientPsychologistLink: {
+      // Как под политикой: связи психолога есть, а сами клиенты через include недоступны
+      findMany: async () => [
+        { id: 'l1', clientId: 'c1', displayName: null, status: 'ACTIVE', createdAt: new Date(0) },
+        { id: 'l2', clientId: 'c2', displayName: 'Мария', status: 'REVOKED', createdAt: new Date(0) },
+      ],
       findFirst: async () => st.link,
       update: async () => {
         st.writes.push('link.update')
@@ -39,7 +44,15 @@ vi.mock('@/lib/db', () => {
   }
   return {
     getEnhancedPrisma: () => enhanced,
-    prisma: { user: { findUnique: async () => (st.session ? { id: st.session.user.id, roles: st.roles } : null) } },
+    prisma: {
+      user: {
+        findUnique: async () => (st.session ? { id: st.session.user.id, roles: st.roles } : null),
+        findMany: async () => [
+          { id: 'c1', name: null, email: 'c1@example.test', image: null },
+          { id: 'c2', name: 'Maria', email: 'c2@example.test', image: null },
+        ],
+      },
+    },
   }
 })
 vi.mock('./quiz.action', () => ({
@@ -73,6 +86,16 @@ describe('гейт роли', () => {
     await expect(cabinet.deleteNoteAction('n1')).rejects.toThrow('Доступ запрещён')
     await expect(cabinet.updateDisplayNameAction({ linkId: 'l1' })).rejects.toThrow('Доступ запрещён')
     expect(st.writes).toEqual([])
+  })
+})
+
+describe('getClientsListAction', () => {
+  it('отозвавший доступ клиент в списке — со статусом, а не падением всего списка', async () => {
+    const { data } = await cabinet.getClientsListAction()
+    expect(data.map((c) => [c.clientName, c.clientEmail, c.status])).toEqual([
+      ['c1@example.test', 'c1@example.test', 'ACTIVE'],
+      ['Мария', 'c2@example.test', 'REVOKED'],
+    ])
   })
 })
 
