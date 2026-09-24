@@ -4,6 +4,14 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.15.0] - 2026-09-24
+
+### Added
+
+- **`uikit`: контракт creatable-options** — `CREATE_OPTION_VALUE`, `isCreateOptionValue`,
+  `mergeCreatedOptions`, `shouldOfferCreate`, типы `CreatedOption`, `CreateOptionHandler`. Общая
+  основа `onCreate` у Select/Combobox в Chakra- и shadcn-скинах.
+
 ## [0.14.0] - 2026-09-23
 
 ### Added
