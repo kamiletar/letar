@@ -46,8 +46,10 @@
   Окно создания и server action — на стороне приложения.
 - **Готового нет:** греп `onCreate|creatable|InlineCreate` по `libs/forms`, `libs/ui`,
   `libs/admin-ui` пуст (2026-09-24).
-- **Статус:** делегировано `forms-dev` (п.3): `onCreate(search) → { label, value } | null` через UIKit-контракт всех
-  скинов + цикл синхронизации из 6 групп (включая form-mcp).
+- **Статус:** ✅ закрыт в forms 2.17.0 / forms-core 0.15.0 / forms-shadcn 0.39.0 (2026-09-24):
+  `onCreate(search) → { label, value } | null` у Select и Combobox в Chakra- и shadcn-скинах, контракт в
+  `@letar/forms-core/uikit`. Демо, доки, пример и form-mcp (через `docs/fields.md`) синхронизированы.
+  **Не сделано:** forms-vue, forms-vue-shadcn, forms-angular; async-поиск в shadcn Combobox.
 
 ### ✅ [2026-09-23] Persistence-черновик воскресал сразу после успешного сабмита (закрыт forms 2.16.8, от пользователя)
 

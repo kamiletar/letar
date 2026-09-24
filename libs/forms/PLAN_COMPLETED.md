@@ -1,5 +1,19 @@
 # Выполненные задачи — @letar/forms
 
+## 2026-09-24 (`forms-dev`) — `onCreate` у Select/Combobox (forms 2.17.0)
+
+**Контекст:** запрос `domwellbes-dev`, тред `forms-domwellbes-2026-09-24`, п.3.
+
+**Сделано:** контракт creatable-options в `forms-core/uikit` (служебный пункт-сентинел, перехват в
+`onValueChange`, слияние с опциями приложения, `shouldOfferCreate`); Chakra-скин (`Select`, `Combobox`, ключ
+i18n `formSelection.createOption`); shadcn-скин. Заодно починена опция `value: ''` в shadcn
+(триггер показывал placeholder) и vue-shadcn (Reka `SelectItem` падал на пустом значении) — служебный токен внутри поля.
+
+**Тесты:** forms 879, forms-core 577, forms-shadcn 276, forms-vue-shadcn 87, form-mcp 60.
+
+**Долг:** `onCreate` в forms-vue/forms-vue-shadcn/forms-angular; shadcn Combobox не показывает подпись
+текущего значения и не умеет async.
+
 ## 2026-09-24 (`forms-dev`) — устаревший черновик persistence при значениях, равных исходным (forms 2.16.13)
 
 **Контекст:** запрос `domwellbes-dev`, триаж `forms-coordinator-dev` (тред
