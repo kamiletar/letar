@@ -31,3 +31,7 @@ export type {
 // `use-grouped-options` hook (its other half built an Ark UI collection, an adapter detail).
 export { getOptionLabel, groupOptions, hasGroups } from './group-options'
 export type { GroupableLike } from './group-options'
+
+// `onCreate` у Select/Combobox — создание записи справочника, не уходя из формы
+export { CREATE_OPTION_VALUE, isCreateOptionValue, mergeCreatedOptions, shouldOfferCreate } from './creatable-options'
+export type { CreatedOption, CreateOptionHandler } from './creatable-options'
