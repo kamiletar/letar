@@ -83,7 +83,19 @@ export default function RootLayout({ children }) {
 }
 ```
 
-**Props:** Наследует все props от `ThemeProviderProps` (next-themes).
+**Props:** наследует все props от `ThemeProviderProps` (next-themes) плюс:
+
+| Prop              | Тип       | Описание                                                                       |
+| ----------------- | --------- | ------------------------------------------------------------------------------ |
+| `lockColorScheme` | `boolean` | Закрепить `color-scheme` темы (default: `true`), см. ниже; `false` — отключить |
+
+**Защита от авто-затемнения браузера.** Brave и Chrome на Android («Тёмный режим для сайтов»)
+перекрашивают страницу с `color-scheme: light`, и выбранная светлая тема рендерится тёмной.
+Поэтому провайдер по умолчанию рендерит `<style>` с `html.light{color-scheme:only light}` и
+`html.dark{color-scheme:dark}` (селекторы следуют `attribute`/`value`) и выключает инлайновый
+`color-scheme` next-themes — он перебил бы правило. Приложению ничего добавлять не нужно; своё
+правило `color-scheme` в `globalCss` держать не надо. Разбор —
+`.claude/docs/browser-auto-dark-light-theme-override.md`.
 
 #### `EmotionRegistry` (`@letar/chakra-provider/next`)
 
