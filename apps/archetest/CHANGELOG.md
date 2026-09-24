@@ -5,6 +5,19 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 версионирование следует [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.28.2] - 2026-09-24
+
+### Changed
+
+- Строки интерфейса `quiz-results.tsx` и `quiz-intro.tsx` перенесены из инлайн-тернарников
+  `isRu ? … : …` в `messages/{ru,en}.json` (`quiz.results.*`, `quiz.intro.*`,
+  `quiz.coverage.completed`). Числа — ICU-параметры next-intl. Тексты дословно прежние.
+  Остаток долга (175 вхождений в 27 файлах) — в PLAN.md, «Технический долг».
+
+### Added
+
+- `quiz-results.spec.tsx`: строки результатов на RU/EN, предупреждения BAR-фильтра.
+
 ## [0.28.1] - 2026-09-24
 
 ### Changed

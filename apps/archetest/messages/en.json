@@ -123,7 +123,23 @@
         "title": "Why take it again?",
         "description": "Your answers reflect your current mood and life situation, not a fixed character. Take the test periodically — an averaged profile across multiple sessions will show a more accurate picture of your personality."
       },
-      "retake": "Take Again"
+      "retake": "Take Again",
+      "moreAvailable": "{count} more questions available for better accuracy",
+      "answerMore": "Answer {count} more questions",
+      "xpAlreadyEarned": "Today’s XP is already earned — every new answer refines your profile",
+      "architectureTitle": "Personality Architecture",
+      "backToMain": "Back to main",
+      "shortDisclaimer": "This test is indicative and is not a diagnostic tool. Results do not replace a specialist consultation. If you experience difficulties, consult a qualified psychologist or psychotherapist.",
+      "lowConfidence": {
+        "title": "⚠ Scales with insufficient accuracy",
+        "hint": "Few relevant questions answered for these scales. Complete more questions to improve accuracy."
+      },
+      "warnings": {
+        "barClinical": "High bipolar scale score. NAR, BOR, HIS, ANT scores may be inflated due to manic/depressive episodes. Clinical evaluation is recommended.",
+        "barUser": "Pronounced mood variability is present. During such periods, scores on emotional scales may be higher than usual — keep this in mind when reading the result.",
+        "borBar": "High scores on both borderline and bipolar scales. Key difference: BOR — reactive emotions (hours), BAR — endogenous cycles (days–weeks). Specialist consultation recommended.",
+        "dprBar": "Chronic pessimism (DPR) may mask the depressive phase of bipolar disorder (BAR). Note any periods of elevation."
+      }
     },
     "achievements": {
       "title": "Achievements",
@@ -151,6 +167,19 @@
         "MASTER": "Master",
         "GURU": "Guru"
       }
+    },
+    "coverage": {
+      "completed": "Completed: {answered} of {total} questions"
+    },
+    "intro": {
+      "yourProgress": "Your Progress",
+      "moreAvailable": "{count} more questions available. More questions = more accurate profile.",
+      "allAnswered": "🎉 You have answered all available questions!",
+      "sessionsCompleted": "Sessions completed: {count}",
+      "newQuestionsInfo": "50 new scenario questions with 4 answer options",
+      "cumulativeProfile": "Cumulative Profile",
+      "fadedCodes": "Faded codes on the chart — scales with insufficient answers. Complete more questions to improve accuracy.",
+      "continue": "Continue Test"
     }
   },
   "cabinet": {

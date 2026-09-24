@@ -97,14 +97,12 @@ export function QuizIntro({ onStart, progress, initialDisclaimerAccepted }: Quiz
             <VStack gap={3}>
               <HStack gap={2}>
                 <LuTrendingUp />
-                <Text fontWeight="bold">{isRu ? 'Ваш прогресс' : 'Your Progress'}</Text>
+                <Text fontWeight="bold">{t('intro.yourProgress')}</Text>
               </HStack>
 
               <HStack w="100%" justify="space-between">
                 <Text fontSize="sm" color="fg.muted">
-                  {isRu
-                    ? `Пройдено: ${progress!.totalAnswered} из ${progress!.totalQuestions} вопросов`
-                    : `Completed: ${progress!.totalAnswered} of ${progress!.totalQuestions} questions`}
+                  {t('coverage.completed', { answered: progress!.totalAnswered, total: progress!.totalQuestions })}
                 </Text>
                 <Text fontSize="sm" fontWeight="bold" color="brand.fg">
                   {progress!.coveragePercent}%
@@ -120,26 +118,18 @@ export function QuizIntro({ onStart, progress, initialDisclaimerAccepted }: Quiz
               {progress!.availableCount > 0
                 ? (
                   <Text fontSize="xs" color="fg.muted">
-                    {isRu
-                      ? `Доступно ещё ${
-                        progress!.availableCount
-                      } новых вопросов. Чем больше вопросов — тем точнее профиль.`
-                      : `${progress!.availableCount} more questions available. More questions = more accurate profile.`}
+                    {t('intro.moreAvailable', { count: progress!.availableCount })}
                   </Text>
                 )
                 : (
                   <Text fontSize="xs" color="success.fg" fontWeight="bold">
-                    {isRu
-                      ? '🎉 Вы ответили на все доступные вопросы!'
-                      : '🎉 You have answered all available questions!'}
+                    {t('intro.allAnswered')}
                   </Text>
                 )}
 
               {progress!.sessionsCount > 0 && (
                 <Text fontSize="xs" color="fg.muted">
-                  {isRu
-                    ? `Сессий пройдено: ${progress!.sessionsCount}`
-                    : `Sessions completed: ${progress!.sessionsCount}`}
+                  {t('intro.sessionsCompleted', { count: progress!.sessionsCount })}
                 </Text>
               )}
             </VStack>
@@ -150,9 +140,7 @@ export function QuizIntro({ onStart, progress, initialDisclaimerAccepted }: Quiz
         <VStack gap={3} fontSize="sm" color="fg.muted">
           <Text>
             {hasProgress
-              ? isRu
-                ? '50 новых вопросов-сценариев с 4 вариантами ответа'
-                : '50 new scenario questions with 4 answer options'
+              ? t('intro.newQuestionsInfo')
               : t('info.questions')}
           </Text>
           <Text>{t('info.time')}</Text>
@@ -166,15 +154,13 @@ export function QuizIntro({ onStart, progress, initialDisclaimerAccepted }: Quiz
           <VStack gap={8} w="100%">
             <PersonalityRadarChart
               data={chartData}
-              title={isRu ? 'Накопительный профиль' : 'Cumulative Profile'}
+              title={t('intro.cumulativeProfile')}
               color="green.500"
               confidence={confidenceData as Record<string, string> | undefined}
             />
             {confidenceData && (
               <Text fontSize="xs" color="fg.muted" maxW="lg">
-                {isRu
-                  ? 'Бледные коды на диаграмме — шкалы с недостаточным количеством ответов. Пройдите ещё вопросов для повышения точности.'
-                  : 'Faded codes on the chart — scales with insufficient answers. Complete more questions to improve accuracy.'}
+                {t('intro.fadedCodes')}
               </Text>
             )}
             {progress?.cumulativeScores && (
@@ -207,7 +193,7 @@ export function QuizIntro({ onStart, progress, initialDisclaimerAccepted }: Quiz
               onClick={onStart}
               disabled={!disclaimerAccepted}
             >
-              {hasProgress ? (isRu ? 'Продолжить тест' : 'Continue Test') : t('start')}
+              {hasProgress ? t('intro.continue') : t('start')}
             </Button>
             {hasCumulativeScores && (
               <Button

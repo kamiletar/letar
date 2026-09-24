@@ -2,7 +2,7 @@
 
 > **📖 Начни с главного README:** [README.md](./README.md) — обзор проекта, быстрый старт, навигация по документации
 >
-> **Версия:** 0.28.0 | **Обновлено:** 2026-09-24 (аудит дизайна: темы, мобильное меню, диаграммы)
+> **Версия:** 0.28.2 | **Обновлено:** 2026-09-24 (перенос строк quiz-results/quiz-intro в messages)
 >
 > **Связанные документы:**
 >
@@ -826,6 +826,20 @@ CAT/IRT. ✅ Подтверждено Kami: разделение ASD → ASD + D
 делать статическими. Правка не нужна нигде.
 
 ## Технический долг / инфра (2026-06)
+
+- [ ] **Строки интерфейса: `isRu ? '…' : '…'` → `messages/{ru,en}.json`** (next-intl).
+      Первый проход 2026-09-24 (v0.28.2): `quiz-results.tsx` и `quiz-intro.tsx` перенесены в
+      `quiz.results.*`, `quiz.intro.*`, `quiz.coverage.completed` (числа — ICU-параметры).
+      Остаток по замеру `grep -rc "isRu ?" --include=*.tsx src` — **175 в 27 файлах** (было 181).
+      Больше всего: `for-professionals/page.tsx` 34, `cabinet/[clientId]/_components/dark-core-block.tsx` 17,
+      `profile-details.tsx` 14, `quiz-container.tsx` 11, `developmental-profile-card.tsx` 11,
+      `experimental-scales-block.tsx` 10, `safety-net-block.tsx` 9, `disclaimer-consent.tsx` 7,
+      `quiz-results.tsx` 7 и `quiz-intro.tsx` 3 (остались выбором полей `label`/`labelEn`
+      из `_data/personality-types` — это контент, не UI), `cabinet/[clientId]/page.tsx` 6,
+      `professional-lead-form.tsx` 6, остальное — по 1–4. Контент-данные `_data/*` не трогать
+      (у них свои ru/en-поля). Компоненты с пропом `isRu` (`SafetyNetBlock`, `DisclaimerSummary`,
+      `DisclaimerConsentCheckbox`, `DarkReassuranceNote`) переводить вместе: сначала убрать
+      проп, потом строки.
 
 - [ ] ⚠️ **Staging индексируется наравне с продом — нужен явный гейт по домену**
       (найдено 2026-07-28 при добавлении `robots.ts`). Файл сейчас отдаёт один и тот же
