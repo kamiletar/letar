@@ -5,6 +5,14 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 версионирование следует [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.28.15] - 2026-09-24
+
+### Added
+
+- `docs/rare-scales-brief.md` — бриф добора редких шкал ядра до порога high=30 (SAD +9, ASD +8,
+  MAS +7, ALX +6). В отличие от СДВГ/привязанности это ядро: изоляции скоринга нет, при вливании
+  сдвинется `actual_max`, поэтому вливание — только пачкой и с бампом `QUESTION_BANK_VERSION`.
+
 ## [0.28.14] - 2026-09-24
 
 ### Added
