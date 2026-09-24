@@ -51,6 +51,19 @@
   `@letar/forms-core/uikit`. Демо, доки, пример и form-mcp (через `docs/fields.md`) синхронизированы.
   **Не сделано:** forms-vue, forms-vue-shadcn, forms-angular; async-поиск в shadcn Combobox.
 
+### [2026-09-24] `onCreate` у Select/Combobox — паритет Vue и Angular (хвост от domwellbes-dev)
+
+- **Запросил:** `forms-dev` по итогам forms 2.17.0; решение владельца — вести в плане, не делать сейчас.
+- **Приоритет:** low — Chakra и shadcn закрыты, приложения на них уже могут использовать.
+- **Что осталось:** `forms-vue`, `forms-vue-shadcn`, `forms-angular` (в каждом Select и Combobox). Основа —
+  контракт `@letar/forms-core/uikit` (`CREATE_OPTION_VALUE`, `mergeCreatedOptions`, `shouldOfferCreate`).
+- **Ловушки:** в `forms-vue`/`forms-angular` Select — нативный `<select>`, служебный пункт должен
+  перехватываться до записи в форму; в `forms-vue-shadcn` (Reka) пустое значение опции недопустимо, для
+  создания использовать токен (`CREATE_OPTION_VALUE`), не `''`.
+- **Тоже долг:** async-поиск и подпись текущего значения в shadcn Combobox.
+- **Статус:** ожидание. После реализации — цикл из 6 групп + form-mcp (`docs/fields.md`: убрать строку
+  «Скины Vue, Vue-shadcn и Angular пока без `onCreate`»; то же в `form-docs` `select.mdx`/`select.ru.mdx`).
+
 ### ✅ [2026-09-23] Persistence-черновик воскресал сразу после успешного сабмита (закрыт forms 2.16.8, от пользователя)
 
 - **Запросил:** пользователь напрямую — находка из domwellbes (`NIGHT_QUEUE_2026-09-22.md` §B3,
