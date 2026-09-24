@@ -58,6 +58,9 @@ export default function HomePage() {
         <Button asChild colorPalette="pink" variant="outline" size="lg" width="fit-content">
           <Link href="/matrix-choice-demo">MatrixChoice (Матрица для опросников)</Link>
         </Button>
+        <Button asChild colorPalette="teal" variant="outline" size="lg" width="fit-content">
+          <Link href="/create-option-demo">Создание записи из поля (onCreate у Select/Combobox)</Link>
+        </Button>
         <Button asChild colorPalette="yellow" variant="outline" size="lg" width="fit-content">
           <Link href="/survey-fields-demo">Survey Fields (ImageChoice + Likert + YesNo)</Link>
         </Button>

@@ -288,6 +288,15 @@ toaster, successMessage })` — обёртка над уже существую�
 
 ---
 
+## onCreate у Select и Combobox (реализовано, @letar/forms + @letar/forms-shadcn)
+
+`/create-option-demo`: создание записи справочника прямо из поля. `Form.Field.Select` — последний пункт
+«+ Добавить…» (`onCreate('')`), `Form.Field.Combobox` — «+ Добавить "текст"» при непустом поиске без
+точного совпадения (`onCreate(text)`), со статическими `options` и с async `useQuery`. Путь `null` —
+ничего не меняется. Реализации `@letar/forms-vue`, `-vue-shadcn`, `-angular` пока нет.
+
+---
+
 ## E2E Тесты
 
 ### Покрытие тестами (22 файла)

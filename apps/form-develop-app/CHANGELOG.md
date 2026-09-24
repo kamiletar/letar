@@ -2,6 +2,13 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.1.23] - 2026-09-24
+
+### Added
+
+- Страница `/create-option-demo`: `onCreate` у `Form.Field.Select` и `Form.Field.Combobox` (статические
+  опции и async `useQuery`), путь с `null`, текущее значение формы на странице.
+
 ## [0.1.22] - 2026-09-24
 
 ### Fixed
