@@ -534,13 +534,14 @@
     },
     "apps/archetest": {
       "name": "@letar/archetest",
-      "version": "0.28.34",
+      "version": "0.28.37",
       "dependencies": {
         "@letar/env-load": "workspace:*",
         "@letar/forms": "workspace:*",
         "@letar/glitchtip": "workspace:*",
         "@letar/i18n-proxy": "workspace:*",
         "@letar/pg-url": "workspace:*",
+        "@letar/theme-check": "workspace:*",
       },
     },
     "apps/archetest-e2e": {
