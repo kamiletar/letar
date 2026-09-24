@@ -166,3 +166,22 @@ export function contentStems(norm: string): Set<string> {
   }
   return stems
 }
+
+/**
+ * EN-текст «не переведён»: пуст, содержит кириллицу или совпадает с RU после нормализации.
+ * Кириллица — самый частый след: у №101–1665 EN-поля были буквальной копией русского текста.
+ */
+export function isUntranslated(en: string, ru: string): boolean {
+  return !en.trim() || /[а-яё]/i.test(en) || normalizeText(en) === normalizeText(ru)
+}
+
+interface EnCheckQuestion {
+  scenario: string
+  scenarioEn: string
+  options: { text: string; textEn: string }[]
+}
+
+/** Вопрос переведён целиком: сценарий и все варианты */
+export function isQuestionTranslated(q: EnCheckQuestion): boolean {
+  return !isUntranslated(q.scenarioEn, q.scenario) && q.options.every((o) => !isUntranslated(o.textEn, o.text))
+}

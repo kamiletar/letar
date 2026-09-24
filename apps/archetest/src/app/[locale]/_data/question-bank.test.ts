@@ -5,6 +5,7 @@
  */
 import { describe, expect, it } from 'vitest'
 import questionsRaw from '../../../../prisma/questions-dump.json'
+import { isQuestionTranslated } from '../../../../scripts/audit-lib'
 import maxScoresData from './max-scores-per-question.json'
 import { ALL_SCALE_CODES, EXPERIMENTAL_SCALE_CODES, SCORED_SCALE_CODES } from './personality-types'
 import { VALIDITY_CHECKS } from './validity-checks'
@@ -26,6 +27,13 @@ interface OptionData {
 }
 
 const questions = questionsRaw as QuestionDump[]
+
+/**
+ * Храповик EN-локализации (пул 2026-09-24, волна 3): потолок числа вопросов, у которых
+ * сценарий или хоть один вариант не переведён. Снижается с каждой партией авторского EN;
+ * рост — регрессия (например, merge батча без EN). Цель — 0.
+ */
+const EN_UNTRANSLATED_MAX = 1565
 const perQuestionMax = (maxScoresData as { per_question_max: Record<string, Record<string, number>> }).per_question_max
 
 /**
@@ -117,6 +125,13 @@ describe('банк вопросов', () => {
         expect(hasCore && hasExp, `вариант у ${q.id} смешивает ядро и экспериментальные шкалы`).toBe(false)
       }
     }
+  })
+
+  it(`EN-локализация не откатывается: непереведённых вопросов ≤ ${EN_UNTRANSLATED_MAX}`, () => {
+    const untranslated = questions.filter(
+      (q) => !isQuestionTranslated({ ...q, options: JSON.parse(q.options) as OptionData[] }),
+    )
+    expect(untranslated.length).toBeLessThanOrEqual(EN_UNTRANSLATED_MAX)
   })
 
   it('attention-check вопросы существуют, без скоринга, correctOptionIndex в диапазоне', () => {

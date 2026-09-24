@@ -5,6 +5,17 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 версионирование следует [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.28.6] - 2026-09-24
+
+### Added
+
+- **Храповик EN-локализации** в `question-bank.test.ts`: `EN_UNTRANSLATED_MAX = 1565` — потолок
+  числа вопросов, у которых сценарий или хоть один вариант не переведён (пуст, с кириллицей или
+  совпадает с RU). Снижается с каждой партией авторского EN (волна 3 пула); merge батча без EN
+  теперь роняет тест, а не тихо пополняет «русский EN-тест».
+- `isUntranslated` вынесена из `audit-question-bank.ts` в `scripts/audit-lib.ts` (+ новая
+  `isQuestionTranslated`), +4 unit. Отчёт аудита не изменился (сверено перегенерацией).
+
 ## [0.28.5] - 2026-09-24
 
 ### Added

@@ -56,6 +56,7 @@ nx typecheck:tsgo archetest    # Проверка типов
 | E2E: kiosk-режим (5.7)        | Кнопка только при `?kiosk=1`, двухтапный сброс чистит согласие                                                             | ✅ `kiosk.spec.ts` (2)                     |
 | E2E: CTA экспресс → лиды      | На экране результатов экспресса видна ссылка на лид-форму                                                                  | ✅ дополнение в `express.spec.ts`          |
 | `--sync-texts` (seed, пул в1) | Только тексты: смена баллов/порядка/числа вариантов/незнакомое поле — отказ; порядок ключей JSON не считается правкой      | ✅ `sync-texts.test.ts` (11)               |
+| Храповик EN (пул в1)          | Непереведённых вопросов ≤ `EN_UNTRANSLATED_MAX`; `isUntranslated`/`isQuestionTranslated`                                   | ✅ `question-bank*.test.ts` (+5)           |
 
 ## Фаза 1: Unit-тесты server actions
 

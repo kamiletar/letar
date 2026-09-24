@@ -32,7 +32,7 @@ import { TOTAL_QUESTIONS } from '../src/app/[locale]/_data/bank-stats'
 import { ALL_SCALE_CODES, EXPERIMENTAL_SCALE_CODES } from '../src/app/[locale]/_data/personality-types'
 import { VALIDITY_CHECKS } from '../src/app/[locale]/_data/validity-checks'
 import { CONFIDENCE_THRESHOLDS } from '../src/app/[locale]/_lib/scoring-core'
-import { collapseRanges, contentStems, jaccard, normalizeText, trigrams } from './audit-lib'
+import { collapseRanges, contentStems, isUntranslated, jaccard, normalizeText, trigrams } from './audit-lib'
 
 const ROOT = join(__dirname, '..')
 const DUMP = join(ROOT, 'prisma', 'questions-dump.json')
@@ -423,11 +423,6 @@ for (const q of dump) {
 }
 
 // ── 6. Полнота EN ──────────────────────────────────────────────────────────
-
-/** EN-текст «не переведён»: пуст, содержит кириллицу или совпадает с RU */
-function isUntranslated(en: string, ru: string): boolean {
-  return !en.trim() || /[а-яё]/i.test(en) || normalizeText(en) === normalizeText(ru)
-}
 
 const enScenarioUntranslated = dump.filter((q) => isUntranslated(q.scenarioEn, q.scenario)).map((q) => q.qnum)
 /** Вопросы, у которых хотя бы один вариант не переведён (+ сколько именно) */

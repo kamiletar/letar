@@ -4,7 +4,15 @@
  * поэтому тестируется его библиотека scripts/audit-lib.ts.
  */
 import { describe, expect, it } from 'vitest'
-import { collapseRanges, contentStems, jaccard, normalizeText, trigrams } from '../../../../scripts/audit-lib'
+import {
+  collapseRanges,
+  contentStems,
+  isQuestionTranslated,
+  isUntranslated,
+  jaccard,
+  normalizeText,
+  trigrams,
+} from '../../../../scripts/audit-lib'
 
 describe('normalizeText', () => {
   it('приводит регистр, ё и пунктуацию к канону', () => {
@@ -70,5 +78,31 @@ describe('contentStems', () => {
   it('стоп-слова и короткие слова отбрасываются', () => {
     // «вы», «не» — стоп/короткие; «нашли», «кошелек» — содержательные
     expect(contentStems('вы не нашли кошелек')).toEqual(new Set(['нашл', 'коше']))
+  })
+})
+
+describe('isUntranslated / isQuestionTranslated', () => {
+  it('кириллица в EN — не переведено', () => {
+    expect(isUntranslated('Your partner says «Нам нужно поговорить»', 'Партнёр говорит')).toBe(true)
+  })
+
+  it('пустой EN — не переведено', () => {
+    expect(isUntranslated('  ', 'Текст')).toBe(true)
+  })
+
+  it('настоящий перевод — переведено', () => {
+    expect(isUntranslated('We need to talk', 'Нам нужно поговорить')).toBe(false)
+  })
+
+  it('вопрос переведён, только если переведены сценарий и все варианты', () => {
+    const base = {
+      scenario: 'Сценарий',
+      scenarioEn: 'Scenario',
+      options: [{ text: 'Да', textEn: 'Yes' }, { text: 'Нет', textEn: 'No' }],
+    }
+    expect(isQuestionTranslated(base)).toBe(true)
+    expect(isQuestionTranslated({ ...base, options: [...base.options.slice(0, 1), { text: 'Нет', textEn: 'Нет' }] }))
+      .toBe(false)
+    expect(isQuestionTranslated({ ...base, scenarioEn: 'Сценарий' })).toBe(false)
   })
 })
