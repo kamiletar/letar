@@ -12602,8 +12602,8 @@
   {
     "id": "c86e57ad6588f6e28bee6ae40",
     "scenario": "Вы наткнулись на старый аккаунт в соцсети, который забросили 5 лет назад. Там посты, фото, переписки. Что сделаете?",
-    "scenarioEn": "Вы наткнулись на старый аккаунт в соцсети, который забросили 5 лет назад. Там посты, фото, переписки. Что сделаете?",
-    "options": "[{\"text\":\"Удалю — прошлое должно быть похоронено\",\"textEn\":\"Удалю — прошлое должно быть похоронено\",\"scoring\":{\"OBC\":3}},{\"text\":\"Полистаю с ностальгией — кем я был(а) тогда\",\"textEn\":\"Полистаю с ностальгией — кем я был(а) тогда\",\"scoring\":{\"SZT\":2,\"BOR\":1}},{\"text\":\"Пересмотрю фото и удалю неудачные — вдруг кто-то найдёт\",\"textEn\":\"Пересмотрю фото и удалю неудачные — вдруг кто-то найдёт\",\"scoring\":{\"AVD\":3}},{\"text\":\"Мне без разницы — оставлю как есть\",\"textEn\":\"Мне без разницы — оставлю как есть\",\"scoring\":{\"SZD\":3}}]",
+    "scenarioEn": "You come across an old social media account you abandoned five years ago. Posts, photos, conversations. What do you do?",
+    "options": "[{\"text\":\"Удалю — прошлое должно быть похоронено\",\"textEn\":\"Delete it — the past should be buried\",\"scoring\":{\"OBC\":3}},{\"text\":\"Полистаю с ностальгией — кем я был(а) тогда\",\"textEn\":\"Scroll through it nostalgically — who was I back then?\",\"scoring\":{\"SZT\":2,\"BOR\":1}},{\"text\":\"Пересмотрю фото и удалю неудачные — вдруг кто-то найдёт\",\"textEn\":\"Go through the photos and delete the bad ones — in case someone finds them\",\"scoring\":{\"AVD\":3}},{\"text\":\"Мне без разницы — оставлю как есть\",\"textEn\":\"It makes no difference — I'll leave it as is\",\"scoring\":{\"SZD\":3}}]",
     "active": true,
     "sortOrder": 1400,
     "createdAt": "2026-03-19T13:05:13.001"
@@ -12611,8 +12611,8 @@
   {
     "id": "c65135e5211f626b1f0513a0d",
     "scenario": "Друг позвал вас поехать автостопом — без плана, без маршрута, наугад. Ваша реакция?",
-    "scenarioEn": "Друг позвал вас поехать автостопом — без плана, без маршрута, наугад. Ваша реакция?",
-    "options": "[{\"text\":\"Мечта! Настоящее приключение без правил!\",\"textEn\":\"Мечта! Настоящее приключение без правил!\",\"scoring\":{\"ANT\":3,\"BAR\":1}},{\"text\":\"Безрассудство — что если мы застрянем? Нужен хотя бы минимальный план\",\"textEn\":\"Безрассудство — что если мы застрянем? Нужен хотя бы минимальный план\",\"scoring\":{\"OBC\":3,\"BAR\":1}},{\"text\":\"Поеду, только если он(а) рядом — одному страшно\",\"textEn\":\"Поеду, только если он(а) рядом — одному страшно\",\"scoring\":{\"DEP\":3}},{\"text\":\"Дорога в никуда — в этом есть философский смысл\",\"textEn\":\"Дорога в никуда — в этом есть философский смысл\",\"scoring\":{\"SZT\":3}}]",
+    "scenarioEn": "A friend suggests hitchhiking together — no plan, no route, just wherever the road takes you. Your reaction?",
+    "options": "[{\"text\":\"Мечта! Настоящее приключение без правил!\",\"textEn\":\"A dream! A real adventure with no rules!\",\"scoring\":{\"ANT\":3,\"BAR\":1}},{\"text\":\"Безрассудство — что если мы застрянем? Нужен хотя бы минимальный план\",\"textEn\":\"Reckless — what if we get stranded? We need at least a basic plan\",\"scoring\":{\"OBC\":3,\"BAR\":1}},{\"text\":\"Поеду, только если он(а) рядом — одному страшно\",\"textEn\":\"I'll go, but only if they're with me — it's scary on my own\",\"scoring\":{\"DEP\":3}},{\"text\":\"Дорога в никуда — в этом есть философский смысл\",\"textEn\":\"A road to nowhere — there's a philosophical meaning in that\",\"scoring\":{\"SZT\":3}}]",
     "active": true,
     "sortOrder": 1401,
     "createdAt": "2026-03-19T13:05:13.002"
@@ -12620,8 +12620,8 @@
   {
     "id": "c0de9599663bedf520115d4a1",
     "scenario": "Ваш коллега каждый день опаздывает, но работает лучше всех. Начальство закрывает глаза. Справедливо ли это?",
-    "scenarioEn": "Ваш коллега каждый день опаздывает, но работает лучше всех. Начальство закрывает глаза. Справедливо ли это?",
-    "options": "[{\"text\":\"Несправедливо — правила должны быть для всех одинаковые\",\"textEn\":\"Несправедливо — правила должны быть для всех одинаковые\",\"scoring\":{\"OBC\":3,\"PAG\":1}},{\"text\":\"Молодец — результат важнее формальностей\",\"textEn\":\"Молодец — результат важнее формальностей\",\"scoring\":{\"ANT\":2}},{\"text\":\"Мне безразлично — каждый работает по-своему\",\"textEn\":\"Мне безразлично — каждый работает по-своему\",\"scoring\":{\"SZD\":3}},{\"text\":\"Он пользуется своим положением — начальство его покрывает\",\"textEn\":\"Он пользуется своим положением — начальство его покрывает\",\"scoring\":{\"PAR\":3}}]",
+    "scenarioEn": "A colleague is late every day but performs better than anyone. Management turns a blind eye. Is that fair?",
+    "options": "[{\"text\":\"Несправедливо — правила должны быть для всех одинаковые\",\"textEn\":\"Unfair — rules should be the same for everyone\",\"scoring\":{\"OBC\":3,\"PAG\":1}},{\"text\":\"Молодец — результат важнее формальностей\",\"textEn\":\"Good for them — results matter more than formalities\",\"scoring\":{\"ANT\":2}},{\"text\":\"Мне безразлично — каждый работает по-своему\",\"textEn\":\"I don't care — everyone works in their own way\",\"scoring\":{\"SZD\":3}},{\"text\":\"Он пользуется своим положением — начальство его покрывает\",\"textEn\":\"They're exploiting their position — management is covering for them\",\"scoring\":{\"PAR\":3}}]",
     "active": true,
     "sortOrder": 1402,
     "createdAt": "2026-03-19T13:05:13.004"
@@ -12629,8 +12629,8 @@
   {
     "id": "c4a48dd38ca37102622d00b1d",
     "scenario": "Вас попросили рассказать о своём хобби на корпоративном мероприятии. Хобби нетипичное (вязание, сбор жуков, средневековые танцы). Что чувствуете?",
-    "scenarioEn": "Вас попросили рассказать о своём хобби на корпоративном мероприятии. Хобби нетипичное (вязание, сбор жуков, средневековые танцы). Что чувствуете?",
-    "options": "[{\"text\":\"Обожаю! Расскажу так, что все захотят попробовать!\",\"textEn\":\"Обожаю! Расскажу так, что все захотят попробовать!\",\"scoring\":{\"HIS\":3,\"BAR\":1}},{\"text\":\"Ни за что — засмеют, я лучше промолчу\",\"textEn\":\"Ни за что — засмеют, я лучше промолчу\",\"scoring\":{\"AVD\":3,\"BAR\":1}},{\"text\":\"Расскажу — мне плевать, что думают\",\"textEn\":\"Расскажу — мне плевать, что думают\",\"scoring\":{\"ANT\":2,\"BAR\":1}},{\"text\":\"В моём хобби есть что-то магическое — если объясню правильно, поймут\",\"textEn\":\"В моём хобби есть что-то магическое — если объясню правильно, поймут\",\"scoring\":{\"SZT\":3}}]",
+    "scenarioEn": "You're asked to talk about your hobby at a company event. It's an unusual one (knitting, collecting beetles, medieval dance). How do you feel?",
+    "options": "[{\"text\":\"Обожаю! Расскажу так, что все захотят попробовать!\",\"textEn\":\"I love it! I'll make everyone want to try it!\",\"scoring\":{\"HIS\":3,\"BAR\":1}},{\"text\":\"Ни за что — засмеют, я лучше промолчу\",\"textEn\":\"No way — they'll laugh at me, I'd rather keep quiet\",\"scoring\":{\"AVD\":3,\"BAR\":1}},{\"text\":\"Расскажу — мне плевать, что думают\",\"textEn\":\"I'll talk about it — I don't care what people think\",\"scoring\":{\"ANT\":2,\"BAR\":1}},{\"text\":\"В моём хобби есть что-то магическое — если объясню правильно, поймут\",\"textEn\":\"There's something magical about my hobby — if I explain it right, they'll get it\",\"scoring\":{\"SZT\":3}}]",
     "active": true,
     "sortOrder": 1403,
     "createdAt": "2026-03-19T13:05:13.006"
@@ -12638,8 +12638,8 @@
   {
     "id": "c0b68fa8a7e2ff2ff66b261bf",
     "scenario": "Вы стоите в очереди за билетами на концерт. Остался последний билет — но за вами стоит ребёнок, который тоже хочет. Что сделаете?",
-    "scenarioEn": "Вы стоите в очереди за билетами на концерт. Остался последний билет — но за вами стоит ребёнок, который тоже хочет. Что сделаете?",
-    "options": "[{\"text\":\"Уступлю — ему это важнее\",\"textEn\":\"Уступлю — ему это важнее\",\"scoring\":{\"DEP\":3}},{\"text\":\"Куплю себе — я стоял(а) первым(ой), это справедливо\",\"textEn\":\"Куплю себе — я стоял(а) первым(ой), это справедливо\",\"scoring\":{\"OBC\":3,\"BAR\":1}},{\"text\":\"Куплю себе — мне плевать на чужого ребёнка\",\"textEn\":\"Куплю себе — мне плевать на чужого ребёнка\",\"scoring\":{\"ANT\":3,\"BAR\":1}},{\"text\":\"Буду мучиться — и что бы ни выбрал(а), пожалею\",\"textEn\":\"Буду мучиться — и что бы ни выбрал(а), пожалею\",\"scoring\":{\"BOR\":3,\"DPR\":1}}]",
+    "scenarioEn": "You're in line for concert tickets. There's one ticket left — but a child behind you wants it too. What do you do?",
+    "options": "[{\"text\":\"Уступлю — ему это важнее\",\"textEn\":\"Let the child have it — it means more to them\",\"scoring\":{\"DEP\":3}},{\"text\":\"Куплю себе — я стоял(а) первым(ой), это справедливо\",\"textEn\":\"Buy it — I was first in line, that's fair\",\"scoring\":{\"OBC\":3,\"BAR\":1}},{\"text\":\"Куплю себе — мне плевать на чужого ребёнка\",\"textEn\":\"Buy it — I don't care about some stranger's kid\",\"scoring\":{\"ANT\":3,\"BAR\":1}},{\"text\":\"Буду мучиться — и что бы ни выбрал(а), пожалею\",\"textEn\":\"Agonize — whatever I choose, I'll regret it\",\"scoring\":{\"BOR\":3,\"DPR\":1}}]",
     "active": true,
     "sortOrder": 1404,
     "createdAt": "2026-03-19T13:05:13.008"
@@ -12647,8 +12647,8 @@
   {
     "id": "cdd8e022e077f8010171ec08a",
     "scenario": "Вы заболели и лежите дома. Друзья пишут: «Выздоравливай!» Но никто не предлагает помочь. Что чувствуете?",
-    "scenarioEn": "Вы заболели и лежите дома. Друзья пишут: «Выздоравливай!» Но никто не предлагает помочь. Что чувствуете?",
-    "options": "[{\"text\":\"Типично — слова есть, а дела нет\",\"textEn\":\"Типично — слова есть, а дела нет\",\"scoring\":{\"PAR\":3}},{\"text\":\"Мне и не нужна помощь — я лучше болею в одиночестве\",\"textEn\":\"Мне и не нужна помощь — я лучше болею в одиночестве\",\"scoring\":{\"SZD\":3,\"BAR\":1}},{\"text\":\"Грустно — хочется, чтобы кто-то принёс суп и посидел рядом\",\"textEn\":\"Грустно — хочется, чтобы кто-то принёс суп и посидел рядом\",\"scoring\":{\"DEP\":3,\"DPR\":1}},{\"text\":\"Обидно — но просить стыдно\",\"textEn\":\"Обидно — но просить стыдно\",\"scoring\":{\"BOR\":1,\"AVD\":2,\"DPR\":1}}]",
+    "scenarioEn": "You're sick at home. Friends text, \"Get well soon!\" But no one offers to help. How do you feel?",
+    "options": "[{\"text\":\"Типично — слова есть, а дела нет\",\"textEn\":\"Typical — lots of words, no action\",\"scoring\":{\"PAR\":3}},{\"text\":\"Мне и не нужна помощь — я лучше болею в одиночестве\",\"textEn\":\"I don't need help anyway — I'd rather be sick on my own\",\"scoring\":{\"SZD\":3,\"BAR\":1}},{\"text\":\"Грустно — хочется, чтобы кто-то принёс суп и посидел рядом\",\"textEn\":\"Sad — I wish someone would bring soup and sit with me\",\"scoring\":{\"DEP\":3,\"DPR\":1}},{\"text\":\"Обидно — но просить стыдно\",\"textEn\":\"Hurt — but I'm too ashamed to ask\",\"scoring\":{\"BOR\":1,\"AVD\":2,\"DPR\":1}}]",
     "active": true,
     "sortOrder": 1405,
     "createdAt": "2026-03-19T13:05:13.01"
@@ -12656,8 +12656,8 @@
   {
     "id": "c1c4798302b08869554a9998a",
     "scenario": "Вы пришли в музей один(а). В зале пусто. Перед вами — одна картина. Что делаете?",
-    "scenarioEn": "Вы пришли в музей один(а). В зале пусто. Перед вами — одна картина. Что делаете?",
-    "options": "[{\"text\":\"Стою и смотрю долго — картина говорит со мной\",\"textEn\":\"Стою и смотрю долго — картина говорит со мной\",\"scoring\":{\"SZT\":3}},{\"text\":\"Сделаю фото и пойду дальше — мне нужно увидеть весь музей\",\"textEn\":\"Сделаю фото и пойду дальше — мне нужно увидеть весь музей\",\"scoring\":{\"OBC\":3}},{\"text\":\"Наслаждаюсь тишиной — пустой зал, только я и искусство\",\"textEn\":\"Наслаждаюсь тишиной — пустой зал, только я и искусство\",\"scoring\":{\"SZD\":3}},{\"text\":\"Сфотографируюсь на фоне и выложу — «Культурный досуг»\",\"textEn\":\"Сфотографируюсь на фоне и выложу — «Культурный досуг»\",\"scoring\":{\"HIS\":3}}]",
+    "scenarioEn": "You go to a museum alone. The gallery is empty. In front of you, a single painting. What do you do?",
+    "options": "[{\"text\":\"Стою и смотрю долго — картина говорит со мной\",\"textEn\":\"Stand and look for a long time — the painting is speaking to me\",\"scoring\":{\"SZT\":3}},{\"text\":\"Сделаю фото и пойду дальше — мне нужно увидеть весь музей\",\"textEn\":\"Take a photo and move on — I need to see the whole museum\",\"scoring\":{\"OBC\":3}},{\"text\":\"Наслаждаюсь тишиной — пустой зал, только я и искусство\",\"textEn\":\"Enjoy the silence — an empty room, just me and the art\",\"scoring\":{\"SZD\":3}},{\"text\":\"Сфотографируюсь на фоне и выложу — «Культурный досуг»\",\"textEn\":\"Take a selfie in front of it and post it — \\\"A bit of culture\\\"\",\"scoring\":{\"HIS\":3}}]",
     "active": true,
     "sortOrder": 1406,
     "createdAt": "2026-03-19T13:05:13.011"
@@ -12665,8 +12665,8 @@
   {
     "id": "c48bb139d587d6087d9f64123",
     "scenario": "Коллега предлагает совместный обед, но вы хотели побыть один(а). Что ответите?",
-    "scenarioEn": "Коллега предлагает совместный обед, но вы хотели побыть один(а). Что ответите?",
-    "options": "[{\"text\":\"Честно скажу: «Сегодня хочу побыть один(а)»\",\"textEn\":\"Честно скажу: «Сегодня хочу побыть один(а)»\",\"scoring\":{\"SZD\":3}},{\"text\":\"Соглашусь — неудобно отказывать\",\"textEn\":\"Соглашусь — неудобно отказывать\",\"scoring\":{\"DEP\":3}},{\"text\":\"Придумаю отговорку — «Занят, дедлайн»\",\"textEn\":\"Придумаю отговорку — «Занят, дедлайн»\",\"scoring\":{\"AVD\":2}},{\"text\":\"Соглашусь — может, будет интересно, а если нет — перетерплю\",\"textEn\":\"Соглашусь — может, будет интересно, а если нет — перетерплю\",\"scoring\":{\"OBC\":3}}]",
+    "scenarioEn": "A colleague invites you to lunch, but you wanted some time alone. What do you say?",
+    "options": "[{\"text\":\"Честно скажу: «Сегодня хочу побыть один(а)»\",\"textEn\":\"Say honestly, \\\"I'd like some time to myself today\\\"\",\"scoring\":{\"SZD\":3}},{\"text\":\"Соглашусь — неудобно отказывать\",\"textEn\":\"Agree — it feels awkward to say no\",\"scoring\":{\"DEP\":3}},{\"text\":\"Придумаю отговорку — «Занят, дедлайн»\",\"textEn\":\"Make an excuse — \\\"Busy, deadline\\\"\",\"scoring\":{\"AVD\":2}},{\"text\":\"Соглашусь — может, будет интересно, а если нет — перетерплю\",\"textEn\":\"Agree — maybe it'll be interesting, and if not, I'll get through it\",\"scoring\":{\"OBC\":3}}]",
     "active": true,
     "sortOrder": 1407,
     "createdAt": "2026-03-19T13:05:13.013"
@@ -12674,8 +12674,8 @@
   {
     "id": "c88a0a6c441546bc3eae309d3",
     "scenario": "Друг рассказал вам свою бизнес-идею. Она слабая. Но он горит ею. Что скажете?",
-    "scenarioEn": "Друг рассказал вам свою бизнес-идею. Она слабая. Но он горит ею. Что скажете?",
-    "options": "[{\"text\":\"Поддержу — мне важнее его настроение, чем правда\",\"textEn\":\"Поддержу — мне важнее его настроение, чем правда\",\"scoring\":{\"DEP\":3}},{\"text\":\"Скажу честно — лучше узнать правду от друга, чем от рынка\",\"textEn\":\"Скажу честно — лучше узнать правду от друга, чем от рынка\",\"scoring\":{\"ANT\":1,\"OBC\":2}},{\"text\":\"Предложу доработать — вот конкретные слабые места\",\"textEn\":\"Предложу доработать — вот конкретные слабые места\",\"scoring\":{\"OBC\":3}},{\"text\":\"Мне всё равно — это его деньги и его риск\",\"textEn\":\"Мне всё равно — это его деньги и его риск\",\"scoring\":{\"SZD\":3}}]",
+    "scenarioEn": "A friend tells you their business idea. It's weak. But they're fired up about it. What do you say?",
+    "options": "[{\"text\":\"Поддержу — мне важнее его настроение, чем правда\",\"textEn\":\"Encourage them — their mood matters more to me than the truth\",\"scoring\":{\"DEP\":3}},{\"text\":\"Скажу честно — лучше узнать правду от друга, чем от рынка\",\"textEn\":\"Be honest — better to hear the truth from a friend than from the market\",\"scoring\":{\"ANT\":1,\"OBC\":2}},{\"text\":\"Предложу доработать — вот конкретные слабые места\",\"textEn\":\"Suggest refining it — here are the specific weak points\",\"scoring\":{\"OBC\":3}},{\"text\":\"Мне всё равно — это его деньги и его риск\",\"textEn\":\"I don't care — it's their money and their risk\",\"scoring\":{\"SZD\":3}}]",
     "active": true,
     "sortOrder": 1408,
     "createdAt": "2026-03-19T13:05:13.014"
@@ -12683,8 +12683,8 @@
   {
     "id": "c1afea5d4843454f033703271",
     "scenario": "Вы случайно разбили чужую машину на парковке. Камер нет, свидетелей нет. Что сделаете?",
-    "scenarioEn": "Вы случайно разбили чужую машину на парковке. Камер нет, свидетелей нет. Что сделаете?",
-    "options": "[{\"text\":\"Оставлю записку с номером — так правильно\",\"textEn\":\"Оставлю записку с номером — так правильно\",\"scoring\":{\"OBC\":3}},{\"text\":\"Уеду — не моя проблема, если никто не видел\",\"textEn\":\"Уеду — не моя проблема, если никто не видел\",\"scoring\":{\"ANT\":3}},{\"text\":\"Оставлю записку — иначе буду мучиться виной\",\"textEn\":\"Оставлю записку — иначе буду мучиться виной\",\"scoring\":{\"DEP\":3}},{\"text\":\"Буду метаться — совесть говорит одно, страх — другое\",\"textEn\":\"Буду метаться — совесть говорит одно, страх — другое\",\"scoring\":{\"BOR\":3}}]",
+    "scenarioEn": "You accidentally damage someone's car in a parking lot. No cameras, no witnesses. What do you do?",
+    "options": "[{\"text\":\"Оставлю записку с номером — так правильно\",\"textEn\":\"Leave a note with my number — it's the right thing to do\",\"scoring\":{\"OBC\":3}},{\"text\":\"Уеду — не моя проблема, если никто не видел\",\"textEn\":\"Drive off — not my problem if nobody saw\",\"scoring\":{\"ANT\":3}},{\"text\":\"Оставлю записку — иначе буду мучиться виной\",\"textEn\":\"Leave a note — otherwise the guilt will eat at me\",\"scoring\":{\"DEP\":3}},{\"text\":\"Буду метаться — совесть говорит одно, страх — другое\",\"textEn\":\"Be torn — my conscience says one thing, my fear says another\",\"scoring\":{\"BOR\":3}}]",
     "active": true,
     "sortOrder": 1409,
     "createdAt": "2026-03-19T13:05:13.016"
@@ -12692,8 +12692,8 @@
   {
     "id": "c0f2c664b043993c1bad7ef9a",
     "scenario": "Ваш партнёр предложил вместе начать бегать по утрам. Вы ненавидите бег. Что скажете?",
-    "scenarioEn": "Ваш партнёр предложил вместе начать бегать по утрам. Вы ненавидите бег. Что скажете?",
-    "options": "[{\"text\":\"Соглашусь — ради него(неё) я готов(а)\",\"textEn\":\"Соглашусь — ради него(неё) я готов(а)\",\"scoring\":{\"DEP\":3}},{\"text\":\"Честно скажу: «Давай найдём спорт, который нравится нам обоим»\",\"textEn\":\"Честно скажу: «Давай найдём спорт, который нравится нам обоим»\",\"scoring\":{\"OBC\":3}},{\"text\":\"Нет — я не буду делать то, что мне не нравится\",\"textEn\":\"Нет — я не буду делать то, что мне не нравится\",\"scoring\":{\"ANT\":3}},{\"text\":\"Попробую — но буду молча страдать и через неделю брошу\",\"textEn\":\"Попробую — но буду молча страдать и через неделю брошу\",\"scoring\":{\"BOR\":1,\"AVD\":2}}]",
+    "scenarioEn": "Your partner suggests you start running together in the mornings. You hate running. What do you say?",
+    "options": "[{\"text\":\"Соглашусь — ради него(неё) я готов(а)\",\"textEn\":\"Agree — for them, I'm willing\",\"scoring\":{\"DEP\":3}},{\"text\":\"Честно скажу: «Давай найдём спорт, который нравится нам обоим»\",\"textEn\":\"Say honestly, \\\"Let's find a sport we both enjoy\\\"\",\"scoring\":{\"OBC\":3}},{\"text\":\"Нет — я не буду делать то, что мне не нравится\",\"textEn\":\"No — I won't do something I don't like\",\"scoring\":{\"ANT\":3}},{\"text\":\"Попробую — но буду молча страдать и через неделю брошу\",\"textEn\":\"Give it a try — but suffer in silence and quit within a week\",\"scoring\":{\"BOR\":1,\"AVD\":2}}]",
     "active": true,
     "sortOrder": 1410,
     "createdAt": "2026-03-19T13:05:13.017"
@@ -12701,8 +12701,8 @@
   {
     "id": "c1f75fcaafa3628fbaf77ac1c",
     "scenario": "Вы на днях выиграли в споре, но оказалось, что были неправы. Признаетесь?",
-    "scenarioEn": "Вы на днях выиграли в споре, но оказалось, что были неправы. Признаетесь?",
-    "options": "[{\"text\":\"Признаюсь — честность важнее гордости\",\"textEn\":\"Признаюсь — честность важнее гордости\",\"scoring\":{\"OBC\":3}},{\"text\":\"Не признаюсь — зачем терять лицо?\",\"textEn\":\"Не признаюсь — зачем терять лицо?\",\"scoring\":{\"NAR\":3}},{\"text\":\"Промолчу — может, никто и не вспомнит\",\"textEn\":\"Промолчу — может, никто и не вспомнит\",\"scoring\":{\"AVD\":2}},{\"text\":\"Мне всё равно — спор есть спор\",\"textEn\":\"Мне всё равно — спор есть спор\",\"scoring\":{\"SZD\":3}}]",
+    "scenarioEn": "You recently won an argument, but it turns out you were wrong. Will you admit it?",
+    "options": "[{\"text\":\"Признаюсь — честность важнее гордости\",\"textEn\":\"Admit it — honesty matters more than pride\",\"scoring\":{\"OBC\":3}},{\"text\":\"Не признаюсь — зачем терять лицо?\",\"textEn\":\"Not admit it — why lose face?\",\"scoring\":{\"NAR\":3}},{\"text\":\"Промолчу — может, никто и не вспомнит\",\"textEn\":\"Say nothing — maybe no one will remember\",\"scoring\":{\"AVD\":2}},{\"text\":\"Мне всё равно — спор есть спор\",\"textEn\":\"I don't care — an argument is an argument\",\"scoring\":{\"SZD\":3}}]",
     "active": true,
     "sortOrder": 1411,
     "createdAt": "2026-03-19T13:05:13.018"
@@ -12710,8 +12710,8 @@
   {
     "id": "c5d3654925942edc5d7e8571d",
     "scenario": "Вы увидели радугу после дождя. Первая мысль?",
-    "scenarioEn": "Вы увидели радугу после дождя. Первая мысль?",
-    "options": "[{\"text\":\"Знак — вселенная говорит, что всё будет хорошо\",\"textEn\":\"Знак — вселенная говорит, что всё будет хорошо\",\"scoring\":{\"SZT\":3}},{\"text\":\"Красиво — сфотографирую и выложу!\",\"textEn\":\"Красиво — сфотографирую и выложу!\",\"scoring\":{\"HIS\":3}},{\"text\":\"Позову близкого: «Смотри!»\",\"textEn\":\"Позову близкого: «Смотри!»\",\"scoring\":{\"DEP\":3}},{\"text\":\"Отметил(а) — и пошёл(а) дальше\",\"textEn\":\"Отметил(а) — и пошёл(а) дальше\",\"scoring\":{\"SZD\":3}}]",
+    "scenarioEn": "You see a rainbow after the rain. First thought?",
+    "options": "[{\"text\":\"Знак — вселенная говорит, что всё будет хорошо\",\"textEn\":\"A sign — the universe is saying everything will be fine\",\"scoring\":{\"SZT\":3}},{\"text\":\"Красиво — сфотографирую и выложу!\",\"textEn\":\"Beautiful — I'll take a photo and post it!\",\"scoring\":{\"HIS\":3}},{\"text\":\"Позову близкого: «Смотри!»\",\"textEn\":\"Call someone close: \\\"Look!\\\"\",\"scoring\":{\"DEP\":3}},{\"text\":\"Отметил(а) — и пошёл(а) дальше\",\"textEn\":\"Noticed it — and moved on\",\"scoring\":{\"SZD\":3}}]",
     "active": true,
     "sortOrder": 1412,
     "createdAt": "2026-03-19T13:05:13.019"
@@ -12719,8 +12719,8 @@
   {
     "id": "c434cd2cb02ed388b1daff9aa",
     "scenario": "Ваш коллега постоянно подчёркивает, что он старше и опытнее вас. Как реагируете?",
-    "scenarioEn": "Ваш коллега постоянно подчёркивает, что он старше и опытнее вас. Как реагируете?",
-    "options": "[{\"text\":\"Раздражает — возраст не равен компетенции\",\"textEn\":\"Раздражает — возраст не равен компетенции\",\"scoring\":{\"ANT\":1,\"NAR\":2}},{\"text\":\"Мне безразлично — его слова ничего не меняют\",\"textEn\":\"Мне безразлично — его слова ничего не меняют\",\"scoring\":{\"SZD\":3}},{\"text\":\"Некомфортно — может, он и правда знает больше, а я недотягиваю\",\"textEn\":\"Некомфортно — может, он и правда знает больше, а я недотягиваю\",\"scoring\":{\"AVD\":3}},{\"text\":\"Он самоутверждается за мой счёт — типичная иерархия\",\"textEn\":\"Он самоутверждается за мой счёт — типичная иерархия\",\"scoring\":{\"PAR\":3}}]",
+    "scenarioEn": "A colleague keeps pointing out that they're older and more experienced than you. How do you react?",
+    "options": "[{\"text\":\"Раздражает — возраст не равен компетенции\",\"textEn\":\"It's irritating — age doesn't equal competence\",\"scoring\":{\"ANT\":1,\"NAR\":2}},{\"text\":\"Мне безразлично — его слова ничего не меняют\",\"textEn\":\"Indifferent — their words don't change anything\",\"scoring\":{\"SZD\":3}},{\"text\":\"Некомфортно — может, он и правда знает больше, а я недотягиваю\",\"textEn\":\"Uncomfortable — maybe they really do know more and I'm falling short\",\"scoring\":{\"AVD\":3}},{\"text\":\"Он самоутверждается за мой счёт — типичная иерархия\",\"textEn\":\"They're asserting themselves at my expense — the usual pecking order\",\"scoring\":{\"PAR\":3}}]",
     "active": true,
     "sortOrder": 1413,
     "createdAt": "2026-03-19T13:05:13.021"
@@ -12728,8 +12728,8 @@
   {
     "id": "cbd874d29f0e64badab893e51",
     "scenario": "Вам предложили написать книгу о своей жизни. Согласитесь?",
-    "scenarioEn": "Вам предложили написать книгу о своей жизни. Согласитесь?",
-    "options": "[{\"text\":\"Конечно! Моя жизнь заслуживает книги!\",\"textEn\":\"Конечно! Моя жизнь заслуживает книги!\",\"scoring\":{\"NAR\":3}},{\"text\":\"Ни за что — моя жизнь слишком личная\",\"textEn\":\"Ни за что — моя жизнь слишком личная\",\"scoring\":{\"AVD\":3}},{\"text\":\"Интересно — но напишу в форме притчи, без прямых фактов\",\"textEn\":\"Интересно — но напишу в форме притчи, без прямых фактов\",\"scoring\":{\"SZT\":3}},{\"text\":\"Соглашусь — это проект, нужен план и структура\",\"textEn\":\"Соглашусь — это проект, нужен план и структура\",\"scoring\":{\"OBC\":3}}]",
+    "scenarioEn": "You're offered the chance to write a book about your life. Will you agree?",
+    "options": "[{\"text\":\"Конечно! Моя жизнь заслуживает книги!\",\"textEn\":\"Of course! My life deserves a book!\",\"scoring\":{\"NAR\":3}},{\"text\":\"Ни за что — моя жизнь слишком личная\",\"textEn\":\"No way — my life is too private\",\"scoring\":{\"AVD\":3}},{\"text\":\"Интересно — но напишу в форме притчи, без прямых фактов\",\"textEn\":\"Intriguing — but I'll write it as a parable, without direct facts\",\"scoring\":{\"SZT\":3}},{\"text\":\"Соглашусь — это проект, нужен план и структура\",\"textEn\":\"Agree — it's a project, I'll need a plan and a structure\",\"scoring\":{\"OBC\":3}}]",
     "active": true,
     "sortOrder": 1414,
     "createdAt": "2026-03-19T13:05:13.022"
@@ -12737,8 +12737,8 @@
   {
     "id": "cff1696f7e6821f26282dbb32",
     "scenario": "Друг говорит: «С тобой иногда сложно, но я тебя люблю». Что чувствуете?",
-    "scenarioEn": "Друг говорит: «С тобой иногда сложно, но я тебя люблю». Что чувствуете?",
-    "options": "[{\"text\":\"Тепло — он принимает меня целиком\",\"textEn\":\"Тепло — он принимает меня целиком\",\"scoring\":{\"DEP\":3}},{\"text\":\"«Сложно» — что это значит? Я делаю что-то не так?\",\"textEn\":\"«Сложно» — что это значит? Я делаю что-то не так?\",\"scoring\":{\"BOR\":1,\"AVD\":2}},{\"text\":\"Конечно сложно — я не из простых\",\"textEn\":\"Конечно сложно — я не из простых\",\"scoring\":{\"NAR\":3}},{\"text\":\"Мне неловко от таких слов — не знаю, как ответить\",\"textEn\":\"Мне неловко от таких слов — не знаю, как ответить\",\"scoring\":{\"SZD\":3}}]",
+    "scenarioEn": "A friend says, \"You can be difficult sometimes, but I love you.\" How do you feel?",
+    "options": "[{\"text\":\"Тепло — он принимает меня целиком\",\"textEn\":\"Warm — they accept me as I am\",\"scoring\":{\"DEP\":3}},{\"text\":\"«Сложно» — что это значит? Я делаю что-то не так?\",\"textEn\":\"\\\"Difficult\\\" — what does that mean? Am I doing something wrong?\",\"scoring\":{\"BOR\":1,\"AVD\":2}},{\"text\":\"Конечно сложно — я не из простых\",\"textEn\":\"Of course I'm difficult — I'm not the simple type\",\"scoring\":{\"NAR\":3}},{\"text\":\"Мне неловко от таких слов — не знаю, как ответить\",\"textEn\":\"Words like that make me awkward — I don't know how to respond\",\"scoring\":{\"SZD\":3}}]",
     "active": true,
     "sortOrder": 1415,
     "createdAt": "2026-03-19T13:05:13.023"
@@ -12746,8 +12746,8 @@
   {
     "id": "c82d313d24bac40e28ffe152d",
     "scenario": "Вы в новом городе и заблудились в красивом районе. Телефон с собой, но вы не хотите открывать карту. Почему?",
-    "scenarioEn": "Вы в новом городе и заблудились в красивом районе. Телефон с собой, но вы не хотите открывать карту. Почему?",
-    "options": "[{\"text\":\"Блуждание — это форма медитации, город ведёт меня сам\",\"textEn\":\"Блуждание — это форма медитации, город ведёт меня сам\",\"scoring\":{\"SZT\":3}},{\"text\":\"Лень — разберусь по ходу\",\"textEn\":\"Лень — разберусь по ходу\",\"scoring\":{\"ANT\":2}},{\"text\":\"Хочу рассказать потом: «Я заблудился и нашёл кое-что невероятное!»\",\"textEn\":\"Хочу рассказать потом: «Я заблудился и нашёл кое-что невероятное!»\",\"scoring\":{\"HIS\":3}},{\"text\":\"Я не заблужусь — у меня хорошая ориентация, мне не нужны подсказки\",\"textEn\":\"Я не заблужусь — у меня хорошая ориентация, мне не нужны подсказки\",\"scoring\":{\"NAR\":2}}]",
+    "scenarioEn": "You're in a new city and lost in a lovely neighborhood. You have your phone, but you don't want to open the map. Why?",
+    "options": "[{\"text\":\"Блуждание — это форма медитации, город ведёт меня сам\",\"textEn\":\"Wandering is a form of meditation — the city guides me itself\",\"scoring\":{\"SZT\":3}},{\"text\":\"Лень — разберусь по ходу\",\"textEn\":\"Too lazy — I'll figure it out as I go\",\"scoring\":{\"ANT\":2}},{\"text\":\"Хочу рассказать потом: «Я заблудился и нашёл кое-что невероятное!»\",\"textEn\":\"I want to tell people later, \\\"I got lost and found something incredible!\\\"\",\"scoring\":{\"HIS\":3}},{\"text\":\"Я не заблужусь — у меня хорошая ориентация, мне не нужны подсказки\",\"textEn\":\"I won't get lost — I have a good sense of direction, I don't need help\",\"scoring\":{\"NAR\":2}}]",
     "active": true,
     "sortOrder": 1416,
     "createdAt": "2026-03-19T13:05:13.024"
@@ -12755,8 +12755,8 @@
   {
     "id": "cb0480a48ade990b3345c9af9",
     "scenario": "Ваш начальник ушёл, и на его место пришёл человек моложе вас. Что чувствуете?",
-    "scenarioEn": "Ваш начальник ушёл, и на его место пришёл человек моложе вас. Что чувствуете?",
-    "options": "[{\"text\":\"Несправедливо — я заслуживал(а) это место!\",\"textEn\":\"Несправедливо — я заслуживал(а) это место!\",\"scoring\":{\"NAR\":3,\"PAG\":1}},{\"text\":\"Мне всё равно — начальники приходят и уходят\",\"textEn\":\"Мне всё равно — начальники приходят и уходят\",\"scoring\":{\"SZD\":3}},{\"text\":\"Подожду и посмотрю — может, он окажется хорошим руководителем\",\"textEn\":\"Подожду и посмотрю — может, он окажется хорошим руководителем\",\"scoring\":{\"OBC\":3}},{\"text\":\"Тревожно — а вдруг он меня уволит?\",\"textEn\":\"Тревожно — а вдруг он меня уволит?\",\"scoring\":{\"BOR\":1,\"AVD\":2}}]",
+    "scenarioEn": "Your boss has left, and the replacement is younger than you. How do you feel?",
+    "options": "[{\"text\":\"Несправедливо — я заслуживал(а) это место!\",\"textEn\":\"Unfair — I deserved that job!\",\"scoring\":{\"NAR\":3,\"PAG\":1}},{\"text\":\"Мне всё равно — начальники приходят и уходят\",\"textEn\":\"I don't care — bosses come and go\",\"scoring\":{\"SZD\":3}},{\"text\":\"Подожду и посмотрю — может, он окажется хорошим руководителем\",\"textEn\":\"I'll wait and see — maybe they'll turn out to be a good manager\",\"scoring\":{\"OBC\":3}},{\"text\":\"Тревожно — а вдруг он меня уволит?\",\"textEn\":\"Anxious — what if they fire me?\",\"scoring\":{\"BOR\":1,\"AVD\":2}}]",
     "active": true,
     "sortOrder": 1417,
     "createdAt": "2026-03-19T13:05:13.025"
@@ -12764,8 +12764,8 @@
   {
     "id": "c889f1b7052e6b756c676674d",
     "scenario": "Друг предложил вместе заняться благотворительностью — раздавать еду бездомным раз в неделю. Ваша реакция?",
-    "scenarioEn": "Друг предложил вместе заняться благотворительностью — раздавать еду бездомным раз в неделю. Ваша реакция?",
-    "options": "[{\"text\":\"С радостью — помогать людям мне даёт ощущение смысла\",\"textEn\":\"С радостью — помогать людям мне даёт ощущение смысла\",\"scoring\":{\"DEP\":3}},{\"text\":\"В помощи другим есть что-то сакральное — это больше, чем просто еда\",\"textEn\":\"В помощи другим есть что-то сакральное — это больше, чем просто еда\",\"scoring\":{\"SZT\":3}},{\"text\":\"Хорошее дело — но мне нужно вписать это в расписание\",\"textEn\":\"Хорошее дело — но мне нужно вписать это в расписание\",\"scoring\":{\"OBC\":3}},{\"text\":\"Зачем? Есть организации, которые этим занимаются профессионально\",\"textEn\":\"Зачем? Есть организации, которые этим занимаются профессионально\",\"scoring\":{\"ANT\":2}}]",
+    "scenarioEn": "A friend suggests volunteering together — handing out food to homeless people once a week. Your reaction?",
+    "options": "[{\"text\":\"С радостью — помогать людям мне даёт ощущение смысла\",\"textEn\":\"Gladly — helping people gives me a sense of meaning\",\"scoring\":{\"DEP\":3}},{\"text\":\"В помощи другим есть что-то сакральное — это больше, чем просто еда\",\"textEn\":\"There's something sacred about helping others — it's more than just food\",\"scoring\":{\"SZT\":3}},{\"text\":\"Хорошее дело — но мне нужно вписать это в расписание\",\"textEn\":\"A good cause — but I'll need to fit it into my schedule\",\"scoring\":{\"OBC\":3}},{\"text\":\"Зачем? Есть организации, которые этим занимаются профессионально\",\"textEn\":\"What for? There are organizations that do this professionally\",\"scoring\":{\"ANT\":2}}]",
     "active": true,
     "sortOrder": 1418,
     "createdAt": "2026-03-19T13:05:13.026"
@@ -12773,8 +12773,8 @@
   {
     "id": "c71560a2047e0933058953696",
     "scenario": "Вы на море. Волны высокие. Все купаются. Вы не уверены. Что сделаете?",
-    "scenarioEn": "Вы на море. Волны высокие. Все купаются. Вы не уверены. Что сделаете?",
-    "options": "[{\"text\":\"Прыгну! Волны — это вызов!\",\"textEn\":\"Прыгну! Волны — это вызов!\",\"scoring\":{\"ANT\":3}},{\"text\":\"Посижу на берегу — мне и отсюда хорошо\",\"textEn\":\"Посижу на берегу — мне и отсюда хорошо\",\"scoring\":{\"SZD\":3}},{\"text\":\"Пойду, только если кто-то будет рядом — мне страшно одному\",\"textEn\":\"Пойду, только если кто-то будет рядом — мне страшно одному\",\"scoring\":{\"DEP\":3}},{\"text\":\"Не пойду — вдруг утону, и все будут смотреть\",\"textEn\":\"Не пойду — вдруг утону, и все будут смотреть\",\"scoring\":{\"AVD\":3}}]",
+    "scenarioEn": "You're at the beach. The waves are high. Everyone is swimming. You're not sure. What do you do?",
+    "options": "[{\"text\":\"Прыгну! Волны — это вызов!\",\"textEn\":\"Dive in! The waves are a challenge!\",\"scoring\":{\"ANT\":3}},{\"text\":\"Посижу на берегу — мне и отсюда хорошо\",\"textEn\":\"Sit on the shore — I'm fine right here\",\"scoring\":{\"SZD\":3}},{\"text\":\"Пойду, только если кто-то будет рядом — мне страшно одному\",\"textEn\":\"I'll go in only if someone's with me — it's scary on my own\",\"scoring\":{\"DEP\":3}},{\"text\":\"Не пойду — вдруг утону, и все будут смотреть\",\"textEn\":\"I won't go in — what if I drown and everyone's watching?\",\"scoring\":{\"AVD\":3}}]",
     "active": true,
     "sortOrder": 1419,
     "createdAt": "2026-03-19T13:05:13.027"
@@ -12782,8 +12782,8 @@
   {
     "id": "c445f8a6aa6d60cee3e9b0952",
     "scenario": "Вы увидели, как незнакомый человек плачет в парке. Что сделаете?",
-    "scenarioEn": "Вы увидели, как незнакомый человек плачет в парке. Что сделаете?",
-    "options": "[{\"text\":\"Подойду и спрошу, нужна ли помощь\",\"textEn\":\"Подойду и спрошу, нужна ли помощь\",\"scoring\":{\"DEP\":3}},{\"text\":\"Пройду мимо — это его личное пространство\",\"textEn\":\"Пройду мимо — это его личное пространство\",\"scoring\":{\"SZD\":3}},{\"text\":\"Хочу помочь — но боюсь быть навязчивым(ой)\",\"textEn\":\"Хочу помочь — но боюсь быть навязчивым(ой)\",\"scoring\":{\"AVD\":3}},{\"text\":\"Почувствую укол грусти — чужие слёзы трогают меня глубоко\",\"textEn\":\"Почувствую укол грусти — чужие слёзы трогают меня глубоко\",\"scoring\":{\"BOR\":3}}]",
+    "scenarioEn": "You see a stranger crying in the park. What do you do?",
+    "options": "[{\"text\":\"Подойду и спрошу, нужна ли помощь\",\"textEn\":\"Go over and ask if they need help\",\"scoring\":{\"DEP\":3}},{\"text\":\"Пройду мимо — это его личное пространство\",\"textEn\":\"Walk past — it's their personal space\",\"scoring\":{\"SZD\":3}},{\"text\":\"Хочу помочь — но боюсь быть навязчивым(ой)\",\"textEn\":\"I want to help — but I'm afraid of intruding\",\"scoring\":{\"AVD\":3}},{\"text\":\"Почувствую укол грусти — чужие слёзы трогают меня глубоко\",\"textEn\":\"Feel a pang of sadness — other people's tears move me deeply\",\"scoring\":{\"BOR\":3}}]",
     "active": true,
     "sortOrder": 1420,
     "createdAt": "2026-03-19T13:05:13.027"
@@ -12791,8 +12791,8 @@
   {
     "id": "ca72b05d5e7b46568feda2a6c",
     "scenario": "На работе решили ввести «дни благодарности» — каждый пишет анонимно, за что благодарен коллеге. Как реагируете?",
-    "scenarioEn": "На работе решили ввести «дни благодарности» — каждый пишет анонимно, за что благодарен коллеге. Как реагируете?",
-    "options": "[{\"text\":\"Напишу с удовольствием — людям важно слышать хорошее\",\"textEn\":\"Напишу с удовольствием — людям важно слышать хорошее\",\"scoring\":{\"DEP\":3}},{\"text\":\"Тревожно — а вдруг мне никто ничего не напишет?\",\"textEn\":\"Тревожно — а вдруг мне никто ничего не напишет?\",\"scoring\":{\"AVD\":3}},{\"text\":\"Фальшь — люди напишут формальности\",\"textEn\":\"Фальшь — люди напишут формальности\",\"scoring\":{\"PAR\":3}},{\"text\":\"Мне без разницы — участвую для галочки\",\"textEn\":\"Мне без разницы — участвую для галочки\",\"scoring\":{\"SZD\":3}}]",
+    "scenarioEn": "Your workplace introduces \"gratitude days\" — everyone anonymously writes what they're grateful to a colleague for. How do you react?",
+    "options": "[{\"text\":\"Напишу с удовольствием — людям важно слышать хорошее\",\"textEn\":\"Happy to write — people need to hear good things\",\"scoring\":{\"DEP\":3}},{\"text\":\"Тревожно — а вдруг мне никто ничего не напишет?\",\"textEn\":\"Anxious — what if nobody writes anything to me?\",\"scoring\":{\"AVD\":3}},{\"text\":\"Фальшь — люди напишут формальности\",\"textEn\":\"Fake — people will just write formalities\",\"scoring\":{\"PAR\":3}},{\"text\":\"Мне без разницы — участвую для галочки\",\"textEn\":\"It makes no difference — I'll take part to tick the box\",\"scoring\":{\"SZD\":3}}]",
     "active": true,
     "sortOrder": 1421,
     "createdAt": "2026-03-19T13:05:13.028"
@@ -12800,8 +12800,8 @@
   {
     "id": "c680a378298df8697c9f17da4",
     "scenario": "Вы смотрите старые видео на телефоне — смех, праздники, моменты с людьми, которых больше нет рядом. Что чувствуете?",
-    "scenarioEn": "Вы смотрите старые видео на телефоне — смех, праздники, моменты с людьми, которых больше нет рядом. Что чувствуете?",
-    "options": "[{\"text\":\"Боль и нежность одновременно — эмоции зашкаливают\",\"textEn\":\"Боль и нежность одновременно — эмоции зашкаливают\",\"scoring\":{\"BOR\":3}},{\"text\":\"Тишина — смотрю спокойно, прошлое уже не ранит\",\"textEn\":\"Тишина — смотрю спокойно, прошлое уже не ранит\",\"scoring\":{\"SZD\":3}},{\"text\":\"Хочу показать кому-то близкому — «Смотри, как было хорошо»\",\"textEn\":\"Хочу показать кому-то близкому — «Смотри, как было хорошо»\",\"scoring\":{\"DEP\":3}},{\"text\":\"Видео — это портал во времени, через который можно почти прикоснуться к тем дням\",\"textEn\":\"Видео — это портал во времени, через который можно почти прикоснуться к тем дням\",\"scoring\":{\"SZT\":3}}]",
+    "scenarioEn": "You're watching old videos on your phone — laughter, holidays, moments with people who are no longer around. How do you feel?",
+    "options": "[{\"text\":\"Боль и нежность одновременно — эмоции зашкаливают\",\"textEn\":\"Pain and tenderness at once — my emotions are off the charts\",\"scoring\":{\"BOR\":3}},{\"text\":\"Тишина — смотрю спокойно, прошлое уже не ранит\",\"textEn\":\"Quiet — I watch calmly, the past no longer hurts\",\"scoring\":{\"SZD\":3}},{\"text\":\"Хочу показать кому-то близкому — «Смотри, как было хорошо»\",\"textEn\":\"I want to show them to someone close — \\\"Look how good it was\\\"\",\"scoring\":{\"DEP\":3}},{\"text\":\"Видео — это портал во времени, через который можно почти прикоснуться к тем дням\",\"textEn\":\"Videos are portals in time — you can almost touch those days\",\"scoring\":{\"SZT\":3}}]",
     "active": true,
     "sortOrder": 1422,
     "createdAt": "2026-03-19T13:05:13.029"
@@ -12809,8 +12809,8 @@
   {
     "id": "ce23a1b835b74f5fbd7feabbe",
     "scenario": "Коллега рассказал вам о своей проблеме, а через час весь офис уже знает. Не от вас. Что чувствуете?",
-    "scenarioEn": "Коллега рассказал вам о своей проблеме, а через час весь офис уже знает. Не от вас. Что чувствуете?",
-    "options": "[{\"text\":\"Типично — в офисе ничего не остаётся секретом\",\"textEn\":\"Типично — в офисе ничего не остаётся секретом\",\"scoring\":{\"PAR\":3}},{\"text\":\"Мне жаль его — он доверился, а его предали\",\"textEn\":\"Мне жаль его — он доверился, а его предали\",\"scoring\":{\"DEP\":3}},{\"text\":\"Мне нет дела — это не моя проблема\",\"textEn\":\"Мне нет дела — это не моя проблема\",\"scoring\":{\"SZD\":3}},{\"text\":\"Обсуждаю с кем-нибудь — это же интересная ситуация\",\"textEn\":\"Обсуждаю с кем-нибудь — это же интересная ситуация\",\"scoring\":{\"HIS\":3}}]",
+    "scenarioEn": "A colleague told you about a problem they have, and an hour later the whole office knows. Not from you. How do you feel?",
+    "options": "[{\"text\":\"Типично — в офисе ничего не остаётся секретом\",\"textEn\":\"Typical — nothing stays secret in an office\",\"scoring\":{\"PAR\":3}},{\"text\":\"Мне жаль его — он доверился, а его предали\",\"textEn\":\"I feel for them — they trusted someone and were betrayed\",\"scoring\":{\"DEP\":3}},{\"text\":\"Мне нет дела — это не моя проблема\",\"textEn\":\"I don't care — it's not my problem\",\"scoring\":{\"SZD\":3}},{\"text\":\"Обсуждаю с кем-нибудь — это же интересная ситуация\",\"textEn\":\"I discuss it with someone — it's an interesting situation\",\"scoring\":{\"HIS\":3}}]",
     "active": true,
     "sortOrder": 1423,
     "createdAt": "2026-03-19T13:05:13.03"
@@ -12818,8 +12818,8 @@
   {
     "id": "cf6b1f0686b1792b83a0a4ef6",
     "scenario": "Вы решили завести утренний ритуал: 10 минут тишины перед началом дня. Через месяц — какие ощущения?",
-    "scenarioEn": "Вы решили завести утренний ритуал: 10 минут тишины перед началом дня. Через месяц — какие ощущения?",
-    "options": "[{\"text\":\"Голова стала яснее — как будто каждый день начинается с чистого листа\",\"textEn\":\"Голова стала яснее — как будто каждый день начинается с чистого листа\",\"scoring\":{\"SZD\":3}},{\"text\":\"10 минут тишины — это 10 минут диалога с собой, глубокого и настоящего\",\"textEn\":\"10 минут тишины — это 10 минут диалога с собой, глубокого и настоящего\",\"scoring\":{\"SZT\":3}},{\"text\":\"Бросил(а) — скучно сидеть молча, лучше сразу за дело\",\"textEn\":\"Бросил(а) — скучно сидеть молча, лучше сразу за дело\",\"scoring\":{\"ANT\":2,\"BAR\":1}},{\"text\":\"Привык(ла) — включил(а) в расписание как обязательный пункт\",\"textEn\":\"Привык(ла) — включил(а) в расписание как обязательный пункт\",\"scoring\":{\"OBC\":3}}]",
+    "scenarioEn": "You decide to start a morning ritual: ten minutes of silence before the day begins. A month later, how does it feel?",
+    "options": "[{\"text\":\"Голова стала яснее — как будто каждый день начинается с чистого листа\",\"textEn\":\"My head is clearer — as if every day starts with a clean slate\",\"scoring\":{\"SZD\":3}},{\"text\":\"10 минут тишины — это 10 минут диалога с собой, глубокого и настоящего\",\"textEn\":\"Ten minutes of silence is ten minutes of dialogue with myself, deep and real\",\"scoring\":{\"SZT\":3}},{\"text\":\"Бросил(а) — скучно сидеть молча, лучше сразу за дело\",\"textEn\":\"I quit — sitting in silence is boring, better to get straight to work\",\"scoring\":{\"ANT\":2,\"BAR\":1}},{\"text\":\"Привык(ла) — включил(а) в расписание как обязательный пункт\",\"textEn\":\"It's a habit now — part of my schedule, non-negotiable\",\"scoring\":{\"OBC\":3}}]",
     "active": true,
     "sortOrder": 1424,
     "createdAt": "2026-03-19T13:05:13.031"
@@ -12827,8 +12827,8 @@
   {
     "id": "c817b8b6c0799d0fdf4a82570",
     "scenario": "Ваш друг стал амбассадором бренда, который вам не нравится. Он просит поддержать его пост лайком. Что сделаете?",
-    "scenarioEn": "Ваш друг стал амбассадором бренда, который вам не нравится. Он просит поддержать его пост лайком. Что сделаете?",
-    "options": "[{\"text\":\"Поставлю лайк — для друга мне не сложно\",\"textEn\":\"Поставлю лайк — для друга мне не сложно\",\"scoring\":{\"DEP\":3}},{\"text\":\"Не поставлю — мне не нравится бренд, и я не буду притворяться\",\"textEn\":\"Не поставлю — мне не нравится бренд, и я не буду притворяться\",\"scoring\":{\"ANT\":2,\"OBC\":1}},{\"text\":\"Проигнорирую — не хочу ни поддерживать, ни отказывать\",\"textEn\":\"Проигнорирую — не хочу ни поддерживать, ни отказывать\",\"scoring\":{\"SZD\":2,\"AVD\":1}},{\"text\":\"Поставлю — и расскажу ему потом, что бренд мне не нравится\",\"textEn\":\"Поставлю — и расскажу ему потом, что бренд мне не нравится\",\"scoring\":{\"OBC\":3}}]",
+    "scenarioEn": "A friend has become an ambassador for a brand you don't like. They ask you to like their post. What do you do?",
+    "options": "[{\"text\":\"Поставлю лайк — для друга мне не сложно\",\"textEn\":\"Like it — it's no trouble for a friend\",\"scoring\":{\"DEP\":3}},{\"text\":\"Не поставлю — мне не нравится бренд, и я не буду притворяться\",\"textEn\":\"Not like it — I don't like the brand and won't pretend\",\"scoring\":{\"ANT\":2,\"OBC\":1}},{\"text\":\"Проигнорирую — не хочу ни поддерживать, ни отказывать\",\"textEn\":\"Ignore it — I don't want to support it or refuse\",\"scoring\":{\"SZD\":2,\"AVD\":1}},{\"text\":\"Поставлю — и расскажу ему потом, что бренд мне не нравится\",\"textEn\":\"Like it — and tell them later that I don't like the brand\",\"scoring\":{\"OBC\":3}}]",
     "active": true,
     "sortOrder": 1425,
     "createdAt": "2026-03-19T13:05:13.032"
@@ -12836,8 +12836,8 @@
   {
     "id": "ca81f1b1edb46a9cda04ddd4b",
     "scenario": "Вы нашли крутую цитату и хотите поделиться. Но она из книги, которую вы не читали — только видели в соцсетях. Что сделаете?",
-    "scenarioEn": "Вы нашли крутую цитату и хотите поделиться. Но она из книги, которую вы не читали — только видели в соцсетях. Что сделаете?",
-    "options": "[{\"text\":\"Выложу — цитата хорошая, неважно, читал(а) я книгу или нет\",\"textEn\":\"Выложу — цитата хорошая, неважно, читал(а) я книгу или нет\",\"scoring\":{\"ANT\":2,\"HIS\":1}},{\"text\":\"Сначала прочитаю книгу — не хочу казаться поверхностным(ой)\",\"textEn\":\"Сначала прочитаю книгу — не хочу казаться поверхностным(ой)\",\"scoring\":{\"OBC\":3}},{\"text\":\"Не выложу — вдруг кто-то спросит, о чём книга, и я не смогу ответить\",\"textEn\":\"Не выложу — вдруг кто-то спросит, о чём книга, и я не смогу ответить\",\"scoring\":{\"AVD\":3}},{\"text\":\"Выложу — с подписью «Наткнулся(лась) на эту мысль» — честно и красиво\",\"textEn\":\"Выложу — с подписью «Наткнулся(лась) на эту мысль» — честно и красиво\",\"scoring\":{\"DEP\":3}}]",
+    "scenarioEn": "You found a great quote and want to share it. But it's from a book you haven't read — you've only seen it on social media. What do you do?",
+    "options": "[{\"text\":\"Выложу — цитата хорошая, неважно, читал(а) я книгу или нет\",\"textEn\":\"Post it — it's a good quote, it doesn't matter whether I've read the book\",\"scoring\":{\"ANT\":2,\"HIS\":1}},{\"text\":\"Сначала прочитаю книгу — не хочу казаться поверхностным(ой)\",\"textEn\":\"Read the book first — I don't want to seem shallow\",\"scoring\":{\"OBC\":3}},{\"text\":\"Не выложу — вдруг кто-то спросит, о чём книга, и я не смогу ответить\",\"textEn\":\"Not post it — what if someone asks what the book is about and I can't answer?\",\"scoring\":{\"AVD\":3}},{\"text\":\"Выложу — с подписью «Наткнулся(лась) на эту мысль» — честно и красиво\",\"textEn\":\"Post it — captioned \\\"Came across this thought\\\" — honest and nice\",\"scoring\":{\"DEP\":3}}]",
     "active": true,
     "sortOrder": 1426,
     "createdAt": "2026-03-19T13:05:13.033"
@@ -12845,8 +12845,8 @@
   {
     "id": "cca165597c8cd94e63556626a",
     "scenario": "Вы в лесу один(а). Тишина. Ни одного звука. Что чувствуете?",
-    "scenarioEn": "Вы в лесу один(а). Тишина. Ни одного звука. Что чувствуете?",
-    "options": "[{\"text\":\"Покой — это то, чего мне не хватает в городе\",\"textEn\":\"Покой — это то, чего мне не хватает в городе\",\"scoring\":{\"SZD\":3}},{\"text\":\"Лес дышит — я чувствую его присутствие, как живое существо\",\"textEn\":\"Лес дышит — я чувствую его присутствие, как живое существо\",\"scoring\":{\"SZT\":3}},{\"text\":\"Тревожно — а если заблужусь?\",\"textEn\":\"Тревожно — а если заблужусь?\",\"scoring\":{\"BOR\":1,\"DEP\":2}},{\"text\":\"Скучно — без людей и событий я быстро устаю\",\"textEn\":\"Скучно — без людей и событий я быстро устаю\",\"scoring\":{\"HIS\":3}}]",
+    "scenarioEn": "You're alone in a forest. Silence. Not a single sound. How do you feel?",
+    "options": "[{\"text\":\"Покой — это то, чего мне не хватает в городе\",\"textEn\":\"At peace — this is what I miss in the city\",\"scoring\":{\"SZD\":3}},{\"text\":\"Лес дышит — я чувствую его присутствие, как живое существо\",\"textEn\":\"The forest is breathing — I sense its presence, like a living being\",\"scoring\":{\"SZT\":3}},{\"text\":\"Тревожно — а если заблужусь?\",\"textEn\":\"Anxious — what if I get lost?\",\"scoring\":{\"BOR\":1,\"DEP\":2}},{\"text\":\"Скучно — без людей и событий я быстро устаю\",\"textEn\":\"Bored — without people and things happening, I tire quickly\",\"scoring\":{\"HIS\":3}}]",
     "active": true,
     "sortOrder": 1427,
     "createdAt": "2026-03-19T13:05:13.034"
@@ -12854,8 +12854,8 @@
   {
     "id": "c8b5aebe289ed45f9ebe5e23e",
     "scenario": "Вас попросили стать крёстным(ой) ребёнка друзей. Вы не религиозны. Что ответите?",
-    "scenarioEn": "Вас попросили стать крёстным(ой) ребёнка друзей. Вы не религиозны. Что ответите?",
-    "options": "[{\"text\":\"Соглашусь — мне важны отношения с ними, а не ритуал\",\"textEn\":\"Соглашусь — мне важны отношения с ними, а не ритуал\",\"scoring\":{\"DEP\":3}},{\"text\":\"Откажусь честно — не хочу лицемерить\",\"textEn\":\"Откажусь честно — не хочу лицемерить\",\"scoring\":{\"OBC\":3}},{\"text\":\"В ритуале есть своя красота — соглашусь с открытым сердцем\",\"textEn\":\"В ритуале есть своя красота — соглашусь с открытым сердцем\",\"scoring\":{\"SZT\":3}},{\"text\":\"Мне неловко — но отказать ещё неловкие\",\"textEn\":\"Мне неловко — но отказать ещё неловкие\",\"scoring\":{\"AVD\":2,\"DEP\":1}}]",
+    "scenarioEn": "Friends ask you to be their child's godparent. You're not religious. What do you say?",
+    "options": "[{\"text\":\"Соглашусь — мне важны отношения с ними, а не ритуал\",\"textEn\":\"Agree — what matters to me is my relationship with them, not the ritual\",\"scoring\":{\"DEP\":3}},{\"text\":\"Откажусь честно — не хочу лицемерить\",\"textEn\":\"Decline honestly — I don't want to be a hypocrite\",\"scoring\":{\"OBC\":3}},{\"text\":\"В ритуале есть своя красота — соглашусь с открытым сердцем\",\"textEn\":\"Rituals have their own beauty — I'll agree with an open heart\",\"scoring\":{\"SZT\":3}},{\"text\":\"Мне неловко — но отказать ещё неловкие\",\"textEn\":\"It's awkward — but saying no would be even more awkward\",\"scoring\":{\"AVD\":2,\"DEP\":1}}]",
     "active": true,
     "sortOrder": 1428,
     "createdAt": "2026-03-19T13:05:13.035"
@@ -12863,8 +12863,8 @@
   {
     "id": "c811753e66e035e6725d33157",
     "scenario": "Вы закончили рабочий день на час раньше. Начальство не знает. Что сделаете?",
-    "scenarioEn": "Вы закончили рабочий день на час раньше. Начальство не знает. Что сделаете?",
-    "options": "[{\"text\":\"Уйду — я заслужил(а) этот час\",\"textEn\":\"Уйду — я заслужил(а) этот час\",\"scoring\":{\"ANT\":3}},{\"text\":\"Останусь — вдруг заметят и будут проблемы\",\"textEn\":\"Останусь — вдруг заметят и будут проблемы\",\"scoring\":{\"AVD\":2,\"DEP\":1}},{\"text\":\"Найду работу на оставшийся час — рабочее время есть рабочее время\",\"textEn\":\"Найду работу на оставшийся час — рабочее время есть рабочее время\",\"scoring\":{\"OBC\":3}},{\"text\":\"Уйду без угрызений совести — мне всё равно\",\"textEn\":\"Уйду без угрызений совести — мне всё равно\",\"scoring\":{\"SZD\":3}}]",
+    "scenarioEn": "You've finished your workday an hour early. Management doesn't know. What do you do?",
+    "options": "[{\"text\":\"Уйду — я заслужил(а) этот час\",\"textEn\":\"Leave — I've earned that hour\",\"scoring\":{\"ANT\":3}},{\"text\":\"Останусь — вдруг заметят и будут проблемы\",\"textEn\":\"Stay — what if someone notices and there's trouble?\",\"scoring\":{\"AVD\":2,\"DEP\":1}},{\"text\":\"Найду работу на оставшийся час — рабочее время есть рабочее время\",\"textEn\":\"Find work for the remaining hour — work time is work time\",\"scoring\":{\"OBC\":3}},{\"text\":\"Уйду без угрызений совести — мне всё равно\",\"textEn\":\"Leave without a twinge of guilt — I don't care\",\"scoring\":{\"SZD\":3}}]",
     "active": true,
     "sortOrder": 1429,
     "createdAt": "2026-03-19T13:05:13.035"
@@ -12872,8 +12872,8 @@
   {
     "id": "c143867a982c3c5669b9e9fd4",
     "scenario": "Вы на рынке нашли идеальный подарок для друга, но он стоит больше, чем вы планировали. Что сделаете?",
-    "scenarioEn": "Вы на рынке нашли идеальный подарок для друга, но он стоит больше, чем вы планировали. Что сделаете?",
-    "options": "[{\"text\":\"Куплю — друг стоит любых денег\",\"textEn\":\"Куплю — друг стоит любых денег\",\"scoring\":{\"DEP\":3,\"BAR\":1}},{\"text\":\"Не куплю — бюджет есть бюджет\",\"textEn\":\"Не куплю — бюджет есть бюджет\",\"scoring\":{\"OBC\":3,\"BAR\":1}},{\"text\":\"Куплю — и потом буду жалеть о деньгах\",\"textEn\":\"Куплю — и потом буду жалеть о деньгах\",\"scoring\":{\"BOR\":2,\"AVD\":1,\"BAR\":1}},{\"text\":\"Куплю — хочу, чтобы он увидел, что я выбрал лучшее\",\"textEn\":\"Куплю — хочу, чтобы он увидел, что я выбрал лучшее\",\"scoring\":{\"NAR\":2,\"BAR\":1}}]",
+    "scenarioEn": "At a market, you find the perfect gift for a friend, but it costs more than you planned. What do you do?",
+    "options": "[{\"text\":\"Куплю — друг стоит любых денег\",\"textEn\":\"Buy it — my friend is worth any price\",\"scoring\":{\"DEP\":3,\"BAR\":1}},{\"text\":\"Не куплю — бюджет есть бюджет\",\"textEn\":\"Not buy it — a budget is a budget\",\"scoring\":{\"OBC\":3,\"BAR\":1}},{\"text\":\"Куплю — и потом буду жалеть о деньгах\",\"textEn\":\"Buy it — and regret the money afterward\",\"scoring\":{\"BOR\":2,\"AVD\":1,\"BAR\":1}},{\"text\":\"Куплю — хочу, чтобы он увидел, что я выбрал лучшее\",\"textEn\":\"Buy it — I want them to see I chose the very best\",\"scoring\":{\"NAR\":2,\"BAR\":1}}]",
     "active": true,
     "sortOrder": 1430,
     "createdAt": "2026-03-19T13:05:13.036"
@@ -12881,8 +12881,8 @@
   {
     "id": "c7f318263bb7b9f388747ad52",
     "scenario": "Вы на семейном ужине. Мама говорит: «Ты похудел(а) — или поправился(лась)?» Что чувствуете?",
-    "scenarioEn": "Вы на семейном ужине. Мама говорит: «Ты похудел(а) — или поправился(лась)?» Что чувствуете?",
-    "options": "[{\"text\":\"Раздражение — зачем комментировать моё тело?\",\"textEn\":\"Раздражение — зачем комментировать моё тело?\",\"scoring\":{\"ANT\":2}},{\"text\":\"Обидно — начинаю сомневаться в себе\",\"textEn\":\"Обидно — начинаю сомневаться в себе\",\"scoring\":{\"BOR\":1,\"AVD\":2,\"DPR\":1}},{\"text\":\"Промолчу — она не со зла, просто мамы так говорят\",\"textEn\":\"Промолчу — она не со зла, просто мамы так говорят\",\"scoring\":{\"DEP\":3}},{\"text\":\"Мне безразлично — моё тело, мои правила\",\"textEn\":\"Мне безразлично — моё тело, мои правила\",\"scoring\":{\"SZD\":3}}]",
+    "scenarioEn": "You're at a family dinner. Your mom says, \"Have you lost weight — or gained some?\" How do you feel?",
+    "options": "[{\"text\":\"Раздражение — зачем комментировать моё тело?\",\"textEn\":\"Irritated — why comment on my body?\",\"scoring\":{\"ANT\":2}},{\"text\":\"Обидно — начинаю сомневаться в себе\",\"textEn\":\"Hurt — I start doubting myself\",\"scoring\":{\"BOR\":1,\"AVD\":2,\"DPR\":1}},{\"text\":\"Промолчу — она не со зла, просто мамы так говорят\",\"textEn\":\"I'll let it go — she doesn't mean any harm, moms just say things like that\",\"scoring\":{\"DEP\":3}},{\"text\":\"Мне безразлично — моё тело, мои правила\",\"textEn\":\"Indifferent — my body, my rules\",\"scoring\":{\"SZD\":3}}]",
     "active": true,
     "sortOrder": 1431,
     "createdAt": "2026-03-19T13:05:13.037"
@@ -12890,8 +12890,8 @@
   {
     "id": "c02ed6d7c49fb22e9cf2d46ab",
     "scenario": "Друг подарил вам билет на мастер-класс по рисованию. Вы не умеете рисовать. Пойдёте?",
-    "scenarioEn": "Друг подарил вам билет на мастер-класс по рисованию. Вы не умеете рисовать. Пойдёте?",
-    "options": "[{\"text\":\"Конечно — это подарок от друга, и я хочу попробовать\",\"textEn\":\"Конечно — это подарок от друга, и я хочу попробовать\",\"scoring\":{\"DEP\":3}},{\"text\":\"Нет — я там опозорюсь среди тех, кто умеет\",\"textEn\":\"Нет — я там опозорюсь среди тех, кто умеет\",\"scoring\":{\"AVD\":3}},{\"text\":\"Пойду — и нарисую что-нибудь безумное, мне плевать на правила\",\"textEn\":\"Пойду — и нарисую что-нибудь безумное, мне плевать на правила\",\"scoring\":{\"ANT\":2,\"HIS\":1,\"BAR\":1}},{\"text\":\"Рисование — это про выражение, а не про умение. Пойду с открытым сердцем\",\"textEn\":\"Рисование — это про выражение, а не про умение. Пойду с открытым сердцем\",\"scoring\":{\"SZT\":3}}]",
+    "scenarioEn": "A friend gives you a ticket to a drawing workshop. You can't draw. Will you go?",
+    "options": "[{\"text\":\"Конечно — это подарок от друга, и я хочу попробовать\",\"textEn\":\"Of course — it's a gift from a friend, and I want to try\",\"scoring\":{\"DEP\":3}},{\"text\":\"Нет — я там опозорюсь среди тех, кто умеет\",\"textEn\":\"No — I'll embarrass myself among people who can draw\",\"scoring\":{\"AVD\":3}},{\"text\":\"Пойду — и нарисую что-нибудь безумное, мне плевать на правила\",\"textEn\":\"I'll go — and draw something wild, I don't care about the rules\",\"scoring\":{\"ANT\":2,\"HIS\":1,\"BAR\":1}},{\"text\":\"Рисование — это про выражение, а не про умение. Пойду с открытым сердцем\",\"textEn\":\"Drawing is about expression, not skill. I'll go with an open heart\",\"scoring\":{\"SZT\":3}}]",
     "active": true,
     "sortOrder": 1432,
     "createdAt": "2026-03-19T13:05:13.038"
@@ -12899,8 +12899,8 @@
   {
     "id": "c2ffbed7455c5fda77a086da3",
     "scenario": "Ваш коллега всегда берёт самую трудную задачу и потом жалуется, что устал. Что думаете?",
-    "scenarioEn": "Ваш коллега всегда берёт самую трудную задачу и потом жалуется, что устал. Что думаете?",
-    "options": "[{\"text\":\"Сам виноват — не умеет распределять нагрузку\",\"textEn\":\"Сам виноват — не умеет распределять нагрузку\",\"scoring\":{\"ANT\":1,\"OBC\":2}},{\"text\":\"Он хочет выглядеть героем — типичный спектакль\",\"textEn\":\"Он хочет выглядеть героем — типичный спектакль\",\"scoring\":{\"PAR\":2,\"NAR\":1}},{\"text\":\"Жалко — предложу помочь\",\"textEn\":\"Жалко — предложу помочь\",\"scoring\":{\"DEP\":3}},{\"text\":\"Мне безразлично — каждый сам выбирает свою нагрузку\",\"textEn\":\"Мне безразлично — каждый сам выбирает свою нагрузку\",\"scoring\":{\"SZD\":3}}]",
+    "scenarioEn": "A colleague always takes on the hardest task and then complains about being tired. What do you think?",
+    "options": "[{\"text\":\"Сам виноват — не умеет распределять нагрузку\",\"textEn\":\"Their own fault — they can't manage their workload\",\"scoring\":{\"ANT\":1,\"OBC\":2}},{\"text\":\"Он хочет выглядеть героем — типичный спектакль\",\"textEn\":\"They want to look like a hero — the usual performance\",\"scoring\":{\"PAR\":2,\"NAR\":1}},{\"text\":\"Жалко — предложу помочь\",\"textEn\":\"I feel for them — I'll offer to help\",\"scoring\":{\"DEP\":3}},{\"text\":\"Мне безразлично — каждый сам выбирает свою нагрузку\",\"textEn\":\"Indifferent — everyone chooses their own workload\",\"scoring\":{\"SZD\":3}}]",
     "active": true,
     "sortOrder": 1433,
     "createdAt": "2026-03-19T13:05:13.039"
@@ -12908,8 +12908,8 @@
   {
     "id": "cb14bf348a0e9e8e00d8f2329",
     "scenario": "Вам подарили дорогие духи. Запах вам не нравится. Будете пользоваться?",
-    "scenarioEn": "Вам подарили дорогие духи. Запах вам не нравится. Будете пользоваться?",
-    "options": "[{\"text\":\"Буду — чтобы не обидеть того, кто подарил\",\"textEn\":\"Буду — чтобы не обидеть того, кто подарил\",\"scoring\":{\"DEP\":3}},{\"text\":\"Не буду — буду пользоваться тем, что нравится мне\",\"textEn\":\"Не буду — буду пользоваться тем, что нравится мне\",\"scoring\":{\"ANT\":2,\"NAR\":1}},{\"text\":\"Поставлю на полку — красивый флакон, но пользоваться не буду\",\"textEn\":\"Поставлю на полку — красивый флакон, но пользоваться не буду\",\"scoring\":{\"OBC\":3}},{\"text\":\"Передарю — зачем хранить то, что не нравится\",\"textEn\":\"Передарю — зачем хранить то, что не нравится\",\"scoring\":{\"SZD\":3}}]",
+    "scenarioEn": "You're given an expensive perfume. You don't like the scent. Will you wear it?",
+    "options": "[{\"text\":\"Буду — чтобы не обидеть того, кто подарил\",\"textEn\":\"Yes — so as not to offend the person who gave it\",\"scoring\":{\"DEP\":3}},{\"text\":\"Не буду — буду пользоваться тем, что нравится мне\",\"textEn\":\"No — I'll wear what I like\",\"scoring\":{\"ANT\":2,\"NAR\":1}},{\"text\":\"Поставлю на полку — красивый флакон, но пользоваться не буду\",\"textEn\":\"Put it on the shelf — a pretty bottle, but I won't use it\",\"scoring\":{\"OBC\":3}},{\"text\":\"Передарю — зачем хранить то, что не нравится\",\"textEn\":\"Regift it — why keep something I don't like\",\"scoring\":{\"SZD\":3}}]",
     "active": true,
     "sortOrder": 1434,
     "createdAt": "2026-03-19T13:05:13.04"
@@ -12917,8 +12917,8 @@
   {
     "id": "c2bcc8829881d2a3df31fa777",
     "scenario": "Вы решили сделать татуировку. Друзья отговаривают. Что сделаете?",
-    "scenarioEn": "Вы решили сделать татуировку. Друзья отговаривают. Что сделаете?",
-    "options": "[{\"text\":\"Сделаю — моё тело, моё решение\",\"textEn\":\"Сделаю — моё тело, моё решение\",\"scoring\":{\"ANT\":3}},{\"text\":\"Задумаюсь — может, они видят то, чего я не вижу\",\"textEn\":\"Задумаюсь — может, они видят то, чего я не вижу\",\"scoring\":{\"DEP\":3}},{\"text\":\"Передумаю — вдруг мне потом не понравится, и все будут говорить «мы предупреждали»\",\"textEn\":\"Передумаю — вдруг мне потом не понравится, и все будут говорить «мы предупреждали»\",\"scoring\":{\"AVD\":3}},{\"text\":\"Татуировка — это символ, знак на теле, связь с чем-то глубинным\",\"textEn\":\"Татуировка — это символ, знак на теле, связь с чем-то глубинным\",\"scoring\":{\"SZT\":3}}]",
+    "scenarioEn": "You've decided to get a tattoo. Your friends are trying to talk you out of it. What do you do?",
+    "options": "[{\"text\":\"Сделаю — моё тело, моё решение\",\"textEn\":\"Get it — my body, my decision\",\"scoring\":{\"ANT\":3}},{\"text\":\"Задумаюсь — может, они видят то, чего я не вижу\",\"textEn\":\"Think it over — maybe they see something I don't\",\"scoring\":{\"DEP\":3}},{\"text\":\"Передумаю — вдруг мне потом не понравится, и все будут говорить «мы предупреждали»\",\"textEn\":\"Change my mind — what if I end up not liking it and everyone says \\\"We told you so\\\"?\",\"scoring\":{\"AVD\":3}},{\"text\":\"Татуировка — это символ, знак на теле, связь с чем-то глубинным\",\"textEn\":\"A tattoo is a symbol, a mark on the body, a link to something deep\",\"scoring\":{\"SZT\":3}}]",
     "active": true,
     "sortOrder": 1435,
     "createdAt": "2026-03-19T13:05:13.041"
@@ -12926,8 +12926,8 @@
   {
     "id": "c3f41de1ab49b80d74fede51d",
     "scenario": "Вы открыли для себя новую кухню (корейскую, перуанскую, грузинскую). Вам очень понравилось. Что дальше?",
-    "scenarioEn": "Вы открыли для себя новую кухню (корейскую, перуанскую, грузинскую). Вам очень понравилось. Что дальше?",
-    "options": "[{\"text\":\"Приглашу друзей в ресторан — хочу разделить впечатление\",\"textEn\":\"Приглашу друзей в ресторан — хочу разделить впечатление\",\"scoring\":{\"HIS\":2,\"DEP\":2}},{\"text\":\"Изучу рецепты и попробую приготовить дома — по инструкции\",\"textEn\":\"Изучу рецепты и попробую приготовить дома — по инструкции\",\"scoring\":{\"OBC\":3}},{\"text\":\"Буду ходить туда один(а) — мне не нужна компания для удовольствия\",\"textEn\":\"Буду ходить туда один(а) — мне не нужна компания для удовольствия\",\"scoring\":{\"SZD\":3}},{\"text\":\"Новая кухня — это путешествие без самолёта, каждый вкус — история\",\"textEn\":\"Новая кухня — это путешествие без самолёта, каждый вкус — история\",\"scoring\":{\"SZT\":3}}]",
+    "scenarioEn": "You've discovered a new cuisine (Korean, Peruvian, Georgian). You loved it. What next?",
+    "options": "[{\"text\":\"Приглашу друзей в ресторан — хочу разделить впечатление\",\"textEn\":\"Invite friends to the restaurant — I want to share the experience\",\"scoring\":{\"HIS\":2,\"DEP\":2}},{\"text\":\"Изучу рецепты и попробую приготовить дома — по инструкции\",\"textEn\":\"Look up recipes and try making it at home — following the instructions\",\"scoring\":{\"OBC\":3}},{\"text\":\"Буду ходить туда один(а) — мне не нужна компания для удовольствия\",\"textEn\":\"Keep going on my own — I don't need company to enjoy something\",\"scoring\":{\"SZD\":3}},{\"text\":\"Новая кухня — это путешествие без самолёта, каждый вкус — история\",\"textEn\":\"A new cuisine is travel without a plane — every flavor tells a story\",\"scoring\":{\"SZT\":3}}]",
     "active": true,
     "sortOrder": 1436,
     "createdAt": "2026-03-19T13:05:13.041"
@@ -12935,8 +12935,8 @@
   {
     "id": "c135013bd364ff002eb28f310",
     "scenario": "Вы на работе, и сегодня пятница. В 16:00 всё сделано. Что делаете?",
-    "scenarioEn": "Вы на работе, и сегодня пятница. В 16:00 всё сделано. Что делаете?",
-    "options": "[{\"text\":\"Ухожу — дело сделано, остальное не моя проблема\",\"textEn\":\"Ухожу — дело сделано, остальное не моя проблема\",\"scoring\":{\"ANT\":3}},{\"text\":\"Найду ещё задачу — рабочий день ещё не закончился\",\"textEn\":\"Найду ещё задачу — рабочий день ещё не закончился\",\"scoring\":{\"OBC\":3}},{\"text\":\"Уйду — но буду проверять рабочий чат из дома, вдруг что-то всплывёт\",\"textEn\":\"Уйду — но буду проверять рабочий чат из дома, вдруг что-то всплывёт\",\"scoring\":{\"DEP\":2}},{\"text\":\"Помогу коллеге — может, ему(ей) нужна помощь\",\"textEn\":\"Помогу коллеге — может, ему(ей) нужна помощь\",\"scoring\":{\"DEP\":3}}]",
+    "scenarioEn": "It's Friday at work. By 4 p.m., everything is done. What do you do?",
+    "options": "[{\"text\":\"Ухожу — дело сделано, остальное не моя проблема\",\"textEn\":\"Leave — the job's done, the rest isn't my problem\",\"scoring\":{\"ANT\":3}},{\"text\":\"Найду ещё задачу — рабочий день ещё не закончился\",\"textEn\":\"Find another task — the workday isn't over yet\",\"scoring\":{\"OBC\":3}},{\"text\":\"Уйду — но буду проверять рабочий чат из дома, вдруг что-то всплывёт\",\"textEn\":\"Leave — but keep checking the work chat from home, in case something comes up\",\"scoring\":{\"DEP\":2}},{\"text\":\"Помогу коллеге — может, ему(ей) нужна помощь\",\"textEn\":\"Help a colleague — maybe they need a hand\",\"scoring\":{\"DEP\":3}}]",
     "active": true,
     "sortOrder": 1437,
     "createdAt": "2026-03-19T13:05:13.042"
@@ -12944,8 +12944,8 @@
   {
     "id": "cd6f61421db24c71b7fc30d6e",
     "scenario": "Ваш друг признался, что ходит к психотерапевту и это помогает. Он предлагает вам тоже попробовать. Что ответите?",
-    "scenarioEn": "Ваш друг признался, что ходит к психотерапевту и это помогает. Он предлагает вам тоже попробовать. Что ответите?",
-    "options": "[{\"text\":\"Мне не нужен терапевт — я сам(а) разбираюсь со своими проблемами\",\"textEn\":\"Мне не нужен терапевт — я сам(а) разбираюсь со своими проблемами\",\"scoring\":{\"NAR\":2}},{\"text\":\"Может быть — но мне страшно открываться незнакомому человеку\",\"textEn\":\"Может быть — но мне страшно открываться незнакомому человеку\",\"scoring\":{\"AVD\":3}},{\"text\":\"Попробую — раз ему помогло, может, и мне поможет\",\"textEn\":\"Попробую — раз ему помогло, может, и мне поможет\",\"scoring\":{\"DEP\":3}},{\"text\":\"Изучу варианты: направления, отзывы, стоимость — и приму решение\",\"textEn\":\"Изучу варианты: направления, отзывы, стоимость — и приму решение\",\"scoring\":{\"OBC\":3}}]",
+    "scenarioEn": "A friend admits they see a therapist and it's helping. They suggest you try it too. What do you say?",
+    "options": "[{\"text\":\"Мне не нужен терапевт — я сам(а) разбираюсь со своими проблемами\",\"textEn\":\"I don't need a therapist — I deal with my problems myself\",\"scoring\":{\"NAR\":2}},{\"text\":\"Может быть — но мне страшно открываться незнакомому человеку\",\"textEn\":\"Maybe — but opening up to a stranger scares me\",\"scoring\":{\"AVD\":3}},{\"text\":\"Попробую — раз ему помогло, может, и мне поможет\",\"textEn\":\"I'll try — if it helped them, maybe it'll help me\",\"scoring\":{\"DEP\":3}},{\"text\":\"Изучу варианты: направления, отзывы, стоимость — и приму решение\",\"textEn\":\"I'll research the options: approaches, reviews, cost — and then decide\",\"scoring\":{\"OBC\":3}}]",
     "active": true,
     "sortOrder": 1438,
     "createdAt": "2026-03-19T13:05:13.043"
@@ -12953,8 +12953,8 @@
   {
     "id": "ccb6ef55c4aeba84409ac90a5",
     "scenario": "Вы написали кому-то важному длинное письмо — и он не ответил. Прошла неделя. Что чувствуете?",
-    "scenarioEn": "Вы написали кому-то важному длинное письмо — и он не ответил. Прошла неделя. Что чувствуете?",
-    "options": "[{\"text\":\"Он меня игнорирует — это неуважение\",\"textEn\":\"Он меня игнорирует — это неуважение\",\"scoring\":{\"PAR\":2,\"NAR\":1}},{\"text\":\"Может, занят — подожду ещё\",\"textEn\":\"Может, занят — подожду ещё\",\"scoring\":{\"DEP\":3}},{\"text\":\"Больно — может, я написал(а) что-то не то\",\"textEn\":\"Больно — может, я написал(а) что-то не то\",\"scoring\":{\"BOR\":2,\"AVD\":2}},{\"text\":\"Ну не ответил — значит, не судьба\",\"textEn\":\"Ну не ответил — значит, не судьба\",\"scoring\":{\"SZD\":3}}]",
+    "scenarioEn": "You wrote someone important a long letter — and they haven't replied. It's been a week. How do you feel?",
+    "options": "[{\"text\":\"Он меня игнорирует — это неуважение\",\"textEn\":\"They're ignoring me — it's disrespectful\",\"scoring\":{\"PAR\":2,\"NAR\":1}},{\"text\":\"Может, занят — подожду ещё\",\"textEn\":\"Maybe they're busy — I'll wait a bit longer\",\"scoring\":{\"DEP\":3}},{\"text\":\"Больно — может, я написал(а) что-то не то\",\"textEn\":\"It hurts — maybe I wrote something wrong\",\"scoring\":{\"BOR\":2,\"AVD\":2}},{\"text\":\"Ну не ответил — значит, не судьба\",\"textEn\":\"So they didn't reply — it wasn't meant to be\",\"scoring\":{\"SZD\":3}}]",
     "active": true,
     "sortOrder": 1439,
     "createdAt": "2026-03-19T13:05:13.044"
@@ -12962,8 +12962,8 @@
   {
     "id": "cbfe058dd6d2f609ef8e624f6",
     "scenario": "Вы решили провести один день, делая только то, что хочется — без «надо». Как прошёл день?",
-    "scenarioEn": "Вы решили провести один день, делая только то, что хочется — без «надо». Как прошёл день?",
-    "options": "[{\"text\":\"Свобода и кайф — почему я не делаю так каждый день?\",\"textEn\":\"Свобода и кайф — почему я не делаю так каждый день?\",\"scoring\":{\"ANT\":3}},{\"text\":\"Тревога — весь день чувствовал(а) вину за «ничегонеделание»\",\"textEn\":\"Тревога — весь день чувствовал(а) вину за «ничегонеделание»\",\"scoring\":{\"OBC\":3}},{\"text\":\"Провёл(а) с близким — оказалось, моё «хочу» — это быть рядом\",\"textEn\":\"Провёл(а) с близким — оказалось, моё «хочу» — это быть рядом\",\"scoring\":{\"DEP\":3}},{\"text\":\"Тишина и одиночество — именно то, чего не хватало\",\"textEn\":\"Тишина и одиночество — именно то, чего не хватало\",\"scoring\":{\"SZD\":3}}]",
+    "scenarioEn": "You decide to spend one day doing only what you want — no \"shoulds.\" How did it go?",
+    "options": "[{\"text\":\"Свобода и кайф — почему я не делаю так каждый день?\",\"textEn\":\"Freedom and bliss — why don't I do this every day?\",\"scoring\":{\"ANT\":3}},{\"text\":\"Тревога — весь день чувствовал(а) вину за «ничегонеделание»\",\"textEn\":\"Anxious — I felt guilty all day for \\\"doing nothing\\\"\",\"scoring\":{\"OBC\":3}},{\"text\":\"Провёл(а) с близким — оказалось, моё «хочу» — это быть рядом\",\"textEn\":\"I spent it with someone close — it turns out what I want is to be with them\",\"scoring\":{\"DEP\":3}},{\"text\":\"Тишина и одиночество — именно то, чего не хватало\",\"textEn\":\"Silence and solitude — exactly what I'd been missing\",\"scoring\":{\"SZD\":3}}]",
     "active": true,
     "sortOrder": 1440,
     "createdAt": "2026-03-19T13:05:13.046"
@@ -12971,8 +12971,8 @@
   {
     "id": "c55c582878e22074d05112c1d",
     "scenario": "Ваш партнёр сказал: «Иногда ты кажешься далёким(ой)». Что ответите?",
-    "scenarioEn": "Ваш партнёр сказал: «Иногда ты кажешься далёким(ой)». Что ответите?",
-    "options": "[{\"text\":\"Может быть — мне бывает сложно быть «здесь»\",\"textEn\":\"Может быть — мне бывает сложно быть «здесь»\",\"scoring\":{\"SZD\":2,\"SZT\":1}},{\"text\":\"Обидно — я стараюсь, но этого никогда не достаточно\",\"textEn\":\"Обидно — я стараюсь, но этого никогда не достаточно\",\"scoring\":{\"BOR\":2,\"AVD\":1,\"DPR\":1}},{\"text\":\"Далёкий(ая)? Я рядом, просто не кричу об этом\",\"textEn\":\"Далёкий(ая)? Я рядом, просто не кричу об этом\",\"scoring\":{\"DEP\":3}},{\"text\":\"Давай обсудим — что конкретно я могу изменить?\",\"textEn\":\"Давай обсудим — что конкретно я могу изменить?\",\"scoring\":{\"OBC\":3}}]",
+    "scenarioEn": "Your partner says, \"Sometimes you seem far away.\" What do you say?",
+    "options": "[{\"text\":\"Может быть — мне бывает сложно быть «здесь»\",\"textEn\":\"Maybe — it's sometimes hard for me to be \\\"here\\\"\",\"scoring\":{\"SZD\":2,\"SZT\":1}},{\"text\":\"Обидно — я стараюсь, но этого никогда не достаточно\",\"textEn\":\"That hurts — I try, but it's never enough\",\"scoring\":{\"BOR\":2,\"AVD\":1,\"DPR\":1}},{\"text\":\"Далёкий(ая)? Я рядом, просто не кричу об этом\",\"textEn\":\"Far away? I'm right here, I just don't shout about it\",\"scoring\":{\"DEP\":3}},{\"text\":\"Давай обсудим — что конкретно я могу изменить?\",\"textEn\":\"Let's talk about it — what specifically can I change?\",\"scoring\":{\"OBC\":3}}]",
     "active": true,
     "sortOrder": 1441,
     "createdAt": "2026-03-19T13:05:13.047"
@@ -12980,8 +12980,8 @@
   {
     "id": "c439dea75316c4504a85c68d3",
     "scenario": "Вы на благотворительном аукционе. Лот, который вам нравится, становится слишком дорогим. Что сделаете?",
-    "scenarioEn": "Вы на благотворительном аукционе. Лот, который вам нравится, становится слишком дорогим. Что сделаете?",
-    "options": "[{\"text\":\"Продолжу торговаться — не хочу проиграть\",\"textEn\":\"Продолжу торговаться — не хочу проиграть\",\"scoring\":{\"ANT\":1,\"NAR\":2}},{\"text\":\"Остановлюсь — бюджет есть бюджет\",\"textEn\":\"Остановлюсь — бюджет есть бюджет\",\"scoring\":{\"OBC\":3}},{\"text\":\"Остановлюсь — но буду грызть себя, что сдался(лась)\",\"textEn\":\"Остановлюсь — но буду грызть себя, что сдался(лась)\",\"scoring\":{\"BOR\":2,\"AVD\":1}},{\"text\":\"Мне всё равно — это просто вещь\",\"textEn\":\"Мне всё равно — это просто вещь\",\"scoring\":{\"SZD\":3}}]",
+    "scenarioEn": "You're at a charity auction. A lot you like is getting too expensive. What do you do?",
+    "options": "[{\"text\":\"Продолжу торговаться — не хочу проиграть\",\"textEn\":\"Keep bidding — I don't want to lose\",\"scoring\":{\"ANT\":1,\"NAR\":2}},{\"text\":\"Остановлюсь — бюджет есть бюджет\",\"textEn\":\"Stop — a budget is a budget\",\"scoring\":{\"OBC\":3}},{\"text\":\"Остановлюсь — но буду грызть себя, что сдался(лась)\",\"textEn\":\"Stop — but then kick myself for giving up\",\"scoring\":{\"BOR\":2,\"AVD\":1}},{\"text\":\"Мне всё равно — это просто вещь\",\"textEn\":\"I don't care — it's just a thing\",\"scoring\":{\"SZD\":3}}]",
     "active": true,
     "sortOrder": 1442,
     "createdAt": "2026-03-19T13:05:13.047"
@@ -12989,8 +12989,8 @@
   {
     "id": "c82e4eaf5fc13c624135e6dad",
     "scenario": "Друг говорит: «Ты бы мне понравился(лась), даже если бы мы только что познакомились». Что чувствуете?",
-    "scenarioEn": "Друг говорит: «Ты бы мне понравился(лась), даже если бы мы только что познакомились». Что чувствуете?",
-    "options": "[{\"text\":\"Тепло — это один из лучших комплиментов в моей жизни\",\"textEn\":\"Тепло — это один из лучших комплиментов в моей жизни\",\"scoring\":{\"DEP\":3}},{\"text\":\"Конечно — я нравлюсь людям с первой встречи\",\"textEn\":\"Конечно — я нравлюсь людям с первой встречи\",\"scoring\":{\"NAR\":3}},{\"text\":\"Сомневаюсь — если бы он знал, какой я на самом деле\",\"textEn\":\"Сомневаюсь — если бы он знал, какой я на самом деле\",\"scoring\":{\"AVD\":3}},{\"text\":\"Мне неловко — не знаю, как реагировать на такое\",\"textEn\":\"Мне неловко — не знаю, как реагировать на такое\",\"scoring\":{\"SZD\":2}}]",
+    "scenarioEn": "A friend says, \"I'd like you even if we'd only just met.\" How do you feel?",
+    "options": "[{\"text\":\"Тепло — это один из лучших комплиментов в моей жизни\",\"textEn\":\"Warm — it's one of the best compliments I've ever had\",\"scoring\":{\"DEP\":3}},{\"text\":\"Конечно — я нравлюсь людям с первой встречи\",\"textEn\":\"Of course — people like me from the first meeting\",\"scoring\":{\"NAR\":3}},{\"text\":\"Сомневаюсь — если бы он знал, какой я на самом деле\",\"textEn\":\"Doubtful — if they only knew what I'm really like\",\"scoring\":{\"AVD\":3}},{\"text\":\"Мне неловко — не знаю, как реагировать на такое\",\"textEn\":\"Awkward — I don't know how to react to something like that\",\"scoring\":{\"SZD\":2}}]",
     "active": true,
     "sortOrder": 1443,
     "createdAt": "2026-03-19T13:05:13.048"
@@ -12998,8 +12998,8 @@
   {
     "id": "cc27e37a81ce881af5f21fde3",
     "scenario": "Вы проснулись и поняли, что впервые за долгое время не тревожитесь. Что сделаете с этим днём?",
-    "scenarioEn": "Вы проснулись и поняли, что впервые за долгое время не тревожитесь. Что сделаете с этим днём?",
-    "options": "[{\"text\":\"Наслаждусь — побуду в тишине и покое\",\"textEn\":\"Наслаждусь — побуду в тишине и покое\",\"scoring\":{\"SZD\":3}},{\"text\":\"Начну волноваться — «А вдруг тревога вернётся?»\",\"textEn\":\"Начну волноваться — «А вдруг тревога вернётся?»\",\"scoring\":{\"BOR\":3}},{\"text\":\"Расскажу близкому — «Представляешь, я сегодня не тревожусь!»\",\"textEn\":\"Расскажу близкому — «Представляешь, я сегодня не тревожусь!»\",\"scoring\":{\"DEP\":3}},{\"text\":\"Воспользуюсь этим — сделаю всё, что откладывал(а) из-за тревоги\",\"textEn\":\"Воспользуюсь этим — сделаю всё, что откладывал(а) из-за тревоги\",\"scoring\":{\"OBC\":3}}]",
+    "scenarioEn": "You wake up and realize that for the first time in ages, you're not anxious. What will you do with the day?",
+    "options": "[{\"text\":\"Наслаждусь — побуду в тишине и покое\",\"textEn\":\"Savor it — spend some time in peace and quiet\",\"scoring\":{\"SZD\":3}},{\"text\":\"Начну волноваться — «А вдруг тревога вернётся?»\",\"textEn\":\"Start worrying — \\\"What if the anxiety comes back?\\\"\",\"scoring\":{\"BOR\":3}},{\"text\":\"Расскажу близкому — «Представляешь, я сегодня не тревожусь!»\",\"textEn\":\"Tell someone close — \\\"Can you believe it, I'm not anxious today!\\\"\",\"scoring\":{\"DEP\":3}},{\"text\":\"Воспользуюсь этим — сделаю всё, что откладывал(а) из-за тревоги\",\"textEn\":\"Make the most of it — do everything I've been putting off because of anxiety\",\"scoring\":{\"OBC\":3}}]",
     "active": true,
     "sortOrder": 1444,
     "createdAt": "2026-03-19T13:05:13.049"
@@ -13007,8 +13007,8 @@
   {
     "id": "c95d50ce6f4ff7e373a1c8ac9",
     "scenario": "Вам предложили роль в любительском спектакле — маленькая, но заметная. Согласитесь?",
-    "scenarioEn": "Вам предложили роль в любительском спектакле — маленькая, но заметная. Согласитесь?",
-    "options": "[{\"text\":\"Только главную роль или никакую — я не «маленький» актёр\",\"textEn\":\"Только главную роль или никакую — я не «маленький» актёр\",\"scoring\":{\"NAR\":3}},{\"text\":\"Попробую — это выход из зоны комфорта\",\"textEn\":\"Попробую — это выход из зоны комфорта\",\"scoring\":{\"OBC\":3}},{\"text\":\"Ни за что — я не могу играть перед людьми\",\"textEn\":\"Ни за что — я не могу играть перед людьми\",\"scoring\":{\"AVD\":3}},{\"text\":\"С радостью! Любая сцена — мой праздник!\",\"textEn\":\"С радостью! Любая сцена — мой праздник!\",\"scoring\":{\"HIS\":3}}]",
+    "scenarioEn": "You're offered a part in an amateur play — small, but noticeable. Will you accept?",
+    "options": "[{\"text\":\"Только главную роль или никакую — я не «маленький» актёр\",\"textEn\":\"The lead or nothing — I'm not a \\\"bit part\\\" actor\",\"scoring\":{\"NAR\":3}},{\"text\":\"Попробую — это выход из зоны комфорта\",\"textEn\":\"Give it a try — it's a step outside my comfort zone\",\"scoring\":{\"OBC\":3}},{\"text\":\"Ни за что — я не могу играть перед людьми\",\"textEn\":\"No way — I can't perform in front of people\",\"scoring\":{\"AVD\":3}},{\"text\":\"С радостью! Любая сцена — мой праздник!\",\"textEn\":\"Gladly! Any stage is a celebration for me!\",\"scoring\":{\"HIS\":3}}]",
     "active": true,
     "sortOrder": 1445,
     "createdAt": "2026-03-19T13:05:13.05"
@@ -13016,8 +13016,8 @@
   {
     "id": "c886dd8b25f8b2906daf68811",
     "scenario": "Вы перечитали свой последний пост в соцсетях через год. Он кажется глупым. Что сделаете?",
-    "scenarioEn": "Вы перечитали свой последний пост в соцсетях через год. Он кажется глупым. Что сделаете?",
-    "options": "[{\"text\":\"Удалю — прошлый я меня не устраивает\",\"textEn\":\"Удалю — прошлый я меня не устраивает\",\"scoring\":{\"AVD\":2,\"OBC\":1}},{\"text\":\"Оставлю — это был я тогда, и мне не стыдно\",\"textEn\":\"Оставлю — это был я тогда, и мне не стыдно\",\"scoring\":{\"SZD\":3,\"BAR\":1}},{\"text\":\"Посмеюсь и выложу скриншот — «Вот кем я был год назад!»\",\"textEn\":\"Посмеюсь и выложу скриншот — «Вот кем я был год назад!»\",\"scoring\":{\"HIS\":3}},{\"text\":\"Задумаюсь — как я менялся за этот год\",\"textEn\":\"Задумаюсь — как я менялся за этот год\",\"scoring\":{\"SZT\":3}}]",
+    "scenarioEn": "A year later, you reread your last social media post. It seems silly. What do you do?",
+    "options": "[{\"text\":\"Удалю — прошлый я меня не устраивает\",\"textEn\":\"Delete it — I'm not happy with my past self\",\"scoring\":{\"AVD\":2,\"OBC\":1}},{\"text\":\"Оставлю — это был я тогда, и мне не стыдно\",\"textEn\":\"Leave it — that was me back then, and I'm not ashamed\",\"scoring\":{\"SZD\":3,\"BAR\":1}},{\"text\":\"Посмеюсь и выложу скриншот — «Вот кем я был год назад!»\",\"textEn\":\"Laugh and post a screenshot — \\\"Here's who I was a year ago!\\\"\",\"scoring\":{\"HIS\":3}},{\"text\":\"Задумаюсь — как я менялся за этот год\",\"textEn\":\"Reflect — how have I changed over this year?\",\"scoring\":{\"SZT\":3}}]",
     "active": true,
     "sortOrder": 1446,
     "createdAt": "2026-03-19T13:05:13.051"
@@ -13025,8 +13025,8 @@
   {
     "id": "c04f7dc4b7f1d43c820a7c4a9",
     "scenario": "Вам предложили войти в совет директоров небольшой организации. Это престижно, но отнимет много времени. Что решите?",
-    "scenarioEn": "Вам предложили войти в совет директоров небольшой организации. Это престижно, но отнимет много времени. Что решите?",
-    "options": "[{\"text\":\"Соглашусь — статус и влияние важны для моей карьеры\",\"textEn\":\"Соглашусь — статус и влияние важны для моей карьеры\",\"scoring\":{\"NAR\":3}},{\"text\":\"Откажусь — моё свободное время дороже любого статуса\",\"textEn\":\"Откажусь — моё свободное время дороже любого статуса\",\"scoring\":{\"SZD\":3}},{\"text\":\"Проанализирую: сколько часов, какие обязанности, что получу\",\"textEn\":\"Проанализирую: сколько часов, какие обязанности, что получу\",\"scoring\":{\"OBC\":3}},{\"text\":\"Спрошу близких — как это повлияет на нашу жизнь\",\"textEn\":\"Спрошу близких — как это повлияет на нашу жизнь\",\"scoring\":{\"DEP\":3}}]",
+    "scenarioEn": "You're offered a seat on the board of a small organization. It's prestigious, but it'll take a lot of time. What do you decide?",
+    "options": "[{\"text\":\"Соглашусь — статус и влияние важны для моей карьеры\",\"textEn\":\"Accept — status and influence matter for my career\",\"scoring\":{\"NAR\":3}},{\"text\":\"Откажусь — моё свободное время дороже любого статуса\",\"textEn\":\"Decline — my free time is worth more than any status\",\"scoring\":{\"SZD\":3}},{\"text\":\"Проанализирую: сколько часов, какие обязанности, что получу\",\"textEn\":\"Analyze it: how many hours, what duties, what I'd get out of it\",\"scoring\":{\"OBC\":3}},{\"text\":\"Спрошу близких — как это повлияет на нашу жизнь\",\"textEn\":\"Ask my loved ones — how will it affect our life?\",\"scoring\":{\"DEP\":3}}]",
     "active": true,
     "sortOrder": 1447,
     "createdAt": "2026-03-19T13:05:13.052"
@@ -13034,8 +13034,8 @@
   {
     "id": "c4c090fc9dcf5eac5070e3aad",
     "scenario": "Вы на концерте. Музыкант просит зал подпевать. Что делаете?",
-    "scenarioEn": "Вы на концерте. Музыкант просит зал подпевать. Что делаете?",
-    "options": "[{\"text\":\"Пою во весь голос — вот для чего я здесь!\",\"textEn\":\"Пою во весь голос — вот для чего я здесь!\",\"scoring\":{\"HIS\":3}},{\"text\":\"Молча слушаю — мне нравится музыка, но петь я не буду\",\"textEn\":\"Молча слушаю — мне нравится музыка, но петь я не буду\",\"scoring\":{\"SZD\":3}},{\"text\":\"Подпеваю тихо — не хочу, чтобы кто-то слышал мой голос\",\"textEn\":\"Подпеваю тихо — не хочу, чтобы кто-то слышал мой голос\",\"scoring\":{\"AVD\":3}},{\"text\":\"Подпеваю — музыка объединяет, это коллективный ритуал\",\"textEn\":\"Подпеваю — музыка объединяет, это коллективный ритуал\",\"scoring\":{\"SZT\":2,\"DEP\":1}}]",
+    "scenarioEn": "You're at a concert. The musician asks the audience to sing along. What do you do?",
+    "options": "[{\"text\":\"Пою во весь голос — вот для чего я здесь!\",\"textEn\":\"Sing at the top of my lungs — that's what I'm here for!\",\"scoring\":{\"HIS\":3}},{\"text\":\"Молча слушаю — мне нравится музыка, но петь я не буду\",\"textEn\":\"Listen quietly — I love the music, but I'm not going to sing\",\"scoring\":{\"SZD\":3}},{\"text\":\"Подпеваю тихо — не хочу, чтобы кто-то слышал мой голос\",\"textEn\":\"Sing along softly — I don't want anyone to hear my voice\",\"scoring\":{\"AVD\":3}},{\"text\":\"Подпеваю — музыка объединяет, это коллективный ритуал\",\"textEn\":\"Sing along — music brings people together, it's a collective ritual\",\"scoring\":{\"SZT\":2,\"DEP\":1}}]",
     "active": true,
     "sortOrder": 1448,
     "createdAt": "2026-03-19T13:05:13.053"
@@ -13043,8 +13043,8 @@
   {
     "id": "ce853a06e14c3b37203c7390b",
     "scenario": "Вы обнаружили, что ваш любимый подкаст закрылся. Что чувствуете?",
-    "scenarioEn": "Вы обнаружили, что ваш любимый подкаст закрылся. Что чувствуете?",
-    "options": "[{\"text\":\"Грустно — как будто потерял друга, с которым общался каждый день\",\"textEn\":\"Грустно — как будто потерял друга, с которым общался каждый день\",\"scoring\":{\"BOR\":2,\"DEP\":1,\"DPR\":1}},{\"text\":\"Найду другой — контента в мире полно\",\"textEn\":\"Найду другой — контента в мире полно\",\"scoring\":{\"OBC\":3}},{\"text\":\"Мне нет дела — был один подкаст, будет другой\",\"textEn\":\"Мне нет дела — был один подкаст, будет другой\",\"scoring\":{\"SZD\":3}},{\"text\":\"В этом есть что-то символичное — всё в мире конечно\",\"textEn\":\"В этом есть что-то символичное — всё в мире конечно\",\"scoring\":{\"SZT\":3}}]",
+    "scenarioEn": "You find out your favorite podcast has ended. How do you feel?",
+    "options": "[{\"text\":\"Грустно — как будто потерял друга, с которым общался каждый день\",\"textEn\":\"Sad — like losing a friend I talked to every day\",\"scoring\":{\"BOR\":2,\"DEP\":1,\"DPR\":1}},{\"text\":\"Найду другой — контента в мире полно\",\"textEn\":\"I'll find another — there's plenty of content out there\",\"scoring\":{\"OBC\":3}},{\"text\":\"Мне нет дела — был один подкаст, будет другой\",\"textEn\":\"I don't care — there was one podcast, there'll be another\",\"scoring\":{\"SZD\":3}},{\"text\":\"В этом есть что-то символичное — всё в мире конечно\",\"textEn\":\"There's something symbolic about it — everything in the world comes to an end\",\"scoring\":{\"SZT\":3}}]",
     "active": true,
     "sortOrder": 1449,
     "createdAt": "2026-03-19T13:05:13.054"
@@ -13052,8 +13052,8 @@
   {
     "id": "c1d24f86eb72ee466579814fa",
     "scenario": "Друг попросил вас написать ему рекомендацию для учёбы за границей. Он — средний студент. Что напишете?",
-    "scenarioEn": "Друг попросил вас написать ему рекомендацию для учёбы за границей. Он — средний студент. Что напишете?",
-    "options": "[{\"text\":\"Напишу честно, но подчеркну его лучшие стороны\",\"textEn\":\"Напишу честно, но подчеркну его лучшие стороны\",\"scoring\":{\"OBC\":3}},{\"text\":\"Напишу восторженно — он мой друг, я хочу ему помочь\",\"textEn\":\"Напишу восторженно — он мой друг, я хочу ему помочь\",\"scoring\":{\"DEP\":3}},{\"text\":\"Откажусь — не хочу врать и подставлять свою репутацию\",\"textEn\":\"Откажусь — не хочу врать и подставлять свою репутацию\",\"scoring\":{\"NAR\":2,\"OBC\":1}},{\"text\":\"Мне всё равно — напишу что-нибудь, не вдаваясь в детали\",\"textEn\":\"Мне всё равно — напишу что-нибудь, не вдаваясь в детали\",\"scoring\":{\"SZD\":3}}]",
+    "scenarioEn": "A friend asks you to write them a recommendation for studying abroad. They're an average student. What do you write?",
+    "options": "[{\"text\":\"Напишу честно, но подчеркну его лучшие стороны\",\"textEn\":\"Be honest, but highlight their best qualities\",\"scoring\":{\"OBC\":3}},{\"text\":\"Напишу восторженно — он мой друг, я хочу ему помочь\",\"textEn\":\"Write something glowing — they're my friend, I want to help\",\"scoring\":{\"DEP\":3}},{\"text\":\"Откажусь — не хочу врать и подставлять свою репутацию\",\"textEn\":\"Decline — I don't want to lie and put my reputation on the line\",\"scoring\":{\"NAR\":2,\"OBC\":1}},{\"text\":\"Мне всё равно — напишу что-нибудь, не вдаваясь в детали\",\"textEn\":\"I don't care — I'll write something without going into detail\",\"scoring\":{\"SZD\":3}}]",
     "active": true,
     "sortOrder": 1450,
     "createdAt": "2026-03-19T13:05:13.055"
@@ -13061,8 +13061,8 @@
   {
     "id": "c9f06a83ce78a24923bf118bf",
     "scenario": "Ваш терапевт предложил вам упражнение: каждый вечер записывать три вещи, за которые вы благодарны. Через месяц?",
-    "scenarioEn": "Ваш терапевт предложил вам упражнение: каждый вечер записывать три вещи, за которые вы благодарны. Через месяц?",
-    "options": "[{\"text\":\"Стало легче — я замечаю хорошее, которое раньше пропускал(а)\",\"textEn\":\"Стало легче — я замечаю хорошее, которое раньше пропускал(а)\",\"scoring\":{\"DEP\":3}},{\"text\":\"Бросил(а) через неделю — слишком сентиментально\",\"textEn\":\"Бросил(а) через неделю — слишком сентиментально\",\"scoring\":{\"ANT\":2}},{\"text\":\"Делаю каждый день — это стало ритуалом, как молитва\",\"textEn\":\"Делаю каждый день — это стало ритуалом, как молитва\",\"scoring\":{\"SZT\":3}},{\"text\":\"Веду аккуратно — в таблице, с датами и категориями\",\"textEn\":\"Веду аккуратно — в таблице, с датами и категориями\",\"scoring\":{\"OBC\":3}}]",
+    "scenarioEn": "Your therapist suggests an exercise: every evening, write down three things you're grateful for. A month later?",
+    "options": "[{\"text\":\"Стало легче — я замечаю хорошее, которое раньше пропускал(а)\",\"textEn\":\"Things feel lighter — I notice good things I used to miss\",\"scoring\":{\"DEP\":3}},{\"text\":\"Бросил(а) через неделю — слишком сентиментально\",\"textEn\":\"I quit after a week — too sentimental\",\"scoring\":{\"ANT\":2}},{\"text\":\"Делаю каждый день — это стало ритуалом, как молитва\",\"textEn\":\"I do it every day — it's become a ritual, like a prayer\",\"scoring\":{\"SZT\":3}},{\"text\":\"Веду аккуратно — в таблице, с датами и категориями\",\"textEn\":\"I keep it neatly — in a spreadsheet, with dates and categories\",\"scoring\":{\"OBC\":3}}]",
     "active": true,
     "sortOrder": 1451,
     "createdAt": "2026-03-19T13:05:13.056"
@@ -13070,8 +13070,8 @@
   {
     "id": "c44459fc446b6ea2a80adb7bf",
     "scenario": "Вы на прогулке и увидели необычное граффити на стене. Что сделаете?",
-    "scenarioEn": "Вы на прогулке и увидели необычное граффити на стене. Что сделаете?",
-    "options": "[{\"text\":\"Остановлюсь и буду смотреть — уличное искусство говорит со мной\",\"textEn\":\"Остановлюсь и буду смотреть — уличное искусство говорит со мной\",\"scoring\":{\"SZT\":3}},{\"text\":\"Сфотографирую и выложу — «Смотрите, что я нашёл!»\",\"textEn\":\"Сфотографирую и выложу — «Смотрите, что я нашёл!»\",\"scoring\":{\"HIS\":3}},{\"text\":\"Пройду мимо — граффити меня не интересует\",\"textEn\":\"Пройду мимо — граффити меня не интересует\",\"scoring\":{\"SZD\":3}},{\"text\":\"Вандализм — стены не для рисования\",\"textEn\":\"Вандализм — стены не для рисования\",\"scoring\":{\"OBC\":3}}]",
+    "scenarioEn": "On a walk, you see unusual graffiti on a wall. What do you do?",
+    "options": "[{\"text\":\"Остановлюсь и буду смотреть — уличное искусство говорит со мной\",\"textEn\":\"Stop and look at it — street art speaks to me\",\"scoring\":{\"SZT\":3}},{\"text\":\"Сфотографирую и выложу — «Смотрите, что я нашёл!»\",\"textEn\":\"Take a photo and post it — \\\"Look what I found!\\\"\",\"scoring\":{\"HIS\":3}},{\"text\":\"Пройду мимо — граффити меня не интересует\",\"textEn\":\"Walk past — graffiti doesn't interest me\",\"scoring\":{\"SZD\":3}},{\"text\":\"Вандализм — стены не для рисования\",\"textEn\":\"It's vandalism — walls aren't for drawing on\",\"scoring\":{\"OBC\":3}}]",
     "active": true,
     "sortOrder": 1452,
     "createdAt": "2026-03-19T13:05:13.057"
@@ -13079,8 +13079,8 @@
   {
     "id": "cdc039bb451d2dd4172dac172",
     "scenario": "Ваш друг попросил вас встретить его маму в аэропорту. Вы никогда её не видели. Что чувствуете?",
-    "scenarioEn": "Ваш друг попросил вас встретить его маму в аэропорту. Вы никогда её не видели. Что чувствуете?",
-    "options": "[{\"text\":\"Пойду с радостью — мне важно помочь другу\",\"textEn\":\"Пойду с радостью — мне важно помочь другу\",\"scoring\":{\"DEP\":3}},{\"text\":\"Нервничаю — а вдруг не узнаю или скажу что-то не то?\",\"textEn\":\"Нервничаю — а вдруг не узнаю или скажу что-то не то?\",\"scoring\":{\"AVD\":3}},{\"text\":\"Мне некомфортно — зачем именно я?\",\"textEn\":\"Мне некомфортно — зачем именно я?\",\"scoring\":{\"SZD\":2}},{\"text\":\"Будет весело — представлюсь красиво, первое впечатление важно!\",\"textEn\":\"Будет весело — представлюсь красиво, первое впечатление важно!\",\"scoring\":{\"HIS\":2,\"NAR\":1}}]",
+    "scenarioEn": "A friend asks you to meet their mom at the airport. You've never seen her. How do you feel?",
+    "options": "[{\"text\":\"Пойду с радостью — мне важно помочь другу\",\"textEn\":\"Happy to go — helping my friend matters to me\",\"scoring\":{\"DEP\":3}},{\"text\":\"Нервничаю — а вдруг не узнаю или скажу что-то не то?\",\"textEn\":\"Nervous — what if I don't recognize her or say the wrong thing?\",\"scoring\":{\"AVD\":3}},{\"text\":\"Мне некомфортно — зачем именно я?\",\"textEn\":\"Uncomfortable — why me, of all people?\",\"scoring\":{\"SZD\":2}},{\"text\":\"Будет весело — представлюсь красиво, первое впечатление важно!\",\"textEn\":\"It'll be fun — I'll introduce myself in style, first impressions matter!\",\"scoring\":{\"HIS\":2,\"NAR\":1}}]",
     "active": true,
     "sortOrder": 1453,
     "createdAt": "2026-03-19T13:05:13.057"
@@ -13088,8 +13088,8 @@
   {
     "id": "c8f9678f77c23e0c05ead2920",
     "scenario": "Вы прочитали статью: «Люди после 30 перестают заводить новых друзей». Что думаете?",
-    "scenarioEn": "Вы прочитали статью: «Люди после 30 перестают заводить новых друзей». Что думаете?",
-    "options": "[{\"text\":\"Мне хватает тех друзей, что есть — новые не нужны\",\"textEn\":\"Мне хватает тех друзей, что есть — новые не нужны\",\"scoring\":{\"SZD\":3}},{\"text\":\"Грустно — и похоже на правду\",\"textEn\":\"Грустно — и похоже на правду\",\"scoring\":{\"BOR\":1,\"AVD\":2,\"DPR\":1}},{\"text\":\"Чепуха — я заведу друзей в любом возрасте!\",\"textEn\":\"Чепуха — я заведу друзей в любом возрасте!\",\"scoring\":{\"HIS\":3}},{\"text\":\"Не согласен(на) — но нужно прилагать больше усилий\",\"textEn\":\"Не согласен(на) — но нужно прилагать больше усилий\",\"scoring\":{\"DEP\":3}}]",
+    "scenarioEn": "You read an article: \"People stop making new friends after 30.\" What do you think?",
+    "options": "[{\"text\":\"Мне хватает тех друзей, что есть — новые не нужны\",\"textEn\":\"The friends I have are enough — I don't need new ones\",\"scoring\":{\"SZD\":3}},{\"text\":\"Грустно — и похоже на правду\",\"textEn\":\"Sad — and it rings true\",\"scoring\":{\"BOR\":1,\"AVD\":2,\"DPR\":1}},{\"text\":\"Чепуха — я заведу друзей в любом возрасте!\",\"textEn\":\"Nonsense — I'll make friends at any age!\",\"scoring\":{\"HIS\":3}},{\"text\":\"Не согласен(на) — но нужно прилагать больше усилий\",\"textEn\":\"I disagree — but it does take more effort\",\"scoring\":{\"DEP\":3}}]",
     "active": true,
     "sortOrder": 1454,
     "createdAt": "2026-03-19T13:05:13.058"
@@ -13097,8 +13097,8 @@
   {
     "id": "c5ae595d0a03dcda73d576066",
     "scenario": "Вы в книжном магазине. Продавец рекомендует книгу, которая вам не подходит. Что сделаете?",
-    "scenarioEn": "Вы в книжном магазине. Продавец рекомендует книгу, которая вам не подходит. Что сделаете?",
-    "options": "[{\"text\":\"Вежливо откажусь и выберу сам(а)\",\"textEn\":\"Вежливо откажусь и выберу сам(а)\",\"scoring\":{\"OBC\":3}},{\"text\":\"Куплю, чтобы не обидеть — он же старался\",\"textEn\":\"Куплю, чтобы не обидеть — он же старался\",\"scoring\":{\"DEP\":3,\"BAR\":1}},{\"text\":\"Мне всё равно — я знаю, что хочу, и не слушаю продавцов\",\"textEn\":\"Мне всё равно — я знаю, что хочу, и не слушаю продавцов\",\"scoring\":{\"SZD\":3}},{\"text\":\"Скажу: «Я ищу другое» — и расскажу, что именно\",\"textEn\":\"Скажу: «Я ищу другое» — и расскажу, что именно\",\"scoring\":{\"ANT\":1,\"NAR\":1}}]",
+    "scenarioEn": "You're in a bookstore. The clerk recommends a book that isn't right for you. What do you do?",
+    "options": "[{\"text\":\"Вежливо откажусь и выберу сам(а)\",\"textEn\":\"Politely decline and choose for myself\",\"scoring\":{\"OBC\":3}},{\"text\":\"Куплю, чтобы не обидеть — он же старался\",\"textEn\":\"Buy it so as not to offend them — they tried\",\"scoring\":{\"DEP\":3,\"BAR\":1}},{\"text\":\"Мне всё равно — я знаю, что хочу, и не слушаю продавцов\",\"textEn\":\"I don't care — I know what I want and don't listen to salespeople\",\"scoring\":{\"SZD\":3}},{\"text\":\"Скажу: «Я ищу другое» — и расскажу, что именно\",\"textEn\":\"Say, \\\"I'm looking for something else\\\" — and explain exactly what\",\"scoring\":{\"ANT\":1,\"NAR\":1}}]",
     "active": true,
     "sortOrder": 1455,
     "createdAt": "2026-03-19T13:05:13.059"
@@ -13106,8 +13106,8 @@
   {
     "id": "c6ec2154f23f476b11bac067d",
     "scenario": "Вы замечаете, что стали чаще улыбаться без причины. Что думаете?",
-    "scenarioEn": "Вы замечаете, что стали чаще улыбаться без причины. Что думаете?",
-    "options": "[{\"text\":\"Наконец-то я в гармонии — улыбка идёт изнутри\",\"textEn\":\"Наконец-то я в гармонии — улыбка идёт изнутри\",\"scoring\":{\"SZT\":3}},{\"text\":\"Подозрительно — может, я просто устал(а) и не контролирую лицо\",\"textEn\":\"Подозрительно — может, я просто устал(а) и не контролирую лицо\",\"scoring\":{\"PAR\":2}},{\"text\":\"Приятно — и хочу поделиться этим настроением с кем-то\",\"textEn\":\"Приятно — и хочу поделиться этим настроением с кем-то\",\"scoring\":{\"HIS\":2,\"DEP\":1}},{\"text\":\"Хорошо — значит, я всё делаю правильно\",\"textEn\":\"Хорошо — значит, я всё делаю правильно\",\"scoring\":{\"NAR\":3}}]",
+    "scenarioEn": "You notice you've been smiling more often for no reason. What do you think?",
+    "options": "[{\"text\":\"Наконец-то я в гармонии — улыбка идёт изнутри\",\"textEn\":\"I'm finally in harmony — the smile comes from within\",\"scoring\":{\"SZT\":3}},{\"text\":\"Подозрительно — может, я просто устал(а) и не контролирую лицо\",\"textEn\":\"Suspicious — maybe I'm just tired and not in control of my face\",\"scoring\":{\"PAR\":2}},{\"text\":\"Приятно — и хочу поделиться этим настроением с кем-то\",\"textEn\":\"Nice — and I want to share the mood with someone\",\"scoring\":{\"HIS\":2,\"DEP\":1}},{\"text\":\"Хорошо — значит, я всё делаю правильно\",\"textEn\":\"Good — it means I'm doing everything right\",\"scoring\":{\"NAR\":3}}]",
     "active": true,
     "sortOrder": 1456,
     "createdAt": "2026-03-19T13:05:13.06"
@@ -13115,8 +13115,8 @@
   {
     "id": "cb32821dd71ff7faaaa155091",
     "scenario": "Друг предложил вам поменяться ролями на один день: он делает вашу работу, вы — его. Согласитесь?",
-    "scenarioEn": "Друг предложил вам поменяться ролями на один день: он делает вашу работу, вы — его. Согласитесь?",
-    "options": "[{\"text\":\"Звучит как приключение — почему нет!\",\"textEn\":\"Звучит как приключение — почему нет!\",\"scoring\":{\"ANT\":2,\"HIS\":1,\"BAR\":1}},{\"text\":\"Нет — мою работу никто не сделает лучше меня\",\"textEn\":\"Нет — мою работу никто не сделает лучше меня\",\"scoring\":{\"NAR\":2,\"OBC\":1}},{\"text\":\"Попробую — интересно увидеть мир чужими глазами\",\"textEn\":\"Попробую — интересно увидеть мир чужими глазами\",\"scoring\":{\"SZT\":3}},{\"text\":\"Боюсь — а вдруг его работа сложнее, и я не справлюсь?\",\"textEn\":\"Боюсь — а вдруг его работа сложнее, и я не справлюсь?\",\"scoring\":{\"AVD\":3,\"DPR\":2}}]",
+    "scenarioEn": "A friend suggests swapping roles for a day: they do your job, you do theirs. Will you agree?",
+    "options": "[{\"text\":\"Звучит как приключение — почему нет!\",\"textEn\":\"Sounds like an adventure — why not!\",\"scoring\":{\"ANT\":2,\"HIS\":1,\"BAR\":1}},{\"text\":\"Нет — мою работу никто не сделает лучше меня\",\"textEn\":\"No — nobody can do my job better than me\",\"scoring\":{\"NAR\":2,\"OBC\":1}},{\"text\":\"Попробую — интересно увидеть мир чужими глазами\",\"textEn\":\"I'll try — it'd be interesting to see the world through someone else's eyes\",\"scoring\":{\"SZT\":3}},{\"text\":\"Боюсь — а вдруг его работа сложнее, и я не справлюсь?\",\"textEn\":\"I'm scared — what if their job is harder and I can't cope?\",\"scoring\":{\"AVD\":3,\"DPR\":2}}]",
     "active": true,
     "sortOrder": 1457,
     "createdAt": "2026-03-19T13:05:13.061"
@@ -13124,8 +13124,8 @@
   {
     "id": "c881e736ef63d3d2f7e1a70bd",
     "scenario": "Вы на свадьбе друга. Все танцуют. Вы не любите танцевать. Что делаете?",
-    "scenarioEn": "Вы на свадьбе друга. Все танцуют. Вы не любите танцевать. Что делаете?",
-    "options": "[{\"text\":\"Выйду танцевать — ради друга можно\",\"textEn\":\"Выйду танцевать — ради друга можно\",\"scoring\":{\"DEP\":3}},{\"text\":\"Посижу за столом — мне и так хорошо\",\"textEn\":\"Посижу за столом — мне и так хорошо\",\"scoring\":{\"SZD\":3}},{\"text\":\"Выйду и зажгу! — свадьба бывает раз в жизни\",\"textEn\":\"Выйду и зажгу! — свадьба бывает раз в жизни\",\"scoring\":{\"HIS\":3}},{\"text\":\"Уйду тихо — танцы не для меня, и мне неловко отказывать\",\"textEn\":\"Уйду тихо — танцы не для меня, и мне неловко отказывать\",\"scoring\":{\"AVD\":3}}]",
+    "scenarioEn": "You're at a friend's wedding. Everyone is dancing. You don't like dancing. What do you do?",
+    "options": "[{\"text\":\"Выйду танцевать — ради друга можно\",\"textEn\":\"Get up and dance — I can do it for my friend\",\"scoring\":{\"DEP\":3}},{\"text\":\"Посижу за столом — мне и так хорошо\",\"textEn\":\"Stay at the table — I'm fine as I am\",\"scoring\":{\"SZD\":3}},{\"text\":\"Выйду и зажгу! — свадьба бывает раз в жизни\",\"textEn\":\"Get out there and tear it up! — you only get married once\",\"scoring\":{\"HIS\":3}},{\"text\":\"Уйду тихо — танцы не для меня, и мне неловко отказывать\",\"textEn\":\"Slip away quietly — dancing isn't for me, and saying no feels awkward\",\"scoring\":{\"AVD\":3}}]",
     "active": true,
     "sortOrder": 1458,
     "createdAt": "2026-03-19T13:05:13.061"
@@ -13133,8 +13133,8 @@
   {
     "id": "cdfc0cc1e96d939f842ce7839",
     "scenario": "Ваш друг обанкротился и просит одолжить крупную сумму. Вы можете, но рискуете. Что решите?",
-    "scenarioEn": "Ваш друг обанкротился и просит одолжить крупную сумму. Вы можете, но рискуете. Что решите?",
-    "options": "[{\"text\":\"Дам — он мой друг, я не могу его бросить\",\"textEn\":\"Дам — он мой друг, я не могу его бросить\",\"scoring\":{\"DEP\":3}},{\"text\":\"Дам часть — и зафиксирую условия письменно\",\"textEn\":\"Дам часть — и зафиксирую условия письменно\",\"scoring\":{\"OBC\":3}},{\"text\":\"Откажу — деньги портят дружбу, и он скорее всего не вернёт\",\"textEn\":\"Откажу — деньги портят дружбу, и он скорее всего не вернёт\",\"scoring\":{\"PAR\":3}},{\"text\":\"Мне тяжело — хочу помочь, но боюсь рисковать\",\"textEn\":\"Мне тяжело — хочу помочь, но боюсь рисковать\",\"scoring\":{\"BOR\":3}}]",
+    "scenarioEn": "A friend has gone bankrupt and asks to borrow a large sum. You can afford it, but it's a risk. What do you decide?",
+    "options": "[{\"text\":\"Дам — он мой друг, я не могу его бросить\",\"textEn\":\"Lend it — they're my friend, I can't abandon them\",\"scoring\":{\"DEP\":3}},{\"text\":\"Дам часть — и зафиксирую условия письменно\",\"textEn\":\"Lend part of it — and put the terms in writing\",\"scoring\":{\"OBC\":3}},{\"text\":\"Откажу — деньги портят дружбу, и он скорее всего не вернёт\",\"textEn\":\"Refuse — money ruins friendships, and they probably won't pay it back\",\"scoring\":{\"PAR\":3}},{\"text\":\"Мне тяжело — хочу помочь, но боюсь рисковать\",\"textEn\":\"It's hard — I want to help, but I'm afraid of the risk\",\"scoring\":{\"BOR\":3}}]",
     "active": true,
     "sortOrder": 1459,
     "createdAt": "2026-03-19T13:05:13.062"
@@ -13142,8 +13142,8 @@
   {
     "id": "c645222222b441baf72a24feb",
     "scenario": "Вы поехали в отпуск и впервые за долгое время ни о чём не тревожитесь. Какая мысль первой приходит в голову?",
-    "scenarioEn": "Вы поехали в отпуск и впервые за долгое время ни о чём не тревожитесь. Какая мысль первой приходит в голову?",
-    "options": "[{\"text\":\"Наконец-то — вот так и надо жить\",\"textEn\":\"Наконец-то — вот так и надо жить\",\"scoring\":{\"SZD\":3}},{\"text\":\"Подозрительное спокойствие — значит, скоро что-то случится\",\"textEn\":\"Подозрительное спокойствие — значит, скоро что-то случится\",\"scoring\":{\"BOR\":2}},{\"text\":\"Хочу позвонить близкому и рассказать, как мне хорошо\",\"textEn\":\"Хочу позвонить близкому и рассказать, как мне хорошо\",\"scoring\":{\"DEP\":3}},{\"text\":\"Это чувство нужно запомнить — и воспроизводить дома\",\"textEn\":\"Это чувство нужно запомнить — и воспроизводить дома\",\"scoring\":{\"OBC\":3}}]",
+    "scenarioEn": "You're on vacation and, for the first time in ages, you're not worried about anything. What's the first thought that comes to mind?",
+    "options": "[{\"text\":\"Наконец-то — вот так и надо жить\",\"textEn\":\"At last — this is how life should be\",\"scoring\":{\"SZD\":3}},{\"text\":\"Подозрительное спокойствие — значит, скоро что-то случится\",\"textEn\":\"Suspiciously calm — something must be about to happen\",\"scoring\":{\"BOR\":2}},{\"text\":\"Хочу позвонить близкому и рассказать, как мне хорошо\",\"textEn\":\"I want to call someone close and tell them how good I feel\",\"scoring\":{\"DEP\":3}},{\"text\":\"Это чувство нужно запомнить — и воспроизводить дома\",\"textEn\":\"I need to remember this feeling — and recreate it at home\",\"scoring\":{\"OBC\":3}}]",
     "active": true,
     "sortOrder": 1460,
     "createdAt": "2026-03-19T13:05:13.063"
@@ -13151,8 +13151,8 @@
   {
     "id": "c6a2026174872c17ca00ab719",
     "scenario": "Друг говорит: «Ты всегда знаешь, что сказать в трудную минуту». Что чувствуете?",
-    "scenarioEn": "Друг говорит: «Ты всегда знаешь, что сказать в трудную минуту». Что чувствуете?",
-    "options": "[{\"text\":\"Горжусь — значит, мои слова имеют вес\",\"textEn\":\"Горжусь — значит, мои слова имеют вес\",\"scoring\":{\"NAR\":3}},{\"text\":\"Тепло — рад(а), что могу помочь\",\"textEn\":\"Тепло — рад(а), что могу помочь\",\"scoring\":{\"DEP\":3}},{\"text\":\"Неловко — я не чувствую себя таким мудрым(ой)\",\"textEn\":\"Неловко — я не чувствую себя таким мудрым(ой)\",\"scoring\":{\"AVD\":3}},{\"text\":\"Мне просто легко читать людей — это не заслуга, а наблюдательность\",\"textEn\":\"Мне просто легко читать людей — это не заслуга, а наблюдательность\",\"scoring\":{\"SZT\":2}}]",
+    "scenarioEn": "A friend says, \"You always know what to say in hard times.\" How do you feel?",
+    "options": "[{\"text\":\"Горжусь — значит, мои слова имеют вес\",\"textEn\":\"Proud — it means my words carry weight\",\"scoring\":{\"NAR\":3}},{\"text\":\"Тепло — рад(а), что могу помочь\",\"textEn\":\"Warm — I'm glad I can help\",\"scoring\":{\"DEP\":3}},{\"text\":\"Неловко — я не чувствую себя таким мудрым(ой)\",\"textEn\":\"Awkward — I don't feel that wise\",\"scoring\":{\"AVD\":3}},{\"text\":\"Мне просто легко читать людей — это не заслуга, а наблюдательность\",\"textEn\":\"I just find people easy to read — it's not a merit, it's observation\",\"scoring\":{\"SZT\":2}}]",
     "active": true,
     "sortOrder": 1461,
     "createdAt": "2026-03-19T13:05:13.064"
@@ -13160,8 +13160,8 @@
   {
     "id": "c4d2c9354acd8daeda5d2b1e5",
     "scenario": "Вы на распродаже. Вокруг толпа. Люди толкаются. Что делаете?",
-    "scenarioEn": "Вы на распродаже. Вокруг толпа. Люди толкаются. Что делаете?",
-    "options": "[{\"text\":\"Ухожу — мне не нужны скидки ценой нервов\",\"textEn\":\"Ухожу — мне не нужны скидки ценой нервов\",\"scoring\":{\"SZD\":3}},{\"text\":\"Растолкаю всех — мне нужна та вещь!\",\"textEn\":\"Растолкаю всех — мне нужна та вещь!\",\"scoring\":{\"ANT\":3}},{\"text\":\"Тревожно — толпа давит, хочу выбраться\",\"textEn\":\"Тревожно — толпа давит, хочу выбраться\",\"scoring\":{\"BOR\":1,\"AVD\":2}},{\"text\":\"Приду завтра — скидки будут, а толпы нет\",\"textEn\":\"Приду завтра — скидки будут, а толпы нет\",\"scoring\":{\"OBC\":3}}]",
+    "scenarioEn": "You're at a big sale. There's a crowd. People are pushing. What do you do?",
+    "options": "[{\"text\":\"Ухожу — мне не нужны скидки ценой нервов\",\"textEn\":\"Leave — I don't need discounts at the cost of my nerves\",\"scoring\":{\"SZD\":3}},{\"text\":\"Растолкаю всех — мне нужна та вещь!\",\"textEn\":\"Push through everyone — I need that item!\",\"scoring\":{\"ANT\":3}},{\"text\":\"Тревожно — толпа давит, хочу выбраться\",\"textEn\":\"Anxious — the crowd is crushing, I want out\",\"scoring\":{\"BOR\":1,\"AVD\":2}},{\"text\":\"Приду завтра — скидки будут, а толпы нет\",\"textEn\":\"Come back tomorrow — the discounts will still be there, the crowd won't\",\"scoring\":{\"OBC\":3}}]",
     "active": true,
     "sortOrder": 1462,
     "createdAt": "2026-03-19T13:05:13.065"
@@ -13169,8 +13169,8 @@
   {
     "id": "cc66c5a6d840451c4918bc8ca",
     "scenario": "Ваш партнёр написал вам письмо от руки — на бумаге, от души, с ошибками. Что чувствуете?",
-    "scenarioEn": "Ваш партнёр написал вам письмо от руки — на бумаге, от души, с ошибками. Что чувствуете?",
-    "options": "[{\"text\":\"Растрогаюсь — в этом есть что-то из другого времени\",\"textEn\":\"Растрогаюсь — в этом есть что-то из другого времени\",\"scoring\":{\"SZT\":3}},{\"text\":\"Тепло — он(а) потратил(а) время и вложил(а) чувства\",\"textEn\":\"Тепло — он(а) потратил(а) время и вложил(а) чувства\",\"scoring\":{\"DEP\":3}},{\"text\":\"Замечу ошибки — но ничего не скажу, главное — содержание\",\"textEn\":\"Замечу ошибки — но ничего не скажу, главное — содержание\",\"scoring\":{\"OBC\":3}},{\"text\":\"Приятно — но не пойму, зачем не написать в мессенджер\",\"textEn\":\"Приятно — но не пойму, зачем не написать в мессенджер\",\"scoring\":{\"SZD\":3}}]",
+    "scenarioEn": "Your partner has written you a handwritten letter — on paper, from the heart, with spelling mistakes. How do you feel?",
+    "options": "[{\"text\":\"Растрогаюсь — в этом есть что-то из другого времени\",\"textEn\":\"Moved — there's something from another era about it\",\"scoring\":{\"SZT\":3}},{\"text\":\"Тепло — он(а) потратил(а) время и вложил(а) чувства\",\"textEn\":\"Warm — they took the time and put their feelings into it\",\"scoring\":{\"DEP\":3}},{\"text\":\"Замечу ошибки — но ничего не скажу, главное — содержание\",\"textEn\":\"I'll notice the mistakes — but say nothing, what matters is what it says\",\"scoring\":{\"OBC\":3}},{\"text\":\"Приятно — но не пойму, зачем не написать в мессенджер\",\"textEn\":\"Nice — but I don't see why they didn't just text me\",\"scoring\":{\"SZD\":3}}]",
     "active": true,
     "sortOrder": 1463,
     "createdAt": "2026-03-19T13:05:13.065"
@@ -13178,8 +13178,8 @@
   {
     "id": "c46a6dbc734df800ff37bd38d",
     "scenario": "Если бы вы могли задать одному человеку на Земле один вопрос — и получить честный ответ — кому бы вы задали и о чём?",
-    "scenarioEn": "Если бы вы могли задать одному человеку на Земле один вопрос — и получить честный ответ — кому бы вы задали и о чём?",
-    "options": "[{\"text\":\"Спросил(а) бы у себя в будущем: «Ты счастлив(а)?»\",\"textEn\":\"Спросил(а) бы у себя в будущем: «Ты счастлив(а)?»\",\"scoring\":{\"SZT\":3}},{\"text\":\"Спросил(а) бы у близкого: «Ты чувствуешь мою любовь?»\",\"textEn\":\"Спросил(а) бы у близкого: «Ты чувствуешь мою любовь?»\",\"scoring\":{\"DEP\":3}},{\"text\":\"Спросил(а) бы у влиятельного человека: «Что вы на самом деле думаете?»\",\"textEn\":\"Спросил(а) бы у влиятельного человека: «Что вы на самом деле думаете?»\",\"scoring\":{\"PAR\":2,\"NAR\":1}},{\"text\":\"Спросил(а) бы у того, кто молчит: «Почему ты ушёл(а)?»\",\"textEn\":\"Спросил(а) бы у того, кто молчит: «Почему ты ушёл(а)?»\",\"scoring\":{\"BOR\":3}}]",
+    "scenarioEn": "If you could ask one person on Earth one question — and get an honest answer — whom would you ask, and what?",
+    "options": "[{\"text\":\"Спросил(а) бы у себя в будущем: «Ты счастлив(а)?»\",\"textEn\":\"I'd ask my future self, \\\"Are you happy?\\\"\",\"scoring\":{\"SZT\":3}},{\"text\":\"Спросил(а) бы у близкого: «Ты чувствуешь мою любовь?»\",\"textEn\":\"I'd ask someone close, \\\"Do you feel my love?\\\"\",\"scoring\":{\"DEP\":3}},{\"text\":\"Спросил(а) бы у влиятельного человека: «Что вы на самом деле думаете?»\",\"textEn\":\"I'd ask someone powerful, \\\"What do you really think?\\\"\",\"scoring\":{\"PAR\":2,\"NAR\":1}},{\"text\":\"Спросил(а) бы у того, кто молчит: «Почему ты ушёл(а)?»\",\"textEn\":\"I'd ask the one who went silent, \\\"Why did you leave?\\\"\",\"scoring\":{\"BOR\":3}}]",
     "active": true,
     "sortOrder": 1464,
     "createdAt": "2026-03-19T13:05:13.066"
@@ -13187,8 +13187,8 @@
   {
     "id": "ca70ecf108948d5c52be82615",
     "scenario": "Вы нашли детскую игрушку, которую считали потерянной навсегда. Что чувствуете?",
-    "scenarioEn": "Вы нашли детскую игрушку, которую считали потерянной навсегда. Что чувствуете?",
-    "options": "[{\"text\":\"Волна тепла — как привет из другой жизни\",\"textEn\":\"Волна тепла — как привет из другой жизни\",\"scoring\":{\"SZT\":3}},{\"text\":\"Расплачусь — слишком много воспоминаний сразу\",\"textEn\":\"Расплачусь — слишком много воспоминаний сразу\",\"scoring\":{\"BOR\":3,\"BAR\":1}},{\"text\":\"Покажу маме — она тоже помнит\",\"textEn\":\"Покажу маме — она тоже помнит\",\"scoring\":{\"DEP\":3}},{\"text\":\"Игрушка есть игрушка — положу обратно\",\"textEn\":\"Игрушка есть игрушка — положу обратно\",\"scoring\":{\"SZD\":3}}]",
+    "scenarioEn": "You find a childhood toy you thought was lost forever. How do you feel?",
+    "options": "[{\"text\":\"Волна тепла — как привет из другой жизни\",\"textEn\":\"A wave of warmth — like a greeting from another life\",\"scoring\":{\"SZT\":3}},{\"text\":\"Расплачусь — слишком много воспоминаний сразу\",\"textEn\":\"I'll burst into tears — too many memories all at once\",\"scoring\":{\"BOR\":3,\"BAR\":1}},{\"text\":\"Покажу маме — она тоже помнит\",\"textEn\":\"I'll show it to my mom — she'll remember it too\",\"scoring\":{\"DEP\":3}},{\"text\":\"Игрушка есть игрушка — положу обратно\",\"textEn\":\"A toy is a toy — I'll put it back\",\"scoring\":{\"SZD\":3}}]",
     "active": true,
     "sortOrder": 1465,
     "createdAt": "2026-03-19T13:05:13.067"
@@ -13196,8 +13196,8 @@
   {
     "id": "c03a3ac3686b4f78090a551df",
     "scenario": "Вас попросили организовать сюрприз для коллеги, который уходит. Вы его не очень любите. Что сделаете?",
-    "scenarioEn": "Вас попросили организовать сюрприз для коллеги, который уходит. Вы его не очень любите. Что сделаете?",
-    "options": "[{\"text\":\"Организую — это профессионализм, не личные чувства\",\"textEn\":\"Организую — это профессионализм, не личные чувства\",\"scoring\":{\"OBC\":3}},{\"text\":\"Откажусь — не буду притворяться\",\"textEn\":\"Откажусь — не буду притворяться\",\"scoring\":{\"ANT\":3}},{\"text\":\"Организую — не хочу, чтобы коллеги подумали, что я злой(ая)\",\"textEn\":\"Организую — не хочу, чтобы коллеги подумали, что я злой(ая)\",\"scoring\":{\"DEP\":3}},{\"text\":\"Зачем именно я? Пусть организует тот, кто его любит\",\"textEn\":\"Зачем именно я? Пусть организует тот, кто его любит\",\"scoring\":{\"PAR\":2,\"AVD\":1}}]",
+    "scenarioEn": "You're asked to organize a surprise for a colleague who's leaving. You don't much like them. What do you do?",
+    "options": "[{\"text\":\"Организую — это профессионализм, не личные чувства\",\"textEn\":\"Organize it — this is professionalism, not personal feelings\",\"scoring\":{\"OBC\":3}},{\"text\":\"Откажусь — не буду притворяться\",\"textEn\":\"Decline — I won't pretend\",\"scoring\":{\"ANT\":3}},{\"text\":\"Организую — не хочу, чтобы коллеги подумали, что я злой(ая)\",\"textEn\":\"Organize it — I don't want my colleagues thinking I'm mean\",\"scoring\":{\"DEP\":3}},{\"text\":\"Зачем именно я? Пусть организует тот, кто его любит\",\"textEn\":\"Why me? Let someone who likes them organize it\",\"scoring\":{\"PAR\":2,\"AVD\":1}}]",
     "active": true,
     "sortOrder": 1466,
     "createdAt": "2026-03-19T13:05:13.068"
@@ -13205,8 +13205,8 @@
   {
     "id": "c59510e806b5a06dc8fea44f0",
     "scenario": "Вы услышали запах из детства — бабушкины пирожки, скошенная трава, старые книги. Что происходит внутри?",
-    "scenarioEn": "Вы услышали запах из детства — бабушкины пирожки, скошенная трава, старые книги. Что происходит внутри?",
-    "options": "[{\"text\":\"Запах переносит меня в другое время — как портал\",\"textEn\":\"Запах переносит меня в другое время — как портал\",\"scoring\":{\"SZT\":3}},{\"text\":\"Тоска по тому, чего уже не вернуть\",\"textEn\":\"Тоска по тому, чего уже не вернуть\",\"scoring\":{\"BOR\":3,\"DPR\":1}},{\"text\":\"Хочу поделиться этим моментом с кем-то\",\"textEn\":\"Хочу поделиться этим моментом с кем-то\",\"scoring\":{\"DEP\":3}},{\"text\":\"Замечаю, но иду дальше — запах есть запах\",\"textEn\":\"Замечаю, но иду дальше — запах есть запах\",\"scoring\":{\"SZD\":3}}]",
+    "scenarioEn": "You catch a scent from your childhood — your grandmother's baking, freshly cut grass, old books. What happens inside?",
+    "options": "[{\"text\":\"Запах переносит меня в другое время — как портал\",\"textEn\":\"The scent carries me to another time — like a portal\",\"scoring\":{\"SZT\":3}},{\"text\":\"Тоска по тому, чего уже не вернуть\",\"textEn\":\"Longing for what can never come back\",\"scoring\":{\"BOR\":3,\"DPR\":1}},{\"text\":\"Хочу поделиться этим моментом с кем-то\",\"textEn\":\"I want to share this moment with someone\",\"scoring\":{\"DEP\":3}},{\"text\":\"Замечаю, но иду дальше — запах есть запах\",\"textEn\":\"I notice it and move on — a smell is a smell\",\"scoring\":{\"SZD\":3}}]",
     "active": true,
     "sortOrder": 1467,
     "createdAt": "2026-03-19T13:05:13.069"
@@ -13214,8 +13214,8 @@
   {
     "id": "c9ba287b9f492d5c24725bd2e",
     "scenario": "Друг предлагает вам вместе открыть бизнес. У вас разные представления о том, как он должен работать. Что скажете?",
-    "scenarioEn": "Друг предлагает вам вместе открыть бизнес. У вас разные представления о том, как он должен работать. Что скажете?",
-    "options": "[{\"text\":\"Соглашусь на его условия — не хочу ссориться\",\"textEn\":\"Соглашусь на его условия — не хочу ссориться\",\"scoring\":{\"DEP\":3}},{\"text\":\"Предложу компромисс — всё можно обсудить и зафиксировать\",\"textEn\":\"Предложу компромисс — всё можно обсудить и зафиксировать\",\"scoring\":{\"OBC\":3}},{\"text\":\"Откажусь — партнёрство с разными взглядами обречено\",\"textEn\":\"Откажусь — партнёрство с разными взглядами обречено\",\"scoring\":{\"PAR\":2,\"NAR\":1}},{\"text\":\"Буду настаивать на своём — мой подход лучше\",\"textEn\":\"Буду настаивать на своём — мой подход лучше\",\"scoring\":{\"ANT\":1,\"NAR\":2}}]",
+    "scenarioEn": "A friend suggests starting a business together. You have different ideas about how it should work. What do you say?",
+    "options": "[{\"text\":\"Соглашусь на его условия — не хочу ссориться\",\"textEn\":\"Go along with their terms — I don't want to fall out\",\"scoring\":{\"DEP\":3}},{\"text\":\"Предложу компромисс — всё можно обсудить и зафиксировать\",\"textEn\":\"Propose a compromise — everything can be discussed and put in writing\",\"scoring\":{\"OBC\":3}},{\"text\":\"Откажусь — партнёрство с разными взглядами обречено\",\"textEn\":\"Decline — a partnership with different views is doomed\",\"scoring\":{\"PAR\":2,\"NAR\":1}},{\"text\":\"Буду настаивать на своём — мой подход лучше\",\"textEn\":\"Insist on my way — my approach is better\",\"scoring\":{\"ANT\":1,\"NAR\":2}}]",
     "active": true,
     "sortOrder": 1468,
     "createdAt": "2026-03-19T13:05:13.069"
@@ -13223,8 +13223,8 @@
   {
     "id": "c17075591fcdaedc17425e7e0",
     "scenario": "Вы в лифте услышали, как незнакомцы обсуждают тему, в которой вы разбираетесь. Они ошибаются. Вмешаетесь?",
-    "scenarioEn": "Вы в лифте услышали, как незнакомцы обсуждают тему, в которой вы разбираетесь. Они ошибаются. Вмешаетесь?",
-    "options": "[{\"text\":\"Нет — это не моё дело\",\"textEn\":\"Нет — это не моё дело\",\"scoring\":{\"SZD\":3}},{\"text\":\"Да — поправлю вежливо, мне важна правда\",\"textEn\":\"Да — поправлю вежливо, мне важна правда\",\"scoring\":{\"OBC\":3}},{\"text\":\"Хочу вмешаться — но боюсь, что будет неловко\",\"textEn\":\"Хочу вмешаться — но боюсь, что будет неловко\",\"scoring\":{\"AVD\":3}},{\"text\":\"Конечно! Покажу свою экспертизу — они должны узнать правду\",\"textEn\":\"Конечно! Покажу свою экспертизу — они должны узнать правду\",\"scoring\":{\"NAR\":3}}]",
+    "scenarioEn": "In an elevator, you overhear strangers discussing something you know well. They're wrong. Will you step in?",
+    "options": "[{\"text\":\"Нет — это не моё дело\",\"textEn\":\"No — it's not my business\",\"scoring\":{\"SZD\":3}},{\"text\":\"Да — поправлю вежливо, мне важна правда\",\"textEn\":\"Yes — I'll correct them politely, the truth matters to me\",\"scoring\":{\"OBC\":3}},{\"text\":\"Хочу вмешаться — но боюсь, что будет неловко\",\"textEn\":\"I'd like to — but I'm afraid it'll be awkward\",\"scoring\":{\"AVD\":3}},{\"text\":\"Конечно! Покажу свою экспертизу — они должны узнать правду\",\"textEn\":\"Of course! I'll show my expertise — they should know the truth\",\"scoring\":{\"NAR\":3}}]",
     "active": true,
     "sortOrder": 1469,
     "createdAt": "2026-03-19T13:05:13.07"
@@ -13232,8 +13232,8 @@
   {
     "id": "ce94aa5d4572b2d7f742592f9",
     "scenario": "Вы решили отказаться от кофе. Через три дня — головная боль и раздражительность. Что дальше?",
-    "scenarioEn": "Вы решили отказаться от кофе. Через три дня — головная боль и раздражительность. Что дальше?",
-    "options": "[{\"text\":\"Продолжу — дисциплина важнее дискомфорта\",\"textEn\":\"Продолжу — дисциплина важнее дискомфорта\",\"scoring\":{\"OBC\":3}},{\"text\":\"Выпью кофе — жизнь слишком коротка для страданий\",\"textEn\":\"Выпью кофе — жизнь слишком коротка для страданий\",\"scoring\":{\"ANT\":3}},{\"text\":\"Тело проходит через очищение — это часть процесса\",\"textEn\":\"Тело проходит через очищение — это часть процесса\",\"scoring\":{\"SZT\":3}},{\"text\":\"Расскажу другу, как мне плохо — хочу поддержки\",\"textEn\":\"Расскажу другу, как мне плохо — хочу поддержки\",\"scoring\":{\"DEP\":3}}]",
+    "scenarioEn": "You decide to give up coffee. Three days in — headaches and irritability. What next?",
+    "options": "[{\"text\":\"Продолжу — дисциплина важнее дискомфорта\",\"textEn\":\"Keep going — discipline matters more than discomfort\",\"scoring\":{\"OBC\":3}},{\"text\":\"Выпью кофе — жизнь слишком коротка для страданий\",\"textEn\":\"Have a coffee — life's too short for suffering\",\"scoring\":{\"ANT\":3}},{\"text\":\"Тело проходит через очищение — это часть процесса\",\"textEn\":\"My body is going through a cleanse — it's part of the process\",\"scoring\":{\"SZT\":3}},{\"text\":\"Расскажу другу, как мне плохо — хочу поддержки\",\"textEn\":\"Tell a friend how awful I feel — I want support\",\"scoring\":{\"DEP\":3}}]",
     "active": true,
     "sortOrder": 1470,
     "createdAt": "2026-03-19T13:05:13.071"
@@ -13241,8 +13241,8 @@
   {
     "id": "c006f3f2837548809fa61b95c",
     "scenario": "Ваш сосед каждый вечер играет на гитаре. Играет неплохо. Что думаете?",
-    "scenarioEn": "Ваш сосед каждый вечер играет на гитаре. Играет неплохо. Что думаете?",
-    "options": "[{\"text\":\"Приятно — как бесплатный концерт каждый вечер\",\"textEn\":\"Приятно — как бесплатный концерт каждый вечер\",\"scoring\":{\"SZT\":2,\"DEP\":1}},{\"text\":\"Мешает — у меня своё расписание, и ему тоже стоит его завести\",\"textEn\":\"Мешает — у меня своё расписание, и ему тоже стоит его завести\",\"scoring\":{\"OBC\":3}},{\"text\":\"Бесит — пусть играет в наушниках\",\"textEn\":\"Бесит — пусть играет в наушниках\",\"scoring\":{\"ANT\":2}},{\"text\":\"Мне безразлично — надеваю наушники и живу\",\"textEn\":\"Мне безразлично — надеваю наушники и живу\",\"scoring\":{\"SZD\":3}}]",
+    "scenarioEn": "Your neighbor plays guitar every evening. They play pretty well. What do you think?",
+    "options": "[{\"text\":\"Приятно — как бесплатный концерт каждый вечер\",\"textEn\":\"Lovely — like a free concert every night\",\"scoring\":{\"SZT\":2,\"DEP\":1}},{\"text\":\"Мешает — у меня своё расписание, и ему тоже стоит его завести\",\"textEn\":\"It's disruptive — I have my schedule, and they should have one too\",\"scoring\":{\"OBC\":3}},{\"text\":\"Бесит — пусть играет в наушниках\",\"textEn\":\"Infuriating — let them play with headphones on\",\"scoring\":{\"ANT\":2}},{\"text\":\"Мне безразлично — надеваю наушники и живу\",\"textEn\":\"Indifferent — I put my headphones on and get on with life\",\"scoring\":{\"SZD\":3}}]",
     "active": true,
     "sortOrder": 1471,
     "createdAt": "2026-03-19T13:05:13.072"
@@ -13250,8 +13250,8 @@
   {
     "id": "cd75267c8ec5b34678bd0c8a1",
     "scenario": "Вы случайно прочитали чужой дневник. Записи — личные, глубокие. Что сделаете?",
-    "scenarioEn": "Вы случайно прочитали чужой дневник. Записи — личные, глубокие. Что сделаете?",
-    "options": "[{\"text\":\"Закрою сразу — чужое личное неприкосновенно\",\"textEn\":\"Закрою сразу — чужое личное неприкосновенно\",\"scoring\":{\"OBC\":3,\"BAR\":1}},{\"text\":\"Прочитаю дальше — любопытство сильнее совести\",\"textEn\":\"Прочитаю дальше — любопытство сильнее совести\",\"scoring\":{\"ANT\":2,\"HIS\":1}},{\"text\":\"Закрою — но буду думать об этом ещё долго\",\"textEn\":\"Закрою — но буду думать об этом ещё долго\",\"scoring\":{\"SZT\":2,\"BOR\":1}},{\"text\":\"Закрою — и никому не расскажу, чтобы защитить автора\",\"textEn\":\"Закрою — и никому не расскажу, чтобы защитить автора\",\"scoring\":{\"DEP\":3}}]",
+    "scenarioEn": "You accidentally read someone's diary. The entries are private and deep. What do you do?",
+    "options": "[{\"text\":\"Закрою сразу — чужое личное неприкосновенно\",\"textEn\":\"Close it immediately — other people's privacy is sacred\",\"scoring\":{\"OBC\":3,\"BAR\":1}},{\"text\":\"Прочитаю дальше — любопытство сильнее совести\",\"textEn\":\"Keep reading — curiosity beats conscience\",\"scoring\":{\"ANT\":2,\"HIS\":1}},{\"text\":\"Закрою — но буду думать об этом ещё долго\",\"textEn\":\"Close it — but keep thinking about it for a long time\",\"scoring\":{\"SZT\":2,\"BOR\":1}},{\"text\":\"Закрою — и никому не расскажу, чтобы защитить автора\",\"textEn\":\"Close it — and tell no one, to protect the writer\",\"scoring\":{\"DEP\":3}}]",
     "active": true,
     "sortOrder": 1472,
     "createdAt": "2026-03-19T13:05:13.072"
@@ -13259,8 +13259,8 @@
   {
     "id": "c0ffdda27d10af8dd00763849",
     "scenario": "Ваш друг стал популярным блогером. Теперь у него мало времени на вас. Что чувствуете?",
-    "scenarioEn": "Ваш друг стал популярным блогером. Теперь у него мало времени на вас. Что чувствуете?",
-    "options": "[{\"text\":\"Обидно — он променял дружбу на подписчиков\",\"textEn\":\"Обидно — он променял дружбу на подписчиков\",\"scoring\":{\"BOR\":1,\"DEP\":2,\"DPR\":1}},{\"text\":\"Мне всё равно — жизнь меняется, люди тоже\",\"textEn\":\"Мне всё равно — жизнь меняется, люди тоже\",\"scoring\":{\"SZD\":3}},{\"text\":\"Завидую — я тоже хочу такого внимания\",\"textEn\":\"Завидую — я тоже хочу такого внимания\",\"scoring\":{\"NAR\":2}},{\"text\":\"Рад(а) за него — но скучаю по нашему общению\",\"textEn\":\"Рад(а) за него — но скучаю по нашему общению\",\"scoring\":{\"DEP\":3}}]",
+    "scenarioEn": "A friend has become a popular blogger. Now they have little time for you. How do you feel?",
+    "options": "[{\"text\":\"Обидно — он променял дружбу на подписчиков\",\"textEn\":\"Hurt — they traded our friendship for followers\",\"scoring\":{\"BOR\":1,\"DEP\":2,\"DPR\":1}},{\"text\":\"Мне всё равно — жизнь меняется, люди тоже\",\"textEn\":\"I don't care — life changes, and so do people\",\"scoring\":{\"SZD\":3}},{\"text\":\"Завидую — я тоже хочу такого внимания\",\"textEn\":\"Envious — I want that kind of attention too\",\"scoring\":{\"NAR\":2}},{\"text\":\"Рад(а) за него — но скучаю по нашему общению\",\"textEn\":\"Happy for them — but I miss our time together\",\"scoring\":{\"DEP\":3}}]",
     "active": true,
     "sortOrder": 1473,
     "createdAt": "2026-03-19T13:05:13.073"
@@ -13268,8 +13268,8 @@
   {
     "id": "c12f98ab3c066c463c2bc036d",
     "scenario": "Вы на отдыхе в деревне. Нет интернета, нет магазинов, только лес и река. Ваши ощущения через три дня?",
-    "scenarioEn": "Вы на отдыхе в деревне. Нет интернета, нет магазинов, только лес и река. Ваши ощущения через три дня?",
-    "options": "[{\"text\":\"Рай — я наконец-то слышу тишину\",\"textEn\":\"Рай — я наконец-то слышу тишину\",\"scoring\":{\"SZD\":3}},{\"text\":\"Природа лечит — чувствую связь с чем-то первобытным\",\"textEn\":\"Природа лечит — чувствую связь с чем-то первобытным\",\"scoring\":{\"SZT\":3}},{\"text\":\"Скука — хочу обратно в город, к людям и событиям\",\"textEn\":\"Скука — хочу обратно в город, к людям и событиям\",\"scoring\":{\"HIS\":3}},{\"text\":\"Хорошо — но без связи с близкими тревожно\",\"textEn\":\"Хорошо — но без связи с близкими тревожно\",\"scoring\":{\"DEP\":3}}]",
+    "scenarioEn": "You're on a break in the countryside. No internet, no stores, just forest and river. How do you feel after three days?",
+    "options": "[{\"text\":\"Рай — я наконец-то слышу тишину\",\"textEn\":\"Paradise — I can finally hear the silence\",\"scoring\":{\"SZD\":3}},{\"text\":\"Природа лечит — чувствую связь с чем-то первобытным\",\"textEn\":\"Nature heals — I feel connected to something primal\",\"scoring\":{\"SZT\":3}},{\"text\":\"Скука — хочу обратно в город, к людям и событиям\",\"textEn\":\"Bored — I want to go back to the city, to people and things happening\",\"scoring\":{\"HIS\":3}},{\"text\":\"Хорошо — но без связи с близкими тревожно\",\"textEn\":\"Good — but being out of touch with loved ones makes me anxious\",\"scoring\":{\"DEP\":3}}]",
     "active": true,
     "sortOrder": 1474,
     "createdAt": "2026-03-19T13:05:13.074"
@@ -13277,8 +13277,8 @@
   {
     "id": "c715840b7de51a1e45b099310",
     "scenario": "Коллега на работе всегда берёт вашу кружку. Мелочь, но вас это раздражает. Что сделаете?",
-    "scenarioEn": "Коллега на работе всегда берёт вашу кружку. Мелочь, но вас это раздражает. Что сделаете?",
-    "options": "[{\"text\":\"Скажу прямо: «Это моя кружка»\",\"textEn\":\"Скажу прямо: «Это моя кружка»\",\"scoring\":{\"ANT\":2,\"OBC\":1}},{\"text\":\"Промолчу — не хочу выглядеть мелочным(ой)\",\"textEn\":\"Промолчу — не хочу выглядеть мелочным(ой)\",\"scoring\":{\"AVD\":2,\"DEP\":1}},{\"text\":\"Он делает это специально — проверяет границы\",\"textEn\":\"Он делает это специально — проверяет границы\",\"scoring\":{\"PAR\":3}},{\"text\":\"Куплю себе новую — проблема решена\",\"textEn\":\"Куплю себе новую — проблема решена\",\"scoring\":{\"SZD\":3,\"BAR\":1}}]",
+    "scenarioEn": "A colleague keeps using your mug. A small thing, but it bugs you. What do you do?",
+    "options": "[{\"text\":\"Скажу прямо: «Это моя кружка»\",\"textEn\":\"Say it straight: \\\"That's my mug\\\"\",\"scoring\":{\"ANT\":2,\"OBC\":1}},{\"text\":\"Промолчу — не хочу выглядеть мелочным(ой)\",\"textEn\":\"Say nothing — I don't want to look petty\",\"scoring\":{\"AVD\":2,\"DEP\":1}},{\"text\":\"Он делает это специально — проверяет границы\",\"textEn\":\"They're doing it on purpose — testing my boundaries\",\"scoring\":{\"PAR\":3}},{\"text\":\"Куплю себе новую — проблема решена\",\"textEn\":\"Buy myself a new one — problem solved\",\"scoring\":{\"SZD\":3,\"BAR\":1}}]",
     "active": true,
     "sortOrder": 1475,
     "createdAt": "2026-03-19T13:05:13.075"
@@ -13286,8 +13286,8 @@
   {
     "id": "c979d2f8910482a64fb20c2a2",
     "scenario": "Вам предложили вести колонку в местной газете. Тема — любая. О чём бы вы писали?",
-    "scenarioEn": "Вам предложили вести колонку в местной газете. Тема — любая. О чём бы вы писали?",
-    "options": "[{\"text\":\"О скрытых смыслах повседневности — то, что другие не замечают\",\"textEn\":\"О скрытых смыслах повседневности — то, что другие не замечают\",\"scoring\":{\"SZT\":3}},{\"text\":\"О себе — моя жизнь достаточно интересна\",\"textEn\":\"О себе — моя жизнь достаточно интересна\",\"scoring\":{\"HIS\":2,\"NAR\":2}},{\"text\":\"Откажусь — не хочу публичности\",\"textEn\":\"Откажусь — не хочу публичности\",\"scoring\":{\"SZD\":2,\"AVD\":1}},{\"text\":\"О продуктивности — конкретные советы с чёткой структурой\",\"textEn\":\"О продуктивности — конкретные советы с чёткой структурой\",\"scoring\":{\"OBC\":3}}]",
+    "scenarioEn": "You're offered a column in the local paper. Any topic you like. What would you write about?",
+    "options": "[{\"text\":\"О скрытых смыслах повседневности — то, что другие не замечают\",\"textEn\":\"The hidden meanings of everyday life — things others don't notice\",\"scoring\":{\"SZT\":3}},{\"text\":\"О себе — моя жизнь достаточно интересна\",\"textEn\":\"Myself — my life is interesting enough\",\"scoring\":{\"HIS\":2,\"NAR\":2}},{\"text\":\"Откажусь — не хочу публичности\",\"textEn\":\"I'd decline — I don't want publicity\",\"scoring\":{\"SZD\":2,\"AVD\":1}},{\"text\":\"О продуктивности — конкретные советы с чёткой структурой\",\"textEn\":\"Productivity — concrete tips with a clear structure\",\"scoring\":{\"OBC\":3}}]",
     "active": true,
     "sortOrder": 1476,
     "createdAt": "2026-03-19T13:05:13.076"
@@ -13295,8 +13295,8 @@
   {
     "id": "cf9f86a32852577bb041591a8",
     "scenario": "Вы были грубы с кассиром в магазине. Уже дома поняли это. Что сделаете?",
-    "scenarioEn": "Вы были грубы с кассиром в магазине. Уже дома поняли это. Что сделаете?",
-    "options": "[{\"text\":\"Вернусь завтра и извинюсь — мне важно исправить это\",\"textEn\":\"Вернусь завтра и извинюсь — мне важно исправить это\",\"scoring\":{\"DEP\":3}},{\"text\":\"Буду корить себя весь вечер — я ужасный человек\",\"textEn\":\"Буду корить себя весь вечер — я ужасный человек\",\"scoring\":{\"BOR\":2,\"AVD\":2}},{\"text\":\"Забуду — кассиры видят сотни людей в день, он(а) не запомнит\",\"textEn\":\"Забуду — кассиры видят сотни людей в день, он(а) не запомнит\",\"scoring\":{\"ANT\":3,\"PAG\":3}},{\"text\":\"Мне неприятно — но жизнь продолжается, нет смысла зацикливаться\",\"textEn\":\"Мне неприятно — но жизнь продолжается, нет смысла зацикливаться\",\"scoring\":{\"SZD\":3}}]",
+    "scenarioEn": "You were rude to a cashier at the store. You realize it once you're home. What do you do?",
+    "options": "[{\"text\":\"Вернусь завтра и извинюсь — мне важно исправить это\",\"textEn\":\"Go back tomorrow and apologize — putting it right matters to me\",\"scoring\":{\"DEP\":3}},{\"text\":\"Буду корить себя весь вечер — я ужасный человек\",\"textEn\":\"Beat myself up all evening — I'm a terrible person\",\"scoring\":{\"BOR\":2,\"AVD\":2}},{\"text\":\"Забуду — кассиры видят сотни людей в день, он(а) не запомнит\",\"textEn\":\"Forget it — cashiers see hundreds of people a day, they won't remember\",\"scoring\":{\"ANT\":3,\"PAG\":3}},{\"text\":\"Мне неприятно — но жизнь продолжается, нет смысла зацикливаться\",\"textEn\":\"It bothers me — but life goes on, no point dwelling on it\",\"scoring\":{\"SZD\":3}}]",
     "active": true,
     "sortOrder": 1477,
     "createdAt": "2026-03-19T13:05:13.076"
@@ -13304,8 +13304,8 @@
   {
     "id": "c7b227b001fd0e8bbae8d875e",
     "scenario": "Друг подарил вам книгу с надписью: «Ты поймёшь, когда будешь готов(а)». Что чувствуете?",
-    "scenarioEn": "Друг подарил вам книгу с надписью: «Ты поймёшь, когда будешь готов(а)». Что чувствуете?",
-    "options": "[{\"text\":\"Интригует — что он имел в виду? Это послание\",\"textEn\":\"Интригует — что он имел в виду? Это послание\",\"scoring\":{\"SZT\":3}},{\"text\":\"Тепло — он знает меня лучше, чем я думал(а)\",\"textEn\":\"Тепло — он знает меня лучше, чем я думал(а)\",\"scoring\":{\"DEP\":3,\"BAR\":1}},{\"text\":\"Странно — что за загадки? Мог бы просто сказать, о чём книга\",\"textEn\":\"Странно — что за загадки? Мог бы просто сказать, о чём книга\",\"scoring\":{\"OBC\":3}},{\"text\":\"Он намекает, что я «не готов(а)» — это обидно\",\"textEn\":\"Он намекает, что я «не готов(а)» — это обидно\",\"scoring\":{\"NAR\":2,\"AVD\":1,\"DPR\":1}}]",
+    "scenarioEn": "A friend gives you a book inscribed, \"You'll understand when you're ready.\" How do you feel?",
+    "options": "[{\"text\":\"Интригует — что он имел в виду? Это послание\",\"textEn\":\"Intrigued — what did they mean? It's a message\",\"scoring\":{\"SZT\":3}},{\"text\":\"Тепло — он знает меня лучше, чем я думал(а)\",\"textEn\":\"Warm — they know me better than I thought\",\"scoring\":{\"DEP\":3,\"BAR\":1}},{\"text\":\"Странно — что за загадки? Мог бы просто сказать, о чём книга\",\"textEn\":\"Odd — why the riddles? They could have just said what the book's about\",\"scoring\":{\"OBC\":3}},{\"text\":\"Он намекает, что я «не готов(а)» — это обидно\",\"textEn\":\"They're hinting that I'm \\\"not ready\\\" — that's hurtful\",\"scoring\":{\"NAR\":2,\"AVD\":1,\"DPR\":1}}]",
     "active": true,
     "sortOrder": 1478,
     "createdAt": "2026-03-19T13:05:13.077"
@@ -13313,8 +13313,8 @@
   {
     "id": "c264dffd3bf5354a2d3d0acac",
     "scenario": "Вы на свадьбе. Играет медленный танец. Рядом нет пары. Что делаете?",
-    "scenarioEn": "Вы на свадьбе. Играет медленный танец. Рядом нет пары. Что делаете?",
-    "options": "[{\"text\":\"Сижу и наблюдаю — мне спокойно и без танца\",\"textEn\":\"Сижу и наблюдаю — мне спокойно и без танца\",\"scoring\":{\"SZD\":3}},{\"text\":\"Приглашу кого-нибудь — почему нет?\",\"textEn\":\"Приглашу кого-нибудь — почему нет?\",\"scoring\":{\"HIS\":3}},{\"text\":\"Немного грустно — но не подам виду\",\"textEn\":\"Немного грустно — но не подам виду\",\"scoring\":{\"BOR\":1,\"AVD\":2,\"DPR\":1}},{\"text\":\"Выйду подышать — мне нужен воздух и тишина\",\"textEn\":\"Выйду подышать — мне нужен воздух и тишина\",\"scoring\":{\"SZT\":1}}]",
+    "scenarioEn": "You're at a wedding. A slow song comes on. You don't have a partner. What do you do?",
+    "options": "[{\"text\":\"Сижу и наблюдаю — мне спокойно и без танца\",\"textEn\":\"Sit and watch — I'm at ease without dancing\",\"scoring\":{\"SZD\":3}},{\"text\":\"Приглашу кого-нибудь — почему нет?\",\"textEn\":\"Ask someone to dance — why not?\",\"scoring\":{\"HIS\":3}},{\"text\":\"Немного грустно — но не подам виду\",\"textEn\":\"A bit sad — but I won't let it show\",\"scoring\":{\"BOR\":1,\"AVD\":2,\"DPR\":1}},{\"text\":\"Выйду подышать — мне нужен воздух и тишина\",\"textEn\":\"Step outside for air — I need air and quiet\",\"scoring\":{\"SZT\":1}}]",
     "active": true,
     "sortOrder": 1479,
     "createdAt": "2026-03-19T13:05:13.078"
@@ -13322,8 +13322,8 @@
   {
     "id": "ca2f3abccaf9750a93fad1c0f",
     "scenario": "Ваш коллега получил награду «лучший сотрудник месяца». Вы считаете, что заслуживали больше. Что делаете?",
-    "scenarioEn": "Ваш коллега получил награду «лучший сотрудник месяца». Вы считаете, что заслуживали больше. Что делаете?",
-    "options": "[{\"text\":\"Несправедливо — я работал(а) лучше, но меня не заметили\",\"textEn\":\"Несправедливо — я работал(а) лучше, но меня не заметили\",\"scoring\":{\"NAR\":3,\"PAG\":1}},{\"text\":\"Наверняка подтасовка — кто-то его продвигает\",\"textEn\":\"Наверняка подтасовка — кто-то его продвигает\",\"scoring\":{\"PAR\":3}},{\"text\":\"Поздравлю — и буду стараться ещё больше в следующем месяце\",\"textEn\":\"Поздравлю — и буду стараться ещё больше в следующем месяце\",\"scoring\":{\"OBC\":3}},{\"text\":\"Мне всё равно — награды ничего не значат\",\"textEn\":\"Мне всё равно — награды ничего не значат\",\"scoring\":{\"SZD\":3}}]",
+    "scenarioEn": "A colleague wins \"Employee of the Month.\" You think you deserved it more. What do you do?",
+    "options": "[{\"text\":\"Несправедливо — я работал(а) лучше, но меня не заметили\",\"textEn\":\"It's unfair — I worked harder, but nobody noticed\",\"scoring\":{\"NAR\":3,\"PAG\":1}},{\"text\":\"Наверняка подтасовка — кто-то его продвигает\",\"textEn\":\"Surely it's rigged — someone is pushing them forward\",\"scoring\":{\"PAR\":3}},{\"text\":\"Поздравлю — и буду стараться ещё больше в следующем месяце\",\"textEn\":\"Congratulate them — and try even harder next month\",\"scoring\":{\"OBC\":3}},{\"text\":\"Мне всё равно — награды ничего не значат\",\"textEn\":\"I don't care — awards mean nothing\",\"scoring\":{\"SZD\":3}}]",
     "active": true,
     "sortOrder": 1480,
     "createdAt": "2026-03-19T13:05:13.079"
@@ -13331,8 +13331,8 @@
   {
     "id": "c770828a7cf79f2a02ef40bd4",
     "scenario": "Вы пришли на вечеринку раньше всех. Хозяин ещё готовит. Что делаете?",
-    "scenarioEn": "Вы пришли на вечеринку раньше всех. Хозяин ещё готовит. Что делаете?",
-    "options": "[{\"text\":\"Помогу — я хочу быть полезным(ой)\",\"textEn\":\"Помогу — я хочу быть полезным(ой)\",\"scoring\":{\"DEP\":3}},{\"text\":\"Сяду и подожду — пришёл вовремя, это они опаздывают\",\"textEn\":\"Сяду и подожду — пришёл вовремя, это они опаздывают\",\"scoring\":{\"OBC\":3}},{\"text\":\"Неловко — лучше бы я пришёл(а) позже\",\"textEn\":\"Неловко — лучше бы я пришёл(а) позже\",\"scoring\":{\"AVD\":3}},{\"text\":\"Круто — помогу и заодно буду «правой рукой» хозяина весь вечер!\",\"textEn\":\"Круто — помогу и заодно буду «правой рукой» хозяина весь вечер!\",\"scoring\":{\"HIS\":2,\"NAR\":1}}]",
+    "scenarioEn": "You arrive at a party before anyone else. The host is still cooking. What do you do?",
+    "options": "[{\"text\":\"Помогу — я хочу быть полезным(ой)\",\"textEn\":\"Help — I want to be useful\",\"scoring\":{\"DEP\":3}},{\"text\":\"Сяду и подожду — пришёл вовремя, это они опаздывают\",\"textEn\":\"Sit and wait — I came on time, they're the ones running late\",\"scoring\":{\"OBC\":3}},{\"text\":\"Неловко — лучше бы я пришёл(а) позже\",\"textEn\":\"Awkward — I should have come later\",\"scoring\":{\"AVD\":3}},{\"text\":\"Круто — помогу и заодно буду «правой рукой» хозяина весь вечер!\",\"textEn\":\"Great — I'll help and be the host's \\\"right hand\\\" all evening!\",\"scoring\":{\"HIS\":2,\"NAR\":1}}]",
     "active": true,
     "sortOrder": 1481,
     "createdAt": "2026-03-19T13:05:13.079"
@@ -13340,8 +13340,8 @@
   {
     "id": "cd2129aa7dd5242612cab6fb2",
     "scenario": "Вы узнали, что знакомый хранит все ваши сообщения за 5 лет. Что думаете?",
-    "scenarioEn": "Вы узнали, что знакомый хранит все ваши сообщения за 5 лет. Что думаете?",
-    "options": "[{\"text\":\"Жутко — зачем он хранит мою переписку?\",\"textEn\":\"Жутко — зачем он хранит мою переписку?\",\"scoring\":{\"PAR\":3}},{\"text\":\"Трогательно — значит, наше общение для него ценно\",\"textEn\":\"Трогательно — значит, наше общение для него ценно\",\"scoring\":{\"DEP\":3}},{\"text\":\"Мне безразлично — пусть хранит\",\"textEn\":\"Мне безразлично — пусть хранит\",\"scoring\":{\"SZD\":3}},{\"text\":\"Неловко — а что если там что-то, за что мне сейчас стыдно?\",\"textEn\":\"Неловко — а что если там что-то, за что мне сейчас стыдно?\",\"scoring\":{\"AVD\":3,\"DPR\":2}}]",
+    "scenarioEn": "You find out an acquaintance has kept all your messages for five years. What do you think?",
+    "options": "[{\"text\":\"Жутко — зачем он хранит мою переписку?\",\"textEn\":\"Creepy — why are they keeping my messages?\",\"scoring\":{\"PAR\":3}},{\"text\":\"Трогательно — значит, наше общение для него ценно\",\"textEn\":\"Touching — it means our conversations are precious to them\",\"scoring\":{\"DEP\":3}},{\"text\":\"Мне безразлично — пусть хранит\",\"textEn\":\"Indifferent — let them keep them\",\"scoring\":{\"SZD\":3}},{\"text\":\"Неловко — а что если там что-то, за что мне сейчас стыдно?\",\"textEn\":\"Awkward — what if there's something in there I'm now ashamed of?\",\"scoring\":{\"AVD\":3,\"DPR\":2}}]",
     "active": true,
     "sortOrder": 1482,
     "createdAt": "2026-03-19T13:05:13.08"
@@ -13349,8 +13349,8 @@
   {
     "id": "c18db310c1d2b0d380328ffcf",
     "scenario": "Друг предложил вам вместе вести дневник: каждый пишет свою версию одного и того же дня. Интересно?",
-    "scenarioEn": "Друг предложил вам вместе вести дневник: каждый пишет свою версию одного и того же дня. Интересно?",
-    "options": "[{\"text\":\"Увлекательно! Два взгляда на один день — как зеркала\",\"textEn\":\"Увлекательно! Два взгляда на один день — как зеркала\",\"scoring\":{\"SZT\":3}},{\"text\":\"Соглашусь — мне приятно делать что-то вместе\",\"textEn\":\"Соглашусь — мне приятно делать что-то вместе\",\"scoring\":{\"DEP\":3}},{\"text\":\"Откажусь — мой дневник только мой\",\"textEn\":\"Откажусь — мой дневник только мой\",\"scoring\":{\"SZD\":3}},{\"text\":\"Хорошая идея — но нужны правила: формат, объём, сроки\",\"textEn\":\"Хорошая идея — но нужны правила: формат, объём, сроки\",\"scoring\":{\"OBC\":3}}]",
+    "scenarioEn": "A friend suggests keeping a joint diary: each of you writes your own version of the same day. Interested?",
+    "options": "[{\"text\":\"Увлекательно! Два взгляда на один день — как зеркала\",\"textEn\":\"Fascinating! Two views of one day — like mirrors\",\"scoring\":{\"SZT\":3}},{\"text\":\"Соглашусь — мне приятно делать что-то вместе\",\"textEn\":\"I'll agree — I like doing things together\",\"scoring\":{\"DEP\":3}},{\"text\":\"Откажусь — мой дневник только мой\",\"textEn\":\"I'll decline — my diary is mine alone\",\"scoring\":{\"SZD\":3}},{\"text\":\"Хорошая идея — но нужны правила: формат, объём, сроки\",\"textEn\":\"Good idea — but we need rules: format, length, deadlines\",\"scoring\":{\"OBC\":3}}]",
     "active": true,
     "sortOrder": 1483,
     "createdAt": "2026-03-19T13:05:13.081"
@@ -13358,8 +13358,8 @@
   {
     "id": "cb0856525551b50a87bbea642",
     "scenario": "На работе объявили конкурс талантов — можно петь, танцевать, показывать фокусы. Будете участвовать?",
-    "scenarioEn": "На работе объявили конкурс талантов — можно петь, танцевать, показывать фокусы. Будете участвовать?",
-    "options": "[{\"text\":\"Конечно! Я удивлю всех!\",\"textEn\":\"Конечно! Я удивлю всех!\",\"scoring\":{\"HIS\":3}},{\"text\":\"Ни за что — мне нечего показать, и не хочу позориться\",\"textEn\":\"Ни за что — мне нечего показать, и не хочу позориться\",\"scoring\":{\"AVD\":3}},{\"text\":\"Буду в зрительном зале — поддержу коллег\",\"textEn\":\"Буду в зрительном зале — поддержу коллег\",\"scoring\":{\"DEP\":3}},{\"text\":\"Зачем? Это пустая трата рабочего времени\",\"textEn\":\"Зачем? Это пустая трата рабочего времени\",\"scoring\":{\"OBC\":3,\"DPR\":3}}]",
+    "scenarioEn": "Your workplace announces a talent show — singing, dancing, magic tricks. Will you take part?",
+    "options": "[{\"text\":\"Конечно! Я удивлю всех!\",\"textEn\":\"Of course! I'll amaze everyone!\",\"scoring\":{\"HIS\":3}},{\"text\":\"Ни за что — мне нечего показать, и не хочу позориться\",\"textEn\":\"No way — I have nothing to show and don't want to embarrass myself\",\"scoring\":{\"AVD\":3}},{\"text\":\"Буду в зрительном зале — поддержу коллег\",\"textEn\":\"I'll be in the audience — cheering on my colleagues\",\"scoring\":{\"DEP\":3}},{\"text\":\"Зачем? Это пустая трата рабочего времени\",\"textEn\":\"What for? It's a waste of work time\",\"scoring\":{\"OBC\":3,\"DPR\":3}}]",
     "active": true,
     "sortOrder": 1484,
     "createdAt": "2026-03-19T13:05:13.082"
@@ -13367,8 +13367,8 @@
   {
     "id": "c022b73ebc9d0a78a522b65aa",
     "scenario": "Ваш партнёр признался, что иногда чувствует себя одиноким рядом с вами. Что ответите?",
-    "scenarioEn": "Ваш партнёр признался, что иногда чувствует себя одиноким рядом с вами. Что ответите?",
-    "options": "[{\"text\":\"Больно — но спасибо за честность, давай работать над этим\",\"textEn\":\"Больно — но спасибо за честность, давай работать над этим\",\"scoring\":{\"DEP\":3}},{\"text\":\"Удар — я столько вкладываю, а этого недостаточно?!\",\"textEn\":\"Удар — я столько вкладываю, а этого недостаточно?!\",\"scoring\":{\"BOR\":3}},{\"text\":\"Может быть, мне тоже стоит быть честным(ой) — я тоже чувствую дистанцию\",\"textEn\":\"Может быть, мне тоже стоит быть честным(ой) — я тоже чувствую дистанцию\",\"scoring\":{\"OBC\":3}},{\"text\":\"Я такой(ая), какой(ая) есть — если ему(ей) не хватает, это его(её) проблема\",\"textEn\":\"Я такой(ая), какой(ая) есть — если ему(ей) не хватает, это его(её) проблема\",\"scoring\":{\"SZD\":2,\"ANT\":1}}]",
+    "scenarioEn": "Your partner admits that sometimes they feel lonely with you. What do you say?",
+    "options": "[{\"text\":\"Больно — но спасибо за честность, давай работать над этим\",\"textEn\":\"It hurts — but thank you for being honest, let's work on it\",\"scoring\":{\"DEP\":3}},{\"text\":\"Удар — я столько вкладываю, а этого недостаточно?!\",\"textEn\":\"A blow — I put in so much, and it's still not enough?!\",\"scoring\":{\"BOR\":3}},{\"text\":\"Может быть, мне тоже стоит быть честным(ой) — я тоже чувствую дистанцию\",\"textEn\":\"Maybe I should be honest too — I feel the distance as well\",\"scoring\":{\"OBC\":3}},{\"text\":\"Я такой(ая), какой(ая) есть — если ему(ей) не хватает, это его(её) проблема\",\"textEn\":\"I am who I am — if they need more, that's their problem\",\"scoring\":{\"SZD\":2,\"ANT\":1}}]",
     "active": true,
     "sortOrder": 1485,
     "createdAt": "2026-03-19T13:05:13.083"
@@ -13376,8 +13376,8 @@
   {
     "id": "c9939e2e3a25388664644d798",
     "scenario": "Вы решили каждый день фотографировать один предмет, который привлёк ваше внимание. Через месяц — какие ощущения?",
-    "scenarioEn": "Вы решили каждый день фотографировать один предмет, который привлёк ваше внимание. Через месяц — какие ощущения?",
-    "options": "[{\"text\":\"Мир стал более заметным — я вижу красоту в мелочах\",\"textEn\":\"Мир стал более заметным — я вижу красоту в мелочах\",\"scoring\":{\"SZT\":3}},{\"text\":\"Выкладываю лучшие фото — подписчикам нравится!\",\"textEn\":\"Выкладываю лучшие фото — подписчикам нравится!\",\"scoring\":{\"HIS\":3}},{\"text\":\"Забросил(а) — каждый день одно и то же\",\"textEn\":\"Забросил(а) — каждый день одно и то же\",\"scoring\":{\"ANT\":2}},{\"text\":\"Создал(а) альбом с подписями и датами — это мой визуальный дневник\",\"textEn\":\"Создал(а) альбом с подписями и датами — это мой визуальный дневник\",\"scoring\":{\"OBC\":3}}]",
+    "scenarioEn": "You decide to photograph one thing that catches your eye every day. A month later, how does it feel?",
+    "options": "[{\"text\":\"Мир стал более заметным — я вижу красоту в мелочах\",\"textEn\":\"The world has become more visible — I see beauty in little things\",\"scoring\":{\"SZT\":3}},{\"text\":\"Выкладываю лучшие фото — подписчикам нравится!\",\"textEn\":\"I post the best shots — my followers love them!\",\"scoring\":{\"HIS\":3}},{\"text\":\"Забросил(а) — каждый день одно и то же\",\"textEn\":\"I gave up — it's the same thing every day\",\"scoring\":{\"ANT\":2}},{\"text\":\"Создал(а) альбом с подписями и датами — это мой визуальный дневник\",\"textEn\":\"I've made an album with captions and dates — it's my visual diary\",\"scoring\":{\"OBC\":3}}]",
     "active": true,
     "sortOrder": 1486,
     "createdAt": "2026-03-19T13:05:13.083"
@@ -13385,8 +13385,8 @@
   {
     "id": "cbec308ba1815b1ee483e1774",
     "scenario": "Вас попросили временно подменить начальника. Вы будете принимать решения за отдел. Что чувствуете?",
-    "scenarioEn": "Вас попросили временно подменить начальника. Вы будете принимать решения за отдел. Что чувствуете?",
-    "options": "[{\"text\":\"Наконец-то! Покажу, как надо управлять!\",\"textEn\":\"Наконец-то! Покажу, как надо управлять!\",\"scoring\":{\"NAR\":3}},{\"text\":\"Тревога — а если приму неправильное решение и все пострадают?\",\"textEn\":\"Тревога — а если приму неправильное решение и все пострадают?\",\"scoring\":{\"AVD\":3}},{\"text\":\"Составлю план: приоритеты, процессы, точки контроля\",\"textEn\":\"Составлю план: приоритеты, процессы, точки контроля\",\"scoring\":{\"OBC\":3}},{\"text\":\"Мне не нужна эта ответственность — пусть назначат кого-то другого\",\"textEn\":\"Мне не нужна эта ответственность — пусть назначат кого-то другого\",\"scoring\":{\"SZD\":2}}]",
+    "scenarioEn": "You're asked to fill in for your boss temporarily. You'll be making decisions for the department. How do you feel?",
+    "options": "[{\"text\":\"Наконец-то! Покажу, как надо управлять!\",\"textEn\":\"Finally! I'll show them how it's done!\",\"scoring\":{\"NAR\":3}},{\"text\":\"Тревога — а если приму неправильное решение и все пострадают?\",\"textEn\":\"Anxious — what if I make the wrong call and everyone suffers?\",\"scoring\":{\"AVD\":3}},{\"text\":\"Составлю план: приоритеты, процессы, точки контроля\",\"textEn\":\"Draw up a plan: priorities, processes, checkpoints\",\"scoring\":{\"OBC\":3}},{\"text\":\"Мне не нужна эта ответственность — пусть назначат кого-то другого\",\"textEn\":\"I don't need this responsibility — let them appoint someone else\",\"scoring\":{\"SZD\":2}}]",
     "active": true,
     "sortOrder": 1487,
     "createdAt": "2026-03-19T13:05:13.084"
@@ -13394,8 +13394,8 @@
   {
     "id": "cb5a4cab79a0d6e01ea2c3281",
     "scenario": "Вы на вечеринке. Незнакомец сел рядом и молча улыбнулся. Что думаете?",
-    "scenarioEn": "Вы на вечеринке. Незнакомец сел рядом и молча улыбнулся. Что думаете?",
-    "options": "[{\"text\":\"Что ему нужно? Подозрительная улыбка\",\"textEn\":\"Что ему нужно? Подозрительная улыбка\",\"scoring\":{\"PAR\":3}},{\"text\":\"Улыбнусь в ответ — и начну разговор\",\"textEn\":\"Улыбнусь в ответ — и начну разговор\",\"scoring\":{\"HIS\":3}},{\"text\":\"Неловко — отведу взгляд и пересяду\",\"textEn\":\"Неловко — отведу взгляд и пересяду\",\"scoring\":{\"AVD\":3}},{\"text\":\"В этой улыбке есть что-то — может, это встреча, которая изменит всё\",\"textEn\":\"В этой улыбке есть что-то — может, это встреча, которая изменит всё\",\"scoring\":{\"SZT\":3}}]",
+    "scenarioEn": "At a party, a stranger sits down next to you and smiles silently. What do you think?",
+    "options": "[{\"text\":\"Что ему нужно? Подозрительная улыбка\",\"textEn\":\"What do they want? Suspicious smile\",\"scoring\":{\"PAR\":3}},{\"text\":\"Улыбнусь в ответ — и начну разговор\",\"textEn\":\"Smile back — and start a conversation\",\"scoring\":{\"HIS\":3}},{\"text\":\"Неловко — отведу взгляд и пересяду\",\"textEn\":\"Awkward — I'll look away and move seats\",\"scoring\":{\"AVD\":3}},{\"text\":\"В этой улыбке есть что-то — может, это встреча, которая изменит всё\",\"textEn\":\"There's something in that smile — maybe it's a meeting that will change everything\",\"scoring\":{\"SZT\":3}}]",
     "active": true,
     "sortOrder": 1488,
     "createdAt": "2026-03-19T13:05:13.085"
@@ -13403,8 +13403,8 @@
   {
     "id": "c757d8bdb4767975c95dfec9f",
     "scenario": "Вы готовите ужин, и у вас горит блюдо. Гости через 30 минут. Что делаете?",
-    "scenarioEn": "Вы готовите ужин, и у вас горит блюдо. Гости через 30 минут. Что делаете?",
-    "options": "[{\"text\":\"Паника — потом импровизация — что-нибудь спасу\",\"textEn\":\"Паника — потом импровизация — что-нибудь спасу\",\"scoring\":{\"BOR\":2,\"HIS\":1}},{\"text\":\"Закажу доставку — решение принято, дальше план Б\",\"textEn\":\"Закажу доставку — решение принято, дальше план Б\",\"scoring\":{\"OBC\":3}},{\"text\":\"Превращу это в историю — «Представляете, что произошло!»\",\"textEn\":\"Превращу это в историю — «Представляете, что произошло!»\",\"scoring\":{\"HIS\":3}},{\"text\":\"Мне плевать — пусть едят то, что есть, или не едят\",\"textEn\":\"Мне плевать — пусть едят то, что есть, или не едят\",\"scoring\":{\"ANT\":3,\"BAR\":1}}]",
+    "scenarioEn": "You're cooking dinner and the dish is burning. Guests arrive in 30 minutes. What do you do?",
+    "options": "[{\"text\":\"Паника — потом импровизация — что-нибудь спасу\",\"textEn\":\"Panic — then improvise — I'll salvage something\",\"scoring\":{\"BOR\":2,\"HIS\":1}},{\"text\":\"Закажу доставку — решение принято, дальше план Б\",\"textEn\":\"Order delivery — decision made, on to plan B\",\"scoring\":{\"OBC\":3}},{\"text\":\"Превращу это в историю — «Представляете, что произошло!»\",\"textEn\":\"Turn it into a story — \\\"You won't believe what happened!\\\"\",\"scoring\":{\"HIS\":3}},{\"text\":\"Мне плевать — пусть едят то, что есть, или не едят\",\"textEn\":\"I don't care — they can eat what there is, or not\",\"scoring\":{\"ANT\":3,\"BAR\":1}}]",
     "active": true,
     "sortOrder": 1489,
     "createdAt": "2026-03-19T13:05:13.086"
@@ -13412,8 +13412,8 @@
   {
     "id": "c1efa8c6c8142bf55d082306b",
     "scenario": "Друг признался, что втайне завидует вам. Что чувствуете?",
-    "scenarioEn": "Друг признался, что втайне завидует вам. Что чувствуете?",
-    "options": "[{\"text\":\"Лестно — значит, я чего-то достиг(ла)\",\"textEn\":\"Лестно — значит, я чего-то достиг(ла)\",\"scoring\":{\"NAR\":3}},{\"text\":\"Неловко — не хочу быть причиной чьей-то зависти\",\"textEn\":\"Неловко — не хочу быть причиной чьей-то зависти\",\"scoring\":{\"AVD\":2,\"DEP\":1}},{\"text\":\"Он честен — ценю это и хочу поддержать его\",\"textEn\":\"Он честен — ценю это и хочу поддержать его\",\"scoring\":{\"DEP\":3}},{\"text\":\"Зависть — опасное чувство; может, он не так дружелюбен, как кажется\",\"textEn\":\"Зависть — опасное чувство; может, он не так дружелюбен, как кажется\",\"scoring\":{\"PAR\":3}}]",
+    "scenarioEn": "A friend confesses that they secretly envy you. How do you feel?",
+    "options": "[{\"text\":\"Лестно — значит, я чего-то достиг(ла)\",\"textEn\":\"Flattered — it means I've achieved something\",\"scoring\":{\"NAR\":3}},{\"text\":\"Неловко — не хочу быть причиной чьей-то зависти\",\"textEn\":\"Awkward — I don't want to be the cause of anyone's envy\",\"scoring\":{\"AVD\":2,\"DEP\":1}},{\"text\":\"Он честен — ценю это и хочу поддержать его\",\"textEn\":\"They're being honest — I appreciate that and want to support them\",\"scoring\":{\"DEP\":3}},{\"text\":\"Зависть — опасное чувство; может, он не так дружелюбен, как кажется\",\"textEn\":\"Envy is a dangerous feeling — maybe they're not as friendly as they seem\",\"scoring\":{\"PAR\":3}}]",
     "active": true,
     "sortOrder": 1490,
     "createdAt": "2026-03-19T13:05:13.087"
@@ -13421,8 +13421,8 @@
   {
     "id": "c9ee51cedfa7aaacdd7179927",
     "scenario": "Вы были на собеседовании и не получили работу. HR написал: «Вы были очень близки к финалу». Что чувствуете?",
-    "scenarioEn": "Вы были на собеседовании и не получили работу. HR написал: «Вы были очень близки к финалу». Что чувствуете?",
-    "options": "[{\"text\":\"«Очень близки» — но не достаточно? Это ещё больнее\",\"textEn\":\"«Очень близки» — но не достаточно? Это ещё больнее\",\"scoring\":{\"BOR\":2,\"AVD\":1}},{\"text\":\"Попрошу обратную связь — хочу понять, что улучшить\",\"textEn\":\"Попрошу обратную связь — хочу понять, что улучшить\",\"scoring\":{\"OBC\":3}},{\"text\":\"Их потеря — я найду что-то лучше\",\"textEn\":\"Их потеря — я найду что-то лучше\",\"scoring\":{\"NAR\":3}},{\"text\":\"Ну не взяли и не взяли — пойду дальше\",\"textEn\":\"Ну не взяли и не взяли — пойду дальше\",\"scoring\":{\"SZD\":3}}]",
+    "scenarioEn": "You interviewed for a job and didn't get it. HR wrote, \"You came very close to the final round.\" How do you feel?",
+    "options": "[{\"text\":\"«Очень близки» — но не достаточно? Это ещё больнее\",\"textEn\":\"\\\"Very close\\\" — but not enough? That hurts even more\",\"scoring\":{\"BOR\":2,\"AVD\":1}},{\"text\":\"Попрошу обратную связь — хочу понять, что улучшить\",\"textEn\":\"Ask for feedback — I want to know what to improve\",\"scoring\":{\"OBC\":3}},{\"text\":\"Их потеря — я найду что-то лучше\",\"textEn\":\"Their loss — I'll find something better\",\"scoring\":{\"NAR\":3}},{\"text\":\"Ну не взяли и не взяли — пойду дальше\",\"textEn\":\"So they didn't hire me — I'll move on\",\"scoring\":{\"SZD\":3}}]",
     "active": true,
     "sortOrder": 1491,
     "createdAt": "2026-03-19T13:05:13.087"
@@ -13430,8 +13430,8 @@
   {
     "id": "ca84917e6593273d6b3b71a7b",
     "scenario": "Ваш ребёнок (или младший родственник) впервые нарисовал вашу семью. Вы на рисунке — маленький(ая) и в углу. Что чувствуете?",
-    "scenarioEn": "Ваш ребёнок (или младший родственник) впервые нарисовал вашу семью. Вы на рисунке — маленький(ая) и в углу. Что чувствуете?",
-    "options": "[{\"text\":\"Это просто рисунок — дети так рисуют\",\"textEn\":\"Это просто рисунок — дети так рисуют\",\"scoring\":{\"SZD\":3}},{\"text\":\"Больно — может, я и правда отдалился(лась) от семьи?\",\"textEn\":\"Больно — может, я и правда отдалился(лась) от семьи?\",\"scoring\":{\"BOR\":2,\"AVD\":1}},{\"text\":\"Улыбнусь и повешу на холодильник — мне важен его(её) мир\",\"textEn\":\"Улыбнусь и повешу на холодильник — мне важен его(её) мир\",\"scoring\":{\"DEP\":3}},{\"text\":\"Проанализирую — это может быть сигнал, что мне стоит быть ближе\",\"textEn\":\"Проанализирую — это может быть сигнал, что мне стоит быть ближе\",\"scoring\":{\"OBC\":3}}]",
+    "scenarioEn": "Your child (or a younger relative) has drawn your family for the first time. You're tiny and off in the corner. How do you feel?",
+    "options": "[{\"text\":\"Это просто рисунок — дети так рисуют\",\"textEn\":\"It's just a drawing — that's how kids draw\",\"scoring\":{\"SZD\":3}},{\"text\":\"Больно — может, я и правда отдалился(лась) от семьи?\",\"textEn\":\"It hurts — maybe I really have drifted away from the family?\",\"scoring\":{\"BOR\":2,\"AVD\":1}},{\"text\":\"Улыбнусь и повешу на холодильник — мне важен его(её) мир\",\"textEn\":\"Smile and put it on the fridge — their world matters to me\",\"scoring\":{\"DEP\":3}},{\"text\":\"Проанализирую — это может быть сигнал, что мне стоит быть ближе\",\"textEn\":\"Think it through — it may be a signal that I should be closer\",\"scoring\":{\"OBC\":3}}]",
     "active": true,
     "sortOrder": 1492,
     "createdAt": "2026-03-19T13:05:13.088"
@@ -13439,8 +13439,8 @@
   {
     "id": "cc070260d3ccdeecd451610ab",
     "scenario": "Вы узнали, что коллега каждый день медитирует в обеденный перерыв в пустой переговорной. Что думаете?",
-    "scenarioEn": "Вы узнали, что коллега каждый день медитирует в обеденный перерыв в пустой переговорной. Что думаете?",
-    "options": "[{\"text\":\"Странно — но меня это не касается\",\"textEn\":\"Странно — но меня это не касается\",\"scoring\":{\"SZD\":3}},{\"text\":\"Уважаю — не каждый найдёт время для себя на работе\",\"textEn\":\"Уважаю — не каждый найдёт время для себя на работе\",\"scoring\":{\"OBC\":3}},{\"text\":\"Присоединюсь — мне тоже нужна тишина в середине дня\",\"textEn\":\"Присоединюсь — мне тоже нужна тишина в середине дня\",\"scoring\":{\"SZT\":2,\"DEP\":1}},{\"text\":\"Подозрительно — он что-то прячет за этой «медитацией»\",\"textEn\":\"Подозрительно — он что-то прячет за этой «медитацией»\",\"scoring\":{\"PAR\":3}}]",
+    "scenarioEn": "You learn that a colleague meditates every lunch break in an empty meeting room. What do you think?",
+    "options": "[{\"text\":\"Странно — но меня это не касается\",\"textEn\":\"Odd — but it's none of my business\",\"scoring\":{\"SZD\":3}},{\"text\":\"Уважаю — не каждый найдёт время для себя на работе\",\"textEn\":\"I respect it — not everyone finds time for themselves at work\",\"scoring\":{\"OBC\":3}},{\"text\":\"Присоединюсь — мне тоже нужна тишина в середине дня\",\"textEn\":\"I'll join them — I need some quiet in the middle of the day too\",\"scoring\":{\"SZT\":2,\"DEP\":1}},{\"text\":\"Подозрительно — он что-то прячет за этой «медитацией»\",\"textEn\":\"Suspicious — they're hiding something behind this \\\"meditation\\\"\",\"scoring\":{\"PAR\":3}}]",
     "active": true,
     "sortOrder": 1493,
     "createdAt": "2026-03-19T13:05:13.089"
@@ -13448,8 +13448,8 @@
   {
     "id": "c045201ed301c6e47cb824b20",
     "scenario": "Вам подарили путёвку на двоих в спа-отель. С кем поедете?",
-    "scenarioEn": "Вам подарили путёвку на двоих в спа-отель. С кем поедете?",
-    "options": "[{\"text\":\"С лучшим другом(подругой) — хочу разделить удовольствие\",\"textEn\":\"С лучшим другом(подругой) — хочу разделить удовольствие\",\"scoring\":{\"DEP\":3}},{\"text\":\"Один(а) — возьму оба дня для себя\",\"textEn\":\"Один(а) — возьму оба дня для себя\",\"scoring\":{\"SZD\":3}},{\"text\":\"С партнёром — романтический отдых нам не помешает\",\"textEn\":\"С партнёром — романтический отдых нам не помешает\",\"scoring\":{\"OBC\":3}},{\"text\":\"С тем, кто оценит это — и расскажет всем, какой(ая) я щедрый(ая)\",\"textEn\":\"С тем, кто оценит это — и расскажет всем, какой(ая) я щедрый(ая)\",\"scoring\":{\"HIS\":1,\"NAR\":2}}]",
+    "scenarioEn": "You're given a spa weekend for two. Whom do you take?",
+    "options": "[{\"text\":\"С лучшим другом(подругой) — хочу разделить удовольствие\",\"textEn\":\"My best friend — I want to share the treat\",\"scoring\":{\"DEP\":3}},{\"text\":\"Один(а) — возьму оба дня для себя\",\"textEn\":\"Go alone — both days just for me\",\"scoring\":{\"SZD\":3}},{\"text\":\"С партнёром — романтический отдых нам не помешает\",\"textEn\":\"My partner — a romantic getaway would do us good\",\"scoring\":{\"OBC\":3}},{\"text\":\"С тем, кто оценит это — и расскажет всем, какой(ая) я щедрый(ая)\",\"textEn\":\"Someone who'll appreciate it — and tell everyone how generous I am\",\"scoring\":{\"HIS\":1,\"NAR\":2}}]",
     "active": true,
     "sortOrder": 1494,
     "createdAt": "2026-03-19T13:05:13.09"
@@ -13457,8 +13457,8 @@
   {
     "id": "c63d3db4f47898ec75c1134dd",
     "scenario": "Ваш друг начал фразу: «Не обижайся, но...» Что вы чувствуете до того, как он договорит?",
-    "scenarioEn": "Ваш друг начал фразу: «Не обижайся, но...» Что вы чувствуете до того, как он договорит?",
-    "options": "[{\"text\":\"Внутренне напрягаюсь — сейчас будет удар\",\"textEn\":\"Внутренне напрягаюсь — сейчас будет удар\",\"scoring\":{\"BOR\":2,\"AVD\":1}},{\"text\":\"Готовлюсь защищаться — эта фраза всегда означает плохое\",\"textEn\":\"Готовлюсь защищаться — эта фраза всегда означает плохое\",\"scoring\":{\"PAR\":3}},{\"text\":\"Спокоен(йна) — послушаю, а потом решу, обижаться или нет\",\"textEn\":\"Спокоен(йна) — послушаю, а потом решу, обижаться или нет\",\"scoring\":{\"SZD\":3}},{\"text\":\"Мне важно выслушать — может, он говорит из заботы\",\"textEn\":\"Мне важно выслушать — может, он говорит из заботы\",\"scoring\":{\"DEP\":3}}]",
+    "scenarioEn": "A friend starts a sentence with, \"Don't take this the wrong way, but...\" How do you feel before they finish?",
+    "options": "[{\"text\":\"Внутренне напрягаюсь — сейчас будет удар\",\"textEn\":\"I brace myself inside — here comes the blow\",\"scoring\":{\"BOR\":2,\"AVD\":1}},{\"text\":\"Готовлюсь защищаться — эта фраза всегда означает плохое\",\"textEn\":\"I get ready to defend myself — that phrase always means something bad\",\"scoring\":{\"PAR\":3}},{\"text\":\"Спокоен(йна) — послушаю, а потом решу, обижаться или нет\",\"textEn\":\"Calm — I'll listen and then decide whether to be offended\",\"scoring\":{\"SZD\":3}},{\"text\":\"Мне важно выслушать — может, он говорит из заботы\",\"textEn\":\"It matters to me to hear them out — maybe it comes from care\",\"scoring\":{\"DEP\":3}}]",
     "active": true,
     "sortOrder": 1495,
     "createdAt": "2026-03-19T13:05:13.091"
@@ -13466,8 +13466,8 @@
   {
     "id": "c15b40186288629de2cc67c8e",
     "scenario": "Вы пришли в парикмахерскую и попросили «как обычно». Мастер сделал(а) по-другому. Результат вам не нравится. Что делаете?",
-    "scenarioEn": "Вы пришли в парикмахерскую и попросили «как обычно». Мастер сделал(а) по-другому. Результат вам не нравится. Что делаете?",
-    "options": "[{\"text\":\"Попрошу переделать — я плачу деньги за то, что хочу\",\"textEn\":\"Попрошу переделать — я плачу деньги за то, что хочу\",\"scoring\":{\"ANT\":1,\"NAR\":2}},{\"text\":\"Скажу «спасибо» и уйду — мне стыдно жаловаться\",\"textEn\":\"Скажу «спасибо» и уйду — мне стыдно жаловаться\",\"scoring\":{\"AVD\":2,\"DEP\":1,\"BAR\":1,\"PAG\":2,\"DPR\":2}},{\"text\":\"Мне всё равно — волосы отрастут\",\"textEn\":\"Мне всё равно — волосы отрастут\",\"scoring\":{\"SZD\":3}},{\"text\":\"Вежливо объясню, что хотел(а) другое — без скандала\",\"textEn\":\"Вежливо объясню, что хотел(а) другое — без скандала\",\"scoring\":{\"OBC\":3}}]",
+    "scenarioEn": "You go to the hairdresser and ask for \"the usual.\" They do something different. You don't like the result. What do you do?",
+    "options": "[{\"text\":\"Попрошу переделать — я плачу деньги за то, что хочу\",\"textEn\":\"Ask them to redo it — I'm paying for what I want\",\"scoring\":{\"ANT\":1,\"NAR\":2}},{\"text\":\"Скажу «спасибо» и уйду — мне стыдно жаловаться\",\"textEn\":\"Say \\\"thank you\\\" and leave — I'm too embarrassed to complain\",\"scoring\":{\"AVD\":2,\"DEP\":1,\"BAR\":1,\"PAG\":2,\"DPR\":2}},{\"text\":\"Мне всё равно — волосы отрастут\",\"textEn\":\"I don't care — hair grows back\",\"scoring\":{\"SZD\":3}},{\"text\":\"Вежливо объясню, что хотел(а) другое — без скандала\",\"textEn\":\"Politely explain that I wanted something different — no scene\",\"scoring\":{\"OBC\":3}}]",
     "active": true,
     "sortOrder": 1496,
     "createdAt": "2026-03-19T13:05:13.092"
@@ -13475,8 +13475,8 @@
   {
     "id": "c2ebc1a813ea97d7b37f0b2c8",
     "scenario": "Вы увидели, как бабушка на улице кормит голубей и разговаривает с ними. Что чувствуете?",
-    "scenarioEn": "Вы увидели, как бабушка на улице кормит голубей и разговаривает с ними. Что чувствуете?",
-    "options": "[{\"text\":\"Трогательно — в этом есть простая человеческая нежность\",\"textEn\":\"Трогательно — в этом есть простая человеческая нежность\",\"scoring\":{\"DEP\":3}},{\"text\":\"Может, она одинока — и голуби её единственные собеседники\",\"textEn\":\"Может, она одинока — и голуби её единственные собеседники\",\"scoring\":{\"SZT\":2,\"BOR\":1}},{\"text\":\"Мне всё равно — прохожу мимо\",\"textEn\":\"Мне всё равно — прохожу мимо\",\"scoring\":{\"SZD\":3}},{\"text\":\"Грязь от голубей — негигиенично\",\"textEn\":\"Грязь от голубей — негигиенично\",\"scoring\":{\"OBC\":3}}]",
+    "scenarioEn": "You see an elderly woman on the street feeding pigeons and talking to them. How do you feel?",
+    "options": "[{\"text\":\"Трогательно — в этом есть простая человеческая нежность\",\"textEn\":\"Touched — there's a simple human tenderness in it\",\"scoring\":{\"DEP\":3}},{\"text\":\"Может, она одинока — и голуби её единственные собеседники\",\"textEn\":\"Maybe she's lonely — and the pigeons are her only company\",\"scoring\":{\"SZT\":2,\"BOR\":1}},{\"text\":\"Мне всё равно — прохожу мимо\",\"textEn\":\"I don't care — I walk past\",\"scoring\":{\"SZD\":3}},{\"text\":\"Грязь от голубей — негигиенично\",\"textEn\":\"Pigeons are dirty — it's unhygienic\",\"scoring\":{\"OBC\":3}}]",
     "active": true,
     "sortOrder": 1497,
     "createdAt": "2026-03-19T13:05:13.093"
@@ -13484,8 +13484,8 @@
   {
     "id": "c2d273c9b996e9bb8dc535eea",
     "scenario": "Друг предложил вам вместе написать песню. Вы не умеете сочинять музыку. Что ответите?",
-    "scenarioEn": "Друг предложил вам вместе написать песню. Вы не умеете сочинять музыку. Что ответите?",
-    "options": "[{\"text\":\"Попробую — мне не нужен талант, чтобы творить\",\"textEn\":\"Попробую — мне не нужен талант, чтобы творить\",\"scoring\":{\"SZT\":3}},{\"text\":\"С радостью! Вместе мы создадим что-то крутое!\",\"textEn\":\"С радостью! Вместе мы создадим что-то крутое!\",\"scoring\":{\"HIS\":2,\"DEP\":1}},{\"text\":\"Откажусь — я буду тормозить процесс\",\"textEn\":\"Откажусь — я буду тормозить процесс\",\"scoring\":{\"AVD\":3,\"PAG\":3}},{\"text\":\"Напишу текст — а музыку оставлю ему\",\"textEn\":\"Напишу текст — а музыку оставлю ему\",\"scoring\":{\"OBC\":3}}]",
+    "scenarioEn": "A friend suggests writing a song together. You can't compose music. What do you say?",
+    "options": "[{\"text\":\"Попробую — мне не нужен талант, чтобы творить\",\"textEn\":\"I'll try — I don't need talent to create\",\"scoring\":{\"SZT\":3}},{\"text\":\"С радостью! Вместе мы создадим что-то крутое!\",\"textEn\":\"Gladly! Together we'll make something awesome!\",\"scoring\":{\"HIS\":2,\"DEP\":1}},{\"text\":\"Откажусь — я буду тормозить процесс\",\"textEn\":\"Decline — I'll only slow things down\",\"scoring\":{\"AVD\":3,\"PAG\":3}},{\"text\":\"Напишу текст — а музыку оставлю ему\",\"textEn\":\"I'll write the lyrics — and leave the music to them\",\"scoring\":{\"OBC\":3}}]",
     "active": true,
     "sortOrder": 1498,
     "createdAt": "2026-03-19T13:05:13.094"
@@ -13493,8 +13493,8 @@
   {
     "id": "c4e0652ef694029ca036e1e82",
     "scenario": "Вы обнаружили, что ваш Instagram-аккаунт взломали и от вашего имени написали странные посты. Что сделаете первым?",
-    "scenarioEn": "Вы обнаружили, что ваш Instagram-аккаунт взломали и от вашего имени написали странные посты. Что сделаете первым?",
-    "options": "[{\"text\":\"Паника — все увидят, подумают что это я!\",\"textEn\":\"Паника — все увидят, подумают что это я!\",\"scoring\":{\"BOR\":2,\"AVD\":2}},{\"text\":\"Немедленно сменю пароль и напишу в поддержку — план действий\",\"textEn\":\"Немедленно сменю пароль и напишу в поддержку — план действий\",\"scoring\":{\"OBC\":3}},{\"text\":\"Кто-то целенаправленно атаковал именно меня — это не случайность\",\"textEn\":\"Кто-то целенаправленно атаковал именно меня — это не случайность\",\"scoring\":{\"PAR\":3}},{\"text\":\"Ну взломали — верну и забуду, не конец света\",\"textEn\":\"Ну взломали — верну и забуду, не конец света\",\"scoring\":{\"ANT\":2,\"PAG\":3}}]",
+    "scenarioEn": "You discover your Instagram account has been hacked and weird posts have gone up in your name. What do you do first?",
+    "options": "[{\"text\":\"Паника — все увидят, подумают что это я!\",\"textEn\":\"Panic — everyone will see and think it was me!\",\"scoring\":{\"BOR\":2,\"AVD\":2}},{\"text\":\"Немедленно сменю пароль и напишу в поддержку — план действий\",\"textEn\":\"Change the password immediately and contact support — action plan\",\"scoring\":{\"OBC\":3}},{\"text\":\"Кто-то целенаправленно атаковал именно меня — это не случайность\",\"textEn\":\"Someone deliberately targeted me specifically — this is no accident\",\"scoring\":{\"PAR\":3}},{\"text\":\"Ну взломали — верну и забуду, не конец света\",\"textEn\":\"So I got hacked — I'll recover it and forget about it, not the end of the world\",\"scoring\":{\"ANT\":2,\"PAG\":3}}]",
     "active": true,
     "sortOrder": 1499,
     "createdAt": "2026-03-19T13:05:13.095"
