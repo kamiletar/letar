@@ -5,6 +5,14 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 версионирование следует [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.28.13] - 2026-09-24
+
+### Added
+
+- `docs/question-review/question-review-attachment.xlsx` + раздел «Привязанность» в
+  `INSTRUCTIONS.md`: главный вопрос ревьюеру — не дублируют ли AAX/AAV шкалы ядра
+  BOR/DEP/SZD/AVD (таблица разведения), честность reverse-инверсии, социальная желательность.
+
 ## [0.28.12] - 2026-09-24
 
 ### Added
