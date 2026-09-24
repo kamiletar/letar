@@ -2,7 +2,7 @@
 
 > **📖 Начни с главного README:** [README.md](./README.md) — обзор проекта, быстрый старт, навигация по документации
 >
-> **Версия:** 0.28.37 | **Обновлено:** 2026-09-24 (пул, волна 4 закрыта: theme:check)
+> **Версия:** 0.28.38 | **Обновлено:** 2026-09-24 (пул, волна 5: группа 1 (for-professionals))
 >
 > **Связанные документы:**
 >
@@ -26,7 +26,7 @@
 | 2     | Пакеты ревьюеру ✅: СДВГ, привязанность, часть B аудита, редкие шкалы — 5 таблиц в `docs/question-review/` | ✅     |
 | 3     | Авторский EN-банк №101–1665 ✅ **EN: 1565/1565**, аудит: 0 непереведённых                                  | ✅     |
 | 4     | UI-хвосты ✅: `/dev/presentation` → brand, клавиатура радара (+тест), `theme:check` в `lint`               | ✅     |
-| 5     | `isRu ? … : …` → `messages` — **осталось 175 в 27 файлах**                                                 | ⏳     |
+| 5     | `isRu ? … : …` → `messages` — **осталось 103 литеральных в 23 файлах** (группа 1 ✅)                       | 🔄     |
 | 6     | Тесты Фазы 4: stratified-shuffle, server actions, E2E квиз/кабинет                                         | ⏳     |
 | 7     | Фичи Фазы 3: `relevantCounts` + динамика ядра, карта стабильности, фильтр, уведомления, сообщения, PDF     | ⏳     |
 
@@ -872,7 +872,12 @@ CAT/IRT. ✅ Подтверждено Kami: разделение ASD → ASD + D
 - [ ] **Строки интерфейса: `isRu ? '…' : '…'` → `messages/{ru,en}.json`** (next-intl).
       Первый проход 2026-09-24 (v0.28.2): `quiz-results.tsx` и `quiz-intro.tsx` перенесены в
       `quiz.results.*`, `quiz.intro.*`, `quiz.coverage.completed` (числа — ICU-параметры).
-      Остаток по замеру `grep -rc "isRu ?" --include=*.tsx src` — **175 в 27 файлах** (было 181).
+      **Пул, группа 1 ✅ v0.28.38:** `for-professionals` (62 строки + 2 списка через `t.raw` + ссылка через
+      `t.rich`) → namespace `forProfessionals`; содержимое вынесено в `_components/for-professionals-view.tsx`
+      ради теста (4: обе локали без MISSING_MESSAGE/ошибок ICU, подстановки, списки, ссылка).
+      **Метрика с группы 1 — литеральные тернарии** (`isRu ? '…' : '…'`, выбор полей `label`/`labelEn`
+      не считается): **осталось 103 в 23 файлах**. Прежний замер строк `grep -rc` (175 → 148) смешивал
+      строки UI с выбором полей данных.
       Больше всего: `for-professionals/page.tsx` 34, `cabinet/[clientId]/_components/dark-core-block.tsx` 17,
       `profile-details.tsx` 14, `quiz-container.tsx` 11, `developmental-profile-card.tsx` 11,
       `experimental-scales-block.tsx` 10, `safety-net-block.tsx` 9, `disclaimer-consent.tsx` 7,

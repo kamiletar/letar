@@ -23,8 +23,12 @@ export default defineConfig({
     restoreMocks: true,
   },
   resolve: {
-    alias: {
-      '@': resolve(import.meta.dirname, './src'),
-    },
+    alias: [
+      { find: '@', replacement: resolve(import.meta.dirname, './src') },
+      // Точное совпадение, не префикс: подпути `@letar/ui/*` сюда не должны попадать. В приложении
+      // баррель резолвится через paths Next; в тестах он мокается (тянет `next/*`), но vi.mock
+      // требует, чтобы модуль вообще резолвился
+      { find: /^@letar\/ui$/, replacement: resolve(import.meta.dirname, '../../libs/ui/src/index.ts') },
+    ],
   },
 })

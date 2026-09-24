@@ -233,5 +233,113 @@
     "deleteDataAction": "Delete permanently",
     "deleteDataSuccess": "Sessions deleted: {count}",
     "deleteDataError": "Failed to delete data. Please try again later."
+  },
+  "forProfessionals": {
+    "lead": {
+      "title": "Want a cabinet for your clients?",
+      "text": "Leave your contact and we will reach out to help set up your psychologist cabinet."
+    },
+    "table": {
+      "suppl": "Suppl.",
+      "cluster": "Cluster",
+      "clinical": "Clinical",
+      "archetype": "Archetype",
+      "name": "Name",
+      "code": "Code",
+      "title": "Scale Reference Table"
+    },
+    "cabinet": {
+      "revoke": "The client can revoke access at any time. You cannot see the client's individual answers — only normalized scale scores.",
+      "linking": "Your client links you by email in their profile settings — the decision is always theirs. After linking, you get access to:",
+      "title": "Psychologist Cabinet on the Platform",
+      "features": [
+        "Client's cumulative profile with clinical scale names",
+        "Results dynamics across sessions (change chart)",
+        "Profile radar diagram",
+        "Top 3 prominent types with interaction descriptions",
+        "Personal client notes (visible only to you)"
+      ],
+      "intro": "The platform features a psychologist cabinet — a tool for tracking your clients’ results. To activate the cabinet, click \"I’m a Professional\" on the <link>cabinet page</link>."
+    },
+    "ethics": {
+      "p2": "Discussing results with the client should take place in a non-judgmental and respectful atmosphere. No profile is \"bad\" — each reflects a unique trait configuration with its own strengths and areas for growth.",
+      "p1": "Test results are confidential and are shared only with the client and their therapist with the client's informed consent. The test must not be used for employment screening, forensic evaluation, or compulsory screening.",
+      "title": "Ethical Principles"
+    },
+    "compat": {
+      "ysq": "YSQ — to identify early maladaptive schemas.",
+      "scl": "SCL-90-R — for general symptom assessment.",
+      "mdq": "MDQ — when BAR is elevated, to clarify bipolar spectrum features.",
+      "bdi": "BDI-II — when DPR or BAR is elevated, to assess current depression severity.",
+      "mcmi": "MCMI-IV — for in-depth personality disorder assessment.",
+      "title": "Compatibility with Other Instruments"
+    },
+    "differential": {
+      "p2": "If the profile shows simultaneously elevated BOR and BAR, this is a signal: verify whether the \"borderline\" presentation may be better explained by a cyclical mood disorder. The test includes 10 dedicated differential items (1946–1955) that distinguish reactive instability of BOR from endogenous cyclicity of BAR.",
+      "p1": "The BAR scale is a key differentiation tool. In practice, clients with unrecognized bipolar disorder are frequently misdiagnosed with Borderline (BOR), Narcissistic (NAR), or Histrionic (HIS) personality disorder.",
+      "title": "Differential Diagnosis"
+    },
+    "consultation": {
+      "p1": "The client completes the test before the first session or between the first and second sessions. The profile immediately highlights areas requiring attention, allowing you to start with targeted questions. Any discrepancy between your clinical impression and the profile is valuable material for discussion.",
+      "title": "During Initial Consultation"
+    },
+    "scales": {
+      "rest": "The remaining 9 core scales — the Light and Dark triads, destructive patterns (sadism, masochism-beta), and the developmental spectrum (systemizing, directness, alexithymia) — are described with their prototypes in the \"Methodology\" section above.",
+      "dpr": "DPR — Depressive Personality (from DSM-IV appendix, chronic depressive temperament as a trait).",
+      "pag": "PAG — Passive-Aggressive (negativistic) pattern (removed from DSM-5, retained due to clinical relevance).",
+      "bar": "BAR — Bipolar Affective Disorder (mood disorder screening as a differential-diagnostic filter).",
+      "supplHeading": "3 supplementary scales:",
+      "clusterC": "Cluster C (anxious): Avoidant (AVD), Dependent (DEP), Obsessive-Compulsive (OBC).",
+      "clusterB": "Cluster B (dramatic): Antisocial (ANT), Borderline (BOR), Histrionic (HIS), Narcissistic (NAR).",
+      "clusterA": "Cluster A (eccentric): Paranoid (PAR), Schizoid (SZD), Schizotypal (SZT).",
+      "coreHeading": "10 core scales (DSM-5):",
+      "title": "Scales"
+    },
+    "portions": {
+      "p3": "Early completion of a batch is not possible — the client answers all 50 questions (or skips them), then receives an updated profile. This guarantees that each batch contributes a balanced improvement to the reliability of all scales.",
+      "p2": "Stratification is particularly important for supplementary scales (BAR, PAG, DPR), which have a smaller question pool. Without stratification, early batches could contain no BAR items, delaying BOR/BAR differential diagnosis until later stages of completion.",
+      "p1": "The test is completed in batches of 50 questions. Each batch is formed using stratified sampling: questions are distributed proportionally across all {coreScales} scales with a guarantee of at least one question per scale. This ensures uniform growth in profile reliability across all axes after each batch.",
+      "title": "Portioned Completion and Stratification"
+    },
+    "domains": {
+      "mappingIntro": "Approximate scale-to-domain mapping (construct level; empirical factor validation pending sample accumulation):",
+      "intro": "The 13 core and supplementary personality-disorder scales map onto contemporary dimensional models in psychiatry — the Alternative Model for Personality Disorders (AMPD/PID-5) and HiTOP, as well as the five personality-disorder domains of ICD-11 (suspended in Russia since 02.2024, but still a reference model for clinicians). The archetest profile can be read both categorically (by A/B/C clusters) and dimensionally — as a position on continuous trait axes.",
+      "items": [
+        "Negative Affectivity — BOR, DPR, AVD, DEP",
+        "Detachment — SZD, AVD, PAR",
+        "Antagonism (AMPD) / Dissociality (ICD-11) — NAR, ANT, PAG; from the extended set — MAC, SAD",
+        "Disinhibition — ANT, BOR, HIS",
+        "Anankastia (ICD-11) — OBC; Psychoticism (AMPD) — SZT",
+        "\"Borderline pattern\" (ICD-11 specifier) — BOR"
+      ]
+    },
+    "darkCore": {
+      "reply": "reply",
+      "sources": "Sources: ",
+      "index": "The clinician’s dashboard includes a “Dark core” index built from four scales of the test (MAC/NAR/ANT/SAD) — with explicit limitations we prefer to state ourselves. First, it is an approximation, not a measurement of D: D itself is measured with the D70/D35/D16 inventories. Second, the tetrad composite correlates with full D at r ≈ .85 — below the median of random four-trait combinations (r ≈ .90), and the authors explicitly warn against treating the tetrad as the prime representation of the core; the shortfall comes from narcissistic admiration, which is why the index also reports an estimate without narcissism. Third, there is substantive criticism of the construct itself: latent D and antagonism (the low pole of Agreeableness) correlate at about −.90, and no incremental validity of D over antagonism has been demonstrated — so these may be two names for one thing. The test has no Agreeableness scale, so this cannot be checked on our data even in principle. The index should be read as a structural hint — an even core versus a core with a pronounced “flavor” — not as a score comparable to a population: the test has no normative percentiles yet.",
+      "dFactor": "Contemporary work on dark traits has shifted from enumerating triads toward a general factor. The Dark Factor of Personality (D) is defined as the general tendency to maximize one’s individual utility — disregarding, accepting, or malevolently provoking disutility for others — accompanied by beliefs that serve as justifications. Within this frame, individual dark traits are not standalone entities but “flavored manifestations”: the common core plus a unique, essentially non-aversive component. For narcissism that is admiration seeking, for psychopathy disinhibition, for Machiavellianism planfulness. In a 2023 study, the triad as a set of three distinguishable traits failed empirical scrutiny.",
+      "title": "The dark core: a general factor and its “flavors”"
+    },
+    "methodology": {
+      "triads": "The Light and Dark triads are not opposite ends of a single axis: per Kaufman et al. (2019), the correlation between them is moderate (r ≈ −.48), not absolute. Elevated scores on both triads simultaneously are a normal data pattern, not a paradox or a filling error.",
+      "experimental": "Beyond the {coreScales}-scale core there are three further experimental scales, available only in the clinician’s dashboard and never shown to the client: “Physical Armor” (RES_PHYS, an original construct with no validated prototype), “Affective Resonance” (RES_AFF, prototypes — IRI Personal Distress and the Highly Sensitive Person scale, HSP/SPS) and “Special Interests” (SPEC_INT). The “Armor & Radar” cross-index is built from them. All three are marked “beta”, are excluded from the express test and from “leading traits”, and do not affect core scoring: their items award points to experimental scales only.",
+      "core": "The validated core covers {validatedScales} of the {coreScales} current scales (table above). Separately, there are original/experimental constructs without a direct validated prototype: within the core this is the MAS scale (\"Self-Sacrificing\", an original masochistic-pattern construct). Such scales are always marked \"beta\" in the UI and should be interpreted with caution, apart from the core.",
+      "colSource": "Source",
+      "colPrototype": "Validated prototype",
+      "colScale": "Archetest scale",
+      "intro": "The test does not invent scales from scratch. Most scales are grounded in validated instruments — at the construct level, never by borrowing items: every archetest question is an original, situational formulation. This preserves licensing cleanliness (some prototypes, e.g. TAS-20, are commercial; others are research-only) while keeping the test connected to the accumulated evidence base and norms.",
+      "title": "Methodology"
+    },
+    "about": {
+      "p2": "The test is not a diagnostic instrument and does not replace a clinical interview. Its purpose is to provide you and your client with a structured starting point for discussion.",
+      "p1": "A multi-scale screening questionnaire for personality traits and affective patterns. {totalQuestions} items, {coreScales} scales, situational format (each item presents a life situation with four response options). The result is a normalized trait prominence profile from 0 to 100% on each scale.",
+      "title": "About the Test"
+    },
+    "heading": "For Clinicians",
+    "meta": {
+      "description": "What Archetest is grounded in: {coreScales} scales mapped onto validated instruments (PID-5, Light Triad Scale, SD3, AQ, TAS-20), the AMPD and ICD-11 dimensional models, the Dark Factor of Personality, and a clinician dashboard with client dynamics.",
+      "title": "For Clinicians: Test Methodology"
+    },
+    "subtitle": "A guide for clinical psychologists, psychotherapists, and psychiatrists."
   }
 }

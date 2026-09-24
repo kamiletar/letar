@@ -5,6 +5,14 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 версионирование следует [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.28.38] - 2026-09-24
+
+### Changed
+
+- Страница «Если вы психолог» переведена на next-intl: все строки — в `messages/{ru,en}.json`
+  (namespace `forProfessionals`), списки — `t.raw`, ссылка на кабинет — `t.rich`. Содержимое вынесено в
+  `ForProfessionalsView` и покрыто тестом (4). В vitest добавлен точный alias `@letar/ui` для `vi.mock`.
+
 ## [0.28.37] - 2026-09-24
 
 ### Added
