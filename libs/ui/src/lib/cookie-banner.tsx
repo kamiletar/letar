@@ -182,7 +182,9 @@ export function CookieBanner({
             </Text>
 
             {!expanded && (
-              <HStack gap={2} flexShrink={0}>
+              // На телефоне (колонка) кнопки прижаты вправо — как «Сохранить выбор»/«Принять все»
+              // в развёрнутой панели ниже; на десктопе (строка) выравнивание задаёт родитель
+              <HStack gap={2} flexShrink={0} justify={{ base: 'flex-end', md: 'initial' }}>
                 <Button
                   size="sm"
                   variant="ghost"

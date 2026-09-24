@@ -2,6 +2,18 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.40.35] - 2026-09-24
+
+### Added
+
+- На iOS включён `:active` (нажатие кнопок и ссылок): хук `useIosActiveFix` из `@letar/chakra-provider` вызывается в корневом провайдере (голый `ChakraProvider`). Раньше без пассивного `touchstart`-листенера Safari не применял `_active`.
+
+## [0.40.34] - 2026-09-24
+
+### Fixed
+
+- Реестр кеша Emotion (`EmotionRegistry` из `@letar/chakra-provider/next`) в корневом провайдере: стили SSR уходят в поток через `useServerInsertedHTML`, а не инлайн-`<style>` перед элементами. Инлайн-стиль позднего потокового сегмента ломал гидратацию (плавающая ошибка React #418).
+
 ## [0.40.33] - 2026-09-22
 
 ### Fixed

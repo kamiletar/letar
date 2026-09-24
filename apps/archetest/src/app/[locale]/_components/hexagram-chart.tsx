@@ -1,24 +1,65 @@
 'use client'
 
-import { Badge, Box, Heading, HStack, Text, useToken, VStack } from '@chakra-ui/react'
+import { Badge, Box, Heading, HStack, SimpleGrid, Text, useToken, VStack } from '@chakra-ui/react'
 import { useLocale } from 'next-intl'
-import { useEffect, useRef, useState } from 'react'
+import { type RefObject, useEffect, useRef, useState } from 'react'
 
 import { prefersReducedMotion } from '@letar/hooks'
 
 import {
+  DARK_TRIAD_CODES,
   getPersonalityType,
+  getScaleDisplayCode,
   getScaleName,
   HEXAGRAM_SCALE_CODES,
+  LIGHT_TRIAD_CODES,
   type PersonalityTypeCode,
 } from '../_data/personality-types'
 import { computeHexagramGeometry, DEFAULT_SIZE, type HexagramVertex, type Point } from '../_lib/hexagram-geometry'
 
 /** Длительность анимации построения звезды, мс */
 const ANIMATION_MS = 700
-/** Поля вокруг геометрии под подписи вершин (viewBox шире квадрата геометрии) */
-const PAD_X = 115
-const PAD_Y = 10
+/**
+ * Поля вокруг геометрии под подписи вершин (viewBox шире квадрата геометрии).
+ * Подписи — короткие коды, поэтому поля узкие: чем меньше viewBox, тем крупнее текст
+ * на экране. С полными названиями (PAD_X 115) на телефоне подписи ужимались до ~7px.
+ */
+const PAD_X = 50
+const PAD_Y = 16
+/** Ширина viewBox — от неё считается масштаб SVG на экране */
+const VIEWBOX_WIDTH = DEFAULT_SIZE + PAD_X * 2
+/** Целевой экранный размер подписи вершины, px — одинаковый на телефоне и десктопе */
+const LABEL_SCREEN_PX = 13
+/** Границы размера подписи в единицах viewBox: снизу — читаемость, сверху — влезть в поля */
+const LABEL_FONT_MIN = 16
+const LABEL_FONT_MAX = 22
+
+/**
+ * Размер подписи в единицах viewBox, дающий ~13px на экране. SVG масштабируется целиком,
+ * и фиксированный размер в единицах viewBox на телефоне (SVG ≈ 300px) ужимался вдвое.
+ * До замера (SSR, первый кадр) — значение для десктопной ширины.
+ */
+function useLabelFontSize(svgRef: RefObject<SVGSVGElement | null>): number {
+  const [fontSize, setFontSize] = useState(LABEL_FONT_MIN)
+
+  useEffect(() => {
+    const svg = svgRef.current
+    if (!svg || typeof ResizeObserver === 'undefined') {
+      return
+    }
+    const observer = new ResizeObserver(([entry]) => {
+      const width = entry?.contentRect.width ?? 0
+      if (width > 0) {
+        const units = LABEL_SCREEN_PX / (width / VIEWBOX_WIDTH)
+        setFontSize(Math.min(LABEL_FONT_MAX, Math.max(LABEL_FONT_MIN, Math.round(units))))
+      }
+    })
+    observer.observe(svg)
+    return () => observer.disconnect()
+  }, [svgRef])
+
+  return fontSize
+}
 
 interface HexagramChartProps {
   /** Нормализованные баллы 0–100 (достаточно 8 шкал гексаграммы) */
@@ -90,18 +131,20 @@ function scaleLabel(code: PersonalityTypeCode, isRu: boolean): string {
   return getScaleName(code, { audience: 'construct', triadAlias: true }, isRu)
 }
 
-/** Подпись вершины за пределами ауры, с anchor по стороне света */
+/** Подпись вершины за пределами ауры: код шкалы + балл, полное название — в подсказке */
 function VertexLabel({
   vertex,
   center,
   labelRadius,
   fill,
+  fontSize,
   isRu,
 }: {
   vertex: HexagramVertex
   center: Point
   labelRadius: number
   fill: string
+  fontSize: number
   isRu: boolean
 }) {
   const dx = vertex.point.x - center.x
@@ -118,46 +161,44 @@ function VertexLabel({
     textAnchor = 'end'
   }
 
-  // Длинные названия («Вера в человечество») переносим по словам на строки ≤ 13 символов
-  const lines = wrapLabel(scaleLabel(vertex.code, isRu), 13)
-  const lineHeight = 16
-  // Вертикальное центрирование многострочного блока относительно оси вершины
-  const firstLineY = y - ((lines.length - 1) * lineHeight) / 2
+  const code = getScaleDisplayCode(vertex.code, { triadAlias: true })
+  const percent = Math.round(vertex.value)
+  // Один строковый child у <title>: массив детей рвёт гидратацию
+  // (см. .claude/docs/react19-svg-title-array-children-hydration.md)
+  const hint = `${code} — ${scaleLabel(vertex.code, isRu)}: ${percent}%`
 
   return (
-    <text x={x} y={firstLineY} textAnchor={textAnchor} dominantBaseline="central" fontSize={14} fill={fill}>
-      {lines.map((line, i) => (
-        <tspan key={i} x={x} dy={i === 0 ? 0 : lineHeight}>
-          {line}
-          {i === lines.length - 1 && (
-            <tspan fontSize={12} opacity={0.75}>
-              {` ${Math.round(vertex.value)}%`}
-            </tspan>
-          )}
-        </tspan>
-      ))}
+    <text
+      x={x}
+      y={y}
+      textAnchor={textAnchor}
+      dominantBaseline="central"
+      // Начертание и размер — в style: SVG-атрибуты font-* перебиваются любым CSS-правилом
+      style={{ fill, fontSize, fontWeight: 700 }}
+    >
+      <title>{hint}</title>
+      {code}
+      <tspan opacity={0.7} style={{ fontWeight: 400 }}>{` ${percent}%`}</tspan>
     </text>
   )
 }
 
-/** Перенос подписи по словам: строки не длиннее maxChars (одно сверхдлинное слово не режется) */
-function wrapLabel(label: string, maxChars: number): string[] {
-  const words = label.split(' ')
-  const lines: string[] = []
-  let current = ''
-  for (const word of words) {
-    const candidate = current ? `${current} ${word}` : word
-    if (candidate.length > maxChars && current) {
-      lines.push(current)
-      current = word
-    } else {
-      current = candidate
-    }
-  }
-  if (current) {
-    lines.push(current)
-  }
-  return lines
+/** Строка легенды: цветная метка группы, код, полное название, балл */
+function LegendRow({ code, name, value, swatch }: { code: string; name: string; value: number; swatch: string }) {
+  return (
+    <HStack gap={2} fontSize="sm" minW={0}>
+      <Box w={2.5} h={2.5} borderRadius="full" flexShrink={0} style={{ background: swatch }} />
+      <Text fontFamily="mono" fontWeight="bold" fontSize="xs" w="2.25rem" flexShrink={0}>
+        {code}
+      </Text>
+      <Text flex="1" minW={0} truncate>
+        {name}
+      </Text>
+      <Text fontWeight="semibold" flexShrink={0}>
+        {Math.round(value)}%
+      </Text>
+    </HStack>
+  )
 }
 
 /**
@@ -178,6 +219,8 @@ export function HexagramChart({
   const isRu = locale === 'ru'
 
   const animatedScores = useAnimatedScores(scores)
+  const svgRef = useRef<SVGSVGElement>(null)
+  const labelFontSize = useLabelFontSize(svgRef)
   const geometry = computeHexagramGeometry(animatedScores, DEFAULT_SIZE)
   const { center, maxRadius } = geometry
 
@@ -195,9 +238,9 @@ export function HexagramChart({
   const intersectionPoints = geometry.intersectionPolygon.map((p) => `${p.x},${p.y}`).join(' ')
 
   // Радиусы колец ауры и подписей — за пределами вершин
-  const sadRingRadius = maxRadius * 1.08
-  const masRingRadius = maxRadius * 1.16
-  const labelRadius = maxRadius * 1.3
+  const sadRingRadius = maxRadius * 1.06
+  const masRingRadius = maxRadius * 1.12
+  const labelRadius = maxRadius * 1.2
 
   const integrationPercent = Math.round(geometry.integrationIndex * 100)
   const masBeta = getPersonalityType('MAS').beta
@@ -210,9 +253,10 @@ export function HexagramChart({
         </Heading>
       )}
 
-      <Box w="100%" maxW="560px" mx="auto">
+      <Box w="100%" maxW="460px" mx="auto">
         <svg
-          viewBox={`0 0 ${DEFAULT_SIZE + PAD_X * 2} ${DEFAULT_SIZE + PAD_Y * 2}`}
+          ref={svgRef}
+          viewBox={`0 0 ${VIEWBOX_WIDTH} ${DEFAULT_SIZE + PAD_Y * 2}`}
           width="100%"
           role="img"
           aria-label={isRu ? 'Гексаграмма Светлой и Тёмной триад' : 'Hexagram of the Light and Dark triads'}
@@ -306,6 +350,7 @@ export function HexagramChart({
                 center={center}
                 labelRadius={labelRadius}
                 fill={fgColor}
+                fontSize={labelFontSize}
                 isRu={isRu}
               />
             ))}
@@ -329,6 +374,38 @@ export function HexagramChart({
               : `Integration zone: ${integrationPercent}% — a visual metaphor of triad overlap, not a psychometric metric`}
           </Text>
         )}
+
+        {/* Расшифровка кодов: полные названия и баллы — на диаграмме только коды */}
+        <SimpleGrid columns={{ base: 1, sm: 2 }} columnGap={8} rowGap={1} w="100%" maxW="520px" mt={1}>
+          <VStack align="stretch" gap={1}>
+            <Text fontSize="xs" fontWeight="semibold" color="fg.muted" textTransform="uppercase" letterSpacing="wide">
+              {isRu ? 'Светлая триада' : 'Light triad'}
+            </Text>
+            {LIGHT_TRIAD_CODES.map((code) => (
+              <LegendRow
+                key={code}
+                code={getScaleDisplayCode(code, { triadAlias: true })}
+                name={scaleLabel(code, isRu)}
+                value={scores[code] ?? 0}
+                swatch={lightColor}
+              />
+            ))}
+          </VStack>
+          <VStack align="stretch" gap={1} mt={{ base: 2, sm: 0 }}>
+            <Text fontSize="xs" fontWeight="semibold" color="fg.muted" textTransform="uppercase" letterSpacing="wide">
+              {isRu ? 'Тёмная триада' : 'Dark triad'}
+            </Text>
+            {DARK_TRIAD_CODES.map((code) => (
+              <LegendRow
+                key={code}
+                code={getScaleDisplayCode(code, { triadAlias: true })}
+                name={scaleLabel(code, isRu)}
+                value={scores[code] ?? 0}
+                swatch={darkColor}
+              />
+            ))}
+          </VStack>
+        </SimpleGrid>
 
         {/* Легенда ауры */}
         {(geometry.aura.sad > 0.01 || geometry.aura.mas > 0.01) && (

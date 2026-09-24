@@ -1,5 +1,5 @@
 import { act, renderHook } from '@testing-library/react'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, type MockInstance, vi } from 'vitest'
 
 import { __resetBookmarksCache, type Bookmark, useBookmarks } from './use-bookmarks'
 
@@ -20,6 +20,11 @@ const testBookmark2: Omit<Bookmark, 'addedAt'> = {
   category: 'Кодексы',
 }
 
+/** Предупреждения React о нестабильном snapshot в useSyncExternalStore */
+function snapshotCacheWarnings(spy: MockInstance<typeof console.error>): unknown[][] {
+  return spy.mock.calls.filter((args) => String(args[0]).includes('should be cached to avoid an infinite loop'))
+}
+
 describe('useBookmarks', () => {
   beforeEach(() => {
     // Очищаем localStorage перед каждым тестом
@@ -33,7 +38,18 @@ describe('useBookmarks', () => {
     window.localStorage.clear()
     // Сбрасываем кеш хука
     __resetBookmarksCache()
-    vi.clearAllMocks()
+    vi.restoreAllMocks()
+  })
+
+  // ⚠️ Флаг предупреждения «should be cached» в React общий на модуль и взводится один раз —
+  // тест гидратации идёт первым, пока его не взвёл другой тест
+  it('getServerSnapshot возвращает стабильную ссылку при гидратации', () => {
+    // React в dev вызывает getServerSnapshot дважды и ругается, если ссылки разные
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    renderHook(() => useBookmarks(), { hydrate: true })
+
+    expect(snapshotCacheWarnings(consoleError)).toHaveLength(0)
   })
 
   it('должен инициализироваться с пустым массивом закладок', () => {
@@ -185,9 +201,12 @@ describe('useBookmarks', () => {
 
   it('должен возвращать пустой массив при ошибке парсинга JSON', () => {
     localStorage.setItem('pravda-bookmarks', 'invalid json')
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
 
     const { result } = renderHook(() => useBookmarks())
 
     expect(result.current.bookmarks).toEqual([])
+    // Ветка catch тоже отдаёт snapshot — ссылка обязана быть стабильной
+    expect(snapshotCacheWarnings(consoleError)).toHaveLength(0)
   })
 })

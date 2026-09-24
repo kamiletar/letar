@@ -28,7 +28,8 @@ export function AchievementCard({ code, unlocked, unlockedAt }: AchievementCardP
       bg={unlocked ? 'bg' : 'bg.subtle'}
       opacity={unlocked ? 1 : 0.5}
       minW="160px"
-      transition="all 0.2s"
+      transitionProperty="opacity, background-color, border-color"
+      transitionDuration="0.2s"
     >
       <VStack gap={1} align="start">
         <Text fontSize="2xl">{def.icon}</Text>
@@ -43,7 +44,7 @@ export function AchievementCard({ code, unlocked, unlockedAt }: AchievementCardP
             {new Date(unlockedAt).toLocaleDateString(isRu ? 'ru-RU' : 'en-US')}
           </Text>
         )}
-        <Text fontSize="xs" color="blue.500" fontWeight="medium">
+        <Text fontSize="xs" color="brand.fg" fontWeight="medium">
           +{def.xpReward} XP
         </Text>
       </VStack>

@@ -63,7 +63,7 @@ export function ScaleTeaser({ isRu }: ScaleTeaserProps) {
             {t('teaserStatesNote')}
           </Text>
 
-          <Button asChild colorPalette="blue" size="sm" alignSelf="center">
+          <Button asChild colorPalette="brand" size="sm" alignSelf="center">
             <Link href="/">{t('fullTestCta')}</Link>
           </Button>
         </VStack>

@@ -198,7 +198,8 @@
       "@letar/ui/use-scroll-gate": ["../../libs/ui/src/lib/use-scroll-gate.ts"],
       "@letar/ui/use-service-worker": ["../../libs/ui/src/lib/use-service-worker.ts"],
       "@letar/ui/use-share": ["../../libs/ui/src/lib/use-share.ts"],
-      "@letar/ui/user-menu": ["../../libs/ui/src/lib/user-menu.tsx"]
+      "@letar/ui/user-menu": ["../../libs/ui/src/lib/user-menu.tsx"],
+      "@letar/chakra-provider/next": ["../../libs/chakra-provider/src/next.ts"]
     }
   },
   "references": [

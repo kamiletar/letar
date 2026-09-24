@@ -13,8 +13,22 @@ import {
   ColorModeSelect,
   RootChakraProvider,
   useColorMode,
+  useIosActiveFix,
 } from '@letar/chakra-provider'
+
+// Только Next.js App Router — отдельный подпуть
+import { DarkOnlyChakraProvider, EmotionRegistry } from '@letar/chakra-provider/next'
 ```
+
+## Точки входа
+
+| Подпуть                       | Что внутри                                  | Кому                                  |
+| ----------------------------- | ------------------------------------------- | ------------------------------------- |
+| `@letar/chakra-provider`      | провайдеры, переключатели темы, хуки        | всем, включая Electron/Vite-рендереры |
+| `@letar/chakra-provider/next` | `EmotionRegistry`, `DarkOnlyChakraProvider` | только Next.js App Router             |
+
+Подпуть требует отдельной строки в `paths` каждого tsconfig-потребителя — см.
+`.claude/docs/lib-entry-points.md`.
 
 ## API
 
@@ -22,7 +36,8 @@ import {
 
 #### `RootChakraProvider`
 
-Обёртка над `ChakraProvider` с поддержкой кастомной темы.
+Обёртка над `ChakraProvider` с поддержкой кастомной темы. Заодно включает `:active` на iOS
+(см. [`useIosActiveFix`](#useiosactivefix)) — приложению ничего подключать не нужно.
 
 ```tsx
 // app/layout.tsx
@@ -68,7 +83,64 @@ export default function RootLayout({ children }) {
 }
 ```
 
-**Props:** Наследует все props от `ThemeProviderProps` (next-themes).
+**Props:** наследует все props от `ThemeProviderProps` (next-themes) плюс:
+
+| Prop              | Тип       | Описание                                                                       |
+| ----------------- | --------- | ------------------------------------------------------------------------------ |
+| `lockColorScheme` | `boolean` | Закрепить `color-scheme` темы (default: `true`), см. ниже; `false` — отключить |
+
+**Защита от авто-затемнения браузера.** Brave и Chrome на Android («Тёмный режим для сайтов»)
+перекрашивают страницу с `color-scheme: light`, и выбранная светлая тема рендерится тёмной.
+Поэтому провайдер по умолчанию рендерит `<style>` с `html.light{color-scheme:only light}` и
+`html.dark{color-scheme:dark}` (селекторы следуют `attribute`/`value`) и выключает инлайновый
+`color-scheme` next-themes — он перебил бы правило. Приложению ничего добавлять не нужно; своё
+правило `color-scheme` в `globalCss` держать не надо. Разбор —
+`.claude/docs/browser-auto-dark-light-theme-override.md`.
+
+#### `EmotionRegistry` (`@letar/chakra-provider/next`)
+
+Реестр кеша Emotion для App Router. **Обязателен** в корневом провайдере Next-приложения, снаружи
+`ColorModeProvider`/`RootChakraProvider`:
+
+```tsx
+'use client'
+import { ColorModeProvider, RootChakraProvider } from '@letar/chakra-provider'
+import { EmotionRegistry } from '@letar/chakra-provider/next'
+
+export function Providers({ children }: PropsWithChildren) {
+  return (
+    <EmotionRegistry>
+      <ColorModeProvider>
+        <RootChakraProvider value={system}>{children}</RootChakraProvider>
+      </ColorModeProvider>
+    </EmotionRegistry>
+  )
+}
+```
+
+Без него Chakra на SSR рендерит инлайн-`<style data-emotion>` перед каждым элементом. Стиль
+позднего потокового сегмента (`loading.tsx`, `<Suspense>`) остаётся в теле страницы, гидратация
+находит `<style>` вместо элемента и плавающе падает с ошибкой React #418, пересобирая корень.
+Реестр копит правила (`cache.compat = true`) и отдаёт их в поток через `useServerInsertedHTML`.
+Разбор — `.claude/docs/emotion-streaming-inline-style-hydration-418.md`.
+
+#### `DarkOnlyChakraProvider` (`@letar/chakra-provider/next`)
+
+Готовый корневой провайдер для приложений с одной тёмной темой (лендинги, витрины):
+`EmotionRegistry` + `ColorModeProvider` (`forcedTheme="dark"`, без системной темы) +
+`RootChakraProvider`. Порядок слоёв зашит внутри, поэтому забыть реестр нельзя.
+
+```tsx
+'use client'
+import { system } from '@/lib/theme'
+import { DarkOnlyChakraProvider } from '@letar/chakra-provider/next'
+
+export function Provider({ children }: PropsWithChildren) {
+  return <DarkOnlyChakraProvider value={system}>{children}</DarkOnlyChakraProvider>
+}
+```
+
+Нужна тема, которую можно переключать, — собирай слои вручную, как в примере `EmotionRegistry`.
 
 ### Хуки
 
@@ -120,6 +192,30 @@ function Card() {
 }
 ```
 
+#### `useIosActiveFix()`
+
+Включает `:active` (в Chakra — `_active`) на iOS. Safari не применяет `:active`, пока на документе
+нет ни одного `touchstart`-листенера, поэтому хук вешает на `document` пустой пассивный. Листенер
+снимается при размонтировании (в StrictMode dev эффект выполняется дважды — без снятия копились бы
+дубли). На скролл не влияет (`passive: true`), на десктопе и в Electron ничего не меняет.
+
+`RootChakraProvider` вызывает хук сам. Явный вызов нужен только приложению на голом `ChakraProvider`
+из `@chakra-ui/react`:
+
+```tsx
+'use client'
+import { ChakraProvider } from '@chakra-ui/react'
+import { useIosActiveFix } from '@letar/chakra-provider'
+
+export function Provider({ children }: PropsWithChildren) {
+  useIosActiveFix()
+  return <ChakraProvider value={system}>{children}</ChakraProvider>
+}
+```
+
+⚠️ Не копируй фикс в приложение руками (`useEffect` + `addEventListener` без cleanup) — до
+2026-09-24 такая копия жила в 10 корневых провайдерах.
+
 ### Компоненты
 
 #### `ColorModeButton`
@@ -154,6 +250,8 @@ function Settings() {
       <ColorModeSelect />
       {/* или только иконки */}
       <ColorModeSelect iconOnly />
+      {/* свои подписи (i18n) и на всю ширину */}
+      <ColorModeSelect fullWidth labels={{ light: 'Light', system: 'Auto', dark: 'Dark' }} />
     </div>
   )
 }
@@ -161,9 +259,13 @@ function Settings() {
 
 **Props:**
 
-| Prop       | Тип       | Описание                                  |
-| ---------- | --------- | ----------------------------------------- |
-| `iconOnly` | `boolean` | Показывать только иконки (default: false) |
+| Prop        | Тип                                  | Описание                                                            |
+| ----------- | ------------------------------------ | ------------------------------------------------------------------- |
+| `iconOnly`  | `boolean`                            | Показывать только иконки (default: false); подпись уходит в `title` |
+| `labels`    | `Partial<Record<ColorMode, string>>` | Подписи режимов; не заданные — русские «Светлая / Система / Тёмная» |
+| `fullWidth` | `boolean`                            | Растянуть на всю ширину, сегменты поровну (default: false)          |
+
+Остальные пропсы уходят в `SegmentGroup.Root` (например, `aria-label`).
 
 ## Зависимости
 
@@ -173,4 +275,4 @@ function Settings() {
 
 ---
 
-**Последнее обновление:** 2026-01-03
+**Последнее обновление:** 2026-09-24

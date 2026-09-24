@@ -1,5 +1,12 @@
 # Выполненные задачи
 
+## Провайдер на `DarkOnlyChakraProvider` — версия 0.4.6 (2026-09-24)
+
+`_components/ui/provider.tsx` сведён к одной строке: `DarkOnlyChakraProvider` из
+`@letar/chakra-provider/next` (0.3.0) вместо ручной сборки `EmotionRegistry` +
+`ColorModeProvider` + `RootChakraProvider`. Поведение прежнее (принудительно тёмная тема, реестр
+Emotion снаружи). В dev сырой HTML без `<style data-emotion>` в `<body>`. Кросс-приложенческий разбор — `PLAN-INFRA-6.md` §201.
+
 ## `scrollIntoView(smooth)` зависал без OS-фокуса окна (2026-09-22)
 
 Делегировано из сессии `pravda-dev` — репо-широкий грепа по паттерну, зависающему при фиксе TOC

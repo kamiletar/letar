@@ -2,10 +2,11 @@
 
 import { createSystem, defaultConfig, defineConfig, defineRecipe } from '@chakra-ui/react'
 import { RootChakraProvider } from '@letar/chakra-provider'
+import { EmotionRegistry } from '@letar/chakra-provider/next'
 import { pressableConfig } from '@letar/ui'
 import type { NextFont } from 'next/dist/compiled/@next/font'
 import type { PropsWithChildren } from 'react'
-import { useEffect, useMemo } from 'react'
+import { useMemo } from 'react'
 
 type Props = PropsWithChildren & {
   fonts: {
@@ -222,10 +223,9 @@ export const ThemeProvider = ({ children, fonts }: Props) => {
     return createSystem(defaultConfig, config)
   }, [fonts.heading.style.fontFamily, fonts.body.style.fontFamily, fonts.mono.style.fontFamily])
 
-  // iOS-фикс: без touchstart-листенера :active не срабатывает
-  useEffect(() => {
-    document.addEventListener('touchstart', () => undefined, { passive: true })
-  }, [])
-
-  return <RootChakraProvider value={system}>{children}</RootChakraProvider>
+  return (
+    <EmotionRegistry>
+      <RootChakraProvider value={system}>{children}</RootChakraProvider>
+    </EmotionRegistry>
+  )
 }

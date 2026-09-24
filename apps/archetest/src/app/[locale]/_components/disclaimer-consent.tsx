@@ -24,7 +24,7 @@ export function DisclaimerSummary({ isRu }: DisclaimerSummaryProps) {
     <Box w="100%" maxW="lg" textAlign="left">
       <Text fontSize="sm" color="fg.muted">
         {isRu ? DISCLAIMER_SUMMARY_RU : DISCLAIMER_SUMMARY_EN}{' '}
-        <ChakraLink asChild color="blue.500" textDecoration="underline">
+        <ChakraLink asChild color="brand.fg" textDecoration="underline">
           <button type="button" onClick={() => setOpen(true)}>
             {isRu ? 'Подробнее' : 'Learn more'}
           </button>
@@ -74,12 +74,17 @@ interface DisclaimerConsentCheckboxProps {
  */
 export function DisclaimerConsentCheckbox({ accepted, onChange, isRu }: DisclaimerConsentCheckboxProps) {
   return (
-    <Checkbox.Root checked={accepted} onCheckedChange={(e) => onChange(!!e.checked)} size="lg" colorPalette="blue">
+    <Checkbox.Root
+      checked={accepted}
+      onCheckedChange={(e) => onChange(!!e.checked)}
+      size="lg"
+      colorPalette="brand"
+    >
       <Checkbox.HiddenInput />
       <Checkbox.Control data-testid="disclaimer-consent-checkbox" />
       <Checkbox.Label fontSize="sm" textAlign="left">
         {isRu ? 'Подтверждаю ознакомление и согласие с ' : 'I have read and agree to the '}
-        <ChakraLink asChild color="blue.500" textDecoration="underline">
+        <ChakraLink asChild color="brand.fg" textDecoration="underline">
           <Link href="/privacy" target="_blank" rel="noopener noreferrer">
             {isRu ? 'политикой конфиденциальности' : 'privacy policy'}
           </Link>

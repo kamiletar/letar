@@ -23,10 +23,17 @@ export interface Bookmark {
 const STORAGE_KEY = 'pravda-bookmarks'
 
 /**
+ * Единственный экземпляр пустого списка закладок.
+ * useSyncExternalStore сравнивает snapshot по ссылке: новый `[]` на каждый вызов
+ * React считает изменением данных (ошибка «should be cached to avoid an infinite loop»).
+ */
+const EMPTY_BOOKMARKS: Bookmark[] = []
+
+/**
  * Кеш для результата getBookmarks.
  * useSyncExternalStore требует стабильной ссылки на объект.
  */
-let cachedBookmarks: Bookmark[] = []
+let cachedBookmarks: Bookmark[] = EMPTY_BOOKMARKS
 let cachedJson: string | null = null
 
 /**
@@ -34,7 +41,7 @@ let cachedJson: string | null = null
  * @internal
  */
 export function __resetBookmarksCache(): void {
-  cachedBookmarks = []
+  cachedBookmarks = EMPTY_BOOKMARKS
   cachedJson = null
 }
 
@@ -44,7 +51,7 @@ export function __resetBookmarksCache(): void {
  */
 function getBookmarks(): Bookmark[] {
   if (typeof window === 'undefined') {
-    return []
+    return EMPTY_BOOKMARKS
   }
   try {
     const stored = localStorage.getItem(STORAGE_KEY)
@@ -54,10 +61,13 @@ function getBookmarks(): Bookmark[] {
     }
     // Обновляем кеш
     cachedJson = stored
-    cachedBookmarks = stored ? JSON.parse(stored) : []
+    cachedBookmarks = stored ? JSON.parse(stored) : EMPTY_BOOKMARKS
     return cachedBookmarks
   } catch {
-    return []
+    // cachedJson уже указывает на битую строку — сбрасываем и список, иначе следующий
+    // вызов вернёт закладки, закешированные до порчи данных
+    cachedBookmarks = EMPTY_BOOKMARKS
+    return cachedBookmarks
   }
 }
 
@@ -91,6 +101,13 @@ function subscribe(callback: () => void): () => void {
 }
 
 /**
+ * Snapshot для SSR и гидратации: на сервере localStorage нет.
+ */
+function getServerBookmarks(): Bookmark[] {
+  return EMPTY_BOOKMARKS
+}
+
+/**
  * Хук для работы с закладками.
  * Использует useSyncExternalStore для синхронизации с localStorage.
  */
@@ -98,7 +115,7 @@ export function useBookmarks() {
   const bookmarks = useSyncExternalStore(
     subscribe,
     getBookmarks,
-    () => [], // SSR fallback
+    getServerBookmarks,
   )
 
   /**

@@ -591,6 +591,14 @@ export const DARK_TRIAD_DISPLAY: Partial<Record<PersonalityTypeCode, { ru: strin
 }
 
 /**
+ * Код шкалы для подписей диаграмм. В контексте Тёмной триады ANT показывается как PSY —
+ * так же, как её название подменяется на «Психопатию» (`DARK_TRIAD_DISPLAY`).
+ */
+export function getScaleDisplayCode(code: PersonalityTypeCode, options: { triadAlias?: boolean } = {}): string {
+  return options.triadAlias && code === 'ANT' ? 'PSY' : code
+}
+
+/**
  * 8 шкал гексаграммы (этапы 5.2/5.3): обе триады + внешнее кольцо SAD/MAS.
  * Ровно эти шкалы покрывает экспресс-тест (24 вопроса = 8 × 3).
  */

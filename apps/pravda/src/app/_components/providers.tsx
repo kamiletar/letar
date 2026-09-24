@@ -1,6 +1,7 @@
 'use client'
 
 import { ColorModeProvider, RootChakraProvider } from '@letar/chakra-provider'
+import { EmotionRegistry } from '@letar/chakra-provider/next'
 import { OfflineConsentBanner, ServiceWorkerRegistration } from '@letar/ui'
 import type { PropsWithChildren } from 'react'
 
@@ -18,20 +19,22 @@ import { TopLoader } from './top-loader'
  */
 export function Providers({ children }: PropsWithChildren) {
   return (
-    <ColorModeProvider>
-      <RootChakraProvider value={system}>
-        <TopLoader />
-        {children}
-        {/* PWA компоненты */}
-        <ServiceWorkerRegistration consentKey="pravda-offline-consent" />
-        <OfflineConsentBanner
-          consentKey="pravda-offline-consent"
-          title="Читайте законы без интернета"
-          description="Сохраните все документы для оффлайн доступа (~5 MB)"
-          features={['Работает без интернета', '22 документа', 'Полнотекстовый поиск']}
-          enableLabel="Включить оффлайн"
-        />
-      </RootChakraProvider>
-    </ColorModeProvider>
+    <EmotionRegistry>
+      <ColorModeProvider>
+        <RootChakraProvider value={system}>
+          <TopLoader />
+          {children}
+          {/* PWA компоненты */}
+          <ServiceWorkerRegistration consentKey="pravda-offline-consent" />
+          <OfflineConsentBanner
+            consentKey="pravda-offline-consent"
+            title="Читайте законы без интернета"
+            description="Сохраните все документы для оффлайн доступа (~5 MB)"
+            features={['Работает без интернета', '22 документа', 'Полнотекстовый поиск']}
+            enableLabel="Включить оффлайн"
+          />
+        </RootChakraProvider>
+      </ColorModeProvider>
+    </EmotionRegistry>
   )
 }

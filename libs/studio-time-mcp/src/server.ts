@@ -16,6 +16,38 @@ import { studioTimeRequest } from './client.js'
 const TIME_KIND = z.enum(['WORK', 'MEETING', 'TRAVEL', 'ADMIN'])
 
 /**
+ * Формат `startedAt`/`endedAt` у `time_log`: ISO-8601, минуты обязательны, секунды и зона — нет.
+ * Здесь только форма строки — ранний отказ без похода в studio. Разбор (без зоны = МСК) и проверки
+ * интервала — в studio (`resolveLogInterval`), единственный источник правды.
+ */
+const ISO_DATE_TIME = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d{1,3})?)?(?:Z|[+-]\d{2}:\d{2})?$/
+
+const MSK_TIME = new Intl.DateTimeFormat('ru-RU', {
+  day: '2-digit',
+  month: '2-digit',
+  hour: '2-digit',
+  minute: '2-digit',
+  timeZone: 'Europe/Moscow',
+})
+
+/**
+ * «23.09, 21:06–23.09, 22:29 МСК (83 мин)» из записи, которую вернул studio — агент сразу видит,
+ * куда реально встала запись, а не только сколько минут он передал.
+ */
+export function formatLogInterval(entry: unknown): string {
+  const { startedAt, endedAt, durationSec } = (entry ?? {}) as {
+    startedAt?: string
+    endedAt?: string
+    durationSec?: number
+  }
+  if (!startedAt || !endedAt) {
+    return 'интервал неизвестен'
+  }
+  const minutes = typeof durationSec === 'number' ? ` (${Math.round(durationSec / 60)} мин)` : ''
+  return `${MSK_TIME.format(new Date(startedAt))}–${MSK_TIME.format(new Date(endedAt))} МСК${minutes}`
+}
+
+/**
  * Идентификатор текущей сессии Claude Code — привязывает открытый таймер к сессии, которая его
  * открыла (§11 «N» PLAN.md studio). MCP-сервер запускается как дочерний stdio-процесс сессии и
  * наследует её `CLAUDE_CODE_SESSION_ID`. Если переменной нет (запуск вне Claude Code, например
@@ -281,33 +313,51 @@ export function createStudioTimeMcpServer(): McpServer {
   })
 
   // ─── time_log ────────────────────────────────────────────────────────────────
+  const logMomentField = (what: string) =>
+    z
+      .string()
+      .regex(ISO_DATE_TIME, 'ISO-8601 дата-время, например 2026-09-23T21:06')
+      .optional()
+      .describe(`${what} — ISO-8601 (2026-09-23T21:06). Без зоны — московское время, с зоной (Z/+03:00) — как есть`)
+
   server.registerTool('time_log', {
-    description:
+    description: [
       'Записывает время задним числом — не трогает активный таймер (например созвон/дорогу, которые не отследил в моменте таймером).',
+      'Интервал задаётся любыми двумя из трёх: startedAt, endedAt, minutes. Только minutes — [сейчас − minutes, сейчас];',
+      'только startedAt — до текущего момента. Знаешь реальное время события — передавай startedAt/endedAt,',
+      'иначе запись встанет на момент вызова и может перекрыть идущий таймер.',
+      'Конец не в будущем, длительность > 0 и не больше суток. Пересечение с другими записями не блокирует — приходит предупреждением.',
+    ].join('\n'),
     inputSchema: z.strictObject({
       app: z.string().min(1).describe('repoSlug приложения'),
       minutes: z
         .number()
         .positive()
         .max(24 * 60)
+        .optional()
         .describe('Сколько минут занял этот участок работы'),
+      startedAt: logMomentField('Начало'),
+      endedAt: logMomentField('Конец'),
       description: z.string().min(1).max(2000).describe('Чем занимался — видит клиент'),
       kind: TIME_KIND.optional().describe('Тип активности: WORK (по умолчанию) / MEETING / TRAVEL / ADMIN'),
       idempotencyKey: z.string().optional().describe('Ключ идемпотентности — см. time_start'),
     }),
-  }, async ({ app, minutes, description, kind, idempotencyKey }) => {
+  }, async ({ app, minutes, startedAt, endedAt, description, kind, idempotencyKey }) => {
     const key = idempotencyKey ?? randomUUID()
     try {
       const res = await studioTimeRequest({
         method: 'POST',
         path: '/api/mcp/time/log',
-        body: { app, minutes, description, kind, idempotencyKey: key },
+        body: { app, minutes, startedAt, endedAt, description, kind, idempotencyKey: key },
       })
       if (!res.ok) {
         return errorText(`❌ time_log(${app}): ${pretty(res.json)}`)
       }
+      const warningLine = res.json.warning ? `\n⚠️ ${res.json.warning}\n` : ''
       return text(
-        `📋 Записано задним числом: **${app}**, ${minutes} мин — ${description}\n\n${pretty(res.json.data)}`,
+        `📋 Записано задним числом: **${app}**, ${formatLogInterval(res.json.data)} — ${description}${warningLine}\n${
+          pretty(res.json.data)
+        }`,
       )
     } catch (err) {
       return errorText(`❌ time_log(${app}): ${err instanceof Error ? err.message : String(err)}`)

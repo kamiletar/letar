@@ -116,6 +116,90 @@ describe('createStudioTimeMcpServer', () => {
         body: expect.objectContaining({ app: 'svoichuzhie', minutes: 30, description: 'созвон с клиентом' }),
       })
     })
+
+    it('startedAt/endedAt уходят в studio как есть, ответ показывает реальный интервал в МСК', async () => {
+      studioTimeRequestMock.mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: {
+          data: {
+            id: 't2',
+            startedAt: '2026-09-23T18:06:00.000Z',
+            endedAt: '2026-09-23T19:29:00.000Z',
+            durationSec: 83 * 60,
+          },
+          warning: null,
+        },
+      })
+
+      const result = await client.callTool({
+        name: 'time_log',
+        arguments: {
+          app: 'studio',
+          startedAt: '2026-09-23T21:06',
+          endedAt: '2026-09-23T22:29',
+          description: 'созвон',
+          kind: 'MEETING',
+        },
+      })
+
+      expect(result.isError).toBeFalsy()
+      expect(textOf(result)).toContain('23.09, 21:06–23.09, 22:29 МСК (83 мин)')
+      expect(textOf(result)).not.toContain('⚠️')
+      expect(studioTimeRequestMock).toHaveBeenCalledWith({
+        method: 'POST',
+        path: '/api/mcp/time/log',
+        body: expect.objectContaining({
+          startedAt: '2026-09-23T21:06',
+          endedAt: '2026-09-23T22:29',
+          minutes: undefined,
+        }),
+      })
+    })
+
+    it('пересечение с другой записью — предупреждение в ответе, не ошибка', async () => {
+      studioTimeRequestMock.mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: {
+          data: { id: 't2', startedAt: '2026-09-23T18:19:00.000Z', endedAt: '2026-09-23T19:42:00.000Z' },
+          warning: 'Интервал пересекается с другими записями (МСК): studio 23.09, 22:30–идёт',
+        },
+      })
+
+      const result = await client.callTool({
+        name: 'time_log',
+        arguments: { app: 'studio', minutes: 83, description: 'созвон' },
+      })
+
+      expect(result.isError).toBeFalsy()
+      expect(textOf(result)).toContain('⚠️ Интервал пересекается')
+    })
+
+    it('отказ studio по интервалу (400) — isError с причиной', async () => {
+      studioTimeRequestMock.mockResolvedValue({
+        ok: false,
+        status: 400,
+        json: { error: 'Конец записи (23.09, 23:00 МСК) в будущем' },
+      })
+
+      const result = await client.callTool({
+        name: 'time_log',
+        arguments: { app: 'studio', startedAt: '2026-09-23T22:00', endedAt: '2026-09-23T23:00', description: 'x' },
+      })
+
+      expect(result.isError).toBe(true)
+      expect(textOf(result)).toContain('в будущем')
+    })
+
+    it.each([
+      ['дата без времени', '2026-09-23'],
+      ['русский формат', '23.09.2026 21:06'],
+      ['только время', '21:06'],
+    ])('ошибка валидации — startedAt не ISO-8601 (%s), без запроса в studio', async (_, startedAt) => {
+      await expectValidationError(client, 'time_log', { app: 'studio', startedAt, minutes: 10, description: 'x' })
+      expect(studioTimeRequestMock).not.toHaveBeenCalled()
+    })
   })
 
   describe('time_status', () => {
@@ -230,6 +314,12 @@ describe('строгие входные схемы — неизвестный а
     ['time_note', { description: 'уточнение', sessionRef: 's1' }],
     ['time_status', { sessionRef: 's1' }],
     ['time_log', { app: 'svoichuzhie', minutes: 30, description: 'созвон', kind: 'MEETING' }],
+    ['time_log', {
+      app: 'svoichuzhie',
+      startedAt: '2026-09-23T21:06',
+      endedAt: '2026-09-23T22:29',
+      description: 'созвон',
+    }],
     ['time_stage_close', { app: 'svoichuzhie', stage: 'Каталог' }],
   ]
 

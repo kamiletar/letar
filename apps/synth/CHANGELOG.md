@@ -4,6 +4,24 @@
 
 ---
 
+## [0.22.9] — 2026-09-24
+
+### Changed
+
+- Провайдер собран из `DarkOnlyChakraProvider` (`@letar/chakra-provider/next`) вместо ручной связки `EmotionRegistry` + `ColorModeProvider` + `RootChakraProvider`. Поведение прежнее: принудительная тёмная тема, реестр Emotion снаружи.
+
+## [0.22.8] — 2026-09-24
+
+### Changed
+
+- Фикс `:active` на iOS (пустой пассивный `touchstart` на `document`) вынесен в `useIosActiveFix` из `@letar/chakra-provider`. Локальная копия удалена: `RootChakraProvider` применяет фикс сам, а листенер теперь снимается при размонтировании (в StrictMode dev он навешивался дважды).
+
+## [0.22.7] — 2026-09-24
+
+### Fixed
+
+- Реестр кеша Emotion (`EmotionRegistry` из `@letar/chakra-provider/next`) в корневом провайдере: стили SSR уходят в поток через `useServerInsertedHTML`, а не инлайн-`<style>` перед элементами. Инлайн-стиль позднего потокового сегмента ломал гидратацию (плавающая ошибка React #418).
+
 ## [0.22.5] — 2026-09-02
 
 ### Added

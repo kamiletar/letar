@@ -13,6 +13,10 @@
 
 ### Fixed
 
+- **`UpdateDrawer` рендерился в потоке родителя** — Drawer был собран без `Drawer.Positioner` и
+  `Portal`: панель не занимала всю высоту экрана и раздувала контейнер, а fixed-`Backdrop`
+  создавал видимость нормальной работы. Разбор —
+  `.claude/docs/chakra-drawer-missing-positioner-inline-render.md`.
 - **Автообновление ставилось не тихо, как обещал `UpdateDrawer`** — `installUpdate()`
   (`main/updater.ts`) вызывал `autoUpdater.quitAndInstall(false, true)`, а
   `electron-builder.yml` собирает NSIS с `oneClick: false`: `isSilent=false` показывал

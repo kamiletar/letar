@@ -5,12 +5,30 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 проект придерживается [Semantic Versioning](https://semver.org/lang/ru/).
 
-## [Unreleased]
+## [1.9.16] - 2026-09-24
+
+### Fixed
+
+- `vitest.config.mts`: добавлен alias `@letar/ui` — пакет только в `nx.implicitDependencies`, симлинка bun нет, а `src/theme/recipes/*` с коммита `f1ba9dfb7` импортируют `pressScale`. Без alias набор `bookmark-button.test.tsx` падал на сборке (`Failed to resolve import "@letar/ui"`).
+- `toc.test.tsx`: два устаревших ожидания — клик по пункту вызывает `scrollIntoView({ behavior: 'instant' })` (не `'smooth'`), а размонтирование останавливает опрос через `clearInterval` (не `removeEventListener('scroll')`). Код TOC менялся в e61e2cbae / dd516304c, тесты не обновили.
 
 ### Changed
 
 - `vitest.config.mts`: убран избыточный alias `@letar/hooks` — пакет уже прямая зависимость,
   симлинк bun резолвит его без alias.
+
+## [1.9.15] - 2026-09-24
+
+### Fixed
+
+- `useBookmarks`: `getServerSnapshot` отдавал новый `[]` на каждый вызов — в dev React писал в консоль «The result of getServerSnapshot should be cached to avoid an infinite loop» на любой странице документа. Пустой список теперь — модульная константа `EMPTY_BOOKMARKS`; её же отдают ветки без `window` и с битым JSON в `localStorage`.
+- `useBookmarks`: при битом JSON следующий вызов возвращал закладки, закешированные до порчи данных (кеш строки обновлялся раньше разбора, а кеш списка — нет).
+
+## [1.9.14] - 2026-09-24
+
+### Fixed
+
+- Реестр кеша Emotion (`EmotionRegistry` из `@letar/chakra-provider/next`) в корневом провайдере: стили SSR уходят в поток через `useServerInsertedHTML`, а не инлайн-`<style>` перед элементами. Инлайн-стиль позднего потокового сегмента ломал гидратацию (плавающая ошибка React #418).
 
 ## [1.9.13] - 2026-09-22
 

@@ -40,7 +40,7 @@ export function RankBadge({ rankCode, xp, showProgress = false }: RankBadgeProps
       </HStack>
       {showProgress && (
         <Box mt={2}>
-          <ScoreBar value={progressPercent} color="blue.500" trackColor="bg.emphasized" animated />
+          <ScoreBar value={progressPercent} color="brand.solid" trackColor="bg.emphasized" animated />
           <Text fontSize="xs" color="fg.muted" mt={1}>
             {nextRank ? t('xpProgress', { current: xp, next: nextRank.minXp }) : t('maxRank')}
           </Text>

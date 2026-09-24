@@ -167,10 +167,11 @@ describe('TableOfContents', () => {
       })
     })
 
-    it('должен удалять scroll listener при unmount', async () => {
+    it('должен останавливать опрос скролла при unmount', async () => {
       setupMockHeadings()
 
-      const removeEventListenerSpy = vi.spyOn(window, 'removeEventListener')
+      // Опрос на setInterval, а не scroll-листенер — см. use-toc-scroll.ts
+      const clearIntervalSpy = vi.spyOn(globalThis, 'clearInterval')
 
       const { container, unmount } = renderWithChakra(<TableOfContents />)
 
@@ -181,7 +182,7 @@ describe('TableOfContents', () => {
 
       unmount()
 
-      expect(removeEventListenerSpy).toHaveBeenCalledWith('scroll', expect.any(Function))
+      expect(clearIntervalSpy).toHaveBeenCalled()
     })
   })
 
@@ -200,7 +201,7 @@ describe('TableOfContents', () => {
       const link = container.querySelector('a[href="#article-1"]')!
       await user.click(link)
 
-      expect(elements[0].scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth' })
+      expect(elements[0].scrollIntoView).toHaveBeenCalledWith({ behavior: 'instant' })
     })
 
     it('должен обновлять URL через history.pushState', async () => {

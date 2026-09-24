@@ -34,7 +34,7 @@ export function QuizProgressBar({ current, total, answered, globalProgress }: Qu
           {t('answered', { count: answered })}
         </Text>
       </HStack>
-      <Progress.Root value={(answered / total) * 100} size="sm" colorPalette="blue">
+      <Progress.Root value={(answered / total) * 100} size="sm" colorPalette="brand">
         <Progress.Track>
           <Progress.Range />
         </Progress.Track>
@@ -48,7 +48,7 @@ export function QuizProgressBar({ current, total, answered, globalProgress }: Qu
               ? `Всего: ${globalProgress.totalAnswered} / ${globalProgress.totalQuestions}`
               : `Total: ${globalProgress.totalAnswered} / ${globalProgress.totalQuestions}`}
           </Text>
-          <Text fontSize="xs" color="blue.500" fontWeight="bold">
+          <Text fontSize="xs" color="brand.fg" fontWeight="bold">
             {globalPercent}%
           </Text>
         </HStack>

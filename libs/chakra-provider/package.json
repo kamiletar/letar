@@ -1,6 +1,6 @@
 {
   "name": "@letar/chakra-provider",
-  "version": "0.0.1",
+  "version": "0.5.0",
   "dependencies": {
     "@letar/hooks": "workspace:*"
   },
@@ -11,6 +11,11 @@
       "types": "./src/index.ts",
       "import": "./src/index.ts",
       "default": "./src/index.ts"
+    },
+    "./next": {
+      "types": "./src/next.ts",
+      "import": "./src/next.ts",
+      "default": "./src/next.ts"
     },
     "./package.json": "./package.json"
   }

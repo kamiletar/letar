@@ -12,6 +12,7 @@ import { PERSONALITY_TYPES } from '../_data/personality-types'
 import { DisclaimerConsentCheckbox, DisclaimerSummary } from './disclaimer-consent'
 import { PersonalityRadarChart } from './personality-radar-chart'
 import { ProfileDetails } from './profile-details'
+import { STICKY_BAR_BLEED } from './sticky-bar-bleed'
 
 interface QuizIntroProps {
   onStart: () => void
@@ -96,21 +97,19 @@ export function QuizIntro({ onStart, progress, initialDisclaimerAccepted }: Quiz
             <VStack gap={3}>
               <HStack gap={2}>
                 <LuTrendingUp />
-                <Text fontWeight="bold">{isRu ? 'Ваш прогресс' : 'Your Progress'}</Text>
+                <Text fontWeight="bold">{t('intro.yourProgress')}</Text>
               </HStack>
 
               <HStack w="100%" justify="space-between">
                 <Text fontSize="sm" color="fg.muted">
-                  {isRu
-                    ? `Пройдено: ${progress!.totalAnswered} из ${progress!.totalQuestions} вопросов`
-                    : `Completed: ${progress!.totalAnswered} of ${progress!.totalQuestions} questions`}
+                  {t('coverage.completed', { answered: progress!.totalAnswered, total: progress!.totalQuestions })}
                 </Text>
-                <Text fontSize="sm" fontWeight="bold" color="blue.500">
+                <Text fontSize="sm" fontWeight="bold" color="brand.fg">
                   {progress!.coveragePercent}%
                 </Text>
               </HStack>
 
-              <Progress.Root value={progress!.coveragePercent} size="sm" colorPalette="blue" w="100%">
+              <Progress.Root value={progress!.coveragePercent} size="sm" colorPalette="brand" w="100%">
                 <Progress.Track>
                   <Progress.Range />
                 </Progress.Track>
@@ -119,26 +118,18 @@ export function QuizIntro({ onStart, progress, initialDisclaimerAccepted }: Quiz
               {progress!.availableCount > 0
                 ? (
                   <Text fontSize="xs" color="fg.muted">
-                    {isRu
-                      ? `Доступно ещё ${
-                        progress!.availableCount
-                      } новых вопросов. Чем больше вопросов — тем точнее профиль.`
-                      : `${progress!.availableCount} more questions available. More questions = more accurate profile.`}
+                    {t('intro.moreAvailable', { count: progress!.availableCount })}
                   </Text>
                 )
                 : (
-                  <Text fontSize="xs" color="green.500" fontWeight="bold">
-                    {isRu
-                      ? '🎉 Вы ответили на все доступные вопросы!'
-                      : '🎉 You have answered all available questions!'}
+                  <Text fontSize="xs" color="success.fg" fontWeight="bold">
+                    {t('intro.allAnswered')}
                   </Text>
                 )}
 
               {progress!.sessionsCount > 0 && (
                 <Text fontSize="xs" color="fg.muted">
-                  {isRu
-                    ? `Сессий пройдено: ${progress!.sessionsCount}`
-                    : `Sessions completed: ${progress!.sessionsCount}`}
+                  {t('intro.sessionsCompleted', { count: progress!.sessionsCount })}
                 </Text>
               )}
             </VStack>
@@ -149,9 +140,7 @@ export function QuizIntro({ onStart, progress, initialDisclaimerAccepted }: Quiz
         <VStack gap={3} fontSize="sm" color="fg.muted">
           <Text>
             {hasProgress
-              ? isRu
-                ? '50 новых вопросов-сценариев с 4 вариантами ответа'
-                : '50 new scenario questions with 4 answer options'
+              ? t('intro.newQuestionsInfo')
               : t('info.questions')}
           </Text>
           <Text>{t('info.time')}</Text>
@@ -165,15 +154,13 @@ export function QuizIntro({ onStart, progress, initialDisclaimerAccepted }: Quiz
           <VStack gap={8} w="100%">
             <PersonalityRadarChart
               data={chartData}
-              title={isRu ? 'Накопительный профиль' : 'Cumulative Profile'}
+              title={t('intro.cumulativeProfile')}
               color="green.500"
               confidence={confidenceData as Record<string, string> | undefined}
             />
             {confidenceData && (
               <Text fontSize="xs" color="fg.muted" maxW="lg">
-                {isRu
-                  ? 'Серые секторы на диаграмме — шкалы с недостаточным количеством ответов. Пройдите ещё вопросов для повышения точности.'
-                  : 'Gray sectors on the chart — scales with insufficient answers. Complete more questions to improve accuracy.'}
+                {t('intro.fadedCodes')}
               </Text>
             )}
             {progress?.cumulativeScores && (
@@ -188,24 +175,35 @@ export function QuizIntro({ onStart, progress, initialDisclaimerAccepted }: Quiz
       </VStack>
 
       {/* Липкая панель: чекбокс согласия (пока не принято) + CTA, всегда вместе на экране (UX-фикс 2026-07-29) */}
-      <StickyActionBar bg="bg" mx={{ base: -4, md: 0 }}>
+      <StickyActionBar bg="bg" {...STICKY_BAR_BLEED}>
         <VStack gap={3} w="100%">
           {!disclaimerAccepted && (
             <DisclaimerConsentCheckbox accepted={disclaimerAccepted} onChange={setDisclaimerAccepted} isRu={isRu} />
           )}
+          {
+            /* На телефоне кнопки делят ширину поровну (flex: 1): прежний `w=100%` у первой
+              выталкивал «Мой профиль» за край экрана и давал горизонтальный скролл */
+          }
           <HStack gap={3} justify="center" w="100%">
             <Button
               size="lg"
-              colorPalette="blue"
-              w={{ base: '100%', sm: 'auto' }}
-              minW={{ sm: '14rem' }}
+              colorPalette="brand"
+              flex={{ base: '1', sm: 'initial' }}
+              minW={{ base: 0, sm: '14rem' }}
               onClick={onStart}
               disabled={!disclaimerAccepted}
             >
-              {hasProgress ? (isRu ? 'Продолжить тест' : 'Continue Test') : t('start')}
+              {hasProgress ? t('intro.continue') : t('start')}
             </Button>
             {hasCumulativeScores && (
-              <Button size="lg" variant="outline" onClick={() => setShowProfile(!showProfile)}>
+              <Button
+                size="lg"
+                variant="outline"
+                flex={{ base: '1', sm: 'initial' }}
+                minW={0}
+                aria-expanded={showProfile}
+                onClick={() => setShowProfile(!showProfile)}
+              >
                 <LuChartNoAxesCombined />
                 {t('myProfile')}
               </Button>

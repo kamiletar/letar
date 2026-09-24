@@ -1,4 +1,5 @@
 import { ColorModeProvider, RootChakraProvider } from '@letar/chakra-provider'
+import { EmotionRegistry } from '@letar/chakra-provider/next'
 import { FormI18nProvider } from '@letar/forms'
 import { CookieBanner } from '@letar/ui'
 import type { Metadata } from 'next'
@@ -25,15 +26,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ru" className={inter.variable} suppressHydrationWarning>
       <body>
-        <RootChakraProvider>
-          <ColorModeProvider>
-            <FormI18nProvider locale="ru">
-              {children}
-              <CookieBanner appKey="auth-hub" />
-              <UmamiScriptConsent />
-            </FormI18nProvider>
-          </ColorModeProvider>
-        </RootChakraProvider>
+        <EmotionRegistry>
+          <RootChakraProvider>
+            <ColorModeProvider>
+              <FormI18nProvider locale="ru">
+                {children}
+                <CookieBanner appKey="auth-hub" />
+                <UmamiScriptConsent />
+              </FormI18nProvider>
+            </ColorModeProvider>
+          </RootChakraProvider>
+        </EmotionRegistry>
       </body>
     </html>
   )

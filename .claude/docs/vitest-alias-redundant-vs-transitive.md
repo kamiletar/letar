@@ -24,8 +24,10 @@
 
 - `driving-school`: `@letar/format-utils`, `@letar/api-server` — не в `dependencies`.
 - `kami`, `mandala`: `@letar/image-upload` (оба подпути) — не в `dependencies`.
-- `pravda`: `@letar/chakra-provider` — не в `dependencies` (`hooks` рядом убран — та была
-  прямой).
+- `pravda`: `@letar/chakra-provider` и `@letar/ui` — не в `dependencies` (`hooks` рядом убран —
+  та была прямой). `@letar/ui` вернули 2026-09-24: `theme/recipes/*` импортируют `pressScale`,
+  и набор `bookmark-button.test.tsx` падал на `Failed to resolve import`. Прямая зависимость
+  не выбрана: правка `bun.lock` ради тестового резолва, а Next/tsgo обходятся без неё.
 - `synth`, `time`: `@letar/seo` — не в `dependencies`.
 - `aboi`: `@letar/ui` — не в `dependencies` (`admin-ui` есть, `ui` — нет).
 

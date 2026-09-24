@@ -113,7 +113,7 @@ export function PsychologistLinkBlock() {
               onKeyDown={(e) => e.key === 'Enter' && handleLink()}
               flex={1}
             />
-            <Button size="sm" onClick={handleLink} loading={loading} colorPalette="blue">
+            <Button size="sm" onClick={handleLink} loading={loading} colorPalette="brand">
               <LuLink size={14} />
             </Button>
           </HStack>

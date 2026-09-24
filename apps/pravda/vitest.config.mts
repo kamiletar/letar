@@ -26,6 +26,8 @@ export default defineConfig({
     alias: {
       '@': resolve(import.meta.dirname, './src'),
       '@letar/chakra-provider': resolve(import.meta.dirname, '../../libs/chakra-provider/src'),
+      // @letar/ui — только implicitDependencies, симлинка bun нет (pressScale в theme/recipes)
+      '@letar/ui': resolve(import.meta.dirname, '../../libs/ui/src'),
     },
   },
 })

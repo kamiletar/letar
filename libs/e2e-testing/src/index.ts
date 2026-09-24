@@ -1,4 +1,5 @@
 export { upsertCredentialAccount } from './lib/credential-account'
+export { fillStable } from './lib/fill-stable'
 export {
   checkWithHydrationRetry,
   clickWithHydrationRetry,

@@ -61,7 +61,7 @@ export function PsychologistNotes({ linkId, notes, onUpdate }: PsychologistNotes
           rows={2}
           flex={1}
         />
-        <Button onClick={handleAdd} loading={adding} colorPalette="blue" size="sm">
+        <Button onClick={handleAdd} loading={adding} colorPalette="brand" size="sm">
           <LuPlus size={14} />
           {t('addNote')}
         </Button>

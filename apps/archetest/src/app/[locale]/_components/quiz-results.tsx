@@ -58,23 +58,13 @@ interface QuizResultsProps {
  */
 function getWarnings(
   scores: Record<PersonalityTypeCode, number>,
-  isRu: boolean,
   showClinical: boolean,
-): { type: 'info' | 'warning'; message: string }[] {
-  const warnings: { type: 'info' | 'warning'; message: string }[] = []
+): { type: 'info' | 'warning'; messageKey: 'barClinical' | 'barUser' | 'borBar' | 'dprBar' }[] {
+  const warnings: { type: 'info' | 'warning'; messageKey: 'barClinical' | 'barUser' | 'borBar' | 'dprBar' }[] = []
 
   // BAR ≥ 40%: цикличность настроения может завышать эмоциональные шкалы
   if ((scores.BAR ?? 0) >= 40) {
-    warnings.push({
-      type: 'warning',
-      message: showClinical
-        ? isRu
-          ? 'Высокий балл по шкале биполярного расстройства. Баллы по шкалам NAR, BOR, HIS, ANT могут быть завышены из-за маниакальных/депрессивных эпизодов. Рекомендуется клиническая оценка.'
-          : 'High bipolar scale score. NAR, BOR, HIS, ANT scores may be inflated due to manic/depressive episodes. Clinical evaluation is recommended.'
-        : isRu
-        ? 'Заметна выраженная переменчивость настроения. В такие периоды баллы по эмоциональным шкалам могут быть выше обычного — учитывайте это, читая результат.'
-        : 'Pronounced mood variability is present. During such periods, scores on emotional scales may be higher than usual — keep this in mind when reading the result.',
-    })
+    warnings.push({ type: 'warning', messageKey: showClinical ? 'barClinical' : 'barUser' })
   }
 
   // Дифференциальные заметки — только для психолога (клинический контекст)
@@ -84,22 +74,12 @@ function getWarnings(
 
   // BOR ≥ 40% + BAR ≥ 40%: дифференциальная диагностика
   if ((scores.BOR ?? 0) >= 40 && (scores.BAR ?? 0) >= 40) {
-    warnings.push({
-      type: 'info',
-      message: isRu
-        ? 'Высокие баллы одновременно по пограничному и биполярному расстройству. Ключевое различие: BOR — реактивные эмоции (часы), BAR — эндогенные циклы (дни–недели). Рекомендуется консультация специалиста.'
-        : 'High scores on both borderline and bipolar scales. Key difference: BOR — reactive emotions (hours), BAR — endogenous cycles (days–weeks). Specialist consultation recommended.',
-    })
+    warnings.push({ type: 'info', messageKey: 'borBar' })
   }
 
   // DPR ≥ 40% + BAR ≥ 30%: маскировка
   if ((scores.DPR ?? 0) >= 40 && (scores.BAR ?? 0) >= 30) {
-    warnings.push({
-      type: 'info',
-      message: isRu
-        ? 'Хронический пессимизм (DPR) может маскировать депрессивную фазу биполярного расстройства (BAR). Обратите внимание на наличие периодов подъёма.'
-        : 'Chronic pessimism (DPR) may mask the depressive phase of bipolar disorder (BAR). Note any periods of elevation.',
-    })
+    warnings.push({ type: 'info', messageKey: 'dprBar' })
   }
 
   return warnings
@@ -157,7 +137,7 @@ export function QuizResults({
   )
 
   // Предупреждения BAR-фильтра (клиническая лексика — только психологу)
-  const warnings = useMemo(() => getWarnings(scores, isRu, showClinical), [scores, isRu, showClinical])
+  const warnings = useMemo(() => getWarnings(scores, showClinical), [scores, showClinical])
   // Safety-net (5.6.4): кризисный блок при выраженных шкалах состояния (DPR/BAR/BOR ≥ 60%)
   const showSafetyNet = useMemo(() => needsSafetyNet(scores), [scores])
   // Мягкая формулировка при высоких «тёмных» шкалах
@@ -184,24 +164,20 @@ export function QuizResults({
           >
             <HStack justify="space-between" mb={2}>
               <Text fontSize="sm" color="fg.muted">
-                {isRu
-                  ? `Пройдено: ${progress.totalAnswered} из ${progress.totalQuestions} вопросов`
-                  : `Completed: ${progress.totalAnswered} of ${progress.totalQuestions} questions`}
+                {t('coverage.completed', { answered: progress.totalAnswered, total: progress.totalQuestions })}
               </Text>
-              <Text fontSize="sm" fontWeight="bold" color="blue.500">
+              <Text fontSize="sm" fontWeight="bold" color="brand.fg">
                 {progress.coveragePercent}%
               </Text>
             </HStack>
-            <Progress.Root value={progress.coveragePercent} size="sm" colorPalette="blue">
+            <Progress.Root value={progress.coveragePercent} size="sm" colorPalette="brand">
               <Progress.Track>
                 <Progress.Range />
               </Progress.Track>
             </Progress.Root>
             {progress.availableCount > 0 && (
               <Text fontSize="xs" color="fg.muted" mt={2}>
-                {isRu
-                  ? `Ещё ${progress.availableCount} вопросов доступно для повышения точности`
-                  : `${progress.availableCount} more questions available for better accuracy`}
+                {t('results.moreAvailable', { count: progress.availableCount })}
               </Text>
             )}
           </Box>
@@ -210,18 +186,14 @@ export function QuizResults({
         {/* Кнопка «Продолжить» (главная CTA если есть ещё вопросы) */}
         {onContinue && progress && progress.availableCount > 0 && (
           <VStack gap={1}>
-            <Button size="lg" colorPalette="blue" onClick={onContinue}>
+            <Button size="lg" colorPalette="brand" onClick={onContinue}>
               <LuArrowRight />
-              {isRu
-                ? `Пройти ещё ${Math.min(50, progress.availableCount)} вопросов`
-                : `Answer ${Math.min(50, progress.availableCount)} more questions`}
+              {t('results.answerMore', { count: Math.min(50, progress.availableCount) })}
             </Button>
             {/* 5.9.3 (гибрид): XP раз в сутки — повторные порции дня уточняют профиль без XP */}
             {xpCountedToday === false && (
               <Text fontSize="xs" color="fg.muted" textAlign="center">
-                {isRu
-                  ? 'XP за сегодня уже получены — каждый новый ответ уточняет профиль'
-                  : 'Today’s XP is already earned — every new answer refines your profile'}
+                {t('results.xpAlreadyEarned')}
               </Text>
             )}
           </VStack>
@@ -236,7 +208,7 @@ export function QuizResults({
             <Alert.Indicator>
               <LuTriangleAlert />
             </Alert.Indicator>
-            <Alert.Description>{w.message}</Alert.Description>
+            <Alert.Description>{t(`results.warnings.${w.messageKey}`)}</Alert.Description>
           </Alert.Root>
         ))}
 
@@ -261,10 +233,10 @@ export function QuizResults({
 
         {/* Гексаграмма триад (этап 5.2) — только если сессия покрыла шкалы триад (банк v2) */}
         {HEXAGRAM_SCALE_CODES.some((code) => (scores[code] ?? 0) > 0) && (
-          <Box w="100%" p={6} borderRadius="lg" borderWidth="1px" borderColor="border">
+          <Box w="100%" p={{ base: 4, md: 6 }} borderRadius="lg" borderWidth="1px" borderColor="border">
             <HexagramChart
               scores={scores}
-              title={isRu ? 'Архитектура личности' : 'Personality Architecture'}
+              title={t('results.architectureTitle')}
               showNarrative
             />
           </Box>
@@ -323,13 +295,13 @@ export function QuizResults({
             <SimpleGrid columns={{ base: 1, md: 2 }} gap={2} mb={4}>
               {(['benefit1', 'benefit2', 'benefit3', 'benefit4'] as const).map((key) => (
                 <HStack key={key} gap={2} align="start">
-                  <Text color="blue.500">•</Text>
+                  <Text color="brand.fg">•</Text>
                   <Text fontSize="sm">{t(`guestBanner.${key}`)}</Text>
                 </HStack>
               ))}
             </SimpleGrid>
             <HStack gap={3}>
-              <Button asChild size="md" colorPalette="blue">
+              <Button asChild size="md" colorPalette="brand">
                 <Link href="/sign-in">{t('guestBanner.signIn')}</Link>
               </Button>
               <Button asChild size="md" variant="outline">
@@ -347,19 +319,17 @@ export function QuizResults({
           {onContinue && progress && progress.availableCount > 0
             ? (
               <>
-                <Button size="lg" colorPalette="blue" onClick={onContinue}>
+                <Button size="lg" colorPalette="brand" onClick={onContinue}>
                   <LuArrowRight />
-                  {isRu
-                    ? `Пройти ещё ${Math.min(50, progress.availableCount)} вопросов`
-                    : `Answer ${Math.min(50, progress.availableCount)} more questions`}
+                  {t('results.answerMore', { count: Math.min(50, progress.availableCount) })}
                 </Button>
                 <Button size="md" variant="ghost" onClick={onRestart}>
-                  {isRu ? 'Вернуться на главную' : 'Back to main'}
+                  {t('results.backToMain')}
                 </Button>
               </>
             )
             : (
-              <Button size="lg" colorPalette="blue" onClick={onRestart}>
+              <Button size="lg" colorPalette="brand" onClick={onRestart}>
                 {t('results.retake')}
               </Button>
             )}
@@ -367,9 +337,7 @@ export function QuizResults({
           <ShareResultButton shareText={t('shareText')} shareTitle={t('results.title')} size="md" />
           {/* Сокращённый дисклеймер */}
           <Text fontSize="xs" color="fg.subtle" textAlign="center" maxW="lg">
-            {isRu
-              ? 'Тест носит ориентировочный характер и не является диагностическим инструментом. Результаты не заменяют консультацию специалиста. При наличии трудностей обратитесь к квалифицированному психологу или психотерапевту.'
-              : 'This test is indicative and is not a diagnostic tool. Results do not replace a specialist consultation. If you experience difficulties, consult a qualified psychologist or psychotherapist.'}
+            {t('results.shortDisclaimer')}
           </Text>
         </VStack>
       </VStack>
@@ -385,6 +353,7 @@ function LowConfidenceWarnings({
   confidence: Record<PersonalityTypeCode, ScaleConfidence>
   isRu: boolean
 }) {
+  const t = useTranslations('quiz')
   const lowScales = PERSONALITY_TYPES.filter(
     (type) => confidence[type.code] === 'insufficient' || confidence[type.code] === 'low',
   )
@@ -394,14 +363,21 @@ function LowConfidenceWarnings({
   }
 
   return (
-    <Box w="100%" p={4} borderRadius="lg" bg="orange.50/5" borderWidth="1px" borderColor="orange.200">
-      <Text fontSize="sm" fontWeight="bold" color="orange.500" mb={2}>
-        {isRu ? '⚠ Шкалы с недостаточной точностью' : '⚠ Scales with insufficient accuracy'}
+    <Box
+      w="100%"
+      p={4}
+      borderRadius="lg"
+      bg="bg.subtle"
+      borderWidth="1px"
+      borderColor="border"
+      borderLeftWidth="3px"
+      borderLeftColor="warning.solid"
+    >
+      <Text fontSize="sm" fontWeight="bold" color="warning.fg" mb={2}>
+        {t('results.lowConfidence.title')}
       </Text>
       <Text fontSize="xs" color="fg.muted" mb={2}>
-        {isRu
-          ? 'Для этих шкал пройдено мало релевантных вопросов. Пройдите ещё вопросов для повышения точности.'
-          : 'Few relevant questions answered for these scales. Complete more questions to improve accuracy.'}
+        {t('results.lowConfidence.hint')}
       </Text>
       <HStack flexWrap="wrap" gap={2}>
         {lowScales.map((type) => (
@@ -410,12 +386,11 @@ function LowConfidenceWarnings({
             px={2}
             py={1}
             borderRadius="md"
-            bg={confidence[type.code] === 'insufficient' ? 'gray.100/10' : 'orange.100/10'}
             borderWidth="1px"
-            borderColor={confidence[type.code] === 'insufficient' ? 'gray.300' : 'orange.300'}
+            borderColor={confidence[type.code] === 'insufficient' ? 'border.emphasized' : 'warning.emphasized'}
             borderStyle={confidence[type.code] === 'insufficient' ? 'dashed' : 'solid'}
           >
-            <Text fontSize="xs" color={confidence[type.code] === 'insufficient' ? 'fg.subtle' : 'orange.500'}>
+            <Text fontSize="xs" color={confidence[type.code] === 'insufficient' ? 'fg.muted' : 'warning.fg'}>
               {isRu ? type.label : type.labelEn} {isRu ? type.archetype : type.archetypeEn}
             </Text>
           </Box>

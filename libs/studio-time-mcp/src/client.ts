@@ -11,7 +11,10 @@ import { studioUrl, timeMcpSecret } from './config.js'
 export interface McpTimeResponse<T = unknown> {
   data?: T
   error?: unknown
-  /** Стоп-кран (§11.15 PLAN.md studio): просрочка оплаты клиентом — только в ответе time_start/time_switch */
+  /**
+   * time_start/time_switch — стоп-кран (§11.15 PLAN.md studio): просрочка оплаты клиентом;
+   * time_log — пересечение записи с другими записями исполнителя (не блокирует запись).
+   */
   warning?: string | null
 }
 

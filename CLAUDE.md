@@ -144,6 +144,7 @@
 - [react-effect-stable-ref-pitfall](/.claude/docs/react-effect-stable-ref-pitfall.md) ⚠️ эффект с deps на ref/DOM не перезапускается
 - [route-announcer-persistent-layout-required](/.claude/docs/route-announcer-persistent-layout-required.md) ⚠️ `RouteAnnouncer` вне persistent layout молчит
 - [undo-toast-immediate-vs-deferred-commit-split](/.claude/docs/undo-toast-immediate-vs-deferred-commit-split.md) ⚠️ один `onCommit`/`onUndo`-контракт не покрыл немедленный commit+restore
+- [react-use-sync-external-store-uncached-snapshot](/.claude/docs/react-use-sync-external-store-uncached-snapshot.md) ⚠️ `() => []` в snapshot — «should be cached»; тест через spy зеленеет до фикса, флаг React общий на модуль
 
 ### Next.js — ловушки
 
@@ -171,6 +172,7 @@
 - [nextjs-rsc-aspectratio-children-only](/.claude/docs/nextjs-rsc-aspectratio-children-only.md) ⚠️ `AspectRatio` в Server Component → 500 при целой картинке
 - [ssr-hydration-persisted-state](/.claude/docs/ssr-hydration-persisted-state.md) ⚠️ localStorage в инициализаторе `useState` — тихо неработающий клик
 - [react19-svg-title-array-children-hydration](/.claude/docs/react19-svg-title-array-children-hydration.md) ⚠️ `<title>` с массивом children рвёт гидратацию и ломает соседние клики
+- [emotion-streaming-inline-style-hydration-418](/.claude/docs/emotion-streaming-inline-style-hydration-418.md) ⚠️ плавающий #418 на прод-сборке: поздний потоковый сегмент несёт инлайн-`<style>` Emotion — нужен реестр кеша
 - [nextjs-public-env-build-time-inlining](/.claude/docs/nextjs-public-env-build-time-inlining.md) ⚠️ `NEXT_PUBLIC_*` литералом в compose не попадает в бандл
 - [nextjs-root-notfound-no-root-layout](/.claude/docs/nextjs-root-notfound-no-root-layout.md) ⚠️ дублирование `<html>` на невалидном сегменте локали
 - [nextjs-streaming-soft-404-loading-boundary](/.claude/docs/nextjs-streaming-soft-404-loading-boundary.md) ⚠️ любой `loading.tsx` выше по дереву превращает 404 в 200
@@ -201,6 +203,8 @@
 - [chakra-semantic-token-contract](/.claude/docs/chakra-semantic-token-contract.md) ⚠️ стоковые рецепты читают `bg.panel`/`fg.error` — не переопределил, провалил WCAG
 - [chakra-inverted-surface-color-contrast](/.claude/docs/chakra-inverted-surface-color-contrast.md) ⚠️ `Tooltip.Content` на `bg.inverted` — низкий контраст в одной теме
 - [chakra-font-token-var-declaration-scope](/.claude/docs/chakra-font-token-var-declaration-scope.md) ⚠️ класс `next/font` на `<body>` не доезжает до `fonts.*` на `:root` — системный шрифт
+- [browser-auto-dark-light-theme-override](/.claude/docs/browser-auto-dark-light-theme-override.md) ⚠️ «темы не различаются»: авто-затемнение браузера, фикс по умолчанию в `ColorModeProvider`
+- [chakra-drawer-missing-positioner-inline-render](/.claude/docs/chakra-drawer-missing-positioner-inline-render.md) ⚠️ Drawer без `Positioner`/`Portal` рендерится внутри шапки
 - [chakra-typegen-shared-node-modules-race](/.claude/docs/chakra-typegen-shared-node-modules-race.md) ⚠️ параллельный `theme:typegen` откатывает чужие варианты
 - [chakra-overflow-wrap-not-inherited](/.claude/docs/chakra-overflow-wrap-not-inherited.md) ⚠️ не наследуется через reset — фикс только `'& *'`
 - [chakra-heading-defaults-to-h2](/.claude/docs/chakra-heading-defaults-to-h2.md) ⚠️ страница может не иметь ни одного `<h1>`
