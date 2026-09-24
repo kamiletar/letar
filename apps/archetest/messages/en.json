@@ -295,7 +295,8 @@
       "anyRank": "Any",
       "empty": "No clients match the filters.",
       "shown": "Showing {shown} of {total}"
-    }
+    },
+    "newSessions": "{count, plural, one {# new session} other {# new sessions}}"
   },
   "settings": {
     "title": "Settings",

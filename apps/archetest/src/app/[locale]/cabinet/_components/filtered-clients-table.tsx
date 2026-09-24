@@ -2,7 +2,7 @@
 
 import { ArchetestForm } from '@/archetest-form'
 import { Link } from '@/i18n/navigation'
-import { Badge, Box, SimpleGrid, Table, Text, VStack } from '@chakra-ui/react'
+import { Badge, Box, HStack, SimpleGrid, Table, Text, VStack } from '@chakra-ui/react'
 import { useFormUrlSync } from '@letar/forms'
 import { useLocale, useTranslations } from 'next-intl'
 import { useMemo } from 'react'
@@ -31,6 +31,8 @@ const FilterSchema = z.object({
 export interface CabinetClientRow extends FilterableClient {
   id: string
   clientId: string
+  /** Завершённых валидных сессий после последнего просмотра карточки (7.4) */
+  newSessions: number
 }
 
 /**
@@ -109,9 +111,16 @@ export function FilteredClientsTable({ clients }: { clients: readonly CabinetCli
                             <Table.Cell>
                               {client.status === 'ACTIVE'
                                 ? (
-                                  <Box asChild fontWeight="bold" color="fg" _hover={{ textDecoration: 'underline' }}>
-                                    <Link href={`/cabinet/${client.clientId}`}>{client.clientName}</Link>
-                                  </Box>
+                                  <HStack gap={2} wrap="wrap">
+                                    <Box asChild fontWeight="bold" color="fg" _hover={{ textDecoration: 'underline' }}>
+                                      <Link href={`/cabinet/${client.clientId}`}>{client.clientName}</Link>
+                                    </Box>
+                                    {client.newSessions > 0 && (
+                                      <Badge colorPalette="purple" variant="solid" size="sm">
+                                        {t('newSessions', { count: client.newSessions })}
+                                      </Badge>
+                                    )}
+                                  </HStack>
                                 )
                                 : <Text color="fg.muted">{client.clientName}</Text>}
                             </Table.Cell>

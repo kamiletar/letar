@@ -267,6 +267,9 @@ model ClientPsychologistLink {
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt
   revokedAt       DateTime?
+  /// Когда психолог последний раз открывал карточку клиента — «N новых сессий» в кабинете (Фаза 3, 7.4).
+  /// Меняется только из getClientDetailAction; null — ещё не открывал, считаем от createdAt
+  lastSeenAt      DateTime?
   notes           PsychologistNote[]
 
   @@unique([clientId, psychologistId])

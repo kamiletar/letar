@@ -5,6 +5,13 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 версионирование следует [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.32.0] - 2026-09-24
+
+### Added
+
+- Кабинет психолога: бейдж «N новых сессий» у клиента — сессии, завершённые после последнего открытия его
+  карточки. Миграция: колонка `ClientPsychologistLink.lastSeenAt`.
+
 ## [0.31.0] - 2026-09-24
 
 ### Added

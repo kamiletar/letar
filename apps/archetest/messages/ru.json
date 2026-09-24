@@ -295,7 +295,8 @@
       "anyRank": "Любой",
       "empty": "Под фильтр никто не попал.",
       "shown": "Показано {shown} из {total}"
-    }
+    },
+    "newSessions": "{count, plural, one {# новая сессия} few {# новые сессии} other {# новых сессий}}"
   },
   "settings": {
     "title": "Настройки",

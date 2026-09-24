@@ -15,6 +15,7 @@ const st = vi.hoisted(() => ({
   writes: [] as string[],
   questionQueries: 0,
   rankQueryIds: undefined as unknown,
+  newSessionsWhere: undefined as unknown,
   sessionsWhere: undefined as unknown,
 }))
 
@@ -24,12 +25,19 @@ vi.mock('@/lib/db', () => {
     clientPsychologistLink: {
       // Как под политикой: связи психолога есть, а сами клиенты через include недоступны
       findMany: async () => [
-        { id: 'l1', clientId: 'c1', displayName: null, status: 'ACTIVE', createdAt: new Date(0) },
-        { id: 'l2', clientId: 'c2', displayName: 'Мария', status: 'REVOKED', createdAt: new Date(0) },
+        {
+          id: 'l1',
+          clientId: 'c1',
+          displayName: null,
+          status: 'ACTIVE',
+          createdAt: new Date(0),
+          lastSeenAt: new Date(1000),
+        },
+        { id: 'l2', clientId: 'c2', displayName: 'Мария', status: 'REVOKED', createdAt: new Date(0), lastSeenAt: null },
       ],
       findFirst: async () => st.link,
-      update: async () => {
-        st.writes.push('link.update')
+      update: async ({ data }: { data: Record<string, unknown> }) => {
+        st.writes.push(`link.update:${Object.keys(data).join(',')}`)
       },
     },
     quizAnswer: { findMany: async () => st.answers },
@@ -42,7 +50,12 @@ vi.mock('@/lib/db', () => {
       },
     },
     quizSession: {
-      findMany: async ({ where }: { where: unknown }) => {
+      findMany: async ({ where, select }: { where: unknown; select: Record<string, boolean> }) => {
+        // Два разных запроса: «новые сессии» для списка и история для карточки
+        if (select.userId) {
+          st.newSessionsWhere = where
+          return [{ userId: 'c1', completedAt: new Date(500) }, { userId: 'c1', completedAt: new Date(2000) }]
+        }
         st.sessionsWhere = where
         return [{
           id: 's1',
@@ -125,6 +138,12 @@ describe('getClientsListAction', () => {
     expect(data.map((c) => c.rankTier)).toEqual(['EXPLORER', null])
     expect(st.rankQueryIds).toEqual(['c1'])
   })
+
+  it('«новые сессии» — после последнего просмотра, только валидные сессии активных клиентов', async () => {
+    const { data } = await cabinet.getClientsListAction()
+    expect(data.map((c) => c.newSessions)).toEqual([1, 0])
+    expect(st.newSessionsWhere).toEqual({ userId: { in: ['c1'] }, completedAt: { not: null }, isValid: true })
+  })
 })
 
 describe('валидация ввода', () => {
@@ -170,6 +189,12 @@ describe('getClientDetailAction', () => {
     const data = (res as { data: { cumulativeScores: Record<string, number> } }).data
     expect(data.cumulativeScores.PAR).toBeGreaterThan(0)
     expect(st.questionQueries).toBe(1)
+  })
+
+  it('открытие карточки отмечает просмотр (lastSeenAt) — и только его', async () => {
+    st.link = { id: 'l1', displayName: null, createdAt: new Date(), client: { id: 'c1' }, notes: [] }
+    await cabinet.getClientDetailAction('c1')
+    expect(st.writes).toEqual(['link.update:lastSeenAt'])
   })
 
   it('динамика — только валидные завершённые сессии, по баллам самой сессии', async () => {

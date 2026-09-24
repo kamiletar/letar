@@ -5,6 +5,7 @@ import { getEnhancedPrisma, prisma } from '@/lib/db'
 import { z } from 'zod/v4'
 import type { ScaleCode } from '../_data/personality-types'
 import { RANKS } from '../_data/ranks'
+import { countNewSessions } from '../_lib/new-sessions'
 import { computeScoresCore, type QuizOptionData, type ScaleConfidence } from '../_lib/scoring-core'
 import { buildSessionDynamics, type QuestionScoringRow } from '../_lib/session-dynamics'
 
@@ -58,6 +59,16 @@ export async function getClientsListAction() {
     : []
   const tierByUser = new Map(entries.map((e) => [e.userId, RANKS.find((r) => r.code === e.rankCode)?.tier ?? null]))
 
+  // «N новых сессий» (7.4): валидные завершённые сессии активных клиентов — через enhanced-клиент,
+  // политика QuizSession и так пускает психолога только к активным связям
+  const recentSessions = activeIds.length > 0
+    ? await db.quizSession.findMany({
+      where: { userId: { in: activeIds }, completedAt: { not: null }, isValid: true },
+      select: { userId: true, completedAt: true },
+    })
+    : []
+  const newByClient = countNewSessions(links, recentSessions)
+
   return {
     data: links.flatMap((link) => {
       const client = byId.get(link.clientId)
@@ -74,6 +85,7 @@ export async function getClientsListAction() {
         status: link.status,
         createdAt: link.createdAt,
         rankTier: link.status === 'ACTIVE' ? tierByUser.get(client.id) ?? null : null,
+        newSessions: newByClient.get(client.id) ?? 0,
       }]
     }),
   }
@@ -100,6 +112,9 @@ export async function getClientDetailAction(clientId: string) {
   if (!link) {
     return { error: 'Клиент не найден или доступ отозван' }
   }
+
+  // Открытие карточки — отметка просмотра: счётчик «N новых» в списке обнуляется (7.4)
+  await db.clientPsychologistLink.update({ where: { id: link.id }, data: { lastSeenAt: new Date() } })
 
   // Все ответы клиента (с сессией — для динамики по сессиям)
   const answeredData = await db.quizAnswer.findMany({
