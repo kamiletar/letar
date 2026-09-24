@@ -18,9 +18,11 @@ import {
   DrawerContent,
   DrawerFooter,
   DrawerHeader,
+  DrawerPositioner,
   DrawerTitle,
   HStack,
   Icon,
+  Portal,
   Progress,
   Skeleton,
   Stack,
@@ -101,195 +103,200 @@ export function UpdateDrawer() {
 
   return (
     <Drawer.Root open={open} onOpenChange={(e) => setOpen(e.open)} placement="end" size="md">
-      <DrawerBackdrop />
-      <DrawerContent>
-        <DrawerHeader>
-          <DrawerTitle>Обновление приложения</DrawerTitle>
-          <DrawerCloseTrigger />
-        </DrawerHeader>
+      <Portal>
+        <DrawerBackdrop />
+        <DrawerPositioner>
+          <DrawerContent>
+            <DrawerHeader>
+              <DrawerTitle>Обновление приложения</DrawerTitle>
+              <DrawerCloseTrigger />
+            </DrawerHeader>
 
-        <DrawerBody>
-          <VStack align="stretch" gap="6">
-            {/* Заголовок версии */}
-            <Box p="4" bg="purple.subtle" borderRadius="lg" borderWidth="1px" borderColor="purple.muted">
-              <HStack justify="space-between" mb="2">
-                <HStack gap="2">
-                  <Icon fontSize="xl" color="purple.fg" asChild>
-                    <LuFileText />
-                  </Icon>
-                  <Text fontWeight="bold" fontSize="lg">
-                    Animatrona v{version}
-                  </Text>
-                </HStack>
-                <Badge colorPalette="purple" size="sm">
-                  {updateStatus === 'available'
-                    ? 'Доступно'
-                    : updateStatus === 'downloading'
-                    ? 'Загрузка'
-                    : updateStatus === 'downloaded'
-                    ? 'Готово'
-                    : 'Готово к установке'}
-                </Badge>
-              </HStack>
-
-              <HStack gap="4" color="fg.muted" fontSize="sm">
-                <HStack gap="1">
-                  <Icon fontSize="sm" asChild>
-                    <LuCalendar />
-                  </Icon>
-                  <Text>
-                    {new Date(releaseDate).toLocaleDateString('ru-RU', {
-                      day: 'numeric',
-                      month: 'long',
-                      year: 'numeric',
-                    })}
-                  </Text>
-                </HStack>
-              </HStack>
-            </Box>
-
-            {/* Прогресс загрузки */}
-            {updateStatus === 'downloading' && (
-              <Box p="4" bg="bg.muted" borderRadius="lg">
-                <VStack align="stretch" gap="3">
-                  <Text fontWeight="semibold" fontSize="sm">
-                    Загрузка...
-                  </Text>
-                  <Progress.Root value={downloadProgress} colorPalette="purple">
-                    <Progress.Track>
-                      <Progress.Range />
-                    </Progress.Track>
-                  </Progress.Root>
-                  <HStack justify="space-between" fontSize="sm" color="fg.muted">
-                    <Text>{downloadProgress.toFixed(1)}%</Text>
+            <DrawerBody>
+              <VStack align="stretch" gap="6">
+                {/* Заголовок версии */}
+                <Box p="4" bg="purple.subtle" borderRadius="lg" borderWidth="1px" borderColor="purple.muted">
+                  <HStack justify="space-between" mb="2">
                     <HStack gap="2">
-                      {downloadSpeed > 0 && <Text>{(downloadSpeed / 1024 / 1024).toFixed(1)} МБ/с</Text>}
-                      {downloadEta > 0 && <Text>~{Math.ceil(downloadEta)} сек</Text>}
+                      <Icon fontSize="xl" color="purple.fg" asChild>
+                        <LuFileText />
+                      </Icon>
+                      <Text fontWeight="bold" fontSize="lg">
+                        Animatrona v{version}
+                      </Text>
+                    </HStack>
+                    <Badge colorPalette="purple" size="sm">
+                      {updateStatus === 'available'
+                        ? 'Доступно'
+                        : updateStatus === 'downloading'
+                        ? 'Загрузка'
+                        : updateStatus === 'downloaded'
+                        ? 'Готово'
+                        : 'Готово к установке'}
+                    </Badge>
+                  </HStack>
+
+                  <HStack gap="4" color="fg.muted" fontSize="sm">
+                    <HStack gap="1">
+                      <Icon fontSize="sm" asChild>
+                        <LuCalendar />
+                      </Icon>
+                      <Text>
+                        {new Date(releaseDate).toLocaleDateString('ru-RU', {
+                          day: 'numeric',
+                          month: 'long',
+                          year: 'numeric',
+                        })}
+                      </Text>
                     </HStack>
                   </HStack>
-                </VStack>
-              </Box>
-            )}
+                </Box>
 
-            {/* Готово к установке */}
-            {updateStatus === 'downloaded' && (
-              <Box p="4" bg="green.subtle" borderRadius="lg" borderWidth="1px" borderColor="green.muted">
-                <HStack gap="2" mb="2">
-                  <Icon fontSize="xl" color="green.fg" asChild>
-                    <LuDownload />
-                  </Icon>
-                  <Text fontWeight="semibold" color="green.fg">
-                    Готово к установке
-                  </Text>
-                </HStack>
-                <Text fontSize="sm" color="fg.muted">
-                  Приложение будет перезапущено для установки обновления
-                </Text>
-              </Box>
-            )}
-
-            {/* Changelog */}
-            <Stack gap="3">
-              <Text fontWeight="semibold" fontSize="md">
-                Что нового
-              </Text>
-
-              {isLoadingChangelog
-                ? (
-                  <VStack align="stretch" gap="2">
-                    <Skeleton height="20px" />
-                    <Skeleton height="20px" />
-                    <Skeleton height="20px" />
-                  </VStack>
-                )
-                : changelog
-                ? (
-                  <Box
-                    fontSize="sm"
-                    lineHeight="relaxed"
-                    css={{
-                      '& h1, & h2, & h3': {
-                        fontWeight: 'semibold',
-                        marginTop: '1rem',
-                        marginBottom: '0.5rem',
-                      },
-                      '& ul, & ol': {
-                        paddingLeft: '1.5rem',
-                      },
-                      '& li': {
-                        marginBottom: '0.25rem',
-                      },
-                      '& p': {
-                        marginBottom: '0.5rem',
-                      },
-                      '& code': {
-                        backgroundColor: 'var(--chakra-colors-bg-muted)',
-                        padding: '0.125rem 0.25rem',
-                        borderRadius: '0.25rem',
-                        fontSize: '0.875em',
-                      },
-                    }}
-                  >
-                    <ReactMarkdown>{changelog}</ReactMarkdown>
+                {/* Прогресс загрузки */}
+                {updateStatus === 'downloading' && (
+                  <Box p="4" bg="bg.muted" borderRadius="lg">
+                    <VStack align="stretch" gap="3">
+                      <Text fontWeight="semibold" fontSize="sm">
+                        Загрузка...
+                      </Text>
+                      <Progress.Root value={downloadProgress} colorPalette="purple">
+                        <Progress.Track>
+                          <Progress.Range />
+                        </Progress.Track>
+                      </Progress.Root>
+                      <HStack justify="space-between" fontSize="sm" color="fg.muted">
+                        <Text>{downloadProgress.toFixed(1)}%</Text>
+                        <HStack gap="2">
+                          {downloadSpeed > 0 && <Text>{(downloadSpeed / 1024 / 1024).toFixed(1)} МБ/с</Text>}
+                          {downloadEta > 0 && <Text>~{Math.ceil(downloadEta)} сек</Text>}
+                        </HStack>
+                      </HStack>
+                    </VStack>
                   </Box>
-                )
-                : releaseNotes
-                ? (
-                  <Box fontSize="sm" color="fg.muted">
-                    <ReactMarkdown>{releaseNotes}</ReactMarkdown>
-                  </Box>
-                )
-                : (
-                  <Text fontSize="sm" color="fg.muted">
-                    Исправления ошибок и улучшения производительности
-                  </Text>
                 )}
-            </Stack>
-          </VStack>
-        </DrawerBody>
 
-        <DrawerFooter>
-          <HStack justify="space-between" w="full">
-            {/* Пропустить версию */}
-            {updateStatus === 'available' && (
-              <Button variant="ghost" colorPalette="gray" size="sm" onClick={handleSkip}>
-                Пропустить версию
-              </Button>
-            )}
+                {/* Готово к установке */}
+                {updateStatus === 'downloaded' && (
+                  <Box p="4" bg="green.subtle" borderRadius="lg" borderWidth="1px" borderColor="green.muted">
+                    <HStack gap="2" mb="2">
+                      <Icon fontSize="xl" color="green.fg" asChild>
+                        <LuDownload />
+                      </Icon>
+                      <Text fontWeight="semibold" color="green.fg">
+                        Готово к установке
+                      </Text>
+                    </HStack>
+                    <Text fontSize="sm" color="fg.muted">
+                      Приложение будет перезапущено для установки обновления
+                    </Text>
+                  </Box>
+                )}
 
-            <HStack gap="2" ml="auto">
-              {/* Позже / Закрыть */}
-              <Button variant="outline" onClick={handleClose}>
-                {updateStatus === 'downloading' ? 'Скрыть' : 'Позже'}
-              </Button>
+                {/* Changelog */}
+                <Stack gap="3">
+                  <Text fontWeight="semibold" fontSize="md">
+                    Что нового
+                  </Text>
 
-              {/* Скачать */}
-              {updateStatus === 'available' && (
-                <Button colorPalette="purple" onClick={handleDownload}>
-                  <LuDownload />
-                  Скачать
-                </Button>
-              )}
+                  {isLoadingChangelog
+                    ? (
+                      <VStack align="stretch" gap="2">
+                        <Skeleton height="20px" />
+                        <Skeleton height="20px" />
+                        <Skeleton height="20px" />
+                      </VStack>
+                    )
+                    : changelog
+                    ? (
+                      <Box
+                        fontSize="sm"
+                        lineHeight="relaxed"
+                        css={{
+                          '& h1, & h2, & h3': {
+                            fontWeight: 'semibold',
+                            marginTop: '1rem',
+                            marginBottom: '0.5rem',
+                          },
+                          '& ul, & ol': {
+                            paddingLeft: '1.5rem',
+                          },
+                          '& li': {
+                            marginBottom: '0.25rem',
+                          },
+                          '& p': {
+                            marginBottom: '0.5rem',
+                          },
+                          '& code': {
+                            backgroundColor: 'var(--chakra-colors-bg-muted)',
+                            padding: '0.125rem 0.25rem',
+                            borderRadius: '0.25rem',
+                            fontSize: '0.875em',
+                          },
+                        }}
+                      >
+                        <ReactMarkdown>{changelog}</ReactMarkdown>
+                      </Box>
+                    )
+                    : releaseNotes
+                    ? (
+                      <Box fontSize="sm" color="fg.muted">
+                        <ReactMarkdown>{releaseNotes}</ReactMarkdown>
+                      </Box>
+                    )
+                    : (
+                      <Text fontSize="sm" color="fg.muted">
+                        Исправления ошибок и улучшения производительности
+                      </Text>
+                    )}
+                </Stack>
+              </VStack>
+            </DrawerBody>
 
-              {/* Отменить загрузку */}
-              {updateStatus === 'downloading' && (
-                <Button colorPalette="red" variant="outline" onClick={handleClose}>
-                  <LuX />
-                  Отменить
-                </Button>
-              )}
+            <DrawerFooter>
+              <HStack justify="space-between" w="full">
+                {/* Пропустить версию */}
+                {updateStatus === 'available' && (
+                  <Button variant="ghost" colorPalette="gray" size="sm" onClick={handleSkip}>
+                    Пропустить версию
+                  </Button>
+                )}
 
-              {/* Установить */}
-              {(updateStatus === 'downloaded'
-                || (updateStatus !== 'available' && updateStatus !== 'downloading' && updateStatus !== 'checking')) && (
-                <Button colorPalette="purple" onClick={handleInstall}>
-                  Установить сейчас
-                </Button>
-              )}
-            </HStack>
-          </HStack>
-        </DrawerFooter>
-      </DrawerContent>
+                <HStack gap="2" ml="auto">
+                  {/* Позже / Закрыть */}
+                  <Button variant="outline" onClick={handleClose}>
+                    {updateStatus === 'downloading' ? 'Скрыть' : 'Позже'}
+                  </Button>
+
+                  {/* Скачать */}
+                  {updateStatus === 'available' && (
+                    <Button colorPalette="purple" onClick={handleDownload}>
+                      <LuDownload />
+                      Скачать
+                    </Button>
+                  )}
+
+                  {/* Отменить загрузку */}
+                  {updateStatus === 'downloading' && (
+                    <Button colorPalette="red" variant="outline" onClick={handleClose}>
+                      <LuX />
+                      Отменить
+                    </Button>
+                  )}
+
+                  {/* Установить */}
+                  {(updateStatus === 'downloaded'
+                    || (updateStatus !== 'available' && updateStatus !== 'downloading' && updateStatus !== 'checking'))
+                    && (
+                      <Button colorPalette="purple" onClick={handleInstall}>
+                        Установить сейчас
+                      </Button>
+                    )}
+                </HStack>
+              </HStack>
+            </DrawerFooter>
+          </DrawerContent>
+        </DrawerPositioner>
+      </Portal>
     </Drawer.Root>
   )
 }

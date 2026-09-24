@@ -43,9 +43,10 @@ for f in $(grep -rlE "DrawerContent|Drawer\.Content" --include=*.tsx apps libs);
 done
 ```
 
-На 2026-09-24 (публичная часть репо) после фикса archetest остался один файл —
-`apps/animatrona/renderer/src/components/update/UpdateDrawer.tsx`. Приватные submodule не
-проверялись.
+На 2026-09-24 нашлось два файла: мобильное меню archetest и `UpdateDrawer` animatrona (v0.56.3).
+После обоих фиксов поиск пуст по всему репо, включая все 14 приватных submodule (выкачаны, проверено
+в тот же день). Для Electron/nextron тот же `Portal` работает без особенностей: он уже стоит в
+диалогах renderer animatrona.
 
 Заметно только живым открытием на узком экране: скриншот закрытого состояния и unit-тесты
 ничего не покажут.
