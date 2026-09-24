@@ -5,6 +5,13 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 версионирование следует [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.30.1] - 2026-09-24
+
+### Fixed
+
+- Подсказки и тексты валидации полей форм в английской версии больше не русские: `FormI18nProvider`
+  получал жёсткий `locale="ru"`, теперь — локаль страницы.
+
 ## [0.30.0] - 2026-09-24
 
 ### Added

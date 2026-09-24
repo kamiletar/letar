@@ -13,13 +13,18 @@ import { system } from '@/theme'
  * Включает:
  * - Chakra UI с кастомной темой
  * - Поддержку тёмной/светлой темы
+ * - Локаль подсказок и ошибок полей @letar/forms
+ *
+ * `locale` — пропом, а не `useLocale()`: `(auth)/layout` рендерит провайдер вне
+ * NextIntlClientProvider. Раньше здесь стояло `locale="ru"` — в EN-версии подсказки и
+ * тексты валидации полей форм оставались русскими.
  */
-export function Providers({ children }: PropsWithChildren) {
+export function Providers({ children, locale = 'ru' }: PropsWithChildren<{ locale?: string }>) {
   return (
     <EmotionRegistry>
       <ColorModeProvider>
         <RootChakraProvider value={system}>
-          <FormI18nProvider locale="ru">{children}</FormI18nProvider>
+          <FormI18nProvider locale={locale}>{children}</FormI18nProvider>
         </RootChakraProvider>
       </ColorModeProvider>
     </EmotionRegistry>

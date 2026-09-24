@@ -79,7 +79,7 @@ export default async function LocaleLayout({
     <html lang={locale} suppressHydrationWarning>
       <body>
         <NextIntlClientProvider messages={messages}>
-          <Providers>
+          <Providers locale={locale}>
             <Header />
             {children}
             <AppToaster />
