@@ -50,6 +50,7 @@ export function QuizContainer({
   initialDisclaimerAccepted,
 }: QuizContainerProps) {
   const t = useTranslations('quiz')
+  const tc = useTranslations('quiz.container')
   const locale = useLocale()
   const isRu = locale === 'ru'
   /** Локаль прохождения для сохранения в сессию (5.9.5, нормы ru/en) */
@@ -265,13 +266,11 @@ export function QuizContainer({
     if (!skipReminderShown && seen >= 10 && skippedCount / seen > 0.3) {
       setSkipReminderShown(true)
       toaster.info({
-        title: isRu ? 'Старайтесь выбирать наиболее близкий вариант' : 'Try to choose the closest option',
-        description: isRu
-          ? 'Даже если ни один ответ не описывает вас идеально — выберите наиболее подходящий. Это повысит точность результата.'
-          : 'Even if no answer perfectly describes you — choose the closest one. This will improve accuracy.',
+        title: tc('skipReminderTitle'),
+        description: tc('skipReminderText'),
       })
     }
-  }, [currentQuestion, saveProgress, skipped, currentIndex, skipReminderShown, isRu])
+  }, [currentQuestion, saveProgress, skipped, currentIndex, skipReminderShown, tc])
 
   // Ref для handleFinish (нужен в handleNext до определения handleFinish)
   // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -304,10 +303,8 @@ export function QuizContainer({
     // Если все вопросы пропущены — нечего сабмитить
     if (answersArray.length === 0) {
       toaster.error({
-        title: isRu ? 'Нет ответов' : 'No answers',
-        description: isRu
-          ? 'Вы пропустили все вопросы. Ответьте хотя бы на один.'
-          : 'You skipped all questions. Please answer at least one.',
+        title: tc('noAnswersTitle'),
+        description: tc('noAnswersText'),
       })
       setState('intro')
       return
@@ -380,7 +377,7 @@ export function QuizContainer({
       sessionStorage.setItem(STORAGE_KEY, JSON.stringify(pending))
       setState('results')
     }
-  }, [answers, isAuthenticated, seed, calculateClientScores, skipped, mood, sessionLocale, showAchievementToasts])
+  }, [answers, isAuthenticated, seed, calculateClientScores, skipped, mood, sessionLocale, showAchievementToasts, tc])
 
   // Обновляем ref для автозавершения вне рендера — чтение/запись ref.current
   // в теле компонента не отслеживается React (react/refs), нужен эффект
@@ -395,10 +392,8 @@ export function QuizContainer({
       const newQuestions = await getRandomQuestionsAction(50)
       if (newQuestions.length === 0) {
         toaster.info({
-          title: isRu ? 'Все вопросы пройдены!' : 'All questions completed!',
-          description: isRu
-            ? 'Вы ответили на все доступные вопросы. Поздравляем!'
-            : 'You have answered all available questions. Congratulations!',
+          title: tc('allDoneTitle'),
+          description: tc('allDoneText'),
         })
         setState('results')
         return
@@ -421,12 +416,12 @@ export function QuizContainer({
       setState('mood')
     } catch {
       toaster.error({
-        title: isRu ? 'Ошибка загрузки' : 'Loading error',
-        description: isRu ? 'Не удалось загрузить новые вопросы' : 'Failed to load new questions',
+        title: tc('loadErrorTitle'),
+        description: tc('loadErrorText'),
       })
       setState('results')
     }
-  }, [isRu])
+  }, [tc])
 
   // Начать заново (вернуться на интро)
   const handleRestart = useCallback(() => {
@@ -511,7 +506,7 @@ export function QuizContainer({
     return (
       <Container maxW="md" py={16}>
         <VStack gap={4} textAlign="center">
-          <Heading size="lg">{isRu ? 'Загружаем новые вопросы...' : 'Loading new questions...'}</Heading>
+          <Heading size="lg">{tc('loadingMore')}</Heading>
         </VStack>
       </Container>
     )
@@ -595,7 +590,7 @@ export function QuizContainer({
                   }
                 }}
               >
-                {isRu ? 'Повторить отправку' : 'Retry'}
+                {tc('retry')}
               </Button>
             </VStack>
           </Container>

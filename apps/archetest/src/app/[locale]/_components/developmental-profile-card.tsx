@@ -2,7 +2,7 @@
 
 import { useShowClinicalNames } from '@/app/_hooks/use-psychologist'
 import { Badge, Box, Card, Heading, HStack, Text, VStack } from '@chakra-ui/react'
-import { useLocale } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { LuShieldAlert, LuSparkles, LuTarget } from 'react-icons/lu'
 import { getGrowthPractices, PRACTICE_METHOD_LABELS } from '../_data/growth-practices'
 import type { PersonalityTypeCode } from '../_data/personality-types'
@@ -44,6 +44,7 @@ export function DevelopmentalProfileCard({
 }: DevelopmentalProfileCardProps) {
   const locale = useLocale()
   const isRu = locale === 'ru'
+  const t = useTranslations('developmentalCard')
   const showClinicalRole = useShowClinicalNames()
   const showClinical = showClinicalOverride ?? showClinicalRole
 
@@ -73,7 +74,7 @@ export function DevelopmentalProfileCard({
             </Heading>
             {type.beta && (
               <Badge colorPalette="purple" variant="subtle" size="sm">
-                β {isRu ? 'бета' : 'beta'}
+                β {t('beta')}
               </Badge>
             )}
             {showClinical && (
@@ -100,9 +101,7 @@ export function DevelopmentalProfileCard({
               {/* 95%-интервал точности ipsative-ранжирования (5.6) */}
               {ciLow !== undefined && ciHigh !== undefined && (
                 <Text fontSize="xs" color="fg.muted">
-                  {isRu
-                    ? `диапазон ${Math.round(ciLow)}–${Math.round(ciHigh)}%`
-                    : `range ${Math.round(ciLow)}–${Math.round(ciHigh)}%`}
+                  {t('range', { ciLow: Math.round(ciLow), ciHigh: Math.round(ciHigh) })}
                 </Text>
               )}
             </HStack>
@@ -113,7 +112,7 @@ export function DevelopmentalProfileCard({
             <Box>
               <HStack gap={2} mb={2} color="success.fg">
                 <LuSparkles />
-                <Heading size="sm">{isRu ? 'Суперсила' : 'Superpower'}</Heading>
+                <Heading size="sm">{t('superpower')}</Heading>
               </HStack>
               <Text whiteSpace="pre-line" fontSize="sm" lineHeight="tall" color="fg">
                 {superpower}
@@ -126,7 +125,7 @@ export function DevelopmentalProfileCard({
             <Box p={3} bg="bg.subtle" borderRadius="md" borderLeft="3px solid" borderLeftColor="warning.solid">
               <HStack gap={2} mb={2} color="warning.fg">
                 <LuShieldAlert />
-                <Heading size="sm">{isRu ? 'Ловушка' : 'The trap'}</Heading>
+                <Heading size="sm">{t('trap')}</Heading>
               </HStack>
               {/* fg.muted, не fg.subtle: на карточке bg.subtle приглушённый текст проваливал AA */}
               <Text fontSize="sm" lineHeight="tall" color="fg.muted">
@@ -140,7 +139,7 @@ export function DevelopmentalProfileCard({
             <Box>
               <HStack gap={2} mb={3} color="info.fg">
                 <LuTarget />
-                <Heading size="sm">{isRu ? 'Практики' : 'Practices'}</Heading>
+                <Heading size="sm">{t('practices')}</Heading>
               </HStack>
               <VStack align="stretch" gap={3}>
                 {practices.map((practice, i) => (

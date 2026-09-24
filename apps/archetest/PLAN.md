@@ -2,7 +2,7 @@
 
 > **📖 Начни с главного README:** [README.md](./README.md) — обзор проекта, быстрый старт, навигация по документации
 >
-> **Версия:** 0.28.39 | **Обновлено:** 2026-09-24 (пул, волна 5: группа 2 (кабинет)))
+> **Версия:** 0.28.40 | **Обновлено:** 2026-09-24 (пул, волна 5: группа 3 (профиль, квиз))))
 >
 > **Связанные документы:**
 >
@@ -26,7 +26,7 @@
 | 2     | Пакеты ревьюеру ✅: СДВГ, привязанность, часть B аудита, редкие шкалы — 5 таблиц в `docs/question-review/` | ✅     |
 | 3     | Авторский EN-банк №101–1665 ✅ **EN: 1565/1565**, аудит: 0 непереведённых                                  | ✅     |
 | 4     | UI-хвосты ✅: `/dev/presentation` → brand, клавиатура радара (+тест), `theme:check` в `lint`               | ✅     |
-| 5     | `isRu ? … : …` → `messages` — **осталось 78 литеральных в 19 файлах** (группы 1–2 ✅)                      | 🔄     |
+| 5     | `isRu ? … : …` → `messages` — **осталось 52 литеральных в 16 файлах** (группы 1–3 ✅)                      | 🔄     |
 | 6     | Тесты Фазы 4: stratified-shuffle, server actions, E2E квиз/кабинет                                         | ⏳     |
 | 7     | Фичи Фазы 3: `relevantCounts` + динамика ядра, карта стабильности, фильтр, уведомления, сообщения, PDF     | ⏳     |
 
@@ -882,6 +882,10 @@ CAT/IRT. ✅ Подтверждено Kami: разделение ASD → ASD + D
       банка), `experimental-scales-block`, `session-dynamics-chart` (дата — `toLocaleDateString(locale)`),
       `cabinet/[clientId]/page` → `cabinet.{darkCore,experimental,dynamicsChart}`; тест
       `cabinet-blocks-i18n.spec.tsx` (6). **Осталось 78 в 19 файлах.**
+      **Группа 3 ✅ v0.28.40:** `profile-details` (подписи точности → `confidence.*`), `developmental-profile-card`,
+      `quiz-container` (тосты → `quiz.container.*`, `isRu` в deps колбэков заменён на `tc`). Поймана и
+      исправлена склейка ICU-переменных (`label`/`labelEn` в одно имя) — конвертер теперь падает на ней;
+      тест `profile-details-i18n.spec.tsx` (4). **Осталось 52 в 16 файлах.**
       Больше всего: `for-professionals/page.tsx` 34, `cabinet/[clientId]/_components/dark-core-block.tsx` 17,
       `profile-details.tsx` 14, `quiz-container.tsx` 11, `developmental-profile-card.tsx` 11,
       `experimental-scales-block.tsx` 10, `safety-net-block.tsx` 9, `disclaimer-consent.tsx` 7,

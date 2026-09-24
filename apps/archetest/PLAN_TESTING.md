@@ -47,6 +47,7 @@ nx typecheck:tsgo archetest    # Проверка типов
 | Радар с клавиатуры (аудит)    | `accessibilityLayer`: поверхность фокусируется (tabindex 0, role application), стрелка открывает тултип оси                | ✅ `personality-radar-chart.spec.tsx` (2)  |
 | i18n: «Если вы психолог»      | Обе локали без MISSING_MESSAGE/ошибок ICU, подстановки чисел, списки `t.raw`, ссылка `t.rich`                              | ✅ `for-professionals-view.spec.tsx` (4)   |
 | i18n: блоки кабинета          | Тёмное ядро (ICU select, покрытие банка, анализ чувствительности), экспериментальные шкалы                                 | ✅ `cabinet-blocks-i18n.spec.tsx` (6)      |
+| i18n: профиль и карточки черт | Обе локали без MISSING_MESSAGE; подписи точности; модификатор PAG — поля данных своей локали (регрессия склейки)           | ✅ `profile-details-i18n.spec.tsx` (4)     |
 | Клиентский скоринг            | `computeClientScores`: нормализация, actual_max, игнор мусора                                                              | ✅ `client-scoring.test.ts` (8)            |
 | Merge гостевой сессии         | Пересчёт на сервере из ответов, отклонение подделок                                                                        | ✅ `scoring-core.test.ts` (сценарий) + E2E |
 | E2E: express-флоу             | Intro → согласие → 24 вопроса → гексаграмма → QR/CTA, restore                                                              | ✅ `express.spec.ts` (2)                   |

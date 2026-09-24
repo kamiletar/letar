@@ -2,7 +2,7 @@
 
 import { useShowClinicalNames } from '@/app/_hooks/use-psychologist'
 import { Box, Card, Heading, Text, VStack } from '@chakra-ui/react'
-import { useLocale } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { Fragment, useMemo } from 'react'
 import type { PersonalityTypeCode } from '../_data/personality-types'
 import { PERSONALITY_TYPES, replaceTypeCodes, STATE_CODES } from '../_data/personality-types'
@@ -19,17 +19,8 @@ interface ProfileDetailsProps {
   relevantCounts?: Record<PersonalityTypeCode, number> | null
 }
 
-/** Метка достоверности */
-function getConfidenceLabel(conf: ScaleConfidence, isRu: boolean): string | null {
-  switch (conf) {
-    case 'insufficient':
-      return isRu ? 'Недостаточно данных' : 'Insufficient data'
-    case 'low':
-      return isRu ? 'Низкая точность' : 'Low accuracy'
-    default:
-      return null
-  }
-}
+/** Шкалы с малым числом ответов получают подпись; остальные — без неё */
+const CONFIDENCE_LABELED = new Set<ScaleConfidence>(['insufficient', 'low'])
 
 /**
  * Текстовые детали профиля: топ-3 типа, суперсила, взаимодействие, модификаторы.
@@ -38,6 +29,7 @@ function getConfidenceLabel(conf: ScaleConfidence, isRu: boolean): string | null
 export function ProfileDetails({ scores, confidence, relevantCounts }: ProfileDetailsProps) {
   const locale = useLocale()
   const isRu = locale === 'ru'
+  const t = useTranslations('profileDetails')
   const showClinical = useShowClinicalNames()
 
   // Ipsative-ранжирование (5.6): ранги внутри профиля + 95%-интервалы точности.
@@ -63,23 +55,19 @@ export function ProfileDetails({ scores, confidence, relevantCounts }: ProfileDe
   return (
     <VStack gap={4} w="100%">
       {/* Топ-3 ведущих черт — developmental-фрейм: Суперсила → Ловушка → Практики (этап 5.6.1) */}
-      <Heading size="lg">{isRu ? 'Ваши ведущие черты' : 'Your leading traits'}</Heading>
+      <Heading size="lg">{t('title')}</Heading>
       <Text fontSize="sm" color="fg.muted" textAlign="center" maxW="2xl">
-        {isRu
-          ? 'Каждая черта — не приговор, а ресурс: у неё есть суперсила, ловушка и конкретные практики для роста.'
-          : 'Each trait is a resource, not a verdict: it has a superpower, a trap, and concrete practices for growth.'}
+        {t('resourceNote')}
       </Text>
       {/* Методологическая подпись ipsative-ранжирования (5.6) */}
       {ranking && (
         <Text fontSize="xs" color="fg.subtle" textAlign="center" maxW="2xl">
-          {isRu
-            ? 'Порядок черт — ипсативное ранжирование: шкалы сравниваются внутри вашего профиля, а не с другими людьми. Диапазон рядом с баллом — 95%-ориентир точности, он сужается с числом отвеченных вопросов.'
-            : 'Trait order is ipsative: scales are compared within your own profile, not against other people. The range next to the score is a 95% precision guide that narrows as you answer more questions.'}
+          {t('ipsativeNote')}
         </Text>
       )}
       {top3.map((type, i) => {
         const conf = confidence?.[type.code]
-        const confLabel = conf ? getConfidenceLabel(conf, isRu) : null
+        const confLabel = conf && CONFIDENCE_LABELED.has(conf) ? t(`confidence.${conf}`) : null
         // Перекрывающиеся интервалы соседей = статистически неразличимы: честно говорим,
         // что порядок условен, вместо ложной точности «61,2% > 60,8%»
         const next = top3[i + 1]
@@ -99,9 +87,7 @@ export function ProfileDetails({ scores, confidence, relevantCounts }: ProfileDe
             />
             {tiedWithNext && (
               <Text fontSize="xs" color="fg.muted" textAlign="center">
-                {isRu
-                  ? '≈ эти черты выражены примерно одинаково — их порядок может меняться от сессии к сессии'
-                  : '≈ these traits are about equally pronounced — their order may swap between sessions'}
+                {t('tiedNote')}
               </Text>
             )}
           </Fragment>
@@ -126,7 +112,7 @@ export function ProfileDetails({ scores, confidence, relevantCounts }: ProfileDe
                 <VStack align="start" gap={3}>
                   <Box>
                     <Text fontWeight="bold" fontSize="sm" color="fg.muted" mb={1}>
-                      {isRu ? 'Динамика' : 'Dynamic'}
+                      {t('dynamic')}
                     </Text>
                     <Text fontSize="sm">
                       {replaceTypeCodes(
@@ -138,7 +124,7 @@ export function ProfileDetails({ scores, confidence, relevantCounts }: ProfileDe
                   </Box>
                   <Box>
                     <Text fontWeight="bold" fontSize="sm" color="green.500" mb={1}>
-                      {isRu ? 'Сильные стороны' : 'Strengths'}
+                      {t('strengths')}
                     </Text>
                     <Text fontSize="sm">
                       {replaceTypeCodes(
@@ -150,7 +136,7 @@ export function ProfileDetails({ scores, confidence, relevantCounts }: ProfileDe
                   </Box>
                   <Box>
                     <Text fontWeight="bold" fontSize="sm" color="orange.500" mb={1}>
-                      {isRu ? 'Зоны риска' : 'Risk areas'}
+                      {t('risks')}
                     </Text>
                     <Text fontSize="sm">
                       {replaceTypeCodes(
@@ -162,7 +148,7 @@ export function ProfileDetails({ scores, confidence, relevantCounts }: ProfileDe
                   </Box>
                   <Box p={3} bg="bg.subtle" borderRadius="md" w="100%">
                     <Text fontWeight="bold" fontSize="sm" mb={1}>
-                      {isRu ? 'Совет' : 'Advice'}
+                      {t('advice')}
                     </Text>
                     <Text fontSize="sm">
                       {replaceTypeCodes(
@@ -192,9 +178,10 @@ export function ProfileDetails({ scores, confidence, relevantCounts }: ProfileDe
           <Card.Root key={code} w="100%" variant="outline" borderColor="orange.300">
             <Card.Body>
               <Heading size="sm" mb={2}>
-                {isRu
-                  ? `Если у вас выражен ${type?.label ?? code} (${type?.archetype ?? ''})`
-                  : `If ${type?.labelEn ?? code} (${type?.archetypeEn ?? ''}) is pronounced`}
+                {t('ifPronounced', {
+                  label: (isRu ? type?.label : type?.labelEn) ?? code,
+                  archetype: (isRu ? type?.archetype : type?.archetypeEn) ?? '',
+                })}
               </Heading>
               <VStack align="start" gap={2}>
                 <Text fontSize="sm">

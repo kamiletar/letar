@@ -180,6 +180,18 @@
       "cumulativeProfile": "Cumulative Profile",
       "fadedCodes": "Faded codes on the chart — scales with insufficient answers. Complete more questions to improve accuracy.",
       "continue": "Continue Test"
+    },
+    "container": {
+      "retry": "Retry",
+      "skipReminderTitle": "Try to choose the closest option",
+      "skipReminderText": "Even if no answer perfectly describes you — choose the closest one. This will improve accuracy.",
+      "noAnswersTitle": "No answers",
+      "noAnswersText": "You skipped all questions. Please answer at least one.",
+      "allDoneTitle": "All questions completed!",
+      "allDoneText": "You have answered all available questions. Congratulations!",
+      "loadErrorTitle": "Loading error",
+      "loadErrorText": "Failed to load new questions",
+      "loadingMore": "Loading new questions..."
     }
   },
   "cabinet": {
@@ -377,5 +389,27 @@
       "title": "For Clinicians: Test Methodology"
     },
     "subtitle": "A guide for clinical psychologists, psychotherapists, and psychiatrists."
+  },
+  "profileDetails": {
+    "confidence": {
+      "insufficient": "Insufficient data",
+      "low": "Low accuracy"
+    },
+    "advice": "Advice",
+    "strengths": "Strengths",
+    "dynamic": "Dynamic",
+    "ifPronounced": "If {label} ({archetype}) is pronounced",
+    "title": "Your leading traits",
+    "resourceNote": "Each trait is a resource, not a verdict: it has a superpower, a trap, and concrete practices for growth.",
+    "tiedNote": "≈ these traits are about equally pronounced — their order may swap between sessions",
+    "ipsativeNote": "Trait order is ipsative: scales are compared within your own profile, not against other people. The range next to the score is a 95% precision guide that narrows as you answer more questions.",
+    "risks": "Risk areas"
+  },
+  "developmentalCard": {
+    "practices": "Practices",
+    "superpower": "Superpower",
+    "range": "range {ciLow}–{ciHigh}%",
+    "beta": "beta",
+    "trap": "The trap"
   }
 }

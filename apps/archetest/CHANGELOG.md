@@ -5,6 +5,14 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 версионирование следует [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.28.40] - 2026-09-24
+
+### Changed
+
+- Профиль и квиз: строки `profile-details`, `developmental-profile-card` и тостов `quiz-container`
+  перенесены в `messages` (`profileDetails`, `developmentalCard`, `quiz.container`). Исправлена склейка
+  переменных в заголовке модификатора (в RU подставилось бы английское название шкалы). Тест (4).
+
 ## [0.28.39] - 2026-09-24
 
 ### Changed
