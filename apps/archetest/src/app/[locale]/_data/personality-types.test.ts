@@ -9,6 +9,7 @@ import {
   EXTENDED_SCALE_CODES,
   getExperimentalScale,
   getPersonalityType,
+  getScaleDisplayCode,
   GLOBAL_MAX_SCORES,
   HEXAGRAM_SCALE_CODES,
   LIGHT_TRIAD_CODES,
@@ -191,5 +192,25 @@ describe('replaceTypeCodes', () => {
 
   it('не трогает неизвестные слова', () => {
     expect(replaceTypeCodes('ABC XYZ', true)).toBe('ABC XYZ')
+  })
+})
+
+describe('getScaleDisplayCode', () => {
+  it('в контексте Тёмной триады ANT подписывается как PSY — в паре с «Психопатией»', () => {
+    expect(getScaleDisplayCode('ANT', { triadAlias: true })).toBe('PSY')
+    expect(DARK_TRIAD_DISPLAY.ANT?.ru).toBe('Психопатия')
+  })
+
+  it('вне триады и для остальных шкал — сам код', () => {
+    expect(getScaleDisplayCode('ANT')).toBe('ANT')
+    for (const code of ALL_SCALE_CODES.filter((c) => c !== 'ANT')) {
+      expect(getScaleDisplayCode(code, { triadAlias: true })).toBe(code)
+    }
+  })
+
+  it('коды на диаграммах уникальны — иначе подписи осей не различить', () => {
+    const triadCodes = HEXAGRAM_SCALE_CODES.map((c) => getScaleDisplayCode(c, { triadAlias: true }))
+    expect(new Set(triadCodes).size).toBe(triadCodes.length)
+    expect(new Set(ALL_SCALE_CODES).size).toBe(ALL_SCALE_CODES.length)
   })
 })

@@ -79,33 +79,36 @@ function ForProfessionalsView({ locale }: { locale: string }) {
               ? 'Тест не изобретает шкалы с нуля. Большинство шкал опираются на валидированные инструменты — но на уровне конструкта, а не заимствования пунктов: все формулировки вопросов archetest авторские и ситуационные. Это сохраняет лицензионную чистоту (часть прототипов, например TAS-20, коммерческие, часть — research-only) и одновременно даёт связь с накопленной научной базой и нормами.'
               : 'The test does not invent scales from scratch. Most scales are grounded in validated instruments — at the construct level, never by borrowing items: every archetest question is an original, situational formulation. This preserves licensing cleanliness (some prototypes, e.g. TAS-20, are commercial; others are research-only) while keeping the test connected to the accumulated evidence base and norms.'}
           </Text>
-          <Table.Root size="sm" w="100%">
-            <Table.Header>
-              <Table.Row>
-                <Table.ColumnHeader>{isRu ? 'Шкала archetest' : 'Archetest scale'}</Table.ColumnHeader>
-                <Table.ColumnHeader>{isRu ? 'Валидированный прототип' : 'Validated prototype'}</Table.ColumnHeader>
-                <Table.ColumnHeader>{isRu ? 'Источник' : 'Source'}</Table.ColumnHeader>
-              </Table.Row>
-            </Table.Header>
-            <Table.Body>
-              {SCALE_PROTOTYPES.map(({ group, groupEn, prototype, prototypeEn, source, doi }) => (
-                <Table.Row key={group}>
-                  <Table.Cell fontWeight="bold">{isRu ? group : groupEn}</Table.Cell>
-                  <Table.Cell>{isRu ? prototype : prototypeEn}</Table.Cell>
-                  <Table.Cell color="fg.muted">
-                    <ChakraLink
-                      href={`https://doi.org/${doi}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      color="fg.muted"
-                    >
-                      {source}
-                    </ChakraLink>
-                  </Table.Cell>
+          {/* Скролл внутри таблицы: на телефоне она шире экрана и раздвигала всю страницу */}
+          <Table.ScrollArea w="100%" borderWidth="1px" borderColor="border" borderRadius="md">
+            <Table.Root size="sm" w="100%">
+              <Table.Header>
+                <Table.Row>
+                  <Table.ColumnHeader>{isRu ? 'Шкала archetest' : 'Archetest scale'}</Table.ColumnHeader>
+                  <Table.ColumnHeader>{isRu ? 'Валидированный прототип' : 'Validated prototype'}</Table.ColumnHeader>
+                  <Table.ColumnHeader>{isRu ? 'Источник' : 'Source'}</Table.ColumnHeader>
                 </Table.Row>
-              ))}
-            </Table.Body>
-          </Table.Root>
+              </Table.Header>
+              <Table.Body>
+                {SCALE_PROTOTYPES.map(({ group, groupEn, prototype, prototypeEn, source, doi }) => (
+                  <Table.Row key={group}>
+                    <Table.Cell fontWeight="bold">{isRu ? group : groupEn}</Table.Cell>
+                    <Table.Cell>{isRu ? prototype : prototypeEn}</Table.Cell>
+                    <Table.Cell color="fg.muted">
+                      <ChakraLink
+                        href={`https://doi.org/${doi}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        color="fg.muted"
+                      >
+                        {source}
+                      </ChakraLink>
+                    </Table.Cell>
+                  </Table.Row>
+                ))}
+              </Table.Body>
+            </Table.Root>
+          </Table.ScrollArea>
           <Text>
             {isRu
               ? `Валидированное ядро — ${
@@ -326,7 +329,7 @@ function ForProfessionalsView({ locale }: { locale: string }) {
                 <>
                   На платформе доступен кабинет психолога — инструмент для отслеживания результатов ваших клиентов. Для
                   активации кабинета нажмите «Я специалист» на{' '}
-                  <ChakraLink asChild color="blue.500">
+                  <ChakraLink asChild color="brand.fg">
                     <Link href="/cabinet">странице кабинета</Link>
                   </ChakraLink>
                   .
@@ -336,7 +339,7 @@ function ForProfessionalsView({ locale }: { locale: string }) {
                 <>
                   The platform features a psychologist cabinet — a tool for tracking your clients' results. To activate
                   the cabinet, click "I'm a Professional" on the{' '}
-                  <ChakraLink asChild color="blue.500">
+                  <ChakraLink asChild color="brand.fg">
                     <Link href="/cabinet">cabinet page</Link>
                   </ChakraLink>
                   .
@@ -374,40 +377,43 @@ function ForProfessionalsView({ locale }: { locale: string }) {
 
         {/* Таблица соответствия шкал */}
         <Section title={isRu ? 'Таблица соответствия шкал' : 'Scale Reference Table'}>
-          <Table.Root size="sm" w="100%">
-            <Table.Header>
-              <Table.Row>
-                <Table.ColumnHeader>{isRu ? 'Код' : 'Code'}</Table.ColumnHeader>
-                <Table.ColumnHeader>{isRu ? 'Название' : 'Name'}</Table.ColumnHeader>
-                <Table.ColumnHeader>{isRu ? 'Архетип' : 'Archetype'}</Table.ColumnHeader>
-                <Table.ColumnHeader>{isRu ? 'Клиническое' : 'Clinical'}</Table.ColumnHeader>
-                <Table.ColumnHeader>{isRu ? 'Кластер' : 'Cluster'}</Table.ColumnHeader>
-              </Table.Row>
-            </Table.Header>
-            <Table.Body>
-              {PERSONALITY_TYPES.map((type) => (
-                <Table.Row key={type.code}>
-                  <Table.Cell fontFamily="mono" fontWeight="bold">
-                    {type.code}
-                  </Table.Cell>
-                  <Table.Cell>{isRu ? type.label : type.labelEn}</Table.Cell>
-                  <Table.Cell>{isRu ? type.archetype : type.archetypeEn}</Table.Cell>
-                  <Table.Cell color="fg.muted">{isRu ? type.clinical : type.clinicalEn}</Table.Cell>
-                  <Table.Cell>
-                    {type.cluster === 'A'
-                      ? 'A'
-                      : type.cluster === 'B'
-                      ? 'B'
-                      : type.cluster === 'C'
-                      ? 'C'
-                      : isRu
-                      ? 'Доп.'
-                      : 'Suppl.'}
-                  </Table.Cell>
+          {/* Скролл внутри таблицы: на телефоне она шире экрана и раздвигала всю страницу */}
+          <Table.ScrollArea w="100%" borderWidth="1px" borderColor="border" borderRadius="md">
+            <Table.Root size="sm" w="100%">
+              <Table.Header>
+                <Table.Row>
+                  <Table.ColumnHeader>{isRu ? 'Код' : 'Code'}</Table.ColumnHeader>
+                  <Table.ColumnHeader>{isRu ? 'Название' : 'Name'}</Table.ColumnHeader>
+                  <Table.ColumnHeader>{isRu ? 'Архетип' : 'Archetype'}</Table.ColumnHeader>
+                  <Table.ColumnHeader>{isRu ? 'Клиническое' : 'Clinical'}</Table.ColumnHeader>
+                  <Table.ColumnHeader>{isRu ? 'Кластер' : 'Cluster'}</Table.ColumnHeader>
                 </Table.Row>
-              ))}
-            </Table.Body>
-          </Table.Root>
+              </Table.Header>
+              <Table.Body>
+                {PERSONALITY_TYPES.map((type) => (
+                  <Table.Row key={type.code}>
+                    <Table.Cell fontFamily="mono" fontWeight="bold">
+                      {type.code}
+                    </Table.Cell>
+                    <Table.Cell>{isRu ? type.label : type.labelEn}</Table.Cell>
+                    <Table.Cell>{isRu ? type.archetype : type.archetypeEn}</Table.Cell>
+                    <Table.Cell color="fg.muted">{isRu ? type.clinical : type.clinicalEn}</Table.Cell>
+                    <Table.Cell>
+                      {type.cluster === 'A'
+                        ? 'A'
+                        : type.cluster === 'B'
+                        ? 'B'
+                        : type.cluster === 'C'
+                        ? 'C'
+                        : isRu
+                        ? 'Доп.'
+                        : 'Suppl.'}
+                    </Table.Cell>
+                  </Table.Row>
+                ))}
+              </Table.Body>
+            </Table.Root>
+          </Table.ScrollArea>
         </Section>
 
         {/* Заявка на связь (этап 5.7) */}
@@ -428,7 +434,7 @@ function ForProfessionalsView({ locale }: { locale: string }) {
         <Box w="100%" textAlign="center" pt={4}>
           <TouchLink
             href={`/${locale}`}
-            color="blue.500"
+            color="brand.fg"
             fontWeight="bold"
             display="inline-flex"
             justifyContent="center"

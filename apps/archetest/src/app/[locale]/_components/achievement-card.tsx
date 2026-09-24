@@ -43,7 +43,7 @@ export function AchievementCard({ code, unlocked, unlockedAt }: AchievementCardP
             {new Date(unlockedAt).toLocaleDateString(isRu ? 'ru-RU' : 'en-US')}
           </Text>
         )}
-        <Text fontSize="xs" color="blue.500" fontWeight="medium">
+        <Text fontSize="xs" color="brand.fg" fontWeight="medium">
           +{def.xpReward} XP
         </Text>
       </VStack>

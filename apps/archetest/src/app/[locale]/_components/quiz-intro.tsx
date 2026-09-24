@@ -12,6 +12,7 @@ import { PERSONALITY_TYPES } from '../_data/personality-types'
 import { DisclaimerConsentCheckbox, DisclaimerSummary } from './disclaimer-consent'
 import { PersonalityRadarChart } from './personality-radar-chart'
 import { ProfileDetails } from './profile-details'
+import { STICKY_BAR_BLEED } from './sticky-bar-bleed'
 
 interface QuizIntroProps {
   onStart: () => void
@@ -105,12 +106,12 @@ export function QuizIntro({ onStart, progress, initialDisclaimerAccepted }: Quiz
                     ? `Пройдено: ${progress!.totalAnswered} из ${progress!.totalQuestions} вопросов`
                     : `Completed: ${progress!.totalAnswered} of ${progress!.totalQuestions} questions`}
                 </Text>
-                <Text fontSize="sm" fontWeight="bold" color="blue.500">
+                <Text fontSize="sm" fontWeight="bold" color="brand.fg">
                   {progress!.coveragePercent}%
                 </Text>
               </HStack>
 
-              <Progress.Root value={progress!.coveragePercent} size="sm" colorPalette="blue" w="100%">
+              <Progress.Root value={progress!.coveragePercent} size="sm" colorPalette="brand" w="100%">
                 <Progress.Track>
                   <Progress.Range />
                 </Progress.Track>
@@ -127,7 +128,7 @@ export function QuizIntro({ onStart, progress, initialDisclaimerAccepted }: Quiz
                   </Text>
                 )
                 : (
-                  <Text fontSize="xs" color="green.500" fontWeight="bold">
+                  <Text fontSize="xs" color="success.fg" fontWeight="bold">
                     {isRu
                       ? '🎉 Вы ответили на все доступные вопросы!'
                       : '🎉 You have answered all available questions!'}
@@ -172,8 +173,8 @@ export function QuizIntro({ onStart, progress, initialDisclaimerAccepted }: Quiz
             {confidenceData && (
               <Text fontSize="xs" color="fg.muted" maxW="lg">
                 {isRu
-                  ? 'Серые секторы на диаграмме — шкалы с недостаточным количеством ответов. Пройдите ещё вопросов для повышения точности.'
-                  : 'Gray sectors on the chart — scales with insufficient answers. Complete more questions to improve accuracy.'}
+                  ? 'Бледные коды на диаграмме — шкалы с недостаточным количеством ответов. Пройдите ещё вопросов для повышения точности.'
+                  : 'Faded codes on the chart — scales with insufficient answers. Complete more questions to improve accuracy.'}
               </Text>
             )}
             {progress?.cumulativeScores && (
@@ -188,24 +189,35 @@ export function QuizIntro({ onStart, progress, initialDisclaimerAccepted }: Quiz
       </VStack>
 
       {/* Липкая панель: чекбокс согласия (пока не принято) + CTA, всегда вместе на экране (UX-фикс 2026-07-29) */}
-      <StickyActionBar bg="bg" mx={{ base: -4, md: 0 }}>
+      <StickyActionBar bg="bg" {...STICKY_BAR_BLEED}>
         <VStack gap={3} w="100%">
           {!disclaimerAccepted && (
             <DisclaimerConsentCheckbox accepted={disclaimerAccepted} onChange={setDisclaimerAccepted} isRu={isRu} />
           )}
+          {
+            /* На телефоне кнопки делят ширину поровну (flex: 1): прежний `w=100%` у первой
+              выталкивал «Мой профиль» за край экрана и давал горизонтальный скролл */
+          }
           <HStack gap={3} justify="center" w="100%">
             <Button
               size="lg"
-              colorPalette="blue"
-              w={{ base: '100%', sm: 'auto' }}
-              minW={{ sm: '14rem' }}
+              colorPalette="brand"
+              flex={{ base: '1', sm: 'initial' }}
+              minW={{ base: 0, sm: '14rem' }}
               onClick={onStart}
               disabled={!disclaimerAccepted}
             >
               {hasProgress ? (isRu ? 'Продолжить тест' : 'Continue Test') : t('start')}
             </Button>
             {hasCumulativeScores && (
-              <Button size="lg" variant="outline" onClick={() => setShowProfile(!showProfile)}>
+              <Button
+                size="lg"
+                variant="outline"
+                flex={{ base: '1', sm: 'initial' }}
+                minW={0}
+                aria-expanded={showProfile}
+                onClick={() => setShowProfile(!showProfile)}
+              >
                 <LuChartNoAxesCombined />
                 {t('myProfile')}
               </Button>

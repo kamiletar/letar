@@ -188,11 +188,11 @@ export function QuizResults({
                   ? `Пройдено: ${progress.totalAnswered} из ${progress.totalQuestions} вопросов`
                   : `Completed: ${progress.totalAnswered} of ${progress.totalQuestions} questions`}
               </Text>
-              <Text fontSize="sm" fontWeight="bold" color="blue.500">
+              <Text fontSize="sm" fontWeight="bold" color="brand.fg">
                 {progress.coveragePercent}%
               </Text>
             </HStack>
-            <Progress.Root value={progress.coveragePercent} size="sm" colorPalette="blue">
+            <Progress.Root value={progress.coveragePercent} size="sm" colorPalette="brand">
               <Progress.Track>
                 <Progress.Range />
               </Progress.Track>
@@ -210,7 +210,7 @@ export function QuizResults({
         {/* Кнопка «Продолжить» (главная CTA если есть ещё вопросы) */}
         {onContinue && progress && progress.availableCount > 0 && (
           <VStack gap={1}>
-            <Button size="lg" colorPalette="blue" onClick={onContinue}>
+            <Button size="lg" colorPalette="brand" onClick={onContinue}>
               <LuArrowRight />
               {isRu
                 ? `Пройти ещё ${Math.min(50, progress.availableCount)} вопросов`
@@ -261,7 +261,7 @@ export function QuizResults({
 
         {/* Гексаграмма триад (этап 5.2) — только если сессия покрыла шкалы триад (банк v2) */}
         {HEXAGRAM_SCALE_CODES.some((code) => (scores[code] ?? 0) > 0) && (
-          <Box w="100%" p={6} borderRadius="lg" borderWidth="1px" borderColor="border">
+          <Box w="100%" p={{ base: 4, md: 6 }} borderRadius="lg" borderWidth="1px" borderColor="border">
             <HexagramChart
               scores={scores}
               title={isRu ? 'Архитектура личности' : 'Personality Architecture'}
@@ -323,13 +323,13 @@ export function QuizResults({
             <SimpleGrid columns={{ base: 1, md: 2 }} gap={2} mb={4}>
               {(['benefit1', 'benefit2', 'benefit3', 'benefit4'] as const).map((key) => (
                 <HStack key={key} gap={2} align="start">
-                  <Text color="blue.500">•</Text>
+                  <Text color="brand.fg">•</Text>
                   <Text fontSize="sm">{t(`guestBanner.${key}`)}</Text>
                 </HStack>
               ))}
             </SimpleGrid>
             <HStack gap={3}>
-              <Button asChild size="md" colorPalette="blue">
+              <Button asChild size="md" colorPalette="brand">
                 <Link href="/sign-in">{t('guestBanner.signIn')}</Link>
               </Button>
               <Button asChild size="md" variant="outline">
@@ -347,7 +347,7 @@ export function QuizResults({
           {onContinue && progress && progress.availableCount > 0
             ? (
               <>
-                <Button size="lg" colorPalette="blue" onClick={onContinue}>
+                <Button size="lg" colorPalette="brand" onClick={onContinue}>
                   <LuArrowRight />
                   {isRu
                     ? `Пройти ещё ${Math.min(50, progress.availableCount)} вопросов`
@@ -359,7 +359,7 @@ export function QuizResults({
               </>
             )
             : (
-              <Button size="lg" colorPalette="blue" onClick={onRestart}>
+              <Button size="lg" colorPalette="brand" onClick={onRestart}>
                 {t('results.retake')}
               </Button>
             )}
@@ -394,8 +394,17 @@ function LowConfidenceWarnings({
   }
 
   return (
-    <Box w="100%" p={4} borderRadius="lg" bg="orange.50/5" borderWidth="1px" borderColor="orange.200">
-      <Text fontSize="sm" fontWeight="bold" color="orange.500" mb={2}>
+    <Box
+      w="100%"
+      p={4}
+      borderRadius="lg"
+      bg="bg.subtle"
+      borderWidth="1px"
+      borderColor="border"
+      borderLeftWidth="3px"
+      borderLeftColor="warning.solid"
+    >
+      <Text fontSize="sm" fontWeight="bold" color="warning.fg" mb={2}>
         {isRu ? '⚠ Шкалы с недостаточной точностью' : '⚠ Scales with insufficient accuracy'}
       </Text>
       <Text fontSize="xs" color="fg.muted" mb={2}>
@@ -410,12 +419,11 @@ function LowConfidenceWarnings({
             px={2}
             py={1}
             borderRadius="md"
-            bg={confidence[type.code] === 'insufficient' ? 'gray.100/10' : 'orange.100/10'}
             borderWidth="1px"
-            borderColor={confidence[type.code] === 'insufficient' ? 'gray.300' : 'orange.300'}
+            borderColor={confidence[type.code] === 'insufficient' ? 'border.emphasized' : 'warning.emphasized'}
             borderStyle={confidence[type.code] === 'insufficient' ? 'dashed' : 'solid'}
           >
-            <Text fontSize="xs" color={confidence[type.code] === 'insufficient' ? 'fg.subtle' : 'orange.500'}>
+            <Text fontSize="xs" color={confidence[type.code] === 'insufficient' ? 'fg.muted' : 'warning.fg'}>
               {isRu ? type.label : type.labelEn} {isRu ? type.archetype : type.archetypeEn}
             </Text>
           </Box>

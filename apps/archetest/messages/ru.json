@@ -16,7 +16,15 @@
     "cabinet": "Кабинет",
     "settings": "Настройки",
     "menu": "Меню",
-    "theme": "Тема"
+    "theme": "Тема",
+    "close": "Закрыть меню",
+    "language": "Язык",
+    "themeLight": "Светлая",
+    "themeSystem": "Авто",
+    "themeDark": "Тёмная",
+    "toggleTheme": "Переключить тему",
+    "highContrast": "Высокий контраст",
+    "cookieSettings": "Настройки cookie"
   },
   "offlineBanner": {
     "title": "Экспресс-тест без интернета",

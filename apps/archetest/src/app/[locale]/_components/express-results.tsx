@@ -184,7 +184,7 @@ export function ExpressResults({ scores, seed, answers, isAuthenticated, onRetak
                 <Text fontSize="sm" color="fg.muted">
                   {t('fullTestDescription')}
                 </Text>
-                <Button asChild colorPalette="blue" size="sm">
+                <Button asChild colorPalette="brand" size="sm">
                   <Link href="/">
                     {t('fullTestCta')}
                     <Icon>

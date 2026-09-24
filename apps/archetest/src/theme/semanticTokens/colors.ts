@@ -3,7 +3,12 @@ import { defineSemanticTokens } from '@chakra-ui/react'
 /**
  * Семантические цветовые токены для archetest
  *
- * Все токены имеют _light и _dark варианты
+ * Все токены имеют _light и _dark варианты.
+ *
+ * Тёмная шкала поверхностей идёт на шаг темнее, чем «зеркало» светлой: карточка
+ * `bg.subtle` — gray.800 над фоном gray.900. Раньше было gray.700, и приглушённый
+ * текст на карточках проваливал WCAG AA (fg.subtle на bg.subtle — 2.2:1, «Ловушка»
+ * в карточке черты почти не читалась). Аудит дизайна 2026-09-24.
  */
 export const semanticColors = defineSemanticTokens.colors({
   bg: {
@@ -14,13 +19,13 @@ export const semanticColors = defineSemanticTokens.colors({
       value: { _light: 'white', _dark: '{colors.gray.800}' },
     },
     subtle: {
-      value: { _light: '{colors.gray.100}', _dark: '{colors.gray.700}' },
+      value: { _light: '{colors.gray.100}', _dark: '{colors.gray.800}' },
     },
     muted: {
-      value: { _light: '{colors.gray.200}', _dark: '{colors.gray.600}' },
+      value: { _light: '{colors.gray.200}', _dark: '{colors.gray.700}' },
     },
     emphasized: {
-      value: { _light: '{colors.gray.300}', _dark: '{colors.gray.500}' },
+      value: { _light: '{colors.gray.300}', _dark: '{colors.gray.600}' },
     },
     inverted: {
       value: { _light: '{colors.gray.900}', _dark: 'white' },
@@ -37,8 +42,10 @@ export const semanticColors = defineSemanticTokens.colors({
     muted: {
       value: { _light: '{colors.gray.600}', _dark: '{colors.gray.400}' },
     },
+    // В тёмной теме gray.500 давал 3.7:1 на фоне и 3.1:1 на карточке — ниже AA для мелкого
+    // текста (дисклеймеры, подписи). gray.400 — 6.9:1 и 5.8:1 соответственно
     subtle: {
-      value: { _light: '{colors.gray.500}', _dark: '{colors.gray.500}' },
+      value: { _light: '{colors.gray.500}', _dark: '{colors.gray.400}' },
     },
     inverted: {
       value: { _light: 'white', _dark: '{colors.gray.900}' },

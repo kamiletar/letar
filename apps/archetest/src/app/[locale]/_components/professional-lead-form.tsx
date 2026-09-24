@@ -55,7 +55,7 @@ export function ProfessionalLeadForm({ isRu }: { isRu: boolean }) {
           <Checkbox.Control />
           <Checkbox.Label fontSize="sm">
             {isRu ? 'Я согласен с ' : 'I agree to the '}
-            <ChakraLink asChild color="blue.500" textDecoration="underline">
+            <ChakraLink asChild color="brand.fg" textDecoration="underline">
               <Link href="/privacy" target="_blank" rel="noopener noreferrer">
                 {isRu ? 'политикой обработки персональных данных' : 'personal data processing policy'}
               </Link>

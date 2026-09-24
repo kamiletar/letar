@@ -174,7 +174,7 @@ export default function SettingsPage() {
                   onKeyDown={(e) => e.key === 'Enter' && handleLink()}
                   flex={1}
                 />
-                <Button onClick={handleLink} loading={loading} colorPalette="blue">
+                <Button onClick={handleLink} loading={loading} colorPalette="brand">
                   <LuLink size={14} />
                   {t('link')}
                 </Button>

@@ -18,6 +18,7 @@ import { type ExpressAnswer, ExpressResults } from './express-results'
 import { IcebreakerCard } from './icebreaker-card'
 import { QuizProgressBar } from './quiz-progress-bar'
 import { QuizQuestionCard } from './quiz-question-card'
+import { STICKY_BAR_BLEED } from './sticky-bar-bleed'
 
 type ExpressState = 'intro' | 'quiz' | 'results'
 
@@ -258,7 +259,7 @@ export function ExpressContainer({ questions, isAuthenticated }: ExpressContaine
         </VStack>
 
         {/* Липкая панель: чекбокс согласия (пока не принято) + CTA, всегда вместе на экране */}
-        <StickyActionBar bg="bg" mx={{ base: -4, md: 0 }}>
+        <StickyActionBar bg="bg" {...STICKY_BAR_BLEED}>
           <VStack gap={3} w="100%">
             {!disclaimerAccepted && (
               <DisclaimerConsentCheckbox accepted={disclaimerAccepted} onChange={handleConsentChange} isRu={isRu} />

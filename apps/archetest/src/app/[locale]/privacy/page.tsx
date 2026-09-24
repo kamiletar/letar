@@ -31,7 +31,7 @@ interface Section {
 
 function buildSections(isRu: boolean): Section[] {
   const emailLink = (
-    <ChakraLink key="email" href={`mailto:${PRIVACY_EMAIL}`} color="blue.500" textDecoration="underline">
+    <ChakraLink key="email" href={`mailto:${PRIVACY_EMAIL}`} color="brand.fg" textDecoration="underline">
       {PRIVACY_EMAIL}
     </ChakraLink>
   )

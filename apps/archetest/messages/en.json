@@ -16,7 +16,15 @@
     "cabinet": "Cabinet",
     "settings": "Settings",
     "menu": "Menu",
-    "theme": "Theme"
+    "theme": "Theme",
+    "close": "Close menu",
+    "language": "Language",
+    "themeLight": "Light",
+    "themeSystem": "Auto",
+    "themeDark": "Dark",
+    "toggleTheme": "Toggle theme",
+    "highContrast": "High contrast",
+    "cookieSettings": "Cookie settings"
   },
   "offlineBanner": {
     "title": "Express test without internet",

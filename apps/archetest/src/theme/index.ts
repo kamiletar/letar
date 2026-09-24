@@ -24,6 +24,15 @@ const archetestConfig = defineConfig({
   },
   globalCss: {
     ...pressableConfig.globalCss,
+    // Отказ от авто-затемнения браузера («Тёмный режим для сайтов» в Brave и Chrome на
+    // Android). Он перекрашивает страницу, объявившую `color-scheme: light`, и светлая тема
+    // становится неотличима от тёмной — ровно так и выглядела жалоба «темы не различаются»
+    // (аудит 2026-09-24). Ключевое слово `only` запрещает браузеру подменять схему: у сайта
+    // своя тёмная тема, автоматическая инверсия ей только мешает (ломает цвета диаграмм).
+    // Поэтому next-themes не пишет инлайновый `color-scheme` (`enableColorScheme={false}`
+    // в providers.tsx) — инлайновый стиль перебил бы это правило.
+    'html.light': { colorScheme: 'only light' },
+    'html.dark': { colorScheme: 'dark' },
     // Высококонтрастный режим (этап 5.4, outdoor/exhibition use):
     // усиливаем приглушённый текст и границы для читаемости при ярком свете.
     // Переключается хуком useHighContrast (атрибут data-contrast на <html>).

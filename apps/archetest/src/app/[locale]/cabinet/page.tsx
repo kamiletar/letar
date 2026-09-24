@@ -71,7 +71,7 @@ export default function CabinetPage() {
                 <Heading size="lg">{t('title')}</Heading>
               </HStack>
               <Text>{t('becomePsychologistDesc')}</Text>
-              <Button colorPalette="blue" onClick={handleBecomePsychologist} loading={becomingPsychologist}>
+              <Button colorPalette="brand" onClick={handleBecomePsychologist} loading={becomingPsychologist}>
                 <LuBriefcase size={16} />
                 {t('becomePsychologist')}
               </Button>

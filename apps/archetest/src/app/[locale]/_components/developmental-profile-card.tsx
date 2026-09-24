@@ -67,9 +67,9 @@ export function DevelopmentalProfileCard({
             <Heading size="md">
               {rank !== undefined && `${rank}. `}
               {label}{' '}
-              <Text as="span" fontWeight="normal">
-                {archetype}
-              </Text>
+              <Box asChild fontWeight="normal">
+                <span>{archetype}</span>
+              </Box>
             </Heading>
             {type.beta && (
               <Badge colorPalette="purple" variant="subtle" size="sm">
@@ -82,9 +82,9 @@ export function DevelopmentalProfileCard({
               </Text>
             )}
             {confidenceLabel && (
-              <Text fontSize="xs" color="white" bg="orange.500" px={1.5} py={0.5} borderRadius="sm" fontWeight="medium">
+              <Badge colorPalette="warning" variant="subtle" size="sm">
                 {confidenceLabel}
-              </Text>
+              </Badge>
             )}
           </HStack>
 
@@ -92,7 +92,7 @@ export function DevelopmentalProfileCard({
             <HStack gap={2} mt={-3} align="baseline">
               <Text
                 fontSize="sm"
-                color={score >= 60 ? 'red.500' : score >= 40 ? 'orange.500' : 'fg.muted'}
+                color={score >= 60 ? 'error.fg' : score >= 40 ? 'warning.fg' : 'fg.muted'}
                 fontWeight={score >= 60 ? 'bold' : 'normal'}
               >
                 {score}%
@@ -111,7 +111,7 @@ export function DevelopmentalProfileCard({
           {/* Блок 1: Суперсила */}
           {superpower && (
             <Box>
-              <HStack gap={2} mb={2} color="green.500">
+              <HStack gap={2} mb={2} color="success.fg">
                 <LuSparkles />
                 <Heading size="sm">{isRu ? 'Суперсила' : 'Superpower'}</Heading>
               </HStack>
@@ -123,12 +123,13 @@ export function DevelopmentalProfileCard({
 
           {/* Блок 2: Ловушка */}
           {trap && (
-            <Box p={3} bg="bg.subtle" borderRadius="md" borderLeft="3px solid" borderLeftColor="orange.400">
-              <HStack gap={2} mb={2} color="orange.500">
+            <Box p={3} bg="bg.subtle" borderRadius="md" borderLeft="3px solid" borderLeftColor="warning.solid">
+              <HStack gap={2} mb={2} color="warning.fg">
                 <LuShieldAlert />
                 <Heading size="sm">{isRu ? 'Ловушка' : 'The trap'}</Heading>
               </HStack>
-              <Text fontSize="sm" lineHeight="tall" color="fg.subtle">
+              {/* fg.muted, не fg.subtle: на карточке bg.subtle приглушённый текст проваливал AA */}
+              <Text fontSize="sm" lineHeight="tall" color="fg.muted">
                 {replaceTypeCodes(trap, isRu, showClinical)}
               </Text>
             </Box>
@@ -137,21 +138,21 @@ export function DevelopmentalProfileCard({
           {/* Блок 3: Практики */}
           {practices.length > 0 && (
             <Box>
-              <HStack gap={2} mb={3} color="blue.500">
+              <HStack gap={2} mb={3} color="info.fg">
                 <LuTarget />
                 <Heading size="sm">{isRu ? 'Практики' : 'Practices'}</Heading>
               </HStack>
               <VStack align="stretch" gap={3}>
                 {practices.map((practice, i) => (
                   <HStack key={i} align="start" gap={3}>
-                    <Text color="blue.500" fontWeight="bold" fontSize="sm" lineHeight="tall">
+                    <Text color="info.fg" fontWeight="bold" fontSize="sm" lineHeight="tall">
                       {i + 1}.
                     </Text>
                     <Box>
                       <Text fontSize="sm" lineHeight="tall">
                         {isRu ? practice.text : practice.textEn}
                       </Text>
-                      <Badge mt={1} colorPalette="blue" variant="surface" size="sm">
+                      <Badge mt={1} colorPalette="info" variant="surface" size="sm">
                         {isRu ? PRACTICE_METHOD_LABELS[practice.method].ru : PRACTICE_METHOD_LABELS[practice.method].en}
                       </Badge>
                     </Box>

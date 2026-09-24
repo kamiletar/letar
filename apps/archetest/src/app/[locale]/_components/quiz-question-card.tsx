@@ -84,7 +84,7 @@ export function QuizQuestionCard({
               key={opt.originalIndex}
               data-testid="quiz-option"
               variant={isSelected ? 'solid' : 'outline'}
-              colorPalette={isSelected ? 'blue' : 'gray'}
+              colorPalette={isSelected ? 'brand' : 'gray'}
               size="lg"
               minH="56px"
               py={4}

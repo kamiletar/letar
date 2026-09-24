@@ -3,6 +3,8 @@
 import { Box, Button, Container, Heading, SimpleGrid, Text, VStack } from '@chakra-ui/react'
 import { Pressable, StickyActionBar } from '@letar/ui'
 
+import { STICKY_BAR_BLEED } from './sticky-bar-bleed'
+
 export interface MoodValue {
   /** 1 = негативная, 2 = нейтральная, 3 = позитивная */
   valence: number
@@ -90,7 +92,7 @@ export function MoodCheckIn({ onSubmit, onSkip, isRu }: MoodCheckInProps) {
          * «Пропустить» перехватывала ссылка «Подробнее в политике ПДн» из баннера).
          */
       }
-      <StickyActionBar bg="bg" mx={{ base: -4, md: 0 }} contentProps={{ justify: 'center' }}>
+      <StickyActionBar bg="bg" {...STICKY_BAR_BLEED} contentProps={{ justify: 'center' }}>
         <Button variant="ghost" size="sm" onClick={onSkip}>
           {isRu ? 'Пропустить' : 'Skip'}
         </Button>
