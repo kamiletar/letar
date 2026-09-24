@@ -94,6 +94,64 @@ TanStack Query (`{ data, isLoading, error }`):
 />
 ```
 
+## Создание записи из поля (`onCreate`)
+
+**API:** `onCreate` и `createLabel` у `Form.Field.Select` и `Form.Field.Combobox`
+
+Когда нужной записи справочника ещё нет, пользователь создаёт её прямо из поля, не покидая форму.
+Библиотека не рисует окно создания: приложение открывает своё окно (или вызывает свой Server
+Action) и возвращает созданную запись.
+
+```tsx
+<Form.Field.Select
+  name="categoryId"
+  options={categories}
+  onCreate={async () => {
+    const created = await openCategoryDialog()
+    return created ? { label: created.name, value: created.id } : null
+  }}
+/>
+
+<Form.Field.Combobox
+  name="supplierId"
+  options={suppliers}
+  onCreate={async (name) => {
+    const created = await openSupplierDialog({ name })
+    return created ? { label: created.name, value: created.id } : null
+  }}
+/>
+```
+
+| Проп          | Описание                                                                                                                                                             |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `onCreate`    | `(search: string) => Promise<CreatedOption \| null>`, где `CreatedOption` — `{ label: string, value: string \| number }`. У Select `search` пустая, у Combobox — введённый текст |
+| `createLabel` | Текст пункта после «+ ». В Chakra-скине по умолчанию берётся из `FormI18nProvider` («Добавить…» / «Add…»)                                                            |
+
+**Как ведёт себя пункт создания**
+
+- **Select.** Последним пунктом списка стоит «+ Добавить…». Выбор пункта вызывает `onCreate('')`.
+- **Combobox.** Пока в поиске есть текст и ни одна подпись не совпала с ним точно (без учёта
+  регистра), список заканчивается пунктом «+ Добавить "текст"». Выбор пункта вызывает
+  `onCreate(текст)`. Работает и со статическими `options`, и с `useQuery` (в Chakra-скине).
+- **Результат.** Вернулась запись `{ label, value }` — она добавляется в список и выбирается.
+  Вернулся `null` (пользователь закрыл окно) — ничего не меняется, а Combobox сохраняет введённый
+  текст поиска.
+- **Служебное значение.** Значение пункта создания в данные формы не попадает никогда.
+- **Ошибки.** Исключение из `onCreate` не проглатывается: оно всплывает как необработанный
+  reject. Ловите его в самом колбэке и показывайте своё сообщение.
+
+**Время жизни созданной записи.** Она живёт, пока поле смонтировано. Если позже список
+`options` приложения (например, после перезагрузки справочника) уже содержит запись с тем же
+`value`, побеждает запись приложения — дубля не будет.
+
+**Обёртки `createForm`.** Для `extraSelects`, `lazySelects`, `extraComboboxes` и `lazyComboboxes`
+компонент-обёртка приложения должен передавать `onCreate` внутрь поля (через spread пропсов),
+иначе пункт создания не появится.
+
+**Скины.** Реализовано в Chakra (`@letar/forms`) и shadcn (`@letar/forms-shadcn`, только
+статические `options`; текст пункта по умолчанию «Добавить…»). В `@letar/forms-vue`,
+`@letar/forms-vue-shadcn` и `@letar/forms-angular` пока не реализовано.
+
 ## RadioGroup
 
 **API:** `Form.Field.RadioGroup`

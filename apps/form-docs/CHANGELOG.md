@@ -2,6 +2,15 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.6.15] - 2026-09-24
+
+### Added
+
+- Гайд `fields/select` (en/ru): раздел «Создание записи из поля (`onCreate`)» — пропсы
+  `onCreate`/`createLabel`, поведение пункта у Select и Combobox, результат `null`, время жизни
+  созданной опции и правило «без дубля», проброс через обёртки `createForm`, статус скинов.
+  Интерактивное демо `/demo/select` получило Select с `onCreate`.
+
 ## [0.6.14] - 2026-09-21
 
 ### Added

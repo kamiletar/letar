@@ -55,6 +55,10 @@
       `forms-vue-shadcn` как живой кейс, не причёсанный reference постфактум)
       Фаза 7.8 → Поток 2 `libs/forms/PLAN.md`, задача от координатора `QuietRidge` (msg #61).
 
+## P8 — onCreate у Select/Combobox ✅ (v0.6.15)
+
+- [x] `fields/select.mdx` + `.ru.mdx`: раздел `onCreate`; демо `/demo/select` с примером создания
+
 ## P7 — переключатели Framework × Skin ⏳ (спроектировано 2026-08-13, реализация не начата)
 
 **Запросил:** Ками напрямую (через координатора `QuietRidge`, 2026-08-13).

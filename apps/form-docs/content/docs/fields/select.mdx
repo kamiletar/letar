@@ -114,6 +114,63 @@ input even though the value is set:
 />
 ```
 
+## Creating a record from the field (`onCreate`)
+
+**API:** `onCreate` and `createLabel` on `Form.Field.Select` and `Form.Field.Combobox`
+
+When the needed dictionary record does not exist yet, the user creates it right from the field
+without leaving the form. The library does not render the creation dialog: your app opens its own
+dialog (or calls its own Server Action) and returns the created record.
+
+```tsx
+<Form.Field.Select
+  name="categoryId"
+  options={categories}
+  onCreate={async () => {
+    const created = await openCategoryDialog()
+    return created ? { label: created.name, value: created.id } : null
+  }}
+/>
+
+<Form.Field.Combobox
+  name="supplierId"
+  options={suppliers}
+  onCreate={async (name) => {
+    const created = await openSupplierDialog({ name })
+    return created ? { label: created.name, value: created.id } : null
+  }}
+/>
+```
+
+| Prop          | Description                                                                                                                                                      |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `onCreate`    | `(search: string) => Promise<CreatedOption \| null>`, where `CreatedOption` is `{ label: string, value: string \| number }`. For Select `search` is empty, for Combobox it is the typed text |
+| `createLabel` | Text of the item after "+ ". The Chakra skin defaults to the `FormI18nProvider` string ("Add…" / "Добавить…")                                                    |
+
+**How the create item behaves**
+
+- **Select.** The last list item is "+ Add…". Picking it calls `onCreate('')`.
+- **Combobox.** While the search text is non-empty and no option label equals it exactly
+  (case-insensitive), the list ends with a `+ Add "text"` item. Picking it calls `onCreate(text)`.
+  Works with static `options` and with `useQuery` (Chakra skin).
+- **Result.** A returned `{ label, value }` is added to the list and selected. A returned `null`
+  (the user closed the dialog) changes nothing, and the Combobox keeps the search text.
+- **Service value.** The value of the create item never reaches the form data.
+- **Errors.** An exception thrown by `onCreate` is not swallowed: it surfaces as an unhandled
+  rejection. Catch it inside the callback and show your own message.
+
+**Lifetime of the created record.** It lives while the field is mounted. If the app's own
+`options` later contain a record with the same `value` (for example after the dictionary was
+revalidated), the app's option wins and there is no duplicate.
+
+**`createForm` wrappers.** For `extraSelects`, `lazySelects`, `extraComboboxes` and
+`lazyComboboxes` the app's wrapper component must forward `onCreate` to the inner field (spread
+the props), otherwise the create item does not appear.
+
+**Skins.** Implemented in Chakra (`@letar/forms`) and shadcn (`@letar/forms-shadcn`, static
+`options` only; the default item text is "Добавить…"). Not implemented yet in
+`@letar/forms-vue`, `@letar/forms-vue-shadcn` and `@letar/forms-angular`.
+
 ## RadioGroup
 
 **API:** `Form.Field.RadioGroup`
