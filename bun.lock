@@ -534,7 +534,7 @@
     },
     "apps/archetest": {
       "name": "@letar/archetest",
-      "version": "0.28.0",
+      "version": "0.28.1",
       "dependencies": {
         "@letar/env-load": "workspace:*",
         "@letar/forms": "workspace:*",
@@ -1128,7 +1128,7 @@
     },
     "libs/chakra-provider": {
       "name": "@letar/chakra-provider",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "dependencies": {
         "@letar/hooks": "workspace:*",
       },

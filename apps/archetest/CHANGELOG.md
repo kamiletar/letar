@@ -5,6 +5,13 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 версионирование следует [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.28.1] - 2026-09-24
+
+### Changed
+
+- Мобильное меню: локальная копия `ThemeModeSelect` заменена общим `ColorModeSelect` из
+  `@letar/chakra-provider` 0.4.0 (`labels` из next-intl, `fullWidth`). Поведение прежнее.
+
 ## [0.28.0] - 2026-09-24
 
 Аудит дизайна: светлая/тёмная тема, мобильное меню, диаграммы.

@@ -238,6 +238,8 @@ function Settings() {
       <ColorModeSelect />
       {/* или только иконки */}
       <ColorModeSelect iconOnly />
+      {/* свои подписи (i18n) и на всю ширину */}
+      <ColorModeSelect fullWidth labels={{ light: 'Light', system: 'Auto', dark: 'Dark' }} />
     </div>
   )
 }
@@ -245,9 +247,13 @@ function Settings() {
 
 **Props:**
 
-| Prop       | Тип       | Описание                                  |
-| ---------- | --------- | ----------------------------------------- |
-| `iconOnly` | `boolean` | Показывать только иконки (default: false) |
+| Prop        | Тип                                  | Описание                                                            |
+| ----------- | ------------------------------------ | ------------------------------------------------------------------- |
+| `iconOnly`  | `boolean`                            | Показывать только иконки (default: false); подпись уходит в `title` |
+| `labels`    | `Partial<Record<ColorMode, string>>` | Подписи режимов; не заданные — русские «Светлая / Система / Тёмная» |
+| `fullWidth` | `boolean`                            | Растянуть на всю ширину, сегменты поровну (default: false)          |
+
+Остальные пропсы уходят в `SegmentGroup.Root` (например, `aria-label`).
 
 ## Зависимости
 

@@ -15,27 +15,16 @@ import {
   HStack,
   IconButton,
   Portal,
-  SegmentGroup,
   Separator,
   Switch,
   Text,
   VStack,
 } from '@chakra-ui/react'
-import { type ColorMode, useColorMode } from '@letar/chakra-provider'
+import { ColorModeSelect } from '@letar/chakra-provider'
 import { createConsentConfig, MobileAuthSection, Pressable } from '@letar/ui'
 import { useTranslations } from 'next-intl'
 import { type ComponentType, type ReactNode, useState } from 'react'
-import {
-  LuBriefcaseMedical,
-  LuCookie,
-  LuGraduationCap,
-  LuMenu,
-  LuMonitor,
-  LuMoon,
-  LuSun,
-  LuX,
-  LuZap,
-} from 'react-icons/lu'
+import { LuBriefcaseMedical, LuCookie, LuGraduationCap, LuMenu, LuX, LuZap } from 'react-icons/lu'
 
 import { logoutAction } from '@/app/_actions/auth.actions'
 import { useHighContrast } from '@/app/_hooks/use-high-contrast'
@@ -95,46 +84,6 @@ function SettingRow({ label, children }: { label: string; children: ReactNode })
       </Text>
       {children}
     </HStack>
-  )
-}
-
-/**
- * Выбор темы из трёх режимов с подписями. Иконка-переключатель в меню (прежний вариант)
- * не показывала, какая тема выбрана и что значит «системная», — отсюда путаница
- * «темы не различаются» (аудит 2026-09-24).
- */
-function ThemeModeSelect() {
-  const t = useTranslations('nav')
-  const { colorMode, setColorMode } = useColorMode()
-
-  const items: Array<{ value: ColorMode; label: string; icon: ReactNode }> = [
-    { value: 'light', label: t('themeLight'), icon: <LuSun /> },
-    { value: 'system', label: t('themeSystem'), icon: <LuMonitor /> },
-    { value: 'dark', label: t('themeDark'), icon: <LuMoon /> },
-  ]
-
-  return (
-    <SegmentGroup.Root
-      size="sm"
-      w="full"
-      value={colorMode}
-      onValueChange={(e) => setColorMode(e.value as ColorMode)}
-      aria-label={t('theme')}
-    >
-      <SegmentGroup.Indicator />
-      <SegmentGroup.Items
-        flex="1"
-        items={items.map((item) => ({
-          value: item.value,
-          label: (
-            <HStack gap={1.5} justify="center">
-              {item.icon}
-              {item.label}
-            </HStack>
-          ),
-        }))}
-      />
-    </SegmentGroup.Root>
   )
 }
 
@@ -217,7 +166,11 @@ export function MobileDrawer() {
                   <Text fontSize="sm" color="fg.muted" mb={2}>
                     {t('theme')}
                   </Text>
-                  <ThemeModeSelect />
+                  <ColorModeSelect
+                    fullWidth
+                    aria-label={t('theme')}
+                    labels={{ light: t('themeLight'), system: t('themeSystem'), dark: t('themeDark') }}
+                  />
                 </Box>
                 <SettingRow label={t('language')}>
                   <LanguageSwitcher />
