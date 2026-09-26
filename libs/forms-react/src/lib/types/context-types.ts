@@ -1,7 +1,7 @@
 'use client'
 
 import type { AddressProvider } from '@letar/forms-core/address'
-import type { PendingRegistry } from '@letar/forms-core/uikit'
+import type { DependentsRegistry, PendingRegistry } from '@letar/forms-core/uikit'
 import type { $ZodType } from 'zod/v4/core'
 
 /**
@@ -79,6 +79,11 @@ export interface DeclarativeFormContextValue {
    * обёртки) поля работают, но отправку не держат
    */
   pending?: PendingRegistry
+  /**
+   * Реестр зависимых полей (`dependsOn`, §18): очищает зависимое поле, когда пользователь сменил родителя.
+   * Ставит корень формы; `dependents.suppress(fn)` — записать значения без очистки (например «страна и город разом»)
+   */
+  dependents?: DependentsRegistry
   /**
    * Отправить форму с ожиданием подтверждения оптимистичных действий. Программная отправка должна идти через него,
    * а не через `form.handleSubmit()`, который реестр обходит

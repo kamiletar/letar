@@ -1,6 +1,6 @@
 'use client'
 
-import type { LoadSelectedFn } from '@letar/forms-core/uikit'
+import type { FieldDeps, LoadSelectedFn } from '@letar/forms-core/uikit'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { callLoader, isAbortError } from './abort-utils'
 
@@ -12,6 +12,8 @@ export interface UseSelectedLoaderOptions<TData> {
   /** Нужна ли догрузка сейчас: значения нет в текущих результатах и нет `initialLabel` */
   enabled: boolean
   onLoadError?: (error: unknown) => void
+  /** Значения родителей (`dependsOn`, §18) — уходят в `ctx.deps`; по умолчанию `{}`. Кэш по `value` от них не зависит */
+  deps?: FieldDeps
 }
 
 export interface UseSelectedLoaderResult<TData> {
@@ -21,6 +23,8 @@ export interface UseSelectedLoaderResult<TData> {
   /** Сбросить закэшированную запись значения — после `onUpdate` этой записи (прежняя остаётся до ответа) */
   invalidate: (value: string) => void
 }
+
+const NO_DEPS: FieldDeps = {}
 
 interface CacheEntry<TData> {
   data: TData | null
@@ -33,13 +37,15 @@ interface CacheEntry<TData> {
  * экране, пока не придёт новое. Отмена запроса — при смене значения и размонтировании.
  */
 export function useSelectedLoader<TData>(options: UseSelectedLoaderOptions<TData>): UseSelectedLoaderResult<TData> {
-  const { loadSelected, value, enabled, onLoadError } = options
+  const { loadSelected, value, enabled, onLoadError, deps = NO_DEPS } = options
 
   const loadRef = useRef(loadSelected)
   const onErrorRef = useRef(onLoadError)
+  const depsRef = useRef(deps)
   useEffect(() => {
     loadRef.current = loadSelected
     onErrorRef.current = onLoadError
+    depsRef.current = deps
   })
 
   const [cache, setCache] = useState<Record<string, CacheEntry<TData>>>({})
@@ -53,7 +59,7 @@ export function useSelectedLoader<TData>(options: UseSelectedLoaderOptions<TData
     }
     const controller = new AbortController()
     let stale = false
-    void callLoader(() => load(value, { signal: controller.signal })).then(
+    void callLoader(() => load(value, { signal: controller.signal, deps: depsRef.current })).then(
       (data) => {
         if (!stale) {
           setCache((prev) => ({ ...prev, [value]: { data, fresh: true } }))

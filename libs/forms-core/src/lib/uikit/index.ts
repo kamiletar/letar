@@ -48,6 +48,24 @@ export type {
   UpdateOptionHandler,
 } from './editable-options'
 
+// Зависимые (каскадные) поля: `dependsOn`, ключ зависимостей, реестр очистки зависимых (§18)
+export {
+  areDepsReady,
+  buildDeps,
+  createDependentsRegistry,
+  getValueAtPath,
+  isEmptyDepValue,
+  resolveDependsOn,
+  serializeDeps,
+} from './dependent-fields'
+export type {
+  DependentFieldProps,
+  DependentRegistration,
+  DependentsRegistry,
+  FieldDeps,
+  ResolvedDependency,
+} from './dependent-fields'
+
 // Реестр неподтверждённых оптимистичных действий формы: отправка ждёт его пустоты (§16.7)
 export { createPendingRegistry } from './pending-registry'
 export type { PendingRegistry, PendingRegistrySnapshot } from './pending-registry'

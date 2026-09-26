@@ -2,6 +2,7 @@
 
 import {
   type CreatedOption,
+  type FieldDeps,
   getOptionText,
   type OptionOverlayEntry,
   type PendingRegistry,
@@ -20,6 +21,8 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 export const DEFAULT_SETTLE_TIMEOUT = 30_000
 
 const PENDING_VALUE_PREFIX = '__letar_pending_'
+
+const NO_DEPS: FieldDeps = {}
 
 /** Опция, созданная полем: с `pending: true` она показана оптимистично и ещё не подтверждена сервером */
 export interface SelectionCreatedOption extends CreatedOption {
@@ -40,6 +43,14 @@ export interface UseSelectionActionsStateOptions {
   onSettleError?: (info: SettleErrorInfo) => void
   /** Мс до признания оптимистичного действия неподтверждённым; по умолчанию 30 000 */
   settleTimeout?: number
+  /** Значения родителей (`dependsOn`, §18): уходят в `ctx.deps` действий и в `SettleErrorInfo`; по умолчанию `{}` */
+  deps?: FieldDeps
+  /**
+   * Ключ зависимостей (`serializeDeps`). Смена — другой родитель: созданные опции, наложение правок и ожидающий
+   * выбор относились к списку прежнего родителя и сбрасываются; подтверждение действия, начатого при прежнем
+   * родителе, в поле уже не записывается (§18.6)
+   */
+  depsKey?: string
 }
 
 /** Что оптимистичный вызов показывает: подпись всегда, `value`/`data` — по обстоятельствам */
@@ -131,7 +142,7 @@ interface OptimisticSession {
  * (`null`, reject, таймаут) откатывает показанное и сообщает приложению — необработанного отказа нет.
  */
 export function useSelectionActionsState(
-  { appOptions, value, registry, onSettleError, settleTimeout = DEFAULT_SETTLE_TIMEOUT }:
+  { appOptions, value, registry, onSettleError, settleTimeout = DEFAULT_SETTLE_TIMEOUT, deps = NO_DEPS, depsKey = '' }:
     UseSelectionActionsStateOptions,
 ): SelectionActionsState {
   const [pending, setPending] = useState(false)
@@ -152,6 +163,8 @@ export function useSelectionActionsState(
   const registryRef = useRef(registry)
   const onSettleErrorRef = useRef(onSettleError)
   const settleTimeoutRef = useRef(settleTimeout)
+  const depsRef = useRef(deps)
+  const depsKeyRef = useRef(depsKey)
   const sessionsRef = useRef(new Set<OptimisticSession>())
   const tempCounterRef = useRef(0)
   useEffect(() => {
@@ -163,6 +176,8 @@ export function useSelectionActionsState(
     registryRef.current = registry
     onSettleErrorRef.current = onSettleError
     settleTimeoutRef.current = settleTimeout
+    depsRef.current = deps
+    depsKeyRef.current = depsKey
   })
 
   useEffect(() => {
@@ -182,6 +197,15 @@ export function useSelectionActionsState(
   const pendingSelection = held && held.from === currentValue ? held.temp : null
   // Снятие — «подстройка state при смене пропсов» прямо в рендере; `heldRef` догоняет в эффекте синхронизации выше
   if (held && held.from !== currentValue) {
+    setHeld(null)
+  }
+
+  // Другой родитель — другой список: то, что накопилось для прежнего, не показываем (подстройка state в рендере)
+  const [seenDepsKey, setSeenDepsKey] = useState(depsKey)
+  if (seenDepsKey !== depsKey) {
+    setSeenDepsKey(depsKey)
+    setCreatedOptions([])
+    setOverlayState([])
     setHeld(null)
   }
 
@@ -228,6 +252,15 @@ export function useSelectionActionsState(
     pendingRef.current = true
     setPending(true)
     setSettleFailure(null)
+    // Снимок зависимостей на момент начала действия: окно создания получает страну, отказ — страну прежнего списка
+    const startDeps = depsRef.current
+    const startDepsKey = depsKeyRef.current
+    const apply: typeof options.apply = (result, info) => {
+      // Родитель сменился, пока действие шло: результат относится к списку прежнего родителя — в поле не пишем
+      if (depsKeyRef.current === startDepsKey) {
+        options.apply(result, info)
+      }
+    }
     controlRef.current?.close()
     if (options.scope === 'option') {
       // Синхронно: результат не зависит от порядка `raf` списка и ловушки фокуса окна приложения
@@ -343,7 +376,7 @@ export function useSelectionActionsState(
           releaseHeld()
           if (mountedRef.current) {
             // Значение формы записывается ДО вердикта реестра: отправка в очереди стартует уже с настоящим value
-            options.apply(result as never, { optimistic: true, selectionHeld })
+            apply(result as never, { optimistic: true, selectionHeld })
           }
           resolveSettled(true)
         },
@@ -363,6 +396,7 @@ export function useSelectionActionsState(
             }
             const info: SettleErrorInfo = {
               kind,
+              deps: startDeps,
               preview: { label: previewNow.label, value: temp ?? fromValue, data: previewNow.data },
               reason,
               error,
@@ -395,6 +429,7 @@ export function useSelectionActionsState(
     // `optimistic` после завершения обработчика (забытый таймер, поздний колбэк) — мимо: подтверждать нечем
     let callDone = false
     const ctx: SelectionActionContext = {
+      deps: startDeps,
       optimistic: (preview) => {
         if (callDone || !mountedRef.current || session?.finished) {
           return
@@ -414,7 +449,7 @@ export function useSelectionActionsState(
         if (session) {
           session.resolve(result)
         } else if (mountedRef.current && result) {
-          options.apply(result, { optimistic: false, selectionHeld: false })
+          apply(result, { optimistic: false, selectionHeld: false })
         }
       } catch (error) {
         if (!session) {

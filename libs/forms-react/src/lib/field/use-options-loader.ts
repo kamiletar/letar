@@ -1,6 +1,6 @@
 'use client'
 
-import type { LoadContext, OptionsSourceProps } from '@letar/forms-core/uikit'
+import type { FieldDeps, LoadContext, OptionsSourceProps } from '@letar/forms-core/uikit'
 import { type DependencyList, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { callLoader, isAbortError } from './abort-utils'
 
@@ -13,13 +13,25 @@ export interface UseOptionsLoaderResult<TOption> {
   reload: () => void
 }
 
+export interface UseOptionsLoaderOptions {
+  /**
+   * При смене `deps` показывать прежние опции, пока идёт запрос (по умолчанию `true`). Для зависимых полей —
+   * `false`: опции прежнего родителя чужие, их нельзя выбрать. На `reload` прежние опции остаются всегда.
+   */
+  keepPrevious?: boolean
+  /** Значения родителей (`dependsOn`, §18) — уходят в `ctx.deps`; по умолчанию `{}` */
+  fieldDeps?: FieldDeps
+}
+
 interface Settled<TOption> {
   token: object
+  depsToken: object
   options: TOption[]
   error: unknown
 }
 
 const NO_OPTIONS: never[] = []
+const NO_FIELD_DEPS: FieldDeps = {}
 
 /**
  * Разовая загрузка списка промисом для Select и Combobox со статичными `options` (server action, `fetch`, SDK):
@@ -31,43 +43,47 @@ const NO_OPTIONS: never[] = []
 export function useOptionsLoader<TOption>(
   load: (ctx: LoadContext) => Promise<TOption[]>,
   deps: DependencyList,
+  { keepPrevious = true, fieldDeps = NO_FIELD_DEPS }: UseOptionsLoaderOptions = {},
 ): UseOptionsLoaderResult<TOption> {
   const loadRef = useRef(load)
+  const fieldDepsRef = useRef(fieldDeps)
   useEffect(() => {
     loadRef.current = load
+    fieldDepsRef.current = fieldDeps
   })
 
   const [nonce, setNonce] = useState(0)
   const [settled, setSettled] = useState<Settled<TOption> | null>(null)
   // Новый токен на каждую смену `deps`/`reload`: по нему различаем «запрос идёт» и «результат актуален»
   // eslint-disable-next-line react-hooks/exhaustive-deps -- список зависимостей задаёт вызывающий
-  const token = useMemo(() => ({}), [...deps, nonce])
+  const depsToken = useMemo(() => ({}), deps)
+  const token = useMemo(() => ({}), [depsToken, nonce])
 
   useEffect(() => {
     const controller = new AbortController()
     let stale = false
-    void callLoader(() => loadRef.current({ signal: controller.signal })).then(
+    void callLoader(() => loadRef.current({ signal: controller.signal, deps: fieldDepsRef.current })).then(
       (options) => {
         if (!stale) {
-          setSettled({ token, options, error: null })
+          setSettled({ token, depsToken, options, error: null })
         }
       },
       (error: unknown) => {
         if (stale || controller.signal.aborted || isAbortError(error)) {
           return
         }
-        setSettled((prev) => ({ token, options: prev?.options ?? NO_OPTIONS, error }))
+        setSettled((prev) => ({ token, depsToken, options: prev?.options ?? NO_OPTIONS, error }))
       },
     )
     return () => {
       stale = true
       controller.abort()
     }
-  }, [token])
+  }, [token, depsToken])
 
   const reload = useCallback(() => setNonce((value) => value + 1), [])
   const current = settled?.token === token
-  const options = settled?.options ?? NO_OPTIONS
+  const options = settled && (keepPrevious || settled.depsToken === depsToken) ? settled.options : NO_OPTIONS
   const loading = !current
   const fieldProps = useMemo(() => ({ options, loading }), [options, loading])
 

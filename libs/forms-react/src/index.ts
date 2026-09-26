@@ -11,6 +11,7 @@
 
 // Контекст декларативной формы
 export { DeclarativeFormContext, useDeclarativeForm, useDeclarativeFormOptional } from './lib/context/form-context'
+export { useCreateDependentsRegistry, useFormDependentsRegistry } from './lib/context/form-dependents'
 export {
   useCreatePendingRegistry,
   useFormPendingRegistry,
@@ -57,6 +58,14 @@ export type {
   UseAsyncSearchResult,
 } from './lib/field/use-async-search'
 export { useDebounce } from './lib/field/use-debounce'
+export { useDependentField, useFieldDeps } from './lib/field/use-dependent-field'
+export type {
+  DependentFieldState,
+  FieldDepsState,
+  UseDependentFieldOptions,
+  UseFieldDepsOptions,
+} from './lib/field/use-dependent-field'
+
 export { useEditIntentField } from './lib/field/use-edit-intent-field'
 export type { UseEditIntentFieldOptions, UseEditIntentFieldResult } from './lib/field/use-edit-intent-field'
 export type {
@@ -68,7 +77,7 @@ export type {
 export { useMaskField } from './lib/field/use-mask-field'
 export { useNodeLabelWarning } from './lib/field/use-node-label-warning'
 export { useOptionsLoader } from './lib/field/use-options-loader'
-export type { UseOptionsLoaderResult } from './lib/field/use-options-loader'
+export type { UseOptionsLoaderOptions, UseOptionsLoaderResult } from './lib/field/use-options-loader'
 export { usePromiseSearch } from './lib/field/use-promise-search'
 export type { UsePromiseSearchOptions, UsePromiseSearchResult } from './lib/field/use-promise-search'
 export { useResolvedFieldProps } from './lib/field/use-resolved-field-props'

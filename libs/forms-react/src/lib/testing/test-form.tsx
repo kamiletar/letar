@@ -3,6 +3,7 @@
 import { useForm } from '@tanstack/react-form'
 import type { ReactElement, ReactNode } from 'react'
 import { DeclarativeFormContext } from '../context/form-context'
+import { useCreateDependentsRegistry } from '../context/form-dependents'
 import { useCreatePendingRegistry, useFormPendingSubmit } from '../context/form-pending'
 
 /**
@@ -27,10 +28,21 @@ export function TestForm<TData extends Record<string, unknown>>(
     onFormReady?: (form: any) => void
   },
 ): ReactElement {
-  const form = useForm({ defaultValues })
+  const dependents = useCreateDependentsRegistry()
+  // Как у корня формы: form-level листенер сообщает реестру зависимостей о правке поля (§18.3)
+  const form = useForm({
+    defaultValues,
+    listeners: {
+      onChange: ({ fieldApi }) => dependents.handleFieldChange(fieldApi.name, fieldApi.state.value),
+    },
+  })
   onFormReady?.(form)
   const pending = useCreatePendingRegistry()
   const submit = useFormPendingSubmit(pending, form)
 
-  return <DeclarativeFormContext.Provider value={{ form, pending, submit }}>{children}</DeclarativeFormContext.Provider>
+  return (
+    <DeclarativeFormContext.Provider value={{ form, pending, submit, dependents }}>
+      {children}
+    </DeclarativeFormContext.Provider>
+  )
 }

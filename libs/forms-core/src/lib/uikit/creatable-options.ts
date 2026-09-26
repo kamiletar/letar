@@ -4,6 +4,8 @@
  * Отрисовка пункта и вызов `onCreate` остаются в скине.
  */
 
+import type { FieldDeps } from './dependent-fields'
+
 /**
  * Опция, которую `onCreate` возвращает приложению-поле: она добавляется в список и выбирается.
  * `data` — данные приложения для `renderOption`/`renderValue` (необязательные).
@@ -18,7 +20,12 @@ export interface CreatedOption<TData = unknown> {
  * Оптимистичный режим (§16.7): обработчик может показать результат сразу, до ответа сервера. Второй аргумент
  * `onCreate`/`onUpdate`; существующие обработчики его игнорируют.
  */
-export interface SelectionActionContext<TData = unknown> {
+export interface SelectionActionContext<TData = unknown, TDeps extends FieldDeps = FieldDeps> {
+  /**
+   * Значения родителей из `dependsOn` на момент начала действия (§18): окно создания города получает страну.
+   * Без `dependsOn` — `{}`.
+   */
+  deps: TDeps
   /**
    * Показать результат сразу, не дожидаясь сервера. Звать, когда ввод пользователя уже принят (окно закрыто),
    * до `await` мутации. `value` у create не передают — поле заведёт временный (только для UI, в форму не пишется).
@@ -32,9 +39,9 @@ export interface SelectionActionContext<TData = unknown> {
  * созданную запись либо `null`, если пользователь отказался. `search` — текст поиска Combobox;
  * у Select он пустой. `ctx.optimistic` — необязательный оптимистичный режим.
  */
-export type CreateOptionHandler<TData = unknown> = (
+export type CreateOptionHandler<TData = unknown, TDeps extends FieldDeps = FieldDeps> = (
   search: string,
-  ctx: SelectionActionContext<TData>,
+  ctx: SelectionActionContext<TData, TDeps>,
 ) => Promise<CreatedOption<TData> | null>
 
 /**

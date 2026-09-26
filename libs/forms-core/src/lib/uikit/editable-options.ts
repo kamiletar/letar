@@ -5,6 +5,7 @@
  */
 
 import { CREATE_OPTION_VALUE, isCreateOptionValue, type SelectionActionContext } from './creatable-options'
+import type { FieldDeps } from './dependent-fields'
 import { getOptionText } from './group-options'
 
 /** Что `onUpdate` возвращает полю */
@@ -20,9 +21,9 @@ export interface UpdatedOption<TData = unknown> {
  * Колбэк приложения: открывает своё окно правки (server action — на его стороне) и возвращает
  * сохранённую запись либо `null`, если пользователь отказался.
  */
-export type UpdateOptionHandler<TOption, TData = unknown> = (
+export type UpdateOptionHandler<TOption, TData = unknown, TDeps extends FieldDeps = FieldDeps> = (
   option: TOption,
-  ctx: SelectionActionContext<TData>,
+  ctx: SelectionActionContext<TData, TDeps>,
 ) => Promise<UpdatedOption<TData> | null>
 
 /** Вид действия поля: место под `'delete'` оставлено (см. PLAN.md, §4.6) */
@@ -32,8 +33,10 @@ export type SelectionActionKind = 'create' | 'edit'
 export type SettleErrorReason = 'rejected' | 'declined' | 'timeout'
 
 /** Что `onSettleError` получает, когда сервер не подтвердил показанное оптимистично (§16.7) */
-export interface SettleErrorInfo<TData = unknown> {
+export interface SettleErrorInfo<TData = unknown, TDeps extends FieldDeps = FieldDeps> {
   kind: SelectionActionKind
+  /** Значения родителей (`dependsOn`) на момент начала действия — для текста «город не сохранён для страны X» */
+  deps: TDeps
   /** Что было показано: у create `value` — временный, в форму он не попадал */
   preview: { label: string; value: string | number; data?: TData }
   /** `rejected` — throw, `declined` — `null` после `optimistic`, `timeout` — нет ответа за `settleTimeout` */
