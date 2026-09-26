@@ -1285,7 +1285,7 @@
     },
     "libs/forms": {
       "name": "@letar/forms",
-      "version": "2.21.0",
+      "version": "2.22.0",
       "dependencies": {
         "@letar/format-utils": "workspace:*",
         "@tanstack/react-table": "^9.2.4",
@@ -1338,7 +1338,7 @@
     },
     "libs/forms-core": {
       "name": "@letar/forms-core",
-      "version": "0.18.0",
+      "version": "0.19.0",
       "dependencies": {
         "@tanstack/table-core": "^9.1.2",
       },
@@ -1360,7 +1360,7 @@
     },
     "libs/forms-shadcn": {
       "name": "@letar/forms-shadcn",
-      "version": "0.42.0",
+      "version": "0.43.0",
       "devDependencies": {
         "@letar/eager-jsx-check": "workspace:*",
         "@letar/forms-core": "workspace:*",
