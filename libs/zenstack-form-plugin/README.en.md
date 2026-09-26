@@ -305,6 +305,49 @@ type-check time; the field simply ends up missing the intended metadata. As of v
 `nx zenstack:generate` prints a `console.warn` for each such case — naming the model/field, the
 unknown key itself, and the list of supported ones. It doesn't break the build, only warns.
 
+## `createForm` registry keys (v4.2.0)
+
+> Requires **`@letar/forms` >= 2.25.0**. With an older library the key is treated as an unknown
+> field type and silently rendered as a text field.
+
+A reference-data picker with its own create/edit dialog is an app component registered in
+`createForm` (`extraSelects`/`lazySelects`, `extraComboboxes`/`lazyComboboxes`, `extraListboxes`).
+The schema refers to it by a **key** in `form.fieldType`:
+
+```zmodel
+categoryId String
+  @meta("form.fieldType", "Select.WorkCategory")
+  @meta("form.props.createItem", true)
+```
+
+Key grammar: `^(Select|Combobox|Listbox)\.[A-Z][A-Za-z0-9]*$`. Built-in types (`tags`, `currency`, ...)
+are camelCase without a dot. A value with a dot that does not match the grammar (`Foo.X`,
+`Select.lower`, `Select.`) is a **`zenstack generate` error** naming `Model.field` and the reason.
+
+The plugin always writes `<output>/form-registry-keys.ts` (no imports) and re-exports it from
+`index.ts`: `formRegistryKeys` (`Select` / `Combobox` / `Listbox` -> unique sorted names,
+`as const`), the types `FormSelectKey` / `FormComboboxKey` / `FormListboxKey`, and
+`formRegistryUsages` (`'Select.WorkCategory': ['Work.categoryId', ...]`). Check in your `createForm`
+module that every key is registered (`FormRegistryCheck` comes from `@letar/forms` >= 2.25.0):
+
+```ts
+import type { FormComboboxKey, FormSelectKey } from '@/generated/form-schemas'
+import { createForm, type FormRegistryCheck } from '@letar/forms'
+
+export const AppForm = createForm({
+  lazySelects: { WorkCategory: () => import('./selects/work-category-select').then((m) => m.WorkCategorySelect) },
+  lazyComboboxes: {
+    Counterparty: () => import('./comboboxes/counterparty-combobox').then((m) => m.CounterpartyCombobox),
+  },
+})
+
+export const appFormRegistryCheck: FormRegistryCheck<typeof AppForm, FormSelectKey, FormComboboxKey> = true
+```
+
+Warnings (generation still succeeds): `form.relation.model` names a model missing from the schema;
+`form.relation.labelField` / `descriptionField` names a field the target model does not have; a
+registry key and `form.relation.*` on the same field (the key wins, `relation` is ignored).
+
 ## Auto-excluded Fields
 
 - `id` — primary keys
@@ -337,6 +380,7 @@ unknown key itself, and the list of supported ones. It doesn't break the build, 
 ```
 src/generated/form-schemas/
 ├── index.ts               # Re-exports all schemas
+├── form-registry-keys.ts  # createForm registry keys (always, since 4.2.0)
 ├── enums/
 │   └── RecipeType.form.ts # Enum schemas with labels
 ├── Recipe.form.ts         # Model schemas

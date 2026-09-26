@@ -1,5 +1,37 @@
 # Changelog
 
+## [4.2.0] - 2026-09-26
+
+> ⚠️ Ключи реестра требуют **`@letar/forms` ≥ 2.25.0**. Плагин версию форм не видит: с более старой
+> библиотекой ключ уходит в неизвестный `fieldType` и молча рисуется текстовым полем.
+
+### Added
+
+- **Ключи реестра `createForm` в `form.fieldType`** (этап Е, `libs/forms/PLAN.md` §17).
+  `@meta("form.fieldType", "Select.WorkCategory")` ссылается на компонент, зарегистрированный в
+  `extraSelects`/`lazySelects` (`Combobox` и `Listbox` — так же) инстанса `createForm`. Грамматика
+  `^(Select|Combobox|Listbox)\.[A-Z][A-Za-z0-9]*$`. Значение с точкой, не подходящее под неё
+  (`Foo.X`, `Select.lower`, `Select.`), — **ошибка `zenstack generate`** с `Модель.поле` и причиной;
+  встроенные типы (camelCase без точки) — как раньше. Регулярка своя: плагин не импортирует `@letar/*`,
+  `dependencies` остаются пустыми.
+- **`<output>/form-registry-keys.ts`** — пишется всегда, без опции и без импортов, реэкспортируется из
+  `index.ts`: `formRegistryKeys` (`Select`/`Combobox`/`Listbox` → уникальные отсортированные имена,
+  `as const`, пустые — `[]`), типы `FormSelectKey`/`FormComboboxKey`/`FormListboxKey` и
+  `formRegistryUsages` (`'Select.WorkCategory'` → `['Work.categoryId', …]`). Обход — по тем же
+  `model.declarations`, включая слитые импорты фрагментов `libs/*.zmodel`. Список нужен
+  `FormRegistryCheck` из `@letar/forms` ≥ 2.25.0.
+- **Предупреждения (не ошибки) по `form.relation.*`:** `form.relation.model` — нет такой модели в схеме;
+  `labelField`/`descriptionField` — у целевой модели нет такого поля (целевая — `relation.model`, без
+  него — тип поля-ссылки); ключ реестра и `form.relation.*` на одном поле — побеждает ключ, `relation`
+  игнорируется. Старые схемы продолжают генерироваться.
+- README: раздел «Ключи реестра `createForm`».
+
+### Fixed
+
+- **Двойной `fieldProps` в `.meta({ ui })`.** Если у поля были и `form.props.*`, и `form.relation.*`,
+  плагин писал ключ `fieldProps` дважды: TS1117, а в JS побеждал последний — `form.props.*`
+  молча терялись. Теперь один `fieldProps` со всеми значениями (`{ …props, relation }`).
+
 ## [4.1.3] - 2026-09-19
 
 ### Fixed

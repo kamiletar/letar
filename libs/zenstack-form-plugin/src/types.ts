@@ -103,7 +103,7 @@ export interface FormFieldMeta {
   /** UI props (everything else — passed to fieldProps) */
   props?: Record<string, unknown>
   /** Relation configuration */
-  relation?: { model?: string; labelField: string }
+  relation?: { model?: string; labelField: string; descriptionField?: string }
   /** (?)-подсказка рядом с лейблом → `ui.tooltip` (`@meta("form.tooltip.*", …)`) */
   tooltip?: FormFieldTooltip
   /** Exclude field from form */

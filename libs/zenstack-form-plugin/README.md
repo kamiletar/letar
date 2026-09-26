@@ -175,6 +175,7 @@ export type RecipeUpdateForm = z.infer<typeof RecipeUpdateFormSchema>
 | `form.placeholder`            | Placeholder                              | `@meta("form.placeholder", "Введите...")`   |
 | `form.description`            | Описание поля                            | `@meta("form.description", "Подсказка")`    |
 | `form.fieldType`              | Тип компонента                           | `@meta("form.fieldType", "tags")`           |
+| `form.fieldType` (ключ)       | Компонент из реестра `createForm` (4.2)  | `@meta("form.fieldType", "Select.X")`       |
 | `form.props.<dotpath>`        | UI-пропсы + escape hatch для constraints | `@meta("form.props.showValue", true)`       |
 | `form.relation.<dotpath>`     | Настройки relation                       | `@meta("form.relation.labelField", "name")` |
 | `form.tooltip.<key>`          | (?)-подсказка рядом с лейблом (v4.1.0)   | `@meta("form.tooltip.impact", "…")`         |
@@ -474,6 +475,124 @@ price Int
 `nx zenstack:generate` печатает `console.warn` для каждого такого случая — с именем модели/поля,
 самим неизвестным ключом и списком поддерживаемых. Не ломает сборку, только предупреждает.
 
+## Ключи реестра `createForm` (v4.2.0, этап Е)
+
+> ⚠️ Требуют **`@letar/forms` ≥ 2.25.0**. Плагин версию форм не видит: с более старой библиотекой
+> ключ уходит в неизвестный тип и молча рисуется текстовым полем.
+
+Справочник с окном создания и правки, своими хуками и `renderOption` — это компонент приложения,
+зарегистрированный в `createForm` (`extraSelects`/`lazySelects`, `extraComboboxes`/`lazyComboboxes`,
+`extraListboxes`). Из схемы на него ссылаются **ключом** в `form.fieldType`:
+
+```zmodel
+model Work {
+  id         String @id @default(cuid())
+  categoryId String
+    @meta("form.title", "Категория")
+    @meta("form.fieldType", "Select.WorkCategory")
+    @meta("form.props.createItem", true)
+}
+```
+
+`Form.AutoFields` и `Form.Field.Auto` берут компонент `Select.WorkCategory` из реестра инстанса
+`createForm` — так же, как `<AppForm.Select.WorkCategory>` в ручной форме. `form.props.*` доходят
+до компонента через `fieldProps`.
+
+### Синтаксис ключа
+
+`Пространство.Имя`, грамматика `^(Select|Combobox|Listbox)\.[A-Z][A-Za-z0-9]*$` — имя обязано быть
+допустимым свойством инстанса. Встроенные типы (`tags`, `currency`, …) — camelCase без точки,
+путаницы с ключами нет.
+
+- Значение **с точкой**, не подходящее под грамматику (`Foo.X`, `Select.lower`, `Select.`), —
+  **ошибка `zenstack generate`** с указанием `Модель.поле` и причины.
+- `Field.<Имя>` для `extraFields` в схеме пока не поддерживается.
+
+### Файл `form-registry-keys.ts`
+
+Плагин **всегда** пишет `<output>/form-registry-keys.ts` (без опции, без импортов — от
+`@letar/forms` не зависит) и реэкспортирует его из `index.ts`:
+
+```ts
+export const formRegistryKeys = {
+  Select: ['WorkCategory'],
+  Combobox: ['Counterparty'],
+  Listbox: [],
+} as const
+
+export type FormSelectKey = (typeof formRegistryKeys.Select)[number]
+export type FormComboboxKey = (typeof formRegistryKeys.Combobox)[number]
+export type FormListboxKey = (typeof formRegistryKeys.Listbox)[number]
+
+// Где используется ключ — для сообщений об ошибках и ревью
+export const formRegistryUsages = {
+  'Select.WorkCategory': ['Work.categoryId', 'Estimate.categoryId'],
+  'Combobox.Counterparty': ['Work.counterpartyId'],
+} as const
+```
+
+Ключи — уникальные и отсортированные; пустые пространства — `[]`. Обход идёт по тем же моделям, что
+и генерация, включая слитые импорты фрагментов `libs/*.zmodel`: ключ во фрагменте — требование к
+каждому приложению, которое его импортирует, поэтому ставьте ключи во фрагментах только осознанно.
+
+### Проверка, что все ключи зарегистрированы
+
+Одну строку в модуле инстанса `createForm` проверяет typecheck (`FormRegistryCheck` — из
+`@letar/forms` ≥ 2.25.0):
+
+```ts
+import type { FormComboboxKey, FormSelectKey } from '@/generated/form-schemas'
+import { createForm, type FormRegistryCheck } from '@letar/forms'
+
+export const AppForm = createForm({
+  lazySelects: {
+    WorkCategory: () => import('./selects/work-category-select').then((m) => m.WorkCategorySelect),
+  },
+  lazyComboboxes: {
+    Counterparty: () => import('./comboboxes/counterparty-combobox').then((m) => m.CounterpartyCombobox),
+  },
+})
+
+// Все ключи из schema.zmodel зарегистрированы — проверяется typecheck'ом
+export const appFormRegistryCheck: FormRegistryCheck<typeof AppForm, FormSelectKey, FormComboboxKey> = true
+```
+
+Забыли зарегистрировать ключ из схемы — ошибка присваивания перечислит недостающие ключи. Файл
+`form-registry-keys.ts` регенерируется целиком: правили схему — запустите `zenstack generate`,
+иначе typecheck проверяет устаревший список.
+
+### Ключ или `RelationConfig.fieldProps`
+
+|                | Ключ реестра                                                                     | `RelationConfig.fieldProps`                                          |
+| -------------- | -------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| где логика     | компонент приложения: свои хуки, окно, `useSelected`, оптимизм, `renderOption`   | конфиг модели у `RelationFieldProvider`                              |
+| где работает   | `Form.AutoFields`, `Form.Field.Auto` и явный JSX `<AppForm.Select.WorkCategory>` | только автоформы с провайдером                                       |
+| откуда опции   | компонент грузит сам                                                             | провайдер, один запрос на модель на форму                            |
+| когда выбирать | справочник с окном создания и правки, нужен и в ручных формах                    | лёгкий случай: подписи, `renderOption`, короткий `onCreate` без окна |
+
+Поле встречается и в ручных формах или у него своё окно — компонент и ключ; только автоформы и
+короткие обработчики — `RelationConfig.fieldProps`.
+
+### Предупреждения при generate
+
+Не роняют генерацию (старые схемы продолжают собираться):
+
+- `@meta("form.relation.model", "X")` — в схеме нет модели `X`;
+- `@meta("form.relation.labelField"|"descriptionField", "f")` — у целевой модели нет поля `f`
+  (целевая модель — `form.relation.model`, а без него тип поля-ссылки; если не определить — поля
+  не проверяются);
+- ключ реестра и `form.relation.*` на одном поле — побеждает ключ, `relation` игнорируется.
+
+### Что ловит typecheck, а что только рантайм
+
+| Что                                                                 | Где ловится                                 |
+| ------------------------------------------------------------------- | ------------------------------------------- |
+| неверный синтаксис ключа, неизвестное пространство                  | `zenstack generate` (ошибка плагина)        |
+| `form.relation.*` ссылается на несуществующую модель или поле       | `zenstack generate` (предупреждение)        |
+| ключ из схемы не зарегистрирован в инстансе                         | typecheck, при строке `FormRegistryCheck`   |
+| строка `FormRegistryCheck` не написана, форма не из `createForm`    | только рантайм (в dev — исключение)         |
+| `form-registry-keys.ts` устарел — схему правили, generate не гоняли | только рантайм: typecheck зелёный на старом |
+
 ## Кросс-полевая валидация: `@@validate` (Фаза 2, v2.5.0)
 
 Проверки, зависящие от нескольких полей сразу, задаются на уровне модели, не поля:
@@ -549,6 +668,7 @@ ZModel разрешает `@@strict()` только на `type`-определе
 ```
 src/generated/form-schemas/
 ├── index.ts                    # Реэкспорт всех схем
+├── form-registry-keys.ts       # Ключи реестра createForm (всегда, с 4.2.0)
 ├── enums/
 │   └── RecipeType.form.ts      # Enum схемы с метками
 ├── Recipe.form.ts              # Model схемы
@@ -632,5 +752,5 @@ MCP сервер [`@letar/form-mcp`](../form-mcp/README.md) предоставл
 
 ## Версия
 
-Текущая версия — **4.1.1** (`form.tooltip.*`; синтаксис `@meta("form.*", value)` — единственный с
-v4.0.0). Полная история — в [package.json](package.json) и [CHANGELOG.md](CHANGELOG.md).
+Текущая версия — **4.2.0** (ключи реестра `createForm` и `form-registry-keys.ts`; `form.tooltip.*` —
+с 4.1.0; синтаксис `@meta("form.*", value)` — единственный с v4.0.0). Полная история — в [package.json](package.json) и [CHANGELOG.md](CHANGELOG.md).

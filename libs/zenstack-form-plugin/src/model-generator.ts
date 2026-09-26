@@ -7,6 +7,7 @@ import type {
   TypeDef,
 } from '@zenstackhq/language/ast'
 import { findUnknownMetaFormPaths, parseMetaAttributes } from './parser.js'
+import { assertValidFieldType } from './registry-keys.js'
 import { quoteRegexLiteral, quoteTsString } from './ts-literal.js'
 import type {
   FormFieldMeta,
@@ -638,7 +639,7 @@ function warnUnknownFormDirectives(modelName: string, fieldName: string, metaPat
  * Порядок — миксины сначала (в порядке объявления `with A, B`), затем собственные поля модели:
  * так же порядок полей ложится в сгенерированный `schema.prisma`.
  */
-function collectAllFields(model: DataModel, visited = new Set<TypeDef>()): DataField[] {
+export function collectAllFields(model: DataModel, visited = new Set<TypeDef>()): DataField[] {
   const mixinFields = model.mixins.flatMap((ref) => collectTypeDefFields(ref.ref, visited))
   return [...mixinFields, ...model.fields]
 }
@@ -689,6 +690,11 @@ export function extractModelInfo(model: DataModel, enumNames: Set<string>): Mode
     if (shouldExclude) {
       excludedFields.push(field.name)
       continue
+    }
+
+    // Этап Е (§17.2): значение с точкой — ссылка на реестр createForm, синтаксис проверяется здесь
+    if (formMeta.fieldType) {
+      assertValidFieldType(model.name, field.name, formMeta.fieldType)
     }
 
     const fieldIsList = isList(field)

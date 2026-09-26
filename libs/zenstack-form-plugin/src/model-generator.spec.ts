@@ -175,6 +175,30 @@ describe('extractModelInfo', () => {
     expect(info.fields[0]?.formMeta.relation).toEqual({ model: 'User', labelField: 'name' })
   })
 
+  it('P1: ключ реестра из form.fieldType попадает в formMeta, неверный — ошибка с Модель.поле', () => {
+    const fieldTypeAttr = (value: string) => ({
+      refText: '@meta',
+      args: [{ value: strLit('form.fieldType') }, { value: strLit(value) }],
+    })
+
+    const ok = extractModelInfo(
+      makeModel('Work', [
+        makeField({ name: 'categoryId', type: 'String', attributes: [fieldTypeAttr('Select.WorkCategory')] }),
+      ]),
+      enumNames,
+    )
+    expect(ok.fields[0]?.formMeta.fieldType).toBe('Select.WorkCategory')
+
+    expect(() =>
+      extractModelInfo(
+        makeModel('Work', [
+          makeField({ name: 'categoryId', type: 'String', attributes: [fieldTypeAttr('Select.lower')] }),
+        ]),
+        enumNames,
+      )
+    ).toThrow(/Work\.categoryId/)
+  })
+
   it('исключает поле с @meta("form.exclude", true)', () => {
     const model = makeModel('Product', [
       makeField({
