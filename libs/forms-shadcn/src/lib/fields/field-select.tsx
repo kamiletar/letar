@@ -96,11 +96,11 @@ const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFie
     const createLabel = componentProps.createLabel ?? 'Добавить…'
 
     // Зависимость от других полей формы (§18): значения родителей, блокировка, автоочистка по правке родителя.
-    // Пустое значение при очистке — то же, что пишет собственная очистка поля (`0` у числового)
+    // Пустое значение при очистке — то же, что пишет собственная очистка поля (`dependent.emptyValue`)
     const dependent = useDependentFieldUi<FieldDeps>({
       fullPath,
       label: resolved.label,
-      emptyValue: componentProps.valueType === 'number' ? 0 : '',
+      valueType: componentProps.valueType,
       dependsOn: componentProps.dependsOn,
       depsReady: componentProps.depsReady,
       clearOnParentChange: componentProps.clearOnParentChange,
@@ -235,10 +235,12 @@ const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFie
     const { helperText: dependentHint, describedBy } = dependentHelperText(dependent, hasError)
 
     const applyValue = (raw: string | undefined) => {
-      if (componentProps.valueType === 'number') {
-        field.handleChange(raw ? Number(raw) : 0)
+      if (!raw) {
+        field.handleChange(dependent.emptyValue)
+      } else if (componentProps.valueType === 'number') {
+        field.handleChange(Number(raw))
       } else {
-        field.handleChange(raw ?? '')
+        field.handleChange(raw)
       }
     }
 

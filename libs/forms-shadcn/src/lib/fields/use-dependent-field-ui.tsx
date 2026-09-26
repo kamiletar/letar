@@ -1,7 +1,7 @@
 'use client'
 
 import { resolveStaticFormText } from '@letar/forms-core/i18n'
-import { getFieldMeta } from '@letar/forms-core/schema'
+import { getFieldMeta, resolveEmptyValue } from '@letar/forms-core/schema'
 import type { DependentFieldProps, FieldDeps } from '@letar/forms-core/uikit'
 import {
   type DependentFieldState,
@@ -50,12 +50,15 @@ export interface DependentFieldUiOptions<TDeps extends FieldDeps> extends Depend
   /** Подпись самого поля — для объявления об очистке */
   label: ReactNode
   /** Пустое значение, которое пишет автоочистка: то же, что пишет собственная кнопка очистки поля */
-  emptyValue: unknown
+  /** Тип значения: у числового Select пустое значение `0`, у остальных `''` (у nullable-схемы — всегда `null`) */
+  valueType?: 'string' | 'number'
 }
 
 export interface DependentFieldUi<TDeps extends FieldDeps> {
   /** Состояние из `useDependentField`: `deps`, `depsKey`, `ready`, `blocked`, `cleared`… */
   state: DependentFieldState<TDeps>
+  /** Пустое значение при очистке: `null` у nullable-схемы, иначе `''`/`0` */
+  emptyValue: string | number | null
   /** Есть `dependsOn` */
   active: boolean
   deps: TDeps
@@ -82,9 +85,11 @@ export interface DependentFieldUi<TDeps extends FieldDeps> {
 export function useDependentFieldUi<TDeps extends FieldDeps = FieldDeps>(
   options: DependentFieldUiOptions<TDeps>,
 ): DependentFieldUi<TDeps> {
-  const { fullPath, label, emptyValue, dependsOn, depsReady, clearOnParentChange, disableWhenParentEmpty } = options
+  const { fullPath, label, valueType, dependsOn, depsReady, clearOnParentChange, disableWhenParentEmpty } = options
   const i18n = useFormI18n()
   const schema = useDeclarativeFormOptional()?.schema
+  // Очистка (автоматическая и собственная кнопка поля) пишет `null` у nullable-схемы, иначе `''`/`0`
+  const emptyValue = resolveEmptyValue(schema, fullPath, valueType)
   const hintId = useId()
 
   // Метка родителя — `ui.title` схемы, иначе последний сегмент имени поля (умолчание хука)
@@ -119,6 +124,7 @@ export function useDependentFieldUi<TDeps extends FieldDeps = FieldDeps>(
 
   return {
     state,
+    emptyValue,
     active: state.active,
     deps: state.deps,
     depsKey: state.depsKey,

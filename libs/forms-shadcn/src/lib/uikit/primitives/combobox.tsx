@@ -4,7 +4,7 @@ import { isCreateOptionValue, type UIKitComboboxProps } from '@letar/forms-core/
 import { cn } from '@letar/tailwind-utils'
 import * as PopoverPrimitive from '@radix-ui/react-popover'
 import { Loader2 } from 'lucide-react'
-import { type ReactNode, useCallback, useEffect, useRef, useState } from 'react'
+import { type KeyboardEvent, type ReactNode, useCallback, useEffect, useId, useRef, useState } from 'react'
 
 /** Расширение контракта `UIKitComboboxProps` для зависимых полей: подсказка связывается с полем ввода */
 export interface ShadcnComboboxExtraProps {
@@ -24,6 +24,8 @@ export function Combobox(
     controlActions,
     listFooter,
     controlRef,
+    onEditHotkey,
+    editHotkeyHint,
     emptyContent,
     loading,
     onOpenChange,
@@ -67,6 +69,84 @@ export function Combobox(
   const selectedPending = value !== undefined && options.some((opt) => opt.value === value && opt.pending)
   const showSpinner = loading || selectedPending
 
+  // Клавиатура: подсвеченный пункт (стрелки), Enter выбирает, Escape закрывает, F2 правит запись (§16.5)
+  const listId = useId()
+  const hintId = useId()
+  const [highlighted, setHighlighted] = useState<string | null>(null)
+  const optionId = (index: number) => `${listId}-opt-${index}`
+  const highlightedIndex = highlighted === null ? -1 : options.findIndex((opt) => opt.value === highlighted)
+  // Подсветка не переживает закрытие списка и исчезнувшую из выдачи опцию
+  useEffect(() => {
+    if (!open) {
+      setHighlighted(null)
+    }
+  }, [open])
+  useEffect(() => {
+    if (highlighted !== null && !options.some((opt) => opt.value === highlighted)) {
+      setHighlighted(null)
+    }
+  }, [options, highlighted])
+  useEffect(() => {
+    if (highlightedIndex >= 0) {
+      document.getElementById(optionId(highlightedIndex))?.scrollIntoView?.({ block: 'nearest' })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `optionId` производный от `listId`
+  }, [highlightedIndex])
+
+  const select = (opt: (typeof options)[number]) => {
+    if (opt.disabled) {
+      return
+    }
+    onValueChange(opt.value)
+    setOpen(false)
+  }
+
+  /** Сдвиг подсветки на `step` по не заблокированным пунктам (по кругу) */
+  const moveHighlight = (step: 1 | -1) => {
+    const enabled = options.filter((opt) => !opt.disabled)
+    if (enabled.length === 0) {
+      return
+    }
+    const current = enabled.findIndex((opt) => opt.value === highlighted)
+    const next = current === -1
+      ? (step === 1 ? 0 : enabled.length - 1)
+      : (current + step + enabled.length) % enabled.length
+    setHighlighted(enabled[next]!.value)
+  }
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      event.preventDefault()
+      if (!open) {
+        setOpen(true)
+        return
+      }
+      moveHighlight(event.key === 'ArrowDown' ? 1 : -1)
+    } else if (event.key === 'Enter') {
+      const opt = open && highlightedIndex >= 0 ? options[highlightedIndex] : undefined
+      if (opt) {
+        // Выбор пункта, а не отправка формы
+        event.preventDefault()
+        select(opt)
+      }
+    } else if (event.key === 'Escape') {
+      if (open) {
+        event.preventDefault()
+        event.stopPropagation()
+        setOpen(false)
+      }
+    } else if (event.key === 'F2' && onEditHotkey) {
+      const opt = open && highlightedIndex >= 0 ? options[highlightedIndex] : undefined
+      if (opt && !isCreateOptionValue(opt.value)) {
+        event.preventDefault()
+        onEditHotkey(opt.value, 'option')
+      } else if (!open && value) {
+        event.preventDefault()
+        onEditHotkey(value, 'value')
+      }
+    }
+  }
+
   return (
     <PopoverPrimitive.Root open={open} onOpenChange={setOpen}>
       <PopoverPrimitive.Anchor asChild>
@@ -77,8 +157,15 @@ export function Combobox(
             type="text"
             role="combobox"
             aria-expanded={open}
+            aria-controls={open ? listId : undefined}
+            aria-autocomplete="list"
+            aria-activedescendant={open && highlightedIndex >= 0 ? optionId(highlightedIndex) : undefined}
+            aria-keyshortcuts={onEditHotkey ? 'F2' : undefined}
             aria-busy={selectedPending ? true : undefined}
-            aria-describedby={rest['aria-describedby']}
+            aria-describedby={[rest['aria-describedby'], onEditHotkey && editHotkeyHint ? hintId : undefined]
+              .filter(Boolean)
+              .join(' ') || undefined}
+            onKeyDown={handleKeyDown}
             value={inputValue}
             onChange={(e) => {
               onInputChange(e.target.value)
@@ -108,10 +195,13 @@ export function Combobox(
             />
           )}
           {controlActions && <div className="absolute inset-y-0 right-1.5 flex items-center">{controlActions}</div>}
+          {onEditHotkey && editHotkeyHint && <span id={hintId} className="sr-only">{editHotkeyHint}</span>}
         </div>
       </PopoverPrimitive.Anchor>
       <PopoverPrimitive.Portal>
         <PopoverPrimitive.Content
+          id={listId}
+          role="listbox"
           onOpenAutoFocus={(e) => e.preventDefault()}
           onInteractOutside={() => setOpen(false)}
           align="start"
@@ -127,22 +217,25 @@ export function Combobox(
             <div className="text-muted-foreground px-2 py-1.5 text-sm">{emptyContent ?? 'Ничего не найдено'}</div>
           )}
           {/* Прошлые результаты остаются на экране, пока идёт новый запрос (спиннер — в поле ввода) */}
-          {options.map((opt) => (
+          {options.map((opt, index) => (
             <div
               key={opt.value}
+              id={optionId(index)}
               role="option"
               aria-selected={opt.value === value}
+              data-highlighted={index === highlightedIndex ? '' : undefined}
+              onMouseMove={() => {
+                if (!opt.disabled && highlighted !== opt.value) {
+                  setHighlighted(opt.value)
+                }
+              }}
               data-disabled={opt.disabled || undefined}
               data-pending={opt.pending ? '' : undefined}
               aria-disabled={opt.disabled || undefined}
-              onClick={() => {
-                if (opt.disabled) { return }
-                onValueChange(opt.value)
-                setOpen(false)
-              }}
+              onClick={() => select(opt)}
               className={cn(
                 'group/item relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none select-none',
-                'hover:bg-accent hover:text-accent-foreground',
+                'hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground',
                 'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
               )}
             >

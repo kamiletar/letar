@@ -50,6 +50,8 @@ const CREATE_VERB_DEFAULT = 'Добавить'
 interface ComboboxFieldState {
   inputValue: string
   setInputValue: (value: string) => void
+  /** Значение, чья подпись сейчас в инпуте; запись значения самим полем помечается тут, чтобы не считаться внешней */
+  syncedValueRef: { current: string | undefined }
   filteredOptions: NormalizedOption[]
   /** Опции в форме приложения (с `data`) по строковому значению — для `renderOption` */
   optionByValue: Map<string, SelectOption>
@@ -104,7 +106,6 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
     const dependent = useDependentFieldUi<FieldDeps>({
       fullPath,
       label: resolved.label,
-      emptyValue: '',
       dependsOn: componentProps.dependsOn,
       depsReady: componentProps.depsReady,
       clearOnParentChange: componentProps.clearOnParentChange,
@@ -200,23 +201,30 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
       return applyOptionOverlay([selectedSourceOption], overlay)[0]
     }, [selectedSourceOption, merged, overlay])
 
-    // Подпись значения в инпуте: `initialLabel`, статичные опции или запись `loadSelected` — что найдётся первым
-    const initializedRef = useRef(false)
+    // Подпись значения в инпуте: `initialLabel`, статичные опции или запись `loadSelected` — что найдётся первым.
+    // Внешняя смена значения (восстановление черновика, `reset`, `setFieldValue`) тоже меняет подпись:
+    // `syncedValueRef` хранит значение, чья подпись уже в инпуте, а собственные записи поля помечают его сами
+    const syncedValueRef = useRef<string | undefined>(undefined)
     // Значение очищено сменой родителя: подпись прежнего значения в поле ввода стирается, а когда поле снова
     // получит значение — подпись выставится заново
     const clearedId = dependent.state.cleared?.id
     useEffect(() => {
       if (clearedId !== undefined) {
-        initializedRef.current = false
+        syncedValueRef.current = undefined
         setInputValue('')
       }
     }, [clearedId])
     useEffect(() => {
-      if (initializedRef.current || !valueKey || inputValue) {
+      if (!valueKey) {
+        syncedValueRef.current = undefined
+        return
+      }
+      // Первичная инициализация не перебивает уже набранный текст; внешнюю смену значения — перебивает
+      if (syncedValueRef.current === valueKey || (syncedValueRef.current === undefined && inputValue)) {
         return
       }
       let label: string | undefined
-      if (componentProps.initialLabel !== undefined) {
+      if (componentProps.initialLabel !== undefined && syncedValueRef.current === undefined) {
         label = componentProps.initialLabel
       } else if (componentProps.options) {
         const found = componentProps.options.find((opt) => String(opt.value) === valueKey)
@@ -224,9 +232,9 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
       } else if (selectedOption && String(selectedOption.value) === valueKey) {
         label = getOptionText(selectedOption)
       }
-      // Опции и запись могут прийти позже — инициализация закрывается, только когда подпись найдена
+      // Опции и запись могут прийти позже — синхронизация закрывается, только когда подпись найдена
       if (label !== undefined) {
-        initializedRef.current = true
+        syncedValueRef.current = valueKey
         setInputValue(label)
       }
     }, [valueKey, inputValue, componentProps.initialLabel, componentProps.options, selectedOption])
@@ -286,6 +294,7 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
     return {
       inputValue,
       setInputValue,
+      syncedValueRef,
       // Ошибка прячет данные: на экране «Не удалось загрузить», а не выдача прошлого поиска
       filteredOptions: promiseSearch.error ? [] : filteredOptions,
       optionByValue,
@@ -335,6 +344,7 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
           if (info.optimistic && !info.selectionHeld) {
             return
           }
+          fieldState.syncedValueRef.current = String(created.value)
           field.handleChange(String(created.value))
           fieldState.setInputValue(created.label)
           // Промис-путь: внешнего кэша, который обновил бы список, нет — запрашиваем текущий поиск заново
@@ -377,6 +387,7 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
           // Замена записи (другой value): выбранное переезжает на новую. Тот же value — форма не dirty
           if (isSelectedNow()) {
             if (String(result.value) !== fromValue) {
+              fieldState.syncedValueRef.current = String(result.value)
               field.handleChange(String(result.value))
             }
             fieldState.setInputValue(result.label)
@@ -427,7 +438,8 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
                 runCreate()
                 return
               }
-              field.handleChange(value ?? '')
+              fieldState.syncedValueRef.current = value || undefined
+              field.handleChange(value || dependent.emptyValue)
               // Выбранная опция даёт подпись в поле ввода (очистка — пустую строку)
               const picked = value === undefined ? undefined : fieldState.optionByValue.get(value)
               fieldState.setInputValue(picked ? getOptionText(picked) : '')
@@ -467,6 +479,15 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
               )
               : undefined}
             listFooter={componentProps.listFooter}
+            onEditHotkey={hasOnUpdate && interactive
+              ? (key, scope) => {
+                const source = fieldState.optionByValue.get(key)
+                if (source && isOptionEditable(source, true)) {
+                  runEdit(source, scope)
+                }
+              }
+              : undefined}
+            editHotkeyHint="F2 — изменить запись"
             emptyContent={fieldState.loadError
               ? (
                 <span className="flex items-center gap-2">

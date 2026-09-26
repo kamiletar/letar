@@ -79,6 +79,10 @@ export function Select(
     ? value
     : undefined
 
+  // Кнопка очистки — настоящая кнопка рядом с триггером; недоступна, когда поле заблокировано или только для чтения
+  const showClear = !!clearable && !!value && !disabled && !readOnly
+  const sideButtons = showClear || !!controlActions
+
   return (
     <SelectPrimitive.Root
       value={value}
@@ -116,7 +120,7 @@ export function Select(
             'disabled:cursor-not-allowed disabled:opacity-50',
             'data-[placeholder]:text-muted-foreground',
             // Место под кнопки рядом со значением
-            controlActions && 'pr-16',
+            sideButtons && 'pr-16',
           )}
         >
           <SelectPrimitive.Value placeholder={placeholder}>{valueContent}</SelectPrimitive.Value>
@@ -124,25 +128,28 @@ export function Select(
             <Loader2 className="text-muted-foreground size-4 shrink-0 animate-spin" aria-hidden />
           )}
           <SelectPrimitive.Icon asChild>
-            {clearable && value
-              ? (
-                <span
-                  role="button"
-                  tabIndex={-1}
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    onValueChange(undefined)
-                  }}
-                >
-                  <X className="size-4 opacity-50" />
-                </span>
-              )
-              : <ChevronDown className="size-4 opacity-50" />}
+            <ChevronDown className="size-4 opacity-50" />
           </SelectPrimitive.Icon>
         </SelectPrimitive.Trigger>
-        {controlActions && (
+        {sideButtons && (
           // Соседом триггера, не внутри него: в `<button>` вложенная кнопка невалидна
-          <div className="absolute inset-y-0 right-8 flex items-center">{controlActions}</div>
+          <div className="absolute inset-y-0 right-8 flex items-center gap-1">
+            {showClear && (
+              <button
+                type="button"
+                data-slot="select-clear"
+                aria-label="Очистить"
+                className="text-muted-foreground hover:text-foreground focus-visible:ring-ring/50 rounded-sm outline-none focus-visible:ring-[3px]"
+                onClick={() => {
+                  onValueChange(undefined)
+                  triggerRef.current?.focus()
+                }}
+              >
+                <X className="size-4 opacity-50" aria-hidden />
+              </button>
+            )}
+            {controlActions}
+          </div>
         )}
       </div>
       {onEditHotkey && editHotkeyHint && <span id={hintId} className="sr-only">{editHotkeyHint}</span>}
