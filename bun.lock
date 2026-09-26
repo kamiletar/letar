@@ -1347,7 +1347,7 @@
     },
     "libs/forms-query": {
       "name": "@letar/forms-query",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "devDependencies": {
         "@letar/forms": "workspace:*",
         "@letar/forms-core": "workspace:*",
@@ -1485,7 +1485,7 @@
     },
     "libs/generators": {
       "name": "@letar/generators",
-      "version": "0.1.5",
+      "version": "0.2.0",
     },
     "libs/github-releases": {
       "name": "@letar/github-releases",
