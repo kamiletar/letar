@@ -738,6 +738,13 @@
         "@letar/env-load": "workspace:*",
       },
     },
+    "apps/flora": {
+      "name": "@letar/flora",
+      "version": "0.1.0",
+      "dependencies": {
+        "@letar/env-load": "workspace:*",
+      },
+    },
     "apps/form-develop-app": {
       "name": "form-develop-app",
       "version": "0.1.23",
@@ -2781,6 +2788,8 @@
     "@letar/exoplayer-sync": ["@letar/exoplayer-sync@workspace:libs/exoplayer-sync"],
 
     "@letar/file-scan": ["@letar/file-scan@workspace:libs/file-scan"],
+
+    "@letar/flora": ["@letar/flora@workspace:apps/flora"],
 
     "@letar/folder-player-react": ["@letar/folder-player-react@workspace:libs/folder-player-react"],
 
