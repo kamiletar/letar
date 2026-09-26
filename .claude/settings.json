@@ -8,7 +8,16 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .claude/hooks/start-agent-mail.js"
+            "command": "node -e \"const p=require('path'),f=require('fs'),n=process.argv[1];let d=process.cwd();for(;;){const s=p.join(d,'.claude','hooks',n);if(f.existsSync(s)){require(s);break}const u=p.dirname(d);if(u===d)break;d=u}\" start-agent-mail.js"
+          }
+        ]
+      },
+      {
+        "matcher": "compact|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"const p=require('path'),f=require('fs'),n=process.argv[1];let d=process.cwd();for(;;){const s=p.join(d,'.claude','hooks',n);if(f.existsSync(s)){require(s);break}const u=p.dirname(d);if(u===d)break;d=u}\" time-resume-reminder.js"
           }
         ]
       }
@@ -19,7 +28,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .claude/hooks/validate-bash.js"
+            "command": "node -e \"const p=require('path'),f=require('fs'),n=process.argv[1];let d=process.cwd();for(;;){const s=p.join(d,'.claude','hooks',n);if(f.existsSync(s)){require(s);break}const u=p.dirname(d);if(u===d)break;d=u}\" validate-bash.js"
           },
           {
             "type": "command",
@@ -34,7 +43,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .claude/hooks/auto-format.js"
+            "command": "node -e \"const p=require('path'),f=require('fs'),n=process.argv[1];let d=process.cwd();for(;;){const s=p.join(d,'.claude','hooks',n);if(f.existsSync(s)){require(s);break}const u=p.dirname(d);if(u===d)break;d=u}\" auto-format.js"
           }
         ]
       },
@@ -43,7 +52,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .claude/hooks/time-heartbeat.js"
+            "command": "node -e \"const p=require('path'),f=require('fs'),n=process.argv[1];let d=process.cwd();for(;;){const s=p.join(d,'.claude','hooks',n);if(f.existsSync(s)){require(s);break}const u=p.dirname(d);if(u===d)break;d=u}\" time-heartbeat.js"
           }
         ]
       }
@@ -53,7 +62,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .claude/hooks/time-stop-check.js"
+            "command": "node -e \"const p=require('path'),f=require('fs'),n=process.argv[1];let d=process.cwd();for(;;){const s=p.join(d,'.claude','hooks',n);if(f.existsSync(s)){require(s);break}const u=p.dirname(d);if(u===d)break;d=u}\" time-stop-check.js"
           }
         ]
       }
