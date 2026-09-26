@@ -11,6 +11,8 @@ export type FormPattern =
   | 'analytics'
   | 'server-errors'
   | 'undo-redo'
+  | 'reference-select'
+  | 'reference-zenstack'
 
 /** Form pattern description */
 export interface PatternInfo {
@@ -315,6 +317,84 @@ function ProductEditor() {
       <Form.Field.Currency name="price" />
       <Form.Button.Submit>Save</Form.Button.Submit>
     </Form>
+  )
+}`,
+  },
+  {
+    name: 'reference-select' as FormPattern,
+    title: 'Dictionary field by a key from the schema',
+    description:
+      'A dictionary (category, unit, counterparty) with its own create/edit dialog is written once as a component and '
+      + 'registered in createForm. The schema points at it with `form.fieldType = "Select.<Name>"`, so Form.AutoFields, '
+      + 'Form.Field.Auto and a hand-written <AppForm.Select.<Name>> use the same component. Needs @letar/forms >= 2.25.0 '
+      + 'and @letar/zenstack-form-plugin >= 4.2.0. If the field is used only in auto forms and needs only labels or a short '
+      + 'onCreate without a dialog, `form.relation.*` + RelationConfig.fieldProps is lighter.',
+    example: `// schema.zmodel — the key lives in the schema
+model Work {
+  id         String @id @default(cuid())
+  categoryId String @meta("form.fieldType", "Select.WorkCategory") @meta("form.props.createItem", false)
+}
+
+// src/app-form/app-form.tsx — register the component; typecheck checks the keys of the schema
+import { createForm, type FormRegistryCheck } from '@letar/forms'
+import type { FormComboboxKey, FormSelectKey } from '@/generated/form-schemas'
+
+export const AppForm = createForm({
+  lazySelects: {
+    WorkCategory: () => import('./selects/work-category-select').then((m) => m.WorkCategorySelect),
+  },
+})
+
+// Not every key from schema.zmodel is registered → compile error listing the missing keys
+export const appFormRegistryCheck: FormRegistryCheck<typeof AppForm, FormSelectKey, FormComboboxKey> = true
+
+// Form: the field is drawn by AppForm.Select.WorkCategory
+<AppForm schema={WorkCreateFormSchema} initialValue={initial} onSubmit={save}>
+  <AppForm.AutoFields />
+</AppForm>`,
+  },
+  {
+    name: 'reference-zenstack' as FormPattern,
+    title: 'Dictionary from ZenStack / TanStack Query with optimistic create',
+    description:
+      'A Select over a ZenStack dictionary: options from useFindMany, create and edit in the app dialog, an optimistic '
+      + 'create (the record is visible and selected at once, the form submit waits for the server). '
+      + 'useZenStackOptions marks the temporary `$optimistic` rows of ZenStack as pending. Return the SERVER answer from '
+      + 'onCreate/onUpdate, not the dialog input. Needs @letar/forms >= 2.24.0 and @letar/forms-query >= 0.2.0.',
+    example: `'use client'
+import { useZenStackOptions } from '@letar/forms-query/zenstack'
+import { useClientQueries } from '@zenstackhq/tanstack-query/react'
+
+export function WorkCategorySelect(props: { name: string; label?: string }) {
+  const client = useClientQueries(schema)
+  // options + loading; $optimistic rows → pending (visible, not selectable), data = the record
+  const categories = useZenStackOptions(
+    client.workCategory.useFindMany({ orderBy: { name: 'asc' } }),
+    (c) => ({ label: c.name, value: c.id }),
+  )
+  const create = client.workCategory.useCreate({ optimisticUpdate: true })
+  const update = client.workCategory.useUpdate()
+  const dialog = useWorkCategoryDialog() // the app dialog: a Promise + resolver, its own AppForm inside
+
+  return (
+    <Form.Field.Select
+      {...props}
+      {...categories.fieldProps}
+      onCreate={async (search, { optimistic }) => {
+        const input = await dialog.open({ name: search })
+        if (!input) { return null }
+        optimistic({ label: input.name }) // the dialog is closed — the record is visible and selected now
+        const created = await create.mutateAsync({ data: input }) // the server answer, not input
+        return { label: created.name, value: created.id, data: created }
+      }}
+      onUpdate={async (option) => {
+        const input = await dialog.open(option.data)
+        if (!input) { return null }
+        const saved = await update.mutateAsync({ where: { id: String(option.value) }, data: input })
+        return saved ? { label: saved.name, value: saved.id, data: saved } : null
+      }}
+      onSettleError={(info) => toast.error('Could not save: ' + info.preview.label)}
+    />
   )
 }`,
   },

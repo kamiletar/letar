@@ -5,9 +5,11 @@ import { buildPatternRegistry, getPatterns } from './pattern-registry.js'
 describe('buildPatternRegistry', () => {
   it('создаёт реестр со всеми известными паттернами', () => {
     const registry = buildPatternRegistry()
-    expect(registry.size).toBe(11)
+    expect(registry.size).toBe(13)
     expect(registry.has('crud-create')).toBe(true)
     expect(registry.has('undo-redo')).toBe(true)
+    expect(registry.has('reference-select')).toBe(true)
+    expect(registry.has('reference-zenstack')).toBe(true)
   })
 
   it('каждая запись хранит title, description и example', () => {
@@ -25,7 +27,17 @@ describe('buildPatternRegistry', () => {
 describe('getPatterns', () => {
   it('без имени возвращает все паттерны', () => {
     const registry = buildPatternRegistry()
-    expect(getPatterns(registry)).toHaveLength(11)
+    expect(getPatterns(registry)).toHaveLength(13)
+  })
+
+  it('M1: паттерны справочников — ключ из схемы и ZenStack/Query с оптимизмом', () => {
+    const registry = buildPatternRegistry()
+    const byKey = registry.get('reference-select' as never)
+    expect(byKey?.example).toContain('form.fieldType')
+    expect(byKey?.example).toContain('FormRegistryCheck')
+    const zenstack = registry.get('reference-zenstack' as never)
+    expect(zenstack?.example).toContain('useZenStackOptions')
+    expect(zenstack?.example).toContain('optimistic')
   })
 
   it('с именем возвращает единственный паттерн в массиве', () => {

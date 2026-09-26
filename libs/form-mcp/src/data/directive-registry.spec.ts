@@ -57,6 +57,16 @@ describe('getDirectives', () => {
     expect(getDirectives(registry)).toHaveLength(8)
   })
 
+  it('M1: form.fieldType описывает ключ реестра, form.relation — без fieldType', () => {
+    const registry = buildDirectiveRegistry([])
+    const fieldType = getDirectives(registry, 'fieldType')[0]
+    expect(fieldType.description).toContain('Select.WorkCategory')
+    expect(fieldType.description).toContain('FormRegistryCheck')
+    const relation = getDirectives(registry, 'relation')[0]
+    expect(relation.output).not.toContain('fieldType')
+    expect(relation.output).toContain('fieldProps')
+  })
+
   it('находит директиву по полному имени с префиксом @form.', () => {
     const registry = buildDirectiveRegistry([])
     const result = getDirectives(registry, '@form.placeholder')

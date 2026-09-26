@@ -1,5 +1,20 @@
 # Changelog — @letar/form-mcp
 
+## 2.3.0 (2026-09-26)
+
+### Added
+
+- `get_directives('fieldType')`: ключ реестра `createForm` (`Select.<Имя>` / `Combobox.<Имя>` / `Listbox.<Имя>`) —
+  `@letar/forms` 2.25.0, `@letar/zenstack-form-plugin` 4.2.0; `FormRegistryCheck` для проверки ключей typecheck'ом.
+- `get_form_pattern('reference-select')` — справочник по ключу из схемы (createForm + `form.fieldType`).
+- `get_form_pattern('reference-zenstack')` — справочник из ZenStack/TanStack Query: `useZenStackOptions`,
+  оптимистичный `onCreate` с `ctx.optimistic` (`@letar/forms` 2.24.0, `@letar/forms-query` 0.2.0).
+
+### Fixed
+
+- `get_directives('relation')`: пример вывода не содержит `fieldType` — плагин пишет `fieldProps: { relation }` и тип
+  поля сам не выбирает.
+
 ## 2.2.1 (2026-09-26)
 
 ### Changed

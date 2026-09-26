@@ -46,9 +46,16 @@ const KNOWN_DIRECTIVES: DirectiveInfo[] = [
   {
     name: '@form.fieldType',
     metaKey: 'form.fieldType',
-    description: 'Explicit form field type override',
-    example: '@meta("form.fieldType", "tags")',
-    output: '.meta({ ui: { fieldType: "tags" } })',
+    description: 'Explicit form field type override. Built-in types are camelCase without a dot ("tags", "combobox"). '
+      + 'A registry key — `Select.<Name>` / `Combobox.<Name>` / `Listbox.<Name>`, for example `Select.WorkCategory` — points at the component the app '
+      + 'registered in createForm (`extraSelects`/`lazySelects`, ...): Form.AutoFields and Form.Field.Auto render '
+      + '`AppForm.Select.<Name>`, so a dictionary with its own dialog, hooks and optimistic mode works in auto forms. '
+      + 'The key needs `@letar/forms` >= 2.25.0. The plugin writes the keys to `form-registry-keys.ts`; add '
+      + '`const check: FormRegistryCheck<typeof AppForm, FormSelectKey, FormComboboxKey> = true` next to createForm '
+      + 'so typecheck fails when a key from the schema is not registered. Do not combine with form.relation.* — the key wins.',
+    example:
+      '@meta("form.fieldType", "tags")  // built-in\n@meta("form.fieldType", "Select.WorkCategory")  // registry key',
+    output: '.meta({ ui: { fieldType: "tags" } })  |  .meta({ ui: { fieldType: "Select.WorkCategory" } })',
   },
   {
     name: '@form.props',
@@ -69,9 +76,9 @@ const KNOWN_DIRECTIVES: DirectiveInfo[] = [
     name: '@form.relation',
     metaKey: 'form.relation.<dotpath>',
     description:
-      'Configuration for relation fields (FK -> Select/Combobox). Тот же запрет объектного литерала, что и у form.props — только плоский dot-path.',
+      'Configuration for relation fields (FK -> Select/Combobox); the plugin writes fieldProps.relation and does not choose the field type. Тот же запрет объектного литерала, что и у form.props — только плоский dot-path.',
     example: '@meta("form.relation.labelField", "name") @meta("form.relation.searchable", true)',
-    output: '.meta({ ui: { fieldType: "combobox", relation: { labelField: "name", searchable: true } } })',
+    output: '.meta({ ui: { fieldProps: { relation: { labelField: "name", searchable: true } } } })',
   },
   {
     name: '@form.tooltip',
