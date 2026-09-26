@@ -45,7 +45,7 @@ describe('FieldCombobox (shadcn) — onCreate', () => {
     fireEvent.change(screen.getByRole('combobox'), { target: { value: 'Sol' } })
     fireEvent.click(screen.getByRole('option', { name: '+ Добавить "Sol"' }))
 
-    await waitFor(() => expect(onCreate).toHaveBeenCalledWith('Sol'))
+    await waitFor(() => expect(onCreate).toHaveBeenCalledWith('Sol', expect.anything()))
     await waitFor(() => expect(values().framework).toBe('solid'))
     expect(screen.getByRole('combobox')).toHaveValue('Solid')
   })

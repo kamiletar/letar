@@ -65,7 +65,7 @@ describe('Field.Combobox — onUpdate', () => {
     await userEvent.click(input())
     await waitFor(() => expect(itemPencils()).toHaveLength(2))
     await userEvent.click(itemPencils()[1])
-    expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({ value: 'b', label: 'Фасад' }))
+    expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({ value: 'b', label: 'Фасад' }), expect.anything())
     expect(input().value).toBe('')
   })
 
@@ -93,7 +93,7 @@ describe('Field.Combobox — onUpdate', () => {
     renderCombobox({ onUpdate }, 'a')
     input().focus()
     await userEvent.keyboard('{F2}')
-    expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({ value: 'a' }))
+    expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({ value: 'a' }), expect.anything())
   })
 
   it('disabled поле — карандашей нет', () => {
@@ -123,7 +123,7 @@ describe('Field.Combobox — onUpdate', () => {
     fireEvent.change(input(), { target: { value: 'Нов' } })
     await waitFor(() => expect(screen.getAllByText(/Add "Нов"/)).toHaveLength(1))
     await userEvent.click(screen.getByText(/Add "Нов"/))
-    expect(onCreate).toHaveBeenCalledWith('Нов')
+    expect(onCreate).toHaveBeenCalledWith('Нов', expect.anything())
     await waitFor(() => expect(input().value).toBe('Новая'))
   })
 })

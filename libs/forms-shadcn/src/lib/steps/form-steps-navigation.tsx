@@ -1,6 +1,6 @@
 'use client'
 
-import { useDeclarativeForm } from '@letar/forms-react'
+import { useDeclarativeForm, useFormSubmit } from '@letar/forms-react'
 import { cn } from '@letar/tailwind-utils'
 import { type ButtonHTMLAttributes, type ReactNode, useCallback, useState } from 'react'
 import { useFormStepsContext } from './form-steps-context'
@@ -61,6 +61,8 @@ export function FormStepsNavigation({
   onSkip,
 }: FormStepsNavigationProps) {
   const { form } = useDeclarativeForm()
+  // Отправка ждёт подтверждения оптимистичных действий полей (§16.7)
+  const submitForm = useFormSubmit(form)
   const { goToNext, goToPrev, skipToEnd, isFirstStep, isLastStep, canGoPrev, currentStep } = useFormStepsContext()
 
   const [isNavigating, setIsNavigating] = useState(false)
@@ -87,11 +89,11 @@ export function FormStepsNavigation({
     setIsSubmittingForm(true)
     try {
       onSubmit?.()
-      await form.handleSubmit()
+      await submitForm()
     } finally {
       setIsSubmittingForm(false)
     }
-  }, [form, onSubmit, isSubmittingForm])
+  }, [submitForm, onSubmit, isSubmittingForm])
 
   const handleSkip = useCallback(async () => {
     setIsSkipping(true)

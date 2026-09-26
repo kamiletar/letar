@@ -115,7 +115,7 @@ describe('FieldCombobox (shadcn) — loadOptions', () => {
     type('Zzz')
     await waitFor(() => expect(loadOptions).toHaveBeenCalledTimes(1))
     fireEvent.click(await screen.findByRole('option', { name: '+ Добавить "Zzz"' }))
-    await waitFor(() => expect(onCreate).toHaveBeenCalledWith('Zzz'))
+    await waitFor(() => expect(onCreate).toHaveBeenCalledWith('Zzz', expect.anything()))
     await waitFor(() => expect(values().cat).toBe('n'))
     await waitFor(() => expect(loadOptions.mock.calls.length).toBeGreaterThanOrEqual(2))
   })
@@ -145,6 +145,7 @@ describe('FieldCombobox (shadcn) — loadOptions', () => {
     await waitFor(() =>
       expect(onUpdate).toHaveBeenCalledWith(
         expect.objectContaining({ value: 'zzz', data: { id: 'zzz', name: 'Запись' } }),
+        expect.anything(),
       )
     )
   })

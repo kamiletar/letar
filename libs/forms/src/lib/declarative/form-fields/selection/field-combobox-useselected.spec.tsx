@@ -94,6 +94,7 @@ describe('Field.Combobox — useSelected (Z7)', () => {
     await userEvent.click(valuePencil()!)
     expect(onUpdate).toHaveBeenCalledWith(
       expect.objectContaining({ value: 'a', label: 'Кровля', data: { id: 'a', name: 'Кровля' } }),
+      expect.anything(),
     )
     await userEvent.click(input())
     await waitFor(() => expect(screen.getByRole('option', { name: /Другая/ })).toBeInTheDocument())

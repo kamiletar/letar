@@ -1,4 +1,5 @@
 import { ChakraProvider, defaultSystem } from '@chakra-ui/react'
+import { createPendingRegistry } from '@letar/forms-core/uikit'
 import { FormI18nProvider } from '@letar/forms-react'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
@@ -98,6 +99,44 @@ describe('DirtyGuard', () => {
 
       const beforeUnloadCalls = addEventListenerSpy.mock.calls.filter((call) => call[0] === 'beforeunload')
       expect(beforeUnloadCalls.length).toBe(0)
+    })
+  })
+
+  describe('оптимистичные действия полей (§16.7)', () => {
+    it('форма не dirty, но действие поля ждёт сервера — диалог при клике на ссылку', async () => {
+      const pending = createPendingRegistry()
+      pending.add(new Promise<boolean>(() => undefined))
+      const context = { ...createMockFormContext(false), pending }
+      const wrapper = createContextWrapper(context)
+
+      render(
+        <div>
+          <DirtyGuard />
+          <a href="/other-page">Go to other page</a>
+        </div>,
+        { wrapper },
+      )
+      await userEvent.click(screen.getByText('Go to other page'))
+
+      await waitFor(() => {
+        expect(screen.getByText('Unsaved changes')).toBeInTheDocument()
+      })
+    })
+
+    it('реестр пуст и форма не dirty — диалога нет', async () => {
+      const context = { ...createMockFormContext(false), pending: createPendingRegistry() }
+      const wrapper = createContextWrapper(context)
+
+      render(
+        <div>
+          <DirtyGuard />
+          <a href="/other-page">Go to other page</a>
+        </div>,
+        { wrapper },
+      )
+      await userEvent.click(screen.getByText('Go to other page'))
+
+      expect(screen.queryByText('Unsaved changes')).not.toBeInTheDocument()
     })
   })
 

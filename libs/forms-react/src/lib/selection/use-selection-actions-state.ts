@@ -180,12 +180,10 @@ export function useSelectionActionsState(
   // Ожидающий выбор живёт, пока значение формы то, что было при показе; изменилось — снимаем (случаи 1–2 §16.7)
   const currentValue = value === undefined || value === null ? '' : String(value)
   const pendingSelection = held && held.from === currentValue ? held.temp : null
-  useEffect(() => {
-    if (held && held.from !== currentValue) {
-      heldRef.current = null
-      setHeld(null)
-    }
-  }, [held, currentValue])
+  // Снятие — «подстройка state при смене пропсов» прямо в рендере; `heldRef` догоняет в эффекте синхронизации выше
+  if (held && held.from !== currentValue) {
+    setHeld(null)
+  }
 
   // Прюнинг фиксируем в state, а не только выводим: иначе устаревшая запись «воскресла» бы позже.
   // setState во время рендера того же компонента — допустимая «подстройка state при смене пропсов»;

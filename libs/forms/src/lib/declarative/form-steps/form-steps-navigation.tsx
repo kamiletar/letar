@@ -1,6 +1,7 @@
 'use client'
 
 import { Button, ButtonGroup, type ButtonProps } from '@chakra-ui/react'
+import { useFormSubmit } from '@letar/forms-react'
 import { type ReactNode, useCallback, useState } from 'react'
 import { useDeclarativeForm } from '../form-context'
 import { useFormStepsContext } from './form-steps-context'
@@ -100,6 +101,8 @@ export function FormStepsNavigation({
   onSkip,
 }: FormStepsNavigationProps) {
   const { form } = useDeclarativeForm()
+  // Отправка ждёт подтверждения оптимистичных действий полей (§16.7)
+  const submitForm = useFormSubmit(form)
   const {
     goToNext,
     goToPrev,
@@ -147,11 +150,11 @@ export function FormStepsNavigation({
     setIsSubmittingForm(true)
     try {
       onSubmit?.()
-      await form.handleSubmit()
+      await submitForm()
     } finally {
       setIsSubmittingForm(false)
     }
-  }, [form, onSubmit, isSubmittingForm])
+  }, [submitForm, onSubmit, isSubmittingForm])
 
   // Handle skip button click
   const handleSkip = useCallback(async () => {

@@ -76,7 +76,7 @@ describe('FieldSelect (shadcn) — onUpdate', () => {
     fireEvent.pointerDown(itemPencils()[1])
     fireEvent.pointerUp(itemPencils()[1])
     fireEvent.click(itemPencils()[1])
-    expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({ value: 'b', label: 'Фасад' }))
+    expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({ value: 'b', label: 'Фасад' }), expect.anything())
     expect(values().cat).toBe('a')
   })
 
@@ -118,7 +118,7 @@ describe('FieldSelect (shadcn) — onUpdate', () => {
     const onUpdate = vi.fn().mockResolvedValue(null)
     setupSelect({ onUpdate })
     fireEvent.keyDown(screen.getByRole('combobox'), { key: 'F2' })
-    expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({ value: 'a' }))
+    expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({ value: 'a' }), expect.anything())
   })
 
   it('свой renderOption без EditButton — карандаша в пункте нет; CreateButton в listFooter зовёт onCreate', async () => {
@@ -134,7 +134,7 @@ describe('FieldSelect (shadcn) — onUpdate', () => {
     await screen.findByRole('option', { name: /Фасад/ })
     expect(itemPencils()).toHaveLength(0)
     fireEvent.click(screen.getByText('+ Добавить…'))
-    expect(onCreate).toHaveBeenCalledWith('')
+    expect(onCreate).toHaveBeenCalledWith('', expect.anything())
   })
 })
 
@@ -157,7 +157,7 @@ describe('FieldCombobox (shadcn) — onUpdate', () => {
     await userEvent.click(screen.getByRole('combobox'))
     await waitFor(() => expect(itemPencils()).toHaveLength(2))
     fireEvent.click(itemPencils()[1])
-    expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({ value: 'b' }))
+    expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({ value: 'b' }), expect.anything())
     expect(values().cat).toBe('a')
   })
 
@@ -183,6 +183,6 @@ describe('FieldCombobox (shadcn) — onUpdate', () => {
     fireEvent.change(screen.getByRole('combobox'), { target: { value: 'Нов' } })
     await waitFor(() => expect(screen.getByText('+ Добавить "Нов"')).toBeInTheDocument())
     fireEvent.click(screen.getByText('+ Добавить "Нов"'))
-    expect(onCreate).toHaveBeenCalledWith('Нов')
+    expect(onCreate).toHaveBeenCalledWith('Нов', expect.anything())
   })
 })

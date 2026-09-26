@@ -1,5 +1,6 @@
 'use client'
 
+import { useCreatePendingRegistry, useFormPendingSubmit, warnSubmitBypassingPending } from '@letar/forms-react'
 import { type ReactElement, type ReactNode, useEffect, useMemo } from 'react'
 import { useAppForm } from '../../form-hook'
 import type { FormOfflineConfig } from '../../offline'
@@ -114,11 +115,16 @@ export function FormSimple<TData extends object>({
     },
   })
 
+  // Реестр неподтверждённых оптимистичных действий полей (§16.7): отправка ждёт его пустоты
+  const pendingRegistry = useCreatePendingRegistry()
+
   // Initialize form
   const form = useAppForm({
     defaultValues: initialValue,
     validators: buildValidators(schema, validateOn),
     onSubmit: async ({ value }) => {
+      warnSubmitBypassingPending(pendingRegistry)
+
       // Honeypot — блокировка ботов
       if (isBot()) {
         return
@@ -160,6 +166,8 @@ export function FormSimple<TData extends object>({
       }
     },
   })
+
+  const submit = useFormPendingSubmit(pendingRegistry, form)
 
   // Защита от отката поля к устаревшему initialValue после post-submit reset() —
   // см. use-post-submit-reset-guard.ts
@@ -207,8 +215,10 @@ export function FormSimple<TData extends object>({
       disabled,
       readOnly,
       addressProvider,
+      pending: pendingRegistry,
+      submit,
     }),
-    [form, schema, features.offlineState, disabled, readOnly, addressProvider],
+    [form, schema, features.offlineState, disabled, readOnly, addressProvider, pendingRegistry, submit],
   )
 
   return (
@@ -221,7 +231,7 @@ export function FormSimple<TData extends object>({
         onSubmit={(e) => {
           e.preventDefault()
           e.stopPropagation()
-          form.handleSubmit()
+          void submit()
         }}
       >
         {honeypot && <HoneypotField />}

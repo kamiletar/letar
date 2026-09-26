@@ -153,7 +153,7 @@ describe('Field.Combobox — loadOptions (L1–L7)', () => {
     type('Zzz')
     await waitFor(() => expect(loadOptions).toHaveBeenCalledTimes(1))
     await userEvent.click(await screen.findByText(/Add "Zzz"/))
-    await waitFor(() => expect(onCreate).toHaveBeenCalledWith('Zzz'))
+    await waitFor(() => expect(onCreate).toHaveBeenCalledWith('Zzz', expect.anything()))
     await waitFor(() => expect(loadOptions.mock.calls.length).toBeGreaterThanOrEqual(2))
   })
 
@@ -202,6 +202,7 @@ describe('Field.Combobox — loadOptions (L1–L7)', () => {
     await waitFor(() =>
       expect(onUpdate).toHaveBeenCalledWith(
         expect.objectContaining({ value: 'zzz', data: { id: 'zzz', name: 'Запись' } }),
+        expect.anything(),
       )
     )
   })

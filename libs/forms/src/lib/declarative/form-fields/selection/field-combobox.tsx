@@ -12,12 +12,14 @@ import {
   type LoadOptionsFn,
   type LoadSelectedFn,
   mergeCreatedOptions,
+  type SettleErrorInfo,
   shouldOfferCreate,
   type UpdateOptionHandler,
 } from '@letar/forms-core/uikit'
 import {
   SelectionActionsProvider,
   SelectionOptionProvider,
+  useFormPendingRegistry,
   useNodeLabelWarning,
   usePromiseSearch,
   useSelectedLoader,
@@ -167,8 +169,24 @@ export interface ComboboxFieldBaseProps<T = string, TData = unknown> extends Bas
    */
   onUpdate?: UpdateOptionHandler<GroupableOption<T, TData> & EditableOptionFlag, TData>
 
+  /**
+   * The server did not confirm what `onCreate`/`onUpdate` showed optimistically (`ctx.optimistic(...)`): rejected,
+   * `null` after `optimistic`, or no answer within `settleTimeout`. The field has already rolled the option back.
+   * Without it the field shows its own message under itself (`role="status"`).
+   */
+  onSettleError?: (info: SettleErrorInfo<TData>) => void
+
+  /** Milliseconds to wait for the server after `ctx.optimistic(...)` (default 30 000) */
+  settleTimeout?: number
+
   /** With `useQuery`: `false` hides the pencil for this data element (system records) */
   getEditable?: (item: TData) => boolean
+
+  /**
+   * With `useQuery`: the data element is not confirmed by the server yet (optimistic update, for example
+   * `!!row.$optimistic` of ZenStack) — shown dimmed with a spinner, cannot be selected or edited.
+   */
+  getPending?: (item: TData) => boolean
 
   /** Own footer of the list, after the items (e.g. `<Form.Field.Combobox.CreateButton />`) */
   listFooter?: ReactNode
@@ -355,6 +373,8 @@ interface ComboboxFieldState extends GroupedOptionsResult {
   loadErrorStrings: { message: string; retry: string }
   /** Подпись служебного пункта «+ Добавить "<поиск>"» (пусто, если пункт сейчас не предлагается) */
   createItemLabel: string
+  /** Шаблон сообщения об отказе оптимистичного действия, `{label}` подставляется при показе */
+  settleErrorTemplate: string
   /** Действия (`onCreate`/`onUpdate`): pending, наложение правок, созданные опции, конвейер */
   actions: ReturnType<typeof useSelectionActionsState>
   /** Все опции (с правками и созданными, без фильтра по тексту) по строковому значению */
@@ -515,6 +535,7 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
       componentProps.getValue,
       componentProps.getDisabled,
       componentProps.getEditable,
+      componentProps.getPending,
     ])
 
     // Инициализация `inputValue` из значения поля (сценарий `defaultValues` при редактировании).
@@ -572,6 +593,7 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
         const getGroup = componentProps.getGroup
         const getDisabled = componentProps.getDisabled
         const getEditable = componentProps.getEditable
+        const getPending = componentProps.getPending
         return (queryData as unknown[]).map((item) => ({
           label: getLabel(item),
           textValue: getTextValue?.(item),
@@ -580,6 +602,7 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
           group: getGroup?.(item),
           disabled: getDisabled?.(item),
           editable: getEditable?.(item),
+          pending: getPending?.(item),
         }))
       }
       return []
@@ -594,8 +617,16 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
       componentProps.getEditable,
     ])
 
-    const actions = useSelectionActionsState({ appOptions: sourceOptions })
+    const pendingRegistry = useFormPendingRegistry()
+    const actions = useSelectionActionsState({
+      appOptions: sourceOptions,
+      value: fieldValue,
+      registry: pendingRegistry,
+      onSettleError: componentProps.onSettleError as ((info: SettleErrorInfo) => void) | undefined,
+      settleTimeout: componentProps.settleTimeout,
+    })
     const { createdOptions, overlay } = actions
+    const settleErrorTemplate = useSelectionString('formSelection.settleError')
 
     const inputRef = useRef<HTMLInputElement | null>(null)
     const highlightedRef = useRef<string | null>(null)
@@ -613,17 +644,23 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
     // Все опции с правками и созданными — по ним ищется опция для карандаша у значения
     const allOptions = useMemo((): ComboboxItem[] => {
       // Значения Combobox — строки: числовое значение из `onCreate`/`onUpdate` приводится к строке
-      const edited = applyOptionOverlay(sourceOptions, overlay).map((opt): ComboboxItem =>
+      // Пока свой оптимистичный create в полёте, `pending`-опции приложения скрыты: почти всегда это та же запись
+      // (мутация ZenStack вставила её в кэш), иначе в списке две «Кровли» (§16.7)
+      const shownApp = actions.hasOwnCreatePending ? sourceOptions.filter((opt) => !opt.pending) : sourceOptions
+      const edited = applyOptionOverlay(shownApp, overlay).map((opt): ComboboxItem =>
         typeof opt.value === 'string' ? opt : { ...opt, value: String(opt.value) }
       )
       const created = createdOptions.map((opt): ComboboxItem => ({
         label: opt.label,
         value: String(opt.value),
         data: opt.data,
+        pending: opt.pending,
       }))
       // Опция приложения сильнее созданной с тем же значением — после перезагрузки справочника дубля нет
-      return mergeCreatedOptions(edited, created)
-    }, [sourceOptions, overlay, createdOptions])
+      const merged = mergeCreatedOptions(edited, created)
+      // Опция в ожидании подтверждения не выбирается ни мышью, ни клавиатурой: в коллекции zag она disabled
+      return merged.map((opt): ComboboxItem => (opt.pending ? { ...opt, disabled: true } : opt))
+    }, [sourceOptions, overlay, createdOptions, actions.hasOwnCreatePending])
 
     // Запись из `useSelected` — вне списка; правки (`onUpdate`) накладываются и на неё
     const selectedOption = useMemo((): ComboboxItem | undefined => {
@@ -701,15 +738,18 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
       loadErrorStrings: { message: loadErrorMessage, retry: loadRetry },
       createItemLabel,
       actions,
+      settleErrorTemplate,
       optionByValue,
       strings: { edit: editVerb, hotkeyHint, createVerb },
       dropdown: { open, setOpen, inputRef, highlightedRef },
     }
   },
   render: ({ field, fullPath, resolved, hasError, errorMessage, componentProps, fieldState }): ReactElement => {
-    const currentValue = field.state.value as string | undefined
+    const formValue = field.state.value as string | undefined
     const minChars = componentProps.minChars ?? 1
     const { actions, strings, dropdown } = fieldState
+    // Оптимистично созданная запись показана выбранной, пока форма хранит прежнее значение (§16.7)
+    const currentValue = actions.pendingSelection ?? formValue
     const hasOnUpdate = !!componentProps.onUpdate
     const interactive = !resolved.disabled && !resolved.readOnly
     const search = fieldState.inputValue.trim()
@@ -721,11 +761,22 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
       if (!onCreate) {
         return
       }
+      // Текст ввода до действия: отказ оптимистичного create возвращает поле в него
+      const previousText = formValue
+        ? getOptionText(fieldState.optionByValue.get(String(formValue)) ?? { value: '' })
+        : ''
       actions.run({
         scope: 'option',
-        call: () => onCreate(search),
-        apply: (created) => {
+        kind: 'create',
+        call: (ctx) => onCreate(search, ctx),
+        onOptimistic: (preview) => fieldState.setInputValue(preview.label),
+        onRevert: () => fieldState.setInputValue(previousText),
+        apply: (created, info) => {
           actions.addCreatedOption(created)
+          // Выбор пользователя, сделанный за время ожидания, подтверждение не перебивает
+          if (info.optimistic && !info.selectionHeld) {
+            return
+          }
           field.handleChange(String(created.value))
           fieldState.setInputValue(created.label)
           // Промис-путь: внешнего кэша, который обновил бы список, нет — запрашиваем текущий поиск заново
@@ -734,6 +785,12 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
           }
         },
       })
+    }
+
+    // Выбрана ли запись `from` СЕЙЧАС: значение читаем живым — за время оптимистичного ожидания оно могло измениться
+    const isSelectedNow = (from: string): boolean => {
+      const live = field.form.getFieldValue(field.name) as string | undefined
+      return live !== undefined && live !== '' && String(live) === from
     }
 
     const runEdit = (option: unknown, scope: 'option' | 'value') => {
@@ -745,15 +802,24 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
       const fromValue = String(source.value)
       actions.run({
         scope,
-        call: () => onUpdate(source as Parameters<typeof onUpdate>[0]),
+        kind: 'edit',
+        fromValue,
+        call: (ctx) => onUpdate(source as Parameters<typeof onUpdate>[0], ctx),
+        // Правят выбранное: инпут показывает новую подпись сразу, не дожидаясь сервера
+        onOptimistic: (preview) => {
+          if (isSelectedNow(fromValue)) {
+            fieldState.setInputValue(preview.label)
+          }
+        },
         apply: (result) => {
           actions.recordEdit(fromValue, result)
           if (componentProps.loadOptions) {
             fieldState.retryLoad()
           }
           fieldState.invalidateSelected(fromValue)
-          // Правили выбранное: инпут показывает новую подпись, а замена записи переносит значение
-          if (currentValue !== undefined && String(currentValue) === fromValue) {
+          // Правили выбранное: инпут показывает новую подпись, а замена записи переносит значение.
+          // Значение читаем живым: при оптимистичной правке за время ожидания оно могло измениться
+          if (isSelectedNow(fromValue)) {
             if (String(result.value) !== fromValue) {
               field.handleChange(String(result.value))
             }
@@ -801,6 +867,7 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
           {componentProps.renderOption(opt, {
             selected: currentValue !== undefined && currentValue !== '' && String(currentValue) === String(opt.value),
             disabled: opt.disabled ?? false,
+            pending: opt.pending ?? false,
           })}
         </SelectionOptionProvider>
       )
@@ -817,9 +884,9 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
         : null
 
     const renderItem = (opt: GroupableOption) => (
-      <Combobox.Item item={opt} key={opt.value}>
+      <Combobox.Item item={opt} key={opt.value} data-pending={opt.pending ? '' : undefined}>
         <Combobox.ItemText>{renderItemContent(opt)}</Combobox.ItemText>
-        {renderItemActions(opt)}
+        {opt.pending ? <Spinner size="xs" /> : renderItemActions(opt)}
         <Combobox.ItemIndicator />
       </Combobox.Item>
     )
@@ -884,6 +951,8 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
                 ref={dropdown.inputRef}
                 placeholder={resolved.placeholder ?? fieldState.defaultPlaceholder}
                 pe={showValueEdit ? '6.5rem' : undefined}
+                // Выбранное значение ждёт сервера (§16.7): подпись уже новая, спиннер рядом
+                aria-busy={selectedSource?.pending ? true : undefined}
                 aria-keyshortcuts={hasOnUpdate && interactive ? 'F2' : undefined}
                 title={hasOnUpdate && interactive ? strings.hotkeyHint : undefined}
                 onKeyDown={(event) => {
@@ -907,7 +976,7 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
                 }}
               />
               <Combobox.IndicatorGroup>
-                {fieldState.isLoading && <Spinner size="xs" />}
+                {(fieldState.isLoading || selectedSource?.pending) && <Spinner size="xs" />}
                 {fieldState.resolvedClearable && <Combobox.ClearTrigger />}
                 {showValueEdit && (
                   // IndicatorGroup не принимает клики (pointer-events: none) — кнопке возвращаем их
@@ -974,6 +1043,11 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
           </Combobox.Root>
         </SelectionActionsProvider>
 
+        {actions.settleFailure && (
+          <Box role="status" mt={1} fontSize="sm" color="fg.error" data-settle-error="">
+            {fieldState.settleErrorTemplate.replace('{label}', actions.settleFailure.label)}
+          </Box>
+        )}
         <FieldError hasError={hasError} errorMessage={errorMessage} helperText={resolved.helperText} />
       </Field.Root>
     )

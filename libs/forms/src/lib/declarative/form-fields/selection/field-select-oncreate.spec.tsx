@@ -75,7 +75,7 @@ describe('Field.Select — onCreate', () => {
     await openDropdown()
     await userEvent.click(await screen.findByRole('option', { name: `+ ${CREATE_LABEL}` }))
 
-    await waitFor(() => expect(onCreate).toHaveBeenCalledWith(''))
+    await waitFor(() => expect(onCreate).toHaveBeenCalledWith('', expect.anything()))
     await waitFor(() => expect(screen.getByRole('combobox')).toHaveTextContent('Фасады'))
   })
 

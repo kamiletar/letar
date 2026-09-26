@@ -51,7 +51,7 @@ describe('FieldSelect (shadcn) — onCreate', () => {
     openSelect()
     fireEvent.click(await screen.findByRole('option', { name: '+ Добавить…' }))
 
-    await waitFor(() => expect(onCreate).toHaveBeenCalledWith(''))
+    await waitFor(() => expect(onCreate).toHaveBeenCalledWith('', expect.anything()))
     await waitFor(() => expect(values().framework).toBe('solid'))
   })
 

@@ -78,6 +78,8 @@ export function Select(
           data-slot="select-trigger"
           onBlur={onBlur}
           data-field-name={rest['data-field-name']}
+          // Выбранное значение ждёт сервера (§16.7): подпись уже новая, спиннер рядом
+          aria-busy={selectedOption?.pending ? true : undefined}
           aria-keyshortcuts={onEditHotkey ? 'F2' : undefined}
           aria-describedby={onEditHotkey && editHotkeyHint ? hintId : undefined}
           onKeyDown={onEditHotkey
@@ -99,7 +101,9 @@ export function Select(
           )}
         >
           <SelectPrimitive.Value placeholder={placeholder}>{valueContent}</SelectPrimitive.Value>
-          {loading && <Loader2 className="text-muted-foreground size-4 shrink-0 animate-spin" aria-hidden />}
+          {(loading || selectedOption?.pending) && (
+            <Loader2 className="text-muted-foreground size-4 shrink-0 animate-spin" aria-hidden />
+          )}
           <SelectPrimitive.Icon asChild>
             {clearable && value
               ? (
@@ -140,7 +144,9 @@ export function Select(
               <SelectPrimitive.Item
                 key={opt.value}
                 value={opt.value}
-                disabled={opt.disabled}
+                // Опция в ожидании подтверждения (§16.7) не выбирается ни мышью, ни клавиатурой
+                disabled={opt.disabled || opt.pending}
+                data-pending={opt.pending ? '' : undefined}
                 textValue={getOptionText(opt)}
                 onKeyDown={onEditHotkey
                   ? (event) => {
@@ -159,10 +165,16 @@ export function Select(
               >
                 <SelectPrimitive.ItemText>
                   {renderOption
-                    ? renderOption(opt, { selected: opt.value === value, disabled: opt.disabled ?? false })
+                    ? renderOption(opt, {
+                      selected: opt.value === value,
+                      disabled: opt.disabled ?? false,
+                      pending: opt.pending ?? false,
+                    })
                     : opt.label}
                 </SelectPrimitive.ItemText>
-                {renderOptionActions?.(opt)}
+                {opt.pending
+                  ? <Loader2 className="text-muted-foreground size-4 shrink-0 animate-spin" aria-hidden />
+                  : renderOptionActions?.(opt)}
                 <SelectPrimitive.ItemIndicator className="absolute right-2 flex size-3.5 items-center justify-center">
                   <Check className="size-4" />
                 </SelectPrimitive.ItemIndicator>

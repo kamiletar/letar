@@ -65,7 +65,12 @@ export const FieldOTPInput = createField<OTPInputFieldProps, string, OTPFieldSta
     const handleChange = (value: string) => {
       field.handleChange(value)
       if (autoSubmit && value.length === length) {
-        formContext.form.handleSubmit()
+        // Через `submit()` контекста: ждёт подтверждения оптимистичных действий других полей (§16.7)
+        if (formContext.submit) {
+          void formContext.submit()
+        } else {
+          formContext.form.handleSubmit()
+        }
       }
     }
 

@@ -2,12 +2,25 @@ import { act, renderHook } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 import { DeclarativeFormContext } from './form-context'
-import { useFormPending, useFormPendingRegistry, useFormPendingSnapshot, useFormSubmit } from './form-pending'
+import {
+  useCreatePendingRegistry,
+  useFormPendingRegistry,
+  useFormPendingSnapshot,
+  useFormPendingSubmit,
+  useFormSubmit,
+} from './form-pending'
+
+/** То, что делает корень формы: реестр + submit */
+function useRoot(form: { handleSubmit: () => unknown }) {
+  const pending = useCreatePendingRegistry()
+  const submit = useFormPendingSubmit(pending, form)
+  return { pending, submit }
+}
 
 describe('form-pending', () => {
-  it('useFormPending: реестр пуст — handleSubmit в том же тике; не пуст — после подтверждения', async () => {
+  it('useFormPendingSubmit: реестр пуст — handleSubmit в том же тике; не пуст — после подтверждения', async () => {
     const form = { handleSubmit: vi.fn().mockResolvedValue(undefined) }
-    const { result } = renderHook(() => useFormPending(form))
+    const { result } = renderHook(() => useRoot(form))
 
     void result.current.submit()
     expect(form.handleSubmit).toHaveBeenCalledTimes(1)
@@ -27,7 +40,7 @@ describe('form-pending', () => {
     expect(outside.result.current.snapshot).toEqual({ count: 0, submitQueued: false })
 
     const form = { handleSubmit: vi.fn() }
-    const root = renderHook(() => useFormPending(form))
+    const root = renderHook(() => useRoot(form))
     const wrapper = ({ children }: { children: ReactNode }) => (
       <DeclarativeFormContext.Provider value={{ form, pending: root.result.current.pending }}>
         {children}

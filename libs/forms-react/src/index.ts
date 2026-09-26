@@ -12,10 +12,12 @@
 // Контекст декларативной формы
 export { DeclarativeFormContext, useDeclarativeForm, useDeclarativeFormOptional } from './lib/context/form-context'
 export {
-  useFormPending,
+  useCreatePendingRegistry,
   useFormPendingRegistry,
   useFormPendingSnapshot,
+  useFormPendingSubmit,
   useFormSubmit,
+  warnSubmitBypassingPending,
 } from './lib/context/form-pending'
 
 // Контекст вложенных групп полей (построение путей вида `user.address.street`)

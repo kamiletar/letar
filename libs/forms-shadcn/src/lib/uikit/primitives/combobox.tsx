@@ -57,6 +57,9 @@ export function Combobox(
 
   // Служебный пункт создания делает список непустым — «пусто» считаем по обычным опциям
   const realOptionsCount = options.filter((opt) => !isCreateOptionValue(opt.value)).length
+  // Выбранное значение ждёт сервера (§16.7): подпись уже новая, спиннер рядом
+  const selectedPending = value !== undefined && options.some((opt) => opt.value === value && opt.pending)
+  const showSpinner = loading || selectedPending
 
   return (
     <PopoverPrimitive.Root open={open} onOpenChange={setOpen}>
@@ -68,6 +71,7 @@ export function Combobox(
             type="text"
             role="combobox"
             aria-expanded={open}
+            aria-busy={selectedPending ? true : undefined}
             value={inputValue}
             onChange={(e) => {
               onInputChange(e.target.value)
@@ -87,10 +91,10 @@ export function Combobox(
               'border-input placeholder:text-muted-foreground flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-sm shadow-xs outline-none',
               'focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
               'disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
-              (controlActions || loading) && 'pr-9',
+              (controlActions || showSpinner) && 'pr-9',
             )}
           />
-          {loading && !controlActions && (
+          {showSpinner && !controlActions && (
             <Loader2
               className="text-muted-foreground pointer-events-none absolute inset-y-0 right-2.5 my-auto size-4 animate-spin"
               aria-hidden
@@ -122,6 +126,8 @@ export function Combobox(
               role="option"
               aria-selected={opt.value === value}
               data-disabled={opt.disabled || undefined}
+              data-pending={opt.pending ? '' : undefined}
+              aria-disabled={opt.disabled || undefined}
               onClick={() => {
                 if (opt.disabled) { return }
                 onValueChange(opt.value)
@@ -134,9 +140,15 @@ export function Combobox(
               )}
             >
               {renderOption
-                ? renderOption(opt, { selected: opt.value === value, disabled: opt.disabled ?? false })
+                ? renderOption(opt, {
+                  selected: opt.value === value,
+                  disabled: opt.disabled ?? false,
+                  pending: opt.pending ?? false,
+                })
                 : opt.label}
-              {renderOptionActions?.(opt)}
+              {opt.pending
+                ? <Loader2 className="text-muted-foreground ml-auto size-4 shrink-0 animate-spin" aria-hidden />
+                : renderOptionActions?.(opt)}
             </div>
           ))}
           {listFooter && <div className="mt-1 border-t pt-1">{listFooter}</div>}

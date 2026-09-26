@@ -2,6 +2,7 @@
 
 import type { AnyFormApi } from '@tanstack/react-form'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useFormSubmit } from '../context/form-pending'
 import type { StepDirection, StepInfo } from './step-types'
 
 const EMPTY_HIDDEN_FIELDS: Set<string> = new Set()
@@ -251,10 +252,11 @@ export function useStepNavigation({
     onStepChangeRef.current?.(count)
   }, [setInternalStep])
 
-  // Программная отправка формы
+  // Программная отправка формы — с ожиданием оптимистичных действий полей (§16.7)
+  const submitForm = useFormSubmit(form)
   const triggerSubmit = useCallback(() => {
-    form.handleSubmit()
-  }, [form])
+    void submitForm()
+  }, [submitForm])
 
   return {
     direction,

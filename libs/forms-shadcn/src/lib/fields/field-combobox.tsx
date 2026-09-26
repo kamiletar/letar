@@ -8,12 +8,14 @@ import {
   isCreateOptionValue,
   isOptionEditable,
   mergeCreatedOptions,
+  type SettleErrorInfo,
   shouldOfferCreate,
 } from '@letar/forms-core/uikit'
 import {
   SelectionActionsProvider,
   SelectionOptionProvider,
   useDebounce,
+  useFormPendingRegistry,
   useNodeLabelWarning,
   usePromiseSearch,
   useSelectedLoader,
@@ -32,6 +34,7 @@ interface NormalizedOption {
   textValue?: string
   value: string
   disabled?: boolean
+  pending?: boolean
   data?: unknown
 }
 
@@ -100,7 +103,7 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
       if (componentProps.options) {
         return componentProps.options
       }
-      const { getLabel, getValue, getTextValue, getDisabled, getEditable } = componentProps
+      const { getLabel, getValue, getTextValue, getDisabled, getEditable, getPending } = componentProps
       if (!promiseSearch.data || !getLabel || !getValue) {
         return []
       }
@@ -111,6 +114,7 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
         value: getValue(item),
         disabled: getDisabled?.(item),
         editable: getEditable?.(item),
+        pending: getPending?.(item),
       }))
     }, [componentProps, promiseSearch.data])
 
@@ -124,7 +128,7 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
     })
     const selectedSourceOption = useMemo((): SelectOption | undefined => {
       const item = selectedLoader.data
-      const { getLabel, getValue, getTextValue, getDisabled, getEditable } = componentProps
+      const { getLabel, getValue, getTextValue, getDisabled, getEditable, getPending } = componentProps
       if (item === undefined || item === null || !getLabel || !getValue) {
         return undefined
       }
@@ -135,17 +139,27 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
         value: getValue(item),
         disabled: getDisabled?.(item),
         editable: getEditable?.(item),
+        pending: getPending?.(item),
       }
     }, [componentProps, selectedLoader.data])
 
-    const actions = useSelectionActionsState({ appOptions: sourceOptions })
+    const pendingRegistry = useFormPendingRegistry()
+    const actions = useSelectionActionsState({
+      appOptions: sourceOptions,
+      value: fieldValue,
+      registry: pendingRegistry,
+      onSettleError: componentProps.onSettleError as ((info: SettleErrorInfo) => void) | undefined,
+      settleTimeout: componentProps.settleTimeout,
+    })
     const { createdOptions, overlay } = actions
 
     // Правки лежат поверх опций приложения; опция приложения сильнее созданной с тем же значением
-    const merged = useMemo(
-      () => mergeCreatedOptions<SelectOption>(applyOptionOverlay(sourceOptions, overlay), createdOptions),
-      [sourceOptions, overlay, createdOptions],
-    )
+    const merged = useMemo(() => {
+      // Пока свой оптимистичный create в полёте, `pending`-опции приложения скрыты: почти всегда это та же запись
+      // (§16.7), иначе в списке две «Кровли»
+      const shownApp = actions.hasOwnCreatePending ? sourceOptions.filter((opt) => !opt.pending) : sourceOptions
+      return mergeCreatedOptions<SelectOption>(applyOptionOverlay(shownApp, overlay), createdOptions)
+    }, [sourceOptions, overlay, createdOptions, actions.hasOwnCreatePending])
 
     // Запись из `loadSelected` — вне списка; правки (`onUpdate`) накладываются и на неё
     const selectedOption = useMemo((): SelectOption | undefined => {
@@ -183,7 +197,9 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
           textValue: opt.textValue,
           data: opt.data,
           value: String(opt.value),
-          disabled: opt.disabled,
+          // Опция в ожидании подтверждения не выбирается ни мышью, ни клавиатурой
+          disabled: opt.disabled || opt.pending,
+          pending: opt.pending,
         })),
       [merged],
     )
@@ -243,8 +259,10 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
     }
   },
   render: ({ field, fullPath, resolved, hasError, errorMessage, fieldState, componentProps }): ReactElement => {
-    const currentValue = (field.state.value as string) || undefined
+    const formValue = (field.state.value as string) || undefined
     const { actions } = fieldState
+    // Оптимистично созданная запись показана выбранной, пока форма хранит прежнее значение (§16.7)
+    const currentValue = actions.pendingSelection ?? formValue
     const hasOnUpdate = !!componentProps.onUpdate
     const interactive = !resolved.disabled && !resolved.readOnly
     const search = fieldState.inputValue.trim()
@@ -256,11 +274,20 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
       if (!onCreate) {
         return
       }
+      // Текст ввода до действия: отказ оптимистичного create возвращает поле в него
+      const previousText = formValue ? getOptionText(fieldState.optionByValue.get(formValue) ?? { value: '' }) : ''
       actions.run({
         scope: 'option',
-        call: () => onCreate(search),
-        apply: (created) => {
+        kind: 'create',
+        call: (ctx) => onCreate(search, ctx),
+        onOptimistic: (preview) => fieldState.setInputValue(preview.label),
+        onRevert: () => fieldState.setInputValue(previousText),
+        apply: (created, info) => {
           actions.addCreatedOption(created)
+          // Выбор пользователя, сделанный за время ожидания, подтверждение не перебивает
+          if (info.optimistic && !info.selectionHeld) {
+            return
+          }
           field.handleChange(String(created.value))
           fieldState.setInputValue(created.label)
           // Промис-путь: внешнего кэша, который обновил бы список, нет — запрашиваем текущий поиск заново
@@ -278,9 +305,22 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
         return
       }
       const fromValue = String(source.value)
+      // Выбрана ли запись СЕЙЧАС: значение читаем живым — за время оптимистичного ожидания оно могло измениться
+      const isSelectedNow = () => {
+        const live = field.form.getFieldValue(field.name) as string | undefined
+        return !!live && String(live) === fromValue
+      }
       actions.run({
         scope,
-        call: () => onUpdate(source),
+        kind: 'edit',
+        fromValue,
+        call: (ctx) => onUpdate(source, ctx),
+        // Правят выбранное: поле ввода показывает новую подпись сразу, не дожидаясь сервера
+        onOptimistic: (preview) => {
+          if (isSelectedNow()) {
+            fieldState.setInputValue(preview.label)
+          }
+        },
         apply: (result) => {
           actions.recordEdit(fromValue, result)
           if (componentProps.loadOptions) {
@@ -288,8 +328,11 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
           }
           fieldState.invalidateSelected(fromValue)
           // Замена записи (другой value): выбранное переезжает на новую. Тот же value — форма не dirty
-          if (String(result.value) !== fromValue && currentValue === fromValue) {
-            field.handleChange(String(result.value))
+          if (isSelectedNow()) {
+            if (String(result.value) !== fromValue) {
+              field.handleChange(String(result.value))
+            }
+            fieldState.setInputValue(result.label)
           }
         },
       })
@@ -399,6 +442,11 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
             data-field-name={fullPath}
           />
         </SelectionActionsProvider>
+        {actions.settleFailure && (
+          <p role="status" className="text-destructive mt-1 text-sm" data-settle-error="">
+            {`Не удалось сохранить «${actions.settleFailure.label}»`}
+          </p>
+        )}
       </FieldWrapper>
     )
   },

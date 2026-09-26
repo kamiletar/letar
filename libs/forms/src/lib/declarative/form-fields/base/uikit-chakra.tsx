@@ -211,7 +211,7 @@ export const chakraUIKit: ChakraUIKit = {
     // Первая доступная опция в порядке отображения — её подсвечивает поле поиска
     const firstVisibleValue = useMemo(() => {
       const ordered = groups ? Array.from(groups.values()).flat() : visibleOptions
-      return ordered.find((opt) => !opt.disabled)?.value
+      return ordered.find((opt) => !opt.disabled && !opt.pending)?.value
     }, [groups, visibleOptions])
 
     // `''` — «ничего не выбрано», если такой опции нет, и настоящее значение, если есть
@@ -226,7 +226,8 @@ export const chakraUIKit: ChakraUIKit = {
           items: visibleOptions,
           itemToString: (item: (typeof options)[number]) => getOptionText(item),
           itemToValue: (item: (typeof options)[number]) => item.value,
-          isItemDisabled: (item: (typeof options)[number]) => item.disabled ?? false,
+          // Опция в ожидании подтверждения (§16.7) не выбирается ни мышью, ни клавиатурой, ни typeahead
+          isItemDisabled: (item: (typeof options)[number]) => !!(item.disabled || item.pending),
           ...(groups && { groupBy: (item: (typeof options)[number]) => item.group ?? '' }),
         }),
       [visibleOptions, groups],
@@ -235,7 +236,11 @@ export const chakraUIKit: ChakraUIKit = {
     // Содержимое пункта: своё (`renderOption`) или label как есть (узел не сплющивается в строку)
     const renderItemContent = (opt: (typeof options)[number]) =>
       renderOption
-        ? renderOption(opt, { selected: selected[0] === opt.value, disabled: opt.disabled ?? false })
+        ? renderOption(opt, {
+          selected: selected[0] === opt.value,
+          disabled: opt.disabled ?? false,
+          pending: opt.pending ?? false,
+        })
         : opt.label
 
     // Подпись выбранного в триггере: `renderValue`; пустой результат — откат к строке опции
@@ -252,18 +257,18 @@ export const chakraUIKit: ChakraUIKit = {
         <ChakraSelect.ItemGroup key={groupName}>
           {groupName && <ChakraSelect.ItemGroupLabel>{groupName}</ChakraSelect.ItemGroupLabel>}
           {groupItems.map((opt) => (
-            <ChakraSelect.Item item={opt} key={opt.value}>
+            <ChakraSelect.Item item={opt} key={opt.value} data-pending={opt.pending ? '' : undefined}>
               <ChakraSelect.ItemText>{renderItemContent(opt)}</ChakraSelect.ItemText>
-              {renderOptionActions?.(opt)}
+              {opt.pending ? <Spinner size="xs" /> : renderOptionActions?.(opt)}
               <ChakraSelect.ItemIndicator />
             </ChakraSelect.Item>
           ))}
         </ChakraSelect.ItemGroup>
       ))
       : visibleOptions.map((opt) => (
-        <ChakraSelect.Item item={opt} key={opt.value}>
+        <ChakraSelect.Item item={opt} key={opt.value} data-pending={opt.pending ? '' : undefined}>
           <ChakraSelect.ItemText>{renderItemContent(opt)}</ChakraSelect.ItemText>
-          {renderOptionActions?.(opt)}
+          {opt.pending ? <Spinner size="xs" /> : renderOptionActions?.(opt)}
           <ChakraSelect.ItemIndicator />
         </ChakraSelect.Item>
       ))
@@ -297,6 +302,8 @@ export const chakraUIKit: ChakraUIKit = {
           <ChakraSelect.Trigger
             ref={triggerRef}
             pe={controlActions ? (clearable ? '5.5rem' : '4rem') : undefined}
+            // Выбранное значение ждёт сервера (§16.7): подпись уже новая, спиннер рядом
+            aria-busy={selectedOption?.pending ? true : undefined}
             aria-keyshortcuts={onEditHotkey ? 'F2' : undefined}
             aria-describedby={onEditHotkey && editHotkeyHint ? hintId : undefined}
             onKeyDown={onEditHotkey
@@ -321,7 +328,7 @@ export const chakraUIKit: ChakraUIKit = {
             </ChakraSelect.ValueText>
           </ChakraSelect.Trigger>
           <ChakraSelect.IndicatorGroup>
-            {loading && <Spinner size="xs" />}
+            {(loading || selectedOption?.pending) && <Spinner size="xs" />}
             {clearable && <ChakraSelect.ClearTrigger />}
             {controlActions && (
               // IndicatorGroup не принимает клики (pointer-events: none) — кнопке возвращаем их

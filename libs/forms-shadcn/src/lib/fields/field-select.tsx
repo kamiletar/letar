@@ -7,13 +7,16 @@ import {
   isCreateOptionValue,
   isOptionEditable,
   mergeCreatedOptions,
+  type SettleErrorInfo,
 } from '@letar/forms-core/uikit'
 import {
   SelectionActionsProvider,
   SelectionOptionProvider,
+  useFormPendingRegistry,
   useNodeLabelWarning,
   useSelectionActionsState,
 } from '@letar/forms-react'
+import { useStore } from '@tanstack/react-form'
 import type { ReactElement } from 'react'
 import { useEffect, useMemo } from 'react'
 import { createField } from '../uikit/primitives'
@@ -54,6 +57,7 @@ interface NormalizedOption {
   value: string
   disabled?: boolean
   editable?: boolean
+  pending?: boolean
   data?: unknown
 }
 
@@ -73,18 +77,30 @@ interface SelectFieldState {
 /** Form.Field.Select — shadcn-скин. */
 const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFieldState>({
   displayName: 'FieldSelect',
-  useFieldState: (componentProps, resolved): SelectFieldState => {
+  useFieldState: (componentProps, resolved, { form, fullPath }): SelectFieldState => {
     const sourceOptions = (componentProps.options ?? resolved.options ?? []) as SelectOption[]
     const showCreateItem = !!componentProps.onCreate && componentProps.createItem !== false
     const hasOnUpdate = !!componentProps.onUpdate
     const createLabel = componentProps.createLabel ?? 'Добавить…'
 
-    const actions = useSelectionActionsState({ appOptions: sourceOptions })
+    // Значение нужно конвейеру действий: ожидающий выбор оптимистичного create снимается, когда оно изменилось
+    const fieldValue = useStore(form.store, () => form.getFieldValue(fullPath)) as string | number | undefined
+    const pendingRegistry = useFormPendingRegistry()
+    const actions = useSelectionActionsState({
+      appOptions: sourceOptions,
+      value: fieldValue,
+      registry: pendingRegistry,
+      onSettleError: componentProps.onSettleError as ((info: SettleErrorInfo) => void) | undefined,
+      settleTimeout: componentProps.settleTimeout,
+    })
     const { createdOptions, overlay } = actions
 
     const { normalizedOptions, optionByValue } = useMemo(() => {
+      // Пока свой оптимистичный create в полёте, `pending`-опции приложения скрыты: почти всегда это та же запись,
+      // иначе в списке две «Кровли» (§16.7)
+      const shownApp = actions.hasOwnCreatePending ? sourceOptions.filter((opt) => !opt.pending) : sourceOptions
       // Правки лежат поверх опций приложения, пока оно не перезапросит список
-      const edited = applyOptionOverlay(sourceOptions, overlay)
+      const edited = applyOptionOverlay(shownApp, overlay)
       // Опция приложения сильнее созданной с тем же значением — дубля после перезагрузки нет
       const merged = mergeCreatedOptions<SelectOption>(edited, createdOptions)
       const toKey = (opt: SelectOption) => (String(opt.value) === '' ? EMPTY_OPTION_TOKEN : String(opt.value))
@@ -94,6 +110,7 @@ const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFie
         data: opt.data,
         value: toKey(opt),
         disabled: opt.disabled,
+        pending: opt.pending,
         editable: isOptionEditable(opt, hasOnUpdate),
       }))
       // Служебный пункт: перехватывается в onValueChange, в форму не попадает
@@ -104,7 +121,7 @@ const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFie
         normalizedOptions: withCreate,
         optionByValue: new Map<string, SelectOption>(merged.map((opt) => [toKey(opt), opt])),
       }
-    }, [sourceOptions, overlay, createdOptions, hasOnUpdate, showCreateItem, createLabel])
+    }, [sourceOptions, overlay, createdOptions, hasOnUpdate, showCreateItem, createLabel, actions.hasOwnCreatePending])
 
     const resolvedClearable = componentProps.clearable ?? !resolved.required
 
@@ -124,10 +141,12 @@ const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFie
   },
   render: ({ field, fullPath, resolved, hasError, errorMessage, componentProps, fieldState }): ReactElement => {
     const currentValue = field.state.value
-    const rawValue = currentValue !== null && currentValue !== undefined ? String(currentValue) : undefined
+    const formRawValue = currentValue !== null && currentValue !== undefined ? String(currentValue) : undefined
+    const { actions } = fieldState
+    // Оптимистично созданная запись показана выбранной, пока форма хранит прежнее значение (§16.7)
+    const rawValue = actions.pendingSelection ?? formRawValue
     // `''` при наличии опции с пустым значением — это выбранная опция, а не «пусто»
     const stringValue = rawValue === '' && fieldState.hasEmptyOption ? EMPTY_OPTION_TOKEN : rawValue
-    const { actions } = fieldState
     const hasOnUpdate = !!componentProps.onUpdate
     const interactive = !resolved.disabled && !resolved.readOnly
 
@@ -147,10 +166,14 @@ const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFie
       }
       actions.run({
         scope: 'option',
-        call: () => onCreate(''),
-        apply: (created) => {
+        kind: 'create',
+        call: (ctx) => onCreate('', ctx),
+        apply: (created, info) => {
           actions.addCreatedOption(created)
-          applyValue(String(created.value))
+          // Выбор пользователя, сделанный за время оптимистичного ожидания, подтверждение не перебивает
+          if (!info.optimistic || info.selectionHeld) {
+            applyValue(String(created.value))
+          }
         },
       })
     }
@@ -164,11 +187,15 @@ const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFie
       const fromValue = String(source.value)
       actions.run({
         scope,
-        call: () => onUpdate(source),
+        kind: 'edit',
+        fromValue,
+        call: (ctx) => onUpdate(source, ctx),
         apply: (result) => {
           actions.recordEdit(fromValue, result)
-          // Замена записи (другой value): выбранное переезжает на новую. Тот же value — форма не dirty
-          if (String(result.value) !== fromValue && rawValue === fromValue) {
+          // Замена записи (другой value): выбранное переезжает на новую. Тот же value — форма не dirty.
+          // Значение читаем живым: при оптимистичной правке за время ожидания оно могло измениться
+          const liveValue = field.form.getFieldValue(field.name)
+          if (String(result.value) !== fromValue && liveValue !== undefined && String(liveValue) === fromValue) {
             applyValue(String(result.value))
           }
         },
@@ -285,6 +312,11 @@ const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFie
             data-field-name={fullPath}
           />
         </SelectionActionsProvider>
+        {actions.settleFailure && (
+          <p role="status" className="text-destructive mt-1 text-sm" data-settle-error="">
+            {`Не удалось сохранить «${actions.settleFailure.label}»`}
+          </p>
+        )}
         <shadcnUIKit.FieldError hasError={hasError} errorMessage={errorMessage} helperText={resolved.helperText} />
       </shadcnUIKit.FieldRoot>
     )

@@ -83,7 +83,7 @@ describe('Field.Combobox — onCreate', () => {
     await typeSearch('Фас')
     await userEvent.click(await screen.findByRole('option', { name: '+ Добавить "Фас"' }))
 
-    await waitFor(() => expect(onCreate).toHaveBeenCalledWith('Фас'))
+    await waitFor(() => expect(onCreate).toHaveBeenCalledWith('Фас', expect.anything()))
     await waitFor(() => expect(screen.getByRole('combobox')).toHaveValue('Фасады'))
 
     await userEvent.click(screen.getByText('go'))
@@ -128,7 +128,7 @@ describe('Field.Combobox — onCreate', () => {
     )
     await typeSearch('Фас')
     await userEvent.click(await screen.findByRole('option', { name: '+ Добавить "Фас"' }))
-    await waitFor(() => expect(onCreate).toHaveBeenCalledWith('Фас'))
+    await waitFor(() => expect(onCreate).toHaveBeenCalledWith('Фас', expect.anything()))
     await waitFor(() => expect(screen.getByRole('combobox')).toHaveValue('Фасады'))
 
     await userEvent.click(screen.getByText('go'))

@@ -23,6 +23,7 @@ export type SelectionStringKey =
   | 'formSelection.editHotkeyHint'
   | 'formSelection.search.placeholder'
   | 'formSelection.search.aria'
+  | 'formSelection.settleError'
 
 /**
  * Встроенный словарь дефолтов — отдельный от `min-chars-hint.ts` (та подсказка требует
@@ -46,6 +47,8 @@ const BUILTIN_SELECTION_STRINGS: Record<SelectionStringKey, Record<string, strin
   // Поле поиска внутри списка Select: подсказка и `aria-label`
   'formSelection.search.placeholder': { en: 'Search...', ru: 'Поиск...' },
   'formSelection.search.aria': { en: 'Search options', ru: 'Поиск по списку' },
+  // Оптимистичное действие не подтвердилось (§16.7); `{label}` подставляет поле
+  'formSelection.settleError': { en: 'Could not save “{label}”', ru: 'Не удалось сохранить «{label}»' },
 }
 
 function buildBuiltinString(key: SelectionStringKey, locale: string): string {

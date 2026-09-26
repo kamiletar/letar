@@ -1,6 +1,7 @@
 'use client'
 
 import { Button } from '@chakra-ui/react'
+import { useFormPendingSnapshot } from '@letar/forms-react'
 import type { ReactElement } from 'react'
 import { useDeclarativeForm } from '../form-context'
 import type { SubmitButtonProps } from '../types'
@@ -32,15 +33,17 @@ export function ButtonSubmit({
   width,
 }: SubmitButtonProps): ReactElement {
   const { form } = useDeclarativeForm()
+  // Отправка в очереди: ждём подтверждения оптимистичных действий полей (§16.7)
+  const { submitQueued } = useFormPendingSnapshot()
 
   return (
     <form.Subscribe selector={(state: { isSubmitting: boolean }) => state.isSubmitting}>
       {(isSubmitting: boolean) => (
         <Button
           type="submit"
-          loading={isSubmitting}
+          loading={isSubmitting || submitQueued}
           loadingText={loadingText}
-          disabled={disabled || isSubmitting}
+          disabled={disabled || isSubmitting || submitQueued}
           colorPalette={colorPalette}
           size={size}
           variant={variant}

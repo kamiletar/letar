@@ -1,5 +1,6 @@
 'use client'
 
+import { useCreatePendingRegistry, useFormPendingSubmit, warnSubmitBypassingPending } from '@letar/forms-react'
 import { type ReactElement, type ReactNode, useEffect } from 'react'
 import { useAppForm } from '../../form-hook'
 import type { FormOfflineConfig } from '../../offline'
@@ -126,11 +127,16 @@ export function FormWithApi<TData extends object>({
     ? (formApi.data ?? initialValue ?? ({} as TData))
     : (initialValue ?? ({} as TData))
 
+  // Реестр неподтверждённых оптимистичных действий полей (§16.7): отправка ждёт его пустоты
+  const pendingRegistry = useCreatePendingRegistry()
+
   // Initialize form
   const form = useAppForm({
     defaultValues,
     validators: buildValidators(schema, validateOn),
     onSubmit: async ({ value }) => {
+      warnSubmitBypassingPending(pendingRegistry)
+
       // Honeypot — блокировка ботов
       if (isBot()) {
         return
@@ -206,6 +212,8 @@ export function FormWithApi<TData extends object>({
   // Data loading flag (edit mode)
   const dataLoaded = formApi.isEditMode && formApi.data && !formApi.isLoading
 
+  const submit = useFormPendingSubmit(pendingRegistry, form)
+
   // Build context value
   const contextValue: DeclarativeFormContextValue = {
     form,
@@ -222,6 +230,8 @@ export function FormWithApi<TData extends object>({
     disabled,
     readOnly,
     addressProvider,
+    pending: pendingRegistry,
+    submit,
   }
 
   // Show loading state in edit mode
@@ -239,7 +249,7 @@ export function FormWithApi<TData extends object>({
         onSubmit={(e) => {
           e.preventDefault()
           e.stopPropagation()
-          form.handleSubmit()
+          void submit()
         }}
       >
         {honeypot && <HoneypotField />}

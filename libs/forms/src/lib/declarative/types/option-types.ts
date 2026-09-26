@@ -23,12 +23,19 @@ export interface BaseOption<T = string, TData = unknown> {
   disabled?: boolean
   /** App data: the field never reads it, only hands it to `renderOption`/`renderValue` */
   data?: TData
+  /**
+   * The record is not confirmed by the server yet (optimistic update): shown dimmed with a spinner, cannot be
+   * selected or edited. Set by the app (`pending: !!row.$optimistic`) or by `@letar/forms-query/zenstack`.
+   */
+  pending?: boolean
 }
 
 /** State of an option for `renderOption` (highlight is a CSS concern — `[data-highlighted]`) */
 export interface OptionRenderState {
   selected: boolean
   disabled: boolean
+  /** The option waits for the server (see `BaseOption.pending`, or the field's own optimistic create/edit) */
+  pending: boolean
 }
 
 /** Flag «the option cannot be edited» for fields with `onUpdate` (default: editable) */

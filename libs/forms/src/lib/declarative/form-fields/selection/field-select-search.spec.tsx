@@ -182,7 +182,7 @@ describe('Field.Select — поиск', () => {
     await act(async () => {
       await userEvent.click(createItem)
     })
-    expect(onCreate).toHaveBeenCalledWith('новая')
+    expect(onCreate).toHaveBeenCalledWith('новая', expect.anything())
   })
 
   it('точное совпадение подписи — пункта создания нет', async () => {
@@ -298,7 +298,9 @@ describe('Field.Select — поиск', () => {
     setQuery(input, 'Привет')
     await waitFor(() => expect(optionTexts()).toEqual(['Привет']))
     await userEvent.keyboard('{F2}')
-    await waitFor(() => expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({ value: 'v1' })))
+    await waitFor(() =>
+      expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({ value: 'v1' }), expect.anything())
+    )
   })
 
   it('aria-activedescendant указывает на подсвеченную опцию', async () => {

@@ -1,7 +1,7 @@
 'use client'
 
 import { resolveStaticFormText } from '@letar/forms-core/i18n'
-import { useFormI18n } from '@letar/forms-react'
+import { useFormI18n, useFormPendingRegistry } from '@letar/forms-react'
 import { useRouter } from 'next/navigation'
 import {
   createContext,
@@ -185,11 +185,14 @@ function DirtyGuardCore({
   const [showDialog, setShowDialog] = useState(false)
   const pendingHref = useRef<string | null>(null)
 
+  // Оптимистичное действие поля, ждущее сервера, — тоже несохранённое изменение (§16.7): выбор ещё не в форме
+  const pendingRegistry = useFormPendingRegistry()
+
   // Check isDirty
   const checkIsDirty = useCallback(() => {
     const state = form.state
-    return state.isDirty
-  }, [form])
+    return state.isDirty || (pendingRegistry?.getSnapshot().count ?? 0) > 0
+  }, [form, pendingRegistry])
 
   // Handler for beforeunload (tab close, refresh)
   useEffect(() => {

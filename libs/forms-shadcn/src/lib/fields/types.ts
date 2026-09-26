@@ -8,6 +8,7 @@ import type {
   LoadOptionsFn,
   LoadSelectedFn,
   SelectSearchable,
+  SettleErrorInfo,
   UpdateOptionHandler,
 } from '@letar/forms-core/uikit'
 import type { BaseFieldProps } from '@letar/forms-react'
@@ -68,12 +69,19 @@ export interface SelectOption<TData = unknown> {
   data?: TData
   /** `false` прячет карандаш этой опции у полей с `onUpdate` (системные записи) */
   editable?: boolean
+  /**
+   * Запись ещё не подтверждена сервером (оптимистичное обновление): приглушена, со спиннером, не выбирается и не
+   * правится. Ставит приложение (`pending: !!row.$optimistic`) или `@letar/forms-query/zenstack`.
+   */
+  pending?: boolean
 }
 
 /** Состояние опции для `renderOption` (подсветка — забота CSS: `data-highlighted`) */
 export interface OptionRenderState {
   selected: boolean
   disabled: boolean
+  /** Опция ждёт сервера (`SelectOption.pending` или собственное оптимистичное действие поля) */
+  pending: boolean
 }
 
 /**
@@ -140,6 +148,14 @@ export interface SelectFieldProps<TData = unknown> extends BaseFieldProps {
    * выбранная опция переезжает на новую. Горячая клавиша — F2 на подсвеченном пункте или значении.
    */
   onUpdate?: UpdateOptionHandler<SelectOption<TData>, TData>
+  /**
+   * Сервер не подтвердил то, что `onCreate`/`onUpdate` показали оптимистично (`ctx.optimistic(...)`): reject, `null`
+   * после `optimistic` или нет ответа за `settleTimeout`. Поле уже откатило опцию. Без обработчика поле показывает
+   * под собой своё сообщение (`role="status"`).
+   */
+  onSettleError?: (info: SettleErrorInfo<TData>) => void
+  /** Сколько ждать сервер после `ctx.optimistic(...)`, мс (по умолчанию 30 000) */
+  settleTimeout?: number
   /** Свой низ списка после пунктов (например `<Form.Field.Select.CreateButton />`) */
   listFooter?: ReactNode
   /**
@@ -300,6 +316,14 @@ export interface ComboboxFieldBaseProps<TData = unknown> extends BaseFieldProps 
    * скине у Combobox нет клавиатурной навигации по списку, поэтому без F2). Контракт как у Select.
    */
   onUpdate?: UpdateOptionHandler<SelectOption<TData>, TData>
+  /**
+   * Сервер не подтвердил то, что `onCreate`/`onUpdate` показали оптимистично (`ctx.optimistic(...)`): reject, `null`
+   * после `optimistic` или нет ответа за `settleTimeout`. Поле уже откатило опцию. Без обработчика поле показывает
+   * под собой своё сообщение (`role="status"`).
+   */
+  onSettleError?: (info: SettleErrorInfo<TData>) => void
+  /** Сколько ждать сервер после `ctx.optimistic(...)`, мс (по умолчанию 30 000) */
+  settleTimeout?: number
   /** Свой низ списка после пунктов */
   listFooter?: ReactNode
   /** Своё содержимое состояния «ничего не найдено» (вместо текста по умолчанию) */
@@ -318,6 +342,8 @@ interface ComboboxGetItem<TData> {
   getValue: (item: TData) => string | number
   getDisabled?: (item: TData) => boolean
   getEditable?: (item: TData) => boolean
+  /** Запись ещё не подтверждена сервером (оптимистичное обновление): приглушена, не выбирается и не правится */
+  getPending?: (item: TData) => boolean
 }
 
 /** Ровно ОДИН источник опций — второй источник рядом не проходит по типам (`?: never`) */
@@ -333,6 +359,7 @@ type ComboboxSource<TData> =
     getValue?: never
     getDisabled?: never
     getEditable?: never
+    getPending?: never
   }
   | (
     & ComboboxGetItem<TData>

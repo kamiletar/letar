@@ -79,7 +79,7 @@ describe('Field.Select — onUpdate', () => {
     await openList()
     await waitFor(() => expect(itemPencils()).toHaveLength(2))
     await userEvent.click(itemPencils()[1])
-    expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({ value: 'b', label: 'Фасад' }))
+    expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({ value: 'b', label: 'Фасад' }), expect.anything())
     expect(screen.getByRole('combobox')).toHaveTextContent('Кровля')
   })
 
@@ -135,7 +135,7 @@ describe('Field.Select — onUpdate', () => {
     renderSelect({ onUpdate })
     screen.getByRole('combobox').focus()
     await userEvent.keyboard('{F2}')
-    expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({ value: 'a' }))
+    expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({ value: 'a' }), expect.anything())
   })
 
   it('свой renderOption без EditButton — карандаша в пункте нет; с EditButton — есть', async () => {
@@ -183,7 +183,7 @@ describe('Field.Select — onUpdate', () => {
     await openList()
     expect(screen.getAllByText(/Add…/)).toHaveLength(1)
     await userEvent.click(screen.getByText(/Add…/))
-    expect(onCreate).toHaveBeenCalledWith('')
+    expect(onCreate).toHaveBeenCalledWith('', expect.anything())
     await waitFor(() => expect(screen.getByRole('combobox')).toHaveTextContent('Новая'))
   })
 
