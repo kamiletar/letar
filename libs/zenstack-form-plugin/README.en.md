@@ -348,6 +348,51 @@ Warnings (generation still succeeds): `form.relation.model` names a model missin
 `form.relation.labelField` / `descriptionField` names a field the target model does not have; a
 registry key and `form.relation.*` on the same field (the key wins, `relation` is ignored).
 
+### Auto-matching by name (v4.3.0)
+
+> Requires **`@letar/forms` >= 2.26.0**. An older library ignores the hint (meta is free-form) and
+> renders the field as before. App behavior changes only after upgrading `@letar/forms` **and**
+> re-running `zenstack generate`.
+
+You do not have to write a key: for a foreign-key field and for an enum field the plugin writes a
+`ui.registryName` hint into the meta on its own - the target model name (from
+`@relation(fields: [categoryId], ...)`) or the enum name. The auto-form looks up `Select.<Name>` in
+the `createForm` registry: found - it renders that component (same rules and props as an explicit
+key); not found - the previous field is rendered (text input for an FK, a Select with the options for
+an enum) **with no error and no warning**.
+
+```zmodel
+model Work {
+  id         String        @id @default(cuid())
+  categoryId String                              // -> ui.registryName: 'WorkCategory'
+  category   WorkCategory  @relation(fields: [categoryId], references: [id])
+  status     WorkStatus                          // -> ui.registryName: 'WorkStatus'
+}
+```
+
+Registering `Select.WorkCategory` (and/or `Select.WorkStatus`) in `createForm` is enough.
+
+**No hint is written when:**
+
+- the field has `form.fieldType` - any value, built-in ones included. This is the **way to opt out**:
+  `@meta("form.fieldType", "select")` keeps the plain Select;
+- `form.relation.*` is set - the author chose the relation-provider path, it is not overridden;
+- the field is a list (`Category[]`, many-to-many) or a composite FK (`fields: [a, b]`);
+- the field is not part of the form (`form.exclude`, `@omit`, `@computed`, `id`, system fields). Auto-matching
+  **does not change** the set of form fields: an FK that is not in the form does not get pulled in.
+
+Only `Select.*` is matched automatically; `Combobox.*` and `Listbox.*` need an explicit key.
+
+`form-registry-keys.ts` additionally exports `formRegistryCandidates.Select` (unique sorted model and enum
+names a hint was derived for) and the `FormSelectCandidate` type. They are **separate** from
+`formRegistryKeys`: a missing component for a candidate is legitimate, so candidates are not part of
+`FormRegistryCheck`. `FormRegistryUnregistered<typeof AppForm, FormSelectCandidate>` from
+`@letar/forms` >= 2.26.0 lists candidates left without a component (`never` - all covered).
+
+Warning: if the registry already has `Select.X` and an auto-form has an FK or enum field named `X`,
+after the upgrade and regeneration that field starts rendering with this component instead of the base
+field. To keep the base field, put a built-in `form.fieldType` on it.
+
 ## Auto-excluded Fields
 
 - `id` — primary keys
@@ -380,7 +425,7 @@ registry key and `form.relation.*` on the same field (the key wins, `relation` i
 ```
 src/generated/form-schemas/
 ├── index.ts               # Re-exports all schemas
-├── form-registry-keys.ts  # createForm registry keys (always, since 4.2.0)
+├── form-registry-keys.ts  # createForm registry keys + auto-match candidates (always, since 4.2.0)
 ├── enums/
 │   └── RecipeType.form.ts # Enum schemas with labels
 ├── Recipe.form.ts         # Model schemas

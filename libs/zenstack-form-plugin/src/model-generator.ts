@@ -644,6 +644,59 @@ export function collectAllFields(model: DataModel, visited = new Set<TypeDef>())
   return [...mixinFields, ...model.fields]
 }
 
+/**
+ * Карта «имя скалярного FK-поля → имя целевой модели» по полям-связям (этап Ж, `libs/forms/PLAN.md`
+ * §17.9). Langium отдаёт `category WorkCategory @relation(fields: [categoryId], references: [id])`
+ * так: атрибут `@relation`, у него `AttributeArg` с `name === 'fields'` и значением `ArrayExpr`
+ * из `ReferenceExpr` (`target.$refText` — имя FK-поля). Имя связи (`@relation("W", fields: …)`) —
+ * отдельный позиционный аргумент без `name`, на разбор `fields` не влияет. Тип поля-связи — целевая модель.
+ *
+ * Берётся только одиночный FK: составной (`fields: [a, b]`) и связь-список (`Category[]`, m:n) пропускаются.
+ * Один FK под двумя связями на разные модели — неоднозначно, такой FK из карты исключается.
+ *
+ * Поле-связь и её FK могут лежать в разных местах (модель и миксин), поэтому на входе — все поля модели
+ * с учётом миксинов (`collectAllFields`).
+ */
+function collectForeignKeyTargets(fields: readonly DataField[]): Map<string, string> {
+  const targets = new Map<string, string>()
+  const ambiguous = new Set<string>()
+
+  for (const field of fields) {
+    if (isList(field)) {
+      continue
+    }
+    // Реальный AST хранит `decl.$refText === '@relation'`; голое `relation` — форма мок-фикстур старых тестов
+    const relationAttr = field.attributes.find(
+      (attr: DataFieldAttribute) => attr.decl?.$refText === '@relation' || attr.decl?.$refText === 'relation',
+    )
+    if (!relationAttr) {
+      continue
+    }
+
+    const fieldsArg = relationAttr.args.find((arg) => arg.name === 'fields')?.value
+    if (fieldsArg?.$type !== 'ArrayExpr' || fieldsArg.items.length !== 1) {
+      continue
+    }
+    const fkItem = fieldsArg.items[0]
+    if (fkItem?.$type !== 'ReferenceExpr') {
+      continue
+    }
+
+    const fkName = fkItem.target.$refText
+    const targetModel = getFieldType(field)
+    const known = targets.get(fkName)
+    if (known !== undefined && known !== targetModel) {
+      ambiguous.add(fkName)
+    }
+    targets.set(fkName, targetModel)
+  }
+
+  for (const fkName of ambiguous) {
+    targets.delete(fkName)
+  }
+  return targets
+}
+
 function collectTypeDefFields(typeDef: TypeDef | undefined, visited: Set<TypeDef>): DataField[] {
   if (!typeDef || visited.has(typeDef)) {
     return []
@@ -663,7 +716,11 @@ export function extractModelInfo(model: DataModel, enumNames: Set<string>): Mode
   // System fields that are always excluded
   const systemFields = ['id', 'createdAt', 'updatedAt']
 
-  for (const field of collectAllFields(model)) {
+  const allFields = collectAllFields(model)
+  // Этап Ж: имя FK-поля → целевая модель, для подсказки автоподбора `registryName`
+  const foreignKeyTargets = collectForeignKeyTargets(allFields)
+
+  for (const field of allFields) {
     const fieldType = getFieldType(field)
     // Фаза 4 (v4.0.0) — legacy comment-синтаксис @form.* убран целиком, @meta("form.*", …)
     // единственный источник UI-метаданных.
@@ -716,15 +773,29 @@ export function extractModelInfo(model: DataModel, enumNames: Set<string>): Mode
       }
     }
 
+    const fieldIsEnum = isEnumType(field, enumNames)
+
+    // Этап Ж (§17.9): подсказка автоподбора `Select.<Имя>` в реестре createForm. Только для скалярного
+    // FK одиночной связью и для enum-поля; любой явный выбор автора (`form.fieldType` — в том числе
+    // встроенный, это способ отказаться, — или `form.relation.*`) подсказку не пишет.
+    // Набор полей формы это не меняет: сюда доходят только уже включённые в форму поля.
+    const hasExplicitChoice = !!formMeta.fieldType || !!formMeta.relation
+    const registryName = !fieldIsList && !hasExplicitChoice
+      ? (fieldIsEnum ? fieldType : foreignKeyTargets.get(field.name))
+      : undefined
+
     const fieldInfo: ModelFieldInfo = {
       name: field.name,
       type: fieldType,
       isRequired: isRequired(field),
       isList: fieldIsList,
-      isEnum: isEnumType(field, enumNames),
-      enumName: isEnumType(field, enumNames) ? fieldType : undefined,
+      isEnum: fieldIsEnum,
+      enumName: fieldIsEnum ? fieldType : undefined,
       defaultValue: getDefaultValue(field),
       formMeta,
+    }
+    if (registryName !== undefined) {
+      fieldInfo.registryName = registryName
     }
 
     fields.push(fieldInfo)
@@ -902,6 +973,8 @@ function generateZodType(field: ModelFieldInfo, _enumNames: Set<string>): string
  */
 interface GenerateUIMetaParams {
   formMeta: FormFieldMeta
+  /** Подсказка автоподбора компонента реестра (`ModelFieldInfo.registryName`) */
+  registryName?: string
   modelName: string
   fieldName: string
   i18nConfig: I18nConfig | null
@@ -911,7 +984,7 @@ interface GenerateUIMetaParams {
  * Generate UI meta object for a field.
  */
 function generateUIMeta(params: GenerateUIMetaParams): string | null {
-  const { formMeta, modelName, fieldName, i18nConfig } = params
+  const { formMeta, registryName, modelName, fieldName, i18nConfig } = params
   const parts: string[] = []
 
   if (formMeta.title) {
@@ -934,6 +1007,10 @@ function generateUIMeta(params: GenerateUIMetaParams): string | null {
     parts.push(`fieldProps: ${JSON.stringify(formMeta.props)}`)
   } else if (formMeta.relation) {
     parts.push(`fieldProps: { relation: ${JSON.stringify(formMeta.relation)} }`)
+  }
+  // Этап Ж: подсказка автоподбора — после fieldType/fieldProps, до tooltip; объект `ui` создаётся и ради неё одной
+  if (registryName !== undefined) {
+    parts.push(`registryName: ${quoteTsString(registryName)}`)
   }
   if (formMeta.tooltip) {
     if (formMeta.tooltip.description) {
@@ -1008,6 +1085,7 @@ export function generateModelCode(
     const zodType = generateZodType(field, enumNames)
     const uiMeta = generateUIMeta({
       formMeta: field.formMeta,
+      registryName: field.registryName,
       modelName: name,
       fieldName: field.name,
       i18nConfig,

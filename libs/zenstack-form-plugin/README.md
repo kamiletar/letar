@@ -573,6 +573,50 @@ export const appFormRegistryCheck: FormRegistryCheck<typeof AppForm, FormSelectK
 Поле встречается и в ручных формах или у него своё окно — компонент и ключ; только автоформы и
 короткие обработчики — `RelationConfig.fieldProps`.
 
+### Автоподбор по имени (v4.3.0, этап Ж)
+
+> ⚠️ Требует **`@letar/forms` ≥ 2.26.0**. С более старой библиотекой подсказка игнорируется (мета
+> произвольна), поле рисуется как раньше. Поведение приложения меняется только после обновления
+> `@letar/forms` **и** повторного `zenstack generate`.
+
+Ключ в схеме писать не обязательно: для поля-внешнего-ключа и для enum-поля плагин сам пишет в мету
+подсказку `ui.registryName` — имя целевой модели (по `@relation(fields: [categoryId], …)`) или имя
+enum. Автоформа ищет в реестре `createForm` компонент `Select.<Имя>`: есть — рисует его (с теми же
+правилами и пропсами, что у явного ключа), нет — рисует прежнее поле (текстовое у FK, Select с опциями
+у enum) **без ошибки и предупреждения**.
+
+```zmodel
+model Work {
+  id         String        @id @default(cuid())
+  categoryId String                              // → ui.registryName: 'WorkCategory'
+  category   WorkCategory  @relation(fields: [categoryId], references: [id])
+  status     WorkStatus                          // → ui.registryName: 'WorkStatus'
+}
+```
+
+Достаточно зарегистрировать `Select.WorkCategory` (и/или `Select.WorkStatus`) в `createForm`.
+
+**Подсказки нет, когда:**
+
+- у поля задан `form.fieldType` — любой, в том числе встроенный. Это **способ отказаться** от автоподбора:
+  `@meta("form.fieldType", "select")` оставляет обычный Select;
+- задан `form.relation.*` — автор выбрал путь через провайдер связей, его не перебиваем;
+- поле — список (`Category[]`, m:n) или составной FK (`fields: [a, b]`);
+- поле не входит в форму (`form.exclude`, `@omit`, `@computed`, `id`, служебные). Набор полей формы автоподбор
+  **не меняет**: FK, не включённый в форму, в неё не попадает.
+
+Автоподбор работает только для `Select.*`; `Combobox.*` и `Listbox.*` — только по явному ключу.
+
+В `form-registry-keys.ts` добавляются `formRegistryCandidates.Select` (уникальные отсортированные имена
+моделей и enum, для которых выведена подсказка) и тип `FormSelectCandidate`. Они **отдельно** от
+`formRegistryKeys`: отсутствие компонента у кандидата законно, поэтому в `FormRegistryCheck` кандидаты не
+входят. Какие кандидаты остались без компонента — покажет `FormRegistryUnregistered<typeof AppForm, FormSelectCandidate>`
+из `@letar/forms` ≥ 2.26.0 (`never` — все покрыты).
+
+⚠️ Если в реестре уже есть `Select.X`, а в автоформе есть FK или enum-поле с именем `X`, после обновления
+и перегенерации оно начнёт рисоваться этим компонентом вместо базового поля. Не хотите — `form.fieldType` со
+встроенным типом на этом поле.
+
 ### Предупреждения при generate
 
 Не роняют генерацию (старые схемы продолжают собираться):
@@ -668,7 +712,7 @@ ZModel разрешает `@@strict()` только на `type`-определе
 ```
 src/generated/form-schemas/
 ├── index.ts                    # Реэкспорт всех схем
-├── form-registry-keys.ts       # Ключи реестра createForm (всегда, с 4.2.0)
+├── form-registry-keys.ts       # Ключи реестра createForm и кандидаты автоподбора (всегда, с 4.2.0)
 ├── enums/
 │   └── RecipeType.form.ts      # Enum схемы с метками
 ├── Recipe.form.ts              # Model схемы
@@ -752,5 +796,6 @@ MCP сервер [`@letar/form-mcp`](../form-mcp/README.md) предоставл
 
 ## Версия
 
-Текущая версия — **4.2.0** (ключи реестра `createForm` и `form-registry-keys.ts`; `form.tooltip.*` —
+Текущая версия — **4.3.0** (автоподбор компонента реестра по имени: `ui.registryName`, `formRegistryCandidates`;
+ключи реестра `createForm` и `form-registry-keys.ts` — с 4.2.0; `form.tooltip.*` —
 с 4.1.0; синтаксис `@meta("form.*", value)` — единственный с v4.0.0). Полная история — в [package.json](package.json) и [CHANGELOG.md](CHANGELOG.md).

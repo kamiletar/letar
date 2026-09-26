@@ -66,6 +66,7 @@ describe('P2: collectRegistryKeys', () => {
     expect(collectRegistryKeys([model('Work', { title: { title: 'Название' } })])).toEqual({
       keys: { Select: [], Combobox: [], Listbox: [] },
       usages: {},
+      candidates: { Select: [] },
     })
   })
 

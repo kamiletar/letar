@@ -148,6 +148,14 @@ export interface ModelFieldInfo {
   enumName?: string
   /** Default value */
   defaultValue?: unknown
+  /**
+   * Подсказка автоподбора компонента реестра `createForm` по имени (этап Ж, `libs/forms/PLAN.md` §17.9):
+   * имя целевой модели у FK (`@relation(fields: [x])`) либо имя enum. Пишется в `ui.registryName`;
+   * маппер форм ищет `Select.<имя>` в реестре, а плагин реестра не видит. Не задана, если у поля есть
+   * `form.fieldType` (любой — так автоподбор отключают) или `form.relation.*`, а также для списков и
+   * составных FK.
+   */
+  registryName?: string
   /** Form metadata */
   formMeta: FormFieldMeta
 }

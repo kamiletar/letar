@@ -74,6 +74,12 @@ export interface RegistryKeysData {
   keys: Record<RegistryNamespace, string[]>
   /** `'Select.WorkCategory'` → `['Work.categoryId', …]` в порядке объявления в схеме */
   usages: Record<string, string[]>
+  /**
+   * Кандидаты автоподбора (этап Ж): уникальные отсортированные имена моделей/enum, для которых плагин
+   * вывел подсказку `ui.registryName` (маппер ищет `Select.<Имя>` в реестре). Отдельно от явных ключей:
+   * отсутствие компонента для кандидата законно, проверять их typecheck'ом нельзя.
+   */
+  candidates: { Select: string[] }
 }
 
 /**
@@ -87,9 +93,13 @@ export function collectRegistryKeys(models: readonly ModelInfo[]): RegistryKeysD
     Listbox: new Set(),
   }
   const usages = new Map<string, string[]>()
+  const candidates = new Set<string>()
 
   for (const model of models) {
     for (const field of model.fields) {
+      if (field.registryName) {
+        candidates.add(field.registryName)
+      }
       const reference = field.formMeta.fieldType ? parseFieldRegistryType(field.formMeta.fieldType) : null
       if (!reference) {
         continue
@@ -116,6 +126,7 @@ export function collectRegistryKeys(models: readonly ModelInfo[]): RegistryKeysD
       Listbox: [...keys.Listbox].sort(),
     },
     usages: sortedUsages,
+    candidates: { Select: [...candidates].sort() },
   }
 }
 
@@ -154,6 +165,18 @@ export type FormListboxKey = (typeof formRegistryKeys.Listbox)[number]
 
 /** Где используется ключ: для сообщений об ошибках и ревью */
 export const formRegistryUsages = ${usagesLiteral}
+
+/**
+ * Кандидаты автоподбора: имена моделей (FK) и enum, для которых плагин вывел подсказку \`ui.registryName\`.
+ * Форма ищет в реестре \`Select.<Имя>\`; нет компонента — рисуется базовое поле, это не ошибка.
+ * Отдельно от \`formRegistryKeys\` (явные ключи): в \`FormRegistryCheck\` кандидаты не входят.
+ */
+export const formRegistryCandidates = {
+  Select: ${renderStringArray(data.candidates.Select)},
+} as const
+
+/** Имена кандидатов \`Select.<Имя>\`: для ревью, каких из них ещё нет в реестре */
+export type FormSelectCandidate = (typeof formRegistryCandidates.Select)[number]
 `
 }
 
