@@ -72,9 +72,23 @@ The form cannot guarantee that a city belongs to the chosen country. The server 
 error on the **child field** through `errorMap.onServer`.
 
 ZenStack v3 cannot express this in the schema through `@@validate`: the compiler rejects a condition that uses a relation
-field (`@@validate condition cannot use relation fields`). The pair check stays in the server action; a policy such as
-`@@allow('create,update', city.countryId == countryId)` passes schema validation, but its runtime behaviour has not been
-verified.
+field (`@@validate condition cannot use relation fields`). The pair check stays in the server action. A policy with a
+relation field does work at runtime (verified on a real database), with one catch:
+
+```zmodel
+model Address {
+  countryId String
+  cityId    String
+  city      City @relation(fields: [cityId], references: [id])
+
+  @@allow('create,update', city.countryId == countryId)
+  // Without this line an `update` that only changes `cityId` passes: `@@allow` looks at the row BEFORE the update
+  @@deny('post-update', city.countryId != countryId)
+}
+```
+
+`create` with a city of another country is rejected. `@@deny('post-update', …)` rejects the same for `update`. The policy
+complements the server action check and does not replace it: the action puts the error under the city field.
 
 ## TanStack Query and ZenStack
 

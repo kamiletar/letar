@@ -54,6 +54,24 @@ model StageTemplateItem {
 (ZenStack: deny всегда приоритетнее allow) — остальные поля модели по-прежнему редактируются
 через тот же `update()`, меняться не может только сама связь.
 
+## Когда FK должен меняться: `@@deny('post-update', …)`
+
+`@deny('update', true)` на FK не подходит, если связь законно переставляется, а нужно держать инвариант пары полей.
+Пример — «город из выбранной страны» (`@@allow('create,update', city.countryId == countryId)`): `create` с чужим городом
+отклоняется, но `update`, меняющий только `cityId`, проходит (проверено 2026-09-27 на `form-develop-app`, реальный Postgres,
+скрипт `apps/form-develop-app/scripts/check-policy-relation-field.ts`). После такой правки строка нарушает инвариант, а любая
+следующая правка отклоняется как «Record not found» — строка перестала проходить собственное условие `@@allow`.
+
+Лечит проверка состояния **после** правки:
+
+```zmodel
+@@allow('create,update', city.countryId == countryId)
+@@deny('post-update', city.countryId != countryId)
+```
+
+Теперь правка города на чужой и правка страны при прежнем городе отклоняются («failed to pass post-update policy check»), а
+одновременная смена пары на согласованную проходит.
+
 ## Как искать этот паттерн
 
 Признак — child-модель с FK на модель, у которой есть поле состояния/статуса, и write-policy

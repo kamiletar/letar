@@ -71,8 +71,23 @@ live-областью («Поле «Город» очищено: изменил�
 ребёнка** через `errorMap.onServer`.
 
 Средствами схемы ZenStack v3 этого не выразить через `@@validate`: компилятор отвергает условие с полем связи
-(`@@validate condition cannot use relation fields`). Проверка пары остаётся в server action; политика вида
-`@@allow('create,update', city.countryId == countryId)` проходит проверку схемы, но её поведение в рантайме не проверялось.
+(`@@validate condition cannot use relation fields`). Проверка пары остаётся в server action. Политика с полем связи в
+рантайме работает (проверено на настоящей базе), с одной оговоркой:
+
+```zmodel
+model Address {
+  countryId String
+  cityId    String
+  city      City @relation(fields: [cityId], references: [id])
+
+  @@allow('create,update', city.countryId == countryId)
+  // Без этой строки `update`, меняющий только `cityId`, проходит: `@@allow` смотрит на строку ДО правки
+  @@deny('post-update', city.countryId != countryId)
+}
+```
+
+`create` с городом чужой страны отклоняется. `@@deny('post-update', …)` отклоняет то же для `update`. Политика дополняет
+проверку в server action, а не заменяет её: действие кладёт ошибку под поле города.
 
 ## TanStack Query и ZenStack
 
