@@ -169,6 +169,8 @@ export interface UIKitSelectProps<TNode = unknown, TData = unknown> extends UIKi
   loading?: boolean
   /** Text of the loading state (localized by the field) */
   loadingMessage?: string
+  /** `id` элемента-подсказки под полем (зависимое поле: «Сначала выберите «Страна»», §18.10) — в `aria-describedby` триггера */
+  describedBy?: string
   size?: string
   variant?: string
   'data-field-name'?: string

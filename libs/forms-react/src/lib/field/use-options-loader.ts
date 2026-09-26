@@ -21,6 +21,11 @@ export interface UseOptionsLoaderOptions {
   keepPrevious?: boolean
   /** Значения родителей (`dependsOn`, §18) — уходят в `ctx.deps`; по умолчанию `{}` */
   fieldDeps?: FieldDeps
+  /**
+   * Загружать ли сейчас (по умолчанию `true`). Зависимое поле с неготовыми родителями (§18.3) не шлёт запрос:
+   * `loading: false`, опций нет. Смена на `true` — запрос.
+   */
+  enabled?: boolean
 }
 
 interface Settled<TOption> {
@@ -43,7 +48,7 @@ const NO_FIELD_DEPS: FieldDeps = {}
 export function useOptionsLoader<TOption>(
   load: (ctx: LoadContext) => Promise<TOption[]>,
   deps: DependencyList,
-  { keepPrevious = true, fieldDeps = NO_FIELD_DEPS }: UseOptionsLoaderOptions = {},
+  { keepPrevious = true, fieldDeps = NO_FIELD_DEPS, enabled = true }: UseOptionsLoaderOptions = {},
 ): UseOptionsLoaderResult<TOption> {
   const loadRef = useRef(load)
   const fieldDepsRef = useRef(fieldDeps)
@@ -60,6 +65,9 @@ export function useOptionsLoader<TOption>(
   const token = useMemo(() => ({}), [depsToken, nonce])
 
   useEffect(() => {
+    if (!enabled) {
+      return
+    }
     const controller = new AbortController()
     let stale = false
     void callLoader(() => loadRef.current({ signal: controller.signal, deps: fieldDepsRef.current })).then(
@@ -79,12 +87,12 @@ export function useOptionsLoader<TOption>(
       stale = true
       controller.abort()
     }
-  }, [token, depsToken])
+  }, [token, depsToken, enabled])
 
   const reload = useCallback(() => setNonce((value) => value + 1), [])
   const current = settled?.token === token
   const options = settled && (keepPrevious || settled.depsToken === depsToken) ? settled.options : NO_OPTIONS
-  const loading = !current
+  const loading = enabled && !current
   const fieldProps = useMemo(() => ({ options, loading }), [options, loading])
 
   return { fieldProps, error: current ? settled?.error ?? null : null, reload }

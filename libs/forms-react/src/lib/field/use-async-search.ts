@@ -1,5 +1,6 @@
 'use client'
 
+import type { FieldDeps } from '@letar/forms-core/uikit'
 import { useState } from 'react'
 import { useDebounce } from './use-debounce'
 
@@ -10,22 +11,42 @@ export interface AsyncQueryResult<TData = unknown> {
   data?: TData[]
   isLoading?: boolean
   error?: Error | null
+  /**
+   * Данные прежнего запроса, показанные пока идёт новый (`placeholderData`/`keepPreviousData` TanStack Query;
+   * у `UseQueryResult` поле есть). У зависимых полей (§18.7): пока родитель сменился, а настоящего ответа для
+   * него нет, эти данные чужие — поле их скрывает
+   */
+  isPlaceholderData?: boolean
 }
 
 /**
  * Async request function for loading options
  * @param search - Search string (empty if request not started)
+ * @param deps - Значения родителей (`dependsOn`, §18); без `dependsOn` — `{}`. Хук прежней формы `(search)` подходит
  */
-export type AsyncQueryFn<TData = unknown> = (search: string) => AsyncQueryResult<TData>
+export type AsyncQueryFn<TData = unknown, TDeps extends FieldDeps = FieldDeps> = (
+  search: string,
+  deps: TDeps,
+) => AsyncQueryResult<TData>
 
 /**
  * Options for useAsyncSearch
  */
-export interface UseAsyncSearchOptions<TData = unknown> {
+export interface UseAsyncSearchOptions<TData = unknown, TDeps extends FieldDeps = FieldDeps> {
   /**
    * Async request function (returns { data, isLoading, error })
    */
-  useQuery?: AsyncQueryFn<TData>
+  useQuery?: AsyncQueryFn<TData, TDeps>
+
+  /** Значения родителей (`dependsOn`, §18) — вторым аргументом в `useQuery`; по умолчанию `{}` */
+  deps?: TDeps
+
+  /**
+   * Ключ зависимостей (`serializeDeps`). Задан у зависимого поля: при смене ключа результат с
+   * `isPlaceholderData: true` (данные прежнего родителя) скрывается — пустой список с `isLoading: true`, пока нет
+   * настоящего ответа для нового ключа. Печать в поиске внутри того же родителя прежние данные оставляет.
+   */
+  depsKey?: string
 
   /**
    * Debounce delay in milliseconds
@@ -72,6 +93,8 @@ export interface UseAsyncSearchResult<TData = unknown> {
   error: Error | null | undefined
 }
 
+const NO_DEPS: FieldDeps = {}
+
 /**
  * Hook for async search with debounce
  *
@@ -108,10 +131,10 @@ export interface UseAsyncSearchResult<TData = unknown> {
  * }, [options, debouncedSearch])
  * ```
  */
-export function useAsyncSearch<TData = unknown>(
-  options: UseAsyncSearchOptions<TData> = {},
+export function useAsyncSearch<TData = unknown, TDeps extends FieldDeps = FieldDeps>(
+  options: UseAsyncSearchOptions<TData, TDeps> = {},
 ): UseAsyncSearchResult<TData> {
-  const { useQuery, debounce = 300, minChars = 1, initialValue = '' } = options
+  const { useQuery, debounce = 300, minChars = 1, initialValue = '', deps = NO_DEPS as TDeps, depsKey } = options
 
   // State input
   const [inputValue, setInputValue] = useState(initialValue)
@@ -124,18 +147,27 @@ export function useAsyncSearch<TData = unknown>(
 
   // Call useQuery (if provided)
   // Pass empty string if we shouldn't query, so the hook is always called
-  const queryResult = useQuery?.(shouldQuery ? debouncedSearch : '')
+  const queryResult = useQuery?.(shouldQuery ? debouncedSearch : '', deps)
 
   // Extract results
-  const { data, isLoading = false, error } = queryResult ?? {}
+  const { data, isLoading = false, error, isPlaceholderData = false } = queryResult ?? {}
+
+  // Зависимое поле (§18.7): для какого ключа зависимостей последний раз пришёл настоящий ответ. Первый ключ — тот,
+  // с которым поле смонтировано: статичный `placeholderData` на старте не прячем
+  const [answeredDepsKey, setAnsweredDepsKey] = useState(depsKey)
+  // Настоящий ответ для текущего ключа — запоминаем прямо в рендере (штатная подстройка состояния React)
+  if (data !== undefined && !isPlaceholderData && answeredDepsKey !== depsKey) {
+    setAnsweredDepsKey(depsKey)
+  }
+  const foreignPlaceholder = depsKey !== undefined && isPlaceholderData && answeredDepsKey !== depsKey
 
   return {
     inputValue,
     setInputValue,
     debouncedSearch,
     shouldQuery,
-    isLoading,
-    data,
+    isLoading: foreignPlaceholder ? true : isLoading,
+    data: foreignPlaceholder ? undefined : data,
     error,
   }
 }
