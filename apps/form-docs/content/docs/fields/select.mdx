@@ -298,6 +298,35 @@ and returns `{ label, value, data? }` — or `null` if the user cancelled.
 - `createItem={false}` removes the service "+ Add…" item: use `<Form.Field.Select.CreateButton />` in `listFooter`.
   Both slots accept `asChild`.
 
+## Optimistic mode (`ctx.optimistic`)
+
+`onCreate(search, ctx)` and `onUpdate(option, ctx)` get `ctx.optimistic(preview)` as the second argument. Call it when
+the app dialog is closed and the request has gone to the server: the field shows and selects the result at once
+instead of waiting.
+
+```tsx
+<Form.Field.Select
+  name="categoryId"
+  {...categories.fieldProps}
+  onCreate={async (search, { optimistic }) => {
+    const input = await dialog.open({ name: search })
+    if (!input) { return null }
+    optimistic({ label: input.name }) // the record is visible and selected right away
+    const created = await create.mutateAsync({ data: input }) // the server's answer, not the input
+    return { label: created.name, value: created.id, data: created }
+  }}
+  onSettleError={(info) => toast.error(`Could not save “${info.preview.label}”`)}
+/>
+```
+
+- While the server is silent the record is dimmed with a spinner (`aria-busy`); the temporary id never reaches the
+  form value. A resolve replaces it with the real record; `null`, a rejection or `settleTimeout` (30 s) roll it back.
+- Without `onSettleError` the field shows its own message under itself (`role="status"`).
+- The form's submit waits for pending actions: the submit button shows a spinner, `onSubmit` gets the real value, a
+  refusal cancels the submit.
+- An option with `pending: true` (or `getPending` on Combobox) is dimmed, not selectable, without a pencil. For
+  ZenStack `optimisticUpdate: true` use `useZenStackOptions` from `@letar/forms-query/zenstack`.
+
 ## RadioGroup
 
 **API:** `Form.Field.RadioGroup`

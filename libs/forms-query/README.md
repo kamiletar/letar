@@ -11,14 +11,15 @@ bun add @letar/forms-query @tanstack/react-query
 
 ## Что внутри
 
-| Экспорт                                                       | Для чего                                                                                                                          |
-| ------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `fromSearchQuery(useHook, { minChars? })`                     | готовый `useQuery` для Combobox: `enabled` по `minChars`, `placeholderData: keepPreviousData`                                     |
-| `fromSelectedQuery(useHook)`                                  | готовый `useSelected` Combobox: запись текущего значения, `enabled` по непустому значению                                         |
-| `useQueryOptions(result, map)`                                | результат запроса → `{ fieldProps: { options, loading }, error }` для Select/Combobox со статичными опциями                       |
-| `useLoaderQuery(key, loadOptions, { minChars?, staleTime? })` | промис-загрузчик (`loadOptions`: server action, `fetch`) → `useQuery` с ключом `[...key, search]`: кэш, дедупликация, инвалидация |
-| `useInvalidateAfter(queryKeys)`                               | обёртка `onCreate`/`onUpdate`: инвалидация и рефетч **до** возврата опции полю                                                    |
-| `@letar/forms-query/zenstack`: `useInvalidateModels(models)`  | то же для мутаций мимо хуков ZenStack (server action, `$procs`)                                                                   |
+| Экспорт                                                          | Для чего                                                                                                                          |
+| ---------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `fromSearchQuery(useHook, { minChars? })`                        | готовый `useQuery` для Combobox: `enabled` по `minChars`, `placeholderData: keepPreviousData`                                     |
+| `fromSelectedQuery(useHook)`                                     | готовый `useSelected` Combobox: запись текущего значения, `enabled` по непустому значению                                         |
+| `useQueryOptions(result, map)`                                   | результат запроса → `{ fieldProps: { options, loading }, error }` для Select/Combobox со статичными опциями                       |
+| `@letar/forms-query/zenstack`: `useZenStackOptions(result, map)` | `useQueryOptions`, где строки `$optimistic` ZenStack получают `pending` (видны, не выбираются)                                    |
+| `useLoaderQuery(key, loadOptions, { minChars?, staleTime? })`    | промис-загрузчик (`loadOptions`: server action, `fetch`) → `useQuery` с ключом `[...key, search]`: кэш, дедупликация, инвалидация |
+| `useInvalidateAfter(queryKeys)`                                  | обёртка `onCreate`/`onUpdate`: инвалидация и рефетч **до** возврата опции полю                                                    |
+| `@letar/forms-query/zenstack`: `useInvalidateModels(models)`     | то же для мутаций мимо хуков ZenStack (server action, `$procs`)                                                                   |
 
 ## Справочник целиком — Select
 
@@ -106,6 +107,33 @@ const invalidateModels = useInvalidateModels(['WorkCategory'])
 
 Вложенные чтения других моделей (`include`/`select` из справочника) не ловятся — перечисляйте модели.
 
+## Оптимистичный режим ZenStack
+
+Хуки ZenStack с `optimisticUpdate: true` кладут в кэш временную запись с чужим id и флагом `$optimistic`. Без маркера
+такая строка — выбираемый пункт с фальшивым id и дубль будущей записи. `useZenStackOptions` ставит маркер сам:
+
+```tsx
+import { useZenStackOptions } from '@letar/forms-query/zenstack'
+
+const categories = useZenStackOptions(client.workCategory.useFindMany(), (c) => ({ label: c.name, value: c.id }))
+const create = client.workCategory.useCreate({ optimisticUpdate: true })
+
+<Form.Field.Select
+  name="categoryId"
+  {...categories.fieldProps}
+  onCreate={async (search, { optimistic }) => {
+    const input = await openCategoryDialog({ name: search })
+    if (!input) { return null }
+    optimistic({ label: input.name }) // окно закрыто — запись видна и выбрана сразу
+    const created = await create.mutateAsync({ data: input }) // ответ сервера, а не input
+    return { label: created.name, value: created.id, data: created }
+  }}
+/>
+```
+
+Строки `pending` видны приглушёнными, не выбираются и не правятся; пока собственный `create` поля в полёте, они скрыты.
+Для своих маркеров — `useQueryOptions(result, map, { isPending: (row) => row.saving })`.
+
 ## Совместимость версий
 
 Типы контракта опций (`@letar/forms-core`) вбандливаются и в скин, и в этот пакет — совпадение структурное.
@@ -114,5 +142,6 @@ const invalidateModels = useInvalidateModels(['WorkCategory'])
 | `@letar/forms-query` | `@letar/forms` | `@letar/forms-shadcn` |
 | -------------------- | -------------- | --------------------- |
 | 0.1.x                | ≥ 2.23.0       | ≥ 0.44.0              |
+| 0.2.x                | ≥ 2.24.0       | ≥ 0.45.0              |
 
 Peer на `@letar/forms` не ставим: пользователь shadcn-скина не должен ставить Chakra-скин.

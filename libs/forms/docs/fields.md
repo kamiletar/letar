@@ -157,6 +157,43 @@ Chakra-скин; в shadcn-скине поля поиска нет (`searchable:
 `useQueryOptions` (результат запроса → `options` + `loading` для Select), `useLoaderQuery`, `useInvalidateAfter` и
 `useInvalidateModels` (подпуть `/zenstack`) — рефетч до возврата созданной опции. `@letar/forms` от него не зависит.
 
+### Оптимистичный режим: `ctx.optimistic` (v2.24.0+)
+
+`onCreate(search, ctx)` и `onUpdate(option, ctx)` получают вторым аргументом `ctx.optimistic(preview)`. Вызов — «окно
+приложения закрыто, запрос ушёл на сервер»: поле не ждёт ответа, а сразу показывает результат.
+
+```tsx
+<Form.Field.Select
+  name="categoryId"
+  {...categories.fieldProps}
+  onCreate={async (search, { optimistic }) => {
+    const input = await dialog.open({ name: search })
+    if (!input) { return null } // отказ пользователя — как раньше
+    optimistic({ label: input.name }) // запись видна и выбрана сразу
+    const created = await create.mutateAsync({ data: input }) // ответ сервера, а не input
+    return { label: created.name, value: created.id, data: created }
+  }}
+  onSettleError={(info) => toast.error(`Не удалось сохранить «${info.preview.label}»`)}
+/>
+```
+
+Три фазы: **интерактивная** (окно открыто, поле занято, как раньше) → **ожидание** (после `optimistic`: запись
+приглушена, спиннер, `aria-busy`; `pending` освобождён, поле можно менять дальше) → **подтверждение** (резолв с записью:
+временная запись заменяется настоящей, выбор переносится на её `value`) или **отказ** (`null`, reject, тайм-аут:
+откат к прежнему значению, `onSettleError` либо встроенное сообщение под полем).
+
+- **Временный id в форму не попадает** — значение формы остаётся прежним до подтверждения. Если за время ожидания
+  пользователь выбрал другое или значение сменили снаружи, подтверждение его выбор не перебивает.
+- **Отправка формы ждёт.** `Form.Button.Submit` показывает загрузку, пока действие ждёт сервера; `onSubmit` уходит с
+  настоящим значением. Отказ отменяет отправку. Прямой `form.handleSubmit()` в обход `submit()` — dev-предупреждение.
+- **`onSettleError(info)`** — `{ kind: 'create' | 'edit', preview, reason: 'rejected' | 'declined' | 'timeout', error? }`.
+  Без него поле показывает своё сообщение (`role="status"`, i18n `formSelection.settleError`).
+- **`settleTimeout`** — сколько ждать сервер после `optimistic` (30 000 мс по умолчанию).
+- **`pending` у опции** (`option.pending`, `getPending` у Combobox с `useQuery`) — запись не подтверждена сервером:
+  приглушена, не выбирается, без карандаша. Пока свой оптимистичный `create` поля в полёте, такие опции приложения
+  скрыты. Для ZenStack `optimisticUpdate: true` маркер ставит `useZenStackOptions` из `@letar/forms-query/zenstack`.
+- Обработчик, не вызывающий `optimistic`, работает по-старому.
+
 **Select или Combobox?**
 
 | Ситуация                                                                       | Поле                                               |

@@ -4,6 +4,19 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.45.0] - 2026-09-26
+
+### Added
+
+- **Оптимистичный режим `Field.Select` и `Field.Combobox`** — паритет с `@letar/forms` 2.24.0: `ctx.optimistic(...)`
+  вторым аргументом `onCreate`/`onUpdate`, `onSettleError`, `settleTimeout`, `getPending`, `pending` у опций (приглушена,
+  спиннер, `aria-busy`, не выбирается), встроенное сообщение об отказе (`role="status"`).
+
+### Changed
+
+- Автоотправка `Field.OtpInput` и навигация шагов идут через `submit()` контекста формы (ждут подтверждений).
+- Обработчики `onCreate`/`onUpdate` получают второй аргумент `ctx`.
+
 ## [0.44.0] - 2026-09-26
 
 ### Added

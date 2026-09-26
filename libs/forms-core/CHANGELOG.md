@@ -4,6 +4,15 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.21.0] - 2026-09-26
+
+### Added
+
+- Оптимистичный режим (`@letar/forms-core/uikit`): `SelectionActionContext` (`optimistic(preview)`), `SettleErrorInfo`,
+  `SettleErrorReason`, `pending` у `UIKitSelectOption` и в состоянии рендера опции, `createPendingRegistry` (реестр
+  ожидающих действий формы: `add`, `subscribe`, `getSnapshot`, `settleAll`, `submitWhenSettled`).
+- `CreateOptionHandler`/`UpdateOptionHandler` получают вторым аргументом `ctx`.
+
 ## [0.20.0] - 2026-09-26
 
 ### Added

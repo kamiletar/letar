@@ -90,6 +90,12 @@ export function useCreateCategory() {
   return client.category.useCreate()
 }
 
+/** Mutation хук создания категории в оптимистичном режиме ZenStack: запись с `$optimistic` в кэше до ответа сервера */
+export function useCreateCategoryOptimistic() {
+  const client = useClientQueries(schema)
+  return client.category.useCreate({ optimisticUpdate: true })
+}
+
 /** Mutation хук для обновления категории */
 export function useUpdateCategory() {
   const client = useClientQueries(schema)

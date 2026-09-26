@@ -119,4 +119,50 @@ test.describe('ZenStack Option Demo', () => {
     await expect(page.getByText('Не удалось загрузить')).toHaveCount(0)
     await expect(page.getByRole('option').first()).toBeVisible()
   })
+
+  test.describe('оптимистичный режим (§16.7)', () => {
+    const trigger = (page: Page) => page.getByRole('combobox', { name: /оптимистичный режим/ })
+
+    /** Пункт «+ Добавить…» оптимистичного Select и закрытие окна приложения с названием */
+    async function createOptimistically(page: Page, name: string) {
+      page.once('dialog', (dialog) => void dialog.accept(name))
+      await field(page, 'optimisticCategory').click()
+      await page.getByRole('option', { name: /Добавить/ }).click()
+    }
+
+    test('запись видна и выбрана до ответа сервера; отправка ждёт и уходит с настоящим id', async ({ page }) => {
+      const name = `Оптимист-${Date.now()}`
+      await page.route('**/api/model/category/create*', async (route) => {
+        await new Promise((resolve) => setTimeout(resolve, 1500))
+        await route.continue()
+      })
+
+      await createOptimistically(page, name)
+      // Сервер ещё молчит: подпись уже в поле, поле занято
+      await expect(field(page, 'optimisticCategory')).toContainText(name)
+      await expect(trigger(page)).toHaveAttribute('aria-busy', 'true')
+
+      await page.getByRole('button', { name: 'Отправить' }).click()
+      // После ответа отправка уходит с настоящим id, а не с временным
+      const preview = page.getByText(/"optimisticCategory"/)
+      await expect(preview).toBeVisible({ timeout: 10_000 })
+      await expect(preview).not.toContainText('__letar_pending')
+      await expect(trigger(page)).not.toHaveAttribute('aria-busy', 'true')
+    })
+
+    test('отказ сервера (500): значение возвращается, под полем сообщение', async ({ page }) => {
+      const name = `Отказ-${Date.now()}`
+      await page.route('**/api/model/category/create*', async (route) => {
+        await new Promise((resolve) => setTimeout(resolve, 500))
+        await route.fulfill({ status: 500, contentType: 'application/json', body: JSON.stringify({ error: 'boom' }) })
+      })
+
+      await createOptimistically(page, name)
+      await expect(field(page, 'optimisticCategory')).toContainText(name)
+
+      await expect(page.locator('[data-field-name="optimisticCategory"]').locator('..').getByRole('status'))
+        .toBeVisible()
+      await expect(field(page, 'optimisticCategory')).not.toContainText(name)
+    })
+  })
 })

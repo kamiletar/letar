@@ -280,6 +280,34 @@ render-функции.
 - `createItem={false}` убирает служебный пункт «+ Добавить…»: поставь `<Form.Field.Select.CreateButton />` в `listFooter`.
   Оба слота принимают `asChild`.
 
+## Оптимистичный режим (`ctx.optimistic`)
+
+`onCreate(search, ctx)` и `onUpdate(option, ctx)` получают вторым аргументом `ctx.optimistic(preview)`. Вызовите его,
+когда окно приложения закрыто и запрос ушёл на сервер: поле сразу показывает и выбирает результат, не дожидаясь ответа.
+
+```tsx
+<Form.Field.Select
+  name="categoryId"
+  {...categories.fieldProps}
+  onCreate={async (search, { optimistic }) => {
+    const input = await dialog.open({ name: search })
+    if (!input) { return null }
+    optimistic({ label: input.name }) // запись видна и выбрана сразу
+    const created = await create.mutateAsync({ data: input }) // ответ сервера, а не input
+    return { label: created.name, value: created.id, data: created }
+  }}
+  onSettleError={(info) => toast.error(`Не удалось сохранить «${info.preview.label}»`)}
+/>
+```
+
+- Пока сервер молчит, запись приглушена и со спиннером (`aria-busy`); временный id в значение формы не попадает.
+  Резолв заменяет её настоящей записью; `null`, reject или `settleTimeout` (30 с) — откат.
+- Без `onSettleError` поле показывает своё сообщение под собой (`role="status"`).
+- Отправка формы ждёт ожидающие действия: кнопка показывает загрузку, `onSubmit` получает настоящее значение, отказ
+  отменяет отправку.
+- Опция с `pending: true` (или `getPending` у Combobox) приглушена, не выбирается, без карандаша. Для `optimisticUpdate`
+  ZenStack — `useZenStackOptions` из `@letar/forms-query/zenstack`.
+
 ## RadioGroup
 
 **API:** `Form.Field.RadioGroup`

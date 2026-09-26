@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.0
+
+- `useZenStackOptions(result, map)` в `@letar/forms-query/zenstack` — `useQueryOptions` для чтений ZenStack: строки
+  `$optimistic` (временные записи `optimisticUpdate: true`, с чужим id) получают `pending` — видны, но не выбираются.
+- `useQueryOptions(result, map, { isPending })` — общий способ пометить неподтверждённые строки.
+- `QueryOption.pending`.
+
 ## 0.1.0
 
 Первый выпуск. Адаптеры TanStack Query для `Field.Select` и `Field.Combobox` из `@letar/forms` и

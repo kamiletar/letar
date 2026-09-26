@@ -166,3 +166,6 @@ const useCategoryById = (id: string, options: SelectedQueryOptions) =>
 - `useInvalidateAfter(keys)` wraps `onCreate`/`onUpdate`: the list is refetched **before** the new option reaches the
   field. ZenStack hooks (`useCreateX`/`useUpdateX`) invalidate themselves — no wrapper needed; for mutations outside
   them use `useInvalidateModels` from `@letar/forms-query/zenstack`.
+- `useZenStackOptions(result, map)` (`@letar/forms-query/zenstack`) is `useQueryOptions` for ZenStack reads: rows with
+  `$optimistic` (temporary records of `optimisticUpdate: true`) become `pending` — visible, not selectable. Pair it with
+  `ctx.optimistic(...)` in `onCreate` for an instant create.

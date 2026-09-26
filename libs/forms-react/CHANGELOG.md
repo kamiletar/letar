@@ -4,6 +4,19 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.16.0] - 2026-09-26
+
+### Added
+
+- Оптимистичный режим: фазы ожидания в `useSelectionActionsState` (временная опция, ожидающий выбор, тайм-аут, откат,
+  `onSettleError`), реестр ожидания формы (`useCreatePendingRegistry`, `useFormPendingSubmit`, `useFormPendingRegistry`,
+  `useFormPendingSnapshot`, `useFormSubmit`), `pending`/`submit` в `DeclarativeFormContextValue`.
+- `TestForm` кладёт `pending` и `submit` в контекст — тесты оптимистичных полей.
+
+### Changed
+
+- Навигация шагов отправляет форму через `submit()` контекста (ждёт подтверждений).
+
 ## [0.15.0] - 2026-09-26
 
 ### Added

@@ -1,6 +1,12 @@
 'use client'
 
-import { useCreateCategory, useFindManyCategory, useFindUniqueCategory, useUpdateCategory } from '@/lib/hooks'
+import {
+  useCreateCategory,
+  useCreateCategoryOptimistic,
+  useFindManyCategory,
+  useFindUniqueCategory,
+  useUpdateCategory,
+} from '@/lib/hooks'
 import { Box, Button, Code, Heading, HStack, Text, VStack } from '@chakra-ui/react'
 import { Form } from '@letar/forms'
 import {
@@ -9,6 +15,7 @@ import {
   type SearchQueryOptions,
   type SelectedQueryOptions,
 } from '@letar/forms-query'
+import { useZenStackOptions } from '@letar/forms-query/zenstack'
 import { useState } from 'react'
 import { z } from 'zod/v4'
 import { DemoPageLayout, SubmittedDataPreview } from '../_components'
@@ -19,6 +26,7 @@ const Schema = z
     comboCategory: z.string().optional().meta({ ui: { title: 'Категория (Combobox, поиск + useSelected)' } }),
     queryCategory: z.string().optional().meta({ ui: { title: 'Категория (Combobox, @letar/forms-query)' } }),
     loadCategory: z.string().optional().meta({ ui: { title: 'Категория (Combobox, loadOptions по fetch)' } }),
+    optimisticCategory: z.string().optional().meta({ ui: { title: 'Категория (Select, оптимистичный режим)' } }),
   })
   .strip()
 
@@ -58,6 +66,10 @@ function useCategorySearch(search: string, options: SearchQueryOptions) {
 function useCategoryById(id: string, options: SelectedQueryOptions) {
   return useFindUniqueCategory({ where: { id } }, options) as { data?: CategoryRecord | null }
 }
+
+/** Строка справочника в оптимистичном режиме ZenStack: временная запись несёт `$optimistic` */
+type OptimisticCategory = CategoryRecord & { $optimistic?: boolean }
+const mapOptimisticCategory = (c: OptimisticCategory) => ({ label: c.name, value: c.id })
 
 const searchCategoriesQuery = fromSearchQuery(useCategorySearch)
 const selectedCategoryQuery = fromSelectedQuery(useCategoryById)
@@ -102,6 +114,14 @@ export default function ZenstackOptionDemoPage() {
 
   const createCategory = useCreateCategory()
   const updateCategory = useUpdateCategory()
+  const createCategoryOptimistic = useCreateCategoryOptimistic()
+
+  // Оптимистичный Select: строки `$optimistic` ZenStack → pending (видны, не выбираются)
+  const optimisticAll = useFindManyCategory({ orderBy: { name: 'asc' } })
+  const optimisticCategories = useZenStackOptions(
+    optimisticAll as { data?: OptimisticCategory[]; isLoading?: boolean },
+    mapOptimisticCategory,
+  )
 
   // Select: справочник целиком
   const all = useFindManyCategory({ orderBy: { name: 'asc' } })
@@ -128,6 +148,20 @@ export default function ZenstackOptionDemoPage() {
     return created ? { label: created.name, value: created.id, data: created } : null
   }
 
+  /** Окно закрыто — запись видна и выбрана сразу (`optimistic`), настоящий id придёт с ответом сервера */
+  const onCreateOptimistic = async (
+    _search: string,
+    { optimistic }: { optimistic: (preview: { label: string }) => void },
+  ) => {
+    const name = askName('')
+    if (!name) {
+      return null
+    }
+    optimistic({ label: name })
+    const created = (await createCategoryOptimistic.mutateAsync({ data: { name } })) as CategoryRecord | null
+    return created ? { label: created.name, value: created.id, data: created } : null
+  }
+
   return (
     <DemoPageLayout
       title="ZenStack Option Demo"
@@ -140,6 +174,7 @@ export default function ZenstackOptionDemoPage() {
           comboCategory: initialId,
           queryCategory: initialId,
           loadCategory: initialId,
+          optimisticCategory: '',
         }}
         schema={Schema}
         onSubmit={setSubmitted}
@@ -209,6 +244,20 @@ export default function ZenstackOptionDemoPage() {
               getLabel={(c) => c.name}
               getValue={(c) => c.id}
               minChars={0}
+            />
+          </Box>
+
+          <Box borderWidth={1} borderRadius="md" p={4}>
+            <Heading size="md" mb={2}>Select: оптимистичный режим (§16.7)</Heading>
+            <Text color="fg.muted" mb={4}>
+              «+ Добавить…» → название → категория выбрана сразу и приглушена, пока мутация ZenStack{' '}
+              (<Code>optimisticUpdate</Code>) ждёт сервер; «Отправить» ждёт подтверждения и уходит с настоящим id. При
+              отказе сервера значение возвращается, а под полем появляется сообщение.
+            </Text>
+            <Form.Field.Select
+              name="optimisticCategory"
+              {...optimisticCategories.fieldProps}
+              onCreate={onCreateOptimistic}
             />
           </Box>
 

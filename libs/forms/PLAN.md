@@ -2461,7 +2461,7 @@ ZenStack (§16.2, этап Б): демо на модели `Category` и нас�
 >   после первого открытия; в `forms-core` 0.20.0.
 > - `useLoaderQuery` возвращает функцию-хук `(search) => UseQueryResult` (а не результат), имеет `staleTime` (30 с по
 >   умолчанию) — без него повтор строки не брался из кэша (Q3).
-> - `useQueryOptions` без `isPending` и `useZenStackOptions` — они ждут `pending` из этапа Д (`forms-query` 0.2.0).
+> - `useQueryOptions` без `isPending` и `useZenStackOptions` — они ждали `pending` из этапа Д (появились в `forms-query` 0.2.0).
 > - shadcn: выбор опции теперь подставляет подпись в поле ввода; подпись значения показывается при монтировании (раньше
 >   поле было пустым при непустом значении); список при этом не фильтруется по подписи выбранного.
 > - Не сделано: `form-mcp` (паттерн «справочник из ZenStack/Query» — вместе с этапом Е, версия 2.3.0), сверка
@@ -2485,6 +2485,24 @@ ZenStack (§16.2, этап Б): демо на модели `Category` и нас�
 5. `forms-query` 0.2.0: `useZenStackOptions`, `isPending` в `useQueryOptions`; тест Q5 (часть про `$optimistic`).
 6. Цикл синхронизации, e2e этапа Д; в CHANGELOG `forms` — «Изменения поведения»: отправка формы ждёт подтверждения
    оптимистичных действий (без них поведение не меняется).
+
+> ✅ **Этап Д закрыт 2026-09-26** — `forms` 2.24.0, `forms-core` 0.21.0, `forms-react` 0.16.0, `forms-shadcn` 0.45.0,
+> `forms-query` 0.2.0. `ctx.optimistic(preview)` вторым аргументом `onCreate`/`onUpdate` в обоих скинах; фазы
+> интерактивная → ожидание → подтверждение/отказ, откат, `onSettleError`/`settleTimeout`, встроенное сообщение;
+> `pending` у опций (`getPending` у Combobox); реестр ожидания формы (`submit()`, `useFormPendingSnapshot`), отправка,
+> `Form.Button.Submit`, `DirtyGuard`, навигация шагов и OTP ждут подтверждений; `useZenStackOptions` и `isPending` в
+> `forms-query`. Тесты: O1–O6, O8, O9, O11–O13 (Chakra и shadcn), Q2/Q5. Демо `/zenstack-option-demo` (Select на
+> `optimisticUpdate` ZenStack) + e2e (медленная мутация, отказ 500). Отклонения от плана:
+>
+> - `getPending` у Combobox (Chakra `useQuery`, shadcn `loadOptions`) — пропс не был в §16.7; нужен, чтобы `pending`
+>   строк `$optimistic` доходил до опций хук-пути.
+> - Существующие обработчики получают второй аргумент `ctx`: тесты приложений с точной проверкой аргументов
+>   (`toHaveBeenCalledWith('x')`) надо дополнить (`expect.anything()`) — записано в «Изменениях поведения» CHANGELOG.
+> - O7 покрыт через `isOptionEditable`/отсутствие карандаша (O11), O10 (персистентность, `UrlSync`) отдельного теста не
+>   имеет: временный id не попадает в значение формы, дополнительной защиты не нужно.
+> - Долги, замеченные по ходу (не этап Д): у shadcn Combobox нет клавиатурной навигации по списку (F2), в shadcn Select
+>   очистка — вложенный `span role="button"`; `renderEmpty({ search })` — объектная форма.
+> - Не сделано: паттерн `form-mcp` (вместе с этапом Е, версия 2.3.0).
 
 **Этап Е — автопривязка справочников из схемы** (§17) — `forms` 2.25.0, `forms-core` 0.22.0,
 `zenstack-form-plugin` 4.2.0, `form-mcp` 2.3.0 (`forms-react`, `forms-shadcn`, `forms-query` не меняются). От А–Д не

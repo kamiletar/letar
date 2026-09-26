@@ -153,3 +153,6 @@ const useCategoryById = (id: string, options: SelectedQueryOptions) =>
 - `useInvalidateAfter(keys)` оборачивает `onCreate`/`onUpdate`: список перезапрашивается **до** того, как новая опция
   дойдёт до поля. Хуки ZenStack (`useCreateX`/`useUpdateX`) инвалидируют сами — обёртка не нужна; для мутаций мимо них —
   `useInvalidateModels` из `@letar/forms-query/zenstack`.
+- `useZenStackOptions(result, map)` (`@letar/forms-query/zenstack`) — `useQueryOptions` для чтений ZenStack: строки с
+  `$optimistic` (временные записи `optimisticUpdate: true`) становятся `pending` — видны, но не выбираются. В паре с
+  `ctx.optimistic(...)` в `onCreate` даёт мгновенное создание.
