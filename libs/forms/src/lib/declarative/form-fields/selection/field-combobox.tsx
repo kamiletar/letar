@@ -365,6 +365,8 @@ export type ComboboxFieldProps<T = string, TData = unknown, TDeps extends FieldD
 interface ComboboxFieldState extends GroupedOptionsResult {
   inputValue: string
   setInputValue: (value: string) => void
+  /** Значение, чья подпись сейчас в инпуте; запись значения самим полем помечается тут, чтобы не считаться внешней */
+  syncedValueRef: { current: string | undefined }
   isLoading: boolean
   /** Ошибка `loadOptions` для текущей строки поиска (`null` — нет) */
   loadError: unknown
@@ -580,25 +582,33 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
     // `useAsyncSearch` стартует с пустой строкой независимо от того, что значение уже выбрано,
     // поэтому без явной синхронизации поле показывает пустой инпут при непустом значении.
     // `initialLabel` сильнее записи из `useSelected`, та приходит позже — ждём её
-    const initializedRef = useRef(false)
+    // Внешняя смена значения (восстановление черновика, `reset(values)`, `setFieldValue`, `UrlSync`) тоже меняет подпись:
+    // `syncedValueRef` хранит значение, чья подпись уже в инпуте, а собственные записи поля помечают его сами
+    const syncedValueRef = useRef<string | undefined>(undefined)
     useEffect(() => {
-      if (initializedRef.current || !fieldValue || inputValue) {
+      const current = fieldValue ? String(fieldValue) : undefined
+      if (current === undefined) {
+        syncedValueRef.current = undefined
+        return
+      }
+      // Первичная инициализация не перебивает уже набранный текст; внешнюю смену значения — перебивает
+      if (syncedValueRef.current === current || (syncedValueRef.current === undefined && inputValue)) {
         return
       }
 
       let label: string | undefined
       if (componentProps.options) {
-        const matchedOption = componentProps.options.find((opt) => String(opt.value) === String(fieldValue))
+        const matchedOption = componentProps.options.find((opt) => String(opt.value) === current)
         label = matchedOption ? getOptionLabel(matchedOption) : undefined
-      } else if (componentProps.initialLabel !== undefined) {
+      } else if (componentProps.initialLabel !== undefined && syncedValueRef.current === undefined) {
         label = componentProps.initialLabel
-      } else if (selectedSourceOption && selectedSourceOption.value === String(fieldValue)) {
+      } else if (selectedSourceOption && selectedSourceOption.value === current) {
         label = getOptionLabel(selectedSourceOption)
       }
-      // Опции и запись из `useSelected` могут прийти позже (загрузка справочника) — инициализация
+      // Опции и запись из `useSelected` могут прийти позже (загрузка справочника) — синхронизация
       // закрывается только когда подпись найдена
       if (label !== undefined) {
-        initializedRef.current = true
+        syncedValueRef.current = current
         setInputValue(label)
       }
     }, [
@@ -770,6 +780,7 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
     return {
       inputValue,
       setInputValue,
+      syncedValueRef,
       dependent,
       isLoading,
       loadError: promiseSearch.error,
@@ -828,6 +839,7 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
           if (info.optimistic && !info.selectionHeld) {
             return
           }
+          fieldState.syncedValueRef.current = String(created.value)
           field.handleChange(String(created.value))
           fieldState.setInputValue(created.label)
           // Промис-путь: внешнего кэша, который обновил бы список, нет — запрашиваем текущий поиск заново
@@ -872,6 +884,7 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
           // Значение читаем живым: при оптимистичной правке за время ожидания оно могло измениться
           if (isSelectedNow(fromValue)) {
             if (String(result.value) !== fromValue) {
+              fieldState.syncedValueRef.current = String(result.value)
               field.handleChange(String(result.value))
             }
             fieldState.setInputValue(result.label)
@@ -982,6 +995,7 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
                 runCreate()
                 return
               }
+              fieldState.syncedValueRef.current = newValue || undefined
               field.handleChange(newValue ?? '')
             }}
             onInteractOutside={() => field.handleBlur()}

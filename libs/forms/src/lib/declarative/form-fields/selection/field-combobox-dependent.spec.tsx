@@ -322,6 +322,29 @@ describe('Field.Combobox — хук-путь useQuery(search, deps) и isPlaceho
   })
 })
 
+describe('Field.Combobox — внешняя смена значения меняет подпись (восстановление черновика, setFieldValue)', () => {
+  it('значение записано извне (родитель тот же) — подпись в поле ввода новая', async () => {
+    render(<Harness initial={{ companyId: 'A', employeeId: 'a1' }} />)
+    await waitFor(() => expect(employee().value).toBe('Анна'))
+
+    act(() => formRef.current!.setFieldValue('employeeId', 'a2'))
+
+    await waitFor(() => expect(employee().value).toBe('Антон'))
+    expect(values().employeeId).toBe('a2')
+  })
+
+  it('выбор пользователем подпись не перебивает', async () => {
+    render(<Harness initial={{ companyId: 'A', employeeId: 'a1' }} />)
+    await waitFor(() => expect(employee().value).toBe('Анна'))
+
+    await userEvent.click(employee())
+    await userEvent.click(await screen.findByRole('option', { name: 'Антон' }))
+
+    await waitFor(() => expect(values().employeeId).toBe('a2'))
+    await waitFor(() => expect(employee().value).toBe('Антон'))
+  })
+})
+
 describe('Field.Combobox — без dependsOn всё как раньше (DS18)', () => {
   it('поле без dependsOn: не заблокировано, подсказок нет, useQuery получает пустые deps', () => {
     const seen: FieldDeps[] = []
