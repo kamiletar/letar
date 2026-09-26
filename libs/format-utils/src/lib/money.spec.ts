@@ -47,8 +47,30 @@ describe('formatKopecks', () => {
     expect(formatKopecks(15000000)).toBe(`150${NBSP}000 ₽`)
   })
 
-  it('форматирует копейки с остатком как дробную часть рублей', () => {
-    expect(formatKopecks(150050)).toBe(`1${NBSP}500,5 ₽`)
+  it('показывает копейки двумя знаками, если они ненулевые', () => {
+    expect(formatKopecks(150050)).toBe(`1${NBSP}500,50 ₽`)
+    expect(formatKopecks(99950)).toBe(`999,50 ₽`)
+    expect(formatKopecks(1)).toBe('0,01 ₽')
+  })
+
+  it('не показывает копейки, если их нет', () => {
+    expect(formatKopecks(490000)).toBe(`4${NBSP}900 ₽`)
+  })
+
+  it('принимает bigint (деньги в ZenStack хранятся BigInt)', () => {
+    expect(formatKopecks(1250000n)).toBe(`12${NBSP}500 ₽`)
+    expect(formatKopecks(99950n)).toBe('999,50 ₽')
+  })
+
+  it('форматирует отрицательные суммы', () => {
+    expect(formatKopecks(-150050n)).toBe(`-1${NBSP}500,50 ₽`)
+  })
+
+  it('locale en: код валюты перед суммой', () => {
+    const plain = (s: string) => s.replaceAll(String.fromCharCode(0xa0), ' ')
+    expect(plain(formatKopecks(390000, { locale: 'en' }))).toBe('RUB 3,900')
+    expect(plain(formatKopecks(99950n, { locale: 'en', prefix: 'from ' }))).toBe('from RUB 999.50')
+    expect(formatKopecks(null, { locale: 'en', fallback: 'on request' })).toBe('on request')
   })
 
   it('возвращает пустую строку для null без fallback', () => {

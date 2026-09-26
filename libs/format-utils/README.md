@@ -25,8 +25,15 @@ import { formatKopecks, formatRubles, toKopecks } from '@letar/format-utils'
 // Сумма в рублях
 formatRubles(150000) // 150 000 ₽
 
-// Сумма, хранящаяся в копейках
+// Сумма, хранящаяся в копейках (number или bigint — деньги в ZenStack хранятся BigInt)
 formatKopecks(15000000) // 150 000 ₽
+formatKopecks(1250000n) // 12 500 ₽
+
+// Копейки — двумя знаками и только если они ненулевые
+formatKopecks(99950) // 999,50 ₽
+
+// Английская запись (валюта всегда рубль)
+formatKopecks(390000, { locale: 'en', prefix: 'from ' }) // from RUB 3,900
 
 // Fallback для null/undefined
 formatRubles(null, { fallback: 'по запросу' }) // по запросу
