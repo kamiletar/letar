@@ -1313,7 +1313,10 @@ zag **1.43.3**; shadcn-скин — `@radix-ui/react-select` **2.3.7**. Номе
   `@letar/forms-core/uikit`; скины Chakra (`@letar/forms`) и shadcn (`@letar/forms-shadcn`); Select и Combobox.
 - **Б.** `onUpdate(option) → Promise<{ label, value, data? } | null>` и два слота на одной инфраструктуре
   контекста: `Form.Field.Select.EditButton` (для `onUpdate`) и `Form.Field.Select.CreateButton` (для `onCreate`,
-  дополнение владельца). Те же слоты у `Form.Field.Combobox`.
+  дополнение владельца). Те же слоты у `Form.Field.Combobox`. Плюс Combobox при пустом результате показывает
+  «Ничего не найдено» и под ним пункт создания (§9.1).
+- **В.** Поиск в `Field.Select`: быстрый фильтр по тексту внутри выпадашки, по умолчанию с 10 опций
+  (`searchable`, §15). Только статичные опции, без `useQuery` — async остаётся за Combobox (§15.7).
 
 **Не-цели.** Мультивыбор. `onDelete`/`DeleteButton` (место оставлено, §4.6). Скины vue/vue-shadcn/angular
 (потребителей нет). `renderValue` у Combobox (значение там — текст инпута, §9). Окно редактирования — его делает
@@ -1382,6 +1385,8 @@ export interface UIKitComboboxProps<TNode = unknown, TData = unknown> extends UI
   /** Содержимое пустого списка вместо текста «Ничего не найдено» (например CreateButton) */
   emptyContent?: TNode
 }
+// Этап В: emptyContent переезжает в UIKitSelectionSlotProps (нужен и Select в режиме поиска),
+// UIKitSelectProps получает search?: UIKitSelectSearch — §15.4
 ```
 
 `creatable-options.ts` — расширение без поломки (дефолт generic-а сохраняет прежний тип):
@@ -1489,6 +1494,11 @@ export interface SelectFieldProps<TData = unknown> extends BaseFieldProps {
   createItem?: boolean
   /** Подвал выпадающего списка */
   listFooter?: ReactNode
+  // этап В (§15)
+  /** Поле поиска в выпадашке. По умолчанию 'auto' — при 10+ опциях (порог 9) */
+  searchable?: SelectSearchable<TData>
+  /** Пустой результат поиска: своё содержимое вместо «Ничего не найдено» (например с CreateButton) */
+  renderEmpty?: (search: string) => ReactNode
   // valueType, clearable, size, variant — без изменений
 }
 
@@ -1696,7 +1706,8 @@ export const FieldSelect: SelectFieldComponent = Object.assign(
 #### 4.4. `CreateButton` — поведение
 
 - Нет контекста поля → `null` + dev-предупреждение; у поля нет `onCreate` → `null`; `scope: 'value-text'` → `null`.
-- Select: `runCreate()` → `onCreate('')`. Combobox: `onCreate(search.trim())` — текст из контекста поля.
+- Select: `runCreate()` → `onCreate('')`; с этапа В в режиме поиска — `onCreate(search.trim())` (§15.4).
+  Combobox: `onCreate(search.trim())` — текст из контекста поля.
 - Путь тот же, что у встроенного пункта «+ Добавить…»: закрыть список → окно приложения → результат →
   опция добавляется и выбирается (§5). Встроенный пункт (`CREATE_OPTION_VALUE`) переводится на тот же `runCreate`,
   `creatingRef` удаляется: один `pending` на поле — пункт, `CreateButton` и `EditButton` не запускаются
@@ -1961,6 +1972,44 @@ final      = withEdits + служебный пункт создания (есл�
   откатывает (`ZC/combobox.machine.mjs:455–462`: только `invokeOnClose` и `setFinalFocus`); `api.focus()` → инпут
   (`ZC/combobox.connect.mjs:93–95`).
 
+#### 9.1. Пустой результат при `onCreate`: «Ничего не найдено» + создание (этап Б)
+
+**Сейчас.** Совпадений нет → в коллекции остаётся один служебный пункт «+ Добавить "<текст>"»
+(`field-combobox.tsx:341–349`). Сообщение о пустом результате рисуется только при `options.length === 0`
+(`field-combobox.tsx:451–455`), а сам `Combobox.Empty` Ark возвращает `null`, если коллекция не пуста
+(`ARK/combobox/combobox-empty.js:10`). Итог: пользователь не видит, что поиск ничего не нашёл, — только
+предложение создать.
+
+**Решение.** Признак пустоты — число **настоящих** совпадений (`baseOptions` без служебного пункта), а не размер
+коллекции:
+
+```
+matches = 0, поиск ≥ minChars, не идёт загрузка:
+  [сообщение: renderEmpty?.(search) ?? emptyMessage ?? «Ничего не найдено»]   ← не пункт коллекции
+  [+ Добавить "<текст>"]                                                       ← служебный пункт, как сейчас
+matches > 0: как сейчас (пункт создания в конце, если нет точного совпадения)
+```
+
+- Сообщение рисуется **своим** элементом, не `Combobox.Empty` (он погашен непустой коллекцией): `<Box>` со стилями
+  слота `empty` рецепта (`css={useComboboxStyles().empty}` — хук экспортирован, Chakra
+  `components/combobox/combobox.js:12, 78`; слот `empty` — `CR/combobox.js:138`), атрибуты
+  `data-scope="combobox" data-part="empty"` и `role="presentation"`, как у Ark (`combobox-empty.js:11–12`). Строка —
+  `formSelection.combobox.emptyMessage` (уже есть, `field-combobox.tsx:362`).
+- Создание остаётся **пунктом коллекции**: стрелка вниз + Enter создают запись, как сейчас. Это единственный
+  клавиатурный путь в Combobox — кнопка в подвале с клавиатуры недостижима (§4.5), поэтому переносить создание
+  в `CreateButton` по умолчанию нельзя. При пустом результате пункт создания подсвечивается первым — Enter сразу
+  создаёт.
+- `createItem={false}` + `renderEmpty={(s) => <>Нет «{s}» <Form.Field.Combobox.CreateButton /></>}` — полная
+  замена рендера пустого состояния, если приложению нужен именно вид «сообщение + кнопка».
+- **Совместимость с уже задеплоенным потребителем `onCreate` (domwellbes).** Он передаёт свои `emptyMessage` на
+  каждый справочник через обёртку над `FieldCombobox`. Меняется только одно: над пунктом создания появляется его
+  же сообщение. Значение, подпись и роль служебного пункта прежние — e2e-селекторы по
+  `getByRole('option', { name: '+ Добавить …' })` не ломаются, `onCreate(search)` вызывается так же. Сообщение,
+  которое отсылает в раздел справочника («… Справочник — «Материалы → Производители»»), рядом с «+ Добавить»
+  читается двусмысленно — сказать потребителю в заметке к релизу, править ли текст, решает он.
+- Ровно то же правило действует у Select в режиме поиска (§15.4) — одна функция в `forms-core`
+  (`resolveEmptyState(matches, search, hasCreate)`), два скина.
+
 ### 10. shadcn-скин
 
 **Паритет:** те же пропсы и слоты, те же headless-хуки из `forms-react`; визуал — `Pencil` из `lucide-react`.
@@ -2062,11 +2111,41 @@ final      = withEdits + служебный пункт создания (есл�
 25. shadcn: пункты 9, 10, 12, 17, 20, 21 плюс «pointerup по карандашу не выбирает пункт».
 26. Регрессия `onCreate` целиком (`field-select-oncreate.spec.tsx`, `field-combobox-oncreate.spec.tsx` в обоих
     скинах) после перевода на общий `runCreate`.
+27. Combobox, пустой результат при `onCreate` (§9.1): видны и сообщение (`emptyMessage` потребителя и
+    дефолт), и `option` «+ Добавить "…"» с прежним именем; ArrowDown/Enter создают; при совпадениях сообщения нет;
+    `renderEmpty` заменяет сообщение; без `onCreate` — прежний `Combobox.Empty`.
+
+**Этап В (поиск в Select, §15).**
+
+28. Порог: 9 опций — поля поиска нет, 10 — есть; `searchable={false}` при 50 — нет; `true` при 3 — есть;
+    `{ threshold: 20 }`; служебный пункт создания в счёт не входит.
+29. Смена числа опций в рантайме 9→10 и 10→9 (перерендер с новым `options`): значение и фокус не теряются,
+    Root не перемонтируется (тот же DOM-узел триггера); при открытом списке с непустым поиском поле поиска не
+    пропадает (§15.3).
+30. Фильтр: без учёта регистра и диакритики (`contains`), по `getOptionText` (строка/`textValue`/подпись правки);
+    свой `filter`; группы — пустые группы исчезают, заголовки групп в поиске не участвуют.
+31. Выбранное значение, отфильтрованное из списка, остаётся в триггере; `value: ''` с опцией «Все» не
+    сбрасывается, пока её не видно (`hasEmptyOption` по полному списку).
+32. Клавиатура в поле поиска: печать, пробел, Home/End редактируют текст и ничего не выбирают; ArrowDown/Up
+    двигают подсветку; первая подходящая подсвечена сразу после ввода; Enter выбирает её; Escape закрывает;
+    Enter во время IME-композиции не выбирает.
+33. Фокус: при открытии — поле поиска (мышь, клавиатура); на `pointer: coarse` — нет (клавиатура телефона не
+    выскакивает); после выбора — триггер; при закрытии поиск сброшен.
+34. Пусто: сообщение + пункт «+ Добавить "<поиск>"» → `onCreate(search)`; без поиска — «+ Добавить…» →
+    `onCreate('')`; `renderEmpty`; `createItem={false}` + `CreateButton` в пустом состоянии.
+35. Слоты не ломаются: `renderOption`, `renderValue` в триггере, карандаши и F2 из поля поиска (F2 → подсвеченная).
+36. ARIA: поле поиска — `role=combobox`, `aria-controls` на List, `aria-activedescendant` = id подсвеченного
+    пункта; Content — `role=dialog` с именем; `getByRole('option', { name })` работает.
+37. Регрессия существующих Select (все спеки Select без изменений при ≤ 9 опциях), `getGroup`, `valueType: 'number'`,
+    `onCreate`, `Form.UrlSync` с Select.
 
 **e2e (`form-develop-app`, реальный браузер).** Демо «Адрес доставки»: карандаш пункта → окно → сохранить →
 подпись обновилась, пункт не выбран; фокус после закрытия окна — на триггере (правка из пункта) и на карандаше
 (правка значения); F2; геометрия триггера (§8) на узкой ширине и на мобильном вьюпорте; `pointer: coarse` — 44px;
 axe на открытом списке (`aria-hidden-focus`). Ассерты скоупить на своё поле (`.claude/docs/e2e-testing.md`).
+Этап В: Select на 30 опций — поиск, выбор с клавиатуры, мобильный вьюпорт (нет автофокуса, поле поиска не
+уезжает при скролле списка, шрифт поля ≥ 16px — иначе iOS зумит страницу), axe (`aria-dialog-name`,
+`aria-required-children`).
 
 ### 13. Порядок реализации для `forms-dev`
 
@@ -2081,7 +2160,10 @@ axe на открытом списке (`aria-hidden-focus`). Ассерты с�
    `ComboboxFieldProps` (`getTextValue`); `SelectFieldComponent`/`ComboboxFieldComponent` пока без статиков;
    compile-only тест вывода.
 3. Chakra Select: `ItemText` + `renderOption`, `renderValue` в `ValueText`, `itemToString: getOptionText`,
-   `readOnly`; в `field-select.tsx` убрать сплющивание; dev-предупреждение; тесты 1–7.
+   `readOnly`; в `field-select.tsx` убрать сплющивание; dev-предупреждение; тесты 1–7. Заодно исправить JSDoc над
+   `FieldSelect` (`field-select.tsx:88–94`): он обещает «advanced features (search, clear, custom rendering)», а
+   поиска нет. После этапа А честно: «clear, custom rendering (`renderOption`/`renderValue`)»; «search» вернуть
+   в этапе В.
 4. Chakra Combobox: тест 8.
 5. shadcn Select/Combobox: `textValue` у `Item`, `Value` с `children`, `renderOption`.
 6. Цикл синхронизации (ниже), версии, `bun.lock`.
@@ -2095,9 +2177,22 @@ axe на открытом списке (`aria-hidden-focus`). Ассерты с�
 3. Chakra Select: слоты (`selection-slots.tsx`), `controlActions`/`renderOptionActions`/`listFooter`/`controlRef`/F2
    в `uikit-chakra.tsx`; `field-select.tsx`: `onCreate` на `runCreate` (удалить `creatingRef`), `onUpdate`,
    `createItem`; статики через `Object.assign`; типы в `form-compound-types.ts` и `create-form.tsx`; тесты 9–24, 26.
-4. Chakra Combobox (§9).
-5. shadcn (§10), тест 25.
+4. Chakra Combobox (§9), включая пустой результат при `onCreate` (§9.1, тест 27; `resolveEmptyState` — в
+   `forms-core` шагом 1).
+5. shadcn (§10), тест 25; §9.1 в shadcn Combobox — тем же правилом.
 6. Цикл синхронизации, e2e-демо.
+
+**Этап В** — `forms` 2.21.0, `forms-core` 0.18.0, `forms-react` 0.13.0, `forms-shadcn` 0.42.0 (подробно — §15.9):
+
+1. `forms-core`: `resolveSearchable`, `filterSelectionOptions`, `SELECT_SEARCH_THRESHOLD = 9`, типы
+   `SelectSearchable`/`UIKitSelectSearch`; unit-тесты порога и фильтра.
+2. `forms-react/selection/`: `useSelectionSearch` (строка поиска, гистерезис порога, сброс на закрытии).
+3. Chakra: поле поиска в `uikit-chakra.tsx` (`composite: false`, `Select.List`, ARIA, клавиши, подсветка первой,
+   автофокус), `field-select.tsx` — `searchable`, `renderEmpty`, `onCreate(search)`; JSDoc — вернуть «search»;
+   тесты 28–37.
+4. shadcn: проп в типах, `searchable` не действует, dev-предупреждение при `true` — долг (§15.6).
+5. Цикл синхронизации, e2e; в CHANGELOG — «Изменения поведения»: у Select с 10+ опциями в выпадашке появилось
+   поле поиска, выключается `searchable={false}`.
 
 **Цикл синхронизации из 6 групп** (`.claude/commands/forms-dev.md`) — после каждого этапа:
 
@@ -2111,7 +2206,13 @@ axe на открытом списке (`aria-hidden-focus`). Ассерты с�
 4. **`apps/form-example`:** пример «Адрес доставки — правка карандашом», расширить `examples/create-option`.
 5. **`libs/forms/NEW_COMPONENTS.md`.**
 6. **`libs/form-mcp`:** новые пропсы Select/Combobox в `get_field_props`/`get_field_example`; в `pattern-registry.ts`
-   — паттерн «справочник с правкой и созданием из формы», если реестр ведёт такие паттерны.
+   — паттерн «справочник с правкой и созданием из формы», если реестр ведёт такие паттерны. Этап В: `searchable` в
+   `get_field_props`, правило выбора «Select или Combobox» (§15.7) в описании полей `list_fields`/`get_form_pattern`.
+
+Вне `libs/forms` (не правка этого плана — сообщить координатору): `.claude/rules/forms.md` в пункте про
+`Field.NativeSelect` говорит, что `Field.Select` закрывает мобильный UX «(поиск, кнопка очистки)». До этапа В
+это неправда. Сейчас нужно «(кнопка очистки; поиск — с forms 2.21.0)», после этапа В — «(поиск с 10 опций,
+кнопка очистки)».
 
 После каждого bump версии — `bun scripts/check-lock-workspace-versions.mjs` и при расхождении отдельный коммит
 `bun.lock` (правило `app-workflow.md` §3.5).
@@ -2130,6 +2231,11 @@ axe на открытом списке (`aria-hidden-focus`). Ассерты с�
   её ловит только compile-only тест вывода (§12, п. 6).
 - **Р5. Производительность:** значение контекста поля новое на каждый рендер — перерисовываются слоты поля; для
   списков в сотни пунктов нормально, виртуализации у Select всё равно нет.
+- **Р6. Этап В меняет открытый список у существующих Select с 10+ опциями** (§15.8): поле поиска, автофокус, печать
+  фильтрует вместо typeahead. Закрытое поле не меняется. Смягчение — строка «Изменения поведения» в CHANGELOG,
+  `searchable={false}`, прогон e2e потребителей до релиза.
+- **Р7. Поиск в Select держится на ручной ARIA и гашении трёх клавиш** поверх внутренностей zag (§15.2): обновление
+  Chakra/Ark может сдвинуть порядок обработки. Закрыто тестами 32, 36 и axe в e2e.
 
 **Открытые вопросы к владельцу** (по каждому — рекомендация):
 
@@ -2161,6 +2267,260 @@ axe на открытом списке (`aria-hidden-focus`). Ассерты с�
     доке? — _Рекомендую да_, без рантайм-запрета.
 12. **shadcn Combobox без F2** (нет модели подсветки, §10) — принять долгом? — _Рекомендую принять_; чинить вместе с
     клавиатурой shadcn Combobox.
+13. **Как делать поиск в Select:** поле поиска внутри выпадашки (а) или подмена на Combobox от порога (б)? —
+    _Рекомендую (а)_ (§15.2): закрытое поле не меняется, `renderValue` и `value: ''` работают, при 9→10 нет
+    перемонтирования, один путь рендера для всех слотов.
+14. **Умолчание `searchable: 'auto'` с порогом 9 (поиск с 10 опций)** — включать у всех существующих Select? —
+    _Рекомендую да_: меняется только открытый список (Р6). Глобальный переключатель
+    `createForm({ selectSearchable })` — не делать сразу, добавить по первой просьбе потребителя.
+15. **Считать ли отключённые опции в порог?** — _Рекомендую да_: они занимают место в списке так же, как
+    доступные. Служебный пункт «+ Добавить» и заголовки групп — не считать.
+16. **Раскладка клавиатуры в фильтре** («rhjdkz» → «Кровля»)? Штатный `contains` её не учитывает (§15.3). —
+    _Рекомендую не в первой итерации._ Если нужно — перенести чистую `correctKeyboardLayout` из
+    `@letar/fuzzy-search` в `forms-core/uikit` (fuzzy-search реэкспортирует её оттуда) и искать по двум строкам.
+    Прямую зависимость `@letar/forms` → `@letar/fuzzy-search` не заводить: forms публикуется в npm, fuzzy-search — нет.
+17. **Печать на закрытом триггере открывает список с поиском** (как в системных списках)? — _Рекомендую нет_ в
+    первой итерации: на закрытом триггере остаётся typeahead zag, поведение не меняется.
+18. **Автофокус поля поиска на тач-устройствах** — _Рекомендую не фокусировать_ (`pointer: coarse`): иначе
+    клавиатура телефона закрывает половину списка; поиск — по тапу в поле.
+19. **shadcn Select без поиска** до готовой клавиатуры shadcn Combobox (§15.6) — принять долгом? — _Рекомендую
+    принять_: поиск внутри Radix Select конфликтует с его фокусной моделью.
+20. **Combobox: «Ничего не найдено» + пункт создания по умолчанию** (§9.1), этап Б? — _Рекомендую да_; пункт
+    создания остаётся пунктом списка (единственный клавиатурный путь), свои тексты потребителя не трогаем.
+21. **Искать ли по названию группы** (`getGroup`)? — _Рекомендую нет_: ищем по тексту опции; совпадение по
+    заголовку группы вывалило бы всю группу.
+
+### 15. Поиск в `Field.Select` (этап В)
+
+Запрос владельца: быстрый фильтр по тексту, когда вариантов много (10 и больше).
+
+#### 15.1. Что есть сейчас
+
+- `Field.Select` — zag select без поля ввода. Есть только typeahead по первым буквам: на триггере и на открытом
+  списке, один печатный символ без Ctrl/Meta (`ZS/select.connect.mjs:182–228, 382–431`, `ZQ/typeahead.mjs:33–35`).
+  JSDoc над `FieldSelect` обещает «advanced features (search, clear, custom rendering)» (`field-select.tsx:88–94`) —
+  это неправда, исправляется в этапе А (§13).
+- `Field.Combobox` уже умеет и async (`useQuery(search)`, `debounce` 300 мс, `minChars`; `field-combobox.tsx:247–256`),
+  и статичные `options` с клиентским фильтром `contains` (`field-combobox.tsx:282, 305–309`), плюс `getGroup`,
+  `getDisabled`, `onCreate`.
+
+#### 15.2. Варианты и выбор
+
+**(а) Поле поиска внутри выпадашки Select.** Проверено по исходникам — реализуемо на публичных частях Ark/Chakra:
+
+- **zag предусматривает вложенный ввод.** Проп `composite` (по умолчанию `true`, `ZS/select.machine.mjs:25`;
+  описание «composed with other composite widgets like tabs or combobox» — `ZS/select.types.d.ts:152–156`). При
+  `composite: false` Content становится `role="dialog"`, а `role="listbox"` и `aria-activedescendant` уходят на
+  отдельную часть `list` (`ZS/select.connect.mjs:372, 378, 433–440`). Chakra её экспортирует: `Select.List`
+  (Chakra `components/select/select.js:37–38`, `namespace.js:2`).
+- **Фильтрация коллекции.** Select перечитывает коллекцию по `collection.toString()` (`ZS/select.machine.mjs:125–127`).
+  `syncCollection` сохраняет выбранные элементы через `selectedItemMap`, даже если их нет в новой коллекции
+  (`ZS/select.machine.mjs:674–684` → `ZL/selection-map.mjs:4–15`): подпись выбранного значения в триггере не
+  пропадает при фильтрации.
+- **Подсветка.** Если подсвеченный пункт отфильтрован, `getNextValue` вернёт `null` (`ZL/list-collection.mjs:201–206`) —
+  первая стрелка «пустая». Решение: при каждом изменении поиска `api.setHighlightValue(<первая доступная>)`
+  (`ZS/select.connect.mjs:90–92`), при пустом результате — `clearHighlightValue()`.
+- **Конфликт с клавишами listbox.** Печатные символы из редактируемого элемента Content в typeahead не забирает
+  (`isEditableElement(target)` → return, `ZS/select.connect.mjs:422–425`). Но таблица клавиш исполняется **до** этой
+  проверки (`:392–421`): пробел без активного typeahead превращается в Enter → `ITEM.CLICK` + `preventDefault`
+  (выбрал бы пункт вместо ввода пробела), Home/End получают `preventDefault` (курсор в поле не двигается). Значит
+  поле поиска гасит всплытие `keydown` для Space, Home, End и для Enter во время IME-композиции
+  (`event.nativeEvent.isComposing`). ArrowUp/Down, Enter, Tab проходят к Content — это и есть нужная навигация.
+- **Фокус.** При открытии Select фокусирует первый tabbable в Content (`ZS/select.machine.mjs:541–548` →
+  `ZQ/initial-focus.mjs:6–16`) — поле поиска стоит первым и получает фокус без своего кода. На `pointer: coarse` —
+  атрибут `data-no-autofocus` на поле (`initial-focus.mjs:13`): фокус уходит на следующий tabbable, клавиатура
+  телефона не выскакивает. Закрытие → фокус на триггер (`ZS/select.machine.mjs:549–555`), как сейчас.
+- **Tab.** При tabbable внутри Content Tab ходит между ними (`initial-focus.mjs:17–25`,
+  `ZS/select.connect.mjs:385–390`). У `Select.List` `tabIndex: 0` (`ZS/select.connect.mjs:435`) — перекрыть
+  `tabIndex={-1}`: пропсы Ark идут после пропсов zag (`ARK/select/select-list.js:10`), не-обработчики
+  перезаписываются (`ZM`). Тогда Tab из поиска ведёт к кнопкам подвала/пустого состояния.
+- **`closeOnSelect`** по умолчанию `true` (`ZS/select.machine.mjs:24`): выбор закрывает список, поиск сбрасывается.
+- **ARIA.** Фокус в поле, а `aria-activedescendant` на List — скринридер подсветку не озвучит. Поэтому поле
+  получает вручную `role="combobox"`, `aria-expanded="true"`, `aria-autocomplete="list"`,
+  `aria-controls=<id List>` (у List своего id нет, `ZS/select.connect.mjs:433–441` — задаём сами),
+  `aria-activedescendant` = id подсвеченного пункта (формат `select:<id>:option:<value>`, `ZS/select.dom.mjs:8`;
+  брать из `api.getItemProps({ item }).id`, не собирать строку) и `aria-label` из i18n. Content-диалог получает
+  имя через `aria-labelledby` метки (`ZS/select.connect.mjs:380`), без метки — свой `aria-label`.
+- **Готового паттерна «Select с поиском» в установленных Chakra 3.37 / Ark 5.39 нет** (ни компонента, ни хука). Есть
+  ли пример в документации Chakra/Ark — **не проверено** (внешние сайты в этой сессии недоступны); `composite` и
+  отдельная часть `list` — единственные признаки поддержки в коде.
+- **Layout.** Content — `overflowY: auto` (`CR/select.js:54–72`): поле поиска `position: sticky; top: 0` на
+  `bg.panel`, иначе уедет при прокрутке. Шрифт поля ≥ 16px — иначе iOS зумит страницу при фокусе.
+
+**(б) Select при `searchable` рисует Combobox:**
+
+- Кнопка-триггер превращается в поле ввода: у существующих потребителей с 10+ опциями меняется само закрытое поле.
+  Пользователь может принять его за свободный текст.
+- `renderValue` невозможен (в инпуте только строка, §9) — этап А для этих полей теряется.
+- Смена 9→10 в рантайме = смена типа компонента: React перемонтирует Root, теряются фокус, открытое состояние и
+  состояние zag; текст инпута нужно заново синхронизировать со значением (`field-combobox.tsx:260–279`).
+- `value: ''` («Все категории») Combobox считает пустым (`value={currentValue ? [currentValue] : []}`,
+  `field-combobox.tsx:391`) — вариант «Все» ломается, `hasEmptyOption` пришлось бы переносить.
+- Уход из поля с недописанным текстом откатывает ввод (`revertInputValue`, `ZC/combobox.machine.mjs:437–443`), очистка
+  чистит и текст, и значение (`:468–472`) — ещё два отличия от Select.
+- Два пути рендера под одним полем: вдвое больше тестов и мест для слотов (`IndicatorGroup` Select и Combobox разные).
+- Плюс: ARIA combobox готова из коробки.
+
+**(в) Не делать поиск в Select, отправлять потребителей в Combobox** со статичными `options`. Отклонено: владелец
+просит поиск именно в Select, а у Select свои плюсы — `renderValue`, `value: ''`, кнопка-триггер без клавиатуры на
+телефоне.
+
+**Выбор — (а).** Закрытое поле не меняется, `renderValue`, карандаш у значения и `value: ''` работают как есть. При
+9→10 появляется или пропадает только строка поиска внутри списка, без перемонтирования. Один путь рендера — одна
+копия слотов. Цена — ручная ARIA и гашение трёх клавиш (Р7), закрыто тестами 32, 36 и axe.
+
+#### 15.3. API
+
+```ts
+// libs/forms, types/field-types.ts
+export interface SelectSearchOptions<TData = unknown> {
+  /** Поиск показывается, когда опций больше порога. По умолчанию 9 (то есть с 10). 0 — всегда */
+  threshold?: number
+  /** По умолчанию formSelection.search.placeholder — «Поиск…» */
+  placeholder?: string
+  /** Своё сообщение пустого результата. По умолчанию formSelection.combobox.emptyMessage — «Ничего не найдено» */
+  emptyMessage?: string
+  /** Свой предикат. По умолчанию contains без регистра и диакритики по getOptionText(option) */
+  filter?: (option: SelectFieldOption<TData>, search: string) => boolean
+}
+export type SelectSearchable<TData = unknown> = boolean | 'auto' | SelectSearchOptions<TData>
+// SelectFieldProps<TData>.searchable?: SelectSearchable<TData>   — по умолчанию 'auto'
+// SelectFieldProps<TData>.renderEmpty?: (search: string) => ReactNode
+```
+
+- `'auto'` (по умолчанию) — поиск при числе опций > 9. `false` — выключить. `true` ≡ `{ threshold: 0 }` —
+  всегда, даже при трёх опциях. Объект — `'auto'` со своими настройками.
+- **Что считается.** Полный список после созданных опций и наложения правок (конвейер §6), без служебного пункта
+  «+ Добавить». Отключённые опции считаются, заголовки групп — нет. Считается **нефильтрованный** список, иначе поле
+  поиска исчезало бы при вводе.
+- **Гистерезис.** Пока строка поиска непустая, поле поиска не исчезает, даже если опций стало ≤ порога (справочник
+  перезапросился при открытом списке): иначе пользователь застрял бы в невидимом фильтре. На закрытии поиск
+  сбрасывается.
+- **Тексты** — i18n `formSelection.*`, резолв в `useFieldState` через `useSelectionString` (хуки в `render`
+  запрещены, `field-combobox.tsx:357–358`). Новые ключи: `formSelection.search.placeholder` («Поиск…» / «Search…»),
+  `formSelection.search.aria` («Поиск по списку» / «Search options»). Пустой результат — существующий
+  `formSelection.combobox.emptyMessage` («Ничего не найдено», `selection-field-strings.ts:28`): одна строка на оба
+  поля, без второго перевода.
+- **Фильтр по умолчанию — тот же, что у Combobox.** Ark `useFilter({ sensitivity: 'base' })` (`field-combobox.tsx:282`)
+  → zag `createFilter`: `Intl.Collator(locale, { usage: 'search', sensitivity: 'base' })`, NFC, поиск подстроки
+  (`@zag-js+i18n-utils@1.41.2/.../dist/filter.mjs:3–36`), локаль — из `LocaleProvider` Ark
+  (`@ark-ui/react/dist/providers/locale/use-filter.js:6–12`). Регистр и диакритика не учитываются; сливает ли
+  `base` «ё» и «е» для `ru` — не проверено, закрыть тестом 30. **Раскладку не учитывает** — открытый вопрос 16.
+- Сравнивается `getOptionText` (`textValue` → строковый `label` → `String(value)`, §3), поэтому `ReactNode`-подписи и
+  правки через `onUpdate` ищутся по своему тексту. Название группы в поиске не участвует (вопрос 21).
+
+#### 15.4. Стыковка со слотами этапов А и Б
+
+**Контракт `forms-core/uikit`:**
+
+```ts
+export interface UIKitSelectSearch {
+  query: string
+  onQueryChange: (query: string) => void
+  placeholder: string
+  ariaLabel: string
+  /** value опций, прошедших фильтр. Коллекция строится по ним; выбранное и hasEmptyOption — по полному options */
+  visibleValues: ReadonlySet<string>
+}
+// UIKitSelectProps.search?: UIKitSelectSearch   — undefined: поиска нет, поведение как сейчас
+// emptyContent?: TNode переезжает из UIKitComboboxProps в UIKitSelectionSlotProps
+```
+
+Почему скин получает полный `options` + `visibleValues`, а не отфильтрованный список: `hasEmptyOption` и `selected`
+(`uikit-chakra.tsx:167–171`) считаются по списку. Если «Все категории» (`''`) отфильтровать, `selected` стал бы `[]`
+и поле визуально сбросилось бы посреди поиска.
+
+**Чистые функции `forms-core`:** `resolveSearchable(searchable, count, query)` → `boolean` (порог и гистерезис),
+`filterSelectionOptions(options, query, match)` — один фильтр для Select и для статичного пути Combobox
+(`field-combobox.tsx:305–309` переходит на него; `match` скин передаёт свой — у Chakra `contains` из `useFilter`),
+`resolveEmptyState` из §9.1. **`forms-react`:** `useSelectionSearch` — строка поиска, сброс на закрытии, итог
+`resolveSearchable`. **Скин:** само поле, гашение клавиш, ARIA, автофокус, подсветка первой, sticky.
+
+| Слот / фича (этапы А, Б)      | В режиме поиска                                                                                                                                                                                                            |
+| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `renderOption`                | без изменений: фильтр по тексту, отрисовка — узел                                                                                                                                                                          |
+| `renderValue`                 | без изменений: триггер остаётся кнопкой, поиск — внутри списка                                                                                                                                                             |
+| `EditButton` у значения       | без изменений (`IndicatorGroup`)                                                                                                                                                                                           |
+| `EditButton` в пунктах, F2    | без изменений; F2 из поля поиска всплывает к Content, обработчик §7 берёт подсвеченный пункт                                                                                                                               |
+| встроенный «+ Добавить»       | идёт **после** фильтра и сам не фильтруется. Поиск пуст — «+ Добавить…» → `onCreate('')`; поиск есть и точного совпадения нет (`shouldOfferCreate` по полному списку) — «+ Добавить "<поиск>"» → `onCreate(search.trim())` |
+| `CreateButton`                | берёт `search` из контекста поля (§2.3) — у Select теперь настоящий текст                                                                                                                                                  |
+| пусто                         | правило §9.1: сообщение (`renderEmpty` / `emptyMessage` / i18n) + пункт создания, при пустом результате он подсвечен первым                                                                                                |
+| `createItem={false}`          | `renderEmpty` с `CreateButton` — в Select кнопка в пустом состоянии достижима Tab-ом                                                                                                                                       |
+| `data`, `editable`, наложение | фильтр идёт после наложения (§6): подпись после правки находится поиском                                                                                                                                                   |
+
+#### 15.5. Поведение
+
+- Открыл список — поле поиска в фокусе (кроме тача). Ввёл текст — список сузился, первая доступная подсвечена,
+  Enter выбирает её. Совпадений нет — сообщение и, при `onCreate`, пункт создания (подсвечен). Escape закрывает
+  (слой dismissable zag), поиск сброшен.
+- На закрытом триггере остаётся прежний typeahead zag (`ZS/select.connect.mjs:182–228`).
+- `value: ''`: «Все категории» фильтруется как обычная опция, выбор не сбрасывается.
+- `getGroup`: группы строятся только из оставшихся опций (`forms-core/uikit/group-options.ts:43–53`) — пустые
+  группы исчезают сами; остались только опции без группы — список плоский.
+- `valueType: 'number'`, `Form.UrlSync`, `onBlur` — путь значения не меняется.
+- `disabled`/`readOnly` — список не открывается, поиска нет.
+- **Смена числа опций в рантайме (9→10, 10→9):** тот же компонент, меняется только `search` в пропсах UIKit →
+  появляется или исчезает строка поиска. Значение и фокус не трогаются, Root не перемонтируется. При открытом списке
+  появление поля фокус не переносит (initial focus срабатывает только при открытии).
+
+#### 15.6. shadcn
+
+Поиск внутри Radix Select конфликтует с его фокусной моделью: наведение мышью переводит DOM-фокус на пункт
+(`RX:877–883`), поле поиска его теряет; Content ловит любой одиночный символ для typeahead и гасит Tab
+(`RX:499–501`); стрелки переводят реальный фокус на пункты (`RX:502–516`). Делать поиск поверх этого —
+бороться с библиотекой. **Долг:** `forms-shadcn` принимает `searchable` в типах (паритет API), `'auto'` ничего не
+делает, `true`/объект — один раз dev-предупреждение. Путь к паритету — Select с поиском на примитиве shadcn
+Combobox (Popover) после его клавиатурного долга (§10); записать в план `forms-shadcn`.
+
+#### 15.7. Async в Select — не нужен
+
+`useQuery` в Select не добавляем. Select — конечный список, целиком известный на клиенте: подпись выбранного
+значения берётся из `options`, `value: ''` работает, поиск фильтрует уже загруженное. Async тянет `debounce`,
+`minChars`, загрузку, `initialLabel` — всё это уже есть в Combobox (`field-combobox.tsx:247–279`). Второй такой же
+механизм в Select — два компонента, делающих одно. Если приложение само загрузило справочник (`options` из своего
+запроса) — это по-прежнему Select.
+
+Как документация разводит поля (`docs/fields.md`, `select.mdx`, страница Combobox, `form-mcp` `get_form_pattern`):
+
+| Ситуация                                                                       | Поле                                               |
+| ------------------------------------------------------------------------------ | -------------------------------------------------- |
+| все варианты уже на клиенте (enum, справочник до сотен записей)                | `Select` — поиск появится сам с 10 опций           |
+| варианты приходят с сервера по тексту поиска, растущий каталог, тысячи записей | `Combobox` + `useQuery`                            |
+| свободный текст с подсказками                                                  | `Combobox` c `allowCustomValue` или `Autocomplete` |
+
+В доке Select — строка «Справочник ищется на сервере? Нужен Combobox», в доке Combobox — «Все варианты уже есть на
+клиенте? Хватит Select: поиск включится сам». Правило «растущий каталог → Combobox» в `.claude/rules/forms.md` уже
+есть и не противоречит.
+
+#### 15.8. Обратная совместимость
+
+- Закрытое поле, значение, `onChange`, `UrlSync` — без изменений у всех.
+- У Select с 10+ опциями в открытом списке появляется поле поиска с автофокусом. Печать после открытия фильтрует,
+  а не прыгает typeahead-ом. «Префикс + Enter» даёт тот же результат (первая подходящая подсвечена), перебор
+  повторным нажатием одной буквы больше не работает.
+- При активном поиске Content меняет роль с `listbox` на `dialog`, listbox — это `List`. `getByRole('listbox')` и
+  `getByRole('option', { name })` в e2e потребителей находят то же; e2e с `keyboard.type` после открытия — проверить
+  прогоном до релиза.
+- CHANGELOG: «Изменения поведения — у Select с 10+ опциями в выпадашке поле поиска; выключается
+  `searchable={false}`».
+
+#### 15.9. Этап, версии, синхронизация
+
+**Отдельный этап В после Б, не внутри А.** Он опирается на Б (`search` и `runCreate` в контексте, `CreateButton`,
+правило пустого результата §9.1) и на А (`getOptionText`, порядок конвейера опций). Он меняет видимое поведение
+существующих потребителей — отдельный minor с отдельной строкой в CHANGELOG, его проще откатить или выключить.
+Риски у него свои (клавиши и ARIA zag) и от А/Б не зависят.
+
+Версии: `forms` 2.21.0, `forms-core` 0.18.0, `forms-react` 0.13.0, `forms-shadcn` 0.42.0 (только типы и
+предупреждение). Шаги — §13 «Этап В». Цикл 6 групп:
+
+1. `libs/forms`: CHANGELOG, README (проп `searchable`), `docs/fields.md` — раздел «Поиск в Select» и таблица §15.7.
+2. `form-develop-app`: демо `/select-search-demo` — 9, 10 и 30 опций, группы, «Все» с `''`, `onCreate` с текстом
+   поиска, переключатель числа опций в рантайме; e2e.
+3. `form-docs`: `select.mdx` + `select.ru.mdx` (раздел «Поиск»), страница Combobox (строка про выбор поля).
+4. `form-example`: выбор из длинного списка (например, регион) с поиском.
+5. `NEW_COMPONENTS.md`.
+6. `form-mcp`: `searchable` в `get_field_props`/`get_field_example`, правило выбора §15.7 в `get_form_pattern`.
 
 ## ✅ [2026-09-04] Миграция `zenstack-form-plugin` на нативные возможности ZModel
 
