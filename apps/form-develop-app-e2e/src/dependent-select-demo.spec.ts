@@ -154,5 +154,22 @@ test.describe('Dependent Select Demo', () => {
       await expect(rowRegions.first()).not.toContainText('Москва')
       await expect(rowRegions.nth(1)).not.toContainText('Санкт-Петербург')
     })
+
+    test('перетаскивание строки мышью меняет порядок и не стирает регионы', async ({ page }) => {
+      const rowRegions = section(page, 'rows').locator('[data-field-name$="regionId"]')
+      const handles = section(page, 'rows').locator('[aria-roledescription="sortable"]')
+      await expect(handles).toHaveCount(2)
+
+      const from = await handles.first().boundingBox()
+      const to = await handles.nth(1).boundingBox()
+      await page.mouse.move(from!.x + from!.width / 2, from!.y + from!.height / 2)
+      await page.mouse.down()
+      // PointerSensor начинает перетаскивание после 8 px — двигаем несколькими шагами
+      await page.mouse.move(to!.x + to!.width / 2, to!.y + to!.height / 2 + 30, { steps: 12 })
+      await page.mouse.up()
+
+      await expect(rowRegions.first()).toContainText('Санкт-Петербург')
+      await expect(rowRegions.nth(1)).toContainText('Москва')
+    })
   })
 })

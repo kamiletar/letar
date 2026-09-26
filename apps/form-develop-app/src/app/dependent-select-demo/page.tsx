@@ -247,6 +247,7 @@ function RowsWithRootParent() {
           />
           <Form.Group.List
             name="stops"
+            sortable
             wrapper={({ children }) => (
               <VStack align="stretch" gap={2}>
                 {children}
@@ -257,6 +258,7 @@ function RowsWithRootParent() {
             )}
           >
             <HStack gap={2} align="end">
+              <Form.Group.List.Button.DragHandle />
               <Form.Field.Select
                 name="regionId"
                 dependsOn="/countryId"
