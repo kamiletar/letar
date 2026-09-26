@@ -106,6 +106,7 @@ const KNOWN_FORM_DIRECTIVE_KEYS = new Set([
   'relation',
   'exclude',
   'tooltip',
+  'dependsOn',
 ])
 
 /**
@@ -169,6 +170,8 @@ function setDeep(target: Record<string, unknown>, dotPath: string, value: unknow
  * Плоский namespace вместо объектного литерала — единственный рабочий вариант (см.
  * {@link metaValueToPlain}):
  * - `@meta("form.title", "…")` / `placeholder` / `description` / `fieldType` — строка
+ * - `@meta("form.dependsOn", "countryId")` / `@meta("form.dependsOn", ["countryId", "typeId"])` — родитель(и)
+ *   зависимого поля выбора → `fieldProps.dependsOn` (этап З); проверки — `depends-on.ts`
  * - `@meta("form.exclude", true)` — булево (без значения — тоже считается `true`)
  * - `@meta("form.props.<key>", …)` — один UI-проп или Zod-constraint; `<key>` может быть
  *   вложенным путём (`"form.props.grid.cols"`) — собирается в объект перед разбором на
@@ -204,6 +207,16 @@ export function parseMetaAttributes(attributes: readonly DataFieldAttribute[]): 
       meta.description = value
     } else if (path === 'fieldType' && typeof value === 'string') {
       meta.fieldType = value
+    } else if (path === 'dependsOn') {
+      // Строка — один родитель, массив строк — несколько; пустые имена и нестроковые элементы отбрасываются
+      if (typeof value === 'string' && value.trim() !== '') {
+        meta.dependsOn = value.trim()
+      } else if (Array.isArray(value)) {
+        const names = value.filter((item): item is string => typeof item === 'string' && item.trim() !== '')
+        if (names.length > 0) {
+          meta.dependsOn = names.map((name) => name.trim())
+        }
+      }
     } else if (path === 'exclude') {
       meta.exclude = value === undefined ? true : Boolean(value)
     } else if (path.startsWith('props.')) {

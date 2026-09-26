@@ -6,6 +6,7 @@ import type {
   Expression,
   TypeDef,
 } from '@zenstackhq/language/ast'
+import type { ModelSchemaInfo } from './depends-on.js'
 import { findUnknownMetaFormPaths, parseMetaAttributes } from './parser.js'
 import { assertValidFieldType } from './registry-keys.js'
 import { quoteRegexLiteral, quoteTsString } from './ts-literal.js'
@@ -697,6 +698,15 @@ function collectForeignKeyTargets(fields: readonly DataField[]): Map<string, str
   return targets
 }
 
+/** Поле-связь со стороны FK: `@relation(fields: [...])` */
+function ownsForeignKey(field: DataField): boolean {
+  const relationAttr = field.attributes.find(
+    (attr: DataFieldAttribute) => attr.decl?.$refText === '@relation' || attr.decl?.$refText === 'relation',
+  )
+  const fieldsArg = relationAttr?.args.find((arg) => arg.name === 'fields')?.value
+  return fieldsArg?.$type === 'ArrayExpr' && fieldsArg.items.length > 0
+}
+
 function collectTypeDefFields(typeDef: TypeDef | undefined, visited: Set<TypeDef>): DataField[] {
   if (!typeDef || visited.has(typeDef)) {
     return []
@@ -704,6 +714,25 @@ function collectTypeDefFields(typeDef: TypeDef | undefined, visited: Set<TypeDef
   visited.add(typeDef)
   const nestedMixinFields = typeDef.mixins.flatMap((ref) => collectTypeDefFields(ref.ref, visited))
   return [...nestedMixinFields, ...typeDef.fields]
+}
+
+/**
+ * Данные о модели, видимые только в AST, — для проверок `form.dependsOn` (`depends-on.ts`, этап З).
+ */
+export function extractModelSchemaInfo(model: DataModel, enumNames: Set<string>): ModelSchemaInfo {
+  const allFields = collectAllFields(model)
+  return {
+    name: model.name,
+    fieldNames: new Set(allFields.map((field) => field.name)),
+    foreignKeyTargets: collectForeignKeyTargets(allFields),
+    // Только «собственные» ссылки — со стороны, где лежит FK (`@relation(fields: [...])`): обратные списки
+    // (`places Address[]`) есть у любой связанной модели и делали бы связанными вообще всё
+    modelReferences: new Set(
+      allFields
+        .filter((field) => !isList(field) && isModelReference(field, enumNames) && ownsForeignKey(field))
+        .map((field) => getFieldType(field)),
+    ),
+  }
 }
 
 /**
@@ -1001,7 +1030,18 @@ function generateUIMeta(params: GenerateUIMetaParams): string | null {
   }
   // Ключ `fieldProps` строго один: дубль в объектном литерале — TS1117, а в JS побеждает последний
   // (раньше `form.props.*` молча терялись, если у поля был ещё и `form.relation.*`)
-  if (formMeta.props && formMeta.relation) {
+  if (formMeta.dependsOn !== undefined) {
+    // Этап З: `form.dependsOn` — в тот же литерал, явная директива сильнее `form.props.dependsOn`
+    parts.push(
+      `fieldProps: ${
+        JSON.stringify({
+          ...formMeta.props,
+          dependsOn: formMeta.dependsOn,
+          ...(formMeta.relation ? { relation: formMeta.relation } : {}),
+        })
+      }`,
+    )
+  } else if (formMeta.props && formMeta.relation) {
     parts.push(`fieldProps: ${JSON.stringify({ ...formMeta.props, relation: formMeta.relation })}`)
   } else if (formMeta.props) {
     parts.push(`fieldProps: ${JSON.stringify(formMeta.props)}`)

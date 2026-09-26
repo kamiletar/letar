@@ -3,9 +3,10 @@ import { isDataModel, isEnum } from '@zenstackhq/language/ast'
 import type { CliGeneratorContext } from '@zenstackhq/sdk'
 import { mkdir, writeFile } from 'fs/promises'
 import { dirname, join, resolve } from 'path'
+import { findDependsOnDiagnostics } from './depends-on.js'
 import { extractEnumInfo, generateEnumCode } from './enum-generator.js'
 import { collectEnumTranslations, collectModelTranslations, generateI18nFiles } from './i18n-generator.js'
-import { collectAllFields, extractModelInfo, generateModelCode } from './model-generator.js'
+import { collectAllFields, extractModelInfo, extractModelSchemaInfo, generateModelCode } from './model-generator.js'
 import { collectRegistryKeys, findRegistryWarnings, generateRegistryKeysCode } from './registry-keys.js'
 import type { I18nConfig } from './types.js'
 
@@ -109,6 +110,16 @@ export async function generate(context: CliGeneratorContext): Promise<void> {
   // Extract information for generation
   const enumInfos = enums.map((e) => extractEnumInfo(e))
   const modelInfos = models.map((m) => extractModelInfo(m, enumNames))
+
+  // Этап З: проверки `form.dependsOn` до записи файлов — ошибка схемы не должна оставить половину выхода
+  const modelSchemaInfos = new Map(models.map((m) => [m.name, extractModelSchemaInfo(m, enumNames)]))
+  const dependsOn = findDependsOnDiagnostics(modelInfos, modelSchemaInfos)
+  for (const warning of dependsOn.warnings) {
+    console.warn(warning)
+  }
+  if (dependsOn.errors.length > 0) {
+    throw new Error(dependsOn.errors.join('\n'))
+  }
 
   // Generate enum files
   for (const enumInfo of enumInfos) {

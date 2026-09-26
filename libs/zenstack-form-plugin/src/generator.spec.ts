@@ -150,4 +150,51 @@ describe('generate — form-registry-keys.ts (этап Е, §17.4)', () => {
     const messages = warn.mock.calls.map((call) => String(call[0]))
     expect(messages.some((m) => /Order\.authorId.*побеждает ключ/.test(m))).toBe(true)
   })
+  it('PD2: form.dependsOn на несуществующее поле — ошибка generate с Модель.поле, файлы не пишутся', async () => {
+    await expect(
+      generate(
+        contextFor([
+          makeModel('Address', [
+            makeField('countryId', 'String'),
+            makeField('cityId', 'String', [meta('form.dependsOn', 'countryid')]),
+          ]),
+        ]),
+      ),
+    ).rejects.toThrow(/Address\.cityId.*«countryid»/)
+    await expect(readFile(join(outputDir, 'index.ts'), 'utf-8')).rejects.toThrow()
+  })
+
+  it('PD2: несколько ошибок dependsOn собираются в одно исключение', async () => {
+    const rejection = generate(
+      contextFor([
+        makeModel('Address', [
+          makeField('a', 'String', [meta('form.dependsOn', 'a')]),
+          makeField('b', 'String', [meta('form.dependsOn', 'nope')]),
+        ]),
+      ]),
+    )
+    await expect(rejection).rejects.toThrow(/Address\.a.*самого себя[\s\S]*Address\.b.*«nope»/)
+  })
+
+  it('PD2: родитель с form.exclude — предупреждение, generate проходит; dependsOn попадает в схему', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+    await generate(
+      contextFor([
+        makeModel('Address', [
+          {
+            ...makeField('countryId', 'String'),
+            attributes: [{
+              $type: 'DataFieldAttribute',
+              decl: { $refText: '@meta' },
+              args: [{ value: strLit('form.exclude') }, { value: { $type: 'BooleanLiteral', value: true } }],
+            }],
+          } as ReturnType<typeof makeField>,
+          makeField('cityId', 'String', [meta('form.dependsOn', 'countryId')]),
+        ]),
+      ]),
+    )
+    const messages = warn.mock.calls.map((call) => String(call[0]))
+    expect(messages.some((m) => /Address\.cityId.*Address\.countryId.*исключён/.test(m))).toBe(true)
+    expect(await readFile(join(outputDir, 'Address.form.ts'), 'utf-8')).toContain('"dependsOn":"countryId"')
+  })
 })

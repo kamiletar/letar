@@ -102,6 +102,11 @@ export interface FormFieldMeta {
   nativeAttributes?: NativeAttributeApplication[]
   /** UI props (everything else — passed to fieldProps) */
   props?: Record<string, unknown>
+  /**
+   * Родитель(и) зависимого поля выбора (`@meta("form.dependsOn", ...)`, этап З): строка или массив строк как в
+   * схеме — уходит в `fieldProps.dependsOn`. Путь с ведущим «/» — от корня формы.
+   */
+  dependsOn?: string | string[]
   /** Relation configuration */
   relation?: { model?: string; labelField: string; descriptionField?: string }
   /** (?)-подсказка рядом с лейблом → `ui.tooltip` (`@meta("form.tooltip.*", …)`) */
