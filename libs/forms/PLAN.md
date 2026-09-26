@@ -1321,6 +1321,9 @@ zag **1.43.3**; shadcn-скин — `@radix-ui/react-select` **2.3.7**. Номе
   `fetch`); «ровно один источник» в типах; пакет `@letar/forms-query` с подпутём `/zenstack` (§16.8, §16.9).
 - **Д.** Оптимистичный режим `onCreate`/`onUpdate`: результат виден сразу, подтверждение в фоне, отправка формы ждёт
   его (§16.7).
+- **Е.** Автопривязка справочников из схемы: `@meta("form.fieldType", "Select.WorkCategory")` → `Form.AutoFields`
+  и `Form.Field.Auto` берут компонент из реестра `createForm`; плагин генерирует типизированный список ключей (§17).
+  Идёт после А–Д и их не блокирует.
 
 **Не-цели.** Мультивыбор. `onDelete`/`DeleteButton` (место оставлено, §4.6). Скины vue/vue-shadcn/angular
 (потребителей нет). `renderValue` у Combobox (значение там — текст инпута, §9). Окно редактирования — его делает
@@ -2270,6 +2273,42 @@ Q — пакет `@letar/forms-query` (свои spec в `libs/forms-query`, на
   регрессия этапа Б без изменений.
 - O13 — реестр (`forms-core`): `settleAll` на пустом — `true` сразу; отказ одного → `false`; снятая запись не держит.
 
+**Этап Е — автопривязка справочников (§17).** E — unit в `libs/forms` и `forms-core`, P — в
+`libs/zenstack-form-plugin`, M — в `libs/form-mcp`.
+
+- E1 — `parseFieldRegistryType` (`forms-core`): `'Select.WorkCategory'` → `{ namespace: 'Select', key: 'WorkCategory' }`;
+  `'select'`, `'Select.'`, `'Foo.X'`, `'Select.workCategory'`, `'Select.A.B'` → `null`. Те же строки — в P1 (одно правило
+  в двух местах).
+- E2 — `Form.AutoFields` в форме инстанса: поле с `fieldType: 'Select.WorkCategory'` рендерит компонент из
+  `extraSelects` с `name`/`label`/`placeholder`/`helperText`/`required` и `fieldProps` без `relation`; то же для
+  `lazySelects` (после `Suspense`) и для `Combobox.`/`Listbox.`.
+- E3 — `Form.Field.Auto` с ключом: тот же компонент, пропсы JSX перекрывают `fieldProps` (как сейчас в
+  `field-auto.tsx:274`).
+- E4 — ключа нет в реестре: dev → исключение, в тексте имя поля, ключ, список доступных ключей; production
+  (`vi.stubEnv('NODE_ENV', 'production')`) → базовое поле по пространству (`combobox` для `Combobox.`), `console.error`
+  один раз на два поля с одним ключом.
+- E5 — `Form` без `createForm` + схема с ключом: dev → исключение с текстом про инстанс; production → базовое поле.
+- E6 — ключ + `relation` на одном поле: рендерится компонент реестра, опции провайдера ему не передаются,
+  dev-предупреждение.
+- E7 — неизвестный встроенный `fieldType` (`'selct'`) → `FieldString` + dev-предупреждение; все известные типы — без
+  предупреждений (регрессия).
+- E8 — типы (compile-only): `AppForm.Select.Missing` — `@ts-expect-error`; `FormRegistryCheck` = `true` при полном
+  реестре, ошибка при недостающем ключе и при инстансе с аннотацией `: ExtendedForm`; `createForm({})` и аннотация
+  `: ExtendedForm` компилируются (обратная совместимость); `withUIMeta` с `fieldType: 'Select.X'` компилируется,
+  `'Foo.X'` — `@ts-expect-error`.
+- E9 — стабильность контекста: перерисовка корня формы не меняет ссылку значения `FormRegistryContext`.
+- P1 — плагин: разбор ключей, снимок `form-registry-keys.ts` (дедуп, сортировка, пустые пространства — `[]`,
+  `formRegistryUsages`), `index.ts` его экспортирует; без ключей — файл с пустыми списками.
+- P2 — плагин: неверный ключ → ошибка generate с `Модель.поле`; `form.relation.model` на несуществующую модель и
+  `labelField`/`descriptionField`, которых нет в модели, → предупреждение; ключ + `relation` → предупреждение.
+- P3 — плагин: `form.props.*` + `form.relation.*` на одном поле → **один** ключ `fieldProps` с обоими (регрессия бага
+  `model-generator.ts:923–928`); после `nx zenstack:generate form-develop-app` — `nx typecheck:tsgo form-develop-app`
+  зелёный.
+- P4 — плагин: ключ во фрагменте, импортированном в схему, попадает в `form-registry-keys.ts` (проверка допущения
+  `mergeImports`, §17.1).
+- M1 — `form-mcp`: `get_directives` содержит пример ключа и правило грамматики; описание `form.relation` совпадает с
+  выходом плагина (`fieldProps.relation`, `fieldType` не ставится).
+
 **e2e (`form-develop-app`, реальный браузер).** Демо «Адрес доставки»: карандаш пункта → окно → сохранить →
 подпись обновилась, пункт не выбран; фокус после закрытия окна — на триггере (правка из пункта) и на карандаше
 (правка значения); F2; геометрия триггера (§8) на узкой ширине и на мобильном вьюпорте; `pointer: coarse` — 44px;
@@ -2290,6 +2329,9 @@ ZenStack (§16.2, этап Б): демо на модели `Category` и нас�
 настоящими хуками ZenStack. Этап Д: оптимистичное создание на медленной мутации (`page.route` с задержкой) — окно
 закрылось, новая категория выбрана сразу, нажатие «Сохранить» ждёт подтверждения и отправляет настоящий id (проверка
 по телу запроса отправки); мутация с ошибкой (500) → выбор откатан, видно сообщение, форма не отправлена.
+Этап Е: демо `Form.AutoFields` по модели с ключом `Select.WorkCategory` в `form-develop-app` — поле рисуется
+компонентом реестра (роль `combobox`/кнопка создания из окна, а не текстовый `input`), создание из окна выбирает
+новую запись; production-сборка с намеренно незарегистрированным ключом — базовый Select, страница не падает.
 
 ### 13. Порядок реализации для `forms-dev`
 
@@ -2376,18 +2418,43 @@ ZenStack (§16.2, этап Б): демо на модели `Category` и нас�
 6. Цикл синхронизации, e2e этапа Д; в CHANGELOG `forms` — «Изменения поведения»: отправка формы ждёт подтверждения
    оптимистичных действий (без них поведение не меняется).
 
+**Этап Е — автопривязка справочников из схемы** (§17) — `forms` 2.24.0, `forms-core` 0.21.0,
+`zenstack-form-plugin` 4.2.0, `form-mcp` 2.3.0 (`forms-react`, `forms-shadcn`, `forms-query` не меняются). От А–Д не
+зависит по коду, идёт после них по очереди:
+
+1. `zenstack-form-plugin`: починка двойного `fieldProps` (`model-generator.ts:923–928`) — отдельный коммит, patch-часть
+   minor; тест P3.
+2. `forms-core`: `FieldRegistryNamespace`, `FieldRegistryType` в `FieldComponentType`, `parseFieldRegistryType`; тест E1.
+3. `libs/forms`: `FormRegistryContext` в `ExtendedFormRoot`, `RegistryField` и fallback в `SchemaFieldWithRelations` и
+   `Form.Field.Auto`, dev-предупреждение в `default` у `renderFieldByType`; тесты E2–E7, E9.
+4. `libs/forms`: generic `createForm`/`ExtendedForm` с умолчаниями `string`, `FormRegistryCheck`; тест E8. **Перед
+   релизом** — `nx typecheck:tsgo` всех потребителей `createForm` (поиск `extraSelects|lazySelects` по `apps/` — 13
+   файлов): generic превращает опечатки `AppForm.Select.X` и доступ по `string`-ключу в ошибки (Р16, вопрос 45).
+5. `zenstack-form-plugin`: разбор и проверка ключей, проверка `form.relation.*` по моделям, `form-registry-keys.ts` в
+   выходе и в `index.ts`; тесты P1, P2, P4; README (раздел «Ключи реестра», совместимость с `forms` ≥ 2.24.0).
+6. `form-mcp`: `get_directives` — ключ и исправленное описание `form.relation`; `get_form_pattern` — паттерн
+   «справочник по ключу из схемы»; тест M1.
+7. Цикл синхронизации (ниже), e2e этапа Е; `libs/zenstack-fragments/README.md` — строка про ключи во фрагментах.
+
 **Версии по этапам** (кто выпускается; `—` — не меняется):
 
-| Этап                    | `forms` | `forms-core` | `forms-react` | `forms-shadcn` | `forms-query` |
-| ----------------------- | ------- | ------------ | ------------- | -------------- | ------------- |
-| А — рендер              | 2.19.0  | 0.16.0       | —             | 0.40.0         | —             |
-| Б — слоты               | 2.20.0  | 0.17.0       | 0.12.0        | 0.41.0         | —             |
-| В — поиск в Select      | 2.21.0  | 0.18.0       | 0.13.0        | 0.42.0         | —             |
-| Г — источники данных    | 2.22.0  | 0.19.0       | 0.14.0        | 0.43.0         | 0.1.0 (новый) |
-| Д — оптимистичный режим | 2.23.0  | 0.20.0       | 0.15.0        | 0.44.0         | 0.2.0         |
+| Этап                    | `forms` | `forms-core` | `forms-react` | `forms-shadcn` | `forms-query` | `zenstack-form-plugin` | `form-mcp` |
+| ----------------------- | ------- | ------------ | ------------- | -------------- | ------------- | ---------------------- | ---------- |
+| А — рендер              | 2.19.0  | 0.16.0       | —             | 0.40.0         | —             | —                      | —          |
+| Б — слоты               | 2.20.0  | 0.17.0       | 0.12.0        | 0.41.0         | —             | —                      | —          |
+| В — поиск в Select      | 2.21.0  | 0.18.0       | 0.13.0        | 0.42.0         | —             | —                      | —          |
+| Г — источники данных    | 2.22.0  | 0.19.0       | 0.14.0        | 0.43.0         | 0.1.0 (новый) | —                      | —          |
+| Д — оптимистичный режим | 2.23.0  | 0.20.0       | 0.15.0        | 0.44.0         | 0.2.0         | —                      | —          |
+| Е — ключи реестра       | 2.24.0  | 0.21.0       | —             | —              | —             | 4.2.0                  | 2.3.0      |
 
-В npm из них уходят `forms` (тег `forms-v*`) и `forms-query` (тег `forms-query-v*`, §16.9); `forms-core`/`forms-react`
-вбандливаются, `forms-shadcn` в `publish-npm.yml` отсутствует (как и раньше). Если к началу этапа текущие версии
+`form-mcp` в этапах А–Д тоже обновляется (группа 6 цикла синхронизации — описания пропсов и паттерны), но это правки
+данных без смены API; версию поднимает `forms-dev` по факту, в таблице не зафиксирована. Текущие версии: плагин
+4.1.3, `form-mcp` 2.2.1.
+
+В npm из них уходят `forms` (тег `forms-v*`), `forms-query` (тег `forms-query-v*`, §16.9) и `zenstack-form-plugin`
+(тег `zenstack-form-plugin-v*`); `form-mcp` — по действующему тегу `form-mcp-v*` (в его `package.json` стоит
+`"private": true` — как это сочетается с публикацией, не проверено); `forms-core`/`forms-react` вбандливаются,
+`forms-shadcn` в `publish-npm.yml` отсутствует (как и раньше). Если к началу этапа текущие версии
 уйдут вперёд — номера сдвигаются, порядок минорных шагов тот же.
 
 **Цикл синхронизации из 6 групп** (`.claude/commands/forms-dev.md`) — после каждого этапа:
@@ -2411,7 +2478,9 @@ ZenStack (§16.2, этап Б): демо на модели `Category` и нас�
 странице Combobox, отдельная страница пакета `@letar/forms-query`; в группе 6 — паттерны «справочник из
 ZenStack/Query» и «справочник на server action» в `get_form_pattern` и примеры
 `form.props.searchable`/`form.props.searchable.threshold`/`form.props.createItem` в `get_directives`.
-`zenstack-form-plugin` не меняется: новых директив нет (§16.5).
+`zenstack-form-plugin` в этапах А–Д не меняется: новых директив нет (§16.5). В этапе Е меняется (§17): в группе 1 —
+раздел «Ключи реестра в схеме» в `docs/fields.md` и README (таблица «ключ или `RelationConfig.fieldProps`», §17.5),
+в группе 3 — та же страница в `form-docs`, в группе 6 — `get_directives`/`get_form_pattern`.
 
 Вне `libs/forms` (не правка этого плана — сообщить координатору): `.claude/rules/forms.md` в пункте про
 `Field.NativeSelect` говорит, что `Field.Select` закрывает мобильный UX «(поиск, кнопка очистки)». До этапа В
@@ -2456,6 +2525,22 @@ ZenStack/Query» и «справочник на server action» в `get_form_pat
 - **Р12. Два публикуемых пакета с общими типами `forms-core`** (`forms` и `forms-query` вбандливают их каждый себе):
   при смене формы контракта опций пакеты разойдутся структурно. Смягчение: такие изменения — minor обоих сразу, тест
   совместимости Q6, таблица совместимых версий в README `forms-query` (§16.9).
+- **Р13. Тихий фолбэк ключа в production** (§17.3): незарегистрированный ключ рисуется базовым Select, а
+  `NODE_ENV=production` стоит и на staging — e2e не увидит исключения. Смягчение: e2e этапа Е проверяет поле по роли и
+  кнопке создания; `console.error` с именем ключа; строка `FormRegistryCheck` ловит пропуск ещё на typecheck.
+- **Р14. Рассинхрон версий плагина и форм** (§17.7): плагин 4.2 с `forms` < 2.24 — ключ молча становится текстовым
+  полем (dev-предупреждение на неизвестный тип появляется только в 2.24). Смягчение: требование версии в README и
+  CHANGELOG обоих пакетов.
+- **Р15. Устаревший `form-registry-keys.ts`:** схему поправили, `zenstack:generate` не запустили — typecheck зелёный на
+  старом списке. Смягчение: файл пишет тот же прогон, что и формы (без него устареют и сами схемы форм); в dev
+  недостающий ключ — исключение. Проверяет ли CI актуальность сгенерированного кода — не проверено.
+- **Р16. Generic `createForm` меняет типы у всех потребителей:** опечатки `AppForm.Select.X` и доступ
+  `AppForm.Select[key]` со `key: string` станут ошибками typecheck. Опечатки — настоящие баги (сейчас падают в
+  рантайме); динамический доступ — расширить тип ключа или аннотировать инстанс. Смягчение: прогон `typecheck:tsgo`
+  всех потребителей до релиза (§13, этап Е, шаг 4), умолчания `string` у `ExtendedForm`.
+- **Р17. «Магия» автопривязки:** поле в `AutoFields` рисуется компонентом из другого файла, при отладке неочевидно,
+  откуда он. Смягчение: `displayName` `RegistryField(Select.X)`, места использования ключа в dev-сообщениях
+  (`formRegistryUsages`), таблица §17.5 в доке.
 
 **Открытые вопросы к владельцу** (по каждому — рекомендация):
 
@@ -2470,6 +2555,9 @@ TanStack Query** — сценарии, примеры в доке и взаим�
 (этап В), 24 — `useSelected` (этап Б), 25 — `RelationConfig.fieldProps` + `data` в опциях провайдера (этап Б),
 26 — нет (`form.fieldType` со ссылкой на компонент не вводим), 27 — да (опции провайдера для relation + combobox).
 Открытых вопросов нет.
+
+🔄 **2026-09-26 владелец пересмотрел вопрос 26:** автопривязка справочников из схемы — этап Е (§17). Новые вопросы
+39–45 открыты.
 
 1. **Горячая клавиша.** F2 для подсвеченного пункта и для выбранного значения на закрытом триггере? —
    _Рекомендую F2_ (стандарт, zag и Radix её не занимают; Ctrl/Shift+Enter конфликтуют с выбором, §7). Сделать
@@ -2560,11 +2648,21 @@ TanStack Query** — сценарии, примеры в доке и взаим�
     `initialLabel` остаётся и имеет приоритет.
 25. **`RelationConfig.fieldProps` + `data: record` в опциях `RelationFieldProvider`** — чтобы автоформы получали
     `onCreate`/`onUpdate`/`renderOption` один раз на модель? — _Рекомендую да, этап Б_ (§16.5, п. 2).
+    Уточнение после пересмотра вопроса 26 (§17.5): `RelationConfig.fieldProps` — лёгкий случай, только для автоформ с
+    провайдером (подписи, `renderOption`, короткий `onCreate` без окна). Справочник со своим окном, нужный и в ручных
+    формах, — компонент реестра и ключ в схеме (этап Е). На одном поле оба — побеждает ключ, `relation`
+    игнорируется с предупреждением.
 26. **`form.fieldType` со ссылкой на компонент инстанса** (`"Select.WorkCategory"`)? — _Рекомендую нет_ (§16.5,
     п. 3): маппер работает по фиксированному `switch`; поле-справочник ставится в форму явно, в `AutoFields` —
     `exclude`. С пакетом `@letar/forms-query` вопрос не связан: пакет не знает ни о компонентах инстанса, ни о
     скинах — импортирует только типы `forms-core`, поэтому ссылка из схемы на компонент не создала бы и цикла через
     него (§16.9).
+    🔄 **Решено иначе: пересмотрено владельцем 2026-09-26.** Автопривязку делаем, этап Е (§17). Новая рекомендация:
+    `@meta("form.fieldType", "Select.WorkCategory")` (вопрос 39); реестр `createForm` доходит до `Form.AutoFields` и
+    `Form.Field.Auto` через `FormRegistryContext` из корня инстанса; плагин пишет `form-registry-keys.ts` с union
+    ключей, приложение проверяет покрытие строкой `FormRegistryCheck` (typecheck); незарегистрированный ключ — в dev
+    исключение, в production базовое поле (вопрос 40). Окно, `renderOption`, тексты и валидация не автоматизируются.
+    Прежний довод «фиксированный `switch`» снимается: ключ разбирается до `switch`, встроенные типы не меняются.
 27. **Relation + `fieldType: "combobox"`** сейчас без опций (`field-type-mapper.tsx:374–375`) — отдавать опции
     провайдера как статичные `options` и перестать распылять служебный `relation` в поле? — _Рекомендую да,
     попутно в этапе Б_ (§16.5, п. 4).
@@ -2603,6 +2701,36 @@ TanStack Query** — сценарии, примеры в доке и взаим�
     _Рекомендую да_; сетевые повторы — дело загрузчика или TanStack (`retry`).
 38. **Select без `loadOptions`**, разовая загрузка — `useOptionsLoader` в ядре, выдающий те же `fieldProps`, что и
     `useQueryOptions`? — _Рекомендую да_ (§16.8): поиск по строке на сервере — задача Combobox.
+
+Вопросы 39–45 — по автопривязке справочников и кодогенерации (§17, этап Е), открыты:
+
+39. **Синтаксис ключа:** `@meta("form.fieldType", "Select.WorkCategory")` или отдельные `form.select`/`form.combobox`
+    (вариант из ответа владельцу)? — _Рекомендую `form.fieldType`_ (§17.2): одна директива на вопрос «какой
+    компонент», нет противоречивых пар, повторяет JSX `AppForm.Select.WorkCategory`, парсер плагина уже принимает.
+40. **Ключа нет в реестре** (или форма не из `createForm`): в dev и тестах — исключение с понятным текстом, в
+    production — базовое поле по пространству (`Select.` → `select`) и `console.error`? — _Рекомендую да_ (§17.3):
+    тихий `FieldString` — ловушка, которая выглядит как успех; падать всей страницей в проде из-за одной регистрации
+    не стоит.
+41. **`Field.<Имя>` для `extraFields`** тем же механизмом? — _Рекомендую не в Е_: в `Field` встроенные и свои
+    компоненты живут в одном пространстве, `Field.String` дублировал бы `string`. Добавить по первому запросу — код
+    тот же, одно пространство в `FieldRegistryNamespace`.
+42. **Заготовка компонента справочника** — nx-генератор `nx g @letar/generators:reference-select <app>
+    --model=WorkCategory --kind=select` (пишет файл один раз, отказывается при существующем, печатает строку для
+    `lazySelects`), а не плагин? — _Рекомендую да, после Е_, когда API этапов Б и Д устоится (§17.6, п. 2): плагин
+    опубликован в npm и не должен знать раскладку монорепо, а «создать один раз» противоречит его модели «перезаписать
+    всё».
+43. **`relations=[…]` для `RelationFieldProvider`** — вместо генерации рантайм-хук `useZenStackRelations(client,
+    formSchema)` в `@letar/forms-query/zenstack` (обходит поля формы с `fieldProps.relation`, берёт
+    `client.<модель>.useFindMany`)? — _Рекомендую да, после Д_ (`forms-query` 0.3.0): всё, кроме хука, уже лежит в
+    схеме; модель проверяет плагин на generate.
+44. **Вторая строка опции:** вместо новой `form.optionHint` — `@meta("form.relation.descriptionField", …)` (уже
+    проходит парсер), провайдер берёт его из meta поля, Select и Combobox рисуют `description` второй строкой? —
+    _Рекомендую да, отдельным minor после этапа А_ (нужен `ItemText`), не в Е (§17.6, п. 5).
+45. **Generic `createForm`** в этапе Е — опечатки `AppForm.Select.X` в JSX станут ошибками typecheck у потребителей?
+    — _Рекомендую да_: без него `FormRegistryCheck` невозможен (индексная сигнатура стирает ключи), а опечатки сейчас
+    падают только в рантайме. До релиза — прогон `typecheck:tsgo` всех потребителей `createForm` (Р16); проверочную
+    строку в инстансе пишет человек (плагин не знает, где инстанс), образец — в доке (генератор `new-app` инстанс
+    формы не создаёт: `createForm` есть только в его `files/PLAN.md.template`).
 
 ### 15. Поиск в `Field.Select` (этап В)
 
@@ -3015,15 +3143,17 @@ useSelected?: (value: string) => { data?: TData | null; isLoading?: boolean }
    В `form-mcp` `get_directives` — добавить эти примеры.
 2. **Функции** (`renderOption`, `renderValue`, `onCreate`, `onUpdate`, `useSelected`) в схему не выносим: в ZModel нет
    функций, а окно и мутации — логика приложения. Два пути:
-   - **основной — компонент-справочник в `createForm`-инстансе**: `extraSelects: lazySelects({ WorkCategory: () =>
-     import('./selects/work-category-select') })`, внутри `useFindMany` + `useCreate`/`useUpdate` + окно; в форме
-     `<AppForm.Select.WorkCategory name="categoryId" />`, в `Form.AutoFields` это поле — в `exclude` и рядом явно;
+   - **основной — компонент-справочник в `createForm`-инстансе**: опция `lazySelects: { WorkCategory: () =>
+     import('./selects/work-category-select').then((m) => m.WorkCategorySelect) }` (`create-form.tsx:111`; функции
+     `lazySelects(...)` в библиотеке нет, см. §17.8), внутри `useFindMany` + `useCreate`/`useUpdate` + окно; в форме
+     `<AppForm.Select.WorkCategory name="categoryId" />`, в `Form.AutoFields` это поле — в `exclude` и рядом явно
+     (до этапа Е; с этапа Е — ключом в схеме, §17);
    - **для автоформ — `RelationConfig.fieldProps`** (вопрос 25): `fieldProps?: Partial<SelectFieldProps>` в конфиге
      модели у `RelationFieldProvider`. Функции там допустимы: конфиг собирается в компоненте приложения, хуки
      мутаций доступны. `SchemaFieldWithRelations` добавляет их к полю. Плюс `data: record` в опциях провайдера.
      Один раз на модель — «категория с созданием и правкой во всех автоформах».
-3. **Не делаем:** `form.fieldType` со ссылкой на компонент инстанса (`"Select.WorkCategory"`) — маппер работает по
-   фиксированному `switch` (вопрос 26).
+3. ~~**Не делаем:** `form.fieldType` со ссылкой на компонент инстанса (`"Select.WorkCategory"`) — маппер работает по
+   фиксированному `switch` (вопрос 26).~~ **Пересмотрено владельцем 2026-09-26:** делаем, этап Е (§17).
 4. **Попутно (этап Б):** relation + `fieldType: "combobox"` — отдавать опции провайдера в Combobox как статичные
    `options`; `relation` не распылять в поле (вопрос 27).
 
@@ -3467,6 +3597,313 @@ export function useOptionsLoader<TOption>(
    [dual-use-engine-browser-safe-import-guard](/.claude/docs/dual-use-engine-browser-safe-import-guard.md)).
 6. `form-mcp`: паттерн «справочник из ZenStack/Query» с импортами из пакета; `libs/forms/README.md` — раздел
    «Интеграции» со ссылкой на пакет.
+
+### 17. Автопривязка справочников и кодогенерация из ZModel (этап Е)
+
+✅ **Решение владельца 2026-09-26, пересмотр вопроса 26.** Идея владельца: генератор ZenStack видит схему — привязку
+поля к справочнику можно автоматизировать. Ответ координатора, принятый за основу: строковый ключ в схеме; реестр
+`extraSelects`/`extraComboboxes` из `createForm` доходит до `Form.AutoFields` через контекст; плагин генерирует
+типизированный список ключей. Окно создания и правки, `renderOption`, тексты и валидация не автоматизируются.
+`RelationConfig.fieldProps` (вопрос 25) остаётся для лёгкого случая. Этап Е идёт **после А–Д и их не блокирует**.
+
+#### 17.1. Что проверено по коду
+
+- **Реестр до автоформ не доходит.** `createForm` собирает `ExtendedSelect`/`ExtendedCombobox`/`ExtendedListbox`
+  (`create-form.tsx:367–381`) и кладёт их только в свойства объекта инстанса (`:406–408`). `AutoFields` — общий
+  `Form.AutoFields` (`:415`), про реестр он не знает.
+- **Прецедент контекста инстанса есть:** корень `ExtendedFormRoot` (`create-form.tsx:385–401`) уже оборачивает форму
+  в `CaptchaContext` (`:395–398`). Корень есть у любой формы инстанса.
+- **Типы реестра — индексная сигнатура:** `ExtendedFormSelect`/`ExtendedFormCombobox` = `{ [key: string]: AnyComponent }`
+  (`create-form.tsx:245–251`), `createForm` не generic (`:337`). Поэтому `AppForm.Select.Опечатка` сейчас
+  компилируется и падает только в рантайме.
+- **Lazy готов как есть:** `createLazyComponents` (`create-form.tsx:353–355`) отдаёт компоненты уже в `Suspense` со
+  `Skeleton` (`lazy-component.tsx:21, 43`). Отдельной работы для `lazySelects` не нужно.
+- **Два входа маппера:** `SchemaFieldWithRelations` (`field-type-mapper.tsx:500–515`, вызов из
+  `form-auto-fields.tsx:87, 93`) и `Form.Field.Auto` (`form-fields/auto/field-auto.tsx:258–275`, свой вызов
+  `renderFieldByType`, опций провайдера не получает). Ключ нужно понимать в обоих.
+- **Неизвестный тип молча становится текстовым полем:** явный `fieldType` имеет приоритет (`field-type-mapper.tsx:104–108`),
+  `default` в `renderFieldByType` → `FieldString` без предупреждения (`:460–462`).
+- **`fieldType` из схемы typecheck не проверяет вообще.** `FieldComponentType` — закрытый union
+  (`forms-core/src/lib/schema/types/meta-types.ts:20–74`), но сгенерированный код пишет его в `.meta({ ui })`, а у Zod
+  `GlobalMeta extends JSONSchemaMeta { [k: string]: unknown }` (`zod@4.6.5 v4/core/registries.d.ts:24–31`); расширения
+  `GlobalMeta` в `libs` нет (поиск). Тип проверяется только там, где аргумент объявлен `FieldUIMeta`: `withUIMeta`
+  (`with-ui-meta.ts:209`), `relationMeta`, `commonMeta` (`common-meta.ts:14`).
+- **Плагин:** `form.fieldType` принимает любую строку (`parser.ts:205–206`) и пишет её как есть
+  (`model-generator.ts:920–922`). Выход — файл на модель и на enum плюс `index.ts` (`generator.ts:109–128`), опции —
+  `output`, `i18n`, `locales` и др. (`generator.ts:14–46`). Сгенерированные файлы импортируют только `zod/v4` и
+  `@zenstackhq/zod` (`apps/form-develop-app/src/generated/form-schemas/Recipe.form.ts:4–5`) — от `@letar/forms` не
+  зависят.
+- **Баг плагина, который этап Е вызовет.** `generateUIMeta` пишет ключ `fieldProps` дважды, если у поля есть и
+  `form.props.*`, и `form.relation.*` (`model-generator.ts:923–928`). Дубль ключа в объектном литерале — ошибка TS1117
+  по спецификации; в JS побеждает последний, то есть `form.props.*` теряются. Тест есть только на `relation` отдельно
+  (`model-generator.spec.ts:1153–1167`); в текущих схемах сочетания нет (поиск `form.relation` по `*.zmodel` — три поля,
+  без `form.props`). **Запуском не проверено.** С ключами сочетание станет обычным (ключ + `form.props.createItem`) —
+  чинить первым шагом.
+- **Мульти-файловая схема:** `loadDocument(…, mergeImports = true)` вливает декларации импортированных файлов в
+  `model.declarations` (`@zenstackhq/language@3.9.5 dist/index.mjs:6939, 7017–7023`), а плагин обходит именно
+  `model.declarations` (`generator.ts:94–100`). Значит ключи из фрагментов `libs/*.zmodel` попадут в список приложения.
+  Что CLI вызывает `loadDocument` с умолчанием `mergeImports` — **не проверено**.
+- **`form-mcp`:** `get_directives` (`libs/form-mcp/src/index.ts:131–144`) берёт описания из
+  `data/directive-registry.ts:24–96`; `generate_form` (`index.ts:146–166`) строит форму из списка полей, а не из схемы.
+  В реестре директив неточность: `form.relation` описан как `ui: { fieldType: "combobox", relation }`
+  (`directive-registry.ts:74`), а плагин пишет `fieldProps: { relation }` и `fieldType` сам не ставит
+  (`model-generator.ts:926–927`, `Recipe.form.ts`).
+- **Вторая строка опции уже почти есть:** у провайдера `RelationConfig.descriptionField` → `description` опции
+  (`relation-field-provider.tsx:55, 133`), но Select и Combobox `description` не рисуют (поиск `.description` по
+  `form-fields/selection` — только карточные поля).
+- **Хуки ZenStack v3 в приложении** берутся через `useClientQueries(schema).<модель>.useFindMany`, `schema` — из
+  `@/generated/schema` (`apps/form-develop-app/src/lib/hooks.ts:12–31`). Путь зависит от раскладки приложения.
+
+#### 17.2. Синтаксис ключа: `form.fieldType` с пространством имён
+
+| Вариант                                                          | Плюсы                                                                                                                                                                | Минусы                                                                                                                                                                                 |
+| ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **(а)** `@meta("form.fieldType", "Select.WorkCategory")`         | одна директива отвечает на вопрос «какой компонент»; повторяет JSX `AppForm.Select.WorkCategory`; парсер уже принимает (`parser.ts:205`); одно описание в `form-mcp` | встроенные типы и ключи в одном поле; нужен шаблонный тип в `FieldComponentType`                                                                                                       |
+| **(б)** `@meta("form.select", "WorkCategory")` / `form.combobox` | ключ виден отдельно                                                                                                                                                  | два способа сказать «какой компонент» и противоречивые пары (`form.fieldType: "tags"` + `form.select`); новые ключи в `parser.ts:100–109`, `FormFieldMeta`, `FieldUIMeta` и `form-mcp` |
+
+**Рекомендую (а)** (вопрос 39). Встроенные типы — camelCase без точки, ключи — `Пространство.Имя` с заглавной; путаницы
+нет. Грамматика ключа: `^(Select|Combobox|Listbox)\.[A-Z][A-Za-z0-9]*$` — имя должно быть допустимым свойством
+инстанса. `Listbox` — для симметрии с `extraListboxes`, цена нулевая. `Field.<Имя>` для `extraFields` — не в Е
+(вопрос 41).
+
+Типы в `forms-core` (`meta-types.ts`):
+
+```ts
+/** Пространства реестра createForm, на которые можно сослаться из схемы */
+export type FieldRegistryNamespace = 'Select' | 'Combobox' | 'Listbox'
+
+/** Ссылка на компонент реестра: 'Select.WorkCategory' */
+export type FieldRegistryType = `${FieldRegistryNamespace}.${string}`
+
+export type FieldComponentType = // …встроенные типы без изменений
+  FieldRegistryType
+
+/** Разбор ссылки на реестр; null — встроенный тип или неверный синтаксис */
+export function parseFieldRegistryType(
+  fieldType: string,
+): { namespace: FieldRegistryNamespace; key: string } | null
+```
+
+`parseFieldRegistryType` — чистая функция в `forms-core` с той же регуляркой, что у плагина (одно правило в двух
+местах, покрыто тестами E1 и P1). Существующие потребители union не ломаются: `SelectionFieldType` — `Extract` по
+литералам (`common-meta.ts:35–38`), исчерпывающих `switch` без `default` по этому типу в `libs` нет (у
+`renderFieldByType` есть `default`).
+
+#### 17.3. Реестр в контексте и выбор компонента
+
+- **Контекст.** Новый `FormRegistryContext` в `libs/forms/src/lib/declarative/form-registry-context.tsx`, значение —
+  `{ Select, Combobox, Listbox }`: те же объекты, что свойства инстанса (`create-form.tsx:367–381`). Они создаются один
+  раз на вызов `createForm`, ссылка стабильна — лишних перерисовок нет. `ExtendedFormRoot` оборачивает форму **всегда**
+  (не только при `captcha`); порядок с `CaptchaContext` не важен. Хук `useFormRegistry(): FormRegistry | null`.
+- **Выбор.** Новый компонент `RegistryField` вызывается до `renderFieldByType` в обоих входах: в
+  `SchemaFieldWithRelations` и в `Form.Field.Auto` (перед `field-auto.tsx:262`). `renderFieldByType` остаётся чистой
+  функцией без хуков — её экспортируют наружу (`declarative/index.ts:561`).
+
+  ```tsx
+  // Поле со ссылкой на реестр createForm: fieldType = 'Select.WorkCategory'
+  function RegistryField({ reference, field, baseProps, fieldProps }: RegistryFieldProps) {
+    const registry = useFormRegistry()
+    const Component = registry?.[reference.namespace][reference.key]
+    if (!Component) {
+      return <RegistryFallback reference={reference} field={field} registry={registry} />
+    }
+    // Служебный relation в компонент не распыляем: справочник грузит данные сам
+    const { relation: _relation, ...rest } = fieldProps ?? {}
+    return <Component {...baseProps} {...rest} />
+  }
+  ```
+
+- **Пропсы компоненту:** `name`, `label`, `placeholder`, `helperText`, `required` (у `Field.Auto` — ещё `disabled`,
+  `readOnly` и остаток JSX, как сейчас), затем `fieldProps` без `relation`. Опции провайдера не передаются. Контракт
+  для доки: компонент реестра принимает пропсы `Form.Field.Select`/`Form.Field.Combobox` без `options` — обычная
+  обёртка так и устроена. На компиляции это не проверить: реестр типизирован `ComponentType<any>`
+  (`create-form.tsx:71`).
+- **Lazy** — без доработок: пока грузится чанк, виден `Skeleton`. SSR — как у ручного `<AppForm.Select.X>`; ловушка
+  зависшего серверного Suspense закрыта в 2.7.1
+  ([letar-forms-lazy-component-ssr-stuck-suspense](/.claude/docs/letar-forms-lazy-component-ssr-stuck-suspense.md)).
+- **Ключ + `form.relation.*` на одном поле:** побеждает ключ, `relation` игнорируется; плагин предупреждает при
+  generate, маппер — dev-предупреждением.
+- **Fallback** (вопрос 40):
+
+  | Ситуация                                                  | dev и тесты (`NODE_ENV !== 'production'`)                                                                                                                           | production                                                                                                                                                                                 |
+  | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+  | ключа нет в реестре                                       | исключение: «Поле `categoryId`: ключ `Select.WorkCategory` не найден в реестре createForm. Есть: `Unit`, `Status`. Добавьте его в `extraSelects` или `lazySelects`» | `console.error` один раз на ключ; базовое поле по пространству: `Select.` → `select` (с опциями провайдера, если у поля есть `relation`), `Combobox.` → `combobox`, `Listbox.` → `listbox` |
+  | форма не из `createForm` (`Form` напрямую), контекста нет | исключение: «ключ реестра работает только в форме createForm-инстанса»                                                                                              | то же, что строкой выше                                                                                                                                                                    |
+
+  Почему исключение в dev: сейчас неизвестный тип тихо становится текстовым полем. Для справочника это ⚠️ ловушка,
+  которая выглядит как успех — поле есть, ввод пишет строку во внешний ключ. Почему не в prod: одна пропущенная
+  регистрация не должна гасить всю страницу. `NODE_ENV=production` стоит и на staging
+  ([node-env-not-production-signal](/.claude/docs/node-env-not-production-signal.md)) — там поведение как в проде, e2e
+  проверяет поле по роли и кнопке создания, а не по отсутствию падения (Р13).
+- **Попутно:** `default` в `renderFieldByType` (`field-type-mapper.tsx:460–462`) — dev-предупреждение на неизвестный
+  встроенный тип (опечатка `"selct"`). Тот же класс тихого успеха, цена — одна строка.
+- **Отладка «магии»:** `displayName` у `RegistryField` — `RegistryField(Select.WorkCategory)`, в React DevTools видно,
+  откуда компонент; в тексте dev-исключения — места использования ключа из `formRegistryUsages` (§17.4).
+
+#### 17.4. Тип ключей: что ловит typecheck, что только рантайм
+
+Плагин видит схему, но не видит `createForm`. Связь — через сгенерированный файл и проверку в инстансе.
+
+**Плагин** пишет `<output>/form-registry-keys.ts` всегда (пустые пространства — `[]`), без опции, и добавляет его в
+`index.ts`:
+
+```ts
+// AUTO-GENERATED by @letar/zenstack-form-plugin
+// DO NOT EDIT MANUALLY
+
+/** Ключи реестра createForm, на которые ссылается schema.zmodel */
+export const formRegistryKeys = {
+  Select: ['WorkCategory'],
+  Combobox: ['Counterparty'],
+  Listbox: [],
+} as const
+
+export type FormSelectKey = (typeof formRegistryKeys.Select)[number]
+export type FormComboboxKey = (typeof formRegistryKeys.Combobox)[number]
+export type FormListboxKey = (typeof formRegistryKeys.Listbox)[number]
+
+/** Где используется ключ: для сообщений об ошибках и ревью */
+export const formRegistryUsages = {
+  'Select.WorkCategory': ['Work.categoryId', 'Estimate.categoryId'],
+  'Combobox.Counterparty': ['Work.counterpartyId'],
+} as const
+```
+
+Файл без импортов: плагин не начинает зависеть от `@letar/forms`, файл компилируется в любом приложении.
+
+**`@letar/forms`: generic `createForm` и проверочный тип** (вопрос 45):
+
+```ts
+export interface ExtendedForm<
+  TSelectKey extends string = string,
+  TComboboxKey extends string = string,
+  TListboxKey extends string = string,
+> {
+  Select: Record<TSelectKey, AnyComponent>
+  Combobox: Record<TComboboxKey, AnyComponent>
+  Listbox: Record<TListboxKey, AnyComponent>
+  // …остальное без изменений
+}
+
+// createForm выводит ключи из extraSelects + lazySelects (и так же для Combobox/Listbox)
+
+/**
+ * true, если все ключи схемы есть в реестре инстанса. Иначе — объект с недостающими ключами:
+ * ошибка присваивания покажет их в тексте. Индексная сигнатура (инстанс аннотирован `: ExtendedForm`)
+ * — тоже ошибка, иначе проверка тихо зеленела бы.
+ */
+export type FormRegistryCheck<
+  TForm,
+  TSelectKey extends string,
+  TComboboxKey extends string = never,
+  TListboxKey extends string = never,
+> = /* … */
+```
+
+Умолчание `string` сохраняет нынешнее поведение: аннотация `: ExtendedForm` (есть в одном приложении, поиск
+`: ExtendedForm =`) компилируется. В приложении:
+
+```ts
+import type { FormComboboxKey, FormSelectKey } from '@/generated/form-schemas'
+
+export const AppForm = createForm({
+  lazySelects: {
+    WorkCategory: () => import('./selects/work-category-select').then((m) => m.WorkCategorySelect),
+  },
+  lazyComboboxes: {
+    Counterparty: () => import('./comboboxes/counterparty-combobox').then((m) => m.CounterpartyCombobox),
+  },
+})
+
+// Все ключи из schema.zmodel зарегистрированы — проверяется typecheck'ом
+export const appFormRegistryCheck: FormRegistryCheck<typeof AppForm, FormSelectKey, FormComboboxKey> = true
+```
+
+Почему не `extraSelects: Record<FormSelectKey, …>`: ключи разнесены по двум опциям (`extra*` и `lazy*`), ни одна
+по отдельности не обязана покрывать весь список. И без generic не поймать опечатку в JSX.
+
+| Что                                                                                     | Где ловится                                                                        |
+| --------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| неверный синтаксис ключа, неизвестное пространство                                      | **generate**, ошибка плагина с `Модель.поле`                                       |
+| `form.relation.model` — нет такой модели; `labelField`/`descriptionField` — не поле     | **generate**, предупреждение (старые схемы не роняем)                              |
+| ключ из схемы не зарегистрирован в инстансе                                             | **typecheck** — при строке `FormRegistryCheck`                                     |
+| инстанс аннотирован `: ExtendedForm` (ключи стёрты до `string`)                         | **typecheck** — `FormRegistryCheck` даёт ошибку                                    |
+| опечатка `AppForm.Select.WorkCategry` в JSX                                             | **typecheck** — с generic `createForm`                                             |
+| `fieldType: 'Foo.X'` в ручном `withUIMeta`/`relationMeta`                               | **typecheck** — шаблонный тип (наличие ключа — нет)                                |
+| строка `FormRegistryCheck` не написана                                                  | только рантайм (dev-исключение)                                                    |
+| форма не из `createForm`, но с `AutoFields` по схеме с ключами                          | только рантайм                                                                     |
+| `form-registry-keys.ts` устарел (схему правили, generate не запускали)                  | только рантайм: typecheck зелёный на старом списке (Р15)                           |
+| компонент не принимает пропсы поля или не подходит к типу значения (ключ на `String[]`) | только рантайм                                                                     |
+| в приложении несколько инстансов `createForm` с разными реестрами                       | typecheck проверяет тот инстанс, для которого написана строка; остальные — рантайм |
+
+#### 17.5. Граница с вопросом 25 (`RelationConfig.fieldProps`)
+
+|                | Ключ реестра (этап Е)                                                            | `RelationConfig.fieldProps` (этап Б)                                 |
+| -------------- | -------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| где логика     | компонент приложения: свои хуки, окно, `useSelected`, оптимизм, `renderOption`   | конфиг модели у `RelationFieldProvider`                              |
+| где работает   | `Form.AutoFields`, `Form.Field.Auto` и явный JSX `<AppForm.Select.WorkCategory>` | только автоформы с провайдером                                       |
+| откуда опции   | компонент грузит сам                                                             | провайдер, один запрос на модель на форму                            |
+| когда выбирать | справочник с окном создания и правки, нужен и в ручных формах                    | лёгкий случай: подписи, `renderOption`, короткий `onCreate` без окна |
+
+Правило для доки: поле встречается и в ручных формах или у него своё окно → компонент и ключ; только автоформы и
+короткие обработчики → `RelationConfig.fieldProps`. На одном поле оба — побеждает ключ (§17.3).
+
+#### 17.6. Варианты кодогенерации из ZModel
+
+| №  | Вариант                                                                                                           | Польза                                  | Цена, риски, отладка                                                                                                                                                                                                                                                                                                                                                                                                                                              | Владелец кода           | Решение                                                                                 |
+| -- | ----------------------------------------------------------------------------------------------------------------- | --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------- | --------------------------------------------------------------------------------------- |
+| 1  | Список ключей `form-registry-keys.ts` + проверки на generate                                                      | высокая: ключи проверяются typecheck'ом | малая; файл без импортов, регенерируется целиком, магии нет                                                                                                                                                                                                                                                                                                                                                                                                       | плагин                  | **Е, минимум**                                                                          |
+| 2  | Заготовка компонента справочника (`useFindMany`/`useCreate`/`useUpdate`, `onCreate`/`onUpdate`, пустой слот окна) | средняя: меньше рутины                  | шаблон зависит от API этапов Б/Д и от раскладки приложения (`src/<app>-form/selects/`, путь `@/generated/schema`, `useClientQueries` — `hooks.ts:12–13`); плагин опубликован в npm и про раскладку монорепо знать не должен; «создать один раз» противоречит модели плагина «перезаписать всё» (`generator.ts:109–128`, шапка `DO NOT EDIT`)                                                                                                                      | человек после генерации | **Отложить**, не в плагине: nx-генератор (вопрос 42)                                    |
+| 3  | `relations=[…]` для `RelationFieldProvider` с `labelField`/`queryArgs`                                            | средняя                                 | всё, кроме хука, уже лежит в схеме (`fieldProps.relation.model/labelField`); кодоген дал бы файл с импортом клиента ZenStack по пути приложения. Лучше рантайм без файла (вопрос 43)                                                                                                                                                                                                                                                                              | —                       | **Отложить**: рантайм-адаптер в `forms-query/zenstack`                                  |
+| 4  | Заготовка окна создания и правки из form-схемы модели                                                             | низкая                                  | окно — это форма модели, рантайм уже умеет: `<AppForm schema={WorkCategoryCreateFormSchema}><AppForm.AutoFields /></AppForm>` в диалоге. Кодоген дал бы копию, которая расходится со схемой                                                                                                                                                                                                                                                                       | —                       | **Не делать**; пример в доке (§16.6)                                                    |
+| 5  | `@meta("form.optionHint", "description")` → вторая строка опции                                                   | средняя                                 | новая директива не нужна: `@meta("form.relation.descriptionField", "note")` уже проходит парсер (`relation.*` через `setDeep`, `parser.ts:209–214`), провайдер умеет `descriptionField` (`relation-field-provider.tsx:55, 133`). Не хватает двух вещей: провайдер берёт `descriptionField` из meta поля, если нет в конфиге; Select/Combobox рисуют `description` второй строкой                                                                                  | библиотека              | **Отложить** в отдельный minor, не `optionHint` (вопрос 44)                             |
+| 6  | Полный «справочник модели»: список + форма + окно                                                                 | высокая для админок                     | это CRUD-экран, а не поле формы; тянет таблицы, пагинацию, права. Граница ответственности `@letar/forms` — поле и форма                                                                                                                                                                                                                                                                                                                                           | —                       | **Не делать** в формах; место — `libs/admin-ui` или приложение                          |
+| 7  | Директивы для пропсов этапов А–Г                                                                                  | —                                       | скаляры уже идут через `form.props.*` (§16.5, п. 1): `searchable`, `searchable.threshold`, `createItem`, `createLabel`, `settleTimeout`, `minChars`. Функции (`onCreate`, `onUpdate`, `renderOption`, `renderValue`, `loadOptions`, `loadSelected`, `useSelected`, `onSettleError`) — нельзя: в `@meta` только литералы (`parser.ts:125–128`). Для полей с ключом `form.props.*` доходят до компонента через `fieldProps` — компонент обязан их распылять (§17.3) | —                       | **Новых директив нет**                                                                  |
+| 8  | «Создать один раз» против регенерации                                                                             | —                                       | смешение двух режимов в одном инструменте — главный источник «магии»: непонятно, какой файл можно править                                                                                                                                                                                                                                                                                                                                                         | —                       | **Правило:** плагин — только регенерируемое; всё, что правит человек, — nx-генератор    |
+| 9  | Мульти-файловая схема и фрагменты `libs/*.zmodel`                                                                 | —                                       | ключи из фрагмента попадают в список каждого приложения, которое его импортирует (§17.1), — каждое обязано зарегистрировать компонент. Это правильно: ключ во фрагменте — требование к потребителю. `formRegistryUsages` пишет `Модель.поле` без имени файла; доступно ли имя файла из AST (`$document`) — не проверено                                                                                                                                           | плагин                  | **Е**: строка в README `libs/zenstack-fragments` — ключи во фрагментах только осознанно |
+| 10 | `form-mcp`: `generate_reference_select` или обновить `generate_form`                                              | низкая                                  | текстовый шаблон дублировал бы nx-генератор из п. 2; `generate_form` строит форму из списка полей, не из схемы — к ключам не относится                                                                                                                                                                                                                                                                                                                            | —                       | **Е**: только `get_directives` и `get_form_pattern` (ниже); новых инструментов нет      |
+
+**Итог.**
+
+- **В этапе Е (минимум):** контекст реестра, `RegistryField`, fallback, dev-предупреждение на неизвестный тип;
+  `FieldRegistryType` и `parseFieldRegistryType` в `forms-core`; generic `createForm` и `FormRegistryCheck`; в плагине —
+  разбор и проверка ключей, `form-registry-keys.ts`, проверка `form.relation.*` по моделям схемы, починка двойного
+  `fieldProps`; в `form-mcp` — описание ключа в `get_directives` (и исправление описания `form.relation`), паттерн
+  «справочник по ключу из схемы» в `get_form_pattern`.
+- **Отложить:** nx-генератор заготовки справочника (после Е, когда API Б и Д устоится; вопрос 42);
+  `useZenStackRelations` в `@letar/forms-query/zenstack` вместо генерации `relations=[…]` (после Д, `forms-query`
+  0.3.0; вопрос 43); `descriptionField` из meta поля и вторая строка опции в Select/Combobox (вопрос 44).
+- **Не делать:** заготовки в плагине, кодоген окна и «справочника модели», директивы под функции,
+  `form.optionHint`, `generate_reference_select`.
+
+#### 17.7. Правила проекта и публикация
+
+- **Плагин** публикуется в npm тегом `zenstack-form-plugin-v*` (`.github/workflows/publish-npm.yml:9–12`),
+  `dependencies: {}`, peer `@zenstackhq/sdk` и `@zenstackhq/zod` (`libs/zenstack-form-plugin/package.json`). Этап Е
+  зависимостей не добавляет: сгенерированный файл без импортов, `@letar/*` плагин не импортирует. Если понадобится
+  `parseFieldRegistryType` из `forms-core` — только `devDependencies` + `noExternal`
+  ([npm-publish-from-monorepo](/.claude/docs/npm-publish-from-monorepo.md)); проще держать свою регулярку и сверять
+  тестами E1/P1.
+- **Совместимость:** плагин 4.2 + `@letar/forms` < 2.24 → ключ уходит в `default` и молча рисуется текстовым полем
+  (Р14). Плагин версию форм не видит — в README плагина и CHANGELOG обоих пакетов: «ключи реестра требуют
+  `@letar/forms` ≥ 2.24.0».
+- **Semver:** плагин — minor 4.2.0 (новый файл в выходе, новые проверки: синтаксис ключа — ошибка, так как раньше
+  ключей не было; `form.relation.*` — предупреждение, чтобы не уронить generate существующих схем). `forms` — minor:
+  новые типы, generic с умолчаниями; изменение поведения — dev-предупреждение на неизвестный `fieldType` (строка в
+  «Изменения поведения»).
+- Формы и поля — только `@letar/forms`; комментарии в генерируемом коде — на русском (как шапка `Recipe.form.ts:7–24`);
+  примеры — нейтральные `WorkCategory`/`Counterparty`.
+- **Nx:** новых проектов нет; изменения — в `libs/forms`, `libs/forms-core`, `libs/zenstack-form-plugin`,
+  `libs/form-mcp`, демо — в `apps/form-develop-app` (её `schema.zmodel` получает поле с ключом).
+
+#### 17.8. Вне `libs/forms` — сообщить координатору
+
+- `.claude/rules/forms.md`, раздел «Паттерн»: `import { createForm, lazyComboboxes, lazySelects } from '@letar/forms'` и
+  `extraSelects: lazySelects({ … })` — таких функций нет (поиск по `libs/forms/src/index.ts` и `declarative/index.ts`
+  — 0 вхождений). Правильно — опции `lazySelects: { … }` / `lazyComboboxes: { … }` с `.then((m) => m.X)`
+  (`create-form.tsx:101–123`). Та же ошибка была в §16.5 этого плана — исправлена.
+- После этапа Е — в том же файле абзац «ключ реестра в схеме»: `@meta("form.fieldType", "Select.X")` + строка
+  `FormRegistryCheck` в инстансе; поле с ключом больше не нужно исключать из `AutoFields`.
 
 ## ✅ [2026-09-04] Миграция `zenstack-form-plugin` на нативные возможности ZModel
 
