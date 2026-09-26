@@ -7,7 +7,12 @@
  * 16 px, поэтому отдельного упрощения для мелких кадров, как в `apps/studio/design/make-icons.mjs`,
  * не требуется.
  */
-import sharp from 'sharp'
+import * as sharpNamespace from 'sharp'
+
+// Под загрузчиком Nx (CJS без esModuleInterop) у default-импорта sharp нет `.default` —
+// «(0, _sharp.default) is not a function». Берём функцию из любой из двух форм экспорта.
+const sharp = ((sharpNamespace as unknown as { default?: typeof sharpNamespace.default }).default
+  ?? sharpNamespace) as unknown as typeof sharpNamespace.default
 
 /** Кадры, которые кладём внутрь `favicon.ico`. */
 const ICO_SIZES = [16, 32, 48]
