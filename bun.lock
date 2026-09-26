@@ -1696,7 +1696,7 @@
     },
     "libs/ui": {
       "name": "@letar/ui",
-      "version": "0.22.3",
+      "version": "0.23.0",
       "dependencies": {
         "@letar/hooks": "workspace:*",
       },
