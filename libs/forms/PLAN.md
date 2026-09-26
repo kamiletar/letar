@@ -4005,6 +4005,7 @@ export const appFormRegistryCheck: FormRegistryCheck<typeof AppForm, FormSelectK
   (`create-form.tsx:101–123`). Та же ошибка была в §16.5 этого плана — исправлена.
 - После этапа Е — в том же файле абзац «ключ реестра в схеме»: `@meta("form.fieldType", "Select.X")` + строка
   `FormRegistryCheck` в инстансе; поле с ключом больше не нужно исключать из `AutoFields`.
+  ✅ Сделано координатором 2026-09-26 (обе правки в `.claude/rules/forms.md`).
 
 ## ✅ [2026-09-04] Миграция `zenstack-form-plugin` на нативные возможности ZModel
 
