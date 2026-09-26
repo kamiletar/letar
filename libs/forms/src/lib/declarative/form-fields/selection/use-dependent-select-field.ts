@@ -1,6 +1,6 @@
 'use client'
 
-import { getFieldMeta } from '@letar/forms-core/schema'
+import { getFieldMeta, resolveEmptyValue } from '@letar/forms-core/schema'
 import type { DependentFieldProps, FieldDeps } from '@letar/forms-core/uikit'
 import {
   type DependentFieldState,
@@ -17,11 +17,13 @@ export interface UseDependentSelectFieldOptions {
   fullPath: string
   /** Метка самого поля (для объявления очистки); узел, не строка — берётся имя поля */
   label: ReactNode
-  /** Что пишет очистка: то же, что пишет собственная кнопка очистки поля */
-  emptyValue: unknown
+  /** Тип значения поля: у числового Select пустое значение `0`, у остальных `''` (у nullable-схемы — всегда `null`) */
+  valueType?: 'string' | 'number'
 }
 
 export interface DependentSelectFieldState<TDeps extends FieldDeps = FieldDeps> extends DependentFieldState<TDeps> {
+  /** Пустое значение при очистке — автоочисткой и собственной кнопкой поля: `null` у nullable-схемы, иначе `''`/`0` */
+  emptyValue: string | number | null
   /** `id` подсказки под полем — идёт в `aria-describedby` триггера */
   hintId: string
   /** Подсказка «Сначала выберите «Страна»» — пусто, когда поле не заблокировано */
@@ -44,9 +46,10 @@ function lastSegment(path: string): string {
  */
 export function useDependentSelectField<TDeps extends FieldDeps = FieldDeps>(
   props: DependentFieldProps<TDeps>,
-  { fullPath, label, emptyValue }: UseDependentSelectFieldOptions,
+  { fullPath, label, valueType }: UseDependentSelectFieldOptions,
 ): DependentSelectFieldState<TDeps> {
   const schema = useDeclarativeFormOptional()?.schema
+  const emptyValue = resolveEmptyValue(schema, fullPath, valueType)
   const i18n = useFormI18n()
   const hintTemplate = useSelectionString('formSelection.dependsOnHint')
   const clearedTemplate = useSelectionString('formSelection.dependentCleared')
@@ -80,6 +83,7 @@ export function useDependentSelectField<TDeps extends FieldDeps = FieldDeps>(
 
   return {
     ...state,
+    emptyValue,
     hintId,
     hint,
     blockedPlaceholder: state.blocked ? props.placeholderWhenDisabled ?? hint : undefined,

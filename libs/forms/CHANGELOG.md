@@ -4,6 +4,25 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.28.0] - 2026-09-27
+
+### Изменения поведения
+
+- **Очистка `Field.Select` и `Field.Combobox` пишет `null`, если схема поля nullable** (`.nullable()`, в том числе
+  `.nullable().optional()` и `.nullable().or(z.literal(''))`), — и собственной кнопкой очистки, и автоочисткой
+  зависимого поля. Раньше писалась пустая строка (у числового Select — `0`). Что это меняет для потребителей:
+  - значение поля после очистки — `null`, а не `''`/`0`: код, который в `onChange`/`Form.Watch`/`onSubmit`
+    сравнивает с `''` или проверяет `=== 0`, надо перевести на `== null`/`!value`;
+  - на сервере внешний ключ теперь получает `null` (раньше `''` не проходил как id) — это и есть цель изменения;
+  - у формы без `schema` и у не-nullable полей (включая одиночный `.optional()`) ничего не меняется: `''`, у числового
+    Select `0`.
+- `Field.Select`: кнопка очистки не показывается у заблокированного (`disabled`) и `readOnly` поля — раньше
+  показывалась (только shadcn-скин, см. его CHANGELOG).
+
+### Added
+
+- `resolveEmptyValue(schema, path, valueType)` и `nullable` в `getFieldMeta` — в `@letar/forms-core/schema`.
+
 ## [2.27.0] - 2026-09-27
 
 ### Added

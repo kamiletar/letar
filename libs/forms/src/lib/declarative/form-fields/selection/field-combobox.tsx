@@ -477,12 +477,11 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
     // значения приоритет: показывать вместо него текст затравки было бы неверно.
     const fieldValue = useStore(form.store, () => form.getFieldValue(fullPath)) as string | undefined
 
-    // Зависимое поле (§18): родители, блокировка, очистка по правке родителя. Пустое значение — `''`, как у
-    // собственной кнопки очистки. TODO(вопрос 50 PLAN §14): для nullable-схемы очистка должна писать `null`
+    // Зависимое поле (§18): родители, блокировка, очистка по правке родителя. Пустое значение — то же, что пишет
+    // собственная кнопка очистки (`dependent.emptyValue`): `null` у nullable-схемы, иначе `''`
     const dependent = useDependentSelectField(componentProps as DependentFieldProps, {
       fullPath,
       label: resolved.label,
-      emptyValue: '',
     })
     const parentsNotReady = dependent.active && !dependent.ready
 
@@ -996,7 +995,7 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
                 return
               }
               fieldState.syncedValueRef.current = newValue || undefined
-              field.handleChange(newValue ?? '')
+              field.handleChange(newValue || fieldState.dependent.emptyValue)
             }}
             onInteractOutside={() => field.handleBlur()}
             disabled={disabled}

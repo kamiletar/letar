@@ -311,13 +311,11 @@ const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFie
     const hotkeyHint = useSelectionString('formSelection.editHotkeyHint')
 
     // Зависимое поле (§18): родители, блокировка, очистка по правке родителя. Пустое значение — то же, что пишет
-    // собственная кнопка очистки (`applyValue(undefined)` в `render`)
-    // TODO(вопрос 50 PLAN §14): для nullable-схемы очистка должна писать `null`, а не `''`/`0` — общий
-    // `resolveEmptyValue(schemaField)` в forms-core для собственной очистки и для зависимой
+    // собственная кнопка очистки (`dependent.emptyValue`): `null` у nullable-схемы, иначе `''`/`0`
     const dependent = useDependentSelectField(componentProps as DependentFieldProps, {
       fullPath,
       label: resolved.label,
-      emptyValue: componentProps.valueType === 'number' ? 0 : '',
+      valueType: componentProps.valueType,
     })
 
     // Источники, кроме статичных `options`: промис (`loadOptions`, один запрос на `deps`) и хук (`useOptions`)
@@ -515,11 +513,13 @@ const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFie
     const interactive = !disabled && !resolved.readOnly
 
     const applyValue = (raw: string | undefined) => {
-      // Convert back to needed type
-      if (componentProps.valueType === 'number') {
-        field.handleChange(raw ? Number(raw) : 0)
+      // Convert back to needed type; очистка пишет пустое значение схемы (`null` у nullable)
+      if (!raw) {
+        field.handleChange(dependent.emptyValue)
+      } else if (componentProps.valueType === 'number') {
+        field.handleChange(Number(raw))
       } else {
-        field.handleChange(raw ?? '')
+        field.handleChange(raw)
       }
     }
 
