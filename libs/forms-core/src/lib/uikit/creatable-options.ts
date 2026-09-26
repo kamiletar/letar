@@ -15,11 +15,27 @@ export interface CreatedOption<TData = unknown> {
 }
 
 /**
+ * Оптимистичный режим (§16.7): обработчик может показать результат сразу, до ответа сервера. Второй аргумент
+ * `onCreate`/`onUpdate`; существующие обработчики его игнорируют.
+ */
+export interface SelectionActionContext<TData = unknown> {
+  /**
+   * Показать результат сразу, не дожидаясь сервера. Звать, когда ввод пользователя уже принят (окно закрыто),
+   * до `await` мутации. `value` у create не передают — поле заведёт временный (только для UI, в форму не пишется).
+   * Повторный вызов заменяет предыдущий предпросмотр.
+   */
+  optimistic: (preview: { label: string; value?: string | number; data?: TData }) => void
+}
+
+/**
  * Колбэк приложения: открывает своё окно создания (server action — на его стороне) и возвращает
  * созданную запись либо `null`, если пользователь отказался. `search` — текст поиска Combobox;
- * у Select он пустой.
+ * у Select он пустой. `ctx.optimistic` — необязательный оптимистичный режим.
  */
-export type CreateOptionHandler<TData = unknown> = (search: string) => Promise<CreatedOption<TData> | null>
+export type CreateOptionHandler<TData = unknown> = (
+  search: string,
+  ctx: SelectionActionContext<TData>,
+) => Promise<CreatedOption<TData> | null>
 
 /**
  * Служебное значение пункта «+ Добавить…». Не совпадает с реальными значениями справочника,

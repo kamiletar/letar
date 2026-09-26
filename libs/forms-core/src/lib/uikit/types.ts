@@ -94,6 +94,11 @@ export interface UIKitSelectOption<TNode = unknown, TData = unknown> {
   data?: TData
   /** Computed by the field (`isOptionEditable`): whether the item gets the edit pencil */
   editable?: boolean
+  /**
+   * The record is not confirmed by the server yet (optimistic mode): shown dimmed with a spinner, cannot be
+   * selected or edited. Set by the app (`pending: !!row.$optimistic`) or by the field for its own optimistic action.
+   */
+  pending?: boolean
 }
 
 /**
@@ -103,6 +108,8 @@ export interface UIKitSelectOption<TNode = unknown, TData = unknown> {
 export interface UIKitOptionRenderState {
   selected: boolean
   disabled: boolean
+  /** The option waits for the server (see `UIKitSelectOption.pending`) */
+  pending: boolean
 }
 
 /** Handle of the dropdown: the skin fills it, the field calls it before the app's own dialog */

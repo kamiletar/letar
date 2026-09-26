@@ -37,9 +37,20 @@ export type { GroupableLike } from './group-options'
 
 // `onCreate` у Select/Combobox — создание записи справочника, не уходя из формы
 export { CREATE_OPTION_VALUE, isCreateOptionValue, mergeCreatedOptions, shouldOfferCreate } from './creatable-options'
-export type { CreatedOption, CreateOptionHandler } from './creatable-options'
+export type { CreatedOption, CreateOptionHandler, SelectionActionContext } from './creatable-options'
 export { applyOptionOverlay, isOptionEditable, pruneOptionOverlay, upsertOptionOverlay } from './editable-options'
-export type { OptionOverlayEntry, SelectionActionKind, UpdatedOption, UpdateOptionHandler } from './editable-options'
+export type {
+  OptionOverlayEntry,
+  SelectionActionKind,
+  SettleErrorInfo,
+  SettleErrorReason,
+  UpdatedOption,
+  UpdateOptionHandler,
+} from './editable-options'
+
+// Реестр неподтверждённых оптимистичных действий формы: отправка ждёт его пустоты (§16.7)
+export { createPendingRegistry } from './pending-registry'
+export type { PendingRegistry, PendingRegistrySnapshot } from './pending-registry'
 
 // Поиск внутри Select: порог показа, фильтр с учётом раскладки, контракт поля поиска для скина
 export { correctKeyboardLayout, detectLayout } from './keyboard-layout'

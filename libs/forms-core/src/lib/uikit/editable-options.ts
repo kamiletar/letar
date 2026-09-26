@@ -4,7 +4,7 @@
  * Отрисовка карандаша и вызов `onUpdate` остаются в скине и в `@letar/forms-react`.
  */
 
-import { CREATE_OPTION_VALUE, isCreateOptionValue } from './creatable-options'
+import { CREATE_OPTION_VALUE, isCreateOptionValue, type SelectionActionContext } from './creatable-options'
 import { getOptionText } from './group-options'
 
 /** Что `onUpdate` возвращает полю */
@@ -20,10 +20,26 @@ export interface UpdatedOption<TData = unknown> {
  * Колбэк приложения: открывает своё окно правки (server action — на его стороне) и возвращает
  * сохранённую запись либо `null`, если пользователь отказался.
  */
-export type UpdateOptionHandler<TOption, TData = unknown> = (option: TOption) => Promise<UpdatedOption<TData> | null>
+export type UpdateOptionHandler<TOption, TData = unknown> = (
+  option: TOption,
+  ctx: SelectionActionContext<TData>,
+) => Promise<UpdatedOption<TData> | null>
 
 /** Вид действия поля: место под `'delete'` оставлено (см. PLAN.md, §4.6) */
 export type SelectionActionKind = 'create' | 'edit'
+
+/** Почему оптимистичное действие не подтвердилось */
+export type SettleErrorReason = 'rejected' | 'declined' | 'timeout'
+
+/** Что `onSettleError` получает, когда сервер не подтвердил показанное оптимистично (§16.7) */
+export interface SettleErrorInfo<TData = unknown> {
+  kind: SelectionActionKind
+  /** Что было показано: у create `value` — временный, в форму он не попадал */
+  preview: { label: string; value: string | number; data?: TData }
+  /** `rejected` — throw, `declined` — `null` после `optimistic`, `timeout` — нет ответа за `settleTimeout` */
+  reason: SettleErrorReason
+  error?: unknown
+}
 
 /** Запись локального наложения правок — одна на исходное value */
 export interface OptionOverlayEntry {
@@ -34,6 +50,8 @@ export interface OptionOverlayEntry {
   hasData: boolean
   /** Текст опции ПРИЛОЖЕНИЯ в момент клика. Его смена = «приложение перезапросило список» */
   baselineText: string
+  /** Оптимистичная правка ждёт подтверждения: опция видна приглушённой, не выбирается и не правится (§16.7) */
+  pending?: boolean
 }
 
 /**
@@ -121,6 +139,7 @@ export function applyOptionOverlay<T extends OverlayOption & { data?: unknown }>
           label: entry.label,
           textValue: entry.label,
           ...(entry.hasData && { data: entry.data }),
+          ...(entry.pending && { pending: true }),
         }
       }
       continue
@@ -130,6 +149,7 @@ export function applyOptionOverlay<T extends OverlayOption & { data?: unknown }>
       textValue: entry.label,
       value: entry.value,
       ...(entry.hasData && { data: entry.data }),
+      ...(entry.pending && { pending: true }),
     } as unknown as T
     if (index >= 0) {
       result[index] = replacement
