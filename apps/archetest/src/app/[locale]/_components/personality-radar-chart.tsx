@@ -255,7 +255,8 @@ function LegendGroup({
 /**
  * Расшифровка кодов под диаграммой (свёрнута по умолчанию). На телефоне тултип по тапу
  * неточен — список «код → название → балл» даёт тот же ответ без прицеливания в ось.
- * Шкалы отсортированы по баллу, «Состояния» (BAR/DPR) вынесены отдельной группой.
+ * Шкалы отсортированы по баллу; «Состояния» (BAR/DPR) и черты с малым числом ответов
+ * вынесены отдельными списками — приблизительные оценки не стоят в одном ряду с надёжными.
  */
 function RadarLegend({
   points,
@@ -265,7 +266,7 @@ function RadarLegend({
   hasComparison: boolean
 }) {
   const t = useTranslations('radar')
-  const { traits, states } = useMemo(() => groupLegendPoints(points), [points])
+  const { traits, uncertain, states } = useMemo(() => groupLegendPoints(points), [points])
 
   return (
     <Collapsible.Root mt={3}>
@@ -292,7 +293,13 @@ function RadarLegend({
       <Collapsible.Content>
         <VStack align="stretch" gap={4} mt={2} px={1} textAlign="start">
           {/* Черты: по убыванию, две колонки заполняются сверху вниз — самые выраженные вверху слева */}
-          <LegendGroup title={t('traits')} points={traits} hasComparison={hasComparison} columns />
+          {traits.length > 0 && (
+            <LegendGroup title={t('traits')} points={traits} hasComparison={hasComparison} columns />
+          )}
+          {/* Шкалы с малым числом ответов — отдельно: их баллы приблизительные и в общем ряду вводили бы в заблуждение */}
+          {uncertain.length > 0 && (
+            <LegendGroup title={t('lowConfidence')} points={uncertain} hasComparison={hasComparison} columns />
+          )}
           {states.length > 0 && <LegendGroup title={t('states')} points={states} hasComparison={hasComparison} />}
         </VStack>
       </Collapsible.Content>

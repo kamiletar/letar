@@ -65,6 +65,38 @@ describe('PersonalityRadarChart: расшифровка сокращений', (
     expect(at('Философ')).toBeGreaterThan(at('Маятник'))
   })
 
+  it('шкалы с малым числом ответов — отдельным списком между чертами и состояниями', () => {
+    const { container } = render(
+      <ChakraProvider value={defaultSystem}>
+        <NextIntlClientProvider locale="ru" messages={ruMessages}>
+          <PersonalityRadarChart
+            data={[...data, { type: 'BAR', label: 'Маятник', value: 46 }]}
+            confidence={{ OBC: 'low' }}
+            title="Профиль"
+            color="currentColor"
+          />
+        </NextIntlClientProvider>
+      </ChakraProvider>,
+    )
+    const legend = container.querySelector('[data-scope="collapsible"][data-part="root"]')
+    const text = legend?.textContent ?? ''
+    const at = (s: string) => text.indexOf(s)
+    const uncertainTitle = ruMessages.radar.lowConfidence
+
+    // Надёжные (Бдительный Страж 55 → Отшельник 20) → «Мало ответов» (Архитектор 70, хоть и выше) → состояния
+    expect(at('Отшельник')).toBeGreaterThan(at('Бдительный Страж'))
+    expect(at(uncertainTitle)).toBeGreaterThan(at('Отшельник'))
+    expect(at('Архитектор')).toBeGreaterThan(at(uncertainTitle))
+    expect(at('Состояния')).toBeGreaterThan(at('Архитектор'))
+    expect(at('Маятник')).toBeGreaterThan(at('Состояния'))
+  })
+
+  it('без шкал с малым числом ответов третьего списка нет', () => {
+    const { container } = renderChart()
+    const legend = container.querySelector('[data-scope="collapsible"][data-part="root"]')
+    expect(legend?.textContent).not.toContain(ruMessages.radar.lowConfidence)
+  })
+
   it('без состояний заголовка «Состояния» нет', () => {
     const { container } = renderChart()
     const legend = container.querySelector('[data-scope="collapsible"][data-part="root"]')

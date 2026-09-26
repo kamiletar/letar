@@ -5,6 +5,15 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 версионирование следует [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.34.3] - 2026-09-26
+
+### Changed
+
+- «Расшифровка сокращений»: шкалы с малым числом ответов (приблизительная оценка, приглушённые строки) вынесены
+  в отдельный список «Мало ответов — оценка приблизительная» между «Чертами» и «Состояниями». Пустые группы не
+  выводятся. `groupLegendPoints` возвращает `traits` / `uncertain` / `states`. Тесты: `radar-legend.test.ts` (8),
+  `personality-radar-chart.spec.tsx` (+2).
+
 ## [0.34.2] - 2026-09-26
 
 ### Changed
