@@ -132,6 +132,7 @@
 - [scrollintoview-smooth-frozen-without-window-focus](/.claude/docs/scrollintoview-smooth-frozen-without-window-focus.md) ⚠️ `scrollIntoView(smooth)` без фокуса окна зависает навсегда, как `rAF`
 - [react-use-transition-initial-pending-race](/.claude/docs/react-use-transition-initial-pending-race.md) ⚠️ `isPending` ещё `false`, когда данных уже нет
 - [sticky-actionbar-cookiebanner-zindex-race](/.claude/docs/sticky-actionbar-cookiebanner-zindex-race.md) ⚠️ баннер перехватывает клик по CTA на короткой странице
+- [print-to-pdf-dark-theme-pattern](/.claude/docs/print-to-pdf-dark-theme-pattern.md) PDF через `window.print()`; ⚠️ тёмная тема печатается бледной, двойной `beforeprint` не возвращает её
 
 ### Данные и состояние
 
