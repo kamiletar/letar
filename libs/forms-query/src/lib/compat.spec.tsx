@@ -22,6 +22,13 @@ describe('совместимость с обоими скинами (Q6)', () =>
     const useSearch = fromSearchQuery<Category, { data?: Category[] }>(() => ({ data: [] }))
     const useSelected = fromSelectedQuery<Category, { data?: Category | null }>(() => ({ data: null }))
 
+    const useDependentSearch = fromSearchQuery<Category, { data?: Category[] }>((_search, _options, _deps) => ({
+      data: [],
+    }))
+    const useDependentSelected = fromSelectedQuery<Category, { data?: Category | null }>(
+      (_value, _options, _deps) => ({ data: null }),
+    )
+
     const ChakraFields = () => {
       const categories = useCategories()
       return (
@@ -38,6 +45,22 @@ describe('совместимость с обоими скинами (Q6)', () =>
           <Form.Field.Combobox
             name="d"
             useQuery={useLoaderQuery(['k'], async () => [] as Category[])}
+            getLabel={(c: Category) => c.name}
+            getValue={(c: Category) => c.id}
+          />
+          {/* Этап З: зависимое поле — адаптеры принимают deps (QD1, QD2) */}
+          <Form.Field.Combobox
+            name="e"
+            dependsOn="companyId"
+            useQuery={useDependentSearch}
+            useSelected={useDependentSelected}
+            getLabel={(c: Category) => c.name}
+            getValue={(c: Category) => c.id}
+          />
+          <Form.Field.Combobox
+            name="f"
+            dependsOn="companyId"
+            useQuery={useLoaderQuery(['k'], async (_search, { deps }) => [{ id: String(deps['companyId']), name: '' }])}
             getLabel={(c: Category) => c.name}
             getValue={(c: Category) => c.id}
           />

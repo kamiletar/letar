@@ -29,14 +29,14 @@ describe('fromSearchQuery (Q1)', () => {
     const useSearch = fromSearchQuery<Category, { data: Category[] }>(useHook, { minChars: 2 })
     useSearch('к')
     useSearch('кр')
-    expect(useHook).toHaveBeenNthCalledWith(1, 'к', { enabled: false, placeholderData: keepPreviousData })
-    expect(useHook).toHaveBeenNthCalledWith(2, 'кр', { enabled: true, placeholderData: keepPreviousData })
+    expect(useHook).toHaveBeenNthCalledWith(1, 'к', { enabled: false, placeholderData: keepPreviousData }, {})
+    expect(useHook).toHaveBeenNthCalledWith(2, 'кр', { enabled: true, placeholderData: keepPreviousData }, {})
   })
 
   it('по умолчанию minChars — 1: пустая строка не запрашивается', () => {
     const useHook = vi.fn((_search: string, _options: unknown) => ({ data: [] as Category[] }))
     fromSearchQuery<Category, { data: Category[] }>(useHook)('')
-    expect(useHook).toHaveBeenCalledWith('', expect.objectContaining({ enabled: false }))
+    expect(useHook).toHaveBeenCalledWith('', expect.objectContaining({ enabled: false }), {})
   })
 
   it('со сменой строки прошлые данные не пропадают (настоящий useQuery)', async () => {
@@ -70,8 +70,8 @@ describe('fromSelectedQuery', () => {
     const useSelected = fromSelectedQuery<Category, { data: null }>(useHook)
     useSelected('')
     useSelected('a')
-    expect(useHook).toHaveBeenNthCalledWith(1, '', { enabled: false })
-    expect(useHook).toHaveBeenNthCalledWith(2, 'a', { enabled: true })
+    expect(useHook).toHaveBeenNthCalledWith(1, '', { enabled: false }, {})
+    expect(useHook).toHaveBeenNthCalledWith(2, 'a', { enabled: true }, {})
   })
 })
 
