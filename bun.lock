@@ -941,7 +941,7 @@
     },
     "apps/studio": {
       "name": "@letar/studio",
-      "version": "0.70.0",
+      "version": "0.71.0",
       "dependencies": {
         "@letar/admin-ui": "workspace:*",
         "@letar/consent": "workspace:*",
@@ -1670,7 +1670,7 @@
     },
     "libs/studio-time-mcp": {
       "name": "@letar/studio-time-mcp",
-      "version": "0.6.0",
+      "version": "0.7.0",
       "dependencies": {
         "@letar/mcp-server-kit": "workspace:*",
         "@modelcontextprotocol/server": "2.0.0",
