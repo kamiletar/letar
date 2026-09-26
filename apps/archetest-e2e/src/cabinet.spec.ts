@@ -6,7 +6,8 @@ import { expect, type Page, test } from '@playwright/test'
  * Сценарий на двух пользователях в двух контекстах браузера:
  * 1. психолог входит и нажимает «Я специалист» — кабинет пуст;
  * 2. клиент в настройках привязывает психолога по email;
- * 3. психолог видит клиента в списке, открывает карточку и добавляет заметку.
+ * 3. психолог видит клиента в списке, открывает карточку и добавляет заметку;
+ * 4. психолог пишет клиенту сообщение — клиент видит его в настройках (волна 7.5).
  *
  * Сессии — через `/api/auth/dev-session` (как в `safety-net.spec.ts`): нужен
  * `DEV_SESSION_TOKEN` в окружении раннера и `ALLOW_DEV_SESSION=true` у приложения.
@@ -65,7 +66,25 @@ test.describe('кабинет психолога', () => {
     await psy.reload()
     await expect(psy.getByText(note)).toBeVisible({ timeout: 30_000 })
 
-    // 4. Клиент отзывает доступ — кабинет психолога показывает связь как отозванную, без ссылки.
+    // 4. Сообщение клиенту (волна 7.5): психолог пишет из карточки, клиент видит его в настройках
+    //    с отметкой «новое», а психолог после этого — отметку «Прочитано»
+    const message = `Жду вас в четверг ${RUN}`
+    await psy.getByLabel('Сообщение').fill(message)
+    await psy.getByRole('button', { name: 'Отправить' }).click()
+    await expect(psy.getByText(message)).toBeVisible({ timeout: 30_000 })
+    await expect(psy.getByText('Не прочитано')).toBeVisible()
+
+    await client.reload()
+    const inbox = client.getByTestId('psychologist-messages')
+    await expect(inbox.getByText(message)).toBeVisible({ timeout: 30_000 })
+    await expect(inbox.getByText('новое', { exact: true })).toBeVisible()
+
+    await expect(async () => {
+      await psy.reload()
+      await expect(psy.getByText('Прочитано', { exact: true })).toBeVisible({ timeout: 5_000 })
+    }).toPass({ timeout: 30_000 })
+
+    // 5. Клиент отзывает доступ — кабинет психолога показывает связь как отозванную, без ссылки.
     //    Регрессия: политика User скрывает от психолога неактивных клиентов, и include клиента
     //    приходил null — список падал целиком
     await client.getByRole('button', { name: 'Отозвать доступ' }).click()
@@ -77,7 +96,12 @@ test.describe('кабинет психолога', () => {
     await expect(revokedRow.getByText('Отозван')).toBeVisible({ timeout: 30_000 })
     await expect(revokedRow.getByRole('link')).toHaveCount(0)
 
-    // 5. Фильтр списка: поиск сужает таблицу, состояние живёт в URL и переживает перезагрузку
+    // Написанное до отзыва остаётся у клиента, уже без отметки «новое»
+    await client.reload()
+    await expect(client.getByTestId('psychologist-messages').getByText(message)).toBeVisible({ timeout: 30_000 })
+    await expect(client.getByTestId('psychologist-messages').getByText('новое', { exact: true })).toHaveCount(0)
+
+    // 6. Фильтр списка: поиск сужает таблицу, состояние живёт в URL и переживает перезагрузку
     await psy.getByLabel('Поиск').fill('нет-такого-клиента')
     await expect(psy.getByText('Под фильтр никто не попал.')).toBeVisible({ timeout: 30_000 })
     await expect(psy).toHaveURL(/search=/, { timeout: 30_000 })
