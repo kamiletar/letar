@@ -289,3 +289,43 @@ model Employee {
 
   @@allow('all', true)
 }
+
+/// Проверка допущения этапа З (`libs/forms/PLAN.md` §18.5): политика доступа с полем связи. Город обязан быть из выбранной
+/// страны — так же, как зависимый селект «страна → город». `@@validate` такого условия не принимает (поле связи), `@@allow` — принимает
+model PolicyCountry {
+  id        String          @id @default(cuid())
+
+  name      String
+
+  cities    PolicyCity[]
+  addresses PolicyAddress[]
+
+  @@allow('all', true)
+}
+
+model PolicyCity {
+  id        String          @id @default(cuid())
+
+  name      String
+
+  countryId String
+  country   PolicyCountry   @relation(fields: [countryId], references: [id])
+
+  addresses PolicyAddress[]
+
+  @@allow('all', true)
+}
+
+model PolicyAddress {
+  id        String        @id @default(cuid())
+
+  countryId String
+  country   PolicyCountry @relation(fields: [countryId], references: [id])
+
+  cityId    String
+  city      PolicyCity    @relation(fields: [cityId], references: [id])
+
+  @@allow('read', true)
+  @@allow('create,update', city.countryId == countryId)
+  @@deny('post-update', city.countryId != countryId)
+}

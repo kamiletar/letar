@@ -171,5 +171,20 @@ test.describe('Dependent Select Demo', () => {
       await expect(rowRegions.first()).toContainText('Санкт-Петербург')
       await expect(rowRegions.nth(1)).toContainText('Москва')
     })
+
+    test('перестановка строки с клавиатуры (Пробел, стрелка, Пробел) меняет порядок и не стирает регионы', async ({ page }) => {
+      const rowRegions = section(page, 'rows').locator('[data-field-name$="regionId"]')
+      const handles = section(page, 'rows').locator('[aria-roledescription="sortable"]')
+      await expect(handles).toHaveCount(2)
+
+      // KeyboardSensor: Пробел поднимает строку, стрелка двигает, второй Пробел опускает
+      await handles.first().focus()
+      await page.keyboard.press('Space')
+      await page.keyboard.press('ArrowDown')
+      await page.keyboard.press('Space')
+
+      await expect(rowRegions.first()).toContainText('Санкт-Петербург')
+      await expect(rowRegions.nth(1)).toContainText('Москва')
+    })
   })
 })

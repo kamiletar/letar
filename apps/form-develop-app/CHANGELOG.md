@@ -2,6 +2,15 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.1.24] - 2026-09-27
+
+### Added
+
+- Модели `PolicyCountry`/`PolicyCity`/`PolicyAddress` и скрипт `scripts/check-policy-relation-field.ts`: рантайм-проверка
+  политики доступа с полем связи (`city.countryId == countryId`). `create` с нарушением отклоняется, правка `cityId`
+  проходила без `@@deny('post-update', …)` — оно в схеме.
+- E2E `dependent-select-demo`: перестановка строки массива с клавиатуры (`KeyboardSensor`).
+
 ## [0.1.23] - 2026-09-24
 
 ### Added
