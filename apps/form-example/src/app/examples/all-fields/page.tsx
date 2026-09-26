@@ -122,8 +122,8 @@ const Schema = z.object({
   plan: z.enum(['free', 'pro', 'enterprise']).meta({ ui: { title: 'RadioGroup' } }),
   tier: z.enum(['starter', 'growth', 'scale']).meta({ ui: { title: 'RadioCard' } }),
   size: z.enum(['sm', 'md', 'lg']).meta({ ui: { title: 'SegmentedGroup' } }),
-  country: z.string().meta({ ui: { title: 'Country (for CascadingSelect)' } }),
-  cascadeCity: z.string().meta({ ui: { title: 'CascadingSelect (depends on country)' } }),
+  country: z.string().meta({ ui: { title: 'Country (parent of a dependent Select)' } }),
+  cascadeCity: z.string().meta({ ui: { title: 'Select with dependsOn (city of the country)' } }),
 
   // === Булевы и мультивыбор (4) ===
   agree: z.boolean().meta({ ui: { title: 'Checkbox' } }),
@@ -157,7 +157,7 @@ const Schema = z.object({
   files: z.any().meta({ ui: { title: 'FileUpload' } }),
 })
 
-// --- Опции для CascadingSelect ---
+// --- Опции для зависимого Select (dependsOn) ---
 
 const countryOptions = [
   { value: 'us', label: 'United States' },
@@ -286,11 +286,10 @@ export default function AllFieldsPage() {
           <Form.Field.RadioCard name="tier" options={tierOptions} />
           <Form.Field.SegmentedGroup name="size" options={sizeOptions} />
           <Form.Field.Select name="country" options={countryOptions} />
-          <Form.Field.CascadingSelect
+          <Form.Field.Select
             name="cascadeCity"
             dependsOn="country"
-            loadOptions={async (parentValue: unknown) =>
-              cityByCountry[parentValue as string] ?? ([] as { value: string; label: string }[])}
+            options={(deps) => cityByCountry[String(deps.country)] ?? []}
           />
 
           <Separator />
