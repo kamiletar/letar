@@ -1,16 +1,35 @@
 'use client'
 
-import type { UIKitSelectProps } from '@letar/forms-core/uikit'
+import { getOptionText, type UIKitSelectProps } from '@letar/forms-core/uikit'
 import { cn } from '@letar/tailwind-utils'
 import * as SelectPrimitive from '@radix-ui/react-select'
 import { Check, ChevronDown, X } from 'lucide-react'
 import type { ReactNode } from 'react'
 
 export function Select(
-  { value, onValueChange, onBlur, options, label, placeholder, disabled, clearable, ...rest }: UIKitSelectProps<
-    ReactNode
-  >,
+  {
+    value,
+    onValueChange,
+    onBlur,
+    options,
+    renderOption,
+    renderValue,
+    label,
+    placeholder,
+    disabled,
+    clearable,
+    ...rest
+  }: UIKitSelectProps<ReactNode>,
 ) {
+  // Подпись триггера Radix копирует порталом из ItemText, если у `Value` нет children — тогда
+  // туда попал бы узел из `label`/`renderOption`. Поэтому при найденной выбранной опции children
+  // задаём всегда: `renderValue` (пустой результат — строка опции). Нет выбора — placeholder
+  const selectedOption = value !== undefined ? options.find((opt) => opt.value === value) : undefined
+  const customValue = selectedOption && renderValue ? renderValue(selectedOption) : undefined
+  const hasCustomValue = customValue !== undefined && customValue !== null && customValue !== false
+    && customValue !== ''
+  const valueContent = selectedOption ? (hasCustomValue ? customValue : getOptionText(selectedOption)) : undefined
+
   return (
     <SelectPrimitive.Root
       value={value}
@@ -29,7 +48,7 @@ export function Select(
           'data-[placeholder]:text-muted-foreground',
         )}
       >
-        <SelectPrimitive.Value placeholder={placeholder} />
+        <SelectPrimitive.Value placeholder={placeholder}>{valueContent}</SelectPrimitive.Value>
         <SelectPrimitive.Icon asChild>
           {clearable && value
             ? (
@@ -62,13 +81,18 @@ export function Select(
                 key={opt.value}
                 value={opt.value}
                 disabled={opt.disabled}
+                textValue={getOptionText(opt)}
                 className={cn(
                   'relative flex w-full cursor-default items-center gap-2 rounded-sm py-1.5 pr-8 pl-2 text-sm outline-none select-none',
                   'focus:bg-accent focus:text-accent-foreground',
                   'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
                 )}
               >
-                <SelectPrimitive.ItemText>{opt.label}</SelectPrimitive.ItemText>
+                <SelectPrimitive.ItemText>
+                  {renderOption
+                    ? renderOption(opt, { selected: opt.value === value, disabled: opt.disabled ?? false })
+                    : opt.label}
+                </SelectPrimitive.ItemText>
                 <SelectPrimitive.ItemIndicator className="absolute right-2 flex size-3.5 items-center justify-center">
                   <Check className="size-4" />
                 </SelectPrimitive.ItemIndicator>

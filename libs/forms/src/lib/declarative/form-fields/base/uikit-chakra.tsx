@@ -13,7 +13,7 @@ import {
   Select as ChakraSelect,
   Text,
 } from '@chakra-ui/react'
-import { getOptionLabel, groupOptions } from '@letar/forms-core/uikit'
+import { getOptionText, groupOptions } from '@letar/forms-core/uikit'
 import type { UIKitCorePrimitives, UIKitExtendedPrimitives, UIKitTone } from '@letar/forms-core/uikit'
 import type { ReactElement, ReactNode } from 'react'
 import { useMemo } from 'react'
@@ -151,6 +151,8 @@ export const chakraUIKit: ChakraUIKit = {
     onValueChange,
     onBlur,
     options,
+    renderOption,
+    renderValue,
     label,
     placeholder,
     disabled,
@@ -174,13 +176,25 @@ export const chakraUIKit: ChakraUIKit = {
       () =>
         createListCollection({
           items: options,
-          itemToString: (item: (typeof options)[number]) => getOptionLabel(item),
+          itemToString: (item: (typeof options)[number]) => getOptionText(item),
           itemToValue: (item: (typeof options)[number]) => item.value,
           isItemDisabled: (item: (typeof options)[number]) => item.disabled ?? false,
           ...(groups && { groupBy: (item: (typeof options)[number]) => item.group ?? '' }),
         }),
       [options, groups],
     )
+
+    // Содержимое пункта: своё (`renderOption`) или label как есть (узел не сплющивается в строку)
+    const renderItemContent = (opt: (typeof options)[number]) =>
+      renderOption
+        ? renderOption(opt, { selected: selected[0] === opt.value, disabled: opt.disabled ?? false })
+        : opt.label
+
+    // Подпись выбранного в триггере: `renderValue`; пустой результат — откат к строке опции
+    const selectedOption = selected.length > 0 ? options.find((opt) => opt.value === selected[0]) : undefined
+    const customValue = selectedOption && renderValue ? renderValue(selectedOption) : undefined
+    const hasCustomValue = customValue !== undefined && customValue !== null && customValue !== false
+      && customValue !== ''
 
     return (
       <ChakraSelect.Root
@@ -201,7 +215,9 @@ export const chakraUIKit: ChakraUIKit = {
         )}
         <ChakraSelect.Control>
           <ChakraSelect.Trigger>
-            <ChakraSelect.ValueText placeholder={placeholder} />
+            <ChakraSelect.ValueText placeholder={placeholder}>
+              {hasCustomValue ? customValue : undefined}
+            </ChakraSelect.ValueText>
           </ChakraSelect.Trigger>
           <ChakraSelect.IndicatorGroup>
             {clearable && <ChakraSelect.ClearTrigger />}
@@ -217,7 +233,7 @@ export const chakraUIKit: ChakraUIKit = {
                     {groupName && <ChakraSelect.ItemGroupLabel>{groupName}</ChakraSelect.ItemGroupLabel>}
                     {groupItems.map((opt) => (
                       <ChakraSelect.Item item={opt} key={opt.value}>
-                        {opt.label}
+                        <ChakraSelect.ItemText>{renderItemContent(opt)}</ChakraSelect.ItemText>
                         <ChakraSelect.ItemIndicator />
                       </ChakraSelect.Item>
                     ))}
@@ -225,7 +241,7 @@ export const chakraUIKit: ChakraUIKit = {
                 ))
                 : options.map((opt) => (
                   <ChakraSelect.Item item={opt} key={opt.value}>
-                    {opt.label}
+                    <ChakraSelect.ItemText>{renderItemContent(opt)}</ChakraSelect.ItemText>
                     <ChakraSelect.ItemIndicator />
                   </ChakraSelect.Item>
                 ))}

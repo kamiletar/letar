@@ -152,6 +152,40 @@ Action) и возвращает созданную запись.
 статические `options`; текст пункта по умолчанию «Добавить…»). В `@letar/forms-vue`,
 `@letar/forms-vue-shadcn` и `@letar/forms-angular` пока не реализовано.
 
+## Свой рендер опций (`renderOption`, `renderValue`, `textValue`, `data`)
+
+**API:** `renderOption`, `renderValue`, `textValue`, `data` у `Form.Field.Select`;
+`renderOption`, `getTextValue`, `textValue`, `data` у `Form.Field.Combobox`. Chakra- и shadcn-скины.
+
+Опция несёт типизированные данные приложения (`data`) и может рисоваться любым узлом. `TData`
+выводится из `options` (у Combobox с `useQuery` — из загруженных элементов) и попадает в
+render-функции.
+
+```tsx
+<Form.Field.Select
+  name="cityId"
+  options={cities.map((c) => ({ value: c.id, label: c.name, data: c }))}
+  renderOption={(o, { selected }) => <span>{o.label} <small>{o.data?.region}</small></span>}
+  renderValue={(o) => <b>{o.data?.name}</b>}
+/>
+```
+
+| Проп / поле опции | Где              | Описание                                                                                         |
+| ----------------- | ---------------- | ------------------------------------------------------------------------------------------------ |
+| `data`            | опция            | Данные приложения, поле их не читает                                                             |
+| `textValue`       | опция            | Строковая форма для поиска, typeahead и подписи в триггере. Нужна, если `label` — не строка      |
+| `renderOption`    | Select, Combobox | `(option, { selected, disabled }) => ReactNode`; рамку пункта рисует скин                        |
+| `renderValue`     | только Select    | `(option) => ReactNode` для триггера; `null`/`''` — откат к тексту опции                         |
+| `getTextValue`    | только Combobox  | `(item) => string` для элементов `useQuery`                                                      |
+
+- Нестроковый `label` больше **не сплющивается в строку**: пункт рисует узел. Без `textValue`
+  поиск, typeahead и подпись в триггере идут по `value`; в dev-режиме поле один раз предупредит.
+- `renderValue` живёт внутри `<button>` — только фразовое содержимое. Пока ничего не выбрано,
+  виден `placeholder`.
+- Служебный пункт «+ Добавить…» через `renderOption` не проходит; `onCreate` может вернуть `data`.
+- У Combobox `renderValue` нет: в инпуте обычный текст.
+- ⚠️ **Изменение поведения:** опции с `label`-узлом раньше показывали `value`, теперь — узел.
+
 ## RadioGroup
 
 **API:** `Form.Field.RadioGroup`

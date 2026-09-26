@@ -3,26 +3,32 @@
 import {
   CREATE_OPTION_VALUE,
   type CreatedOption,
+  getOptionText,
   isCreateOptionValue,
   mergeCreatedOptions,
   shouldOfferCreate,
 } from '@letar/forms-core/uikit'
+import { useNodeLabelWarning } from '@letar/forms-react'
 import type { ReactElement } from 'react'
 import { useCallback, useMemo, useRef, useState } from 'react'
 import { createField, FieldWrapper } from '../uikit/primitives'
 import { shadcnUIKit } from '../uikit/uikit-shadcn'
-import type { ComboboxFieldProps } from './types'
+import type { ComboboxFieldProps, SelectOption } from './types'
 
 interface NormalizedOption {
   label: React.ReactNode
+  textValue?: string
   value: string
   disabled?: boolean
+  data?: unknown
 }
 
 interface ComboboxFieldState {
   inputValue: string
   setInputValue: (value: string) => void
   filteredOptions: NormalizedOption[]
+  /** Опции в форме приложения (с `data`) по строковому значению — для `renderOption` */
+  optionByValue: Map<string, SelectOption>
   /** Подпись служебного пункта «+ Добавить "<поиск>"» (пусто, если пункт сейчас не предлагается) */
   createItemLabel: string
   /** Добавляет опцию, возвращённую `onCreate`, в локальный список */
@@ -39,7 +45,7 @@ interface ComboboxFieldState {
  * группировка). `shadcnUIKit.Combobox` (Popover + список) сам ничего не фильтрует — принимает
  * уже отфильтрованные `options`, фильтрация — обязанность поля, не примитива.
  */
-export const FieldCombobox = createField<ComboboxFieldProps, string, ComboboxFieldState>({
+const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldState>({
   displayName: 'FieldCombobox',
   useFieldState: (componentProps): ComboboxFieldState => {
     const [inputValue, setInputValue] = useState('')
@@ -51,27 +57,38 @@ export const FieldCombobox = createField<ComboboxFieldProps, string, ComboboxFie
     const creatingRef = useRef(false)
     const hasOnCreate = !!componentProps.onCreate
 
-    const normalized: NormalizedOption[] = useMemo(
-      () =>
-        // Опция приложения сильнее созданной с тем же значением — дубля после перезагрузки нет
-        mergeCreatedOptions(componentProps.options, createdOptions).map((opt) => ({
-          label: opt.label,
-          value: String(opt.value),
-          disabled: (opt as { disabled?: boolean }).disabled,
-        })),
+    // Опция приложения сильнее созданной с тем же значением — дубля после перезагрузки нет
+    const merged = useMemo(
+      () => mergeCreatedOptions<SelectOption>(componentProps.options, createdOptions),
       [componentProps.options, createdOptions],
     )
+    const normalized: NormalizedOption[] = useMemo(
+      () =>
+        merged.map((opt) => ({
+          label: opt.label,
+          textValue: opt.textValue,
+          data: opt.data,
+          value: String(opt.value),
+          disabled: opt.disabled,
+        })),
+      [merged],
+    )
+    const optionByValue = useMemo(
+      () => new Map<string, SelectOption>(merged.map((opt) => [String(opt.value), opt])),
+      [merged],
+    )
+    useNodeLabelWarning('Combobox', normalized)
     const matchedOptions = useMemo(() => {
       const minChars = componentProps.minChars ?? 0
       if (inputValue.length < minChars) { return [] }
       if (!inputValue) { return normalized }
       const needle = inputValue.toLowerCase()
-      return normalized.filter((opt) => String(opt.label).toLowerCase().includes(needle))
+      return normalized.filter((opt) => getOptionText(opt).toLowerCase().includes(needle))
     }, [normalized, inputValue, componentProps.minChars])
 
     // Служебный пункт «+ Добавить "<поиск>"» — в конце списка; в форму не попадает
     const search = inputValue.trim()
-    const createItemLabel = hasOnCreate && shouldOfferCreate(search, normalized.map((opt) => String(opt.label)))
+    const createItemLabel = hasOnCreate && shouldOfferCreate(search, normalized.map((opt) => getOptionText(opt)))
       ? `+ ${componentProps.createLabel ?? 'Добавить'} "${search}"`
       : ''
     const filteredOptions = useMemo(
@@ -82,7 +99,7 @@ export const FieldCombobox = createField<ComboboxFieldProps, string, ComboboxFie
       [matchedOptions, createItemLabel],
     )
 
-    return { inputValue, setInputValue, filteredOptions, createItemLabel, addCreatedOption, creatingRef }
+    return { inputValue, setInputValue, filteredOptions, optionByValue, createItemLabel, addCreatedOption, creatingRef }
   },
   render: ({ field, fullPath, resolved, hasError, errorMessage, fieldState, componentProps }): ReactElement => {
     const currentValue = (field.state.value as string) || undefined
@@ -113,6 +130,13 @@ export const FieldCombobox = createField<ComboboxFieldProps, string, ComboboxFie
             field.handleChange(value ?? '')
           }}
           options={fieldState.filteredOptions}
+          renderOption={componentProps.renderOption
+            ? (opt, state) => {
+              // Служебный пункт создания через renderer приложения не проходит
+              const source = fieldState.optionByValue.get(opt.value)
+              return source ? componentProps.renderOption?.(source, state) : opt.label
+            }
+            : undefined}
           placeholder={resolved.placeholder ?? 'Поиск...'}
           disabled={resolved.disabled}
           data-field-name={fullPath}
@@ -121,3 +145,11 @@ export const FieldCombobox = createField<ComboboxFieldProps, string, ComboboxFie
     )
   },
 })
+
+/**
+ * `createField` не generic — generic-сигнатура восстанавливается приведением: `TData` выводится
+ * из `options` и попадает в `renderOption`.
+ */
+export const FieldCombobox = FieldComboboxBase as unknown as <TData = unknown>(
+  props: ComboboxFieldProps<TData>,
+) => ReactElement

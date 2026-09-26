@@ -9,9 +9,10 @@ import {
   mergeCreatedOptions,
   shouldOfferCreate,
 } from '@letar/forms-core/uikit'
+import { useNodeLabelWarning } from '@letar/forms-react'
 import { useStore } from '@tanstack/react-form'
 import { type ReactElement, type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import type { BaseFieldProps, FieldSize, GroupableOption } from '../../types'
+import type { BaseFieldProps, FieldSize, GroupableOption, OptionRenderState } from '../../types'
 import {
   type AsyncQueryFn,
   createField,
@@ -33,7 +34,7 @@ export interface ComboboxFieldProps<T = string, TData = unknown> extends BaseFie
   /**
    * Static options (mutually exclusive with useQuery)
    */
-  options?: GroupableOption<T>[]
+  options?: GroupableOption<T, TData>[]
 
   /**
    * Async function for loading options
@@ -54,6 +55,20 @@ export interface ComboboxFieldProps<T = string, TData = unknown> extends BaseFie
    * Required when using useQuery
    */
   getLabel?: (item: TData) => ReactNode
+
+  /**
+   * String form of a data element — for filtering, typeahead and the input text after a pick.
+   * Needed when `getLabel` returns a node (otherwise the option falls back to its value).
+   */
+  getTextValue?: (item: TData) => string
+
+  /**
+   * Own content of an option in the dropdown. The skin keeps its item frame (highlight,
+   * indicator). With `useQuery`, `option.data` is the loaded item; with static `options`, the
+   * option's own `data`. Not called for the service «+ Add…» item. Unlike `Select`, there is no
+   * `renderValue`: the input holds plain text.
+   */
+  renderOption?: (option: GroupableOption<T, TData>, state: OptionRenderState) => ReactNode
 
   /**
    * Get value from data element
@@ -146,7 +161,7 @@ export interface ComboboxFieldProps<T = string, TData = unknown> extends BaseFie
    * />
    * ```
    */
-  onCreate?: CreateOptionHandler
+  onCreate?: CreateOptionHandler<TData>
 
   /** Text of the create item: «+ <createLabel> "<search>"» (default: localized «Add» / «Добавить») */
   createLabel?: string
@@ -231,7 +246,7 @@ interface ComboboxFieldState extends GroupedOptionsResult {
  * />
  * ```
  */
-export const FieldCombobox = createField<ComboboxFieldProps, string, ComboboxFieldState>({
+const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldState>({
   displayName: 'FieldCombobox',
   useFieldState: (
     componentProps: Omit<ComboboxFieldProps, keyof BaseFieldProps>,
@@ -298,7 +313,7 @@ export const FieldCombobox = createField<ComboboxFieldProps, string, ComboboxFie
         // Значения Combobox — строки: числовое значение из `onCreate` приводится к строке
         const visibleCreated = createdOptions
           .filter((opt) => !inputValue || contains(opt.label, inputValue))
-          .map((opt): GroupableOption => ({ label: opt.label, value: String(opt.value) }))
+          .map((opt): GroupableOption => ({ label: opt.label, value: String(opt.value), data: opt.data }))
         return mergeCreatedOptions(list, visibleCreated)
       }
 
@@ -312,11 +327,14 @@ export const FieldCombobox = createField<ComboboxFieldProps, string, ComboboxFie
 
       if (queryData && componentProps.getLabel && componentProps.getValue) {
         const getLabel = componentProps.getLabel
+        const getTextValue = componentProps.getTextValue
         const getValue = componentProps.getValue
         const getGroup = componentProps.getGroup
         const getDisabled = componentProps.getDisabled
         return withCreated((queryData as unknown[]).map((item) => ({
           label: getLabel(item),
+          textValue: getTextValue?.(item),
+          data: item,
           value: getValue(item),
           group: getGroup?.(item),
           disabled: getDisabled?.(item),
@@ -328,6 +346,7 @@ export const FieldCombobox = createField<ComboboxFieldProps, string, ComboboxFie
       componentProps.options,
       queryData,
       componentProps.getLabel,
+      componentProps.getTextValue,
       componentProps.getValue,
       componentProps.getGroup,
       componentProps.getDisabled,
@@ -347,6 +366,8 @@ export const FieldCombobox = createField<ComboboxFieldProps, string, ComboboxFie
         createItemLabel ? [...baseOptions, { label: createItemLabel, value: CREATE_OPTION_VALUE }] : baseOptions,
       [baseOptions, createItemLabel],
     )
+
+    useNodeLabelWarning('Combobox', baseOptions)
 
     // Create collection with grouping via shared hook
     const { collection, groups } = useGroupedOptions(options)
@@ -381,6 +402,18 @@ export const FieldCombobox = createField<ComboboxFieldProps, string, ComboboxFie
   render: ({ field, fullPath, resolved, hasError, errorMessage, componentProps, fieldState }): ReactElement => {
     const currentValue = field.state.value as string | undefined
     const minChars = componentProps.minChars ?? 1
+
+    // Содержимое пункта: своё (`renderOption`) или label как есть (узел не сплющивается в строку).
+    // Служебный пункт «+ Добавить…» через renderOption не проходит
+    const renderItemContent = (opt: GroupableOption): ReactNode => {
+      if (!componentProps.renderOption || isCreateOptionValue(String(opt.value))) {
+        return opt.label
+      }
+      return componentProps.renderOption(opt, {
+        selected: currentValue !== undefined && currentValue !== '' && String(currentValue) === String(opt.value),
+        disabled: opt.disabled ?? false,
+      })
+    }
 
     return (
       <Field.Root invalid={hasError} required={resolved.required} disabled={resolved.disabled}>
@@ -467,7 +500,7 @@ export const FieldCombobox = createField<ComboboxFieldProps, string, ComboboxFie
                       {groupName && <Combobox.ItemGroupLabel>{groupName}</Combobox.ItemGroupLabel>}
                       {groupOptions.map((opt) => (
                         <Combobox.Item item={opt} key={opt.value}>
-                          <Combobox.ItemText>{getOptionLabel(opt)}</Combobox.ItemText>
+                          <Combobox.ItemText>{renderItemContent(opt)}</Combobox.ItemText>
                           <Combobox.ItemIndicator />
                         </Combobox.Item>
                       ))}
@@ -476,7 +509,7 @@ export const FieldCombobox = createField<ComboboxFieldProps, string, ComboboxFie
                   /* Flat options */
                   : fieldState.options.map((opt) => (
                     <Combobox.Item item={opt} key={opt.value}>
-                      <Combobox.ItemText>{getOptionLabel(opt)}</Combobox.ItemText>
+                      <Combobox.ItemText>{renderItemContent(opt)}</Combobox.ItemText>
                       <Combobox.ItemIndicator />
                     </Combobox.Item>
                   ))}
@@ -490,3 +523,11 @@ export const FieldCombobox = createField<ComboboxFieldProps, string, ComboboxFie
     )
   },
 })
+
+/**
+ * `createField` is not generic, so the generic signature is restored by a cast: `TData` is
+ * inferred from `options`/`useQuery` and flows into `renderOption`/`getTextValue`/`getLabel`.
+ */
+export const FieldCombobox = FieldComboboxBase as unknown as <T = string, TData = unknown>(
+  props: ComboboxFieldProps<T, TData>,
+) => ReactElement

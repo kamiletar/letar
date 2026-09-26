@@ -4,6 +4,13 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.12.0] - 2026-09-26
+
+### Added
+
+- **`useNodeLabelWarning`** — dev-предупреждение (один раз на поле), когда у опции нестроковый
+  `label` без `textValue`. Общий хук Chakra- и shadcn-скинов Select/Combobox.
+
 ## [0.11.2] - 2026-09-23
 
 ### Fixed

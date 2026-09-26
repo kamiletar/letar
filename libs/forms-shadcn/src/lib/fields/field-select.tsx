@@ -6,11 +6,12 @@ import {
   isCreateOptionValue,
   mergeCreatedOptions,
 } from '@letar/forms-core/uikit'
+import { useNodeLabelWarning } from '@letar/forms-react'
 import type { ReactElement } from 'react'
 import { useCallback, useMemo, useRef, useState } from 'react'
 import { createField } from '../uikit/primitives'
 import { shadcnUIKit } from '../uikit/uikit-shadcn'
-import type { SelectFieldProps } from './types'
+import type { SelectFieldProps, SelectOption } from './types'
 
 /**
  * Radix Select трактует `''` как «ничего не выбрано» (показывает placeholder), поэтому опция
@@ -21,8 +22,10 @@ const EMPTY_OPTION_TOKEN = '__letar_empty_option__'
 
 interface NormalizedOption {
   label: React.ReactNode
+  textValue?: string
   value: string
   disabled?: boolean
+  data?: unknown
 }
 
 interface SelectFieldState {
@@ -30,6 +33,8 @@ interface SelectFieldState {
   resolvedClearable: boolean
   /** В списке есть опция с пустым значением (`''`) */
   hasEmptyOption: boolean
+  /** Опции в форме приложения (с `data`) по нормализованному значению — для render-функций */
+  optionByValue: Map<string, SelectOption>
   /** Добавляет опцию, возвращённую `onCreate`, в локальный список */
   addCreatedOption: (option: CreatedOption) => void
   /** `true`, пока `onCreate` не завершился (повторный выбор пункта игнорируется) */
@@ -37,7 +42,7 @@ interface SelectFieldState {
 }
 
 /** Form.Field.Select — shadcn-скин. */
-export const FieldSelect = createField<SelectFieldProps, string | number, SelectFieldState>({
+const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFieldState>({
   displayName: 'FieldSelect',
   useFieldState: (componentProps, resolved): SelectFieldState => {
     const sourceOptions = componentProps.options ?? resolved.options ?? []
@@ -51,23 +56,34 @@ export const FieldSelect = createField<SelectFieldProps, string | number, Select
     const hasOnCreate = !!componentProps.onCreate
     const createLabel = componentProps.createLabel ?? 'Добавить…'
 
-    const normalizedOptions: NormalizedOption[] = useMemo(() => {
+    const { normalizedOptions, optionByValue } = useMemo(() => {
       // Опция приложения сильнее созданной с тем же значением — дубля после перезагрузки нет
-      const merged = mergeCreatedOptions(sourceOptions, createdOptions)
+      const merged = mergeCreatedOptions<SelectOption>(sourceOptions, createdOptions)
+      const toKey = (opt: SelectOption) => (String(opt.value) === '' ? EMPTY_OPTION_TOKEN : String(opt.value))
       const normalized: NormalizedOption[] = merged.map((opt) => ({
         label: opt.label,
-        value: String(opt.value) === '' ? EMPTY_OPTION_TOKEN : String(opt.value),
+        textValue: opt.textValue,
+        data: opt.data,
+        value: toKey(opt),
         disabled: opt.disabled,
       }))
       // Служебный пункт: перехватывается в onValueChange, в форму не попадает
-      return hasOnCreate ? [...normalized, { label: `+ ${createLabel}`, value: CREATE_OPTION_VALUE }] : normalized
+      const withCreate: NormalizedOption[] = hasOnCreate
+        ? [...normalized, { label: `+ ${createLabel}`, value: CREATE_OPTION_VALUE }]
+        : normalized
+      return {
+        normalizedOptions: withCreate,
+        optionByValue: new Map<string, SelectOption>(merged.map((opt) => [toKey(opt), opt])),
+      }
     }, [sourceOptions, createdOptions, hasOnCreate, createLabel])
 
     const resolvedClearable = componentProps.clearable ?? !resolved.required
 
     const hasEmptyOption = normalizedOptions.some((opt) => opt.value === EMPTY_OPTION_TOKEN)
 
-    return { normalizedOptions, resolvedClearable, hasEmptyOption, addCreatedOption, creatingRef }
+    useNodeLabelWarning('Select', normalizedOptions)
+
+    return { normalizedOptions, optionByValue, resolvedClearable, hasEmptyOption, addCreatedOption, creatingRef }
   },
   render: ({ field, fullPath, resolved, hasError, errorMessage, componentProps, fieldState }): ReactElement => {
     const currentValue = field.state.value
@@ -109,6 +125,19 @@ export const FieldSelect = createField<SelectFieldProps, string | number, Select
           }}
           onBlur={field.handleBlur}
           options={fieldState.normalizedOptions}
+          renderOption={componentProps.renderOption
+            ? (opt, state) => {
+              // Служебный пункт «+ Добавить…» через renderer приложения не проходит
+              const source = fieldState.optionByValue.get(opt.value)
+              return source ? componentProps.renderOption?.(source, state) : opt.label
+            }
+            : undefined}
+          renderValue={componentProps.renderValue
+            ? (opt) => {
+              const source = fieldState.optionByValue.get(opt.value)
+              return source ? componentProps.renderValue?.(source) : undefined
+            }
+            : undefined}
           label={resolved.label}
           placeholder={resolved.placeholder}
           disabled={resolved.disabled}
@@ -120,3 +149,11 @@ export const FieldSelect = createField<SelectFieldProps, string | number, Select
     )
   },
 })
+
+/**
+ * `createField` не generic — generic-сигнатура восстанавливается приведением: `TData` выводится
+ * из `options` и попадает в `renderOption`/`renderValue`.
+ */
+export const FieldSelect = FieldSelectBase as unknown as <TData = unknown>(
+  props: SelectFieldProps<TData>,
+) => ReactElement

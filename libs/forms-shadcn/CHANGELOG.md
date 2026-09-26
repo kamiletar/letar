@@ -4,6 +4,19 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.40.0] - 2026-09-26
+
+### Added
+
+- **`renderOption`/`renderValue`/`textValue`/`data` у `Field.Select`, `renderOption` у `Field.Combobox`**
+  (паритет с `@letar/forms` 2.19.0). `SelectOption<TData>`, `OptionRenderState`. Подпись триггера
+  Select — `renderValue` либо текст опции (Radix иначе копирует узел из `ItemText`); typeahead — по `textValue`.
+
+### Fixed
+
+- Фильтр и проверка дубля `onCreate` в `Field.Combobox` шли по `String(label)` — для узла это
+  `[object Object]`; теперь по `getOptionText`.
+
 ## [0.39.0] - 2026-09-24
 
 ### Added

@@ -6,7 +6,7 @@ import * as PopoverPrimitive from '@radix-ui/react-popover'
 import { type ReactNode, useState } from 'react'
 
 export function Combobox(
-  { value, inputValue, onInputChange, onValueChange, options, loading, placeholder, disabled, ...rest }:
+  { value, inputValue, onInputChange, onValueChange, options, renderOption, loading, placeholder, disabled, ...rest }:
     UIKitComboboxProps<ReactNode>,
 ) {
   const [open, setOpen] = useState(false)
@@ -66,7 +66,9 @@ export function Combobox(
                 'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
               )}
             >
-              {opt.label}
+              {renderOption
+                ? renderOption(opt, { selected: opt.value === value, disabled: opt.disabled ?? false })
+                : opt.label}
             </div>
           ))}
         </PopoverPrimitive.Content>

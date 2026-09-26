@@ -52,10 +52,20 @@ export interface EditIntentFieldProps<T = unknown> extends Omit<BaseFieldProps, 
   children: ReactNode
 }
 
-export interface SelectOption {
+export interface SelectOption<TData = unknown> {
   label: ReactNode
+  /** Строковая форма опции — поиск, typeahead, подпись в триггере. Нужна, если `label` — не строка */
+  textValue?: string
   value: string | number
   disabled?: boolean
+  /** Данные приложения: поле их не читает, только передаёт в `renderOption`/`renderValue` */
+  data?: TData
+}
+
+/** Состояние опции для `renderOption` (подсветка — забота CSS: `data-highlighted`) */
+export interface OptionRenderState {
+  selected: boolean
+  disabled: boolean
 }
 
 /**
@@ -85,9 +95,19 @@ export interface CascadingSelectFieldProps extends BaseFieldProps {
 }
 
 /** Props for Form.Field.Select (shadcn-скин). */
-export interface SelectFieldProps extends BaseFieldProps {
+export interface SelectFieldProps<TData = unknown> extends BaseFieldProps {
   /** Options for selection. If not specified, taken from schema meta */
-  options?: SelectOption[]
+  options?: SelectOption<TData>[]
+  /**
+   * Своё содержимое опции в списке; рамку пункта (подсветка, галочка) рисует скин. `option.data`
+   * типизируется из `options`. Для служебного пункта «+ Добавить…» не вызывается.
+   */
+  renderOption?: (option: SelectOption<TData>, state: OptionRenderState) => ReactNode
+  /**
+   * Своя подпись выбранного значения в триггере (внутри `<button>` — только фразовое содержимое).
+   * Пустой результат — откат к тексту опции; пока ничего не выбрано, виден `placeholder`.
+   */
+  renderValue?: (option: SelectOption<TData>) => ReactNode
   /** Value type: 'string' (by default) or 'number' */
   valueType?: 'string' | 'number'
   /**
@@ -97,7 +117,7 @@ export interface SelectFieldProps extends BaseFieldProps {
    * Созданная опция живёт, пока поле смонтировано; когда `options` приложения уже содержат то же
    * значение (справочник перезагружен), побеждает опция приложения — дубля нет.
    */
-  onCreate?: CreateOptionHandler
+  onCreate?: CreateOptionHandler<TData>
   /** Текст пункта создания после «+ » (по умолчанию «Добавить…») */
   createLabel?: string
   /** Show clear button (auto-determined: true if optional, false if required) */
@@ -225,8 +245,10 @@ export interface PasswordStrengthFieldProps extends BaseFieldProps {
  * группировки — оба требуют больше инфраструктуры, чем нужно для доказательства контракта.
  * Фильтрация — по вхождению подстроки в `label` (регистронезависимо), на стороне поля.
  */
-export interface ComboboxFieldProps extends BaseFieldProps {
-  options: SelectOption[]
+export interface ComboboxFieldProps<TData = unknown> extends BaseFieldProps {
+  options: SelectOption<TData>[]
+  /** Своё содержимое опции в списке. Для служебного пункта создания не вызывается */
+  renderOption?: (option: SelectOption<TData>, state: OptionRenderState) => ReactNode
   /** Минимум символов для показа списка (по умолчанию 0 — показывать сразу) */
   minChars?: number
   /**
@@ -235,7 +257,7 @@ export interface ComboboxFieldProps extends BaseFieldProps {
    * `onCreate(текст)`. Приложение открывает своё окно создания и возвращает `{ label, value }` —
    * опция добавляется и выбирается — либо `null` (значение остаётся, текст поиска сохраняется).
    */
-  onCreate?: CreateOptionHandler
+  onCreate?: CreateOptionHandler<TData>
   /** Глагол пункта создания: «+ <createLabel> "<текст>"» (по умолчанию «Добавить») */
   createLabel?: string
 }

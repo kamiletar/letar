@@ -9,14 +9,33 @@ import type { ReactNode } from 'react'
  *
  * @template T - Value type (default string)
  */
-export interface BaseOption<T = string> {
+export interface BaseOption<T = string, TData = unknown> {
   /** Display text of the option */
   label: ReactNode
+  /**
+   * String form of the option — for search, typeahead and the trigger caption. Needed when
+   * `label` is not a string (otherwise the option falls back to its value).
+   */
+  textValue?: string
   /** Option value */
   value: T
   /** Option is disabled */
   disabled?: boolean
+  /** App data: the field never reads it, only hands it to `renderOption`/`renderValue` */
+  data?: TData
 }
+
+/** State of an option for `renderOption` (highlight is a CSS concern — `[data-highlighted]`) */
+export interface OptionRenderState {
+  selected: boolean
+  disabled: boolean
+}
+
+/** Option of `Form.Field.Select` — `data` type is inferred from `options` */
+export type SelectFieldOption<TData = unknown> = BaseOption<string | number, TData>
+
+/** Option of `Form.Field.Combobox` with static `options` */
+export type ComboboxFieldOption<T = string, TData = unknown> = GroupableOption<T, TData>
 
 /**
  * Option with grouping support
@@ -25,7 +44,7 @@ export interface BaseOption<T = string> {
  *
  * @template T - Value type (default string)
  */
-export interface GroupableOption<T = string> extends BaseOption<T> {
+export interface GroupableOption<T = string, TData = unknown> extends BaseOption<T, TData> {
   /** Group key for option grouping */
   group?: string
 }

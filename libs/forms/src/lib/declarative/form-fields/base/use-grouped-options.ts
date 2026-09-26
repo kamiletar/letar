@@ -29,7 +29,7 @@ export interface GroupedOptionsResult<T = string> {
  * <Select.ItemText>{getOptionLabel(option)}</Select.ItemText>
  * ```
  */
-export function getOptionLabel<T>(item: { label?: string | ReactNode; value: T }): string {
+export function getOptionLabel<T>(item: { label?: string | ReactNode; textValue?: string; value: T }): string {
   return getOptionLabelCore(item)
 }
 

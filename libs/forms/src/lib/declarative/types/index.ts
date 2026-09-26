@@ -4,14 +4,17 @@
 export type {
   BaseOption,
   CheckboxCardOption,
+  ComboboxFieldOption,
   ComboboxOption,
   GroupableOption,
   ListboxOption,
   NativeSelectOption,
+  OptionRenderState,
   RadioCardOption,
   RadioOption,
   RichOption,
   SegmentedGroupOption,
+  SelectFieldOption,
   SelectOption,
 } from './option-types'
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { getOptionLabel, groupOptions, hasGroups } from './group-options'
+import { getOptionLabel, getOptionText, groupOptions, hasGroups, isNodeLabelWithoutText } from './group-options'
 
 describe('groupOptions', () => {
   it('returns null when no option declares a group', () => {
@@ -77,5 +77,41 @@ describe('getOptionLabel', () => {
   it('falls back to the value for non-string labels (e.g. a React node)', () => {
     // The core must not know what a ReactNode is — anything non-string degrades to the value
     expect(getOptionLabel({ value: 'v', label: { type: 'span' } })).toBe('v')
+  })
+})
+
+describe('getOptionText', () => {
+  it('textValue сильнее label и value', () => {
+    expect(getOptionText({ label: 'Метка', textValue: 'Текст', value: 'v' })).toBe('Текст')
+  })
+
+  it('строковый и числовой label — сам label', () => {
+    expect(getOptionText({ label: 'Метка', value: 'v' })).toBe('Метка')
+    expect(getOptionText({ label: 5, value: 'v' })).toBe('5')
+  })
+
+  it('узел без textValue — String(value)', () => {
+    expect(getOptionText({ label: { type: 'em' }, value: 7 })).toBe('7')
+    expect(getOptionText({ value: 'v' })).toBe('v')
+  })
+
+  it('пустой textValue допустим и не откатывается к label', () => {
+    expect(getOptionText({ label: 'Метка', textValue: '', value: 'v' })).toBe('')
+  })
+
+  it('getOptionLabel делегирует: без textValue результат прежний, с textValue — он', () => {
+    expect(getOptionLabel({ label: 'Метка', value: 'v' })).toBe('Метка')
+    expect(getOptionLabel({ label: {}, value: 'v' })).toBe('v')
+    expect(getOptionLabel({ label: {}, textValue: 'T', value: 'v' })).toBe('T')
+  })
+})
+
+describe('isNodeLabelWithoutText', () => {
+  it('true только для узла без textValue', () => {
+    expect(isNodeLabelWithoutText({ label: { type: 'b' } })).toBe(true)
+    expect(isNodeLabelWithoutText({ label: { type: 'b' }, textValue: 'x' })).toBe(false)
+    expect(isNodeLabelWithoutText({ label: 'строка' })).toBe(false)
+    expect(isNodeLabelWithoutText({ label: 3 })).toBe(false)
+    expect(isNodeLabelWithoutText({ label: null })).toBe(false)
   })
 })

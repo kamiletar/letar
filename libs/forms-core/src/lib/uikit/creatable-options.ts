@@ -4,10 +4,14 @@
  * Отрисовка пункта и вызов `onCreate` остаются в скине.
  */
 
-/** Опция, которую `onCreate` возвращает приложению-поле: она добавляется в список и выбирается */
-export interface CreatedOption {
+/**
+ * Опция, которую `onCreate` возвращает приложению-поле: она добавляется в список и выбирается.
+ * `data` — данные приложения для `renderOption`/`renderValue` (необязательные).
+ */
+export interface CreatedOption<TData = unknown> {
   label: string
   value: string | number
+  data?: TData
 }
 
 /**
@@ -15,7 +19,7 @@ export interface CreatedOption {
  * созданную запись либо `null`, если пользователь отказался. `search` — текст поиска Combobox;
  * у Select он пустой.
  */
-export type CreateOptionHandler = (search: string) => Promise<CreatedOption | null>
+export type CreateOptionHandler<TData = unknown> = (search: string) => Promise<CreatedOption<TData> | null>
 
 /**
  * Служебное значение пункта «+ Добавить…». Не совпадает с реальными значениями справочника,

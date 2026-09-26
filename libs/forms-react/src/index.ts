@@ -58,6 +58,7 @@ export type {
   UseMaskFieldResult,
 } from './lib/field/use-mask-field'
 export { useMaskField } from './lib/field/use-mask-field'
+export { useNodeLabelWarning } from './lib/field/use-node-label-warning'
 export { useResolvedFieldProps } from './lib/field/use-resolved-field-props'
 export { useActionFormErrors } from './lib/form/use-action-form-errors'
 export type {

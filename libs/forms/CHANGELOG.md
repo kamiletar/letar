@@ -4,6 +4,25 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.19.0] - 2026-09-26
+
+### Added
+
+- **Свой рендер опций Select/Combobox** (тред `forms-select-render-onupdate`, этап А). У опции —
+  `textValue` и типизированное `data` (`TData` выводится из `options`); у `Form.Field.Select` —
+  `renderOption(option, { selected, disabled })` и `renderValue(option)`; у `Form.Field.Combobox` —
+  `renderOption` и `getTextValue` (`option.data` = элемент `useQuery`). `onCreate` может вернуть `data`.
+  Служебный пункт «+ Добавить…» через `renderOption` не проходит. Типы `OptionRenderState`,
+  `SelectFieldOption`, `ComboboxFieldOption`.
+- Dev-предупреждение (один раз на поле): у опции нестроковый `label` без `textValue`.
+
+### Changed
+
+- ⚠️ **Изменение поведения.** Нестроковый `label` больше не сплющивается в строку: пункт Select
+  рисует узел, подпись в триггере — `textValue` (иначе `value`). Раньше пункты с узлом в `label`
+  показывали `value`. Строковые `label` работают как раньше.
+- `FieldSelect`/`FieldCombobox` — generic-сигнатуры `<TData>`; коллекция Chakra строится по `getOptionText`.
+
 ## [2.18.0] - 2026-09-26
 
 ### Added

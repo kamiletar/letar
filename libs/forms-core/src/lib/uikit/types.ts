@@ -78,19 +78,42 @@ export interface UIKitCheckboxProps<TNode = unknown> {
   'data-field-name'?: string
 }
 
-export interface UIKitSelectOption<TNode = unknown> {
+export interface UIKitSelectOption<TNode = unknown, TData = unknown> {
   value: string
   label: TNode
+  /**
+   * String form of the option: `itemToString` of the collection, typeahead/search, the trigger
+   * caption by default and the duplicate check of `onCreate`. Needed when `label` is not a string.
+   */
+  textValue?: string
   disabled?: boolean
   /** Group key for optgroup-style rendering. Options without it render flat, ungrouped. */
   group?: string
+  /** App data. The skin never reads it — it only hands it to the render functions. */
+  data?: TData
 }
 
-export interface UIKitSelectProps<TNode = unknown> {
+/**
+ * State of an option for `renderOption`. Highlight is deliberately absent: both skins set
+ * `[data-highlighted]`, it is a CSS concern.
+ */
+export interface UIKitOptionRenderState {
+  selected: boolean
+  disabled: boolean
+}
+
+export interface UIKitSelectProps<TNode = unknown, TData = unknown> {
   value?: string
   onValueChange: (value: string | undefined) => void
   onBlur?: () => void
-  options: UIKitSelectOption<TNode>[]
+  options: UIKitSelectOption<TNode, TData>[]
+  /** Own content of an option; the skin wraps it in its own item text. Not called for service items. */
+  renderOption?: (option: UIKitSelectOption<TNode, TData>, state: UIKitOptionRenderState) => TNode
+  /**
+   * Own caption of the selected value. Rendered INSIDE the trigger (a `<button>`) — phrasing
+   * content only, no buttons. Returning an empty value falls back to the option text.
+   */
+  renderValue?: (option: UIKitSelectOption<TNode, TData>) => TNode
   label?: TNode
   placeholder?: string
   disabled?: boolean
@@ -151,12 +174,14 @@ export interface UIKitNativeSelectProps {
   'data-field-name'?: string
 }
 
-export interface UIKitComboboxProps<TNode = unknown> {
+export interface UIKitComboboxProps<TNode = unknown, TData = unknown> {
   value?: string
   inputValue: string
   onInputChange: (value: string) => void
   onValueChange: (value: string | undefined) => void
-  options: UIKitSelectOption<TNode>[]
+  options: UIKitSelectOption<TNode, TData>[]
+  /** Own content of an option; the skin wraps it in its own item text. Not called for service items. */
+  renderOption?: (option: UIKitSelectOption<TNode, TData>, state: UIKitOptionRenderState) => TNode
   loading?: boolean
   placeholder?: string
   disabled?: boolean

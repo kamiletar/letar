@@ -123,6 +123,7 @@ export type {
   NativeSelectFieldProps,
   NumberFieldProps,
   NumberInputFieldProps,
+  OptionRenderState,
   OTPInputFieldProps,
   PasswordFieldProps,
   PasswordRequirement,

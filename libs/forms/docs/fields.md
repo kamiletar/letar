@@ -67,6 +67,42 @@
   ```
   Гонка устаревших ответов при быстром наборе текста обрабатывается внутри хука.
 
+### Свой рендер опций: `renderOption`, `renderValue`, `textValue`, `data` (v2.19.0+)
+
+Опция несёт типизированные данные приложения (`data`), а рисовать её можно любым узлом. Chakra-скин
+(`@letar/forms`) и shadcn-скин (`@letar/forms-shadcn`), `Form.Field.Select` и `Form.Field.Combobox`.
+
+| Проп / поле опции | Где              | Описание                                                                                                    |
+| ----------------- | ---------------- | ----------------------------------------------------------------------------------------------------------- |
+| `data`            | опция            | Данные приложения. `TData` выводится из `options` и попадает в render-функции                               |
+| `textValue`       | опция            | Строковая форма: поиск, typeahead, подпись в триггере. Нужна, если `label` — не строка                      |
+| `renderOption`    | Select, Combobox | `(option, { selected, disabled }) => ReactNode` — содержимое пункта; рамку (подсветка, галочка) рисует скин |
+| `renderValue`     | только Select    | `(option) => ReactNode` — подпись выбранного в триггере; `null`/`''` — откат к тексту опции                 |
+| `getTextValue`    | только Combobox  | `(item) => string` — строковая форма элемента `useQuery`; у `renderOption` `option.data` — сам элемент      |
+
+```tsx
+<Form.Field.Select
+  name="cityId"
+  options={cities.map((c) => ({ value: c.id, label: c.name, data: c }))}
+  renderOption={(o) => (
+    <span>
+      {o.label} <small>{o.data?.region}</small>
+    </span>
+  )}
+  renderValue={(o) => <b>{o.data?.name}</b>}
+/>
+```
+
+- Нестроковый `label` больше **не сплющивается в строку**: пункт рисует узел как есть. Без
+  `textValue` поиск, typeahead и подпись в триггере идут по `value` — в dev-режиме поле один раз
+  предупредит в консоли.
+- `renderValue` рисуется внутри `<button>` (триггер): только фразовое содержимое, без кнопок и ссылок.
+  Пока ничего не выбрано, виден `placeholder`.
+- Служебный пункт «+ Добавить…» через `renderOption` не проходит; `onCreate` может вернуть `data`.
+- У Combobox `renderValue` нет: в инпуте — обычный текст (`textValue`/`getTextValue`/строковый `label`).
+- Подсветку (`highlighted`) в `state` не передаём — оба скина ставят `[data-highlighted]`, стилизуйте CSS.
+- ⚠️ **Изменение поведения:** пункты с `label`-узлом раньше показывали `value`, теперь — узел.
+
 ### `onCreate` — создать запись справочника, не уходя из формы (v2.17.0+)
 
 Проп `onCreate` есть у `Form.Field.Select` и `Form.Field.Combobox` (Chakra-скин и shadcn-скин).

@@ -171,6 +171,39 @@ the props), otherwise the create item does not appear.
 `options` only; the default item text is "Добавить…"). Not implemented yet in
 `@letar/forms-vue`, `@letar/forms-vue-shadcn` and `@letar/forms-angular`.
 
+## Custom option rendering (`renderOption`, `renderValue`, `textValue`, `data`)
+
+**API:** `renderOption`, `renderValue`, `textValue`, `data` on `Form.Field.Select`;
+`renderOption`, `getTextValue`, `textValue`, `data` on `Form.Field.Combobox`. Chakra and shadcn skins.
+
+An option carries typed app data (`data`) and can be drawn as any node. `TData` is inferred from
+`options` (for Combobox with `useQuery` — from the loaded items) and flows into the render functions.
+
+```tsx
+<Form.Field.Select
+  name="cityId"
+  options={cities.map((c) => ({ value: c.id, label: c.name, data: c }))}
+  renderOption={(o, { selected }) => <span>{o.label} <small>{o.data?.region}</small></span>}
+  renderValue={(o) => <b>{o.data?.name}</b>}
+/>
+```
+
+| Prop / option field | Where            | Description                                                                                  |
+| ------------------- | ---------------- | -------------------------------------------------------------------------------------------- |
+| `data`              | option           | App data, never read by the field                                                            |
+| `textValue`         | option           | String form for search, typeahead and the trigger caption. Needed when `label` is not a string |
+| `renderOption`      | Select, Combobox | `(option, { selected, disabled }) => ReactNode`; the skin keeps its item frame                |
+| `renderValue`       | Select only      | `(option) => ReactNode` for the trigger; `null`/`''` falls back to the option text            |
+| `getTextValue`      | Combobox only    | `(item) => string` for `useQuery` items                                                       |
+
+- A non-string `label` is **no longer flattened to a string**: the item draws the node. Without
+  `textValue` search, typeahead and the trigger caption use `value`; in development the field warns once.
+- `renderValue` lives inside a `<button>` — phrasing content only. While nothing is selected the
+  `placeholder` shows.
+- The service "+ Add…" item skips `renderOption`; `onCreate` may return `data`.
+- Combobox has no `renderValue`: the input holds plain text.
+- ⚠️ **Behavior change:** options with a node `label` used to show their `value`, now they show the node.
+
 ## RadioGroup
 
 **API:** `Form.Field.RadioGroup`

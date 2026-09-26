@@ -4,6 +4,16 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.16.0] - 2026-09-26
+
+### Added
+
+- **`uikit`: `getOptionText`** (textValue → строковый/числовой label → `String(value)`),
+  `isNodeLabelWithoutText`, тип `UIKitOptionRenderState`. `UIKitSelectOption<TNode, TData>` получил
+  `textValue` и `data`; `UIKitSelectProps` — `renderOption`/`renderValue`, `UIKitComboboxProps` — `renderOption`.
+  `CreatedOption<TData>` и `CreateOptionHandler<TData>` несут `data`. `getOptionLabel` делегирует
+  `getOptionText` (для данных без `textValue` результат прежний).
+
 ## [0.15.0] - 2026-09-24
 
 ### Added

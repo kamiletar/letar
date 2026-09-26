@@ -59,12 +59,48 @@ export function hasGroups<T extends GroupableLike>(options: readonly T[]): boole
 }
 
 /**
+ * Text of an option as a plain string: `textValue` → string (or number) `label` → `String(value)`.
+ *
+ * Single source for everything that needs a string out of an option: `itemToString` of the
+ * adapter collection (typeahead, `valueAsString`), the trigger caption, search/filter and the
+ * duplicate check of `onCreate`. `label` is typed loosely because a React adapter allows
+ * `ReactNode` labels — a node without `textValue` falls back to the value rather than forcing
+ * the core to know about nodes.
+ */
+export function getOptionText<TValue>(
+  item: { label?: unknown; textValue?: string; value: TValue },
+): string {
+  if (typeof item.textValue === 'string') {
+    return item.textValue
+  }
+  if (typeof item.label === 'string') {
+    return item.label
+  }
+  if (typeof item.label === 'number') {
+    return String(item.label)
+  }
+  return String(item.value)
+}
+
+/**
  * Label of an option as a plain string, falling back to its value.
  *
- * Used both for accessible text and for adapter-side collection building (`itemToString`).
- * `label` is typed loosely because a React adapter allows `ReactNode` labels — anything
- * non-string falls back to the value rather than forcing the core to know about nodes.
+ * Kept as a public name; delegates to `getOptionText`, so `textValue` (when set) wins. For data
+ * without `textValue` and with a string label the result is unchanged.
  */
-export function getOptionLabel<TValue>(item: { label?: unknown; value: TValue }): string {
-  return typeof item.label === 'string' ? item.label : String(item.value)
+export function getOptionLabel<TValue>(item: { label?: unknown; textValue?: string; value: TValue }): string {
+  return getOptionText(item)
+}
+
+/**
+ * Whether a `ReactNode`-like label needs `textValue` to be searched and shown in the trigger:
+ * anything except a string, a number or an empty value. A helper for the dev-only warning.
+ */
+export function isNodeLabelWithoutText(item: { label?: unknown; textValue?: string }): boolean {
+  if (typeof item.textValue === 'string') {
+    return false
+  }
+  const label = item.label
+  return label !== null && label !== undefined && typeof label !== 'string' && typeof label !== 'number'
+    && typeof label !== 'boolean'
 }
