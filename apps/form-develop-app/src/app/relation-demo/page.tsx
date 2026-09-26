@@ -1,8 +1,10 @@
 'use client'
 
-import { useCreateCategory, useCreateRecipe, useFindManyCategory } from '@/lib/hooks'
+import { schema } from '@/generated/schema'
+import { useCreateCategory, useCreateRecipe } from '@/lib/hooks'
 import { Badge, Box, Code, Heading, HStack, Separator, Text, VStack } from '@chakra-ui/react'
-import { Form, type RelationConfig, RelationFieldProvider, relationMeta, withUIMeta } from '@letar/forms'
+import { Form, RelationFieldProvider, relationMeta, withUIMeta } from '@letar/forms'
+import { useZenStackRelations } from '@letar/forms-query/zenstack'
 import { useState } from 'react'
 import { z } from 'zod/v4'
 import { DemoPageLayout, SubmittedDataPreview } from '../_components'
@@ -36,6 +38,9 @@ const RecipeFormSchema = withUIMeta(
 )
 
 type RecipeFormData = z.infer<typeof RecipeFormSchema>
+
+// Настройки справочников поверх собранных из схемы: описание опции. Вынесено за компонент — литерал в JSX пересобирал бы массив relations на каждом рендере
+const relationOverrides = { Category: { descriptionField: 'description' } }
 
 const recipeInitialValues: RecipeFormData = {
   title: '',
@@ -71,6 +76,9 @@ export default function RelationDemoPage() {
   // ZenStack mutations
   const createCategory = useCreateCategory()
   const createRecipe = useCreateRecipe()
+
+  // Справочники берутся из самой form-схемы: fieldProps.relation → useFindMany модели из схемы ZenStack
+  const relations = useZenStackRelations(schema, RecipeFormSchema, { overrides: relationOverrides })
 
   const handleCategorySubmit = async (data: CategoryFormData) => {
     await createCategory.mutateAsync({ data })
@@ -124,8 +132,8 @@ export default function RelationDemoPage() {
             <Badge colorPalette="green">Автозагрузка опций</Badge>
           </HStack>
           <Text color="fg.muted" mb={4}>
-            Категории автоматически загружаются через <Code>useFindManyCategory</Code> и передаются в поле{' '}
-            <Code>categoryId</Code>.
+            Категории автоматически загружаются через <Code>useZenStackRelations</Code> (<Code>useFindMany</Code>{' '}
+            модели из схемы ZenStack) и передаются в поле <Code>categoryId</Code>.
           </Text>
 
           <Code
@@ -137,11 +145,9 @@ export default function RelationDemoPage() {
             borderRadius="md"
             _dark={{ bg: 'gray.800' }}
           >
-            {`<RelationFieldProvider
-  relations={[
-    { model: 'Category', useQuery: useFindManyCategory, labelField: 'name' },
-  ]}
->
+            {`const relations = useZenStackRelations(schema, RecipeFormSchema)
+
+<RelationFieldProvider relations={relations}>
   <Form schema={RecipeFormSchema} ...>
     <Form.AutoFields />  {/* categoryId получит options автоматически */}
   </Form>
@@ -149,19 +155,7 @@ export default function RelationDemoPage() {
           </Code>
 
           {/* Форма с RelationFieldProvider */}
-          <RelationFieldProvider
-            relations={[
-              {
-                model: 'Category',
-                // RelationConfig объявлен без параметров типа, поэтому useQuery в нём —
-                // (args?: unknown). Хук с типизированными args под него не подходит по
-                // контравариантности параметров, отсюда приведение типа.
-                useQuery: useFindManyCategory as RelationConfig['useQuery'],
-                labelField: 'name',
-                descriptionField: 'description',
-              },
-            ]}
-          >
+          <RelationFieldProvider relations={relations}>
             <Form schema={RecipeFormSchema} initialValue={recipeInitialValues} onSubmit={handleRecipeSubmit}>
               <VStack gap={4} align="stretch">
                 <Form.AutoFields />
@@ -203,18 +197,13 @@ export default function RelationDemoPage() {
 
             <Box>
               <Text fontWeight="bold" mb={2}>
-                2. Оборачиваем форму в RelationFieldProvider:
+                2. Собираем relations из схемы и оборачиваем форму в RelationFieldProvider:
               </Text>
               <Code display="block" whiteSpace="pre" p={3} bg="white" borderRadius="md">
-                {`<RelationFieldProvider
-  relations={[
-    {
-      model: 'Category',           // Должно совпадать!
-      useQuery: useFindManyCategory,
-      labelField: 'name',
-    },
-  ]}
->`}
+                {`// модель и labelField берутся из fieldProps.relation схемы
+const relations = useZenStackRelations(schema, RecipeFormSchema)
+
+<RelationFieldProvider relations={relations}>`}
               </Code>
             </Box>
 
