@@ -50,8 +50,9 @@
       волны 7, `--sync-texts` волны 3) отправить из локальной сессии после слияния в `main`.
 - [ ] ⚠️ Открытый вопрос: **время пула не записано в studio** — в облаке нет `TIME_MCP_SECRET`, таймер не запускался.
       Внести задним числом `time_log` (работа над archetest 2026-09-24…26) — решение Kami, биллинговая ли это работа.
-- [ ] ⚠️ Открытый вопрос: реестровый номер оператора ПДн в `privacy/page.tsx` — вынести из публичного репо
-      (env/приватный конфиг) или оставить как публичные сведения политики; решение Kami (см. волну 5 ниже).
+- [x] ✅ Реестровый номер оператора ПДн (РКН) — **решение Kami 2026-09-26: остаётся в `privacy/page.tsx`** (номер его,
+      тот же, что у kami и studio; на странице политики он публичен по закону). Из слайда `/dev/presentation` номер убран
+      (ссылка на /privacy), в `public-repo-hygiene.md` записано исключение только для страницы `/privacy`.
 - [x] ✅ `typecheck:tsgo archetest` — в основном чекауте 2026-09-26 зелёный (4 ошибки в `libs/auth/src/server/create-auth/index.ts`
       из облачного контейнера не воспроизводятся: там среда ставилась без `--frozen-lockfile`). Заодно перед деплоем
       прогнано: `nx test` 348/348, `nx lint` 0 ошибок (32 warnings), `nx build` (webpack + Serwist) — зелёные.
@@ -1003,8 +1004,8 @@ CAT/IRT. ✅ Подтверждено Kami: разделение ASD → ASD + D
       Хвост: `FormI18nProvider` стоял с `locale="ru"` жёстко — в EN подсказки и ошибки полей форм были русскими;
       ✅ v0.30.1 локаль передаётся из layout пропом (`(auth)/layout` — вне NextIntl, поэтому не `useLocale`).
       `isRu` в коде теперь только выбирает поля справочников (`label`/`labelEn`) и юридический текст
-      политики. ⚠️ В `privacy/page.tsx` зашит реестровый номер оператора ПДн (РКН) — по
-      `public-repo-hygiene` ему место вне публичного репо (env/приватный конфиг); решение Kami.
+      политики. Реестровый номер оператора ПДн (РКН) в `privacy/page.tsx` оставлен
+      осознанно — решение Kami 2026-09-26 (см. «пул» выше).
       Больше всего: `for-professionals/page.tsx` 34, `cabinet/[clientId]/_components/dark-core-block.tsx` 17,
       `profile-details.tsx` 14, `quiz-container.tsx` 11, `developmental-profile-card.tsx` 11,
       `experimental-scales-block.tsx` 10, `safety-net-block.tsx` 9, `disclaimer-consent.tsx` 7,
