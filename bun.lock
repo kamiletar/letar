@@ -740,9 +740,10 @@
     },
     "apps/flora": {
       "name": "@letar/flora",
-      "version": "0.2.0",
+      "version": "0.2.1",
       "dependencies": {
         "@letar/env-load": "workspace:*",
+        "@letar/format-utils": "workspace:*",
       },
     },
     "apps/form-develop-app": {
@@ -1282,7 +1283,7 @@
     },
     "libs/format-utils": {
       "name": "@letar/format-utils",
-      "version": "0.5.0",
+      "version": "0.6.0",
     },
     "libs/forms": {
       "name": "@letar/forms",
