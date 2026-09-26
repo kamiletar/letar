@@ -192,6 +192,70 @@ describe('createStudioTimeMcpServer', () => {
       expect(textOf(result)).toContain('в будущем')
     })
 
+    it('без billable/nonBillReason в studio уходит undefined (студия ставит billable: true сама)', async () => {
+      studioTimeRequestMock.mockResolvedValue({ ok: true, status: 200, json: { data: { id: 't2' } } })
+
+      await client.callTool({ name: 'time_log', arguments: { app: 'studio', minutes: 30, description: 'работа' } })
+
+      expect(studioTimeRequestMock).toHaveBeenCalledWith({
+        method: 'POST',
+        path: '/api/mcp/time/log',
+        body: expect.objectContaining({ billable: undefined, nonBillReason: undefined }),
+      })
+    })
+
+    it('billable: false уходит в studio, ответ помечает запись небиллируемой (INTERNAL по умолчанию)', async () => {
+      studioTimeRequestMock.mockResolvedValue({ ok: true, status: 200, json: { data: { id: 't2' } } })
+
+      const result = await client.callTool({
+        name: 'time_log',
+        arguments: { app: 'archetest', minutes: 300, description: 'работа', billable: false },
+      })
+
+      expect(result.isError).toBeFalsy()
+      expect(textOf(result)).toContain('[небиллируемая: INTERNAL]')
+      expect(studioTimeRequestMock).toHaveBeenCalledWith({
+        method: 'POST',
+        path: '/api/mcp/time/log',
+        body: expect.objectContaining({ billable: false, nonBillReason: undefined }),
+      })
+    })
+
+    it('billable: false + nonBillReason уходят в studio как есть', async () => {
+      studioTimeRequestMock.mockResolvedValue({ ok: true, status: 200, json: { data: { id: 't2' } } })
+
+      const result = await client.callTool({
+        name: 'time_log',
+        arguments: { app: 'archetest', minutes: 60, description: 'правка', billable: false, nonBillReason: 'REWORK' },
+      })
+
+      expect(textOf(result)).toContain('[небиллируемая: REWORK]')
+      expect(studioTimeRequestMock).toHaveBeenCalledWith({
+        method: 'POST',
+        path: '/api/mcp/time/log',
+        body: expect.objectContaining({ billable: false, nonBillReason: 'REWORK' }),
+      })
+    })
+
+    it.each([
+      ['без billable', { nonBillReason: 'GIFT' }],
+      ['при billable: true', { billable: true, nonBillReason: 'GIFT' }],
+    ])('ошибка валидации — nonBillReason %s, без запроса в studio', async (_, billing) => {
+      await expectValidationError(client, 'time_log', { app: 'studio', minutes: 10, description: 'x', ...billing })
+      expect(studioTimeRequestMock).not.toHaveBeenCalled()
+    })
+
+    it('ошибка валидации — неизвестная причина nonBillReason', async () => {
+      await expectValidationError(client, 'time_log', {
+        app: 'studio',
+        minutes: 10,
+        description: 'x',
+        billable: false,
+        nonBillReason: 'OTHER',
+      })
+      expect(studioTimeRequestMock).not.toHaveBeenCalled()
+    })
+
     it.each([
       ['дата без времени', '2026-09-23'],
       ['русский формат', '23.09.2026 21:06'],
@@ -320,6 +384,7 @@ describe('строгие входные схемы — неизвестный а
       endedAt: '2026-09-23T22:29',
       description: 'созвон',
     }],
+    ['time_log', { app: 'svoichuzhie', minutes: 30, description: 'работа', billable: false, nonBillReason: 'GIFT' }],
     ['time_stage_close', { app: 'svoichuzhie', stage: 'Каталог' }],
   ]
 

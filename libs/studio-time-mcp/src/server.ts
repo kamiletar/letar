@@ -14,6 +14,8 @@ import { z } from 'zod'
 import { studioTimeRequest } from './client.js'
 
 const TIME_KIND = z.enum(['WORK', 'MEETING', 'TRAVEL', 'ADMIN'])
+/** Значения enum `NonBillReason` в studio (schema.zmodel). */
+const NON_BILL_REASON = z.enum(['GIFT', 'REWORK', 'BARTER', 'INTERNAL'])
 
 /**
  * Формат `startedAt`/`endedAt` у `time_log`: ISO-8601, минуты обязательны, секунды и зона — нет.
@@ -327,6 +329,8 @@ export function createStudioTimeMcpServer(): McpServer {
       'только startedAt — до текущего момента. Знаешь реальное время события — передавай startedAt/endedAt,',
       'иначе запись встанет на момент вызова и может перекрыть идущий таймер.',
       'Конец не в будущем, длительность > 0 и не больше суток. Пересечение с другими записями не блокирует — приходит предупреждением.',
+      'По умолчанию запись биллируемая. Работа, которую не выставляют в счёт (внутренняя, подарок, переделка своей ошибки,',
+      'бартер) — billable: false; причина в nonBillReason (по умолчанию INTERNAL), только вместе с billable: false.',
     ].join('\n'),
     inputSchema: z.strictObject({
       app: z.string().min(1).describe('repoSlug приложения'),
@@ -341,23 +345,34 @@ export function createStudioTimeMcpServer(): McpServer {
       description: z.string().min(1).max(2000).describe('Чем занимался — видит клиент'),
       kind: TIME_KIND.optional().describe('Тип активности: WORK (по умолчанию) / MEETING / TRAVEL / ADMIN'),
       idempotencyKey: z.string().optional().describe('Ключ идемпотентности — см. time_start'),
+      billable: z
+        .boolean()
+        .optional()
+        .describe('Биллируемая ли запись (по умолчанию true). false — не идёт в счёт клиенту'),
+      nonBillReason: NON_BILL_REASON.optional().describe(
+        'Причина небиллируемости: GIFT / REWORK / BARTER / INTERNAL (по умолчанию INTERNAL). Только вместе с billable: false',
+      ),
+    }).refine((input) => !(input.nonBillReason && input.billable !== false), {
+      message: 'nonBillReason допустим только вместе с billable: false',
+      path: ['nonBillReason'],
     }),
-  }, async ({ app, minutes, startedAt, endedAt, description, kind, idempotencyKey }) => {
+  }, async ({ app, minutes, startedAt, endedAt, description, kind, idempotencyKey, billable, nonBillReason }) => {
     const key = idempotencyKey ?? randomUUID()
     try {
       const res = await studioTimeRequest({
         method: 'POST',
         path: '/api/mcp/time/log',
-        body: { app, minutes, startedAt, endedAt, description, kind, idempotencyKey: key },
+        body: { app, minutes, startedAt, endedAt, description, kind, idempotencyKey: key, billable, nonBillReason },
       })
       if (!res.ok) {
         return errorText(`❌ time_log(${app}): ${pretty(res.json)}`)
       }
       const warningLine = res.json.warning ? `\n⚠️ ${res.json.warning}\n` : ''
+      const billingNote = billable === false ? ` [небиллируемая: ${nonBillReason ?? 'INTERNAL'}]` : ''
       return text(
-        `📋 Записано задним числом: **${app}**, ${formatLogInterval(res.json.data)} — ${description}${warningLine}\n${
-          pretty(res.json.data)
-        }`,
+        `📋 Записано задним числом: **${app}**, ${
+          formatLogInterval(res.json.data)
+        } — ${description}${billingNote}${warningLine}\n${pretty(res.json.data)}`,
       )
     } catch (err) {
       return errorText(`❌ time_log(${app}): ${err instanceof Error ? err.message : String(err)}`)
