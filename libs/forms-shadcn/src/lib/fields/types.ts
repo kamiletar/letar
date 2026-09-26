@@ -137,6 +137,11 @@ export interface SelectFieldProps<TData = unknown> extends BaseFieldProps {
   /** Свой низ списка после пунктов (например `<Form.Field.Select.CreateButton />`) */
   listFooter?: ReactNode
   /**
+   * Опции ещё грузятся: спиннер в поле, «Загрузка...» в списке и (пока у выбранного значения нет опции)
+   * в триггере вместо placeholder.
+   */
+  loading?: boolean
+  /**
    * Поле поиска внутри списка — паритет API с `@letar/forms` (Chakra). ⚠️ В shadcn-скине поиска нет:
    * фокусная модель Radix Select (наведение мыши уводит фокус на пункт, typeahead забирает символы и Tab)
    * конфликтует с полем ввода. `'auto'`/`false` ничего не делают; `true` и объект — одно предупреждение в

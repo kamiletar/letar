@@ -155,6 +155,13 @@ export interface UIKitSelectProps<TNode = unknown, TData = unknown> extends UIKi
    * the set of visible values (`selected` / the empty option are resolved over the full list).
    */
   search?: UIKitSelectSearch
+  /**
+   * The options are being loaded: spinner in the control, `loadingMessage` in the list and, while
+   * the selected value has no option yet, in the trigger instead of the placeholder.
+   */
+  loading?: boolean
+  /** Text of the loading state (localized by the field) */
+  loadingMessage?: string
   size?: string
   variant?: string
   'data-field-name'?: string

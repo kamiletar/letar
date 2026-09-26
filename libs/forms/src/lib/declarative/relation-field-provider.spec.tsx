@@ -68,8 +68,8 @@ describe('RelationFieldProvider', () => {
       })
 
       expect(result.current.options).toEqual([
-        { value: '1', label: 'Категория 1', description: undefined },
-        { value: '2', label: 'Категория 2', description: undefined },
+        { value: '1', label: 'Категория 1', description: undefined, data: expect.anything() },
+        { value: '2', label: 'Категория 2', description: undefined, data: expect.anything() },
       ])
       expect(result.current.isLoading).toBe(false)
       expect(result.current.error).toBeNull()
@@ -115,6 +115,7 @@ describe('RelationFieldProvider', () => {
         value: 'cat-1',
         label: 'Категория 1',
         description: undefined,
+        data: expect.anything(),
       })
     })
 
@@ -140,6 +141,7 @@ describe('RelationFieldProvider', () => {
         value: '1',
         label: 'Item 1',
         description: 'Описание',
+        data: expect.anything(),
       })
     })
   })
@@ -322,8 +324,8 @@ describe('RelationFieldProvider', () => {
 
       const options = result.current?.getOptions('Category')
       expect(options).toEqual([
-        { value: '1', label: 'Cat 1', description: undefined },
-        { value: '2', label: 'Cat 2', description: undefined },
+        { value: '1', label: 'Cat 1', description: undefined, data: expect.anything() },
+        { value: '2', label: 'Cat 2', description: undefined, data: expect.anything() },
       ])
     })
 
@@ -363,7 +365,7 @@ describe('RelationFieldProvider', () => {
 
       const state = result.current?.getState('Category')
       expect(state).toEqual({
-        options: [{ value: '1', label: 'Cat 1', description: undefined }],
+        options: [{ value: '1', label: 'Cat 1', description: undefined, data: expect.anything() }],
         isLoading: false,
         error: null,
       })

@@ -70,13 +70,28 @@ export function useDeleteManyRecipeComponent() {
 // ============================================================================
 
 /** Query хук для useFindMany категорий */
-export function useFindManyCategory(args?: { include?: object; orderBy?: object }) {
+export function useFindManyCategory(
+  args?: { include?: object; orderBy?: object; where?: object; take?: number },
+  options?: { enabled?: boolean },
+) {
   const client = useClientQueries(schema)
-  return client.category.useFindMany(args)
+  return client.category.useFindMany(args, options)
+}
+
+/** Query хук для useFindUnique категории (`enabled: false` при пустом id) */
+export function useFindUniqueCategory(args: { where: { id: string } }, options?: { enabled?: boolean }) {
+  const client = useClientQueries(schema)
+  return client.category.useFindUnique(args, options)
 }
 
 /** Mutation хук для создания категории */
 export function useCreateCategory() {
   const client = useClientQueries(schema)
   return client.category.useCreate()
+}
+
+/** Mutation хук для обновления категории */
+export function useUpdateCategory() {
+  const client = useClientQueries(schema)
+  return client.category.useUpdate()
 }

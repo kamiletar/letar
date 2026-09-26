@@ -2423,8 +2423,17 @@ ZenStack (§16.2, этап Б): демо на модели `Category` и нас�
 5. Цикл синхронизации, e2e; в CHANGELOG — «Изменения поведения»: у Select с 10+ опциями в выпадашке появилось
    поле поиска, выключается `searchable={false}`.
 
-**Этап Г — источники данных** (§16.8, §16.9) — `forms` 2.22.0, `forms-core` 0.19.0, `forms-react` 0.15.0,
-`forms-shadcn` 0.43.0, **новый** `forms-query` 0.1.0. Опирается на Б (`useSelected`, конвейер `run`) и В (`loading`):
+> ✅ **Долги этапов Б/В закрыты 2026-09-26** — `forms` 2.22.0, `forms-core` 0.19.0, `forms-shadcn` 0.43.0 (версии Г
+> сдвинуты на одну): `useSelected` у Combobox (Б.4, тест Z7); `RelationConfig.fieldProps` + `data` в опциях
+> провайдера, опции провайдера в Combobox при relation + `fieldType: "combobox"`, `relation` в поле не передаётся
+> (Б.7, тест Z8); `loading` у Select в обоих скинах (тест Z6); демо `/zenstack-option-demo` на настоящих хуках
+> ZenStack + e2e (Б.6; проверено в браузере: создание → запись выбрана, F2 → подпись новая, после `update` — один
+> `findMany` справочника, `useSelected` → подпись значения вне выдачи). Попутно исправлено: Combobox со статичными
+> `options`, пришедшими позже монтирования, теперь показывает подпись выбранного значения. `form-mcp` описаний
+> пропсов полей не хранит — не менялся.
+
+**Этап Г — источники данных** (§16.8, §16.9) — `forms` 2.23.0, `forms-core` 0.20.0, `forms-react` 0.15.0,
+`forms-shadcn` 0.44.0, **новый** `forms-query` 0.1.0. Опирается на Б (`useSelected`, конвейер `run`) и В (`loading`):
 
 1. `forms-core`: `LoadContext`, `LoadOptionsFn`, `LoadSelectedFn`, `OptionsSourceProps`; unit-тесты типов.
 2. `forms-react`: общий источник поиска — промис-путь рядом с `useAsyncSearch` (дебаунс, `minChars`, отмена, номер

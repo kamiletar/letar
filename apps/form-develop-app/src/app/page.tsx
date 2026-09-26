@@ -70,6 +70,11 @@ export default function HomePage() {
         <Button asChild colorPalette="teal" variant="outline" size="lg" width="fit-content">
           <Link href="/select-search-demo">Поиск в Select (searchable: порог 10, раскладка, onCreate с текстом)</Link>
         </Button>
+        <Button asChild colorPalette="purple" variant="outline" size="lg" width="fit-content">
+          <Link href="/zenstack-option-demo">
+            ZenStack + справочник (onUpdate/onCreate/useSelected/loading на настоящих хуках)
+          </Link>
+        </Button>
         <Button asChild colorPalette="orange" variant="outline" size="lg" width="fit-content">
           <Link href="/dirty-guard-demo">DirtyGuard (защита от потери данных в createForm и на форме)</Link>
         </Button>

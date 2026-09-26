@@ -11,6 +11,7 @@ import {
   Input as ChakraInput,
   Portal,
   Select as ChakraSelect,
+  Spinner,
   Text,
 } from '@chakra-ui/react'
 import { getOptionText, groupOptions } from '@letar/forms-core/uikit'
@@ -169,6 +170,8 @@ export const chakraUIKit: ChakraUIKit = {
     editHotkeyHint,
     emptyContent,
     search,
+    loading,
+    loadingMessage,
     ...rest
   }): ReactElement {
     // Управляемое открытие: поле закрывает список перед окном приложения (`controlRef.close`)
@@ -240,6 +243,8 @@ export const chakraUIKit: ChakraUIKit = {
     const customValue = selectedOption && renderValue ? renderValue(selectedOption) : undefined
     const hasCustomValue = customValue !== undefined && customValue !== null && customValue !== false
       && customValue !== ''
+    // Значение уже есть, а его опция ещё грузится: в триггере — текст загрузки, а не пустой placeholder
+    const showLoadingValue = !!loading && !!loadingMessage && selected.length > 0 && !selectedOption
 
     // Пункты списка (с группами или плоские); в режиме поиска — внутри `Select.List`
     const itemsContent = groups
@@ -306,10 +311,17 @@ export const chakraUIKit: ChakraUIKit = {
           >
             <ChakraSelect.ValueText placeholder={placeholder}>
               {/* В режиме поиска выбранной опции может не быть в отфильтрованной коллекции: подпись даём сами */}
-              {hasCustomValue ? customValue : search && selectedOption ? getOptionText(selectedOption) : undefined}
+              {hasCustomValue
+                ? customValue
+                : showLoadingValue
+                ? loadingMessage
+                : search && selectedOption
+                ? getOptionText(selectedOption)
+                : undefined}
             </ChakraSelect.ValueText>
           </ChakraSelect.Trigger>
           <ChakraSelect.IndicatorGroup>
+            {loading && <Spinner size="xs" />}
             {clearable && <ChakraSelect.ClearTrigger />}
             {controlActions && (
               // IndicatorGroup не принимает клики (pointer-events: none) — кнопке возвращаем их
@@ -336,6 +348,9 @@ export const chakraUIKit: ChakraUIKit = {
                 : undefined}
             >
               {search && <SelectSearchField search={search} listId={listId} firstValue={firstVisibleValue} />}
+              {loading && visibleOptions.length === 0 && loadingMessage && (
+                <Box px={3} py={2} color="fg.muted" fontSize="sm">{loadingMessage}</Box>
+              )}
               {search && emptyContent}
               {search
                 ? (

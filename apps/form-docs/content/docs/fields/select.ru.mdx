@@ -70,6 +70,16 @@ const options = [
 - **Select или Combobox?** Все варианты уже на клиенте (enum, справочник до сотен записей) — `Select`. Варианты
   приходят с сервера по тексту поиска или каталог растёт — `Combobox` с `useQuery`.
 
+## Загрузка и выбранная запись (`loading`, `useSelected`)
+
+- `Select` — `loading={query.isLoading}`: спиннер в поле, «Загрузка…» в пустом списке и, пока у выбранного значения
+  нет опции, в кнопке вместо placeholder.
+- `Combobox` — `useSelected={(id) => useFindUniqueCategory({ where: { id } }, { enabled: !!id })}` догружает запись
+  текущего значения, если её нет в выдаче поиска: инпут показывает подпись без `initialLabel`, карандаш и F2 работают,
+  `onUpdate` получает `data`.
+- `RelationFieldProvider`: запись целиком лежит в `option.data`; `RelationConfig.fieldProps` — общие пропсы всех
+  полей модели (собственные `fieldProps` поля сильнее).
+
 ## Combobox
 
 **API:** `Form.Field.Combobox`

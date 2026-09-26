@@ -4,6 +4,12 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.19.0] - 2026-09-26
+
+### Added
+
+- `UIKitSelectProps.loading`, `UIKitSelectProps.loadingMessage` — состояние загрузки опций у Select.
+
 ## [0.18.0] - 2026-09-26
 
 ### Added

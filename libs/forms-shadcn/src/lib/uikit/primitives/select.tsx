@@ -3,7 +3,7 @@
 import { getOptionText, type UIKitSelectProps } from '@letar/forms-core/uikit'
 import { cn } from '@letar/tailwind-utils'
 import * as SelectPrimitive from '@radix-ui/react-select'
-import { Check, ChevronDown, X } from 'lucide-react'
+import { Check, ChevronDown, Loader2, X } from 'lucide-react'
 import { type ReactNode, useEffect, useId, useRef, useState } from 'react'
 
 export function Select(
@@ -25,6 +25,8 @@ export function Select(
     controlRef,
     onEditHotkey,
     editHotkeyHint,
+    loading,
+    loadingMessage,
     ...rest
   }: UIKitSelectProps<ReactNode>,
 ) {
@@ -52,7 +54,13 @@ export function Select(
   const customValue = selectedOption && renderValue ? renderValue(selectedOption) : undefined
   const hasCustomValue = customValue !== undefined && customValue !== null && customValue !== false
     && customValue !== ''
-  const valueContent = selectedOption ? (hasCustomValue ? customValue : getOptionText(selectedOption)) : undefined
+  // Значение есть, а его опция ещё грузится: в триггере текст загрузки, а не пустой placeholder
+  const showLoadingValue = !!loading && !!loadingMessage && !!value && !selectedOption
+  const valueContent = selectedOption
+    ? (hasCustomValue ? customValue : getOptionText(selectedOption))
+    : showLoadingValue
+    ? loadingMessage
+    : undefined
 
   return (
     <SelectPrimitive.Root
@@ -91,6 +99,7 @@ export function Select(
           )}
         >
           <SelectPrimitive.Value placeholder={placeholder}>{valueContent}</SelectPrimitive.Value>
+          {loading && <Loader2 className="text-muted-foreground size-4 shrink-0 animate-spin" aria-hidden />}
           <SelectPrimitive.Icon asChild>
             {clearable && value
               ? (
@@ -124,6 +133,9 @@ export function Select(
           )}
         >
           <SelectPrimitive.Viewport className="p-1">
+            {loading && options.length === 0 && loadingMessage && (
+              <div className="text-muted-foreground px-2 py-1.5 text-sm">{loadingMessage}</div>
+            )}
             {options.map((opt) => (
               <SelectPrimitive.Item
                 key={opt.value}

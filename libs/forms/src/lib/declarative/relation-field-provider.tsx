@@ -13,6 +13,8 @@ export interface RelationOption {
   label: string
   /** Description (optional) */
   description?: string
+  /** Whole loaded record — reaches `renderOption`/`renderValue`/`onUpdate` of the field as `option.data` */
+  data?: unknown
 }
 
 /**
@@ -55,6 +57,12 @@ export interface RelationConfig<TData = unknown, TArgs = unknown> {
   descriptionField?: string
   /** Arguments for useQuery (filters, sorting) */
   queryArgs?: TArgs
+  /**
+   * Props for every field bound to this model (`renderOption`, `onCreate`, `onUpdate`, `searchable`…).
+   * Applied under the field's own `fieldProps`: the field's value wins. The record of each option
+   * is available as `option.data`.
+   */
+  fieldProps?: Record<string, unknown>
 }
 
 /**
@@ -65,6 +73,8 @@ export interface RelationFieldContextValue {
   getOptions: (model: string) => RelationOption[]
   /** Get state loading for model */
   getState: (model: string) => RelationState
+  /** `fieldProps` from the model's `RelationConfig` */
+  getFieldProps: (model: string) => Record<string, unknown> | undefined
   /** All loaded relations */
   relations: Record<string, RelationState>
 }
@@ -131,6 +141,7 @@ function RelationLoader<TData>({
         value: String(record[valueField] ?? ''),
         label: String(record[labelField] ?? ''),
         description: descriptionField ? String(record[descriptionField] ?? '') : undefined,
+        data: item,
       }
     })
 
@@ -228,6 +239,7 @@ export function RelationFieldProvider({
   // Context value
   const contextValue = useMemo<RelationFieldContextValue>(
     () => ({
+      getFieldProps: (model: string) => relations.find((config) => config.model === model)?.fieldProps,
       getOptions: (model: string) => relationsState[model]?.options ?? [],
       getState: (model: string) =>
         relationsState[model] ?? {
@@ -237,7 +249,7 @@ export function RelationFieldProvider({
         },
       relations: relationsState,
     }),
-    [relationsState],
+    [relationsState, relations],
   )
 
   return (

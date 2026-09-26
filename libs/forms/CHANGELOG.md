@@ -4,6 +4,25 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.22.0] - 2026-09-26
+
+### Added
+
+- **`loading` у `Form.Field.Select`** (тред `forms-select-render-onupdate`, этап Б/В): спиннер в поле, «Загрузка…» в
+  пустом списке и, пока у выбранного значения нет опции, в кнопке вместо placeholder.
+- **`useSelected` у `Form.Field.Combobox`**: догрузка записи текущего значения по id (хук, например `useFindUnique*`).
+  Даёт подпись в инпуте без `initialLabel` (тот сильнее), `data` для карандаша/F2 и `onUpdate`; в список выдачи запись
+  не попадает.
+- **`RelationFieldProvider`**: запись справочника целиком — в `option.data`; `RelationConfig.fieldProps` — общие
+  пропсы полей модели (собственные `fieldProps` поля сильнее). С `fieldType: 'combobox'` опции провайдера становятся
+  статичными `options` Combobox; служебный ключ `relation` в поле больше не передаётся.
+- Демо `/zenstack-option-demo` (`form-develop-app`) на настоящих хуках ZenStack + e2e.
+
+### Fixed
+
+- `Combobox` со статичными `options`, пришедшими после монтирования (справочник загрузился позже значения): подпись
+  выбранного значения появляется, когда опция пришла (раньше инициализация закрывалась на первом рендере).
+
 ## [2.21.0] - 2026-09-26
 
 ### Added

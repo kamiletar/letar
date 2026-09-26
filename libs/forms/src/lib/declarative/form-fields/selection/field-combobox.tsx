@@ -111,6 +111,30 @@ export interface ComboboxFieldProps<T = string, TData = unknown> extends BaseFie
   initialLabel?: string
 
   /**
+   * Loads the record of the CURRENT value by its id — a hook, called on every render with the
+   * field value (an empty string when nothing is selected; make the query `enabled` only for a
+   * non-empty value). Solves what `useQuery` cannot: the selected record may be absent from the
+   * current search page, so there is nothing to take its label, `renderOption` data or
+   * `onUpdate` argument from.
+   *
+   * The loaded record becomes the option of the selected value: the input shows its label
+   * (`getLabel`/`getTextValue`), the pencil and F2 work on it and `onUpdate` receives its `data`.
+   * It does not enter the dropdown list. `initialLabel`, when passed, wins for the initial text.
+   *
+   * @example
+   * ```tsx
+   * <Form.Field.Combobox
+   *   name="categoryId"
+   *   useQuery={(search) => useFindManyCategory({ where: { name: { contains: search } } })}
+   *   useSelected={(id) => useFindUniqueCategory({ where: { id } }, { enabled: !!id })}
+   *   getLabel={(c) => c.name}
+   *   getValue={(c) => c.id}
+   * />
+   * ```
+   */
+  useSelected?: (value: string) => { data?: TData | null; isLoading?: boolean }
+
+  /**
    * Get group key from data element
    * Optional, for grouping results
    */
@@ -321,26 +345,66 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
       initialValue: fieldValue ? undefined : componentProps.initialSearchValue,
     })
 
+    // Запись текущего значения по id (`useSelected`) — хук вызывается на каждом рендере, как `useQuery`
+    const selectedResult = componentProps.useSelected?.(fieldValue ? String(fieldValue) : '')
+    const selectedItem = selectedResult?.data
+
+    // Опция выбранного значения из `useSelected`: в список не попадает, только в `optionByValue` и подпись
+    const selectedSourceOption = useMemo((): ComboboxItem | undefined => {
+      if (selectedItem === undefined || selectedItem === null || !componentProps.getLabel || !componentProps.getValue) {
+        return undefined
+      }
+      return {
+        label: componentProps.getLabel(selectedItem),
+        textValue: componentProps.getTextValue?.(selectedItem),
+        data: selectedItem,
+        value: String(componentProps.getValue(selectedItem)),
+        disabled: componentProps.getDisabled?.(selectedItem),
+        editable: componentProps.getEditable?.(selectedItem),
+      }
+    }, [
+      selectedItem,
+      componentProps.getLabel,
+      componentProps.getTextValue,
+      componentProps.getValue,
+      componentProps.getDisabled,
+      componentProps.getEditable,
+    ])
+
     // Инициализация `inputValue` из значения поля (сценарий `defaultValues` при редактировании).
     // `Combobox.Root` контролируем по `inputValue` отдельно от `value` (см. `render` ниже) —
     // `useAsyncSearch` стартует с пустой строкой независимо от того, что значение уже выбрано,
     // поэтому без явной синхронизации поле показывает пустой инпут при непустом значении.
+    // `initialLabel` сильнее записи из `useSelected`, та приходит позже — ждём её
     const initializedRef = useRef(false)
     useEffect(() => {
       if (initializedRef.current || !fieldValue || inputValue) {
         return
       }
-      initializedRef.current = true
 
+      let label: string | undefined
       if (componentProps.options) {
         const matchedOption = componentProps.options.find((opt) => String(opt.value) === String(fieldValue))
-        if (matchedOption) {
-          setInputValue(getOptionLabel(matchedOption))
-        }
+        label = matchedOption ? getOptionLabel(matchedOption) : undefined
       } else if (componentProps.initialLabel !== undefined) {
-        setInputValue(componentProps.initialLabel)
+        label = componentProps.initialLabel
+      } else if (selectedSourceOption && selectedSourceOption.value === String(fieldValue)) {
+        label = getOptionLabel(selectedSourceOption)
       }
-    }, [fieldValue, inputValue, componentProps.options, componentProps.initialLabel, setInputValue])
+      // Опции и запись из `useSelected` могут прийти позже (загрузка справочника) — инициализация
+      // закрывается только когда подпись найдена
+      if (label !== undefined) {
+        initializedRef.current = true
+        setInputValue(label)
+      }
+    }, [
+      fieldValue,
+      inputValue,
+      componentProps.options,
+      componentProps.initialLabel,
+      selectedSourceOption,
+      setInputValue,
+    ])
 
     // Filter for static options
     const { contains } = useFilter({ sensitivity: 'base' })
@@ -417,10 +481,22 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
       return mergeCreatedOptions(edited, created)
     }, [sourceOptions, overlay, createdOptions])
 
-    const optionByValue = useMemo(
-      () => new Map<string, ComboboxItem>(allOptions.map((opt) => [String(opt.value), opt])),
-      [allOptions],
-    )
+    // Запись из `useSelected` — вне списка; правки (`onUpdate`) накладываются и на неё
+    const selectedOption = useMemo((): ComboboxItem | undefined => {
+      if (!selectedSourceOption || allOptions.some((opt) => String(opt.value) === selectedSourceOption.value)) {
+        return undefined
+      }
+      const [edited] = applyOptionOverlay([selectedSourceOption], overlay)
+      return edited && typeof edited.value !== 'string' ? { ...edited, value: String(edited.value) } : edited
+    }, [selectedSourceOption, allOptions, overlay])
+
+    const optionByValue = useMemo(() => {
+      const map = new Map<string, ComboboxItem>(allOptions.map((opt) => [String(opt.value), opt]))
+      if (selectedOption) {
+        map.set(String(selectedOption.value), selectedOption)
+      }
+      return map
+    }, [allOptions, selectedOption])
 
     // Фильтр по тексту: статичные опции фильтруем сами (правки уже наложены), `useQuery` — на сервере;
     // созданные опции фильтруются так же, как остальные

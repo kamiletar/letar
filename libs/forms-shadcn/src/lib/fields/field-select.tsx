@@ -265,6 +265,8 @@ const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFie
               )
               : undefined}
             listFooter={componentProps.listFooter}
+            loading={componentProps.loading}
+            loadingMessage="Загрузка..."
             controlRef={actions.controlRef}
             onEditHotkey={hasOnUpdate && interactive
               ? (key, scope) => {

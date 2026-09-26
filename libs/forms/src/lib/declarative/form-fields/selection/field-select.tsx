@@ -136,6 +136,12 @@ export interface SelectFieldProps<TData = unknown> extends BaseFieldProps {
    * the «+ Add "…"» item goes under it; with `createItem={false}` put `<Form.Field.Select.CreateButton />` here.
    */
   renderEmpty?: (context: { search: string }) => ReactNode
+  /**
+   * The options are still being loaded (for example `isLoading` of the query that feeds `options`): spinner in
+   * the field, the localized «Loading…» in the list and — while the selected value has no option yet — in the
+   * trigger instead of the placeholder. `emptyContent` of the search is not shown while loading.
+   */
+  loading?: boolean
   /** Show clear button (auto-determined: true if optional, false if required) */
   clearable?: boolean
   /** Size */
@@ -158,6 +164,8 @@ interface SelectFieldState {
   matchedCount: number
   /** Own message of an empty search result (`searchable.emptyMessage` or the localized default) */
   emptyMessage: string
+  /** Localized «Loading…» */
+  loadingMessage: string
   /** Localized strings of the slots */
   strings: { edit: string; hotkeyHint: string; create: string; createVerb: string }
 }
@@ -233,6 +241,7 @@ const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFie
     const searchPlaceholder = useSelectionString('formSelection.search.placeholder')
     const searchAria = useSelectionString('formSelection.search.aria')
     const defaultEmptyMessage = useSelectionString('formSelection.combobox.emptyMessage')
+    const loadingMessage = useSelectionString('formSelection.combobox.loadingMessage')
     const searchState = useSelectionSearch<SelectFieldOption>({
       searchable: componentProps.searchable as SelectSearchable<SelectFieldOption> | undefined,
       options: merged,
@@ -283,6 +292,7 @@ const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFie
       emptyMessage: typeof componentProps.searchable === 'object' && componentProps.searchable.emptyMessage
         ? componentProps.searchable.emptyMessage
         : defaultEmptyMessage,
+      loadingMessage,
       strings: { edit, hotkeyHint, create: `+ ${createLabel}`, createVerb },
     }
   },
@@ -438,7 +448,9 @@ const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFie
               : undefined}
             listFooter={componentProps.listFooter}
             search={fieldState.search}
-            emptyContent={fieldState.search && fieldState.matchedCount === 0
+            loading={componentProps.loading}
+            loadingMessage={fieldState.loadingMessage}
+            emptyContent={fieldState.search && fieldState.matchedCount === 0 && !componentProps.loading
               ? (
                 <Box px={3} py={2} color="fg.muted" fontSize="sm">
                   {componentProps.renderEmpty

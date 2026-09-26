@@ -159,6 +159,8 @@ interface SelectOptionResolved {
   value: string
   label: string
   description?: string
+  /** Record of the relation (from `RelationFieldProvider`) — reaches `renderOption` as `option.data` */
+  data?: unknown
 }
 
 /**
@@ -190,6 +192,7 @@ function resolveSelectOptions(
       value: opt.value,
       label: opt.label,
       description: opt.description,
+      data: opt.data,
     }))
   }
 
@@ -245,9 +248,12 @@ export function renderFieldByType(type: FieldComponentType, props: FieldRenderPr
     readOnly,
     enumValues,
     constraints,
-    fieldProps = {},
+    fieldProps: rawFieldProps = {},
     relationOptions,
   } = props
+
+  // `relation` — служебная конфигурация привязки к справочнику, а не проп поля: в поле не передаётся
+  const { relation: _relation, ...fieldProps } = rawFieldProps
 
   // Generate label if not specified
   const label = labelProp ?? camelCaseToLabel(name)
@@ -372,7 +378,16 @@ export function renderFieldByType(type: FieldComponentType, props: FieldRenderPr
     case 'nativeSelect':
       return <FieldNativeSelect key={name} {...baseProps} options={nativeSelectOptions ?? []} {...fieldProps} />
     case 'combobox':
-      return <FieldCombobox key={name} {...baseProps} {...fieldProps} />
+      // Справочник из RelationFieldProvider: его записи — статичные опции Combobox (с `data`),
+      // если приложение не дало свои `options`/`useQuery`
+      return (
+        <FieldCombobox
+          key={name}
+          {...baseProps}
+          {...(relationOptions && relationOptions.length > 0 && !fieldProps.useQuery && { options: selectOptions })}
+          {...fieldProps}
+        />
+      )
     case 'autocomplete':
       return <FieldAutocomplete key={name} {...baseProps} {...fieldProps} />
     case 'listbox':
@@ -467,8 +482,13 @@ export function renderFieldByType(type: FieldComponentType, props: FieldRenderPr
  * Render a field from SchemaFieldInfo
  * @param field - field information from schema
  * @param relationOptions - options from RelationFieldProvider (if available)
+ * @param relationFieldProps - `RelationConfig.fieldProps` of the field's model (if available)
  */
-export function renderSchemaField(field: SchemaFieldInfo, relationOptions?: RelationOption[]): ReactElement {
+export function renderSchemaField(
+  field: SchemaFieldInfo,
+  relationOptions?: RelationOption[],
+  relationFieldProps?: Record<string, unknown>,
+): ReactElement {
   const fieldType = resolveFieldType(field)
 
   return renderFieldByType(fieldType, {
@@ -479,7 +499,8 @@ export function renderSchemaField(field: SchemaFieldInfo, relationOptions?: Rela
     required: field.required,
     enumValues: field.enumValues,
     constraints: field.constraints,
-    fieldProps: field.ui?.fieldProps,
+    // Свои `fieldProps` поля сильнее общих из `RelationConfig.fieldProps`
+    fieldProps: relationFieldProps ? { ...relationFieldProps, ...field.ui?.fieldProps } : field.ui?.fieldProps,
     relationOptions,
   })
 }
@@ -505,12 +526,14 @@ export function SchemaFieldWithRelations({ field }: { field: SchemaFieldInfo }):
 
   // If relation config and context exist - get options
   let relationOptions: RelationOption[] | undefined
+  let relationFieldProps: Record<string, unknown> | undefined
   if (relationConfig && relationContext) {
     const state = relationContext.getState(relationConfig.model)
     if (!state.isLoading && state.options.length > 0) {
       relationOptions = state.options
     }
+    relationFieldProps = relationContext.getFieldProps(relationConfig.model)
   }
 
-  return renderSchemaField(field, relationOptions)
+  return renderSchemaField(field, relationOptions, relationFieldProps)
 }

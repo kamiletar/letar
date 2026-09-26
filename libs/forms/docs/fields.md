@@ -100,6 +100,22 @@ Chakra-скин; в shadcn-скине поля поиска нет (`searchable:
   `searchable={false}`. Роль Content — `dialog`, `listbox` — на `Select.List`; e2e с `keyboard.type` после открытия
   проверить прогоном.
 
+### Загрузка справочника: `loading`, `useSelected`, `RelationFieldProvider` (v2.22.0+)
+
+- **`loading` у `Select`.** Справочник ещё грузится (`isLoading` хука `useFindMany`) — передай `loading={isLoading}`:
+  спиннер в поле, «Загрузка…» в пустом списке, а у значения, чья опция ещё не пришла, — то же слово в кнопке вместо
+  placeholder (без него поле выглядело пустым). Опции пришли — всё исчезает само.
+- **`useSelected` у `Combobox`.** Выбранная запись может не попасть в выдачу поиска, и подписи для неё негде взять.
+  `useSelected={(id) => useFindUniqueCategory({ where: { id } }, { enabled: !!id })}` догружает её по значению:
+  инпут показывает подпись без `initialLabel`, карандаш и F2 работают, `onUpdate` получает `data`. Хук вызывается на
+  каждом рендере — пустой `id` выключает запрос сам приложение. В список выдачи запись не попадает.
+  `initialLabel`, если передан, сильнее.
+- **Справочник из `RelationFieldProvider`.** Запись целиком лежит в `option.data`. У `RelationConfig` есть
+  `fieldProps` — общие пропсы (`renderOption`, `onCreate`, `onUpdate`, `searchable`…) для всех полей этой модели;
+  собственные `fieldProps` поля сильнее. С `fieldType: 'combobox'` опции провайдера становятся статичными `options`
+  Combobox.
+- Живая связка с ZenStack — демо `/zenstack-option-demo` в `form-develop-app`.
+
 **Select или Combobox?**
 
 | Ситуация                                                                       | Поле                                               |

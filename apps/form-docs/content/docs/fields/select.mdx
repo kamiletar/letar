@@ -81,6 +81,16 @@ From the 10th option the open list of a `Select` shows a search field with autof
 - **Select or Combobox?** All options are already on the client (enum, a dictionary up to hundreds of records) —
   `Select`. Options come from the server by the search text, or the catalog keeps growing — `Combobox` with `useQuery`.
 
+## Loading and the selected record (`loading`, `useSelected`)
+
+- `Select` — `loading={query.isLoading}`: spinner in the field, «Loading…» in the empty list and, while the selected
+  value has no option yet, in the button instead of the placeholder.
+- `Combobox` — `useSelected={(id) => useFindUniqueCategory({ where: { id } }, { enabled: !!id })}` loads the record
+  of the current value when it is not in the search page: the input shows its label without `initialLabel`, the pencil
+  and F2 work, `onUpdate` receives `data`.
+- `RelationFieldProvider`: the whole record reaches `option.data`; `RelationConfig.fieldProps` are shared props for
+  every field of the model (the field's own `fieldProps` win).
+
 ## Combobox
 
 **API:** `Form.Field.Combobox`
