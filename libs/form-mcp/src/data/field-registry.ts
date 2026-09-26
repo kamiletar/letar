@@ -1,3 +1,4 @@
+import { FIELD_EXTRA_PROPS, type FieldPropInfo } from './field-props.js'
 import type { DocSection } from './loader.js'
 
 /** Field categories */
@@ -27,6 +28,11 @@ export interface FieldInfo {
   category: FieldCategory
   /** Detailed documentation (from H2 section below the table) */
   details?: string
+  /**
+   * Пропсы, которых нет в таблице `fields.md` (зависимые поля Select/Combobox, этап З); только у полей, для которых
+   * они заведены в `field-props.ts`
+   */
+  props?: FieldPropInfo[]
 }
 
 /** Mapping of section headings -> categories */
@@ -97,6 +103,10 @@ export function buildFieldRegistry(fieldSections: DocSection[]): Map<string, Fie
         description: row.description,
         category,
         details: detailSections.get(name),
+      }
+      const props = FIELD_EXTRA_PROPS[name.toLowerCase()]
+      if (props) {
+        info.props = props
       }
       registry.set(name.toLowerCase(), info)
     }

@@ -5,7 +5,7 @@ import { buildPatternRegistry, getPatterns } from './pattern-registry.js'
 describe('buildPatternRegistry', () => {
   it('создаёт реестр со всеми известными паттернами', () => {
     const registry = buildPatternRegistry()
-    expect(registry.size).toBe(13)
+    expect(registry.size).toBe(14)
     expect(registry.has('crud-create')).toBe(true)
     expect(registry.has('undo-redo')).toBe(true)
     expect(registry.has('reference-select')).toBe(true)
@@ -27,7 +27,7 @@ describe('buildPatternRegistry', () => {
 describe('getPatterns', () => {
   it('без имени возвращает все паттерны', () => {
     const registry = buildPatternRegistry()
-    expect(getPatterns(registry)).toHaveLength(13)
+    expect(getPatterns(registry)).toHaveLength(14)
   })
 
   it('M1: паттерны справочников — ключ из схемы и ZenStack/Query с оптимизмом', () => {
@@ -41,6 +41,26 @@ describe('getPatterns', () => {
     const zenstack = registry.get('reference-zenstack' as never)
     expect(zenstack?.example).toContain('useZenStackOptions')
     expect(zenstack?.example).toContain('optimistic')
+  })
+
+  it('MD1: паттерн dependent-select — промис Country → City и ZenStack Company → Employee', () => {
+    const registry = buildPatternRegistry()
+    const pattern = registry.get('dependent-select' as never)
+    expect(pattern?.title).toContain('Dependent')
+    // Промис: страна → город, deps в загрузчике и в onCreate
+    expect(pattern?.example).toContain('dependsOn="countryId"')
+    expect(pattern?.example).toContain('loadOptions={(search, { signal, deps })')
+    // ZenStack: useQuery(search, deps) и onCreate(search, { deps })
+    expect(pattern?.example).toContain('useQuery(search, deps)')
+    expect(pattern?.example).toContain('onCreate={async (search, { deps })')
+    expect(pattern?.example).toContain('fromSearchQuery')
+    expect(pattern?.example).toContain('useInvalidateAfter')
+    // Строка массива: путь от корня
+    expect(pattern?.example).toContain('dependsOn="/countryId"')
+    // Сервер проверяет пару, ошибка — в errorMap.onServer поля ребёнка
+    expect(pattern?.description).toContain('errorMap.onServer')
+    expect(pattern?.description).toContain('server')
+    expect(getPatterns(registry, 'dependent-select')).toHaveLength(1)
   })
 
   it('с именем возвращает единственный паттерн в массиве', () => {

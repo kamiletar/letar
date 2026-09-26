@@ -55,6 +55,26 @@ describe('createFormMcpServer', () => {
       expect(parsed.fullName).toBe('Form.Field.String')
     })
 
+    it('MD1: Select и Combobox отдают пропсы зависимых полей', async () => {
+      const { client } = await connectedClient()
+
+      for (const fieldType of ['Select', 'Combobox']) {
+        const result = await client.callTool({ name: 'get_field_props', arguments: { fieldType } })
+        expect(result.isError).toBeFalsy()
+        const parsed = JSON.parse(textOf(result)) as { props?: Array<{ name: string }> }
+        const names = (parsed.props ?? []).map((p) => p.name)
+        expect(names, fieldType).toEqual(
+          expect.arrayContaining([
+            'dependsOn',
+            'depsReady',
+            'clearOnParentChange',
+            'disableWhenParentEmpty',
+            'placeholderWhenDisabled',
+          ]),
+        )
+      }
+    })
+
     it('несуществующее поле — доменная ошибка isError, не Zod-валидация', async () => {
       const { client } = await connectedClient()
 
@@ -92,7 +112,30 @@ describe('createFormMcpServer', () => {
     })
   })
 
+  describe('get_directives — form.dependsOn (MD1)', () => {
+    it('директива form.dependsOn отдаётся с проверками плагина', async () => {
+      const { client } = await connectedClient()
+
+      const result = await client.callTool({ name: 'get_directives', arguments: { directive: 'dependsOn' } })
+
+      expect(result.isError).toBeFalsy()
+      const [directive] = JSON.parse(textOf(result)) as Array<{ metaKey: string; description: string }>
+      expect(directive.metaKey).toBe('form.dependsOn')
+      expect(directive.description).toContain('cycle')
+    })
+  })
+
   describe('get_form_pattern', () => {
+    it('MD1: паттерн dependent-select доступен по имени', async () => {
+      const { client } = await connectedClient()
+
+      const result = await client.callTool({ name: 'get_form_pattern', arguments: { pattern: 'dependent-select' } })
+
+      expect(result.isError).toBeFalsy()
+      expect(textOf(result)).toContain('dependsOn="countryId"')
+      expect(textOf(result)).toContain('errorMap.onServer')
+    })
+
     it('успешный вызов возвращает известный паттерн', async () => {
       const { client } = await connectedClient()
 

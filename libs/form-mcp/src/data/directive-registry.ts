@@ -85,6 +85,32 @@ const KNOWN_DIRECTIVES: DirectiveInfo[] = [
     output: '.meta({ ui: { fieldProps: { relation: { labelField: "name", searchable: true } } } })',
   },
   {
+    name: '@form.dependsOn',
+    metaKey: 'form.dependsOn',
+    description:
+      'The field depends on another field of the form (cascading select: country -> city, company -> employee). '
+      + 'A string for one parent, an array of strings for several (`["countryId", "typeId"]`); the plugin writes `fieldProps.dependsOn` '
+      + 'into the same fieldProps literal as form.props.* / form.relation.*. A path is relative to the field group, a leading "/" means '
+      + 'from the form root (`"/countryId"` inside an array row). `@meta("form.props.dependsOn", ...)` also works, but only this key is checked. '
+      + 'Checks at `zenstack generate`, every message names `Model.field`: ERROR — no such field in the model, the field depends on itself, '
+      + 'a cycle (a <-> b); WARNING — the parent is excluded from the form (form.exclude, a relation field or a system field: the child stays disabled forever), '
+      + 'both fields have relations but the child target model has no relation to the parent target model (looks like a mistake), '
+      + 'form.dependsOn on a field with form.relation.* and no registry key: the list is not filtered — an auto form loads ALL records of the model. '
+      + 'A "/name" that is not a field of the model is only warned about (it may live in a group or array row). '
+      + 'There is no auto-derivation of the dependency from a foreign key: paths can be several (City -> Region -> Country), one target can have several fields '
+      + '(homeCountryId, workCountryId) and a relation in the schema does not mean "filter the list" — write the directive explicitly. '
+      + 'To filter the list use a registry key (`@meta("form.fieldType", "Select.<Name>")`, Form.AutoFields): `dependsOn` reaches the inner Field.Select / Field.Combobox '
+      + 'and the component loaders get `ctx.deps`. The server, not the form, must check the pair (city belongs to country) and return the error of the CHILD field via '
+      + '`errorMap.onServer`. Needs @letar/forms >= 2.27.0 and @letar/zenstack-form-plugin >= 4.4.0.',
+    example: '@meta("form.dependsOn", "countryId")\n'
+      + '@meta("form.dependsOn", ["countryId", "typeId"])  // several parents\n'
+      + '@meta("form.dependsOn", "/countryId")  // from the form root\n'
+      + '// with the list from the createForm registry (the child loads by deps.countryId):\n'
+      + 'cityId String @meta("form.dependsOn", "countryId") @meta("form.fieldType", "Select.City")',
+    output:
+      '.meta({ ui: { fieldProps: { dependsOn: "countryId" } } })  |  fieldProps: { dependsOn: ["countryId", "typeId"] }',
+  },
+  {
     name: '@form.tooltip',
     metaKey: 'form.tooltip.<title|description|impact|example>',
     description:

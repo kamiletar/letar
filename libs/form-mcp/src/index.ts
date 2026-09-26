@@ -57,7 +57,8 @@ export function createFormMcpServer(options: FormMcpServerOptions): McpServer {
   })
 
   server.registerTool('get_field_props', {
-    description: 'Get props, description, and documentation for a specific form field.',
+    description:
+      'Get props, description, and documentation for a specific form field. Select and Combobox also return `props`: the dependent-field props (dependsOn, depsReady, clearOnParentChange, disableWhenParentEmpty, placeholderWhenDisabled) and `deps` in loaders and onCreate/onUpdate context.',
     inputSchema: z.object({ fieldType: z.string().describe('Field type, e.g.: String, Date, Select, Combobox') }),
   }, async ({ fieldType }) => {
     const field = fieldRegistry.get(fieldType.toLowerCase())
@@ -75,6 +76,9 @@ export function createFormMcpServer(options: FormMcpServerOptions): McpServer {
     }
     if (field.details) {
       result.details = field.details
+    }
+    if (field.props) {
+      result.props = field.props
     }
     return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] }
   })
@@ -100,12 +104,12 @@ export function createFormMcpServer(options: FormMcpServerOptions): McpServer {
 
   server.registerTool('get_form_pattern', {
     description:
-      'Get a complete form example for a common scenario: crud-create, crud-edit, multi-step, offline, i18n, from-schema, declarative, server-action.',
+      'Get a complete form example for a common scenario: crud-create, crud-edit, multi-step, offline, i18n, from-schema, declarative, server-action, reference-select, reference-zenstack, dependent-select (cascading selects).',
     inputSchema: z.object({
       pattern: z
         .string()
         .describe(
-          'Pattern name: crud-create, crud-edit, multi-step, offline, i18n, from-schema, declarative, server-action',
+          'Pattern name: crud-create, crud-edit, multi-step, offline, i18n, from-schema, declarative, server-action, reference-select, reference-zenstack, dependent-select',
         ),
     }),
   }, async ({ pattern }) => {
@@ -437,6 +441,7 @@ function buildMigratePrompt(sourceFramework: string): string {
 }
 
 export { type DirectiveInfo } from './data/directive-registry.js'
+export { type FieldPropInfo } from './data/field-props.js'
 export { type FieldCategory, type FieldInfo } from './data/field-registry.js'
 export { type LoadedDocs } from './data/loader.js'
 export { type FormPattern, type PatternInfo } from './data/pattern-registry.js'

@@ -89,6 +89,60 @@ describe('buildFieldRegistry', () => {
   })
 })
 
+/** Секция «Выбор из списка» с Select и Combobox */
+const selectSection: DocSection = {
+  heading: 'Выбор из списка',
+  level: 2,
+  content: [
+    '| Компонент | Описание |',
+    '| --- | --- |',
+    '| `Form.Field.Select` | Стилизованный Select |',
+    '| `Form.Field.Combobox` | Searchable select с группами |',
+    '| `Form.Field.RadioGroup` | Радио-группа |',
+  ].join('\n'),
+}
+
+describe('buildFieldRegistry — пропсы зависимых полей (MD1)', () => {
+  const registry = buildFieldRegistry([selectSection])
+  const names = (key: string) => registry.get(key)?.props?.map((p) => p.name) ?? []
+
+  it('Select и Combobox получают общие пропсы зависимости', () => {
+    for (const key of ['select', 'combobox']) {
+      expect(names(key)).toEqual(
+        expect.arrayContaining([
+          'dependsOn',
+          'depsReady',
+          'clearOnParentChange',
+          'disableWhenParentEmpty',
+          'placeholderWhenDisabled',
+        ]),
+      )
+    }
+  })
+
+  it('Select: источники loadOptions / useOptions / options-функция и deps в onCreate/onUpdate', () => {
+    expect(names('select')).toEqual(
+      expect.arrayContaining(['options', 'loadOptions', 'useOptions', 'onCreate', 'onUpdate']),
+    )
+    const byName = Object.fromEntries((registry.get('select')?.props ?? []).map((p) => [p.name, p]))
+    expect(byName['options']?.type).toContain('(deps')
+    expect(byName['loadOptions']?.description).toContain("always ''")
+    expect(byName['useOptions']?.type).toContain('deps')
+    expect(byName['onCreate']?.type).toContain('deps')
+  })
+
+  it('Combobox: deps в loadOptions, loadSelected, useQuery, useSelected, onCreate, onUpdate', () => {
+    const byName = Object.fromEntries((registry.get('combobox')?.props ?? []).map((p) => [p.name, p]))
+    for (const name of ['loadOptions', 'loadSelected', 'useQuery', 'useSelected', 'onCreate', 'onUpdate']) {
+      expect(byName[name]?.type, name).toContain('deps')
+    }
+  })
+
+  it('у остальных полей props нет', () => {
+    expect(registry.get('radiogroup')?.props).toBeUndefined()
+  })
+})
+
 describe('getFields', () => {
   it('без category возвращает все поля', () => {
     const registry = buildFieldRegistry([textSection, numberSection])

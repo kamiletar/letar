@@ -13,6 +13,7 @@ export type FormPattern =
   | 'undo-redo'
   | 'reference-select'
   | 'reference-zenstack'
+  | 'dependent-select'
 
 /** Form pattern description */
 export interface PatternInfo {
@@ -405,6 +406,98 @@ export function WorkCategorySelect(props: { name: string; label?: string }) {
     />
   )
 }`,
+  },
+  {
+    name: 'dependent-select' as FormPattern,
+    title: 'Dependent (cascading) selects: country -> city, company -> employee',
+    description:
+      'A Select or Combobox whose list depends on another field: `dependsOn="countryId"`. The parent values arrive as `deps` in every loader '
+      + '(`loadOptions(search, { signal, deps })`, `loadSelected`, `useQuery(search, deps)`, `useSelected(value, deps)`) and in `onCreate/onUpdate(…, { deps })` — '
+      + 'the create dialog gets the parent that was selected on click. The field is disabled until the parents are set and is cleared only when the USER edits a parent '
+      + '(hydration, reset, a restored draft do not clear it); a parent change aborts the previous request. Chain: country -> region -> city clears both children in one batch. '
+      + 'An array row refers to a root field with a leading "/": `dependsOn="/countryId"`; a bare name is a field of the same row. '
+      + 'The form does not guarantee the pair: the server must check it (`city.countryId === countryId`) and return the error of the CHILD field via `errorMap.onServer` '
+      + '(a Server Action returns it as a value, see the server-errors pattern) — the message appears under "City". '
+      + 'From a schema: `@meta("form.dependsOn", "countryId")` (plus a registry key `form.fieldType = "Select.City"` to filter the list in auto forms). '
+      + 'Needs @letar/forms >= 2.27.0; the TanStack Query adapters — @letar/forms-query >= 0.3.0. Not for the deprecated CascadingSelect.',
+    example: `// 1. Promise source: Country -> City (a Select loads once per parent value)
+<Form.Field.Select
+  name="countryId"
+  loadOptions={(_search, { signal }) => fetchCountries(signal)}
+  getLabel={(c) => c.name}
+  getValue={(c) => c.id}
+/>
+<Form.Field.Combobox
+  name="cityId"
+  dependsOn="countryId"
+  loadOptions={(search, { signal, deps }) => searchCities({ countryId: deps.countryId, search }, signal)}
+  loadSelected={(value, { signal, deps }) => getCity(value, deps.countryId, signal)}
+  getLabel={(c) => c.name}
+  getValue={(c) => c.id}
+  // deps is a snapshot at the click: the dialog gets the country that was selected
+  onCreate={async (search, { deps }) => {
+    const city = await openCityDialog({ countryId: deps.countryId, name: search })
+    return city ? { label: city.name, value: city.id, data: city } : null
+  }}
+/>
+
+// A chain: the region depends on the country, the city on the region. A new country clears both (one batch, no request for cities)
+<Form.Field.Select name="regionId" dependsOn="countryId" loadOptions={(_s, { signal, deps }) => fetchRegions(deps.countryId, signal)} ... />
+<Form.Field.Combobox name="cityId" dependsOn="regionId" loadOptions={...} ... />
+
+// Select from a loaded list: a function of deps filters without a request (category -> subcategory)
+<Form.Field.Select name="subcategoryId" dependsOn="categoryId" options={(deps) => allSubcategories.filter((s) => s.categoryId === deps.categoryId)} />
+
+// 2. ZenStack + TanStack Query: Company -> Employee (@letar/forms-query)
+import { fromSearchQuery, fromSelectedQuery, type SearchQueryOptions, useInvalidateAfter } from '@letar/forms-query'
+
+// The field calls useQuery(search, deps); the adapter gives the hook (search, options, deps),
+// options.enabled = minChars passed AND the parents are ready — no request while the company is empty
+function useEmployeeSearch(search: string, options: SearchQueryOptions, deps: { companyId?: string }) {
+  const client = useClientQueries(schema)
+  return client.employee.useFindMany(
+    { where: { companyId: deps.companyId, name: { contains: search, mode: 'insensitive' } }, take: 20 },
+    options,
+  )
+}
+const searchEmployees = fromSearchQuery(useEmployeeSearch)
+
+function EmployeeCombobox() {
+  // a mutation outside the ZenStack hooks (a server action): invalidate only the list of the company where the record was created
+  const invalidateAfter = useInvalidateAfter((ctx) => [['employees', ctx.deps.companyId]])
+  return (
+    <Form.Field.Combobox
+      name="employeeId"
+      dependsOn="companyId"
+      useQuery={searchEmployees}
+      useSelected={fromSelectedQuery(useEmployeeById)}
+      getLabel={(e) => e.name}
+      getValue={(e) => e.id}
+      onCreate={invalidateAfter(async (search, { deps }) => createEmployeeViaDialog({ companyId: deps.companyId, name: search }))}
+    />
+  )
+}
+
+// 3. A row of an array: "/countryId" is a field of the form root, a bare name is a field of the same row
+<Form.Group.List name="deliveries">
+  <Form.Field.Select name="cityId" dependsOn="/countryId" loadOptions={(_s, { signal, deps }) => fetchCities(deps.countryId, signal)} ... />
+</Form.Group.List>
+
+// 4. The server checks the pair and returns the error of the CHILD field (a Server Action returns it as a value)
+'use server'
+import { actionFailure } from '@letar/forms/server-errors'
+
+export async function saveAddress(input: AddressInput) {
+  const city = await db.city.findUnique({ where: { id: input.cityId }, select: { countryId: true } })
+  if (!city || city.countryId !== input.countryId) {
+    return actionFailure('The city does not belong to the country', 'cityId') // the field of the CHILD
+  }
+  // ...
+}
+// on the client run() puts the message under "City" (errorMap.onServer of the child field)
+
+// 5. From schema.zmodel (needs the plugin >= 4.4.0; get_directives -> @form.dependsOn)
+// cityId String @meta("form.dependsOn", "countryId") @meta("form.fieldType", "Select.City")`,
   },
 ]
 

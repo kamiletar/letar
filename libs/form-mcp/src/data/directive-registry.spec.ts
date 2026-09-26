@@ -6,7 +6,7 @@ import type { DocSection } from './loader.js'
 describe('buildDirectiveRegistry', () => {
   it('содержит все известные директивы без дополнительных секций', () => {
     const registry = buildDirectiveRegistry([])
-    expect(registry.size).toBe(8)
+    expect(registry.size).toBe(9)
     expect(registry.has('@form.title')).toBe(true)
     expect(registry.has('@form.tooltip')).toBe(true)
     expect(registry.has('@form.exclude')).toBe(true)
@@ -39,7 +39,7 @@ describe('buildDirectiveRegistry', () => {
     }
     const registry = buildDirectiveRegistry([section])
     expect(registry.has('@form.unknowndirective')).toBe(false)
-    expect(registry.size).toBe(8)
+    expect(registry.size).toBe(9)
   })
 
   it('секция без "@form." в заголовке не переопределяет описание', () => {
@@ -54,7 +54,7 @@ describe('buildDirectiveRegistry', () => {
 describe('getDirectives', () => {
   it('без имени возвращает все директивы', () => {
     const registry = buildDirectiveRegistry([])
-    expect(getDirectives(registry)).toHaveLength(8)
+    expect(getDirectives(registry)).toHaveLength(9)
   })
 
   it('M1: form.fieldType описывает ключ реестра, form.relation — без fieldType', () => {
@@ -68,6 +68,28 @@ describe('getDirectives', () => {
     const relation = getDirectives(registry, 'relation')[0]
     expect(relation.output).not.toContain('fieldType')
     expect(relation.output).toContain('fieldProps')
+  })
+
+  it('MD1: form.dependsOn — строка и массив, проверки плагина, без автовывода по FK', () => {
+    const registry = buildDirectiveRegistry([])
+    const [dependsOn] = getDirectives(registry, 'dependsOn')
+    expect(dependsOn.name).toBe('@form.dependsOn')
+    expect(dependsOn.metaKey).toBe('form.dependsOn')
+    // Строка и массив в примерах
+    expect(dependsOn.example).toContain('@meta("form.dependsOn", "countryId")')
+    expect(dependsOn.example).toContain('@meta("form.dependsOn", ["countryId", "typeId"])')
+    expect(dependsOn.example).toContain('"/countryId"')
+    // Проверки generate
+    for (const check of ['no such field', 'itself', 'cycle', 'form.exclude', 'relation']) {
+      expect(dependsOn.description).toContain(check)
+    }
+    // Явная директива, автовывода нет; связь с ключом реестра
+    expect(dependsOn.description).toContain('no auto-derivation')
+    expect(dependsOn.description).toContain('Select.<Name>')
+    expect(dependsOn.description).toContain('not filtered')
+    expect(dependsOn.output).toContain('fieldProps: { dependsOn: "countryId" }')
+    // Находится и с полным именем
+    expect(getDirectives(registry, '@form.dependsOn')).toHaveLength(1)
   })
 
   it('находит директиву по полному имени с префиксом @form.', () => {
