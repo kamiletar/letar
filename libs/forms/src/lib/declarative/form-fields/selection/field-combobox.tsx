@@ -6,6 +6,8 @@ import {
   CREATE_OPTION_VALUE,
   type CreateOptionHandler,
   createSearchMatcher,
+  type DependentFieldProps,
+  type FieldDeps,
   getOptionText,
   isCreateOptionValue,
   isOptionEditable,
@@ -39,17 +41,22 @@ import {
   useAsyncSearch,
   useGroupedOptions,
 } from '../base'
+import { DependentSelectNotes } from './dependent-select-notes'
 import { useMinCharsHint } from './min-chars-hint'
 import { useSelectionString } from './selection-field-strings'
 import { SelectCreateButton, SelectEditButton } from './selection-slots'
+import { type DependentSelectFieldState, useDependentSelectField } from './use-dependent-select-field'
 
 /** Option of the field: groupable + the «cannot be edited» flag */
 type ComboboxItem = GroupableOption & EditableOptionFlag
 
 /**
- * Props of Form.Field.Combobox that do not depend on where the options come from
+ * Props of Form.Field.Combobox that do not depend on where the options come from. `TDeps` — the shape of `deps`
+ * (values of the parent fields from `dependsOn`, §18)
  */
-export interface ComboboxFieldBaseProps<T = string, TData = unknown> extends BaseFieldProps {
+export interface ComboboxFieldBaseProps<T = string, TData = unknown, TDeps extends FieldDeps = FieldDeps>
+  extends BaseFieldProps, DependentFieldProps<TDeps>
+{
   /**
    * String form of a data element — for filtering, typeahead and the input text after a pick.
    * Needed when `getLabel` returns a node (otherwise the option falls back to its value).
@@ -248,7 +255,7 @@ interface NoPromiseSource {
  * (TanStack Query / ZenStack hooks) or the promise path `loadOptions` (server action, `fetch`, SDK).
  * `getLabel`/`getValue` are required for both async paths.
  */
-export type ComboboxSource<T = string, TData = unknown> =
+export type ComboboxSource<T = string, TData = unknown, TDeps extends FieldDeps = FieldDeps> =
   | (
     & NoHookSource
     & NoPromiseSource
@@ -278,8 +285,14 @@ export type ComboboxSource<T = string, TData = unknown> =
        *   take: 20,
        * })}
        * ```
+       *
+       * A dependent field (`dependsOn`, §18) gets the values of the parents as the second argument:
+       * `useQuery={(search, deps) => useFindManyEmployee({ where: { companyId: deps.companyId, ... } })}`.
+       * Make the query `enabled` only when the parents are filled (`fromSearchQuery` from `@letar/forms-query` does it).
+       * While the parent changed and there is no real answer for it yet (`isPlaceholderData`), the field shows an
+       * empty list with the loading state instead of the previous parent's options.
        */
-      useQuery: AsyncQueryFn<TData>
+      useQuery: AsyncQueryFn<TData, TDeps>
       /**
        * Loads the record of the CURRENT value by its id — a hook, called on every render with the
        * field value (an empty string when nothing is selected; make the query `enabled` only for a
@@ -302,7 +315,7 @@ export type ComboboxSource<T = string, TData = unknown> =
        * />
        * ```
        */
-      useSelected?: (value: string) => { data?: TData | null; isLoading?: boolean }
+      useSelected?: (value: string, deps: TDeps) => { data?: TData | null; isLoading?: boolean }
     }
   )
   | (
@@ -329,13 +342,13 @@ export type ComboboxSource<T = string, TData = unknown> =
        * />
        * ```
        */
-      loadOptions: LoadOptionsFn<TData>
+      loadOptions: LoadOptionsFn<TData, TDeps>
       /**
        * Record of the current value when it is not among the loaded results and there is no
        * `initialLabel` (the pair of `useSelected` for the promise path). Kept per field instance,
        * dropped after `onUpdate` of that record.
        */
-      loadSelected?: LoadSelectedFn<TData>
+      loadSelected?: LoadSelectedFn<TData, TDeps>
       /** An error of `loadOptions`/`loadSelected` (a cancelled request is not an error) — for a log or a toast */
       onLoadError?: (error: unknown) => void
     }
@@ -344,9 +357,9 @@ export type ComboboxSource<T = string, TData = unknown> =
 /**
  * Props for Form.Field.Combobox: the common props and exactly one source of options
  */
-export type ComboboxFieldProps<T = string, TData = unknown> =
-  & ComboboxFieldBaseProps<T, TData>
-  & ComboboxSource<T, TData>
+export type ComboboxFieldProps<T = string, TData = unknown, TDeps extends FieldDeps = FieldDeps> =
+  & ComboboxFieldBaseProps<T, TData, TDeps>
+  & ComboboxSource<T, TData, TDeps>
 
 /** State type for useFieldState */
 interface ComboboxFieldState extends GroupedOptionsResult {
@@ -375,6 +388,8 @@ interface ComboboxFieldState extends GroupedOptionsResult {
   createItemLabel: string
   /** Шаблон сообщения об отказе оптимистичного действия, `{label}` подставляется при показе */
   settleErrorTemplate: string
+  /** Зависимое поле (§18): `deps`, блокировка, подсказка, объявление очистки */
+  dependent: DependentSelectFieldState
   /** Действия (`onCreate`/`onUpdate`): pending, наложение правок, созданные опции, конвейер */
   actions: ReturnType<typeof useSelectionActionsState>
   /** Все опции (с правками и созданными, без фильтра по тексту) по строковому значению */
@@ -460,6 +475,15 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
     // значения приоритет: показывать вместо него текст затравки было бы неверно.
     const fieldValue = useStore(form.store, () => form.getFieldValue(fullPath)) as string | undefined
 
+    // Зависимое поле (§18): родители, блокировка, очистка по правке родителя. Пустое значение — `''`, как у
+    // собственной кнопки очистки. TODO(вопрос 50 PLAN §14): для nullable-схемы очистка должна писать `null`
+    const dependent = useDependentSelectField(componentProps as DependentFieldProps, {
+      fullPath,
+      label: resolved.label,
+      emptyValue: '',
+    })
+    const parentsNotReady = dependent.active && !dependent.ready
+
     // Ввод и дебаунс — общие для обоих асинхронных путей; хук-путь (`useQuery`) — прямо здесь
     const {
       inputValue,
@@ -470,6 +494,9 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
       shouldQuery,
     } = useAsyncSearch({
       useQuery: componentProps.useQuery,
+      deps: dependent.deps,
+      // Ключ нужен только зависимому полю: по нему прежний `placeholderData` чужого родителя скрывается (§18.7)
+      depsKey: dependent.active ? dependent.depsKey : undefined,
       debounce: componentProps.debounce ?? 300,
       minChars: componentProps.minChars ?? 1,
       initialValue: fieldValue ? undefined : componentProps.initialSearchValue,
@@ -494,11 +521,15 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
     const promiseSearch = usePromiseSearch({
       loadOptions: componentProps.loadOptions,
       search: debouncedSearch,
-      enabled: everOpened && shouldQuery,
+      // Пока родители не готовы, запрос не уходит (региона нет — городов не просим)
+      enabled: everOpened && shouldQuery && !parentsNotReady,
       onLoadError: componentProps.onLoadError,
+      deps: dependent.deps,
+      depsKey: dependent.depsKey,
     })
-    const queryData = componentProps.loadOptions ? promiseSearch.data : hookData
-    const isLoading = hookLoading || promiseSearch.isLoading || !!componentProps.loading
+    // Хук-путь при неготовых родителях: результат хука (в том числе кэш прежнего родителя) не показываем
+    const queryData = parentsNotReady ? undefined : componentProps.loadOptions ? promiseSearch.data : hookData
+    const isLoading = !parentsNotReady && (hookLoading || promiseSearch.isLoading || !!componentProps.loading)
 
     // `loadSelected`: значение непустое, его нет в текущих результатах и нет `initialLabel`
     const valueKey = fieldValue ? String(fieldValue) : ''
@@ -509,10 +540,16 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
       value: valueKey,
       enabled: !valueInResults && componentProps.initialLabel === undefined,
       onLoadError: componentProps.onLoadError,
+      deps: dependent.deps,
     })
 
     // Запись текущего значения по id: хук `useSelected` (вызывается на каждом рендере, как `useQuery`) или `loadSelected`
-    const selectedResult = componentProps.useSelected?.(valueKey)
+    // `deps` вторым аргументом — только у зависимого поля: у обычного вызов остаётся прежним `useSelected(value)`
+    const selectedResult = dependent.active
+      ? componentProps.useSelected?.(valueKey, dependent.deps)
+      : (componentProps.useSelected as ((value: string) => { data?: unknown; isLoading?: boolean }) | undefined)?.(
+        valueKey,
+      )
     const selectedItem = componentProps.useSelected ? selectedResult?.data : promiseSelected.data
 
     // Опция выбранного значения из `useSelected`: в список не попадает, только в `optionByValue` и подпись
@@ -573,6 +610,14 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
       setInputValue,
     ])
 
+    // Автоочистка значения (§18.3) убирает и текст в поле ввода: он был подписью очищенного значения
+    const clearedId = dependent.cleared?.id
+    useEffect(() => {
+      if (clearedId !== undefined) {
+        setInputValue('')
+      }
+    }, [clearedId, setInputValue])
+
     // Filter for static options
     const { contains } = useFilter({ sensitivity: 'base' })
 
@@ -624,6 +669,8 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
       registry: pendingRegistry,
       onSettleError: componentProps.onSettleError as ((info: SettleErrorInfo) => void) | undefined,
       settleTimeout: componentProps.settleTimeout,
+      deps: dependent.deps,
+      depsKey: dependent.depsKey,
     })
     const { createdOptions, overlay } = actions
     const settleErrorTemplate = useSelectionString('formSelection.settleError')
@@ -723,6 +770,7 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
     return {
       inputValue,
       setInputValue,
+      dependent,
       isLoading,
       loadError: promiseSearch.error,
       retryLoad: promiseSearch.reload,
@@ -751,7 +799,10 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
     // Оптимистично созданная запись показана выбранной, пока форма хранит прежнее значение (§16.7)
     const currentValue = actions.pendingSelection ?? formValue
     const hasOnUpdate = !!componentProps.onUpdate
-    const interactive = !resolved.disabled && !resolved.readOnly
+    // Зависимое поле без готовых родителей заблокировано (§18.10)
+    const { dependent } = fieldState
+    const disabled = resolved.disabled || dependent.blocked
+    const interactive = !disabled && !resolved.readOnly
     const search = fieldState.inputValue.trim()
 
     // Ошибки `onCreate`/`onUpdate` — забота приложения: всплывают как unhandled rejection
@@ -905,7 +956,7 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
       : (componentProps.emptyMessage ?? fieldState.defaultEmptyMessage)
 
     return (
-      <Field.Root invalid={hasError} required={resolved.required} disabled={resolved.disabled}>
+      <Field.Root invalid={hasError} required={resolved.required} disabled={disabled}>
         <SelectionActionsProvider value={actionsValue}>
           <Combobox.Root
             collection={fieldState.collection}
@@ -934,7 +985,7 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
               field.handleChange(newValue ?? '')
             }}
             onInteractOutside={() => field.handleBlur()}
-            disabled={resolved.disabled}
+            disabled={disabled}
             readOnly={resolved.readOnly}
             allowCustomValue={componentProps.allowCustomValue ?? false}
             openOnClick
@@ -949,7 +1000,8 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
             <Combobox.Control>
               <Combobox.Input
                 ref={dropdown.inputRef}
-                placeholder={resolved.placeholder ?? fieldState.defaultPlaceholder}
+                placeholder={dependent.blockedPlaceholder ?? resolved.placeholder ?? fieldState.defaultPlaceholder}
+                aria-describedby={dependent.hint ? dependent.hintId : undefined}
                 pe={showValueEdit ? '6.5rem' : undefined}
                 // Выбранное значение ждёт сервера (§16.7): подпись уже новая, спиннер рядом
                 aria-busy={selectedSource?.pending ? true : undefined}
@@ -1043,6 +1095,7 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
           </Combobox.Root>
         </SelectionActionsProvider>
 
+        <DependentSelectNotes dependent={dependent} />
         {actions.settleFailure && (
           <Box role="status" mt={1} fontSize="sm" color="fg.error" data-settle-error="">
             {fieldState.settleErrorTemplate.replace('{label}', actions.settleFailure.label)}

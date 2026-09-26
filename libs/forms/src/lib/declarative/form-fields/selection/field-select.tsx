@@ -5,10 +5,14 @@ import {
   applyOptionOverlay,
   CREATE_OPTION_VALUE,
   type CreateOptionHandler,
+  type DependentFieldProps,
+  type FieldDeps,
   getOptionText,
   isCreateOptionValue,
   isOptionEditable,
+  type LoadOptionsFn,
   mergeCreatedOptions,
+  type OptionsSourceProps,
   type SelectSearchable,
   type SettleErrorInfo,
   shouldOfferCreate,
@@ -20,16 +24,19 @@ import {
   SelectionOptionProvider,
   useFormPendingRegistry,
   useNodeLabelWarning,
+  useOptionsLoader,
   useSelectionActionsState,
   useSelectionSearch,
 } from '@letar/forms-react'
 import { useStore } from '@tanstack/react-form'
 import type { ReactElement, ReactNode } from 'react'
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import type { BaseFieldProps, FieldSize, OptionRenderState, SelectFieldOption } from '../../types'
 import { chakraUIKit, createField, type ResolvedFieldProps, SelectionFieldLabel } from '../base'
+import { DependentSelectNotes } from './dependent-select-notes'
 import { useSelectionString } from './selection-field-strings'
 import { SelectCreateButton, SelectEditButton } from './selection-slots'
+import { type DependentSelectFieldState, useDependentSelectField } from './use-dependent-select-field'
 
 /** Normalized option (value is always string for the UIKit Select contract) */
 interface NormalizedOption {
@@ -44,11 +51,12 @@ interface NormalizedOption {
 }
 
 /**
- * Props for Select field
+ * Props of Select that do not depend on where the options come from. `TDeps` — the shape of `deps` (values of the
+ * parent fields from `dependsOn`, §18)
  */
-export interface SelectFieldProps<TData = unknown> extends BaseFieldProps {
-  /** Options for selection (string or number values). If not specified, taken from schema meta */
-  options?: SelectFieldOption<TData>[]
+export interface SelectFieldBaseProps<TData = unknown, TDeps extends FieldDeps = FieldDeps>
+  extends BaseFieldProps, DependentFieldProps<TDeps>
+{
   /**
    * Own content of an option in the dropdown. The skin still draws its own item frame
    * (highlight, indicator), you only supply what is inside. `option.data` is typed from `options`.
@@ -148,12 +156,6 @@ export interface SelectFieldProps<TData = unknown> extends BaseFieldProps {
    * the «+ Add "…"» item goes under it; with `createItem={false}` put `<Form.Field.Select.CreateButton />` here.
    */
   renderEmpty?: (context: { search: string }) => ReactNode
-  /**
-   * The options are still being loaded (for example `isLoading` of the query that feeds `options`): spinner in
-   * the field, the localized «Loading…» in the list and — while the selected value has no option yet — in the
-   * trigger instead of the placeholder. `emptyContent` of the search is not shown while loading.
-   */
-  loading?: boolean
   /** Show clear button (auto-determined: true if optional, false if required) */
   clearable?: boolean
   /** Size */
@@ -162,8 +164,92 @@ export interface SelectFieldProps<TData = unknown> extends BaseFieldProps {
   variant?: 'outline' | 'subtle'
 }
 
+/** No other source may be passed next to the one in use — the type says so (`?: never`) */
+interface NoLoadOptionsSource {
+  loadOptions?: never
+  onLoadError?: never
+}
+interface NoOptionsHookSource {
+  useOptions?: never
+}
+
+/**
+ * Exactly ONE source of options (§18.2 of the plan): static `options` (an array, or a function of `deps` for a
+ * dependent field), the promise path `loadOptions` (server action, `fetch`) or the hook path `useOptions`.
+ * Without any of them the options come from the schema meta.
+ */
+export type SelectSource<TData = unknown, TDeps extends FieldDeps = FieldDeps> =
+  | (
+    & NoLoadOptionsSource
+    & NoOptionsHookSource
+    & {
+      /**
+       * Options for selection (string or number values). If not specified, taken from schema meta.
+       * A function of `deps` filters an already loaded full list for a dependent field (category → subcategory);
+       * it is not called while the parents are not ready.
+       */
+      options?: SelectFieldOption<TData>[] | ((deps: TDeps) => SelectFieldOption<TData>[])
+      /**
+       * The options are still being loaded (for example `isLoading` of the query that feeds `options`): spinner in
+       * the field, the localized «Loading…» in the list and — while the selected value has no option yet — in the
+       * trigger instead of the placeholder. `emptyContent` of the search is not shown while loading.
+       */
+      loading?: boolean
+    }
+  )
+  | (
+    & NoOptionsHookSource
+    & {
+      options?: never
+      loading?: never
+      /**
+       * Promise path: the whole list at once (`search` is always `''`), one request per `deps` (after the parents
+       * are ready). A new parent cancels the previous request (`signal`); the options of the previous parent are
+       * hidden while the next request runs. Returns the options themselves.
+       *
+       * @example
+       * ```tsx
+       * <Form.Field.Select
+       *   name="cityId"
+       *   dependsOn="countryId"
+       *   loadOptions={async (_search, { signal, deps }) => {
+       *     const cities = await listCities({ countryId: deps.countryId }, signal)
+       *     return cities.map((c) => ({ value: c.id, label: c.name }))
+       *   }}
+       * />
+       * ```
+       */
+      loadOptions: LoadOptionsFn<SelectFieldOption<TData>, TDeps>
+      /** An error of `loadOptions` (a cancelled request is not an error) — for a log or a toast */
+      onLoadError?: (error: unknown) => void
+    }
+  )
+  | (
+    & NoLoadOptionsSource
+    & {
+      options?: never
+      loading?: never
+      /**
+       * Hook path: a hook that returns `{ options, loading }` — the same shape as `useQueryOptions(...).fieldProps`
+       * from `@letar/forms-query`. It is called on every render with `deps` of the parents.
+       */
+      useOptions: (deps: TDeps) => OptionsSourceProps<SelectFieldOption<TData>>
+    }
+  )
+
+/**
+ * Props for Select field: the common props and exactly one source of options
+ */
+export type SelectFieldProps<TData = unknown, TDeps extends FieldDeps = FieldDeps> =
+  & SelectFieldBaseProps<TData, TDeps>
+  & SelectSource<TData, TDeps>
+
 /** State type for useFieldState */
 interface SelectFieldState {
+  /** The options are being loaded (`loading`, `loadOptions`, `useOptions`) */
+  loading: boolean
+  /** Dependent field (§18): `deps`, blocked state, hint, announcement */
+  dependent: DependentSelectFieldState
   normalizedOptions: NormalizedOption[]
   resolvedClearable: boolean
   /** Actions (`onCreate`/`onUpdate`): pending, overlay of edits, created options, pipeline */
@@ -224,8 +310,61 @@ const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFie
     const edit = useSelectionString('formSelection.editOption')
     const hotkeyHint = useSelectionString('formSelection.editHotkeyHint')
 
+    // Зависимое поле (§18): родители, блокировка, очистка по правке родителя. Пустое значение — то же, что пишет
+    // собственная кнопка очистки (`applyValue(undefined)` в `render`)
+    // TODO(вопрос 50 PLAN §14): для nullable-схемы очистка должна писать `null`, а не `''`/`0` — общий
+    // `resolveEmptyValue(schemaField)` в forms-core для собственной очистки и для зависимой
+    const dependent = useDependentSelectField(componentProps as DependentFieldProps, {
+      fullPath,
+      label: resolved.label,
+      emptyValue: componentProps.valueType === 'number' ? 0 : '',
+    })
+
+    // Источники, кроме статичных `options`: промис (`loadOptions`, один запрос на `deps`) и хук (`useOptions`)
+    const loadOptionsProp = componentProps.loadOptions
+    const loader = useOptionsLoader<SelectFieldOption>(
+      (ctx) => loadOptionsProp ? loadOptionsProp('', ctx) : Promise.resolve([]),
+      [dependent.depsKey, dependent.ready],
+      // Прежние опции чужого родителя не показываем; пока родители не готовы, запрос не уходит
+      { keepPrevious: false, fieldDeps: dependent.deps, enabled: !!loadOptionsProp && dependent.ready },
+    )
+    const onLoadError = componentProps.onLoadError
+    useEffect(() => {
+      if (loader.error !== null && loader.error !== undefined) {
+        onLoadError?.(loader.error)
+      }
+    }, [loader.error, onLoadError])
+    // Хук вызывается на каждом рендере, как `useQuery` у Combobox: наличие его не меняется за жизнь поля
+    const hookSource = componentProps.useOptions?.(dependent.deps)
+
     // Options: props take priority, fallback to schema meta
-    const appOptions = (componentProps.options ?? resolved.options ?? []) as SelectFieldOption[]
+    const optionsProp = componentProps.options
+    const appOptions = useMemo((): SelectFieldOption[] => {
+      // Родители не готовы — списка нет (функция не вызывается с пустыми `deps`)
+      if (dependent.active && !dependent.ready) {
+        return []
+      }
+      if (loadOptionsProp) {
+        return loader.fieldProps.options
+      }
+      if (hookSource) {
+        return hookSource.options
+      }
+      const own = typeof optionsProp === 'function' ? optionsProp(dependent.deps) : optionsProp
+      return (own ?? resolved.options ?? []) as SelectFieldOption[]
+    }, [
+      dependent.active,
+      dependent.ready,
+      dependent.deps,
+      loadOptionsProp,
+      loader.fieldProps.options,
+      hookSource,
+      optionsProp,
+      resolved.options,
+    ])
+    const loading = dependent.active && !dependent.ready
+      ? false
+      : !!(componentProps.loading || loader.fieldProps.loading || hookSource?.loading)
     // Значение нужно конвейеру действий: ожидающий выбор оптимистичного create снимается, когда оно изменилось
     const fieldValue = useStore(form.store, () => form.getFieldValue(fullPath)) as string | number | undefined
     const pendingRegistry = useFormPendingRegistry()
@@ -235,6 +374,8 @@ const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFie
       registry: pendingRegistry,
       onSettleError: componentProps.onSettleError as ((info: SettleErrorInfo) => void) | undefined,
       settleTimeout: componentProps.settleTimeout,
+      deps: dependent.deps,
+      depsKey: dependent.depsKey,
     })
     const { createdOptions, overlay } = actions
     const settleErrorTemplate = useSelectionString('formSelection.settleError')
@@ -296,10 +437,32 @@ const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFie
 
     // The «+ Добавить…» item is service-only: intercepted in onValueChange, never reaches the form.
     // It comes AFTER the filter and is not filtered itself
-    const normalizedOptions = useMemo<NormalizedOption[]>(
-      () => offerCreate ? [...normalized, { label: createOptionLabel, value: CREATE_OPTION_VALUE }] : normalized,
-      [normalized, offerCreate, createOptionLabel],
-    )
+    // Зависимое поле (§18.4): значения нет среди опций (несогласованные данные, родитель пуст) — показываем сырое
+    // значение в триггере, а не стираем: очистка бывает только по правке родителя. Недоступный пункт — чтобы
+    // контрол видел выбранное; пока опции грузятся, «Загрузка…» рисует сам контрол
+    const rawValue = fieldValue === undefined || fieldValue === null || fieldValue === ''
+      ? undefined
+      : String(fieldValue)
+    const orphanValue = dependent.active && !loading && rawValue !== undefined
+        && !normalized.some((opt) => opt.value === rawValue)
+      ? rawValue
+      : undefined
+    const optionsLoaded = dependent.ready && !loading
+    useEffect(() => {
+      const env = typeof process === 'undefined' ? undefined : process.env?.['NODE_ENV']
+      if (orphanValue !== undefined && optionsLoaded && (env === 'development' || env === 'test')) {
+        console.warn(
+          `[@letar/forms] Field.Select «${fullPath}»: значения «${orphanValue}» нет среди опций при выбранных `
+            + 'родителях — данные несогласованы; значение показано как есть и не стёрто.',
+        )
+      }
+    }, [orphanValue, optionsLoaded, fullPath])
+    const normalizedOptions = useMemo<NormalizedOption[]>(() => {
+      const withOrphan = orphanValue === undefined
+        ? normalized
+        : [...normalized, { label: orphanValue, value: orphanValue, disabled: true }]
+      return offerCreate ? [...withOrphan, { label: createOptionLabel, value: CREATE_OPTION_VALUE }] : withOrphan
+    }, [normalized, orphanValue, offerCreate, createOptionLabel])
 
     // The skin gets the FULL list and the visible values; the service item is always visible
     const skinSearch = useMemo<UIKitSelectSearch | undefined>(
@@ -319,6 +482,8 @@ const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFie
     useNodeLabelWarning('Select', normalizedOptions)
 
     return {
+      loading,
+      dependent,
       normalizedOptions,
       optionByValue,
       resolvedClearable,
@@ -344,7 +509,10 @@ const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFie
     // Text of the search field: goes to `onCreate` and to the «+ Add "…"» item
     const searchText = fieldState.search?.query ?? ''
     const hasOnUpdate = !!componentProps.onUpdate
-    const interactive = !resolved.disabled && !resolved.readOnly
+    // Зависимое поле без готовых родителей заблокировано (§18.10): нативный `disabled` триггера
+    const { dependent } = fieldState
+    const disabled = resolved.disabled || dependent.blocked
+    const interactive = !disabled && !resolved.readOnly
 
     const applyValue = (raw: string | undefined) => {
       // Convert back to needed type
@@ -431,7 +599,7 @@ const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFie
     const selectedSource = stringValue !== undefined ? fieldState.optionByValue.get(stringValue) : undefined
 
     return (
-      <chakraUIKit.FieldRoot invalid={hasError} required={resolved.required} disabled={resolved.disabled}>
+      <chakraUIKit.FieldRoot invalid={hasError} required={resolved.required} disabled={disabled}>
         <SelectionActionsProvider value={actionsValue}>
           <chakraUIKit.Select
             value={stringValue}
@@ -496,9 +664,9 @@ const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFie
               : undefined}
             listFooter={componentProps.listFooter}
             search={fieldState.search}
-            loading={componentProps.loading}
+            loading={fieldState.loading}
             loadingMessage={fieldState.loadingMessage}
-            emptyContent={fieldState.search && fieldState.matchedCount === 0 && !componentProps.loading
+            emptyContent={fieldState.search && fieldState.matchedCount === 0 && !fieldState.loading
               ? (
                 <Box px={3} py={2} color="fg.muted" fontSize="sm">
                   {componentProps.renderEmpty
@@ -520,8 +688,9 @@ const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFie
             label={resolved.label
               ? <SelectionFieldLabel label={resolved.label} tooltip={resolved.tooltip} required={resolved.required} />
               : undefined}
-            placeholder={resolved.placeholder}
-            disabled={resolved.disabled}
+            placeholder={dependent.blockedPlaceholder ?? resolved.placeholder}
+            describedBy={dependent.hint ? dependent.hintId : undefined}
+            disabled={disabled}
             readOnly={resolved.readOnly}
             clearable={fieldState.resolvedClearable}
             size={componentProps.size ?? 'md'}
@@ -529,6 +698,7 @@ const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFie
             data-field-name={fullPath}
           />
         </SelectionActionsProvider>
+        <DependentSelectNotes dependent={dependent} />
         {actions.settleFailure && (
           <Box role="status" mt={1} fontSize="sm" color="fg.error" data-settle-error="">
             {fieldState.settleErrorTemplate.replace('{label}', actions.settleFailure.label)}

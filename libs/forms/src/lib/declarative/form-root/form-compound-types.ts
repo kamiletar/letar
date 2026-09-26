@@ -1,5 +1,6 @@
 'use client'
 
+import type { FieldDeps } from '@letar/forms-core/uikit'
 import type { SelectionCreateButtonProps, SelectionEditButtonProps } from '@letar/forms-react'
 import type { ReactElement, ReactNode } from 'react'
 import type { CaptchaFieldProps } from '../../captcha/types'
@@ -161,16 +162,21 @@ export interface FormFieldComponents {
   Schedule: (props: ScheduleFieldProps) => ReactElement
 
   // Выбор из списка
-  Select: (<TData = unknown>(props: SelectFieldProps<TData>) => ReactElement) & SelectionSlotComponents
+  Select:
+    & (<TData = unknown, TDeps extends FieldDeps = FieldDeps>(props: SelectFieldProps<TData, TDeps>) => ReactElement)
+    & SelectionSlotComponents
   NativeSelect: <T extends string = string>(props: NativeSelectFieldProps<T>) => ReactElement
   Combobox:
-    & (<T extends string = string, TData = unknown>(props: ComboboxFieldProps<T, TData>) => ReactElement)
+    & (<T extends string = string, TData = unknown, TDeps extends FieldDeps = FieldDeps>(
+      props: ComboboxFieldProps<T, TData, TDeps>,
+    ) => ReactElement)
     & SelectionSlotComponents
   Listbox: <T extends string = string>(props: ListboxFieldProps<T>) => ReactElement
   RadioGroup: <T extends string = string>(props: RadioGroupFieldProps<T>) => ReactElement
   RadioCard: <T extends string = string>(props: RadioCardFieldProps<T>) => ReactElement
   SegmentedGroup: <T extends string = string>(props: SegmentedGroupFieldProps<T>) => ReactElement
   Autocomplete: <TData = unknown>(props: AutocompleteFieldProps<TData>) => ReactElement
+  /** @deprecated Используйте `Select`/`Combobox` с `dependsOn` и `loadOptions` (см. `FieldCascadingSelect`) */
   CascadingSelect: (props: {
     name?: string
     label?: string

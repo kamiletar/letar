@@ -89,6 +89,24 @@ export type { FormSubscribeProps, FormUrlSyncOptions, FormUrlSyncProps } from '.
 export type { FormServerActionToaster, UseFormServerActionOptions, UseFormServerActionResult } from './lib/declarative'
 export type { FormRegistry } from './lib/declarative'
 
+// Зависимые (каскадные) поля выбора: `dependsOn`, `deps` в загрузчиках и действиях (этап З, §18)
+export { useFieldDeps } from './lib/declarative'
+export type {
+  ComboboxFieldBaseProps,
+  ComboboxSource,
+  DependentFieldProps,
+  FieldDeps,
+  FieldDepsState,
+  LoadContext,
+  LoadOptionsFn,
+  LoadSelectedFn,
+  OptionsSourceProps,
+  SelectFieldBaseProps,
+  SelectionActionContext,
+  SelectSource,
+  SettleErrorInfo,
+} from './lib/declarative'
+
 export type {
   BaseFieldProps,
   ComboboxFieldProps,

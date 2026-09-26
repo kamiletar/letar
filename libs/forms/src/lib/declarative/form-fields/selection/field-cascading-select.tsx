@@ -18,6 +18,8 @@ export interface CascadingSelectLoadResult<T = string> {
 
 /**
  * Props for CascadingSelect field
+ *
+ * @deprecated См. `FieldCascadingSelect`: вместо него `Form.Field.Select`/`Form.Field.Combobox` с `dependsOn`.
  */
 export interface CascadingSelectFieldProps<TParent = string, TValue = string> extends BaseFieldProps {
   /**
@@ -267,6 +269,28 @@ function CascadingSelectContent<TParent = string, TValue = string>({
  *   label="Region"
  *   dependsOn="address.country"
  *   loadOptions={loadRegions}
+ * />
+ * ```
+ *
+ * @deprecated Используйте `Form.Field.Select` или `Form.Field.Combobox` с `dependsOn` и `loadOptions` (этап З,
+ * `libs/forms/PLAN.md` §18) — они закрывают тот же сценарий и лишены проблем этого поля:
+ * - `loadOptions` не получает `AbortSignal`: при быстрой смене родителя ответы приходят вразнобой (гонка);
+ * - очистка идёт эффектом по значению родителя, поэтому восстановление черновика или гидратация формы со
+ *   значениями обоих полей стирают ребёнка (в новом API очищает только правка пользователя);
+ * - нет `renderOption`, поиска, `onCreate`/`onUpdate`, подсказки «Сначала выберите…» и объявления очистки для
+ *   скринридера;
+ * - родитель один, значения нескольких родителей и путь «от корня» (`/countryId`) не поддерживаются.
+ *
+ * Поведение поля не менялось и не изменится; новые возможности добавляются только в `Select`/`Combobox`.
+ *
+ * @example Замена на новый API
+ * ```tsx
+ * <Form.Field.Select name="countryId" label="Страна" options={countries} />
+ * <Form.Field.Select
+ *   name="cityId"
+ *   label="Город"
+ *   dependsOn="countryId"
+ *   loadOptions={async (_search, { signal, deps }) => fetchCities(deps.countryId as string, { signal })}
  * />
  * ```
  */

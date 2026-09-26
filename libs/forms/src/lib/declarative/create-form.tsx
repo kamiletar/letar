@@ -1,5 +1,6 @@
 'use client'
 
+import type { FieldDeps } from '@letar/forms-core/uikit'
 import type { ComponentType, ReactElement, ReactNode } from 'react'
 import { CaptchaContext } from '../captcha/captcha-context'
 import { CaptchaField } from '../captcha/captcha-field'
@@ -227,10 +228,14 @@ interface ExtendedFormField {
   PinInput: (props: PinInputFieldProps) => ReactElement
   OTPInput: (props: OTPInputFieldProps) => ReactElement
   Slider: (props: SliderFieldProps) => ReactElement
-  Select: (<TData = unknown>(props: SelectFieldProps<TData>) => ReactElement) & SelectionSlotComponents
+  Select:
+    & (<TData = unknown, TDeps extends FieldDeps = FieldDeps>(props: SelectFieldProps<TData, TDeps>) => ReactElement)
+    & SelectionSlotComponents
   NativeSelect: <T extends string>(props: NativeSelectFieldProps<T>) => ReactElement
   Combobox:
-    & (<T extends string, TData = unknown>(props: ComboboxFieldProps<T, TData>) => ReactElement)
+    & (<T extends string, TData = unknown, TDeps extends FieldDeps = FieldDeps>(
+      props: ComboboxFieldProps<T, TData, TDeps>,
+    ) => ReactElement)
     & SelectionSlotComponents
   Autocomplete: <TData = unknown>(props: AutocompleteFieldProps<TData>) => ReactElement
   Listbox: <T extends string>(props: ListboxFieldProps<T>) => ReactElement

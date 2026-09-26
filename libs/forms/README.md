@@ -136,6 +136,9 @@ export const AppForm = createForm({ /* ... */ })
 ключ часто не нужен: FK и enum-поля автоформа подбирает по имени модели/enum
 ([§ Автоподбор по имени](./docs/fields.md)).
 
+Зависимые селекты (страна → город, компания → сотрудник) — `dependsOn` у `Field.Select`/`Field.Combobox`, `deps` во всех
+загрузчиках и в `onCreate`: [docs/fields.md § Зависимые поля](./docs/fields.md) (v2.27.0+).
+
 ### Form-level компоненты
 
 ```tsx

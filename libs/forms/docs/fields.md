@@ -271,6 +271,67 @@ export const AppForm = createForm({
 - ⚠️ После обновления `@letar/forms` и `zenstack generate` любой существующий `Select.X` в реестре, имя которого
   совпало с моделью или enum автоформы, начнёт рисоваться вместо базового поля. Если это не нужно — `form.fieldType`.
 
+### Зависимые поля: `dependsOn` (v2.27.0+)
+
+Страна → регион → город, компания → сотрудник, категория → подкатегория. Отдельного компонента нет: зависимость — свойство
+обычных `Form.Field.Select` и `Form.Field.Combobox`.
+
+```tsx
+<Form.Field.Select
+  name="countryId"
+  loadOptions={(_search, { signal }) => fetchCountries(signal)}
+  getLabel={(c) => c.name}
+  getValue={(c) => c.id}
+/>
+<Form.Field.Combobox
+  name="cityId"
+  dependsOn="countryId"
+  loadOptions={(search, { signal, deps }) => searchCities({ countryId: deps.countryId, search }, signal)}
+  loadSelected={(value, { signal, deps }) => getCity(value, deps.countryId, signal)}
+  getLabel={(c) => c.name}
+  getValue={(c) => c.id}
+  onCreate={(search, { deps }) => openCityDialog({ countryId: deps.countryId, name: search })}
+/>
+```
+
+- **Свойства** (общие для Select и Combobox): `dependsOn` — строка или массив имён; `depsReady(deps)` — своя проверка
+  готовности (по умолчанию все значения непустые); `clearOnParentChange` (`true`); `disableWhenParentEmpty` (`true`);
+  `placeholderWhenDisabled` (по умолчанию «Сначала выберите «Страна»»). Имена те же, что у `CascadingSelect`.
+- **Пути.** `dependsOn="countryId"` читается относительно группы поля, как `name`; в строке `Form.Group.List` это поле
+  той же строки. Ведущий «/» — от корня формы: `dependsOn="/countryId"`. В `deps` ключ всегда без «/».
+- **`deps`** — объект со значениями родителей по ключам из `dependsOn`. Он приходит в `loadOptions(search, { signal,
+  deps })`, `loadSelected(value, { signal, deps })`, `useQuery(search, deps)`, `useSelected(value, deps)`,
+  `onCreate(search, { deps })`, `onUpdate(option, { deps })` и в `onSettleError({ deps })`. `deps` в действиях — снимок на
+  момент начала: окно создания города получает ту страну, что была выбрана при нажатии.
+- **Источники Select.** Ровно один из трёх: `options` (массив либо функция `(deps) => массив` — фильтр уже загруженного
+  списка), `loadOptions` (один запрос на каждое значение родителя, `search` всегда `''`) или `useOptions(deps)` (хук с
+  `{ options, loading }`, как `useQueryOptions(...).fieldProps`).
+- **Когда очищается дочернее поле.** Только когда родитель **правят**: выбор пользователем, `field.handleChange`,
+  `form.setFieldValue`. Гидратация формы, `reset(values)`, новое значение `initialValue`, `UrlSync` и `useUrlPrefill`
+  поле не трогают; черновик из `useFormPersistence` восстанавливается без очистки. Цепочка страна → регион → город
+  очищается целиком за одну правку, запрос городов при пустом регионе не уходит.
+- **Записать родителя и ребёнка разом** (например выбор адреса на карте): `dependents.suppress(() => { … })` из
+  `useDeclarativeForm().dependents` — записи внутри не очищают зависимых.
+- **Пустое значение**, которое пишет очистка, — то же, что пишет собственная кнопка очистки поля.
+- **Смена родителя** отменяет запрос прежнего (`signal`), опции прежнего родителя не показываются, созданные опции и
+  наложение правок (`onCreate`/`onUpdate`) сбрасываются. Оптимистичное создание, пока родитель менялся, в поле уже не
+  записывается.
+- **Заблокированное поле** — нативный `disabled` плюс видимая подсказка под полем, связанная с триггером
+  (`aria-describedby`); очистка объявляется вежливой live-областью («Поле «Город» очищено: изменилось поле «Страна»»).
+- **Родитель должен быть отрисованным полем** формы: очистку запускает form-level листенер TanStack Form, а он есть только
+  у смонтированного `form.Field`. Родитель, скрытый условным рендером, правкой из кода очистку не запускает.
+- **Сервер проверяет пару.** Форма не гарантирует, что город принадлежит стране: запрос можно отправить в обход, список
+  мог устареть. Server action проверяет пару (`city.countryId === countryId`) и возвращает ошибку **поля ребёнка** через
+  `errorMap.onServer` — сообщение встанет под «Город».
+- **TanStack Query и ZenStack** (`@letar/forms-query`, 0.3.0+): `fromSearchQuery((search, options, deps) => …)`,
+  `useLoaderQuery(key, load)` кладёт `deps` в ключ запроса, `useInvalidateAfter((ctx) => keys)` инвалидирует только
+  список нужного родителя.
+- **Из схемы:** `@meta("form.dependsOn", "countryId")` (несколько родителей — массивом) даёт `fieldProps.dependsOn`; плагин
+  на generate проверяет, что поле есть, не ссылается на себя, цикла нет, родитель не исключён `form.exclude`. Автовывода
+  зависимости по внешнему ключу нет. Со списком из реестра `createForm` (`form.fieldType = "Select.<Имя>"`) `dependsOn`
+  и `deps` доходят до компонента; автоформа без ключа реестра поле блокирует и очищает, но список не фильтрует.
+- **`CascadingSelect`** — `@deprecated`, оставлен как есть (см. ниже).
+
 ### Свой рендер опций: `renderOption`, `renderValue`, `textValue`, `data` (v2.19.0+)
 
 Опция несёт типизированные данные приложения (`data`), а рисовать её можно любым узлом. Chakra-скин
@@ -576,6 +637,11 @@ const Schema = z.object({
 ---
 
 ## Form.Field.CascadingSelect — Каскадный выбор (v0.42.0+)
+
+> ⚠️ **Устарел.** Для новых форм — `dependsOn` у `Form.Field.Select`/`Form.Field.Combobox` (см. «Зависимые поля: `dependsOn`»):
+> без гонок запросов, с поиском, `onCreate`/`onUpdate`, `deps` во всех загрузчиках и очисткой только по правке родителя.
+> `CascadingSelect` очищает значение эффектом при любой смене родителя (в том числе при восстановлении черновика) и не
+> отменяет устаревшие запросы; поведение не менялось и не изменится.
 
 Загружает опции динамически на основе значения другого поля:
 

@@ -1,6 +1,11 @@
 'use client'
 
-import { useCreatePendingRegistry, useFormPendingSubmit, warnSubmitBypassingPending } from '@letar/forms-react'
+import {
+  useCreateDependentsRegistry,
+  useCreatePendingRegistry,
+  useFormPendingSubmit,
+  warnSubmitBypassingPending,
+} from '@letar/forms-react'
 import { type ReactElement, type ReactNode, useEffect, useMemo } from 'react'
 import { useAppForm } from '../../form-hook'
 import type { FormOfflineConfig } from '../../offline'
@@ -118,10 +123,18 @@ export function FormSimple<TData extends object>({
   // Реестр неподтверждённых оптимистичных действий полей (§16.7): отправка ждёт его пустоты
   const pendingRegistry = useCreatePendingRegistry()
 
+  // Реестр зависимых полей (`dependsOn`, §18): очищает зависимое поле по правке родителя
+  const dependents = useCreateDependentsRegistry()
+
   // Initialize form
   const form = useAppForm({
     defaultValues: initialValue,
     validators: buildValidators(schema, validateOn),
+    // Form-level листенер зовётся на правку поля (`handleChange`/`setFieldValue`), но не на `reset`/`update()` —
+    // гидратация зависимые поля не очищает (§18.3)
+    listeners: {
+      onChange: ({ fieldApi }) => dependents.handleFieldChange(fieldApi.name, fieldApi.state.value),
+    },
     onSubmit: async ({ value }) => {
       warnSubmitBypassingPending(pendingRegistry)
 
@@ -197,10 +210,13 @@ export function FormSimple<TData extends object>({
     ) {
       return
     }
-    features.restoreFormData(form)
+    // Восстановление черновика пишет значения по одному: без подавления запись родителя очистила бы уже
+    // восстановленного ребёнка, если он идёт в порядке ключей раньше
+    dependents.suppress(() => features.restoreFormData(form))
   }, [
     form,
     features,
+    dependents,
     features.isPersistenceEnabled,
     features.persistenceResult.shouldRestore,
     features.persistenceResult.savedData,
@@ -216,9 +232,10 @@ export function FormSimple<TData extends object>({
       readOnly,
       addressProvider,
       pending: pendingRegistry,
+      dependents,
       submit,
     }),
-    [form, schema, features.offlineState, disabled, readOnly, addressProvider, pendingRegistry, submit],
+    [form, schema, features.offlineState, disabled, readOnly, addressProvider, pendingRegistry, dependents, submit],
   )
 
   return (

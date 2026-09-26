@@ -689,3 +689,19 @@ export type { BirthCertificateFieldProps, DocumentFieldConfig, DocumentFieldProp
 
 // Поиск внутри Select — типы пропа `searchable`
 export type { SelectSearchable, SelectSearchSettings } from '@letar/forms-core/uikit'
+
+// Зависимые (каскадные) поля выбора и источники опций с `deps` (§18)
+export type {
+  DependentFieldProps,
+  FieldDeps,
+  LoadContext,
+  LoadOptionsFn,
+  LoadSelectedFn,
+  OptionsSourceProps,
+  SelectionActionContext,
+  SettleErrorInfo,
+} from '@letar/forms-core/uikit'
+export { useFieldDeps } from '@letar/forms-react'
+export type { FieldDepsState } from '@letar/forms-react'
+export type { ComboboxFieldBaseProps, ComboboxSource } from './form-fields/selection/field-combobox'
+export type { SelectFieldBaseProps, SelectSource } from './form-fields/selection/field-select'

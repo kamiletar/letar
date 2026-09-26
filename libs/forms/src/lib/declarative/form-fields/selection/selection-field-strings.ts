@@ -24,6 +24,8 @@ export type SelectionStringKey =
   | 'formSelection.search.placeholder'
   | 'formSelection.search.aria'
   | 'formSelection.settleError'
+  | 'formSelection.dependsOnHint'
+  | 'formSelection.dependentCleared'
 
 /**
  * Встроенный словарь дефолтов — отдельный от `min-chars-hint.ts` (та подсказка требует
@@ -49,6 +51,13 @@ const BUILTIN_SELECTION_STRINGS: Record<SelectionStringKey, Record<string, strin
   'formSelection.search.aria': { en: 'Search options', ru: 'Поиск по списку' },
   // Оптимистичное действие не подтвердилось (§16.7); `{label}` подставляет поле
   'formSelection.settleError': { en: 'Could not save “{label}”', ru: 'Не удалось сохранить «{label}»' },
+  // Зависимое поле (`dependsOn`, §18): подсказка под заблокированным полем и объявление автоочистки.
+  // `{parent}` — метка родителя (или несколько через запятую), `{field}` — метка самого поля; подставляет поле
+  'formSelection.dependsOnHint': { en: 'Select “{parent}” first', ru: 'Сначала выберите «{parent}»' },
+  'formSelection.dependentCleared': {
+    en: '“{field}” was cleared: “{parent}” changed',
+    ru: 'Поле «{field}» очищено: изменилось поле «{parent}»',
+  },
 }
 
 function buildBuiltinString(key: SelectionStringKey, locale: string): string {

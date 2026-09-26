@@ -172,6 +172,7 @@ export const chakraUIKit: ChakraUIKit = {
     search,
     loading,
     loadingMessage,
+    describedBy,
     ...rest
   }): ReactElement {
     // Управляемое открытие: поле закрывает список перед окном приложения (`controlRef.close`)
@@ -305,7 +306,10 @@ export const chakraUIKit: ChakraUIKit = {
             // Выбранное значение ждёт сервера (§16.7): подпись уже новая, спиннер рядом
             aria-busy={selectedOption?.pending ? true : undefined}
             aria-keyshortcuts={onEditHotkey ? 'F2' : undefined}
-            aria-describedby={onEditHotkey && editHotkeyHint ? hintId : undefined}
+            aria-describedby={[onEditHotkey && editHotkeyHint ? hintId : undefined, describedBy].filter(Boolean).join(
+              ' ',
+            )
+              || undefined}
             onKeyDown={onEditHotkey
               ? (event) => {
                 // Закрытый список: F2 правит выбранное значение

@@ -56,7 +56,7 @@ export function FormGroupListDeclarative({
   maxItems: maxItemsProp,
   minItems: minItemsProp,
 }: FormGroupListDeclarativeProps): ReactElement {
-  const { form, schema } = useDeclarativeForm()
+  const { form, schema, dependents } = useDeclarativeForm()
   const parentGroup = useFormGroup()
 
   // Build full path from parent groups
@@ -108,6 +108,8 @@ export function FormGroupListDeclarative({
             form,
             schema,
             primitiveArrayIndex: index,
+            // Реестр зависимых полей формы (§18): без него `dependsOn` внутри строки не очищал бы значение
+            dependents,
           }
 
           // Item context for Remove button - use arrayField.removeValue
