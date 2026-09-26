@@ -4,6 +4,13 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.48.0] - 2026-09-27
+
+### Added
+
+- `getOptionText(option)` — публичный экспорт (из `@letar/forms-core/uikit`): текст опции для окна правки в
+  `onUpdate`, где `option.label` — `ReactNode`.
+
 ## [0.47.0] - 2026-09-27
 
 ### Изменения поведения

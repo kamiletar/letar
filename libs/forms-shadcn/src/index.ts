@@ -166,5 +166,8 @@ export type {
   StepPersistenceConfig,
 } from './lib/steps'
 
+// Текст опции для окон приложения (`onUpdate`): `label` может быть ReactNode
+export { getOptionText } from '@letar/forms-core/uikit'
+
 // cn() — clsx + tailwind-merge, стандартный shadcn-хелпер
 export { cn } from '@letar/tailwind-utils'
