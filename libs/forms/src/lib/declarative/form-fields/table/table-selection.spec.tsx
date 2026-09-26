@@ -1,7 +1,7 @@
 import { ChakraProvider, defaultSystem } from '@chakra-ui/react'
 import { render, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
-import { describe, expect, it } from 'vitest'
+import { beforeAll, describe, expect, it } from 'vitest'
 import { Form } from '../../index'
 
 const Wrapper = ({ children }: { children: ReactNode }) => (
@@ -12,6 +12,13 @@ const Wrapper = ({ children }: { children: ReactNode }) => (
  * Тест: клик по чекбоксу одной строки НЕ должен выделять другие строки.
  * Баг: клик по одному чекбоксу влиял на все.
  */
+// Поле грузится лениво (`import()`): на холодном кэше vite-трансформ тяжёлой зависимости (@tanstack/react-table) занимает секунды, и на
+// загруженной машине первый тест упирался в таймаут (5 с по умолчанию). Прогреваем модуль в хуке со своим таймаутом —
+// тесты стартуют с готовым модулем, а провал загрузки виден как провал хука, а не «случайного» теста.
+beforeAll(async () => {
+  await import('./field-table-editor')
+}, 60_000)
+
 describe('TableEditor row selection', () => {
   function renderTable() {
     return render(

@@ -1,7 +1,7 @@
 import { TestForm } from '@letar/forms-react/testing'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { renderToString } from 'react-dom/server'
-import { describe, expect, it, vi } from 'vitest'
+import { beforeAll, describe, expect, it, vi } from 'vitest'
 import { FieldDataGrid } from './field-data-grid'
 
 const employees = [
@@ -9,6 +9,13 @@ const employees = [
   { name: 'Мария', salary: 120000 },
   { name: 'Пётр', salary: 75000 },
 ]
+
+// Поле грузится лениво (`import()`): на холодном кэше vite-трансформ тяжёлой зависимости (@tanstack/react-table) занимает секунды, и на
+// загруженной машине первый тест упирался в таймаут (5 с по умолчанию). Прогреваем модуль в хуке со своим таймаутом —
+// тесты стартуют с готовым модулем, а провал загрузки виден как провал хука, а не «случайного» теста.
+beforeAll(async () => {
+  await import('./field-data-grid-impl')
+}, 60_000)
 
 describe('FieldDataGrid (shadcn)', () => {
   // Регресс-тест: см. комментарий в field-data-grid.tsx — до фикса Suspense монтировался сразу,

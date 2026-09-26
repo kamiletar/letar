@@ -1,7 +1,7 @@
 import { ChakraProvider, defaultSystem } from '@chakra-ui/react'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
-import { describe, expect, it, vi } from 'vitest'
+import { beforeAll, describe, expect, it, vi } from 'vitest'
 import { z } from 'zod/v4'
 import { Form } from '../../'
 
@@ -14,6 +14,13 @@ const employees = [
   { name: 'Мария', salary: 120000 },
   { name: 'Пётр', salary: 75000 },
 ]
+
+// Поле грузится лениво (`import()`): на холодном кэше vite-трансформ тяжёлой зависимости (@tanstack/react-table) занимает секунды, и на
+// загруженной машине первый тест упирался в таймаут (5 с по умолчанию). Прогреваем модуль в хуке со своим таймаутом —
+// тесты стартуют с готовым модулем, а провал загрузки виден как провал хука, а не «случайного» теста.
+beforeAll(async () => {
+  await import('./field-data-grid')
+}, 60_000)
 
 describe('Form.Field.DataGrid', () => {
   it('рендерит строки и заголовки колонок', async () => {

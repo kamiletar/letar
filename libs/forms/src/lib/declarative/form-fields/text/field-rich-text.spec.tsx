@@ -1,7 +1,7 @@
 import { ChakraProvider, defaultSystem } from '@chakra-ui/react'
 import { render, screen, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
-import { describe, expect, it, vi } from 'vitest'
+import { beforeAll, describe, expect, it, vi } from 'vitest'
 
 import { Form } from '../../'
 
@@ -11,6 +11,13 @@ const TestWrapper = ({ children }: { children: ReactNode }) => (
 
 // FieldRichText загружается лениво (lazy() + dynamic import) — реализация с @tiptap/*
 // резолвится асинхронно, поэтому проверки после render() требуют waitFor/findBy.
+// Поле грузится лениво (`import()`): на холодном кэше vite-трансформ тяжёлой зависимости (tiptap) занимает секунды, и на
+// загруженной машине первый тест упирался в таймаут (5 с по умолчанию). Прогреваем модуль в хуке со своим таймаутом —
+// тесты стартуют с готовым модулем, а провал загрузки виден как провал хука, а не «случайного» теста.
+beforeAll(async () => {
+  await import('./field-rich-text-impl')
+}, 60_000)
+
 describe('FieldRichText', () => {
   describe('rendering', () => {
     it('рендерит rich text editor', async () => {

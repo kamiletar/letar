@@ -1,8 +1,15 @@
 import { TestForm } from '@letar/forms-react/testing'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { renderToString } from 'react-dom/server'
-import { describe, expect, it } from 'vitest'
+import { beforeAll, describe, expect, it } from 'vitest'
 import { FieldRichText } from './field-rich-text'
+
+// Поле грузится лениво (`import()`): на холодном кэше vite-трансформ тяжёлой зависимости (tiptap) занимает секунды, и на
+// загруженной машине первый тест упирался в таймаут (5 с по умолчанию). Прогреваем модуль в хуке со своим таймаутом —
+// тесты стартуют с готовым модулем, а провал загрузки виден как провал хука, а не «случайного» теста.
+beforeAll(async () => {
+  await import('./field-rich-text-impl')
+}, 60_000)
 
 describe('FieldRichText (shadcn)', () => {
   // Регресс-тест: см. комментарий в field-rich-text.tsx — до фикса Suspense монтировался сразу,
