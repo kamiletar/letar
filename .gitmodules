@@ -40,3 +40,6 @@
 [submodule "apps/domwellbes-e2e"]
 	path = apps/domwellbes-e2e
 	url = git@github.com:kamiletar/letar-private-domwellbes-e2e.git
+[submodule "apps/flora"]
+	path = apps/flora
+	url = git@github.com:kamiletar/letar-private-flora.git
