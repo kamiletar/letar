@@ -71,6 +71,11 @@ polite live region ("Field «City» cleared: field «Country» changed").
 The form cannot guarantee that a city belongs to the chosen country. The server action must check the pair and return the
 error on the **child field** through `errorMap.onServer`.
 
+ZenStack v3 cannot express this in the schema through `@@validate`: the compiler rejects a condition that uses a relation
+field (`@@validate condition cannot use relation fields`). The pair check stays in the server action; a policy such as
+`@@allow('create,update', city.countryId == countryId)` passes schema validation, but its runtime behaviour has not been
+verified.
+
 ## TanStack Query and ZenStack
 
 With `@letar/forms-query` 0.3.0+: `fromSearchQuery((search, options, deps) => …)`, `useLoaderQuery` puts `deps` into the

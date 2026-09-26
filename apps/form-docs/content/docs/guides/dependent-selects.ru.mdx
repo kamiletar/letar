@@ -70,6 +70,10 @@ live-областью («Поле «Город» очищено: изменил�
 Форма не гарантирует, что город принадлежит выбранной стране. Server action проверяет пару и возвращает ошибку **поля
 ребёнка** через `errorMap.onServer`.
 
+Средствами схемы ZenStack v3 этого не выразить через `@@validate`: компилятор отвергает условие с полем связи
+(`@@validate condition cannot use relation fields`). Проверка пары остаётся в server action; политика вида
+`@@allow('create,update', city.countryId == countryId)` проходит проверку схемы, но её поведение в рантайме не проверялось.
+
 ## TanStack Query и ZenStack
 
 С `@letar/forms-query` 0.3.0+: `fromSearchQuery((search, options, deps) => …)`, `useLoaderQuery` кладёт `deps` в ключ
