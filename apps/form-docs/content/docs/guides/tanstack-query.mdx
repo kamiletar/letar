@@ -123,3 +123,46 @@ const mutation = useMutation({
   },
 })
 ```
+
+## Option sources: `@letar/forms-query`
+
+A separate package with TanStack Query adapters for `Select` and `Combobox` — both skins. `@letar/forms` does not
+depend on it.
+
+```bash
+bun add @letar/forms-query
+```
+
+```tsx
+import {
+  fromSearchQuery,
+  fromSelectedQuery,
+  type SearchQueryOptions,
+  type SelectedQueryOptions,
+  useQueryOptions,
+} from '@letar/forms-query'
+
+// A whole dictionary — Select
+const regions = useQueryOptions(useFindManyRegion(), toOption)
+<Form.Field.Select name="regionId" {...regions.fieldProps} />
+
+// A growing catalog — Combobox: `enabled` by `minChars` and `keepPreviousData` are added for you.
+// The hooks live at module level: the rules of hooks do not allow calling them inside an arrow in JSX
+const useCategorySearch = (search: string, options: SearchQueryOptions) =>
+  useFindManyCategory({ where: { name: { contains: search } }, take: 20 }, options)
+const useCategoryById = (id: string, options: SelectedQueryOptions) =>
+  useFindUniqueCategory({ where: { id } }, options)
+
+<Form.Field.Combobox
+  name="categoryId"
+  useQuery={fromSearchQuery(useCategorySearch)}
+  useSelected={fromSelectedQuery(useCategoryById)}
+  getLabel={(c) => c.name}
+  getValue={(c) => c.id}
+/>
+```
+
+- `useLoaderQuery(key, loadOptions)` turns a promise loader (server action, `fetch`) into a query with a cache and a key.
+- `useInvalidateAfter(keys)` wraps `onCreate`/`onUpdate`: the list is refetched **before** the new option reaches the
+  field. ZenStack hooks (`useCreateX`/`useUpdateX`) invalidate themselves — no wrapper needed; for mutations outside
+  them use `useInvalidateModels` from `@letar/forms-query/zenstack`.

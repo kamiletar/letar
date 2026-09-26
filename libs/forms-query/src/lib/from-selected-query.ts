@@ -16,7 +16,11 @@ export interface SelectedQueryResultLike<TData> {
  *
  * @example
  * ```tsx
- * useSelected={fromSelectedQuery((id, options) => useFindUniqueCategory({ where: { id } }, options))}
+ * function useCategoryById(id: string, options: SelectedQueryOptions) {
+ *   return useFindUniqueCategory({ where: { id } }, options)
+ * }
+ * // ...
+ * useSelected={fromSelectedQuery(useCategoryById)}
  * ```
  */
 export function fromSelectedQuery<TData, TResult extends SelectedQueryResultLike<TData>>(

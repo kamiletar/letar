@@ -4,6 +4,15 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.15.0] - 2026-09-26
+
+### Added
+
+- **Источники опций по промису:** `usePromiseSearch` (запрос на дебаунсенную строку поиска, `AbortController` на запрос,
+  номер запроса против гонок, прошлые результаты при загрузке, ошибка и `reload`), `useSelectedLoader` (запись значения
+  по id, кэш на экземпляр, `invalidate`), `useOptionsLoader(load, deps)` — разовая загрузка справочника для
+  `Field.Select` (`{ fieldProps: { options, loading }, error, reload }`).
+
 ## [0.14.0] - 2026-09-26
 
 ### Added

@@ -39,14 +39,27 @@ function RegionField() {
 ## Растущий справочник — Combobox
 
 ```tsx
-import { fromSearchQuery, fromSelectedQuery } from '@letar/forms-query'
+import {
+  fromSearchQuery,
+  fromSelectedQuery,
+  type SearchQueryOptions,
+  type SelectedQueryOptions,
+} from '@letar/forms-query'
+
+// Хуки — на уровне модуля: правило хуков не разрешает вызывать их внутри стрелки в JSX
+function useCategorySearch(search: string, options: SearchQueryOptions) {
+  return useFindManyCategory({ where: { name: { contains: search, mode: 'insensitive' } }, take: 20 }, options)
+}
+function useCategoryById(id: string, options: SelectedQueryOptions) {
+  return useFindUniqueCategory({ where: { id } }, options)
+}
+const searchCategories = fromSearchQuery(useCategorySearch)
+const selectedCategory = fromSelectedQuery(useCategoryById)
 
 <Form.Field.Combobox
   name="categoryId"
-  useQuery={fromSearchQuery((search, options) =>
-    useFindManyCategory({ where: { name: { contains: search, mode: 'insensitive' } }, take: 20 }, options)
-  )}
-  useSelected={fromSelectedQuery((id, options) => useFindUniqueCategory({ where: { id } }, options))}
+  useQuery={searchCategories}
+  useSelected={selectedCategory}
   getLabel={(c) => c.name}
   getValue={(c) => c.id}
 />

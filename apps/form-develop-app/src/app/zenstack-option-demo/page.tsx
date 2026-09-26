@@ -3,6 +3,12 @@
 import { useCreateCategory, useFindManyCategory, useFindUniqueCategory, useUpdateCategory } from '@/lib/hooks'
 import { Box, Button, Code, Heading, HStack, Text, VStack } from '@chakra-ui/react'
 import { Form } from '@letar/forms'
+import {
+  fromSearchQuery,
+  fromSelectedQuery,
+  type SearchQueryOptions,
+  type SelectedQueryOptions,
+} from '@letar/forms-query'
 import { useState } from 'react'
 import { z } from 'zod/v4'
 import { DemoPageLayout, SubmittedDataPreview } from '../_components'
@@ -11,6 +17,8 @@ const Schema = z
   .object({
     selectCategory: z.string().optional().meta({ ui: { title: 'Категория (Select, весь справочник из useFindMany)' } }),
     comboCategory: z.string().optional().meta({ ui: { title: 'Категория (Combobox, поиск + useSelected)' } }),
+    queryCategory: z.string().optional().meta({ ui: { title: 'Категория (Combobox, @letar/forms-query)' } }),
+    loadCategory: z.string().optional().meta({ ui: { title: 'Категория (Combobox, loadOptions по fetch)' } }),
   })
   .strip()
 
@@ -37,6 +45,45 @@ function useSelectedCategory(id: string): { data?: CategoryRecord | null; isLoad
     data?: CategoryRecord | null
     isLoading?: boolean
   }
+}
+
+/** Хуки поиска и записи значения для `@letar/forms-query`: обычные `use*` на уровне модуля (правила хуков) */
+function useCategorySearch(search: string, options: SearchQueryOptions) {
+  return useFindManyCategory(
+    { where: { name: { contains: search, mode: 'insensitive' } }, orderBy: { name: 'asc' }, take: 20 },
+    options,
+  ) as { data?: CategoryRecord[]; isLoading?: boolean }
+}
+
+function useCategoryById(id: string, options: SelectedQueryOptions) {
+  return useFindUniqueCategory({ where: { id } }, options) as { data?: CategoryRecord | null }
+}
+
+const searchCategoriesQuery = fromSearchQuery(useCategorySearch)
+const selectedCategoryQuery = fromSelectedQuery(useCategoryById)
+
+/** `loadOptions` Combobox: обычный `fetch` к RPC-API ZenStack, без TanStack Query; `signal` отменяет устаревший запрос */
+async function loadCategories(search: string, { signal }: { signal: AbortSignal }): Promise<CategoryRecord[]> {
+  const args = { where: { name: { contains: search, mode: 'insensitive' } }, orderBy: { name: 'asc' }, take: 20 }
+  const response = await fetch(`/api/model/category/findMany?q=${encodeURIComponent(JSON.stringify(args))}`, { signal })
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}`)
+  }
+  return ((await response.json()) as { data: CategoryRecord[] }).data
+}
+
+/** `loadSelected` Combobox: запись текущего значения по id */
+async function loadCategory(id: string, { signal }: { signal: AbortSignal }): Promise<CategoryRecord | null> {
+  const response = await fetch(
+    `/api/model/category/findUnique?q=${encodeURIComponent(JSON.stringify({ where: { id } }))}`,
+    {
+      signal,
+    },
+  )
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}`)
+  }
+  return ((await response.json()) as { data: CategoryRecord | null }).data
 }
 
 /** Окно приложения — `window.prompt` вместо настоящего диалога: важно не окно, а связка с хуками ZenStack */
@@ -88,7 +135,12 @@ export default function ZenstackOptionDemoPage() {
     >
       <Form
         key={initialId}
-        initialValue={{ selectCategory: initialId, comboCategory: initialId }}
+        initialValue={{
+          selectCategory: initialId,
+          comboCategory: initialId,
+          queryCategory: initialId,
+          loadCategory: initialId,
+        }}
         schema={Schema}
         onSubmit={setSubmitted}
       >
@@ -123,6 +175,40 @@ export default function ZenstackOptionDemoPage() {
               getValue={(c) => c.id}
               onUpdate={onUpdate}
               onCreate={onCreate}
+            />
+          </Box>
+
+          <Box borderWidth={1} borderRadius="md" p={4}>
+            <Heading size="md" mb={2}>Combobox: @letar/forms-query</Heading>
+            <Text color="fg.muted" mb={4}>
+              Те же хуки ZenStack, но через <Code>fromSearchQuery</Code> и{' '}
+              <Code>fromSelectedQuery</Code>: пакет сам добавляет <Code>enabled</Code> по <Code>minChars</Code> и{' '}
+              <Code>keepPreviousData</Code>.
+            </Text>
+            <Form.Field.Combobox<string, CategoryRecord>
+              name="queryCategory"
+              useQuery={searchCategoriesQuery}
+              useSelected={selectedCategoryQuery}
+              getLabel={(c) => c.name}
+              getValue={(c) => c.id}
+              minChars={0}
+            />
+          </Box>
+
+          <Box borderWidth={1} borderRadius="md" p={4}>
+            <Heading size="md" mb={2}>Combobox: loadOptions по fetch</Heading>
+            <Text color="fg.muted" mb={4}>
+              Без TanStack Query: <Code>loadOptions(search, {'{ signal }'})</Code> и <Code>loadSelected</Code> — обычный
+              {' '}
+              <Code>fetch</Code>. Запрос уходит после первого открытия списка; при ошибке — «Повторить».
+            </Text>
+            <Form.Field.Combobox<string, CategoryRecord>
+              name="loadCategory"
+              loadOptions={loadCategories}
+              loadSelected={loadCategory}
+              getLabel={(c) => c.name}
+              getValue={(c) => c.id}
+              minChars={0}
             />
           </Box>
 

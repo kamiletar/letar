@@ -116,6 +116,47 @@ Chakra-скин; в shadcn-скине поля поиска нет (`searchable:
   Combobox.
 - Живая связка с ZenStack — демо `/zenstack-option-demo` в `form-develop-app`.
 
+### Источники данных: `loadOptions`, `loadSelected`, `@letar/forms-query` (v2.23.0+)
+
+У `Combobox` **ровно один** источник опций — второй рядом не проходит по типам:
+
+| Источник  | Пропсы                                               | Когда                                            |
+| --------- | ---------------------------------------------------- | ------------------------------------------------ |
+| статичный | `options` (+ `loading`)                              | список уже на клиенте или грузится целиком       |
+| хук       | `useQuery(search)` (+ `useSelected(id)`)             | TanStack Query / хуки ZenStack                   |
+| промис    | `loadOptions(search, { signal })` (+ `loadSelected`) | server action, `fetch`, SDK — без TanStack Query |
+
+`getLabel`/`getValue` обязательны для хука и промиса.
+
+```tsx
+<Form.Field.Combobox
+  name="userId"
+  loadOptions={(search, { signal }) => searchUsers({ search }, signal)}
+  loadSelected={(id, { signal }) => getUser({ id }, signal)}
+  getLabel={(u) => u.name}
+  getValue={(u) => u.id}
+  onLoadError={(error) => log(error)}
+/>
+```
+
+- **Когда идёт запрос.** После `debounce` (300 мс), когда набрано `minChars` (по умолчанию 1; `0` — запрос с пустой
+  строкой при первом открытии списка). Пока список ни разу не открывали, запросов нет — N полей на странице не шлют N
+  запросов на монтировании.
+- **Отмена и гонки.** Новый запрос отменяет прошлый (`signal`), применяется только результат последнего — даже если
+  загрузчик `signal` игнорирует (server action). Прошлая выдача остаётся на экране со спиннером, пока идёт новый запрос.
+- **Ошибка.** В списке «Не удалось загрузить» и «Повторить» (Enter в поле — тоже); автоповторов нет. `onLoadError` —
+  для лога или тоста; отменённый запрос ошибкой не считается.
+- **`loadSelected`** — пара `useSelected`: запись значения, которой нет в выдаче и нет `initialLabel`. Кэш на экземпляр
+  поля, после `onUpdate` этой записи запрашивается заново.
+- **`onCreate`/`onUpdate`.** После подтверждённого действия текущий поиск запрашивается заново. Кэша у `loadOptions`
+  нет — нужен кэш и инвалидация по ключу: `useLoaderQuery` из `@letar/forms-query`.
+- **`loading` у статичных `options`** — спиннер и «Loading...» в пустом списке, пока справочник грузится.
+
+**Пакет [`@letar/forms-query`](../../forms-query/README.md)** — TanStack Query для Select и Combobox (обоих скинов):
+`fromSearchQuery`/`fromSelectedQuery` (готовые `useQuery`/`useSelected` с `enabled` и `keepPreviousData`),
+`useQueryOptions` (результат запроса → `options` + `loading` для Select), `useLoaderQuery`, `useInvalidateAfter` и
+`useInvalidateModels` (подпуть `/zenstack`) — рефетч до возврата созданной опции. `@letar/forms` от него не зависит.
+
 **Select или Combobox?**
 
 | Ситуация                                                                       | Поле                                               |

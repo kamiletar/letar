@@ -31,11 +31,15 @@ export interface FromSearchQueryOptions {
  *
  * @example
  * ```tsx
+ * // Хук — на уровне модуля (правило хуков не разрешает вызывать его внутри стрелки в JSX)
+ * function useCategorySearch(search: string, options: SearchQueryOptions) {
+ *   return useFindManyCategory({ where: { name: { contains: search, mode: 'insensitive' } }, take: 20 }, options)
+ * }
+ * const searchCategories = fromSearchQuery(useCategorySearch)
+ *
  * <Form.Field.Combobox
  *   name="categoryId"
- *   useQuery={fromSearchQuery((search, options) =>
- *     useFindManyCategory({ where: { name: { contains: search, mode: 'insensitive' } }, take: 20 }, options)
- *   )}
+ *   useQuery={searchCategories}
  *   getLabel={(c) => c.name}
  *   getValue={(c) => c.id}
  * />

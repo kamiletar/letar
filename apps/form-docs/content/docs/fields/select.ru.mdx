@@ -80,6 +80,33 @@ const options = [
 - `RelationFieldProvider`: запись целиком лежит в `option.data`; `RelationConfig.fieldProps` — общие пропсы всех
   полей модели (собственные `fieldProps` поля сильнее).
 
+## Источники данных (`loadOptions`, `loadSelected`, `@letar/forms-query`)
+
+У `Combobox` **ровно один** источник опций (второй рядом не проходит по типам): статичные `options` (+ `loading`),
+хук `useQuery` (+ `useSelected`) или промис `loadOptions` (+ `loadSelected`) — server action, `fetch`, SDK, TanStack
+Query не нужен. `getLabel`/`getValue` обязательны для обоих асинхронных путей.
+
+```tsx
+<Form.Field.Combobox
+  name="userId"
+  loadOptions={(search, { signal }) => searchUsers({ search }, signal)}
+  loadSelected={(id, { signal }) => getUser({ id }, signal)}
+  getLabel={(u) => u.name}
+  getValue={(u) => u.id}
+  onLoadError={(error) => log(error)}
+/>
+```
+
+- Запрос уходит через `debounce`, когда набрано `minChars` (`minChars: 0` — с пустой строкой при первом открытии
+  списка; список ни разу не открывали — запросов нет).
+- Новый запрос отменяет прошлый (`signal`), применяется только последний; прошлая выдача остаётся на экране со
+  спиннером. Ошибка — «Не удалось загрузить» и «Повторить» (Enter тоже), автоповторов нет.
+- После подтверждённого `onCreate`/`onUpdate` текущий поиск запрашивается заново. Нужен кэш и инвалидация по ключу —
+  `useLoaderQuery` из `@letar/forms-query`.
+
+Пакет **`@letar/forms-query`** (оба скина): `fromSearchQuery`, `fromSelectedQuery`, `useQueryOptions`,
+`useLoaderQuery`, `useInvalidateAfter`, `/zenstack` → `useInvalidateModels`. `@letar/forms` от него не зависит.
+
 ## Combobox
 
 **API:** `Form.Field.Combobox`

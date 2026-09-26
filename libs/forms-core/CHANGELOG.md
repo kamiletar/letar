@@ -4,6 +4,14 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.20.0] - 2026-09-26
+
+### Added
+
+- Контракт асинхронных источников (`@letar/forms-core/uikit`): `LoadContext`, `LoadOptionsFn`, `LoadSelectedFn`,
+  `OptionsSourceProps`.
+- `UIKitComboboxProps.onOpenChange` — список открыт/закрыт (поле стартует асинхронную загрузку при первом открытии).
+
 ## [0.19.0] - 2026-09-26
 
 ### Added

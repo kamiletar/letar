@@ -91,6 +91,34 @@ From the 10th option the open list of a `Select` shows a search field with autof
 - `RelationFieldProvider`: the whole record reaches `option.data`; `RelationConfig.fieldProps` are shared props for
   every field of the model (the field's own `fieldProps` win).
 
+## Data sources (`loadOptions`, `loadSelected`, `@letar/forms-query`)
+
+`Combobox` takes **exactly one** source of options (the second one does not pass the types): static `options`
+(+ `loading`), the hook path `useQuery` (+ `useSelected`) or the promise path `loadOptions`
+(+ `loadSelected`) — a server action, `fetch`, an SDK, no TanStack Query needed. `getLabel`/`getValue` are required for
+both async paths.
+
+```tsx
+<Form.Field.Combobox
+  name="userId"
+  loadOptions={(search, { signal }) => searchUsers({ search }, signal)}
+  loadSelected={(id, { signal }) => getUser({ id }, signal)}
+  getLabel={(u) => u.name}
+  getValue={(u) => u.id}
+  onLoadError={(error) => log(error)}
+/>
+```
+
+- The request starts after `debounce` once `minChars` is reached (`minChars: 0` — with an empty string when the list
+  is first opened; a list that was never opened sends nothing).
+- A new request cancels the previous one (`signal`); only the last result is applied; the previous results stay on
+  screen with a spinner. An error shows «Failed to load» and «Retry» (Enter works too), no automatic retries.
+- After a confirmed `onCreate`/`onUpdate` the current search is requested again. For a cache and invalidation by key
+  use `useLoaderQuery` from `@letar/forms-query`.
+
+The **`@letar/forms-query`** package (both skins): `fromSearchQuery`, `fromSelectedQuery`, `useQueryOptions`,
+`useLoaderQuery`, `useInvalidateAfter`, `/zenstack` → `useInvalidateModels`. `@letar/forms` does not depend on it.
+
 ## Combobox
 
 **API:** `Form.Field.Combobox`

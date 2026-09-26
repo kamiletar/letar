@@ -9,6 +9,7 @@
     "implicitDependencies": [
       "@letar/chakra-provider",
       "@letar/forms",
+      "@letar/forms-query",
       "@letar/format-utils",
       "@letar/query-provider",
       "@letar/ui",
@@ -19,6 +20,7 @@
   "dependencies": {
     "@letar/env-load": "workspace:*",
     "@letar/forms-core": "workspace:*",
+    "@letar/forms-query": "workspace:*",
     "@letar/pg-url": "workspace:*"
   }
 }

@@ -4,6 +4,29 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.23.0] - 2026-09-26
+
+### Added
+
+- **Промис-путь у `Form.Field.Combobox`** (тред `forms-select-render-onupdate`, этап Г): `loadOptions(search, { signal })`
+  вместо хука `useQuery` — server action, `fetch`, SDK. Запрос уходит через `debounce` после `minChars` (`minChars: 0` —
+  с пустой строкой при первом открытии списка), новый запрос отменяет прошлый, применяется только последний, прошлая
+  выдача остаётся на экране со спиннером. При ошибке — сообщение и «Повторить» (Enter в поле — тоже), автоповторов нет;
+  `onLoadError` — для лога. После подтверждённого `onCreate`/`onUpdate` текущий поиск запрашивается заново.
+- **`loadSelected(value, { signal })`** — пара `useSelected` для промис-пути: запись текущего значения, которой нет в
+  выдаче (подпись в поле, `data` для карандаша/F2). `initialLabel` сильнее; кэш на экземпляр поля, сбрасывается после
+  `onUpdate` этой записи.
+- **`loading` у статичных `options` Combobox**: спиннер в поле и «Loading...» в пустом списке, пока справочник грузится.
+- **Ровно один источник опций в типах** — `ComboboxFieldProps` = общие пропсы & (`options` | `useQuery` | `loadOptions`);
+  второй источник рядом — ошибка TS (`?: never`), в dev при обходе через `any` — одно предупреждение в консоль.
+- **Пакет [`@letar/forms-query`](../forms-query/README.md)** — TanStack Query для Select/Combobox (`fromSearchQuery`,
+  `fromSelectedQuery`, `useQueryOptions`, `useLoaderQuery`, `useInvalidateAfter`, `/zenstack`). Ядро форм от TanStack
+  Query по-прежнему не зависит.
+
+### Fixed
+
+- Combobox со статичными `options`, пришедшими позже монтирования, показывает подпись выбранного значения.
+
 ## [2.22.0] - 2026-09-26
 
 ### Added

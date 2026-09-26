@@ -8,6 +8,8 @@ import { expect, test } from '@playwright/test'
  */
 test.describe('ZenStack Option Demo', () => {
   const field = (page: Page, name: string) => page.locator(`[data-field-name="${name}"]`)
+  /** Инпут Combobox: `data-field-name` стоит на обёртке, не на нём */
+  const combo = (page: Page, name: string) => field(page, name).getByRole('combobox')
 
   test.beforeEach(async ({ page }) => {
     await page.goto('/zenstack-option-demo')
@@ -60,6 +62,61 @@ test.describe('ZenStack Option Demo', () => {
 
     // «Открыть с выбранной последней категорией» перемонтирует форму со значением в обоих полях
     await page.getByRole('button', { name: /Открыть с выбранной/ }).click()
-    await expect(page.locator('input[role="combobox"]')).toHaveValue(/.+/)
+    await expect(combo(page, 'comboCategory')).toHaveValue(/.+/)
+  })
+
+  test('@letar/forms-query: Combobox через fromSearchQuery/fromSelectedQuery — список и подпись значения', async ({ page }) => {
+    const name = `Query-${Date.now()}`
+    page.once('dialog', (dialog) => void dialog.accept(name))
+    await field(page, 'selectCategory').click()
+    await page.getByRole('option', { name: /Добавить/ }).click()
+    await expect(field(page, 'selectCategory')).toContainText(name)
+
+    await page.getByRole('button', { name: /Открыть с выбранной/ }).click()
+    await expect(combo(page, 'queryCategory')).toHaveValue(/.+/)
+    await combo(page, 'queryCategory').click()
+    await expect(page.getByRole('option').first()).toBeVisible()
+  })
+
+  test('loadOptions по fetch: запрос только после открытия списка, выбор, подпись значения', async ({ page }) => {
+    const requests: string[] = []
+    page.on('request', (request) => {
+      if (
+        request.url().includes('/api/model/category/findMany')
+        && decodeURIComponent(request.url()).includes('"take":20')
+      ) {
+        requests.push(request.url())
+      }
+    })
+    const load = combo(page, 'loadCategory')
+    await page.waitForTimeout(500)
+    const before = requests.length
+
+    await load.click()
+    const option = page.getByRole('option').first()
+    await expect(option).toBeVisible()
+    expect(requests.length).toBeGreaterThan(before)
+
+    const label = (await option.innerText()).trim()
+    await option.click()
+    await expect(load).toHaveValue(label)
+  })
+
+  test('loadOptions: сбой запроса — «Не удалось загрузить» и «Повторить» повторяет запрос', async ({ page }) => {
+    let failing = true
+    await page.route('**/api/model/category/findMany*', async (route) => {
+      if (failing && decodeURIComponent(route.request().url()).includes('"take":20')) {
+        await route.abort()
+        return
+      }
+      await route.continue()
+    })
+    await combo(page, 'loadCategory').click()
+    await expect(page.getByText('Не удалось загрузить')).toBeVisible()
+
+    failing = false
+    await page.getByRole('button', { name: 'Повторить' }).click()
+    await expect(page.getByText('Не удалось загрузить')).toHaveCount(0)
+    await expect(page.getByRole('option').first()).toBeVisible()
   })
 })

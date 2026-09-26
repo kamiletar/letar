@@ -2447,8 +2447,30 @@ ZenStack (§16.2, этап Б): демо на модели `Category` и нас�
    нужен `pending`); тесты Q1–Q4, Q5 (часть про инвалидацию), Q6, Q7; правки `publish-npm.yml` (§16.9).
 6. Цикл синхронизации + README и CHANGELOG `forms-query`; e2e этапа Г.
 
-**Этап Д — оптимистичный режим** (§16.7) — `forms` 2.23.0, `forms-core` 0.20.0, `forms-react` 0.15.0,
-`forms-shadcn` 0.44.0, `forms-query` 0.2.0. Опирается на Б (наложение, конвейер, `createdOptions`):
+> ✅ **Этап Г закрыт 2026-09-26** — `forms` 2.23.0, `forms-core` 0.20.0, `forms-react` 0.15.0, `forms-shadcn` 0.44.0,
+> `forms-query` 0.1.0 (новый). Промис-путь Combobox (`loadOptions`/`loadSelected`/`onLoadError`, отмена, гонки, «Повторить»,
+> перезапрос после `onCreate`/`onUpdate`), `loading` у статичных `options`, ровно один источник опций в типах — в обоих
+> скинах; `usePromiseSearch`/`useSelectedLoader`/`useOptionsLoader` в `forms-react`; пакет `@letar/forms-query`
+> (`fromSearchQuery`, `fromSelectedQuery`, `useQueryOptions`, `useLoaderQuery`, `useInvalidateAfter`, `/zenstack` →
+> `useInvalidateModels`, публикация тегом `forms-query-v*`). Тесты: L1–L7, L9 (Chakra и shadcn), Q1–Q7. Демо
+> `/zenstack-option-demo` (два новых Combobox: `@letar/forms-query` и `loadOptions` по `fetch`) + e2e (6 сценариев, в том
+> числе сбой запроса и «Повторить»). Typecheck потребителей Combobox (`domwellbes`, `driving-school`, `form-develop-app*`,
+> `form-example`, `form-docs`) — без новых ошибок. Отклонения от плана:
+>
+> - `UIKitComboboxProps.onOpenChange` (новое поле контракта): shadcn-примитив сообщает открытие, промис-путь стартует
+>   после первого открытия; в `forms-core` 0.20.0.
+> - `useLoaderQuery` возвращает функцию-хук `(search) => UseQueryResult` (а не результат), имеет `staleTime` (30 с по
+>   умолчанию) — без него повтор строки не брался из кэша (Q3).
+> - `useQueryOptions` без `isPending` и `useZenStackOptions` — они ждут `pending` из этапа Д (`forms-query` 0.2.0).
+> - shadcn: выбор опции теперь подставляет подпись в поле ввода; подпись значения показывается при монтировании (раньше
+>   поле было пустым при непустом значении); список при этом не фильтруется по подписи выбранного.
+> - Не сделано: `form-mcp` (паттерн «справочник из ZenStack/Query» — вместе с этапом Е, версия 2.3.0), сверка
+>   `releaseTagPattern` `nx release` для `forms-query` (§16.9, п. 4) — до первого релиза, L8 (`fieldProps` в shadcn) —
+>   покрыт compile-only Q6, рантайм-теста нет. Тест «`libs/forms/dist` без `@tanstack/react-query`» срабатывает только при
+>   собранном `dist` (по исходникам — всегда).
+
+**Этап Д — оптимистичный режим** (§16.7) — `forms` 2.24.0, `forms-core` 0.21.0, `forms-react` 0.16.0,
+`forms-shadcn` 0.45.0, `forms-query` 0.2.0. Опирается на Б (наложение, конвейер, `createdOptions`):
 
 1. `forms-core`: `SelectionActionContext`, `SettleErrorInfo`, `BaseOption.pending`, `createPendingRegistry`; тест O13.
 2. `forms-react`: `pending` в `DeclarativeFormContextValue`; фазы ожидания в `useSelectionActionsState` (временная
@@ -2464,7 +2486,7 @@ ZenStack (§16.2, этап Б): демо на модели `Category` и нас�
 6. Цикл синхронизации, e2e этапа Д; в CHANGELOG `forms` — «Изменения поведения»: отправка формы ждёт подтверждения
    оптимистичных действий (без них поведение не меняется).
 
-**Этап Е — автопривязка справочников из схемы** (§17) — `forms` 2.24.0, `forms-core` 0.21.0,
+**Этап Е — автопривязка справочников из схемы** (§17) — `forms` 2.25.0, `forms-core` 0.22.0,
 `zenstack-form-plugin` 4.2.0, `form-mcp` 2.3.0 (`forms-react`, `forms-shadcn`, `forms-query` не меняются). От А–Д не
 зависит по коду, идёт после них по очереди:
 
@@ -2477,7 +2499,7 @@ ZenStack (§16.2, этап Б): демо на модели `Category` и нас�
    релизом** — `nx typecheck:tsgo` всех потребителей `createForm` (поиск `extraSelects|lazySelects` по `apps/` — 13
    файлов): generic превращает опечатки `AppForm.Select.X` и доступ по `string`-ключу в ошибки (Р16, вопрос 45).
 5. `zenstack-form-plugin`: разбор и проверка ключей, проверка `form.relation.*` по моделям, `form-registry-keys.ts` в
-   выходе и в `index.ts`; тесты P1, P2, P4; README (раздел «Ключи реестра», совместимость с `forms` ≥ 2.24.0).
+   выходе и в `index.ts`; тесты P1, P2, P4; README (раздел «Ключи реестра», совместимость с `forms` ≥ 2.25.0).
 6. `form-mcp`: `get_directives` — ключ и исправленное описание `form.relation`; `get_form_pattern` — паттерн
    «справочник по ключу из схемы»; тест M1.
 7. Цикл синхронизации (ниже), e2e этапа Е; `libs/zenstack-fragments/README.md` — строка про ключи во фрагментах.
@@ -2489,9 +2511,9 @@ ZenStack (§16.2, этап Б): демо на модели `Category` и нас�
 | А — рендер              | 2.19.0  | 0.16.0       | —             | 0.40.0         | —             | —                      | —          |
 | Б — слоты               | 2.20.0  | 0.17.0       | 0.13.0        | 0.41.0         | —             | —                      | —          |
 | В — поиск в Select      | 2.21.0  | 0.18.0       | 0.14.0        | 0.42.0         | —             | —                      | —          |
-| Г — источники данных    | 2.22.0  | 0.19.0       | 0.15.0        | 0.43.0         | 0.1.0 (новый) | —                      | —          |
-| Д — оптимистичный режим | 2.23.0  | 0.20.0       | 0.16.0        | 0.44.0         | 0.2.0         | —                      | —          |
-| Е — ключи реестра       | 2.24.0  | 0.21.0       | —             | —              | —             | 4.2.0                  | 2.3.0      |
+| Г — источники данных    | 2.23.0  | 0.20.0       | 0.15.0        | 0.44.0         | 0.1.0 (новый) | —                      | —          |
+| Д — оптимистичный режим | 2.24.0  | 0.21.0       | 0.16.0        | 0.45.0         | 0.2.0         | —                      | —          |
+| Е — ключи реестра       | 2.25.0  | 0.22.0       | —             | —              | —             | 4.2.0                  | 2.3.0      |
 
 `form-mcp` в этапах А–Д тоже обновляется (группа 6 цикла синхронизации — описания пропсов и паттерны), но это правки
 данных без смены API; версию поднимает `forms-dev` по факту, в таблице не зафиксирована. Текущие версии: плагин
@@ -3932,7 +3954,7 @@ export const appFormRegistryCheck: FormRegistryCheck<typeof AppForm, FormSelectK
   тестами E1/P1.
 - **Совместимость:** плагин 4.2 + `@letar/forms` < 2.24 → ключ уходит в `default` и молча рисуется текстовым полем
   (Р14). Плагин версию форм не видит — в README плагина и CHANGELOG обоих пакетов: «ключи реестра требуют
-  `@letar/forms` ≥ 2.24.0».
+  `@letar/forms` ≥ 2.25.0».
 - **Semver:** плагин — minor 4.2.0 (новый файл в выходе, новые проверки: синтаксис ключа — ошибка, так как раньше
   ключей не было; `form.relation.*` — предупреждение, чтобы не уронить generate существующих схем). `forms` — minor:
   новые типы, generic с умолчаниями; изменение поведения — dev-предупреждение на неизвестный `fieldType` (строка в

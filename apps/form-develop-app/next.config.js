@@ -24,6 +24,7 @@ const nextConfig = {
     '@letar/format-utils',
     '@letar/forms',
     '@letar/forms-core',
+    '@letar/forms-query',
     '@letar/forms-react',
     '@letar/query-provider',
     '@letar/ui',
