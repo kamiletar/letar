@@ -524,5 +524,8 @@
     "siteName": "Archetest",
     "title": "Archetest — Personality Type Test",
     "description": "Discover your personality archetype. {totalQuestions} questions, {coreScales} scales — 50 per session, at your own pace."
+  },
+  "print": {
+    "button": "Save as PDF"
   }
 }

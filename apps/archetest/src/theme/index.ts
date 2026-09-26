@@ -38,6 +38,14 @@ const archetestConfig = defineConfig({
       '--chakra-colors-border-muted': 'var(--chakra-colors-border-emphasized) !important',
       '--chakra-colors-border-subtle': 'var(--chakra-colors-border-emphasized) !important',
     },
+    // Печать / «Сохранить в PDF» (волна 7.6): навигация, кнопки, баннеры и тосты не нужны на
+    // бумаге; карточки не рвутся между страницами. Светлую тему на время печати включает
+    // PrintButton (класс на <html>), здесь только то, что решается одним CSS. Условие `_print`, а не
+    // вложенный '@media print': внутри него Chakra не принимает произвольные селекторы (TS2353).
+    'header, [data-print-hide], [data-scope="toast"]': { _print: { display: 'none !important' } },
+    '.chakra-card__root, [data-print-keep]': { _print: { breakInside: 'avoid' } },
+    // Фоны (полосы баллов, бейджи) печатаются и при выключенной «печати фона» в диалоге
+    body: { _print: { printColorAdjust: 'exact' } },
   },
 })
 

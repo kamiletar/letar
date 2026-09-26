@@ -13,6 +13,7 @@ import type { ScaleConfidence } from '../_lib/scoring-core'
 import { AchievementCard } from './achievement-card'
 import { HexagramChart } from './hexagram-chart'
 import { PersonalityRadarChart } from './personality-radar-chart'
+import { PrintButton } from './print-button'
 import { ProfileDetails } from './profile-details'
 import { PsychologistLinkBlock } from './psychologist-link-block'
 import { RankBadge } from './rank-badge'
@@ -185,7 +186,7 @@ export function QuizResults({
 
         {/* Кнопка «Продолжить» (главная CTA если есть ещё вопросы) */}
         {onContinue && progress && progress.availableCount > 0 && (
-          <VStack gap={1}>
+          <VStack gap={1} data-print-hide="">
             <Button size="lg" colorPalette="brand" onClick={onContinue}>
               <LuArrowRight />
               {t('results.answerMore', { count: Math.min(50, progress.availableCount) })}
@@ -285,7 +286,15 @@ export function QuizResults({
 
         {/* Баннер для незалогиненных — предложение сохранить результаты */}
         {!isAuthenticated && (
-          <Box w="100%" p={6} borderRadius="lg" bg="bg.subtle" borderWidth="1px" borderColor="border">
+          <Box
+            w="100%"
+            p={6}
+            borderRadius="lg"
+            bg="bg.subtle"
+            borderWidth="1px"
+            borderColor="border"
+            data-print-hide=""
+          >
             <Heading size="md" mb={3}>
               {t('guestBanner.title')}
             </Heading>
@@ -311,11 +320,13 @@ export function QuizResults({
           </Box>
         )}
 
-        {/* Блок привязки психолога */}
-        <PsychologistLinkBlock />
+        {/* Блок привязки психолога — не для бумаги */}
+        <Box w="100%" data-print-hide="">
+          <PsychologistLinkBlock />
+        </Box>
 
-        {/* Действия */}
-        <VStack gap={3}>
+        {/* Действия — на бумаге не нужны (7.6), дисклеймер ниже печатается */}
+        <VStack gap={3} data-print-hide="">
           {onContinue && progress && progress.availableCount > 0
             ? (
               <>
@@ -335,11 +346,13 @@ export function QuizResults({
             )}
           {/* Поделиться результатом (5.4) */}
           <ShareResultButton shareText={t('shareText')} shareTitle={t('results.title')} size="md" />
-          {/* Сокращённый дисклеймер */}
-          <Text fontSize="xs" color="fg.subtle" textAlign="center" maxW="lg">
-            {t('results.shortDisclaimer')}
-          </Text>
+          {/* Сохранить в PDF / распечатать (7.6) */}
+          <PrintButton size="md" />
         </VStack>
+        {/* Сокращённый дисклеймер */}
+        <Text fontSize="xs" color="fg.subtle" textAlign="center" maxW="lg">
+          {t('results.shortDisclaimer')}
+        </Text>
       </VStack>
     </Container>
   )

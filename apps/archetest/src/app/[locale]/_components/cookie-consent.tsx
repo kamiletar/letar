@@ -1,6 +1,7 @@
 'use client'
 
 import { getPathname } from '@/i18n/navigation'
+import { Box } from '@chakra-ui/react'
 import { CookieBanner } from '@letar/ui'
 import { useLocale } from 'next-intl'
 
@@ -9,12 +10,15 @@ export function CookieConsent() {
   const locale = useLocale()
   const privacyUrl = getPathname({ href: '/privacy', locale })
 
+  // data-print-hide: баннер fixed-позиции иначе печатается поверх результатов (7.6)
   return (
-    <CookieBanner
-      appKey="archetest"
-      privacyUrl={privacyUrl}
-      analyticsLabel="Аналитика (Umami)"
-      marketingLabel="Маркетинг (ретаргетинг)"
-    />
+    <Box data-print-hide="">
+      <CookieBanner
+        appKey="archetest"
+        privacyUrl={privacyUrl}
+        analyticsLabel="Аналитика (Umami)"
+        marketingLabel="Маркетинг (ретаргетинг)"
+      />
+    </Box>
   )
 }

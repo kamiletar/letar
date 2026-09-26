@@ -1,13 +1,14 @@
 'use client'
 
 import { Link } from '@/i18n/navigation'
-import { Alert, Button, Card, Container, Heading, HStack, Input, Spinner, Text, VStack } from '@chakra-ui/react'
+import { Alert, Box, Button, Card, Container, Heading, HStack, Input, Spinner, Text, VStack } from '@chakra-ui/react'
 import { useLocale, useTranslations } from 'next-intl'
 import { use, useCallback, useEffect, useMemo, useState } from 'react'
 import { LuPencil, LuSave } from 'react-icons/lu'
 import { getClientDetailAction, updateDisplayNameAction } from '../../_actions/cabinet.action'
 import { HexagramChart } from '../../_components/hexagram-chart'
 import { PersonalityRadarChart } from '../../_components/personality-radar-chart'
+import { PrintButton } from '../../_components/print-button'
 import { ProfileDetails } from '../../_components/profile-details'
 import {
   EXPERIMENTAL_SCALE_CODES,
@@ -152,10 +153,13 @@ export default function ClientDetailPage({ params }: { params: Promise<{ clientI
   return (
     <Container maxW="4xl" py={12}>
       <VStack gap={6} align="start" w="100%">
-        {/* Навигация назад */}
-        <Button asChild variant="ghost" size="sm">
-          <Link href="/cabinet">{t('backToList')}</Link>
-        </Button>
+        {/* Навигация назад и «Сохранить в PDF» (7.6) — обе кнопки на бумагу не попадают */}
+        <HStack justify="space-between" w="100%" wrap="wrap" gap={2} data-print-hide="">
+          <Button asChild variant="ghost" size="sm">
+            <Link href="/cabinet">{t('backToList')}</Link>
+          </Button>
+          <PrintButton size="sm" />
+        </HStack>
 
         {/* Имя клиента и displayName */}
         <Card.Root w="100%" variant="outline">
@@ -176,8 +180,8 @@ export default function ClientDetailPage({ params }: { params: Promise<{ clientI
                 </HStack>
               </VStack>
 
-              {/* DisplayName */}
-              <VStack align="end" gap={1}>
+              {/* DisplayName — рабочая пометка психолога, не для печати */}
+              <VStack align="end" gap={1} data-print-hide="">
                 {editingName
                   ? (
                     <HStack gap={2}>
@@ -266,10 +270,15 @@ export default function ClientDetailPage({ params }: { params: Promise<{ clientI
         )}
 
         {/* Сообщения клиенту (волна 7.5) — в отличие от заметок, клиент их видит */}
-        <ClientMessages linkId={detail.link.id} messages={detail.messages} onSent={loadDetail} />
+        <Box w="100%" data-print-hide="">
+          <ClientMessages linkId={detail.link.id} messages={detail.messages} onSent={loadDetail} />
+        </Box>
 
         {/* Заметки психолога */}
-        <PsychologistNotes linkId={detail.link.id} notes={detail.notes} onUpdate={loadDetail} />
+        {/* Заметки приватны — распечатка карточки может уйти клиенту */}
+        <Box w="100%" data-print-hide="">
+          <PsychologistNotes linkId={detail.link.id} notes={detail.notes} onUpdate={loadDetail} />
+        </Box>
       </VStack>
     </Container>
   )
