@@ -65,6 +65,8 @@ model Category {
   /// Рецепты в категории
   recipes     Recipe[]
 
+  autoNameDemos AutoNameDemo[]
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -248,6 +250,19 @@ model RegistryKeyDemo {
 
   categoryId String? @meta("form.title", "Категория (компонент из createForm)")
     @meta("form.fieldType", "Select.Category") @meta("form.props.createLabel", "Добавить категорию")
+
+  @@allow('all', true)
+}
+
+/// Демо автоподбора по имени модели (этап Ж): у поля categoryId нет form.fieldType, но связь @relation на Category —
+/// автоформа рисует DevelopAppForm.Select.Category из реестра createForm
+model AutoNameDemo {
+  id         String    @id @default(cuid())
+
+  title      String    @meta("form.title", "Название работы")
+
+  categoryId String?   @meta("form.title", "Категория (подобрана по имени модели)")
+  category   Category? @relation(fields: [categoryId], references: [id])
 
   @@allow('all', true)
 }

@@ -31,7 +31,7 @@ export const ProductCreateFormSchema = z.object({
     }),
   status: StatusFormSchema
     .meta({
-      ui: { title: 'Status' }
+      ui: { title: 'Status', registryName: 'Status' }
     }),
   tags: z.array(z.string())
     .meta({

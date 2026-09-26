@@ -17,3 +17,15 @@ export type FormListboxKey = (typeof formRegistryKeys.Listbox)[number]
 
 /** Где используется ключ: для сообщений об ошибках и ревью */
 export const formRegistryUsages = {} as const
+
+/**
+ * Кандидаты автоподбора: имена моделей (FK) и enum, для которых плагин вывел подсказку `ui.registryName`.
+ * Форма ищет в реестре `Select.<Имя>`; нет компонента — рисуется базовое поле, это не ошибка.
+ * Отдельно от `formRegistryKeys` (явные ключи): в `FormRegistryCheck` кандидаты не входят.
+ */
+export const formRegistryCandidates = {
+  Select: ['ContactSubject', 'Status'],
+} as const
+
+/** Имена кандидатов `Select.<Имя>`: для ревью, каких из них ещё нет в реестре */
+export type FormSelectCandidate = (typeof formRegistryCandidates.Select)[number]

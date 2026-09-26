@@ -18,7 +18,7 @@ export const ContactCreateFormSchema = z.object({
     }),
   subject: ContactSubjectFormSchema
     .meta({
-      ui: { title: 'Subject' }
+      ui: { title: 'Subject', registryName: 'ContactSubject' }
     }),
   message: z.string()
     .meta({
