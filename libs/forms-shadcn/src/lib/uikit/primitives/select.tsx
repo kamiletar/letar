@@ -6,6 +6,20 @@ import * as SelectPrimitive from '@radix-ui/react-select'
 import { Check, ChevronDown, Loader2, X } from 'lucide-react'
 import { type ReactNode, useEffect, useId, useRef, useState } from 'react'
 
+/**
+ * Расширение контракта `UIKitSelectProps`, нужное зависимым полям (§18.10): подсказка «Сначала выберите…»
+ * связывается с триггером, а значение вне загруженных опций показывается как есть.
+ */
+export interface ShadcnSelectExtraProps {
+  /** Id элемента с подсказкой; дописывается к `aria-describedby` триггера */
+  'aria-describedby'?: string
+  /**
+   * Значение есть, а записи с таким `value` в списке нет (несогласованные данные): в триггере показать само
+   * значение, а не пустое место. Идущая загрузка («Загрузка...») сильнее.
+   */
+  showUnknownValue?: boolean
+}
+
 export function Select(
   {
     value,
@@ -27,8 +41,9 @@ export function Select(
     editHotkeyHint,
     loading,
     loadingMessage,
+    showUnknownValue,
     ...rest
-  }: UIKitSelectProps<ReactNode>,
+  }: UIKitSelectProps<ReactNode> & ShadcnSelectExtraProps,
 ) {
   // Управляемое открытие: поле закрывает список перед окном приложения (`controlRef.close`)
   const [open, setOpen] = useState(false)
@@ -60,6 +75,8 @@ export function Select(
     ? (hasCustomValue ? customValue : getOptionText(selectedOption))
     : showLoadingValue
     ? loadingMessage
+    : showUnknownValue && value
+    ? value
     : undefined
 
   return (
@@ -81,7 +98,9 @@ export function Select(
           // Выбранное значение ждёт сервера (§16.7): подпись уже новая, спиннер рядом
           aria-busy={selectedOption?.pending ? true : undefined}
           aria-keyshortcuts={onEditHotkey ? 'F2' : undefined}
-          aria-describedby={onEditHotkey && editHotkeyHint ? hintId : undefined}
+          aria-describedby={[rest['aria-describedby'], onEditHotkey && editHotkeyHint ? hintId : undefined]
+            .filter(Boolean)
+            .join(' ') || undefined}
           onKeyDown={onEditHotkey
             ? (event) => {
               // Закрытый список: F2 правит выбранное значение

@@ -6,6 +6,12 @@ import * as PopoverPrimitive from '@radix-ui/react-popover'
 import { Loader2 } from 'lucide-react'
 import { type ReactNode, useCallback, useEffect, useRef, useState } from 'react'
 
+/** Расширение контракта `UIKitComboboxProps` для зависимых полей: подсказка связывается с полем ввода */
+export interface ShadcnComboboxExtraProps {
+  /** Id элемента с подсказкой «Сначала выберите…» */
+  'aria-describedby'?: string
+}
+
 export function Combobox(
   {
     value,
@@ -24,7 +30,7 @@ export function Combobox(
     placeholder,
     disabled,
     ...rest
-  }: UIKitComboboxProps<ReactNode>,
+  }: UIKitComboboxProps<ReactNode> & ShadcnComboboxExtraProps,
 ) {
   const [open, setOpenState] = useState(false)
   // Обработчик держим в ref: стрелка приложения не должна пересоздавать `setOpen` и перезапускать эффект ниже
@@ -72,6 +78,7 @@ export function Combobox(
             role="combobox"
             aria-expanded={open}
             aria-busy={selectedPending ? true : undefined}
+            aria-describedby={rest['aria-describedby']}
             value={inputValue}
             onChange={(e) => {
               onInputChange(e.target.value)

@@ -14,6 +14,26 @@ import type { CascadingSelectFieldProps, SelectOption } from './types'
 /**
  * Form.Field.CascadingSelect — shadcn-скин. Значение — `string`.
  *
+ * @deprecated Используйте `dependsOn` у `Form.Field.Select` / `Form.Field.Combobox` (§18 плана forms).
+ * Перенос — замена `CascadingSelect` на `Select` с загрузчиком `(search, { signal, deps })`:
+ * ```tsx
+ * // было
+ * <Form.Field.CascadingSelect name="cityId" dependsOn="countryId" loadOptions={(country) => loadCities(country)} />
+ * // стало
+ * <Form.Field.Select
+ *   name="cityId"
+ *   dependsOn="countryId"
+ *   loadOptions={(_search, { signal, deps }) => loadCities(String(deps.countryId), signal)}
+ *   getLabel={(city) => city.name}
+ *   getValue={(city) => city.id}
+ * />
+ * ```
+ * Известные проблемы этого компонента, которые не исправляются: нет `AbortSignal` (ответ прошлого родителя может
+ * перезаписать ответ нового), значение стирается эффектом по любой смене родителя — в том числе при восстановлении
+ * черновика и загрузке записи, когда родитель и ребёнок выставляются вместе, — нет подписи выбранного значения до
+ * загрузки списка, `onCreate`, оптимистичного режима и подсказки, почему поле заблокировано. Поведение
+ * оставлено без изменений ради существующих потребителей.
+ *
  * Компонует `form.Subscribe` напрямую (не `createField()`) — тот же приём, что у
  * `FieldCascadingSelect` Chakra-версии: рендер зависит от значения ДРУГОГО поля
  * (`dependsOn`), а не только от своего собственного состояния. Портирован без изменений

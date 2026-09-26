@@ -5,8 +5,11 @@ import type { PhoneCountry } from '@letar/forms-core/phone'
 import type { FileSecurityConfig } from '@letar/forms-core/security'
 import type {
   CreateOptionHandler,
+  DependentFieldProps,
+  FieldDeps,
   LoadOptionsFn,
   LoadSelectedFn,
+  OptionsSourceProps,
   SelectSearchable,
   SettleErrorInfo,
   UpdateOptionHandler,
@@ -87,6 +90,21 @@ export interface OptionRenderState {
 /**
  * Props for Form.Field.CascadingSelect (shadcn-скин). Значение — `string`.
  *
+ * @deprecated Используйте `dependsOn` у `Form.Field.Select` / `Form.Field.Combobox` (§18 плана forms):
+ * ```tsx
+ * <Form.Field.Combobox
+ *   name="cityId"
+ *   dependsOn="countryId"
+ *   loadOptions={(search, { signal, deps }) => loadCities(deps.countryId, search, signal)}
+ *   getLabel={(city) => city.name}
+ *   getValue={(city) => city.id}
+ * />
+ * ```
+ * У устаревшего компонента известные проблемы, которые не исправляются: нет `AbortSignal` (ответ прошлого родителя
+ * может перезаписать ответ нового), значение очищается эффектом по любой смене родителя — в том числе при
+ * восстановлении черновика и загрузке записи, когда родитель и ребёнок выставляются вместе, — нет поиска, `onCreate`,
+ * оптимистичного режима и подписи выбранного значения до загрузки списка.
+ *
  * Портирован из Chakra-версии без изменений логики (загрузка опций по значению родительского
  * поля через `form.Subscribe`, сброс значения при смене родителя, disable пока родитель пуст).
  * Beta: generic-параметры `<TParent, TValue>` не портированы — только `string`/`string` (нет
@@ -111,9 +129,9 @@ export interface CascadingSelectFieldProps extends BaseFieldProps {
 }
 
 /** Props for Form.Field.Select (shadcn-скин). */
-export interface SelectFieldProps<TData = unknown> extends BaseFieldProps {
-  /** Options for selection. If not specified, taken from schema meta */
-  options?: SelectOption<TData>[]
+export interface SelectFieldBaseProps<TData = unknown, TDeps extends FieldDeps = FieldDeps>
+  extends BaseFieldProps, DependentFieldProps<TDeps>
+{
   /**
    * Своё содержимое опции в списке; рамку пункта (подсветка, галочка) рисует скин. `option.data`
    * типизируется из `options`. Для служебного пункта «+ Добавить…» не вызывается.
@@ -159,11 +177,6 @@ export interface SelectFieldProps<TData = unknown> extends BaseFieldProps {
   /** Свой низ списка после пунктов (например `<Form.Field.Select.CreateButton />`) */
   listFooter?: ReactNode
   /**
-   * Опции ещё грузятся: спиннер в поле, «Загрузка...» в списке и (пока у выбранного значения нет опции)
-   * в триггере вместо placeholder.
-   */
-  loading?: boolean
-  /**
    * Поле поиска внутри списка — паритет API с `@letar/forms` (Chakra). ⚠️ В shadcn-скине поиска нет:
    * фокусная модель Radix Select (наведение мыши уводит фокус на пункт, typeahead забирает символы и Tab)
    * конфликтует с полем ввода. `'auto'`/`false` ничего не делают; `true` и объект — одно предупреждение в
@@ -173,6 +186,82 @@ export interface SelectFieldProps<TData = unknown> extends BaseFieldProps {
   /** Show clear button (auto-determined: true if optional, false if required) */
   clearable?: boolean
 }
+
+/** Как запись `loadOptions` Select становится опцией (та же пара, что у Combobox) */
+interface SelectGetItem<TData> {
+  getLabel: (item: TData) => ReactNode
+  getValue: (item: TData) => string | number
+  getTextValue?: (item: TData) => string
+  getDisabled?: (item: TData) => boolean
+  getEditable?: (item: TData) => boolean
+  /** Запись ещё не подтверждена сервером (оптимистичное обновление): приглушена, не выбирается и не правится */
+  getPending?: (item: TData) => boolean
+}
+
+/**
+ * Ровно ОДИН источник опций Select — второй рядом не проходит по типам (`?: never`).
+ * Источник нельзя менять между рендерами одного поля (хук-путь `useOptions` вызывается на каждом рендере).
+ */
+type SelectSource<TData, TDeps extends FieldDeps> =
+  | {
+    /**
+     * Статичные опции; не заданы — берутся из меты схемы. Функция `(deps) => опции` — фильтр уже загруженного
+     * списка по значениям родителей (`dependsOn`); пока родители не готовы, не вызывается (список пуст).
+     */
+    options?: SelectOption<TData>[] | ((deps: TDeps) => SelectOption<TData>[])
+    /**
+     * Опции ещё грузятся: спиннер в поле, «Загрузка...» в списке и (пока у выбранного значения нет опции)
+     * в триггере вместо placeholder.
+     */
+    loading?: boolean
+    loadOptions?: never
+    useOptions?: never
+    onLoadError?: never
+    getLabel?: never
+    getValue?: never
+    getTextValue?: never
+    getDisabled?: never
+    getEditable?: never
+    getPending?: never
+  }
+  | (
+    & SelectGetItem<TData>
+    & {
+      options?: never
+      loading?: never
+      useOptions?: never
+      /**
+       * Разовая загрузка списка промисом (server action, `fetch`, SDK): на каждое значение `deps` родителей, когда
+       * они готовы; `search` всегда `''`. Смена родителя отменяет запрос (`signal`), опции прежнего родителя
+       * не показываются. Поиск по строке на сервере — задача `Form.Field.Combobox`.
+       */
+      loadOptions: LoadOptionsFn<TData, TDeps>
+      /** Ошибка загрузки (отменённый запрос — не ошибка): лог или тост */
+      onLoadError?: (error: unknown) => void
+    }
+  )
+  | {
+    options?: never
+    loading?: never
+    loadOptions?: never
+    onLoadError?: never
+    getLabel?: never
+    getValue?: never
+    getTextValue?: never
+    getDisabled?: never
+    getEditable?: never
+    getPending?: never
+    /**
+     * Хук-путь: `(deps) => { options, loading }` — та же форма, что `useQueryOptions(...).fieldProps`
+     * из `@letar/forms-query`. Вызывается на каждом рендере поля, на уровне модуля.
+     */
+    useOptions: (deps: TDeps) => OptionsSourceProps<SelectOption<TData>>
+  }
+
+/** Props for Form.Field.Select (shadcn-скин): общие пропсы и ровно один источник опций. */
+export type SelectFieldProps<TData = unknown, TDeps extends FieldDeps = FieldDeps> =
+  & SelectFieldBaseProps<TData, TDeps>
+  & SelectSource<TData, TDeps>
 
 /** Props for Form.Field.Textarea (shadcn-скин). */
 export interface TextareaFieldProps extends BaseFieldProps {
@@ -295,7 +384,9 @@ export interface PasswordStrengthFieldProps extends BaseFieldProps {
  * группировки — оба требуют больше инфраструктуры, чем нужно для доказательства контракта.
  * Фильтрация — по вхождению подстроки в `label` (регистронезависимо), на стороне поля.
  */
-export interface ComboboxFieldBaseProps<TData = unknown> extends BaseFieldProps {
+export interface ComboboxFieldBaseProps<TData = unknown, TDeps extends FieldDeps = FieldDeps>
+  extends BaseFieldProps, DependentFieldProps<TDeps>
+{
   /** Своё содержимое опции в списке. Для служебного пункта создания не вызывается */
   renderOption?: (option: SelectOption<TData>, state: OptionRenderState) => ReactNode
   /** Минимум символов для показа списка (по умолчанию 0 — показывать сразу) */
@@ -347,7 +438,7 @@ interface ComboboxGetItem<TData> {
 }
 
 /** Ровно ОДИН источник опций — второй источник рядом не проходит по типам (`?: never`) */
-type ComboboxSource<TData> =
+type ComboboxSource<TData, TDeps extends FieldDeps = FieldDeps> =
   | {
     /** Статичные опции. `loading` — их ещё загружают: спиннер и «Загрузка...» в списке */
     options: SelectOption<TData>[]
@@ -372,16 +463,18 @@ type ComboboxSource<TData> =
        * списка). Новый запрос отменяет прошлый (`signal`), применяется только последний, прошлая выдача
        * остаётся на экране со спиннером. При ошибке в списке «Не удалось загрузить» и «Повторить», автоповторов нет.
        */
-      loadOptions: LoadOptionsFn<TData>
+      loadOptions: LoadOptionsFn<TData, TDeps>
       /** Запись текущего значения, когда её нет в выдаче и нет `initialLabel`; кэш на экземпляр поля */
-      loadSelected?: LoadSelectedFn<TData>
+      loadSelected?: LoadSelectedFn<TData, TDeps>
       /** Ошибка `loadOptions`/`loadSelected` (отменённый запрос — не ошибка): лог или тост */
       onLoadError?: (error: unknown) => void
     }
   )
 
 /** Props for Form.Field.Combobox (shadcn-скин): общие пропсы и ровно один источник опций */
-export type ComboboxFieldProps<TData = unknown> = ComboboxFieldBaseProps<TData> & ComboboxSource<TData>
+export type ComboboxFieldProps<TData = unknown, TDeps extends FieldDeps = FieldDeps> =
+  & ComboboxFieldBaseProps<TData, TDeps>
+  & ComboboxSource<TData, TDeps>
 
 /**
  * Props for Form.Field.PinInput (shadcn-скин).

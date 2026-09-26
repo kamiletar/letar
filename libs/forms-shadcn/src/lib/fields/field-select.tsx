@@ -3,6 +3,7 @@
 import {
   applyOptionOverlay,
   CREATE_OPTION_VALUE,
+  type FieldDeps,
   getOptionText,
   isCreateOptionValue,
   isOptionEditable,
@@ -14,15 +15,23 @@ import {
   SelectionOptionProvider,
   useFormPendingRegistry,
   useNodeLabelWarning,
+  usePromiseSearch,
   useSelectionActionsState,
 } from '@letar/forms-react'
 import { useStore } from '@tanstack/react-form'
 import type { ReactElement } from 'react'
 import { useEffect, useMemo } from 'react'
 import { createField } from '../uikit/primitives'
+import { Select as SelectControl } from '../uikit/primitives/select'
 import { shadcnUIKit } from '../uikit/uikit-shadcn'
 import { SelectCreateButton, SelectEditButton } from './selection-slots'
 import type { SelectFieldProps, SelectOption } from './types'
+import {
+  type DependentFieldUi,
+  dependentHelperText,
+  DependentLiveRegion,
+  useDependentFieldUi,
+} from './use-dependent-field-ui'
 
 /**
  * Radix Select трактует `''` как «ничего не выбрано» (показывает placeholder), поэтому опция
@@ -72,16 +81,77 @@ interface SelectFieldState {
   actions: ReturnType<typeof useSelectionActionsState>
   /** Подпись служебного пункта создания */
   createLabel: string
+  /** Зависимое поле (`dependsOn`): значения родителей, блокировка, подсказка, объявление очистки */
+  dependent: DependentFieldUi<FieldDeps>
+  /** Опции ещё грузятся: свой `loading`, запрос `loadOptions` или хук `useOptions` */
+  loading: boolean
 }
 
 /** Form.Field.Select — shadcn-скин. */
 const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFieldState>({
   displayName: 'FieldSelect',
   useFieldState: (componentProps, resolved, { form, fullPath }): SelectFieldState => {
-    const sourceOptions = (componentProps.options ?? resolved.options ?? []) as SelectOption[]
     const showCreateItem = !!componentProps.onCreate && componentProps.createItem !== false
     const hasOnUpdate = !!componentProps.onUpdate
     const createLabel = componentProps.createLabel ?? 'Добавить…'
+
+    // Зависимость от других полей формы (§18): значения родителей, блокировка, автоочистка по правке родителя.
+    // Пустое значение при очистке — то же, что пишет собственная очистка поля (`0` у числового)
+    const dependent = useDependentFieldUi<FieldDeps>({
+      fullPath,
+      label: resolved.label,
+      emptyValue: componentProps.valueType === 'number' ? 0 : '',
+      dependsOn: componentProps.dependsOn,
+      depsReady: componentProps.depsReady,
+      clearOnParentChange: componentProps.clearOnParentChange,
+      disableWhenParentEmpty: componentProps.disableWhenParentEmpty,
+      placeholderWhenDisabled: componentProps.placeholderWhenDisabled,
+    })
+
+    // Источник `loadOptions`: разовая загрузка на каждый `depsKey`, только когда родители готовы (search всегда `''`).
+    // Опции прежнего родителя не показываются (`usePromiseSearch` прячет ответ с другим `depsKey`)
+    const promiseSearch = usePromiseSearch({
+      loadOptions: componentProps.loadOptions,
+      search: '',
+      enabled: dependent.ready,
+      onLoadError: componentProps.onLoadError,
+      deps: dependent.deps,
+      depsKey: dependent.depsKey,
+    })
+    // Источник `useOptions`: хук приложения на каждом рендере (источник между рендерами не меняется)
+    const hookSource = componentProps.useOptions?.(dependent.deps)
+
+    const appOptions = componentProps.options
+    const promiseData = promiseSearch.data
+    const hookOptions = hookSource?.options
+    const sourceOptions = useMemo((): SelectOption[] => {
+      if (componentProps.loadOptions) {
+        const { getLabel, getValue, getTextValue, getDisabled, getEditable, getPending } = componentProps
+        if (!promiseData || !getLabel || !getValue) {
+          return []
+        }
+        return (promiseData as unknown[]).map((item): SelectOption => ({
+          label: getLabel(item),
+          textValue: getTextValue?.(item),
+          data: item,
+          value: getValue(item),
+          disabled: getDisabled?.(item),
+          editable: getEditable?.(item),
+          pending: getPending?.(item),
+        }))
+      }
+      if (hookOptions) {
+        return hookOptions as SelectOption[]
+      }
+      if (typeof appOptions === 'function') {
+        // Родители не готовы — функция не вызывается: она вправе рассчитывать на непустые `deps`
+        return dependent.ready ? (appOptions as (deps: FieldDeps) => SelectOption[])(dependent.deps) : []
+      }
+      return (appOptions ?? resolved.options ?? []) as SelectOption[]
+      // `componentProps` меняется на каждом рендере — зависим от того, что реально читаем
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [appOptions, resolved.options, promiseData, hookOptions, dependent.depsKey, dependent.ready])
+    const loading = !!componentProps.loading || promiseSearch.isLoading || !!hookSource?.loading
 
     // Значение нужно конвейеру действий: ожидающий выбор оптимистичного create снимается, когда оно изменилось
     const fieldValue = useStore(form.store, () => form.getFieldValue(fullPath)) as string | number | undefined
@@ -92,6 +162,8 @@ const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFie
       registry: pendingRegistry,
       onSettleError: componentProps.onSettleError as ((info: SettleErrorInfo) => void) | undefined,
       settleTimeout: componentProps.settleTimeout,
+      deps: dependent.deps,
+      depsKey: dependent.depsKey,
     })
     const { createdOptions, overlay } = actions
 
@@ -137,18 +209,30 @@ const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFie
       }
     }, [searchRequested])
 
-    return { normalizedOptions, optionByValue, resolvedClearable, hasEmptyOption, actions, createLabel }
+    return {
+      normalizedOptions,
+      optionByValue,
+      resolvedClearable,
+      hasEmptyOption,
+      actions,
+      createLabel,
+      dependent,
+      loading,
+    }
   },
   render: ({ field, fullPath, resolved, hasError, errorMessage, componentProps, fieldState }): ReactElement => {
     const currentValue = field.state.value
     const formRawValue = currentValue !== null && currentValue !== undefined ? String(currentValue) : undefined
-    const { actions } = fieldState
+    const { actions, dependent } = fieldState
     // Оптимистично созданная запись показана выбранной, пока форма хранит прежнее значение (§16.7)
     const rawValue = actions.pendingSelection ?? formRawValue
     // `''` при наличии опции с пустым значением — это выбранная опция, а не «пусто»
     const stringValue = rawValue === '' && fieldState.hasEmptyOption ? EMPTY_OPTION_TOKEN : rawValue
     const hasOnUpdate = !!componentProps.onUpdate
-    const interactive = !resolved.disabled && !resolved.readOnly
+    // Родители не готовы — поле заблокировано (§18): нативный `disabled`, подсказка вместо placeholder
+    const disabled = resolved.disabled || dependent.blocked
+    const interactive = !disabled && !resolved.readOnly
+    const { helperText: dependentHint, describedBy } = dependentHelperText(dependent, hasError)
 
     const applyValue = (raw: string | undefined) => {
       if (componentProps.valueType === 'number') {
@@ -233,9 +317,9 @@ const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFie
     const selectedSource = stringValue !== undefined ? fieldState.optionByValue.get(stringValue) : undefined
 
     return (
-      <shadcnUIKit.FieldRoot invalid={hasError} required={resolved.required} disabled={resolved.disabled}>
+      <shadcnUIKit.FieldRoot invalid={hasError} required={resolved.required} disabled={disabled}>
         <SelectionActionsProvider value={actionsValue}>
-          <shadcnUIKit.Select
+          <SelectControl
             value={stringValue}
             onValueChange={(pickedValue) => {
               const newStringValue = pickedValue === EMPTY_OPTION_TOKEN ? '' : pickedValue
@@ -292,7 +376,7 @@ const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFie
               )
               : undefined}
             listFooter={componentProps.listFooter}
-            loading={componentProps.loading}
+            loading={fieldState.loading}
             loadingMessage="Загрузка..."
             controlRef={actions.controlRef}
             onEditHotkey={hasOnUpdate && interactive
@@ -305,19 +389,27 @@ const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFie
               : undefined}
             editHotkeyHint="F2 — изменить запись"
             label={resolved.label}
-            placeholder={resolved.placeholder}
-            disabled={resolved.disabled}
+            placeholder={dependent.blocked ? dependent.blockedPlaceholder : resolved.placeholder}
+            disabled={disabled}
             readOnly={resolved.readOnly}
             clearable={fieldState.resolvedClearable}
             data-field-name={fullPath}
+            aria-describedby={describedBy}
+            // Значение зависимого поля вне загруженных опций (несогласованные данные) — показываем, не стираем
+            showUnknownValue={dependent.active}
           />
         </SelectionActionsProvider>
+        <DependentLiveRegion ui={dependent} />
         {actions.settleFailure && (
           <p role="status" className="text-destructive mt-1 text-sm" data-settle-error="">
             {`Не удалось сохранить «${actions.settleFailure.label}»`}
           </p>
         )}
-        <shadcnUIKit.FieldError hasError={hasError} errorMessage={errorMessage} helperText={resolved.helperText} />
+        <shadcnUIKit.FieldError
+          hasError={hasError}
+          errorMessage={errorMessage}
+          helperText={dependentHint ?? resolved.helperText}
+        />
       </shadcnUIKit.FieldRoot>
     )
   },
@@ -325,10 +417,11 @@ const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFie
 
 /**
  * `createField` не generic — generic-сигнатура восстанавливается приведением: `TData` выводится
- * из `options` и попадает в `renderOption`/`renderValue`.
+ * из `options` и попадает в `renderOption`/`renderValue`; `TDeps` — тип `deps` зависимого поля
+ * (`<Form.Field.Select<City, { countryId: string }> dependsOn="countryId" …>` или из аннотации параметра загрузчика).
  */
-const FieldSelectGeneric = FieldSelectBase as unknown as <TData = unknown>(
-  props: SelectFieldProps<TData>,
+const FieldSelectGeneric = FieldSelectBase as unknown as <TData = unknown, TDeps extends FieldDeps = FieldDeps>(
+  props: SelectFieldProps<TData, TDeps>,
 ) => ReactElement
 
 /** Слоты `Form.Field.Select.EditButton` / `.CreateButton` — для своего `renderOption`/`listFooter` */
