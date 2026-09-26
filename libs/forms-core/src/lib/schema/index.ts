@@ -20,10 +20,17 @@ export type { DeepUIMetaConfig, UIMetaConfig } from './with-ui-meta'
 export { withUIMeta, withUIMetaDeep } from './with-ui-meta'
 
 export type { FieldSchemaInfo } from './schema-meta'
-export { getFieldMeta } from './schema-meta'
+export { getFieldMeta, resolveEmptyValue } from './schema-meta'
 
 export type { UnwrapResult } from './zod-utils'
-export { getZodType, hasDefaultValue, isOptionalSchema, unwrapSchema, unwrapSchemaWithRequired } from './zod-utils'
+export {
+  getZodType,
+  hasDefaultValue,
+  isNullableSchema,
+  isOptionalSchema,
+  unwrapSchema,
+  unwrapSchemaWithRequired,
+} from './zod-utils'
 
 export { parseFieldRegistryType } from './types/field-registry-type'
 export type { FieldRegistryNamespace, FieldRegistryType } from './types/field-registry-type'

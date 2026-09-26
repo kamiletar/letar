@@ -145,6 +145,27 @@ export function isOptionalSchema(schema: any): boolean {
 }
 
 /**
+ * Принимает ли схема `null` (`.nullable()`, в том числе под `.optional()`/`.default()` и в паттерне
+ * `.nullable().or(z.literal(''))`). Одиночный `.optional()` — не nullable: там пустое значение `undefined`.
+ */
+export function isNullableSchema(schema: any): boolean {
+  const type = getZodType(schema)
+  if (type === 'nullable') {
+    return true
+  }
+  if (type === 'optional' || type === 'default') {
+    const inner = schema._zod.def.inner ?? schema._zod.def.innerType
+    return inner ? isNullableSchema(inner) : false
+  }
+  if (type === 'union') {
+    const options = schema._zod.def.options
+    return Array.isArray(options)
+      && options.some((option: unknown) => getZodType(option) === 'null' || isNullableSchema(option))
+  }
+  return false
+}
+
+/**
  * Checks, имеет ли schema default value
  */
 export function hasDefaultValue(schema: any): boolean {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { z } from 'zod/v4'
-import { getFieldMeta } from './schema-meta'
+import { getFieldMeta, resolveEmptyValue } from './schema-meta'
 
 describe('getFieldMeta', () => {
   it('извлекает ui из простого поля', () => {
@@ -68,5 +68,34 @@ describe('getFieldMeta', () => {
     const schema = z.object({ title: z.string() })
 
     expect(getFieldMeta(schema, 'missing')).toEqual({ required: false })
+  })
+})
+
+describe('nullable и resolveEmptyValue', () => {
+  const schema = z.object({
+    plain: z.string(),
+    optionalOnly: z.string().optional(),
+    nullableField: z.string().nullable(),
+    nullish: z.string().nullable().optional(),
+    nullableOrEmpty: z.string().nullable().or(z.literal('')),
+    nested: z.object({ inner: z.number().nullable() }),
+  })
+
+  it('getFieldMeta.nullable: true только для nullable-схемы', () => {
+    expect(getFieldMeta(schema, 'plain').nullable).toBeUndefined()
+    expect(getFieldMeta(schema, 'optionalOnly').nullable).toBeUndefined()
+    expect(getFieldMeta(schema, 'nullableField').nullable).toBe(true)
+    expect(getFieldMeta(schema, 'nullish').nullable).toBe(true)
+    expect(getFieldMeta(schema, 'nullableOrEmpty').nullable).toBe(true)
+    expect(getFieldMeta(schema, 'nested.inner').nullable).toBe(true)
+  })
+
+  it('resolveEmptyValue: null для nullable, иначе "" / 0', () => {
+    expect(resolveEmptyValue(schema, 'nullableField')).toBeNull()
+    expect(resolveEmptyValue(schema, 'nullableField', 'number')).toBeNull()
+    expect(resolveEmptyValue(schema, 'plain')).toBe('')
+    expect(resolveEmptyValue(schema, 'plain', 'number')).toBe(0)
+    expect(resolveEmptyValue(schema, 'optionalOnly')).toBe('')
+    expect(resolveEmptyValue(undefined, 'x')).toBe('')
   })
 })

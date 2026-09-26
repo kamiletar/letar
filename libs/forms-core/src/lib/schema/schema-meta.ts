@@ -1,5 +1,5 @@
 import type { FieldUIMeta } from './types/meta-types'
-import { unwrapSchemaWithRequired } from './zod-utils'
+import { isNullableSchema, unwrapSchemaWithRequired } from './zod-utils'
 
 /**
  * Result анализа схемы поля
@@ -9,6 +9,8 @@ export interface FieldSchemaInfo {
   ui?: FieldUIMeta
   /** Обязательно the field (не optional/nullable) */
   required: boolean
+  /** Схема поля принимает `null` (`.nullable()`); одиночный `.optional()` не считается */
+  nullable?: boolean
 }
 
 /**
@@ -59,7 +61,24 @@ export function getFieldMeta(schema: any, path: string): FieldSchemaInfo {
   return {
     ui: meta?.ui as FieldUIMeta | undefined,
     required: result.required,
+    ...(result.nullable ? { nullable: true } : {}),
   }
+}
+
+/**
+ * Пустое значение поля выбора при очистке: `null` для nullable-схемы (внешний ключ `''` на сервере не проходит,
+ * а `0` у числового поля — неверное значение), иначе `''` (или `0` у числового Select, как всегда).
+ */
+export function resolveEmptyValue(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  schema: any,
+  path: string,
+  valueType: 'string' | 'number' = 'string',
+): string | number | null {
+  if (schema && getFieldMeta(schema, path).nullable) {
+    return null
+  }
+  return valueType === 'number' ? 0 : ''
 }
 
 interface SchemaPathResult {
@@ -67,6 +86,8 @@ interface SchemaPathResult {
   schema: unknown
   /** Обязательность поля after анализа всей цепочки */
   required: boolean
+  /** Схема самого поля принимает `null` */
+  nullable?: boolean
 }
 
 /**
@@ -166,5 +187,6 @@ function getSchemaAtPath(schema: any, path: string): SchemaPathResult {
     // Возвращаем схему ДО unwrap — на ней can быть мета (.default().meta())
     schema: current,
     required: isRequired && finalUnwrap.required,
+    nullable: isNullableSchema(current),
   }
 }

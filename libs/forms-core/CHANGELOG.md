@@ -4,6 +4,15 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.25.0] - 2026-09-27
+
+### Added
+
+- `getFieldMeta(schema, path).nullable` — схема поля принимает `null` (`.nullable()`, под `.optional()`/`.default()`,
+  в паттерне `.nullable().or(z.literal(''))`); одиночный `.optional()` не считается.
+- `resolveEmptyValue(schema, path, valueType)` — пустое значение поля выбора при очистке: `null` у nullable-схемы, иначе
+  `''` (`0` у числового). Экспорт `isNullableSchema`.
+
 ## [0.24.0] - 2026-09-27
 
 ### Added
