@@ -10,6 +10,7 @@ import type {
 } from '@letar/forms-react'
 import type { ReactNode } from 'react'
 import type { FormOfflineConfig } from '../../offline'
+import type { DirtyGuardConfig } from '../dirty-guard'
 import type { FormPersistenceConfig } from '../form-persistence'
 import type { RateLimitConfig } from '../security'
 
@@ -163,6 +164,12 @@ export interface FormPropsWithApi<TData extends object> {
    * Ключ — имя поля, значение — callback с новым значением и form API.
    */
   onFieldChange?: OnFieldChangeMap
+  /**
+   * Защита от потери несохранённых данных при уходе со страницы (`Form.DirtyGuard` автоматически).
+   * `true` — включить с текстами по умолчанию, объект — со своими, `false` — выключить.
+   * Перебивает опцию `dirtyGuard` из `createForm()`. По умолчанию выключено.
+   */
+  dirtyGuard?: DirtyGuardConfig
   /**
    * Включить honeypot-ловушку для ботов.
    * Рендерит скрытое поле — если бот его заполнит, submit будет заблокирован.

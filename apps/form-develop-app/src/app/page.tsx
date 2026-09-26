@@ -61,6 +61,9 @@ export default function HomePage() {
         <Button asChild colorPalette="teal" variant="outline" size="lg" width="fit-content">
           <Link href="/create-option-demo">Создание записи из поля (onCreate у Select/Combobox)</Link>
         </Button>
+        <Button asChild colorPalette="orange" variant="outline" size="lg" width="fit-content">
+          <Link href="/dirty-guard-demo">DirtyGuard (защита от потери данных в createForm и на форме)</Link>
+        </Button>
         <Button asChild colorPalette="yellow" variant="outline" size="lg" width="fit-content">
           <Link href="/survey-fields-demo">Survey Fields (ImageChoice + Likert + YesNo)</Link>
         </Button>

@@ -3,6 +3,7 @@
 import { type ReactElement, type ReactNode, useEffect, useMemo } from 'react'
 import { useAppForm } from '../../form-hook'
 import type { FormOfflineConfig } from '../../offline'
+import { type DirtyGuardOptions, DirtyGuardScope } from '../dirty-guard'
 import { DeclarativeFormContext } from '../form-context'
 import { FormDebugValues } from '../form-debug-values'
 import type { FormPersistenceConfig } from '../form-persistence'
@@ -52,6 +53,8 @@ export interface FormSimpleProps<TData extends object> {
   addressProvider?: import('../form-fields/specialized/providers').AddressProvider
   /** Реактивные побочные эффекты при изменении полей */
   onFieldChange?: OnFieldChangeMap
+  /** Автоматическая защита от потери данных (см. `FormPropsWithApi.dirtyGuard`), уже слитая с опцией `createForm` */
+  dirtyGuard?: DirtyGuardOptions | null
   /** Honeypot-ловушка для ботов */
   honeypot?: boolean
   /** Клиентский rate limiting */
@@ -89,6 +92,7 @@ export function FormSimple<TData extends object>({
   middleware,
   addressProvider,
   onFieldChange,
+  dirtyGuard,
   honeypot,
   rateLimit,
   children,
@@ -226,7 +230,7 @@ export function FormSimple<TData extends object>({
             Too many attempts. Try again in {rateLimitState.secondsLeft}s.
           </div>
         )}
-        {children}
+        <DirtyGuardScope config={dirtyGuard ?? null}>{children}</DirtyGuardScope>
         {debug && <FormDebugValues showInProduction={debug === 'force'} />}
       </form>
     </DeclarativeFormContext.Provider>

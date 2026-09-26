@@ -118,6 +118,10 @@ export const AppForm = createForm({ /* ... */ })
 <AppForm.Subscribe>{(values) => <Preview values={values} />}</AppForm.Subscribe>
 ```
 
+`createForm({ dirtyGuard: true })` включает защиту от потери несохранённых данных на всех формах
+инстанса (тексты — объектом вместо `true`); `<AppForm dirtyGuard={false}>` выключает её на форме входа
+или фильтре. Подробности — [docs/form-level.md § Form.DirtyGuard](./docs/form-level.md#formdirtyguard--защита-от-потери-данных).
+
 ### Form-level компоненты
 
 ```tsx

@@ -457,7 +457,13 @@ export { useFormApi } from './use-form-api'
 export { type FormPersistenceConfig, type FormPersistenceResult, useFormPersistence } from './form-persistence'
 
 // DirtyGuard component
-export { DirtyGuard, type DirtyGuardProps } from './dirty-guard'
+export {
+  DirtyGuard,
+  type DirtyGuardConfig,
+  type DirtyGuardOptions,
+  type DirtyGuardProps,
+  resolveDirtyGuardConfig,
+} from './dirty-guard'
 
 // Утилитарные компоненты формы
 export { FormDivider, type FormDividerProps } from './form-divider'

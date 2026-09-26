@@ -4,6 +4,7 @@ import type { ComponentType, ReactElement, ReactNode } from 'react'
 import { CaptchaContext } from '../captcha/captcha-context'
 import { CaptchaField } from '../captcha/captcha-field'
 import type { CaptchaConfig, CaptchaFieldProps } from '../captcha/types'
+import { type DirtyGuardConfig, resolveDirtyGuardConfig } from './dirty-guard'
 import type { AutoFieldsProps } from './form-auto-fields'
 import type { ResetButtonProps } from './form-buttons'
 import type {
@@ -142,6 +143,20 @@ interface CreateFormOptions {
    * ```
    */
   captcha?: CaptchaConfig
+
+  /**
+   * Защита от потери данных для всех форм инстанса (`Form.DirtyGuard` автоматически).
+   * `true` — с текстами по умолчанию, объект — со своими (`dialogTitle`, `dialogDescription`,
+   * `confirmText`, `cancelText`, `message`). Проп `dirtyGuard` на форме перебивает опцию;
+   * `<AppForm dirtyGuard={false}>` выключает защиту (логин, фильтры). По умолчанию выключено.
+   *
+   * @example
+   * ```tsx
+   * const AppForm = createForm({ dirtyGuard: true })
+   * <AppForm dirtyGuard={false} onSubmit={login}>...</AppForm>
+   * ```
+   */
+  dirtyGuard?: DirtyGuardConfig
 
   /**
    * Lazy Listbox components — loaded only at render time
@@ -331,6 +346,7 @@ export function createForm(options: CreateFormOptions = {}): ExtendedForm {
     lazyListboxes = {},
     addressProvider,
     captcha,
+    dirtyGuard,
   } = options
 
   // Create lazy wrappers for components
@@ -368,7 +384,12 @@ export function createForm(options: CreateFormOptions = {}): ExtendedForm {
     // Root component — оборачивает в CaptchaContext если captcha задан
     function ExtendedFormRoot<TData extends object>(props: FormPropsWithApi<TData>) {
       // Inject addressProvider from createForm if not set on Form props
-      const mergedProps = addressProvider && !props.addressProvider ? { ...props, addressProvider } : props
+      const withAddress = addressProvider && !props.addressProvider ? { ...props, addressProvider } : props
+      // dirtyGuard: проп формы перебивает опцию инстанса; в Form уходит уже итоговый объект или false
+      const resolvedDirtyGuard = resolveDirtyGuardConfig(dirtyGuard, props.dirtyGuard)
+      const mergedProps = dirtyGuard === undefined && props.dirtyGuard === undefined
+        ? withAddress
+        : { ...withAddress, dirtyGuard: resolvedDirtyGuard ?? false }
       const formElement = Form(mergedProps)
 
       // Оборачиваем в CaptchaContext если captcha конфиг задан

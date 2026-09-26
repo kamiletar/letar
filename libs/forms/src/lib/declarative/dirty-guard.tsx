@@ -3,7 +3,17 @@
 import { resolveStaticFormText } from '@letar/forms-core/i18n'
 import { useFormI18n } from '@letar/forms-react'
 import { useRouter } from 'next/navigation'
-import { type ReactElement, useCallback, useEffect, useRef, useState } from 'react'
+import {
+  createContext,
+  type ReactElement,
+  type ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { useDeclarativeForm } from './form-context'
 
 type DirtyGuardTextKey = 'message' | 'dialogTitle' | 'dialogDescription' | 'confirmText' | 'cancelText'
@@ -82,6 +92,46 @@ export interface DirtyGuardProps {
 }
 
 /**
+ * Настройки автоматической защиты (`dirtyGuard` на форме или в `createForm`) —
+ * те же тексты и `onBlock`, что у `Form.DirtyGuard`, без `enabled` (им управляет сам проп).
+ */
+export type DirtyGuardOptions = Omit<DirtyGuardProps, 'enabled'>
+
+/** Значение пропа `dirtyGuard`: `true` — с текстами по умолчанию, объект — со своими, `false` — выключено */
+export type DirtyGuardConfig = boolean | DirtyGuardOptions
+
+/**
+ * Итоговая конфигурация автоматической защиты: проп формы перебивает опцию `createForm`.
+ * `false` на форме выключает защиту даже при включённой опции инстанса; объект на форме
+ * дополняет объект инстанса (тексты формы важнее), `true` на форме оставляет тексты инстанса.
+ * Возвращает `null` — защита выключена.
+ */
+export function resolveDirtyGuardConfig(
+  instance: DirtyGuardConfig | undefined,
+  form: DirtyGuardConfig | undefined,
+): DirtyGuardOptions | null {
+  const effective = form === undefined ? instance : form
+  if (!effective) {
+    return null
+  }
+  const instanceOptions = typeof instance === 'object' ? instance : {}
+  const formOptions = typeof form === 'object' ? form : {}
+  // `undefined` в объекте формы не затирает текст инстанса
+  const definedFormOptions = Object.fromEntries(Object.entries(formOptions).filter(([, value]) => value !== undefined))
+  return { ...instanceOptions, ...definedFormOptions }
+}
+
+/**
+ * Реестр вручную поставленных `<Form.DirtyGuard />` внутри формы: пока хотя бы один смонтирован,
+ * автоматическая защита уступает ему (иначе два диалога и два `beforeunload`).
+ */
+interface DirtyGuardRegistry {
+  registerManual: () => () => void
+}
+
+const DirtyGuardRegistryContext = createContext<DirtyGuardRegistry | null>(null)
+
+/**
  * Form.DirtyGuard - Prevent accidental navigation when form has unsaved changes
  *
  * Shows browser's native confirmation dialog when user tries to:
@@ -111,7 +161,7 @@ export interface DirtyGuardProps {
  * />
  * ```
  */
-export function DirtyGuard({
+function DirtyGuardCore({
   message: messageProp,
   dialogTitle: dialogTitleProp,
   dialogDescription: dialogDescriptionProp,
@@ -334,5 +384,56 @@ export function DirtyGuard({
         </div>
       </div>
     </div>
+  )
+}
+
+/**
+ * Form.DirtyGuard, поставленный вручную. Регистрируется в форме и отключает автоматическую
+ * защиту (`dirtyGuard` на форме или в `createForm`), чтобы не дублировать диалог.
+ * Явный `<Form.DirtyGuard />` работает и при `dirtyGuard={false}` — выключено только автоматическое.
+ */
+export function DirtyGuard(props: DirtyGuardProps): ReactElement | null {
+  const registry = useContext(DirtyGuardRegistryContext)
+  const registerManual = registry?.registerManual
+
+  useEffect(() => registerManual?.(), [registerManual])
+
+  return <DirtyGuardCore {...props} />
+}
+
+function AutoDirtyGuard(
+  { options, manualCount }: { options: DirtyGuardOptions; manualCount: number },
+): ReactElement | null {
+  return <DirtyGuardCore {...options} enabled={manualCount === 0} />
+}
+
+/**
+ * Область защиты формы: раздаёт реестр ручных guard и монтирует автоматический, если он включён.
+ * Рендерится внутри `DeclarativeFormContext.Provider` (guard читает форму из контекста).
+ */
+export function DirtyGuardScope({
+  config,
+  children,
+}: {
+  config: DirtyGuardOptions | null
+  children: ReactNode
+}): ReactElement {
+  const [manualCount, setManualCount] = useState(0)
+
+  const registry = useMemo<DirtyGuardRegistry>(
+    () => ({
+      registerManual: () => {
+        setManualCount((count) => count + 1)
+        return () => setManualCount((count) => count - 1)
+      },
+    }),
+    [],
+  )
+
+  return (
+    <DirtyGuardRegistryContext.Provider value={registry}>
+      {config && <AutoDirtyGuard options={config} manualCount={manualCount} />}
+      {children}
+    </DirtyGuardRegistryContext.Provider>
   )
 }

@@ -2,6 +2,7 @@
 
 import { SensitiveFieldsProvider } from '@letar/forms-react'
 import type { ReactElement } from 'react'
+import { resolveDirtyGuardConfig } from '../dirty-guard'
 import type { FormPropsWithApi } from '../types'
 import type { FormComponent } from './form-compound-types'
 import { FormSimple } from './form-simple'
@@ -72,10 +73,14 @@ function FormRoot<TData extends object>({
   middleware,
   addressProvider,
   onFieldChange,
+  dirtyGuard,
   honeypot,
   rateLimit,
   children,
 }: FormPropsWithApi<TData>): ReactElement {
+  // Проп формы уже слит с опцией createForm — здесь только приводим к настройкам или null
+  const resolvedDirtyGuard = resolveDirtyGuardConfig(undefined, dirtyGuard)
+
   // If api is provided — use FormWithApi, otherwise — simple form
   if (api) {
     return (
@@ -94,6 +99,7 @@ function FormRoot<TData extends object>({
           middleware={middleware}
           addressProvider={addressProvider}
           onFieldChange={onFieldChange}
+          dirtyGuard={resolvedDirtyGuard}
           honeypot={honeypot}
           rateLimit={rateLimit}
         >
@@ -124,6 +130,7 @@ function FormRoot<TData extends object>({
         middleware={middleware}
         addressProvider={addressProvider}
         onFieldChange={onFieldChange}
+        dirtyGuard={resolvedDirtyGuard}
         honeypot={honeypot}
         rateLimit={rateLimit}
       >

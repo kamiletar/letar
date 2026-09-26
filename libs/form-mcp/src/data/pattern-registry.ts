@@ -189,6 +189,7 @@ function LocalizedForm() {
   </Form.Group.List>
 
   <Form.Errors />
+  {/* or once for the whole instance: createForm({ dirtyGuard: true }); off per form: dirtyGuard={false} */}
   <Form.DirtyGuard message="You have unsaved changes" />
   <Form.Button.Submit>Save</Form.Button.Submit>
 </Form>`,

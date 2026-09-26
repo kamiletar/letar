@@ -1,5 +1,12 @@
 # Changelog — @letar/form-mcp
 
+## 2.2.1 (2026-09-26)
+
+### Changed
+
+- `get_form_pattern('declarative')`: комментарий про `createForm({ dirtyGuard: true })` и
+  `dirtyGuard={false}` (`@letar/forms` 2.18.0).
+
 ## 2.2.0 (2026-09-21)
 
 ### Changed

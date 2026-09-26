@@ -6,6 +6,17 @@
 
 ## Backlog (запросы от агентов)
 
+### ✅ [2026-09-26] `createForm({ dirtyGuard })` — защита от потери данных по умолчанию (закрыт forms 2.18.0, от domwellbes-dev)
+
+- **Запросил:** `domwellbes-dev` (CobaltBay) через `forms-coordinator-dev`, тред `forms-dirtyguard-default`;
+  владелец добавил: нужен проп для выключения (логин).
+- **Решение:** опция `createForm({ dirtyGuard })` и проп формы `dirtyGuard`, тип `boolean | DirtyGuardOptions`,
+  проп перебивает опцию, умолчание — выключено. `DirtyGuardScope` внутри формы раздаёт реестр ручных guard и
+  монтирует автоматический; ручной `<Form.DirtyGuard />` перехватывает работу (нет дубля окна и
+  `beforeunload`), `dirtyGuard={false}` ручной не отключает.
+- **Скины:** только React-скин `@letar/forms`; у shadcn/vue/angular своего `createForm`/`Form.DirtyGuard` нет.
+- **Проверено:** 15 новых тестов (`dirty-guard-auto.spec.tsx`), весь `forms` — 122 файла, 898 тестов.
+
 ### ✅ [2026-09-24] Три доработки по отчёту domwellbes о 2.17.0 (закрыт forms 2.17.1, от domwellbes-dev)
 
 - **Запросил:** `domwellbes-dev` через `forms-coordinator-dev` (тред `forms-domwellbes-2026-09-24`, msg 2107).

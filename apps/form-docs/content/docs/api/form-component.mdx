@@ -382,6 +382,18 @@ dictionary by `locale` → English when there is no provider. Props override eve
 <Form.DirtyGuard dialogTitle="Leaving?" confirmText="Yes, leave" cancelText="No, stay" />
 ```
 
+Enable it for every form of an instance instead of placing the component by hand (v2.18.0+):
+
+```tsx
+const AppForm = createForm({ dirtyGuard: true }) // or { dialogTitle, dialogDescription, confirmText, cancelText }
+
+<AppForm dirtyGuard={false} onSubmit={login}>…</AppForm> // sign-in, filters: switch it off
+```
+
+The form prop overrides the instance option (`false` off, `true` keeps instance texts, an object merges over
+them). Off by default. A hand-placed `<Form.DirtyGuard />` inside a guarded form takes over without a duplicate
+dialog, and `dirtyGuard={false}` does not disable a component you placed explicitly.
+
 Not caught: programmatic `router.push()` / `router.replace()` and the browser Back/Forward buttons
 (`popstate` fires after the address has already changed and cannot be cancelled). For programmatic
 navigation check `form.state.isDirty` yourself before calling `router.push`.

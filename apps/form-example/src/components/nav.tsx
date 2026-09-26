@@ -60,6 +60,7 @@ const exampleCategories = [
     items: [
       { href: '/examples/offline', label: 'Offline' },
       { href: '/examples/persistence', label: 'Persistence' },
+      { href: '/examples/dirty-guard', label: 'Unsaved Changes Guard' },
       { href: '/examples/autosave', label: 'Autosave' },
       { href: '/examples/i18n', label: 'i18n' },
       { href: '/examples/security', label: 'Security' },

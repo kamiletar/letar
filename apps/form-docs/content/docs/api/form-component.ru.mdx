@@ -221,6 +221,18 @@ description: Главный составной компонент Form и его
 <Form.DirtyGuard dialogTitle="Уйти?" confirmText="Да, уйти" cancelText="Нет, остаться" />
 ```
 
+Включите её сразу для всех форм инстанса, не расставляя компонент вручную (v2.18.0+):
+
+```tsx
+const AppForm = createForm({ dirtyGuard: true }) // или { dialogTitle, dialogDescription, confirmText, cancelText }
+
+<AppForm dirtyGuard={false} onSubmit={login}>…</AppForm> // логин, фильтры: выключить
+```
+
+Проп формы перебивает опцию инстанса (`false` — выключить, `true` — оставить тексты инстанса, объект — дополнить
+их). По умолчанию выключено. Вручную поставленный `<Form.DirtyGuard />` в форме с автозащитой берёт работу на
+себя без второго окна, а `dirtyGuard={false}` явно поставленный компонент не отключает.
+
 Не ловится: программный `router.push()` / `router.replace()` и кнопки «Назад»/«Вперёд» браузера (`popstate`
 приходит уже после смены адреса, отменить его нельзя). Для программной навигации проверяйте
 `form.state.isDirty` сами перед `router.push`.

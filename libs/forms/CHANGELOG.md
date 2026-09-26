@@ -4,6 +4,18 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.18.0] - 2026-09-26
+
+### Added
+
+- **`dirtyGuard` — защита от потери данных по умолчанию** (domwellbes-dev, тред
+  `forms-dirtyguard-default`). Опция `createForm({ dirtyGuard: true | { …тексты } })` включает
+  `Form.DirtyGuard` автоматически на всех формах инстанса; проп `dirtyGuard` на форме перебивает её
+  (`false` — выключить логин/фильтры, `true`/объект — включить точечно). Умолчание — выключено.
+  Ручной `<Form.DirtyGuard />` при включённой автозащите не даёт дубля окна и `beforeunload`
+  (автоматическая уступает ему); `dirtyGuard={false}` ручной компонент не отключает.
+- Экспорт `DirtyGuardConfig`, `DirtyGuardOptions`, `resolveDirtyGuardConfig`.
+
 ## [2.17.1] - 2026-09-24
 
 ### Added
