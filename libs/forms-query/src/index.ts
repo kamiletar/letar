@@ -1,3 +1,4 @@
+export { type CollectedRelation, collectRelations } from './lib/collect-relations'
 export { fromSearchQuery } from './lib/from-search-query'
 export type { FromSearchQueryOptions, QueryResultLike, SearchQueryOptions } from './lib/from-search-query'
 export { fromSelectedQuery } from './lib/from-selected-query'

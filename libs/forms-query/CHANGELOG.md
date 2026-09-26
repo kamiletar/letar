@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.4.0
+
+- `useZenStackRelations(schema, formSchema, { overrides?, exclude?, clientOptions? })` в `@letar/forms-query/zenstack` —
+  `relations` для `RelationFieldProvider` из самой form-схемы: поля с `fieldProps.relation` → `useFindMany` модели из
+  схемы ZenStack. Вместо ручного адаптера на каждую модель. Один справочник у нескольких полей грузится один раз, поля с
+  ключом реестра `createForm` пропускаются, отсутствующая в схеме модель — исключение со списком моделей.
+- `collectRelations(formSchema)` — сбор справочников из form-схемы без ZenStack и TanStack Query.
+- Типы `ZenStackSchema`, `ZenStackClientOptions`, `ZenStackRelationConfig`, `ZenStackRelationOverride`,
+  `ZenStackRelationQueryResult`, `UseZenStackRelationsOptions`.
+- Собранный пакет теперь несёт код обхода схемы из `@letar/forms-core/schema` (вбандливается, ~15 КБ общего чанка).
+
 ## 0.3.0
 
 - `fromSearchQuery` и `fromSelectedQuery` вызывают хук третьим аргументом `deps` — значения родителей зависимого поля.

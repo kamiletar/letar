@@ -11,15 +11,17 @@ bun add @letar/forms-query @tanstack/react-query
 
 ## Что внутри
 
-| Экспорт                                                          | Для чего                                                                                                                          |
-| ---------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `fromSearchQuery(useHook, { minChars? })`                        | готовый `useQuery` для Combobox: `enabled` по `minChars`, `placeholderData: keepPreviousData`                                     |
-| `fromSelectedQuery(useHook)`                                     | готовый `useSelected` Combobox: запись текущего значения, `enabled` по непустому значению                                         |
-| `useQueryOptions(result, map)`                                   | результат запроса → `{ fieldProps: { options, loading }, error }` для Select/Combobox со статичными опциями                       |
-| `@letar/forms-query/zenstack`: `useZenStackOptions(result, map)` | `useQueryOptions`, где строки `$optimistic` ZenStack получают `pending` (видны, не выбираются)                                    |
-| `useLoaderQuery(key, loadOptions, { minChars?, staleTime? })`    | промис-загрузчик (`loadOptions`: server action, `fetch`) → `useQuery` с ключом `[...key, search]`: кэш, дедупликация, инвалидация |
-| `useInvalidateAfter(queryKeys)`                                  | обёртка `onCreate`/`onUpdate`: инвалидация и рефетч **до** возврата опции полю                                                    |
-| `@letar/forms-query/zenstack`: `useInvalidateModels(models)`     | то же для мутаций мимо хуков ZenStack (server action, `$procs`)                                                                   |
+| Экспорт                                                                   | Для чего                                                                                                                          |
+| ------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `fromSearchQuery(useHook, { minChars? })`                                 | готовый `useQuery` для Combobox: `enabled` по `minChars`, `placeholderData: keepPreviousData`                                     |
+| `fromSelectedQuery(useHook)`                                              | готовый `useSelected` Combobox: запись текущего значения, `enabled` по непустому значению                                         |
+| `useQueryOptions(result, map)`                                            | результат запроса → `{ fieldProps: { options, loading }, error }` для Select/Combobox со статичными опциями                       |
+| `@letar/forms-query/zenstack`: `useZenStackOptions(result, map)`          | `useQueryOptions`, где строки `$optimistic` ZenStack получают `pending` (видны, не выбираются)                                    |
+| `useLoaderQuery(key, loadOptions, { minChars?, staleTime? })`             | промис-загрузчик (`loadOptions`: server action, `fetch`) → `useQuery` с ключом `[...key, search]`: кэш, дедупликация, инвалидация |
+| `useInvalidateAfter(queryKeys)`                                           | обёртка `onCreate`/`onUpdate`: инвалидация и рефетч **до** возврата опции полю                                                    |
+| `@letar/forms-query/zenstack`: `useInvalidateModels(models)`              | то же для мутаций мимо хуков ZenStack (server action, `$procs`)                                                                   |
+| `@letar/forms-query/zenstack`: `useZenStackRelations(schema, formSchema)` | `relations` для `RelationFieldProvider` из самой form-схемы: `fieldProps.relation` → `useFindMany` модели                         |
+| `collectRelations(formSchema)`                                            | те же справочники списком `{ model, labelField, paths }` — без ZenStack и TanStack Query, для своего источника данных             |
 
 ## Справочник целиком — Select
 
@@ -134,6 +136,31 @@ const create = client.workCategory.useCreate({ optimisticUpdate: true })
 Строки `pending` видны приглушёнными, не выбираются и не правятся; пока собственный `create` поля в полёте, они скрыты.
 Для своих маркеров — `useQueryOptions(result, map, { isPending: (row) => row.saving })`.
 
+## `relations` из form-схемы — `useZenStackRelations`
+
+`RelationFieldProvider` из `@letar/forms` подгружает опции полей со связью (`@meta("form.relation.*")`, `relationMeta()`),
+но список `relations` приходилось писать руками: адаптер `useFindMany` на каждую модель. Хук строит его из схемы:
+
+```tsx
+import { schema } from '@/generated/schema'
+import { useZenStackRelations } from '@letar/forms-query/zenstack'
+
+// Вне компонента: литерал в JSX пересобирал бы массив на каждом рендере
+const overrides = { Category: { queryArgs: { orderBy: { name: 'asc' } }, descriptionField: 'note' } }
+
+const relations = useZenStackRelations(schema, RecipeCreateFormSchema, { overrides })
+<RelationFieldProvider relations={relations}>…</RelationFieldProvider>
+```
+
+- Одна модель у нескольких полей грузится один раз; поля с ключом реестра `createForm` (`Select.Category`) пропускаются —
+  такой компонент грузит данные сам.
+- `overrides[Модель]` — `queryArgs`, `labelField`, `valueField`, `descriptionField`, `fieldProps`; `exclude` — модели, которые
+  не грузить; `clientOptions` — второй аргумент `useClientQueries` (`endpoint`, `fetch`).
+- Модели нет в схеме ZenStack — исключение со списком моделей. Два поля просят разные `labelField` одной модели —
+  побеждает первое, в консоль уходит предупреждение.
+- Первый аргумент — **схема ZenStack** (`schema` из `schema.ts`), а не результат `useClientQueries`: тот собирается заново на
+  каждом рендере, и массив `relations` был бы каждый раз новым.
+
 ## Совместимость версий
 
 Типы контракта опций (`@letar/forms-core`) вбандливаются и в скин, и в этот пакет — совпадение структурное.
@@ -143,5 +170,7 @@ const create = client.workCategory.useCreate({ optimisticUpdate: true })
 | -------------------- | -------------- | --------------------- |
 | 0.1.x                | ≥ 2.23.0       | ≥ 0.44.0              |
 | 0.2.x                | ≥ 2.24.0       | ≥ 0.45.0              |
+| 0.3.x                | ≥ 2.27.0       | ≥ 0.46.0              |
+| 0.4.x                | ≥ 2.27.0       | ≥ 0.46.0              |
 
 Peer на `@letar/forms` не ставим: пользователь shadcn-скина не должен ставить Chakra-скин.

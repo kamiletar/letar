@@ -1,6 +1,6 @@
 {
   "name": "@letar/forms-query",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Интеграция @letar/forms с TanStack Query: источники опций для Select и Combobox",
   "type": "module",
   "main": "./src/index.ts",
