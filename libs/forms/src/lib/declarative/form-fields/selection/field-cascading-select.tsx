@@ -8,6 +8,10 @@ import type { BaseFieldProps, BaseOption, FieldSize } from '../../types'
 import { FieldError, getFieldErrors, getOptionLabel, type ResolvedFieldProps, SelectionFieldLabel } from '../base'
 import { useResolvedFieldProps } from '../base/use-resolved-field-props'
 
+// Общий пустой массив: умолчание `[]` создавало бы новый массив на каждом рендере, а `initialOptions` стоит в
+// зависимостях эффекта загрузки — каждая перерисовка родителя перезапускала бы запрос.
+const EMPTY_OPTIONS: never[] = []
+
 /**
  * Options loading result
  */
@@ -301,7 +305,7 @@ export function FieldCascadingSelect<TParent = string, TValue = string>(
     name,
     dependsOn,
     loadOptions,
-    initialOptions = [],
+    initialOptions = EMPTY_OPTIONS,
     clearOnParentChange = true,
     disableWhenParentEmpty = true,
     clearable,

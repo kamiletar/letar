@@ -19,6 +19,12 @@
 - `Field.Select`: кнопка очистки не показывается у заблокированного (`disabled`) и `readOnly` поля — раньше
   показывалась (только shadcn-скин, см. его CHANGELOG).
 
+### Fixed
+
+- `Field.CascadingSelect` (`@deprecated`): умолчание `initialOptions = []` создавало новый массив на каждом рендере и
+  перезапускало загрузку при любой перерисовке внешнего компонента; теперь общая константа. Свой `initialOptions`
+  inline-массивом по-прежнему перезапускает запрос — выноси его за компонент.
+
 ### Added
 
 - `resolveEmptyValue(schema, path, valueType)` и `nullable` в `getFieldMeta` — в `@letar/forms-core/schema`.
