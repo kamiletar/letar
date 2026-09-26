@@ -28,6 +28,11 @@
   Скрытие у конкретной опции — `editable: false` в опции. Правило дублей обратное
   `onCreate`: отредактированная подпись побеждает, пока приложение не перезапросит список, потом уступает свежей
   от приложения. Мультивыбор в первой версии вне охвата. `onDelete` не делаем.
+- **Дополнение владельца (2026-09-26, через координатора):** по симметрии нужен слот
+  `Form.Field.Select.CreateButton` для `onCreate` — тем же механизмом контекста.
+- **Архитектура (2026-09-26):** развёрнутое описание обоих этапов для реализации — раздел
+  [«Архитектура: кастомный рендер и слоты Select/Combobox»](#архитектура-кастомный-рендер-и-слоты-selectcombobox)
+  ниже в этом файле (перед записью про миграцию `zenstack-form-plugin`).
 - **Статус:** делегировано `forms-dev` 2026-09-26.
 
 ### ✅ [2026-09-26] `createForm({ dirtyGuard })` — защита от потери данных по умолчанию (закрыт forms 2.18.0, от domwellbes-dev)
@@ -1269,6 +1274,893 @@
   выходил. Обходы `ignoreBuildErrors: true` у `label-printer-desktop`/`animatrona-player`/шаблона
   `generators:electron-app` теперь избыточны — их зона, снятие не входит в эту задачу, сообщено
   координатору отдельным пунктом.
+
+## Архитектура: кастомный рендер и слоты Select/Combobox
+
+> `renderOption`/`renderValue`, `data: TData`, `onUpdate`, слоты `EditButton`/`CreateButton` — этапы А и Б.
+> Развёрнутое продолжение записи Backlog «[2026-09-26] Select/Combobox: кастомный рендер…» (вверху файла).
+> Написано архитектором по заданию `forms-coordinator-dev` 2026-09-26, реализует `forms-dev`. Кода реализации
+> здесь нет — только сигнатуры и наброски. Каждое утверждение о Chakra/Ark/zag/Radix сверено с исходниками в
+> `node_modules`; ссылки вида `ZS/select.connect.mjs:261` — файл и строка (сокращения в §0). Пометка
+> «(не проверено)» — то, что по исходникам подтвердить не удалось.
+
+### 0. Версии и сокращения путей
+
+Реально установлено (симлинк `libs/forms/node_modules/@chakra-ui/react`): Chakra UI **3.37.0** → Ark UI **5.39.0** →
+zag **1.43.3**; shadcn-скин — `@radix-ui/react-select` **2.3.7**. Номера строк верны для этих версий; после
+`bun update` Chakra/Ark/Radix пункты со ссылками перепроверить (поведение закрыто тестами из §12).
+
+- `ZS/` = `node_modules/.bun/@zag-js+select@1.43.3/node_modules/@zag-js/select/dist/`
+- `ZC/` = `node_modules/.bun/@zag-js+combobox@1.43.3/node_modules/@zag-js/combobox/dist/`
+- `ZQ/` = `node_modules/.bun/@zag-js+dom-query@1.43.3/node_modules/@zag-js/dom-query/dist/`
+- `ZF/` = `node_modules/.bun/@zag-js+focus-trap@1.43.3/node_modules/@zag-js/focus-trap/dist/`
+- `ZL/` = `node_modules/.bun/@zag-js+collection@1.43.3/node_modules/@zag-js/collection/dist/`
+- `ZM/` = `node_modules/.bun/@zag-js+core@1.43.3/node_modules/@zag-js/core/dist/merge-props.mjs`
+- `ARK/` = `node_modules/.bun/@ark-ui+react@5.39.0+6f4b9a1cfb20c0ae/node_modules/@ark-ui/react/dist/components/`
+- `CR/` = `node_modules/.bun/@chakra-ui+react@3.37.0+9493b15259d2b947/node_modules/@chakra-ui/react/dist/esm/theme/recipes/`
+- `RX` = `node_modules/.bun/@radix-ui+react-select@2.3.7+2b23df507bdda662/node_modules/@radix-ui/react-select/dist/index.mjs`
+
+### 1. Контекст, цели, не-цели
+
+Референс владельца: адрес доставки правится карандашом в модальном окне, без перехода на страницу; карандаш есть
+и у каждой опции списка, и у выбранного значения; рендер — библиотечный по умолчанию или свой, в своём кнопку
+ставят куда угодно компонентом-слотом. `onCreate` (forms 2.17.0) — уже сделанная половина той же идеи.
+
+**Цели.**
+
+- **А.** `renderOption(option, state)`, `renderValue(option)`, типизированное `data: TData` в опции; нестроковый
+  `label` перестаёт сплющиваться в строку, поиск и typeahead при этом не ломаются. Контракт —
+  `@letar/forms-core/uikit`; скины Chakra (`@letar/forms`) и shadcn (`@letar/forms-shadcn`); Select и Combobox.
+- **Б.** `onUpdate(option) → Promise<{ label, value, data? } | null>` и два слота на одной инфраструктуре
+  контекста: `Form.Field.Select.EditButton` (для `onUpdate`) и `Form.Field.Select.CreateButton` (для `onCreate`,
+  дополнение владельца). Те же слоты у `Form.Field.Combobox`.
+
+**Не-цели.** Мультивыбор. `onDelete`/`DeleteButton` (место оставлено, §4.6). Скины vue/vue-shadcn/angular
+(потребителей нет). `renderValue` у Combobox (значение там — текст инпута, §9). Окно редактирования — его делает
+приложение, как у `onCreate`. `Field.NativeSelect` (deprecated), `Listbox`, `Autocomplete`, `CascadingSelect`.
+
+### 2. Контракт типов
+
+#### 2.1. `@letar/forms-core/uikit` — типы и чистые функции, без React
+
+`types.ts` — все новые поля необязательные: vue/angular-скины компилируются без правок.
+
+```ts
+export interface UIKitSelectOption<TNode = unknown, TData = unknown> {
+  value: string
+  label: TNode
+  /** Строка опции: itemToString коллекции, typeahead/поиск, подпись в триггере по умолчанию, проверка дублей onCreate */
+  textValue?: string
+  disabled?: boolean
+  group?: string
+  /** Данные приложения. Скин их не читает — только отдаёт в render-функции */
+  data?: TData
+  /** Итог, посчитанный полем (isOptionEditable): рисовать ли карандаш у пункта */
+  editable?: boolean
+}
+
+/** Состояние пункта для renderOption. Подсветки нет сознательно: оба скина ставят `[data-highlighted]` — это CSS */
+export interface UIKitOptionRenderState {
+  selected: boolean
+  disabled: boolean
+}
+
+/** Ручка выпадашки: скин заполняет её, поле вызывает перед окном приложения (§5) */
+export interface UIKitSelectControl {
+  close: () => void
+  focusTrigger: () => void
+}
+
+/** Слоты, общие для Select и Combobox */
+export interface UIKitSelectionSlotProps<TNode = unknown, TData = unknown> {
+  /** Своё содержимое пункта; скин оборачивает его в свой ItemText. Служебный пункт «+ Добавить…» сюда не попадает */
+  renderOption?: (option: UIKitSelectOption<TNode, TData>, state: UIKitOptionRenderState) => TNode
+  /** Кнопки пункта по умолчанию (карандаш). Поле передаёт их, только если своего renderOption нет (§4.2) */
+  renderOptionActions?: (option: UIKitSelectOption<TNode, TData>) => TNode
+  /** Кнопки у выбранного значения — ВНЕ триггера (у Chakra — в IndicatorGroup) */
+  controlActions?: TNode
+  /** Подвал списка внутри Content, после пунктов (например CreateButton) */
+  listFooter?: TNode
+  /** Скин кладёт сюда { close, focusTrigger }, пока смонтирован Root */
+  controlRef?: { current: UIKitSelectControl | null }
+  /** F2: value подсвеченного пункта (список открыт) или выбранного (закрыт) — §7 */
+  onEditHotkey?: (value: string) => void
+  /** Локализованная подсказка для aria-describedby/title, когда onEditHotkey задан */
+  editHotkeyHint?: string
+}
+
+export interface UIKitSelectProps<TNode = unknown, TData = unknown> extends UIKitSelectionSlotProps<TNode, TData> {
+  // ...текущие поля без изменений; options: UIKitSelectOption<TNode, TData>[]
+  /** Своя подпись выбранного значения. Рисуется ВНУТРИ триггера (<button>) — только фразовое содержимое, без кнопок */
+  renderValue?: (option: UIKitSelectOption<TNode, TData>) => TNode
+  /** Закрывает пробел: сейчас resolved.readOnly до Select не доходит вовсе (field-select.tsx:158–205) */
+  readOnly?: boolean
+}
+
+export interface UIKitComboboxProps<TNode = unknown, TData = unknown> extends UIKitSelectionSlotProps<TNode, TData> {
+  // ...текущие поля; options: UIKitSelectOption<TNode, TData>[]
+  /** Содержимое пустого списка вместо текста «Ничего не найдено» (например CreateButton) */
+  emptyContent?: TNode
+}
+```
+
+`creatable-options.ts` — расширение без поломки (дефолт generic-а сохраняет прежний тип):
+
+```ts
+export interface CreatedOption<TData = unknown> {
+  label: string
+  value: string | number
+  /** Новое, необязательное: данные для renderOption созданной опции */
+  data?: TData
+}
+export type CreateOptionHandler<TData = unknown> = (search: string) => Promise<CreatedOption<TData> | null>
+```
+
+Новый `editable-options.ts` (экспорт через `uikit/index.ts`):
+
+```ts
+/** Что onUpdate возвращает полю */
+export interface UpdatedOption<TData = unknown> {
+  label: string
+  /** Тот же value — правка подписи; другой — запись заменена (copy-on-write, §6) */
+  value: string | number
+  /** Передан — заменяет data опции; не передан — data остаётся прежней */
+  data?: TData
+}
+export type UpdateOptionHandler<TOption, TData = unknown> = (option: TOption) => Promise<UpdatedOption<TData> | null>
+
+/** Место под расширение: 'delete' добавится вместе с onDelete (§4.6) */
+export type SelectionActionKind = 'create' | 'edit'
+
+/** Запись локального наложения правок — одна на исходное value */
+export interface OptionOverlayEntry {
+  fromValue: string
+  label: string
+  value: string | number
+  data?: unknown
+  hasData: boolean
+  /** Текст опции ПРИЛОЖЕНИЯ в момент клика. Его смена = «приложение перезапросило список» */
+  baselineText: string
+}
+
+/** textValue → строковый (или числовой) label → String(value) */
+export function getOptionText(option: { label?: unknown; textValue?: string; value: unknown }): string
+/** onUpdate есть, editable !== false, не disabled, value !== '' и не служебный CREATE_OPTION_VALUE */
+export function isOptionEditable(
+  option: { value: unknown; disabled?: boolean; editable?: boolean },
+  hasOnUpdate: boolean,
+): boolean
+/** Добавить/заменить запись по fromValue; у повторной правки baselineText остаётся от первой */
+export function upsertOptionOverlay(
+  overlay: readonly OptionOverlayEntry[],
+  entry: OptionOverlayEntry,
+): OptionOverlayEntry[]
+/** Убрать устаревшие записи (§6). Нечего убирать — вернуть ТОТ ЖЕ массив (важно для setState, §6) */
+export function pruneOptionOverlay<T extends { value: string | number; label?: unknown; textValue?: string }>(
+  appOptions: readonly T[],
+  overlay: readonly OptionOverlayEntry[],
+): readonly OptionOverlayEntry[]
+/** Наложить активные записи на итоговый список (§6) */
+export function applyOptionOverlay<
+  T extends { value: string | number; label?: unknown; textValue?: string; data?: unknown },
+>(options: readonly T[], overlay: readonly OptionOverlayEntry[]): T[]
+```
+
+Существующая `getOptionLabel` (публичный экспорт) не удаляется: её тело делегирует `getOptionText`. Для текущих
+данных (без `textValue`) результат тот же.
+
+#### 2.2. Публичные типы полей (`libs/forms`, `types/option-types.ts` и `types/field-types.ts`)
+
+```ts
+export interface BaseOption<T = string, TData = unknown> {
+  label: ReactNode
+  value: T
+  disabled?: boolean
+  /** Строка для поиска, typeahead, подписи в триггере и проверки дублей, когда label — не строка */
+  textValue?: string
+  /** Данные приложения — приходят в renderOption/renderValue/onUpdate */
+  data?: TData
+}
+export interface GroupableOption<T = string, TData = unknown> extends BaseOption<T, TData> {
+  group?: string
+}
+export interface EditableOptionFlag {
+  /** false — у этой опции нет карандаша (этап Б) */
+  editable?: boolean
+}
+export type SelectFieldOption<TData = unknown> = BaseOption<string | number, TData> & EditableOptionFlag
+export type ComboboxFieldOption<T = string, TData = unknown> = GroupableOption<T, TData> & EditableOptionFlag
+export interface OptionRenderState {
+  selected: boolean
+  disabled: boolean
+}
+
+export interface SelectFieldProps<TData = unknown> extends BaseFieldProps {
+  options?: SelectFieldOption<TData>[]
+  getGroup?: (option: SelectFieldOption<TData>) => string | undefined
+  // этап А
+  renderOption?: (option: SelectFieldOption<TData>, state: OptionRenderState) => ReactNode
+  renderValue?: (option: SelectFieldOption<TData>) => ReactNode
+  // этап Б
+  onUpdate?: UpdateOptionHandler<SelectFieldOption<TData>, TData>
+  onCreate?: CreateOptionHandler<TData>
+  createLabel?: string
+  /** false — без встроенного пункта «+ Добавить…»; кнопку ставит приложение (CreateButton в listFooter). По умолчанию true */
+  createItem?: boolean
+  /** Подвал выпадающего списка */
+  listFooter?: ReactNode
+  // valueType, clearable, size, variant — без изменений
+}
+
+export interface ComboboxFieldProps<T = string, TData = unknown> extends BaseFieldProps {
+  options?: ComboboxFieldOption<T, TData>[]
+  // useQuery/getLabel/getValue/getGroup/getDisabled/... — без изменений
+  // этап А
+  renderOption?: (option: ComboboxFieldOption<T, TData>, state: OptionRenderState) => ReactNode
+  /** Строка элемента запроса, когда getLabel возвращает ReactNode */
+  getTextValue?: (item: TData) => string
+  // этап Б
+  getEditable?: (item: TData) => boolean
+  onUpdate?: UpdateOptionHandler<ComboboxFieldOption<T, TData>, TData>
+  onCreate?: CreateOptionHandler<TData>
+  createLabel?: string
+  createItem?: boolean
+  listFooter?: ReactNode
+  /** Пустой список: своё содержимое вместо emptyMessage (например с CreateButton) */
+  renderEmpty?: (search: string) => ReactNode
+}
+```
+
+- **Почему у Select generic только `TData`, без `TValue`.** С ограничением `TValue extends string | number` TS
+  выводит из `options` литеральный union (`'roof' | 'base'`), и тогда `onCreate`/`onUpdate`, вернувшие новый id,
+  перестают типизироваться. Значения Select остаются `string | number`, как сейчас.
+- **Вывод `TData`.** `options={items.map((i) => ({ label: i.name, value: i.id, data: i }))}` → `TData = Item`;
+  `renderOption`/`onUpdate` — стрелки без аннотации, контекстно-зависимые, TS выводит их параметр после `options`.
+  У Combobox с `useQuery` `TData` уже есть (тип элемента запроса); поле кладёт `data: item` в опцию само.
+- **`data` необязательна** (`TData | undefined`): у созданной через `onCreate` опции и у наложенной правки без
+  `data` её честно нет. В доке — `option.data?.city`.
+- ⚠️ Вывод проверить под `tsgo` compile-only тестом (§12): у tsgo был свой расхождение с tsc в выводе generic
+  из колбэков (`.claude/docs/tsgo-generic-default-param-inference.md`).
+
+#### 2.3. Слоты — `@letar/forms-react` (React без UI-библиотеки, общий для обоих скинов)
+
+Новая папка `libs/forms-react/src/lib/selection/`: контексты, headless-хуки кнопок и состояние для
+`useFieldState`. Визуал кнопок — в скинах.
+
+```ts
+export interface SelectionEditButtonProps {
+  /** Своя иконка/текст; по умолчанию карандаш скина */
+  children?: ReactNode
+  /** По умолчанию «Изменить «<текст опции>»» (i18n formSelection.editOptionAria) */
+  'aria-label'?: string
+  /** По умолчанию «Изменить (F2)» (i18n formSelection.editOption + подсказка клавиши) */
+  title?: string
+}
+export interface SelectionCreateButtonProps {
+  /** По умолчанию «+ Добавить…» у Select и «+ Добавить "<поиск>"» у Combobox (createLabel, i18n) */
+  children?: ReactNode
+}
+export interface SelectionSlotComponents {
+  EditButton: (props: SelectionEditButtonProps) => ReactElement | null
+  CreateButton: (props: SelectionCreateButtonProps) => ReactElement | null
+}
+
+/** Где стоит слот: в пункте, у значения (вне триггера) или внутри триггера (там слоты запрещены) */
+export type SelectionSlotScope = 'option' | 'value' | 'value-text'
+
+/** Контекст поля — ОДИН провайдер на поле, общий для всех слотов */
+export interface SelectionActionsContextValue {
+  pending: boolean
+  canCreate: boolean
+  hasOnUpdate: boolean
+  interactive: boolean // !disabled && !readOnly
+  search: string // текст поиска Combobox; '' у Select
+  runCreate: () => void
+  runEdit: (option: unknown, scope: 'option' | 'value') => void
+  strings: SelectionActionStrings // edit, editAria(text), create, createWithSearch(search), hotkeyHint
+}
+
+/** Контекст опции — поле ставит его вокруг renderOption, renderOptionActions, controlActions, renderValue */
+export interface SelectionOptionContextValue {
+  option: unknown // публичная опция после наложения правок
+  text: string // getOptionText(option), для aria-label
+  editable: boolean
+  scope: SelectionSlotScope
+}
+
+/** Headless: видимость, disabled, обработчики событий (stopPropagation — здесь, одинаково для скинов) */
+export function useSelectionEditButton(props: SelectionEditButtonProps): SelectionEditButtonState | null
+export function useSelectionCreateButton(props: SelectionCreateButtonProps): SelectionCreateButtonState | null
+/** Для useFieldState поля: pending, mountedRef, overlay, createdOptions, controlRef и конвейер run (§5) */
+export function useSelectionActionsState(options: UseSelectionActionsStateOptions): SelectionActionsState
+```
+
+Типизация статиков (`form-root/form-compound-types.ts` → `FormFieldComponents`, и дубль в `create-form.tsx` →
+`ExtendedFormField`):
+
+```ts
+export type SelectFieldComponent =
+  & (<TData = unknown>(props: SelectFieldProps<TData>) => ReactElement)
+  & SelectionSlotComponents
+export type ComboboxFieldComponent =
+  & (<T extends string = string, TData = unknown>(props: ComboboxFieldProps<T, TData>) => ReactElement)
+  & SelectionSlotComponents
+// FormFieldComponents.Select: SelectFieldComponent; FormFieldComponents.Combobox: ComboboxFieldComponent
+```
+
+Навеска (набросок): `createField` возвращает не-generic `(props: P) => ReactElement`
+(`forms-react/.../create-field-primitives.tsx:135–137`), поэтому generic и статики восстанавливаются приведением:
+
+```ts
+const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFieldState>({/* ... */})
+export const FieldSelect: SelectFieldComponent = Object.assign(
+  FieldSelectBase as <TData = unknown>(props: SelectFieldProps<TData>) => ReactElement,
+  { EditButton: SelectionEditButton, CreateButton: SelectionCreateButton },
+)
+```
+
+`FieldCombobox` получает **те же самые** компоненты: `Form.Field.Combobox.EditButton === Form.Field.Select.EditButton`.
+Поле определяется контекстом, а не тем, через какой статик слот взят. `assertSameKeys` (`declarative/index.ts:251`)
+сверяет только набор ключей `Form.Field` — не меняется.
+
+### 3. Как обойти сплющивание `label`
+
+**Сейчас.** Chakra: `field-select.tsx:190–195` отдаёт в UIKit `label: getOptionLabel(opt)` — строку; `ReactNode`
+превращается в `String(value)`. Сам примитив уже рисует `{opt.label}` в пункте (`uikit-chakra.tsx:219–231`, без
+`ItemText`), коллекция — `itemToString: getOptionLabel` (`uikit-chakra.tsx:177`). Combobox:
+`<Combobox.ItemText>{getOptionLabel(opt)}</Combobox.ItemText>` (`field-combobox.tsx:470, 479`). shadcn Select
+рисует `opt.label` в `ItemText` (`forms-shadcn/.../primitives/select.tsx`), то есть `ReactNode` там уже работает.
+
+**Решение.**
+
+1. **Коллекция остаётся строковой:** `itemToString: getOptionText` (`textValue` → строковый `label` →
+   `String(value)`). Что на ней держится: typeahead Select через `collection.search`
+   (`ZS/select.machine.mjs:586–593, 637–644` → `ZL/list-collection.mjs:249`), подпись `valueAsString`
+   (`ZS/select.machine.mjs:108`), `collection.toString()` с подписью внутри (`ZL/list-collection.mjs:432–440`) —
+   поэтому смена подписи сама запускает `syncCollection` (`ZS/select.machine.mjs:125–127`). В Combobox — текст
+   инпута при выборе пункта.
+2. **Отрисовка — из опции:** поле передаёт `label` как есть плюс `textValue: getOptionText(opt)`. Скин:
+   `<ItemText>{renderOption ? renderOption(o, state) : o.label}</ItemText>`. `state` поле считает само
+   (`selected = String(value) === o.value`, `disabled = o.disabled`) — хуки zag для этого не нужны.
+3. **Триггер.** `ValueText` Ark рисует `children || select.valueAsString || placeholder`
+   (`ARK/select/select-value-text.js`). С `renderValue` — `children = renderValue(selected)`; вернул пустое —
+   откат к строке. **Без `renderValue` в триггере строка (`getOptionText`), а не `ReactNode` из `label`:** триггер —
+   `<button>` (`ZS/select.connect.mjs:150–160`), а `label` приложения может содержать блоки и кнопки. `ReactNode`
+   в триггере — только явным `renderValue`.
+4. **`ReactNode` без `textValue`** — однократный dev-only `console.warn` на поле: «у опции `<value>` нестроковый
+   label без textValue — поиск и подпись в триггере покажут value».
+5. **Выбранная опция для `renderValue`** ищется по value в итоговом списке (после созданных и правок). Не
+   нашлась (async ещё не загрузился) — `children` нет, zag показывает подпись из своего кеша выбранных
+   (`ZL/selection-map.mjs:4–15`: `collection.find(value) ?? selectedItemMap.get(value)`).
+
+**Обратная совместимость.**
+
+- Строковые `label` — поведение то же (`textValue` нет → берётся `label`).
+- ⚠️ **Изменение поведения:** пункты с нестроковым `label` начнут рисовать сам `ReactNode` вместо `String(value)`.
+  Это исправление (тип всегда был `ReactNode`), но в CHANGELOG — отдельной строкой «Изменения поведения». Перед
+  релизом — греп потребителей (`label: <`, `label={<` рядом с `Field.Select`/`Combobox`).
+- Содержимое пункта Chakra теперь в `Select.ItemText` (recipe `itemText: { flex: 1 }`, `CR/select.js:100–102`) —
+  визуально то же, снапшоты могут сдвинуться.
+- `getOptionLabel` получает `textValue` — для данных без `textValue` результат прежний.
+- Новые поля UIKit необязательные — vue/angular не трогаем.
+
+### 4. Слоты `EditButton` и `CreateButton`
+
+#### 4.1. Слои
+
+| Слой               | Что                                                                                                          | Где                                                                                                                                                                             |
+| ------------------ | ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `forms-core/uikit` | типы, `getOptionText`, `isOptionEditable`, функции наложения                                                 | `types.ts`, `creatable-options.ts`, новый `editable-options.ts`                                                                                                                 |
+| `forms-react`      | два контекста, `useSelectionActionsState` (для `useFieldState`), headless-хуки кнопок                        | новый `src/lib/selection/`                                                                                                                                                      |
+| скин               | визуал кнопок; где рисовать `controlActions`/`renderOptionActions`/`listFooter`; заполнение `controlRef`; F2 | `libs/forms`: `uikit-chakra.tsx`, новый `selection/selection-slots.tsx`; `forms-shadcn`: `primitives/select.tsx`, `primitives/combobox.tsx`, новый `fields/selection-slots.tsx` |
+| поле               | состояние, сборка провайдеров, перевод публичной опции ↔ UIKit-опции                                         | `field-select.tsx`, `field-combobox.tsx` в обоих скинах                                                                                                                         |
+
+Визуал: Chakra — `IconButton` + `LuPencil` (`react-icons/lu`, уже используется в `libs/forms`); shadcn — `<button>`
+
+- `Pencil` из `lucide-react`.
+
+#### 4.2. Провайдеры и где стоят кнопки по умолчанию
+
+- **Контекст поля** — `render` поля оборачивает весь примитив в `<SelectionActionsProvider>`. Значение
+  собирается в `render` из `fieldState` и `applyValue` (`field.handleChange` есть только в `render`, а хуки там
+  запрещены — `createField` зовёт `render` внутри `<form.Field>`). Объект новый на каждый рендер, без memo:
+  дёшево, слоты перерисовываются вместе с полем.
+- **Контекст опции** — поле оборачивает:
+  - вывод `renderOption` приложения → `scope: 'option'`;
+  - кнопки по умолчанию → `renderOptionActions={props.renderOption ? undefined : (o) => o.editable ? <EditButton/> : null}`
+    в провайдере `scope: 'option'`;
+  - `controlActions` → `<EditButton/>` в провайдере выбранной опции, `scope: 'value'`, если значение выбрано,
+    опция редактируема и поле `interactive`;
+  - вывод `renderValue` → `scope: 'value-text'`.
+- **Правило «свой рендер — свои кнопки»:** если задан `renderOption`, карандаш в пунктах автоматически НЕ
+  рисуется — приложение ставит `<Form.Field.Select.EditButton />` в своём рендере там, где нужно (или не ставит).
+  Карандаш у выбранного значения от `renderOption` не зависит. Автодетекция «есть ли EditButton в рендере»
+  отвергнута: она работает только после эффекта (мигание) и неочевидна. Открытый вопрос №3.
+
+#### 4.3. `EditButton` — поведение
+
+| Ситуация                                                                     | Что рендерит                                       |
+| ---------------------------------------------------------------------------- | -------------------------------------------------- |
+| вне поля (нет контекста поля) или вне опции                                  | `null` + dev-предупреждение                        |
+| `scope: 'value-text'` (внутри `renderValue`, то есть внутри `<button>`)      | `null` + dev-предупреждение про вложенную кнопку   |
+| у поля нет `onUpdate`                                                        | `null` + dev-предупреждение                        |
+| опция не редактируема (`editable: false`, `disabled`, value `''`, служебная) | `null`                                             |
+| поле `disabled` или `readOnly`                                               | `null`                                             |
+| идёт действие (`pending`)                                                    | кнопка `disabled`                                  |
+| `scope: 'option'`                                                            | `tabIndex={-1}`, `aria-hidden`, гасит события (§7) |
+| `scope: 'value'`                                                             | обычная кнопка в Tab-порядке, `aria-label`         |
+
+Клик → `runEdit(option, scope)`. В пункте кнопка гасит `pointerdown`, `pointerup`, `click` (`stopPropagation`,
+у `click` ещё `preventDefault`) — причины по каждому скину в §7.
+
+#### 4.4. `CreateButton` — поведение
+
+- Нет контекста поля → `null` + dev-предупреждение; у поля нет `onCreate` → `null`; `scope: 'value-text'` → `null`.
+- Select: `runCreate()` → `onCreate('')`. Combobox: `onCreate(search.trim())` — текст из контекста поля.
+- Путь тот же, что у встроенного пункта «+ Добавить…»: закрыть список → окно приложения → результат →
+  опция добавляется и выбирается (§5). Встроенный пункт (`CREATE_OPTION_VALUE`) переводится на тот же `runCreate`,
+  `creatingRef` удаляется: один `pending` на поле — пункт, `CreateButton` и `EditButton` не запускаются
+  параллельно.
+- Внутри списка (`listFooter`, `renderEmpty`): атрибут `data-no-autofocus` — zag пропускает его при начальном
+  фокусе (`ZQ/initial-focus.mjs:13`), фокус при открытии остаётся на Content. Кнопка гасит всплытие `keydown`
+  Enter/Space — иначе Content превратит Enter в выбор подсвеченного пункта и `preventDefault` отменит нативную
+  активацию кнопки (`ZS/select.connect.mjs:405–407, 417–419`).
+
+#### 4.5. Встроенный пункт «+ Добавить…» и свой рендер
+
+- В `renderOption` не попадает никогда (`isCreateOptionValue` — скин рисует его сам: `+ ${createLabel}`), карандаша
+  не получает (`isOptionEditable` исключает `CREATE_OPTION_VALUE`).
+- Отдельный `renderCreate` не вводим: текст — через `createLabel`; другое место — `createItem={false}` +
+  `CreateButton` в `listFooter` (Select, Combobox) или в `renderEmpty` (Combobox, пустая выдача).
+- «Рядом с меткой поля» так не сделать: метка — `<label>`, а `<button>` — labelable-элемент, внутри чужого
+  `<label>` недопустим (HTML: label не содержит labelable-потомков, кроме своего контрола). Нужен отдельный слот
+  `labelAddon` рядом с меткой, вне `<label>`, — в первую итерацию не входит (открытый вопрос №6).
+- ⚠️ Клавиатура: в Select `CreateButton` из подвала достижим Tab-ом (`isValidTabEvent` пропускает Tab, когда в
+  Content есть tabbable — `ZQ/initial-focus.mjs:17–25`). В Combobox фокус в инпуте, Tab уводит из поля — кнопка
+  в подвале с клавиатуры недостижима. Поэтому в доке: `createItem={false}` у Combobox — только если у
+  пользователя клавиатуры есть другой путь; по умолчанию оставлять встроенный пункт.
+
+#### 4.6. `DeleteButton` — не делаем, место оставлено
+
+- Расширение симметрично: `SelectionActionKind` получает `'delete'`, `SelectionSlotComponents` — `DeleteButton`,
+  `onDelete(option) → Promise<boolean>`, конвейер `run` (§5) уже общий по виду действия, `OptionOverlayEntry` —
+  флаг `removed` (опция скрыта до перезапроса; правило прюнинга «приложение больше не отдаёт value» ложится
+  естественно).
+- Почему не сейчас: владелец исключил; удаление записи справочника из формы необратимо и задевает другие
+  сущности, которые на неё ссылаются. По правилу студии необратимое действие требует окна подтверждения со
+  знанием о ссылках, а оно есть только у приложения. Выбранное значение после удаления повисает без подписи.
+  Потребителя нет.
+
+### 5. Поведение и состояния
+
+**Конвейер `run`** (общий для edit и create, живёт в `forms-react`):
+
+```
+run(kind, option?, scope):
+  1. pendingRef.current || !mountedRef.current → выход      // двойной клик, F2 дважды, пункт + кнопка
+  2. pendingRef.current = true; setPending(true)
+  3. edit: baselineText = текст опции ПРИЛОЖЕНИЯ (для §6)
+  4. controlRef.current?.close()                             // Chakra: api.setOpen(false), ZS/select.connect.mjs:76–80
+  5. scope === 'option' → controlRef.current?.focusTrigger() // синхронно; Chakra: api.focus(), ZS/select.connect.mjs:73–75
+     scope === 'value'  → фокус остаётся на карандаше: он и вызвал окно
+  6. обработчик приложения вызывается СИНХРОННО в том же обработчике события (как onCreate сейчас)
+  7. .then(result => mounted && result && apply(kind, result, option))
+     .finally(() => { pendingRef.current = false; mounted && setPending(false) })
+     // reject не глотается — unhandled rejection, та же политика, что у onCreate (field-select.tsx:172–173)
+```
+
+**Почему фокус переводится синхронно — и почему этого достаточно.**
+
+- zag Select при закрытии сам возвращает фокус на триггер, но в `raf` (`ZS/select.machine.mjs:320–334` → действие
+  `focusTriggerEl`, `549–555`).
+- Модальное окно Chakra (zag dialog) включает ловушку фокуса тоже в `raf` (`ZF/index.mjs:6–27`) и запоминает
+  элемент, активный в момент включения (`ZF/focus-trap.mjs:609`), — туда вернёт фокус при закрытии.
+- Без шага 5 активным в этот момент может оказаться карандаш внутри уже скрытого Content — и после закрытия
+  окна фокус уйдёт в `body`. Синхронный `focusTrigger` делает результат независимым от порядка двух `raf`.
+  Поздний `raf` Select-а внутри уже открытого окна ловушка вернёт обратно (`ZF/focus-trap.mjs:71–79`).
+- Radix: при закрытии Content фокус возвращается на триггер в cleanup (`RX:466`, `onUnmountAutoFocus`); плюс
+  явный `focusTrigger` через ref триггера.
+
+**`apply` для edit:**
+
+```
+fromValue = String(option.value)
+fromValue есть в createdOptions и НЕТ в опциях приложения → правим запись в createdOptions (label, value, data)
+иначе → overlay = upsertOptionOverlay(overlay, { fromValue, label, value, data, hasData: 'data' in result, baselineText })
+текущее значение поля === fromValue (проверка на момент РЕЗОЛВА) && String(result.value) !== fromValue
+  → applyValue(result.value) с учётом valueType
+Combobox: опция выбрана → setInputValue(result.label)
+```
+
+- Правка подписи при том же value **не** вызывает `handleChange`: форма не становится dirty, `dirtyGuard` не
+  срабатывает. Смена value у выбранной опции — обычное изменение значения, форма dirty.
+- Невыбранная опция после правки **не** выбирается: правка ≠ выбор (открытый вопрос №2).
+- `null` — ничего не меняется; фокус там, куда вернуло окно; Combobox сохраняет текст поиска.
+- `reject` — `pending` снят, повторный клик работает.
+- `disabled` поле — слоты не рисуются, список не открывается. `readOnly` — слоты не рисуются; `readOnly`
+  передаётся в UIKit (zag учитывает его в `isInteractive`, `ZS/select.machine.mjs:102`).
+- Поле размонтировалось при открытом окне — результат игнорируется (`mountedRef`), `handleChange` не вызывается.
+- Опции поменялись, пока окно открыто (async), — правка ложится по `fromValue` при следующем рендере; опции
+  нет — запись инертна (§6).
+- **apply для create** — как сейчас (`addCreatedOption` + `applyValue`), плюс `data`.
+- **Окно приложения** — по образцу `useQuickCreate` потребителя `onCreate` (Promise + resolver, повторный вызов
+  отвечает `null` старому обещанию). Урок оттуда в доку: без вложенного `<form>` в окне — React-событие `submit`
+  всплывает из портала по дереву компонентов до внешней формы и отправляет её.
+
+### 6. Наложение правок и слияние с опциями приложения
+
+**Конвейер опций в `useFieldState`:**
+
+```
+appOptions = componentProps.options ?? resolved.options ?? []   // Combobox: static options или из queryData
+active     = pruneOptionOverlay(appOptions, overlay)            // нечего убирать → тот же массив
+if (active !== overlay) setOverlay(active)                      // фиксировать в state, чтобы запись не «воскресла»
+merged     = mergeCreatedOptions(appOptions, createdOptions)    // правило onCreate: приложение сильнее
+withEdits  = applyOptionOverlay(merged, active)
+final      = withEdits + служебный пункт создания (если onCreate и createItem !== false)
+```
+
+`setState` во время рендера того же компонента — разрешённый паттерн «подстройка state при смене пропсов»;
+цикл конечен, потому что `pruneOptionOverlay` возвращает тот же массив, когда убирать нечего. Если линтер
+`react-hooks` возразит — `useEffect` с тем же сравнением ссылок. Главное — фиксировать в state, а не только
+выводить.
+
+**Правило «правка побеждает до перезапроса, потом уступает»** формализовано по тексту опции приложения, а не по
+ссылке на массив `options`: приложения пишут `options={data.map(...)}` прямо в рендере, ссылка новая каждый раз,
+и сброс по ссылке съел бы правку сразу, до ответа сервера.
+
+**`pruneOptionOverlay`** — запись устаревает только по положительному сигналу от приложения:
+
+| Случай       | Запись устарела, когда                                                                |
+| ------------ | ------------------------------------------------------------------------------------- |
+| value тот же | в `appOptions` есть `fromValue`, и его текст ≠ `baselineText` (пришла свежая подпись) |
+| value другой | в `appOptions` появился новый value (приложение знает о новой записи)                 |
+
+Отсутствие `fromValue` в `appOptions` сигналом **не** считается: во время async-загрузки `options = []`, и сброс
+по отсутствию вернул бы после загрузки старую подпись из кеша запроса.
+
+**`applyOptionOverlay`:**
+
+- value тот же — у опции `fromValue` заменить `label`, `textValue = label` и `data` (если `hasData`); `group`,
+  `disabled`, `editable` остаются от приложения;
+- value другой — опцию `fromValue` заменить на месте новой `{ label, value, data }`; если `fromValue` в списке нет —
+  дописать в конец, как созданную, чтобы выбранное новое значение имело подпись.
+
+**Крайние случаи.**
+
+- Сервер вернул прежнюю подпись (правка не сохранилась или менялись только данные) — запись живёт до
+  размонтирования поля. Лечится корректным `onUpdate`: возвращать то, что реально сохранено. Явный сигнал
+  перезапроса — открытый вопрос №5.
+- Приложение удалило опцию — запись инертна; выбранное значение висит без подписи, как у любого Select со
+  значением вне `options`.
+- Опции из schema meta (`resolved.options`, enum) не меняются — наложение живёт до размонтирования.
+- Правка опции, созданной через `onCreate`, до перезапроса — правится запись в `createdOptions`, наложение не
+  заводится; после перезапроса побеждает опция приложения (правило `onCreate`).
+- Две правки одной опции подряд — `upsert` по `fromValue`, `baselineText` остаётся от первой.
+- Правка с заменой value, затем правка уже новой опции — вторая запись по новому `fromValue`; первая уйдёт, когда
+  приложение отдаст новый value.
+- Ключи сравниваются как `String(value)` — как в `mergeCreatedOptions` (`creatable-options.ts:35–42`).
+
+### 7. Клавиатура и a11y
+
+**Что делает zag (Chakra).**
+
+- Открытый Select: фокус на Content (`tabIndex: 0`, `ZS/select.connect.mjs:381`), пункты фокус не получают —
+  подсветка через `aria-activedescendant` (`:378`). При открытии фокус получает первый tabbable внутри Content,
+  иначе сам Content (`ZQ/initial-focus.mjs:6–16`); элемент с `tabIndex=-1` не tabbable
+  (`ZQ/tabbable.mjs:134–138`). **Поэтому карандаш пункта обязан быть `tabIndex=-1`:** иначе при каждом открытии
+  фокус прыгнет на первый карандаш, а Enter на нём Content превратит в выбор пункта.
+- Content обрабатывает стрелки, Home/End, Enter/Space и typeahead по одному печатному символу без Ctrl/Meta
+  (`ZS/select.connect.mjs:392–429`, `ZQ/typeahead.mjs:33–35`). Trigger — то же плюс стрелки влево/вправо
+  (`:182–228`). **F2 не обрабатывает никто.**
+- Обработчики, переданные в Ark-часть, вызываются раньше обработчиков zag: `callAll(props[key], result[key])`
+  (`ZM:31–34`).
+- Пункт Select выбирается по `onClick`, и выбор пропускается при `event.defaultPrevented`
+  (`ZS/select.connect.mjs:261–265`). У Combobox такой проверки нет (`ZC/combobox.connect.mjs:383–389`) → карандаш
+  универсально делает `stopPropagation` на `click`. Radix выбирает мышью по `pointerup`, остальными — по `click`
+  (`RX:868–873`) → там карандаш гасит ещё `pointerup`/`pointerdown`.
+- Content Combobox гасит `pointerdown` (`ZC/combobox.connect.mjs:317–320`) — при клике по карандашу фокус
+  остаётся в инпуте.
+
+**Горячая клавиша — рекомендую F2** (общепринятое «изменить/переименовать»: Проводник, Excel, VS Code):
+
+- Select, список открыт: F2 на Content → `onEditHotkey(highlightedValue)` (из `useSelectContext()`); список
+  закрыт: F2 на триггере → выбранное значение.
+- Combobox: F2 в инпуте (его keymap F2 не трогает, `ZC/combobox.connect.mjs:190–245`) → подсвеченный пункт, если
+  список открыт, иначе выбранное значение.
+- Radix: F2 в `onKeyDown` пункта (фокус на самом пункте; свой обработчик вызывается до радиксового через
+  `composeEventHandlers`, а радиксовый игнорирует keydown не от себя — `RX:890–893`); закрыт — на триггере.
+- Нередактируемый пункт или нет подсветки — ничего не делаем, событие не гасим.
+- **Отвергнуто:** Ctrl/Shift+Enter в Select — Content обрабатывает Enter без учёта модификаторов и не смотрит
+  `defaultPrevented` (`ZS/select.connect.mjs:382–419`), пункт выбрался бы вместе с правкой. Буквы съест typeahead.
+- macOS-ноутбуки: F2 = Fn+F2 — записать в доке.
+
+**ARIA.**
+
+- Карандаш в пункте: `aria-hidden="true"` + `tabIndex=-1`. У `role=option` дети презентационные (ARIA), вложенную
+  кнопку скринридер всё равно не увидит, а `aria-hidden` сохраняет доступное имя пункта равным подписи —
+  `getByRole('option', { name: 'Кровля' })` в тестах и e2e продолжает работать при включённом `onUpdate`. Правило
+  axe `aria-hidden-focus` для `tabIndex=-1` должно проходить (не проверено — прогнать axe в e2e).
+- Доступный путь для клавиатуры и скринридера: (1) карандаш у выбранного значения — обычная кнопка в Tab-порядке
+  после триггера, `aria-label` «Изменить «<текст>»»; (2) F2 — `aria-keyshortcuts="F2"` на триггере и Content,
+  визуально скрытая подсказка через `aria-describedby` Content (`editHotkeyHint`, i18n
+  `formSelection.editHotkeyHint`).
+- Новые i18n-ключи в `selection-field-strings.ts` (ru/en): `formSelection.editOption` («Изменить»),
+  `formSelection.editOptionAria` («Изменить «{label}»»), `formSelection.editHotkeyHint` («F2 — изменить пункт»).
+- **Тач:** наведения нет — карандаш виден всегда (приглушённый, ярче на `[data-highlighted]`), не «по hover».
+  `_hover` Chakra уже под `@media (hover: hover)` — не оборачивать повторно
+  (`.claude/docs/chakra-hover-condition-already-media-gated.md`).
+- **Цель 44px:** на `@media (pointer: coarse)` пункт `minH="11"`, карандаш 44×44; на мыши — `IconButton` `xs` с
+  расширенной зоной нажатия (`_before` с отрицательным `inset`).
+- **Фокус-ловушки:** Chakra Content — не ловушка, но Tab без tabbable внутри гасится
+  (`ZS/select.connect.mjs:385–390` + `ZQ/initial-focus.mjs:17–25`). Radix Select — модальный, Tab гасится
+  (`RX:500`). У окна приложения своя ловушка; возврат фокуса — §5.
+
+### 8. Layout-ловушки
+
+- **Карандаш у значения — в `Select.IndicatorGroup`, не в `Trigger`:** триггер — `<button>`
+  (`ZS/select.connect.mjs:150–160`), вложенная кнопка — невалидный HTML. Порядок: `[ClearTrigger][EditButton][Indicator]`.
+- `IndicatorGroup` — `position: absolute`, `pointerEvents: none` (`CR/select.js:37–47`); `ClearTrigger` сам
+  включает `pointerEvents: auto` (`:122–128`) → карандашу то же `pointerEvents="auto"` и
+  `focusVisibleRing="inside"`, как у `ClearTrigger`.
+- Клик по карандашу у значения при открытом списке — это interact-outside: исключены только trigger и
+  clearTrigger (`ZS/select.machine.mjs:444`). Список закроется сам с `restoreFocus = false` для фокусируемой цели
+  (`:449`) — фокус остаётся на карандаше, это и нужно.
+- **Триггер не резервирует место под иконки:** у `ValueText` только `maxW: 80%` и `lineClamp: 1`
+  (`CR/select.js:118–121`). Третья иконка на узком поле наедет на текст → при `controlActions` триггеру
+  `pe` на ширину группы. Проверка в e2e геометрией: правый край `ValueText` ≤ левого края `IndicatorGroup`.
+- **Combobox:** отступ инпута считается селекторами `:has([data-part=trigger])`/`clear-trigger` через
+  `--padding-factor` (`CR/combobox.js:20–33`) и о карандаше не знает → своё правило
+  `&:has([data-letar-slot=edit-value])` увеличивает `--padding-factor` на один индикатор.
+- **Пункт:** recipe `item` — flex, `justifyContent: space-between` (`CR/select.js:74–96`); `ItemIndicator` у
+  невыбранных скрыт атрибутом `hidden` (`ZS/select.connect.mjs:290`). Карандаш между текстом и индикатором прыгал
+  бы у выбранной строки → порядок `[ItemText flex=1 minW=0][ItemIndicator][карандаш flexShrink=0]`: карандаш
+  всегда у правого края.
+- **disabled-пункт:** `pointerEvents: none` (`CR/select.js:88–91`) — карандаш недостижим мышью, поэтому
+  `isOptionEditable` исключает `disabled`.
+- **Длинные подписи:** `ItemText` переносится (`minW=0`), карандаш не сжимается.
+- **`renderValue` и обрезка:** `lineClamp: 1` (`display: -webkit-box`) обрезает только инлайн-содержимое;
+  flex/блочный корень из `renderValue` клампом не режется. При `renderValue` скин ставит `ValueText`
+  `display="flex" minW="0" overflow="hidden"`, текстовую часть приложение обрезает само (`truncate`). Только
+  фразовое содержимое, без кнопок и ссылок.
+- **Portal:** список в `Portal` (`uikit-chakra.tsx:211`) — стили, завязанные на DOM-предка поля, в `renderOption`
+  не действуют; React-контекст через портал проходит.
+- **Обрезка focus ring:** Content — `overflowY: auto` (`CR/select.js:54–72`). Карандашу пункта кольцо не нужно
+  (`tabIndex=-1`); кнопкам в подвале — `focusVisibleRing="inside"` (аналог
+  `.claude/docs/pressable-overflow-clips-focus-ring.md`).
+- **Подвал `listFooter`:** Content скроллится сам → подвал `position: sticky; bottom: 0` на `bg.panel`.
+- **Не рисовать два карандаша** для мобильного и десктопа через `display={{ base, md }}` — дубль в DOM
+  (`.claude/docs/react-duplicate-responsive-dom.md`); один элемент с адаптивным размером.
+- **Поле в flex-строке с одним `maxW`** схлопывается до стрелки (`.claude/docs/chakra-select-flex-item-maxw-collapse.md`),
+  лишняя иконка это усилит — демо проверяет `w` + `maxW`.
+
+### 9. Combobox
+
+**Входит в обе итерации (Chakra).**
+
+- **А:** `renderOption` (в `Combobox.ItemText`), `textValue`/`getTextValue`, `data` (в пути `useQuery` —
+  `data: item` автоматически); нестроковый `label` в пунктах больше не сплющивается; инпут, фильтр `contains`,
+  `shouldOfferCreate` и эффект начальной подписи работают по `getOptionText`.
+- **`renderValue` нет:** значение Combobox — текст инпута, свой вид выбранного значения внутри поля ввода
+  противоречит вводу.
+- **Б:** `onUpdate`, карандаш в пунктах и у значения (`IndicatorGroup`: `[Spinner][Clear][Edit][Trigger]`), F2 в
+  инпуте, `CreateButton` (`onCreate(search.trim())`), `listFooter`, `renderEmpty(search)` → `emptyContent`,
+  `createItem`.
+
+**Особенности.**
+
+- **async:** наложение применяется к опциям из `queryData`; прюнинг — по тексту, отсутствие опции на текущей
+  странице выдачи не сигнал (§6). Фильтрация по тексту — после наложения.
+- **Выбранное значение вне текущей выдачи** (`initialLabel`): у карандаша значения нет полной опции →
+  `onUpdate` получит `{ value, label: текущий текст инпута }` без `data`. Смягчение: поле кеширует последнюю
+  выбранную опцию из `onValueChange` (`details.items[0]`) — после выбора в этой сессии `data` будет. Открытый
+  вопрос №7.
+- **`initialSearchValue`:** карандаш у значения — только при непустом value, а не по тексту инпута.
+- После `onUpdate` выбранной опции — `setInputValue(label)`, как у `onCreate` (`field-combobox.tsx:407–412`).
+- Закрытие: `useComboboxContext()` → `api.setOpen(false)` (`ZC/combobox.connect.mjs:96–100`); `CLOSE` текст не
+  откатывает (`ZC/combobox.machine.mjs:455–462`: только `invokeOnClose` и `setFinalFocus`); `api.focus()` → инпут
+  (`ZC/combobox.connect.mjs:93–95`).
+
+### 10. shadcn-скин
+
+**Паритет:** те же пропсы и слоты, те же headless-хуки из `forms-react`; визуал — `Pencil` из `lucide-react`.
+
+**Отличия Radix от zag** (`RX`):
+
+- Фокус — настоящий DOM-фокус на пунктах (`tabIndex: -1`, фокус по `pointermove`, `:860–884`), не
+  `aria-activedescendant` → «подсвеченный» пункт = `document.activeElement`; F2 — в `onKeyDown` пункта.
+- Выбор мышью — `pointerup`, иначе `click` (`:868–873`) → карандаш гасит `pointerdown`/`pointerup`/`click`.
+- Подпись триггера копируется порталом из `ItemText` выбранного пункта, только если у `Value` нет `children`
+  (`:943`) → всегда передаём `children` у `Value` = `renderValue(sel) ?? getOptionText(sel)`. Тогда `ItemText` не
+  портируется, и ни `renderOption`, ни карандаш в триггер не утекут. Typeahead — по `textValue` пункта
+  (`:815–821, :1178`) → передавать `textValue`.
+- Content модальный (FocusScope, скрытие остального от AT, блок внешних pointer-событий) → окно приложения при
+  открытом списке недоступно; «сначала закрыть» обязательно. Закрытие — контролируемый `open` внутри примитива
+  плюс ref триггера для `focusTrigger`.
+- Карандаш у значения — сосед `Trigger` в обёртке `relative` (Radix `Root` своего DOM не рендерит).
+
+**Не достичь / долг.**
+
+- Существующая кнопка очистки — `span role="button"` **внутри** `Trigger` (`primitives/select.tsx`): невалидная
+  вложенность, в этой задаче не чиним — записать долгом.
+- Группы в shadcn Select не поддержаны (`getGroup` нет) — не расширяем.
+- shadcn Combobox — Popover + `div role="option"` без клавиатурной навигации и подсветки → F2 нет; только
+  карандаш мышью/тапом, карандаш у значения и `CreateButton` в подвале/пустом состоянии. Клавиатура Combobox —
+  к уже записанному долгу shadcn Combobox (async-поиск).
+
+### 11. Пространство имён и `extraSelects`
+
+- `Form.Select.*` — `extraSelects` + `lazySelects` приложения (`create-form.tsx:368–371`), `Form.Combobox.*` —
+  аналогично; `Form.Field.*` — поля библиотеки плюс `extraFields` поверх (`create-form.tsx:357–360`). Слоты — это
+  статические члены компонента `Form.Field.Select`/`Form.Field.Combobox`, а не ключи `Form.Select`: ключ
+  приложения `EditButton` в `extraSelects` их не перекрывает.
+- Статики переживают `{ ...Form.Field, ...extraFields }`: копируется ссылка на функцию, свойства остаются на ней.
+  Единственная коллизия — `extraFields: { Select: … }` заменяет поле целиком вместе со статиками;
+  задокументировать (предупреждения в `createForm` сейчас нет).
+- `lazySelects`: `createLazyComponent` оборачивает компонент приложения (`lazy-component.tsx:43–54`) — статики на
+  ленивой обёртке не нужны: слот берётся из синхронного `Form.Field.Select` и находит поле через контекст,
+  поэтому работает и в `renderOption` обёртки. `AppForm.Select.Status.EditButton` не существует и не нужен.
+  Обёртки на `FieldCombobox` напрямую (async-фабрики приложений) получают `FieldCombobox.EditButton` так же.
+- **Обёртки обязаны пробрасывать** `renderOption`/`renderValue`/`onUpdate`/`createItem`/`listFooter`/`renderEmpty` —
+  тот же урок, что с `onCreate` (`docs/fields.md`, «Своя обёртка над Select/Combobox…»). Абзац дополнить.
+- **SSR/RSC:** слоты — клиентские компоненты модуля `'use client'`; `renderOption` — функция, из Server Component
+  не передаётся; `Form.Field.Select.EditButton` в серверном файле — «точка в клиентский модуль»
+  (`.claude/docs/nextjs-compound-component-server-boundary.md`), то же ограничение, что у всего `Form.Field.*`.
+
+### 12. План тестов
+
+**Среда.** vitest + jsdom, как в `field-select-oncreate.spec.tsx`: заглушки `ResizeObserver`,
+`scrollTo`/`scrollIntoView`; клики — `userEvent` (настоящие pointer-события: zag игнорирует программные, см.
+заметку про NumberInput/Checkbox); F2 — `userEvent.keyboard('{F2}')`. Действия zag в `raf` (фокус на триггер)
+ждать через `waitFor`. Radix (shadcn) — заглушки `hasPointerCapture`/`setPointerCapture`/`releasePointerCapture`/
+`scrollIntoView` и открытие через `pointerDown`, как в `forms-shadcn/.../field-select-oncreate.spec.tsx`.
+
+**Этап А.**
+
+1. `renderOption` рисует свой узел в пункте; `state.selected` верный; доступное имя пункта — из содержимого.
+2. Typeahead на закрытом триггере и на открытом списке идёт по `textValue`.
+3. `renderValue` — в триггере у выбранной; без значения — placeholder; `renderValue` вернул `null` — строка.
+4. `ReactNode`-label без `renderValue`: триггер показывает `textValue`; без `textValue` — `String(value)` и
+   одно dev-предупреждение.
+5. Изменение поведения: пункт с `ReactNode`-label рисует узел, а не `String(value)`.
+6. Типы: compile-only `*.spec.tsx`, который проходит `typecheck:tsgo` (`tsconfig.spec.json`): `TData` выводится из
+   `options`, `// @ts-expect-error` на несуществующем поле `option.data`; литеральный union value не выводится.
+7. Регрессия: `getGroup` + `renderOption`; служебный пункт `onCreate` в `renderOption` не попадает (spy);
+   `value: ''` выбирается и показывается (`hasEmptyOption`, `uikit-chakra.tsx:167–171`); `valueType: 'number'`.
+8. Combobox: `renderOption`, `getTextValue`, `data: item` из `useQuery`, фильтр по тексту, `initialLabel`.
+
+**Этап Б.**
+
+9. Карандаш есть в каждой опции при `onUpdate`; нет без `onUpdate`, при `editable: false`, `disabled`, value `''`.
+10. Клик по карандашу пункта: `onUpdate` получил публичную опцию с `data`; значение поля не изменилось; список
+    закрыт до резолва; `document.activeElement` — триггер в момент вызова `onUpdate`.
+11. Резолв `{ label: 'Новое', value: тот же }` у выбранной: подпись в списке и триггере обновилась; `isDirty` формы
+    `false`.
+12. Резолв с другим value у выбранной: значение поля — новое, старая опция заменена на месте.
+13. `null` — ничего; `reject` — ловится как unhandled rejection (`window` `unhandledrejection`), `pending` снят,
+    второй клик работает.
+14. `pending`: второй клик по карандашу, клик по встроенному «+ Добавить…» и `CreateButton` игнорируются, кнопки
+    `disabled`.
+15. Наложение: перерендер с той же подписью — правка держится; с новой подписью от приложения — побеждает
+    приложение; `options = []` (загрузка), затем прежняя подпись — правка держится; после прюнинга возврат к
+    `baselineText` — запись не воскресает.
+16. Созданная через `onCreate` → правка до перезапроса → подпись обновлена; приложение отдало value — побеждает
+    приложение.
+17. Карандаш у значения: виден при выбранной редактируемой опции; скрыт без значения, при `disabled`/`readOnly`;
+    `trigger.contains(pencil) === false`; клик → `onUpdate` с выбранной опцией, список не открывается, фокус
+    остаётся на карандаше.
+18. F2: открыть, ArrowDown, F2 → `onUpdate` с подсвеченной; F2 на закрытом триггере → выбранная; F2 на
+    нередактируемой — ничего; typeahead не сломан.
+19. Свой `renderOption` без `EditButton` → карандашей в пунктах нет, у значения есть; с `EditButton` внутри —
+    работает.
+20. `EditButton` вне поля и внутри `renderValue` → `null` + предупреждение; в триггере нет вложенных `button`.
+21. `CreateButton` в `listFooter`: Select → `onCreate('')`; Combobox с текстом → `onCreate(текст)`;
+    `createItem={false}` убирает встроенный пункт; Enter на `CreateButton` не выбирает подсвеченный пункт.
+22. При открытии списка с карандашами фокус на Content (`role=listbox`), а не на карандаше.
+23. Доступное имя пункта не меняется от карандаша: `getByRole('option', { name: 'Кровля' })` при `onUpdate`.
+24. Размонтирование при открытом окне → после резолва нет `handleChange` и ошибок.
+25. shadcn: пункты 9, 10, 12, 17, 20, 21 плюс «pointerup по карандашу не выбирает пункт».
+26. Регрессия `onCreate` целиком (`field-select-oncreate.spec.tsx`, `field-combobox-oncreate.spec.tsx` в обоих
+    скинах) после перевода на общий `runCreate`.
+
+**e2e (`form-develop-app`, реальный браузер).** Демо «Адрес доставки»: карандаш пункта → окно → сохранить →
+подпись обновилась, пункт не выбран; фокус после закрытия окна — на триггере (правка из пункта) и на карандаше
+(правка значения); F2; геометрия триггера (§8) на узкой ширине и на мобильном вьюпорте; `pointer: coarse` — 44px;
+axe на открытом списке (`aria-hidden-focus`). Ассерты скоупить на своё поле (`.claude/docs/e2e-testing.md`).
+
+### 13. Порядок реализации для `forms-dev`
+
+Каждый шаг — отдельный коммит, TDD (сначала падающий тест). Контракт и чистые функции — раньше скинов.
+
+**Этап А** — `forms` 2.19.0, `forms-core` 0.16.0, `forms-shadcn` 0.40.0 (`forms-react` не меняется):
+
+1. `forms-core`: `getOptionText`, `getOptionLabel` через неё; `textValue`/`data` в `UIKitSelectOption`;
+   `UIKitOptionRenderState`; `renderOption`/`renderValue`/`readOnly` в контракте; `CreatedOption.data`;
+   unit-тесты.
+2. `libs/forms` типы: `BaseOption<T, TData>`, `SelectFieldOption`, `OptionRenderState`, `SelectFieldProps<TData>`,
+   `ComboboxFieldProps` (`getTextValue`); `SelectFieldComponent`/`ComboboxFieldComponent` пока без статиков;
+   compile-only тест вывода.
+3. Chakra Select: `ItemText` + `renderOption`, `renderValue` в `ValueText`, `itemToString: getOptionText`,
+   `readOnly`; в `field-select.tsx` убрать сплющивание; dev-предупреждение; тесты 1–7.
+4. Chakra Combobox: тест 8.
+5. shadcn Select/Combobox: `textValue` у `Item`, `Value` с `children`, `renderOption`.
+6. Цикл синхронизации (ниже), версии, `bun.lock`.
+
+**Этап Б** — `forms` 2.20.0, `forms-core` 0.17.0, `forms-react` 0.12.0, `forms-shadcn` 0.41.0:
+
+1. `forms-core/uikit/editable-options.ts`: `isOptionEditable`, `upsert/prune/applyOptionOverlay`,
+   `SelectionActionKind`, `UpdatedOption` — чистые функции, таблица случаев §6 целиком в unit-тестах.
+2. `forms-react/selection/`: контексты, `useSelectionActionsState` (pending, mounted, overlay, created, `run`),
+   headless-хуки кнопок; тесты с фейковым `controlRef`.
+3. Chakra Select: слоты (`selection-slots.tsx`), `controlActions`/`renderOptionActions`/`listFooter`/`controlRef`/F2
+   в `uikit-chakra.tsx`; `field-select.tsx`: `onCreate` на `runCreate` (удалить `creatingRef`), `onUpdate`,
+   `createItem`; статики через `Object.assign`; типы в `form-compound-types.ts` и `create-form.tsx`; тесты 9–24, 26.
+4. Chakra Combobox (§9).
+5. shadcn (§10), тест 25.
+6. Цикл синхронизации, e2e-демо.
+
+**Цикл синхронизации из 6 групп** (`.claude/commands/forms-dev.md`) — после каждого этапа:
+
+1. **`libs/forms`:** `CHANGELOG.md` (у этапа А — строка «Изменения поведения», §3), `package.json`, `README.md`
+   (таблица пропсов Select/Combobox), `docs/fields.md` — раздел «Свой рендер опций и кнопки у опций» (F2 и Fn+F2
+   на macOS, правило «свой рендер — свои кнопки», наложение правок, окно без вложенного `<form>`) и дополнение
+   абзаца про обёртки.
+2. **`apps/form-develop-app`:** демо `/select-render-demo` (адрес доставки с `data`, карандаш, F2, `CreateButton` в
+   подвале) и расширение `/create-option-demo`; e2e.
+3. **`apps/form-docs`:** `content/docs/fields/select.mdx` + `select.ru.mdx`, страница Combobox, API reference.
+4. **`apps/form-example`:** пример «Адрес доставки — правка карандашом», расширить `examples/create-option`.
+5. **`libs/forms/NEW_COMPONENTS.md`.**
+6. **`libs/form-mcp`:** новые пропсы Select/Combobox в `get_field_props`/`get_field_example`; в `pattern-registry.ts`
+   — паттерн «справочник с правкой и созданием из формы», если реестр ведёт такие паттерны.
+
+После каждого bump версии — `bun scripts/check-lock-workspace-versions.mjs` и при расхождении отдельный коммит
+`bun.lock` (правило `app-workflow.md` §3.5).
+
+### 14. Риски и открытые вопросы
+
+**Риски.**
+
+- **Р1. Изменение поведения `ReactNode`-label** (§3): потребитель, который «чинил» это своим кодом, увидит двойную
+  подпись. Смягчение — греп потребителей до релиза и строка в CHANGELOG.
+- **Р2. Опора на внутренности zag/Radix** (порядок `raf`, `defaultPrevented`, `data-no-autofocus`): закрыто
+  тестами §12 и e2e; при обновлении Chakra/Radix — прогон этих тестов обязателен.
+- **Р3. `setState` в рендере** для прюнинга может не понравиться линтеру `react-hooks` — запасной вариант `useEffect`
+  (§6).
+- **Р4. Приведение типа у `createField`** (generic и статики): ошибка в сигнатуре не видна компилятору в реализации —
+  её ловит только compile-only тест вывода (§12, п. 6).
+- **Р5. Производительность:** значение контекста поля новое на каждый рендер — перерисовываются слоты поля; для
+  списков в сотни пунктов нормально, виртуализации у Select всё равно нет.
+
+**Открытые вопросы к владельцу** (по каждому — рекомендация):
+
+1. **Горячая клавиша.** F2 для подсвеченного пункта и для выбранного значения на закрытом триггере? —
+   _Рекомендую F2_ (стандарт, zag и Radix её не занимают; Ctrl/Shift+Enter конфликтуют с выбором, §7). Сделать
+   ли клавишу настраиваемой пропом — нет, пока нет запроса.
+2. **Выбирать ли опцию после правки**, если она не была выбрана? — _Рекомендую не выбирать:_ правка ≠ выбор,
+   владелец и так сказал «клик по карандашу не выбирает пункт».
+3. **Свой `renderOption` без `EditButton`** — карандашей в пунктах нет (явное правило), или авто-карандаш остаётся,
+   пока его не выключат пропом? — _Рекомендую явное правило_ «свой рендер — свои кнопки» (§4.2): предсказуемо,
+   без мигания.
+4. **`onUpdate` вернул другой value** (запись заменена): заменять опцию на месте и переключать значение, если
+   она была выбрана? — _Рекомендую да_ (§6); иначе форма ссылается на устаревшую запись.
+5. **Явный сигнал «список перезапрошен»** на случай, когда сервер вернул прежнюю подпись: проп `optionsKey`
+   (смена ключа сбрасывает все правки)? — _Рекомендую не делать в первой итерации_, описать в доке «возвращайте из
+   `onUpdate` то, что реально сохранено»; добавить при первом реальном случае.
+6. **`CreateButton` рядом с меткой поля** (слот `labelAddon` вне `<label>`) — нужен сразу? — _Рекомендую отложить:_
+   подвал списка и пустое состояние Combobox закрывают сценарий, а метку делят все поля выбора.
+7. **Combobox с `useQuery`:** значение, которого нет на текущей странице выдачи, уходит в `onUpdate` без `data`
+   (только value и текст) — приемлемо? — _Рекомендую принять_ и описать; приложение само догружает запись по
+   value. Проп `initialData` — только при реальном запросе.
+8. **Видимость карандаша на десктопе:** всегда (приглушённый) или только у подсвеченного пункта? —
+   _Рекомендую всегда:_ находимость и одинаковое поведение с тачем, где наведения нет.
+9. **`readOnly`-поле:** карандаш у значения скрыт? — _Рекомендую скрыть_, как у `disabled`: режим просмотра не
+   правит справочники.
+10. **Опция со значением `''`** («Все категории») по умолчанию не редактируема? — _Рекомендую да_ (это не запись
+    справочника); явный `editable: true` её не включает, чтобы правило было одним.
+11. **`createItem={false}` у Combobox** без клавиатурного пути к `CreateButton` (§4.5) — только предупреждение в
+    доке? — _Рекомендую да_, без рантайм-запрета.
+12. **shadcn Combobox без F2** (нет модели подсветки, §10) — принять долгом? — _Рекомендую принять_; чинить вместе с
+    клавиатурой shadcn Combobox.
 
 ## ✅ [2026-09-04] Миграция `zenstack-form-plugin` на нативные возможности ZModel
 
