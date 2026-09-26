@@ -2624,6 +2624,27 @@ ZenStack (§16.2, этап Б): демо на модели `Category` и нас�
 9. Цикл синхронизации, демо `/dependent-select-demo`, перевод демо `CascadingSelect` на новый API, e2e этапа З; в
    CHANGELOG `forms` — «Изменения поведения», если принят вопрос 50 (очистка nullable-поля пишет `null`).
 
+> ✅ **Этап З закрыт 2026-09-27** — `forms` 2.27.0, `forms-core` 0.24.0, `forms-react` 0.17.0, `forms-shadcn` 0.46.0,
+> `forms-query` 0.3.0, `zenstack-form-plugin` 4.4.0, `form-mcp` 2.5.0 (не запушено, не опубликовано). `dependsOn` у
+> `Field.Select`/`Field.Combobox` обоих скинов, `deps` во всех загрузчиках и действиях, очистка по правке родителя,
+> `@meta("form.dependsOn")`, паттерн `dependent-select` в `form-mcp`. Демо `/dependent-select-demo` (8 e2e-сценариев),
+> гайд `dependent-selects` в `form-docs`, `all-fields` в `form-example` переведён на новый API. Отклонения от плана:
+>
+> - Live-область очистки — на каждом зависимом поле, а не одна на форму (§18.15).
+> - `useSelected(value, deps)` получает `deps` вторым аргументом только у зависимого поля; у обычного вызов прежний.
+> - `useOptionsLoader` получил опцию `enabled`; `UIKitSelectProps` — `describedBy`.
+> - У shadcn корня формы нет: реестр подключает приложение по образцу `TestForm`; встроенные строки — только два ключа.
+> - Очистка nullable-поля пишет `''`, а не `null` (вопрос 50 — TODO).
+> - Демо `CascadingSelect` (`select-demo`, `form-develop-app-shadcn`) не переводились: компонент `@deprecated`, но не
+>   изменён, его e2e остаются как страховка от регрессии.
+> - Найдено по ходу: `Combobox` выставлял подпись значения один раз — восстановление черновика оставляло пустой инпут;
+>   исправлено в Chakra (2.27.0), **shadcn-Combobox имеет тот же дефект — в долге**.
+> - Долг: shadcn `Combobox` без клавиатурной навигации, `span role=button` в очистке shadcn `Select`, перестановка
+>   строк sortable-списка drag-and-drop (проверялся `moveFieldValues`), `@@validate` с полем связи в ZenStack v3,
+>   лишние загрузки из-за `initialOptions=[]` у `CascadingSelect`. Combobox по умолчанию `minChars=1` — в демо
+>   зависимых списков нужен `minChars={0}`.
+> - Абзац про `dependsOn` для `.claude/rules/forms.md` и semgrep-правило `@deprecated CascadingSelect` — за координатором.
+
 **Версии по этапам** (кто выпускается; `—` — не меняется):
 
 | Этап                    | `forms` | `forms-core` | `forms-react` | `forms-shadcn` | `forms-query` | `zenstack-form-plugin` | `form-mcp` |
