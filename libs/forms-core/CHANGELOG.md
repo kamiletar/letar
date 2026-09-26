@@ -4,6 +4,14 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.22.0] - 2026-09-26
+
+### Added
+
+- `FieldRegistryType` и `parseFieldRegistryType` (`@letar/forms-core/schema`): ссылка на компонент реестра `createForm`
+  в `ui.fieldType` (`Select.<Имя>` / `Combobox.<Имя>` / `Listbox.<Имя>`); `FieldRegistryType` входит в тип `fieldType`
+  метаданных.
+
 ## [0.21.0] - 2026-09-26
 
 ### Added

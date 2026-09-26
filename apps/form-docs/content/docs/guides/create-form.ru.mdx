@@ -140,6 +140,29 @@ export const DrivingSchoolForm = createForm({
 })
 ```
 
+## Ключи реестра в схеме (v2.25.0+)
+
+Справочник с окном создания и правки — компонент приложения, зарегистрированный в `createForm`. Из `schema.zmodel` на
+него ссылаются **ключом** в `form.fieldType`: `Form.AutoFields` и `Form.Field.Auto` рисуют тот же компонент, что и
+ручная форма:
+
+```zmodel
+model Work {
+  categoryId String @meta("form.fieldType", "Select.WorkCategory")
+}
+```
+
+```tsx
+import type { FormComboboxKey, FormSelectKey } from '@/generated/form-schemas'
+
+// typecheck падает, если ключ из схемы не зарегистрирован выше
+export const check: FormRegistryCheck<typeof AppForm, FormSelectKey, FormComboboxKey> = true
+```
+
+Грамматика ключа — `Select.<Имя>` / `Combobox.<Имя>` / `Listbox.<Имя>`. Ключи пишет
+`@letar/zenstack-form-plugin` ≥ 4.2.0 в `form-registry-keys.ts`. Неизвестный ключ в dev/test — исключение со списком
+доступных, в production — один `console.error` и базовый `Select`.
+
 ## Возвращаемый тип
 
 | Свойство              | Описание                        |

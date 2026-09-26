@@ -189,6 +189,29 @@ export const DrivingSchoolForm = createForm({
 })
 ```
 
+## Registry keys in the schema (v2.25.0+)
+
+A dictionary with its own create/edit dialog is an app component registered in `createForm`. Point at it from
+`schema.zmodel` with a **registry key** in `form.fieldType`, and `Form.AutoFields` / `Form.Field.Auto` render the same
+component as a hand-written form:
+
+```zmodel
+model Work {
+  categoryId String @meta("form.fieldType", "Select.WorkCategory")
+}
+```
+
+```tsx
+import type { FormComboboxKey, FormSelectKey } from '@/generated/form-schemas'
+
+// typecheck fails if a key from the schema is not registered above
+export const check: FormRegistryCheck<typeof AppForm, FormSelectKey, FormComboboxKey> = true
+```
+
+The key grammar is `Select.<Name>` / `Combobox.<Name>` / `Listbox.<Name>`. The keys are written by
+`@letar/zenstack-form-plugin` >= 4.2.0 to `form-registry-keys.ts`. An unknown key throws in dev/test with the list of
+available keys; in production it logs once and renders a plain `Select`.
+
 ## Full Return Type
 
 `createForm()` returns an extended `Form` component with all built-in features:

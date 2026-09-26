@@ -4,6 +4,25 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.25.0] - 2026-09-26
+
+### Added
+
+- **Ключ реестра `createForm` в схеме** (этап Е): `@meta("form.fieldType", "Select.WorkCategory")` — `Form.AutoFields` и
+  `Form.Field.Auto` рисуют компонент из `extraSelects`/`lazySelects`/`extraComboboxes`/`lazyComboboxes`/`extraListboxes`
+  инстанса. Грамматика `^(Select|Combobox|Listbox)\.[A-Z][A-Za-z0-9]*$`; `form.props.*` доходят до компонента.
+  Ключи выпускает `@letar/zenstack-form-plugin` 4.2.0 (`form-registry-keys.ts`).
+- `createForm` — generic: ключи реестра выводятся из `extra*`/`lazy*`; `FormRegistryCheck<typeof AppForm,
+  FormSelectKey, FormComboboxKey>` роняет typecheck на незарегистрированном ключе; `useFormRegistry()`.
+- `RegistryField`, `FormRegistryContext` (экспорт из `@letar/forms`).
+
+### Изменения поведения
+
+- Неизвестный `fieldType` в схеме: в dev/test — `console.warn` (вместо тихого текстового поля). Неизвестный ключ
+  реестра: dev/test — исключение со списком доступных ключей, production — один `console.error` на ключ и базовый
+  `Select`. Ключ и `form.relation.*` на одном поле — побеждает ключ (dev-предупреждение).
+- Ключи реестра требуют `@letar/forms` ≥ 2.25.0: со старой версией они молча рисуются текстовым полем.
+
 ## [2.24.0] - 2026-09-26
 
 ### Added

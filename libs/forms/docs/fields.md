@@ -202,6 +202,46 @@ Chakra-скин; в shadcn-скине поля поиска нет (`searchable:
 | варианты приходят с сервера по тексту поиска, растущий каталог, тысячи записей | `Combobox` + `useQuery`                            |
 | свободный текст с подсказками                                                  | `Combobox` c `allowCustomValue` или `Autocomplete` |
 
+### Справочник по ключу из схемы (v2.25.0+)
+
+Справочник с окном создания и правки — компонент приложения в `createForm` (`extraSelects`/`lazySelects`,
+`extraComboboxes`/`lazyComboboxes`, `extraListboxes`). Из `schema.zmodel` на него ссылаются **ключом** в
+`form.fieldType` — тогда `Form.AutoFields` и `Form.Field.Auto` рисуют тот же компонент, что и ручная форма:
+
+```zmodel
+model Work {
+  categoryId String @meta("form.fieldType", "Select.WorkCategory") @meta("form.props.createItem", false)
+}
+```
+
+```tsx
+export const AppForm = createForm({
+  lazySelects: { WorkCategory: () => import('./selects/work-category-select').then((m) => m.WorkCategorySelect) },
+})
+
+// typecheck падает, если ключ из схемы не зарегистрирован (ключи пишет zenstack-form-plugin ≥ 4.2.0)
+import type { FormComboboxKey, FormSelectKey } from '@/generated/form-schemas'
+export const appFormRegistryCheck: FormRegistryCheck<typeof AppForm, FormSelectKey, FormComboboxKey> = true
+
+<AppForm schema={WorkCreateFormSchema} initialValue={initial} onSubmit={save}>
+  <AppForm.AutoFields />
+</AppForm>
+```
+
+- Грамматика ключа: `Select.<Имя>` / `Combobox.<Имя>` / `Listbox.<Имя>`, имя с заглавной буквы. `form.props.*` доходят до
+  компонента; `relation` из `RelationConfig` на него не распыляется.
+- Ключа нет в реестре: в dev/test — исключение со списком доступных ключей, в production — один `console.error` на ключ и
+  базовый `Select`. Форма не из `createForm` — исключение про `createForm`-инстанс.
+- Ключ и `form.relation.*` на одном поле — побеждает ключ (dev-предупреждение).
+- `createForm` теперь generic: ключи выводятся из `extra*`/`lazy*` (без них — `string`); хук `useFormRegistry()`.
+
+**Ключ реестра или `form.relation.*`?**
+
+| Нужно                                                                                        | Решение                                         |
+| -------------------------------------------------------------------------------------------- | ----------------------------------------------- |
+| своё окно создания/правки, свои хуки, `renderOption`, оптимистичный режим                    | ключ реестра (`form.fieldType`)                 |
+| только подписи и поиск по модели, короткий `onCreate` без окна, поле встречается лишь в авто | `form.relation.*` + `RelationConfig.fieldProps` |
+
 ### Свой рендер опций: `renderOption`, `renderValue`, `textValue`, `data` (v2.19.0+)
 
 Опция несёт типизированные данные приложения (`data`), а рисовать её можно любым узлом. Chakra-скин

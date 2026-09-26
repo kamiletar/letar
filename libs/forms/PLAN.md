@@ -2522,6 +2522,21 @@ ZenStack (§16.2, этап Б): демо на модели `Category` и нас�
    «справочник по ключу из схемы»; тест M1.
 7. Цикл синхронизации (ниже), e2e этапа Е; `libs/zenstack-fragments/README.md` — строка про ключи во фрагментах.
 
+> ✅ **Этап Е закрыт 2026-09-26** — `forms` 2.25.0, `forms-core` 0.22.0, `zenstack-form-plugin` 4.2.0, `form-mcp` 2.3.0.
+> Ключ `Select.<Имя>` / `Combobox.<Имя>` / `Listbox.<Имя>` в `form.fieldType`; `RegistryField`, `FormRegistryContext`,
+> generic `createForm`, `FormRegistryCheck`, `useFormRegistry`; плагин пишет `form-registry-keys.ts` и проверяет
+> `form.relation.*`; `form-mcp` — описание директивы и паттерны `reference-select`/`reference-zenstack` (закрывает
+> «не сделано» этапов Г и Д). Тесты: E1–E7, E9, E8 (типы), P1–P4, M1. Демо `/registry-key-demo` в `form-develop-app` + e2e.
+> Отклонения от плана:
+>
+> - Строгий режим неизвестного ключа — только dev/test (`env === 'development' || 'test'`): ESLint репозитория запрещает
+>   `NODE_ENV === 'production'`; в production — `console.error` один раз на ключ и базовый `Select`.
+> - Плагин (субагент) дополнительно: `descriptionField` в `FormFieldMeta.relation`, экспорт `collectAllFields`.
+> - `formRegistryUsages` в `form-registry-keys.ts` — без имён файлов; не проверено на реальном потребителе.
+> - Не сделано (отложено): nx-генератор заготовки компонента справочника, `useZenStackRelations`, `descriptionField` в
+>   рендере. Абзац «ключ реестра в схеме» (§17.8) нужен в `.claude/rules/forms.md` — за координатором.
+> - Долг вне этапа: `form-develop-app` TS2322 в `file-upload-demo/page.tsx:126` (был до этапа).
+
 **Версии по этапам** (кто выпускается; `—` — не меняется):
 
 | Этап                    | `forms` | `forms-core` | `forms-react` | `forms-shadcn` | `forms-query` | `zenstack-form-plugin` | `form-mcp` |
@@ -2535,7 +2550,7 @@ ZenStack (§16.2, этап Б): демо на модели `Category` и нас�
 
 `form-mcp` в этапах А–Д тоже обновляется (группа 6 цикла синхронизации — описания пропсов и паттерны), но это правки
 данных без смены API; версию поднимает `forms-dev` по факту, в таблице не зафиксирована. Текущие версии: плагин
-4.1.3, `form-mcp` 2.2.1.
+4.2.0, `form-mcp` 2.3.0.
 
 В npm из них уходят `forms` (тег `forms-v*`), `forms-query` (тег `forms-query-v*`, §16.9) и `zenstack-form-plugin`
 (тег `zenstack-form-plugin-v*`); `form-mcp` — по действующему тегу `form-mcp-v*` (в его `package.json` стоит
