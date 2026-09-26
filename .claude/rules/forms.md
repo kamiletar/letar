@@ -35,18 +35,18 @@ src/<app-name>-form/
 ### Паттерн
 
 ```typescript
-import { createForm, lazyComboboxes, lazySelects } from '@letar/forms'
+import { createForm } from '@letar/forms'
 
 export const MyAppForm = createForm({
-  extraSelects: lazySelects({
+  lazySelects: {
     // Enum Select-ы (lazy imports для оптимизации памяти!)
     Status: () => import('./selects/status-select'),
     Category: () => import('./selects/category-select'),
-  }),
-  extraComboboxes: lazyComboboxes({
+  },
+  lazyComboboxes: {
     // Async Combobox-ы для поиска сущностей
     User: () => import('./comboboxes/user-combobox'),
-  }),
+  },
   extraFields: {
     // Синхронные кастомные поля
     PlateNumber: PlateNumberField,
