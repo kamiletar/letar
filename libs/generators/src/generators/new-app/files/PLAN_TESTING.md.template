@@ -1,5 +1,20 @@
 # <%= displayName %> — план тестирования
 
+## Статистика
+
+| Тип        | Написано | Выполнено |
+| ---------- | -------- | --------- |
+| Unit-тесты | 0        | 0         |
+| E2E тесты  | 0        | 0         |
+| **Всего**  | **0**    | **0**     |
+
+## Запуск тестов
+
+```bash
+nx test <%= name %>             # Unit-тесты (Vitest)
+nx e2e <%= name %>-e2e          # E2E-тесты (Playwright), после подключения e2e-suite
+```
+
 ## Unit-тесты (Vitest)
 
 Настроены (`vitest.config.mts`, `vitest.setup.tsx`), тестов пока нет — добавляй по мере появления
@@ -14,3 +29,7 @@ nx g @letar/generators:e2e-suite <%= name %>
 ```
 
 См. `.claude/docs/e2e-testing.md` за особенностями WebKit/Portal-компонентов.
+
+---
+
+**Последнее обновление:** <%= date %>

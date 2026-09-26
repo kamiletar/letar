@@ -15,6 +15,13 @@ import type { NewAppGeneratorSchema } from './schema'
  */
 const DEFAULT_FAVICON = { background: '#2D3748', foreground: '#FFFFFF' }
 
+/** Локальная дата генерации в формате YYYY-MM-DD — подставляется в CHANGELOG и «Последнее обновление». */
+function todayIso(): string {
+  const now = new Date()
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`
+}
+
 const templatesDir = templatesDirFor(import.meta.url)
 
 /**
@@ -50,7 +57,7 @@ export default async function newAppGenerator(tree: Tree, options: NewAppGenerat
     port,
     displayName,
     description,
-    year: new Date().getFullYear(),
+    date: todayIso(),
     withDb,
   })
 

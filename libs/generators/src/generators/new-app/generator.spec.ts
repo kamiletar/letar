@@ -215,4 +215,39 @@ describe('new-app generator', () => {
     const gitignore = tree.read('apps/my-app/.gitignore', 'utf-8') ?? ''
     expect(gitignore).not.toContain('src/generated/')
   })
+
+  it('документация соответствует documentation-guidelines: дата на момент запуска, Keep a Changelog', async () => {
+    await newAppGenerator(tree, { name: 'my-app' })
+    const read = (f: string) => tree.read(`apps/my-app/${f}`, 'utf-8') ?? ''
+    const now = new Date()
+    const pad = (n: number) => String(n).padStart(2, '0')
+    const today = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`
+
+    const readme = read('README.md')
+    expect(readme).toContain('## Документация')
+    expect(readme).toContain('[CHANGELOG.md](CHANGELOG.md)')
+    expect(readme).toContain(`**Последнее обновление:** ${today}`)
+    expect(readme).toContain('nx run my-app:format')
+    expect(readme).not.toContain('nx format my-app')
+
+    const changelog = read('CHANGELOG.md')
+    expect(changelog).toContain('[Keep a Changelog](https://keepachangelog.com/)')
+    expect(changelog).toContain('## [Unreleased]')
+    expect(changelog).toContain(`## [0.1.0] - ${today}`)
+    expect(changelog).toContain('### Added')
+
+    const testing = read('PLAN_TESTING.md')
+    expect(testing).toContain('## Статистика')
+    expect(testing).toContain('## Запуск тестов')
+    expect(testing).toContain('nx test my-app')
+    expect(testing).toContain('nx e2e my-app-e2e')
+
+    const completed = read('PLAN_COMPLETED.md')
+    expect(completed).toContain(`## v0.1.0 — Каркас приложения (${today})`)
+    expect(completed).toContain(`**Последнее обновление:** ${today}`)
+
+    for (const f of ['README.md', 'CHANGELOG.md', 'PLAN.md', 'PLAN_COMPLETED.md', 'PLAN_TESTING.md']) {
+      expect(read(f)).not.toContain('<%')
+    }
+  })
 })

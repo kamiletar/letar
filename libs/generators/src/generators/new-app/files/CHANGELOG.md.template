@@ -1,5 +1,11 @@
 # Changelog
 
-## 0.1.0 (<%= year %>)
+Формат — [Keep a Changelog](https://keepachangelog.com/), версии — [Semantic Versioning](https://semver.org/).
+
+## [Unreleased]
+
+## [0.1.0] - <%= date %>
+
+### Added
 
 - Сгенерирован каркас приложения (`nx g @letar/generators:new-app <%= name %>`)
