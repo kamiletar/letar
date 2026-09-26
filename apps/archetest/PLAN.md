@@ -681,7 +681,14 @@ attention-check, он без баллов намеренно); расхожде�
         `cabinet.action.test.ts` (8) — гейт роли на всех действиях, валидация и `.strip()`, отказ без активной
         связи, баллы по последнему ответу. **Безопасность:** с `leaderboard.action.ts` снят `'use server'` —
         `recalcLeaderboardEntry(userId)` был публичным эндпоинтом (пересчёт чужого кэша через raw prisma).
-- [ ] **Политики ZenStack: закрыть три пробела defense-in-depth** (ревью `auth-policy-validator` 2026-09-24,
+- [x] **Политики ZenStack: закрыть три пробела defense-in-depth** ✅ 2026-09-26 v0.34.1 —
+      field-level `@deny('update')` (не `@allow`: тот только добавляет право): `User.roles/email/emailVerified/externalId` —
+      только ADMIN; `ClientPsychologistLink`: `clientId`/`psychologistId` неизменяемы, `status`/`revokedAt` — клиент, `displayName`/
+      `lastSeenAt` — психолог (после отзыва психолог не возвращает ACTIVE); `PsychologistNote` — только по ACTIVE-связи,
+      `linkId` неизменяем; create связи — не с самим собой. ⚠️ Роль PSYCHOLOGIST у `psychologistId` в политике create не
+      проверить: ZenStack 3.9.5 по `'PSYCHOLOGIST' in psychologist.roles` строит `"UserRole"[] @> text[]` и падает на
+      PostgreSQL — остаётся в `linkPsychologistAction`. Тесты на настоящей БД: `src/lib/access-policies.test.ts` (15).
+      Исходная постановка: (ревью `auth-policy-validator` 2026-09-24,
       проверено вручную). Сегодня **не эксплуатируются**: HTTP-обработчика ZenStack в приложении нет, все записи
       enhanced-клиентом идут с фиксированными полями, у `roles` в Better Auth `input: false`. Сработают при первом
       коде, который передаст пользовательские поля в enhanced `update`:

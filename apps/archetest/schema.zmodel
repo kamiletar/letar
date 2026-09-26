@@ -46,15 +46,19 @@ model User {
   /// Имя пользователя
   name            String?
   /// Email пользователя
-  email           String    @unique
+  ///
+  /// Пробел defense-in-depth: self-update `@@allow('update', auth() == this)` без сужения полей
+  /// позволил бы выдать себе роль. Сужает только `@deny` (field-level `@allow` лишь добавляет
+  /// право), поэтому служебные поля закрыты для всех, кроме ADMIN
+  email           String    @unique @deny('update', auth() == null || !('ADMIN' in auth().roles))
   /// URL аватара
   image           String?
   /// Email подтверждён
-  emailVerified   Boolean   @default(false)
-  /// Роли пользователя
-  roles           UserRole[] @default([USER])
+  emailVerified   Boolean   @default(false) @deny('update', auth() == null || !('ADMIN' in auth().roles))
+  /// Роли пользователя. Самоназначение PSYCHOLOGIST идёт через raw-клиент в becomePsychologistAction
+  roles           UserRole[] @default([USER]) @deny('update', auth() == null || !('ADMIN' in auth().roles))
   /// ID в ключнице (для связи)
-  externalId      String?   @unique
+  externalId      String?   @unique @deny('update', auth() == null || !('ADMIN' in auth().roles))
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
@@ -257,19 +261,21 @@ model QuizQuestion {
 /// Связь клиента с психологом (создаёт клиент)
 model ClientPsychologistLink {
   id              String     @id @default(cuid())
-  clientId        String
+  /// Стороны связи неизменяемы после создания (перестановка переадресовала бы доступ)
+  clientId        String     @deny('update', true)
   client          User       @relation("ClientLinks", fields: [clientId], references: [id], onDelete: Cascade)
-  psychologistId  String
+  psychologistId  String     @deny('update', true)
   psychologist    User       @relation("PsychologistLinks", fields: [psychologistId], references: [id], onDelete: Cascade)
-  /// Отображаемое имя клиента (задаёт психолог)
-  displayName     String?
-  status          LinkStatus @default(ACTIVE)
+  /// Отображаемое имя клиента (задаёт психолог; клиент и чужие — нет)
+  displayName     String?    @deny('update', auth() == null || (!('ADMIN' in auth().roles) && psychologistId != auth().id))
+  /// Статус и отзыв меняет только клиент: психолог не может сам вернуть ACTIVE после отзыва
+  status          LinkStatus @default(ACTIVE) @deny('update', auth() == null || (!('ADMIN' in auth().roles) && clientId != auth().id))
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt
-  revokedAt       DateTime?
+  revokedAt       DateTime?  @deny('update', auth() == null || (!('ADMIN' in auth().roles) && clientId != auth().id))
   /// Когда психолог последний раз открывал карточку клиента — «N новых сессий» в кабинете (Фаза 3, 7.4).
   /// Меняется только из getClientDetailAction; null — ещё не открывал, считаем от createdAt
-  lastSeenAt      DateTime?
+  lastSeenAt      DateTime?  @deny('update', auth() == null || (!('ADMIN' in auth().roles) && psychologistId != auth().id))
   notes           PsychologistNote[]
   messages        PsychologistMessage[]
 
@@ -281,8 +287,10 @@ model ClientPsychologistLink {
   @@allow('read', clientId == auth().id)
   // Психолог видит свои связи
   @@allow('read', psychologistId == auth().id && 'PSYCHOLOGIST' in auth().roles)
-  // Клиент создаёт связь
-  @@allow('create', clientId == auth().id)
+  // Клиент создаёт связь, но не с самим собой. Что psychologistId — психолог, проверяет
+  // linkPsychologistAction: `'PSYCHOLOGIST' in psychologist.roles` в pre-create ZenStack 3.9.5
+  // компилирует в `"UserRole"[] @> text[]` и падает на PostgreSQL (не хватает каста enum-массива)
+  @@allow('create', clientId == auth().id && psychologistId != auth().id)
   // Клиент может отозвать (revoke)
   @@allow('update', clientId == auth().id)
   // Психолог может обновить displayName
@@ -319,7 +327,7 @@ model PsychologistMessage {
 /// Заметка психолога о клиенте
 model PsychologistNote {
   id        String   @id @default(cuid())
-  linkId    String
+  linkId    String   @deny('update', true)
   link      ClientPsychologistLink @relation(fields: [linkId], references: [id], onDelete: Cascade)
   /// Текст заметки
   content   String
@@ -328,8 +336,8 @@ model PsychologistNote {
 
   @@index([linkId])
 
-  // Только психолог-владелец связи
-  @@allow('all', link.psychologistId == auth().id && 'PSYCHOLOGIST' in auth().roles)
+  // Только психолог-владелец АКТИВНОЙ связи: после отзыва клиентом заметки недоступны (чтение и запись)
+  @@allow('all', link.psychologistId == auth().id && link.status == 'ACTIVE' && 'PSYCHOLOGIST' in auth().roles)
   @@allow('all', 'ADMIN' in auth().roles)
 }
 
