@@ -137,7 +137,7 @@ describe('extractModelInfo', () => {
 
   it('исключает FK-поле с атрибутом @relation', () => {
     const model = makeModel('Order', [
-      makeField({ name: 'authorId', type: 'String', attributes: [{ refText: 'relation' }] }),
+      makeField({ name: 'authorId', type: 'String', attributes: [{ refText: '@relation' }] }),
     ])
 
     const info = extractModelInfo(model, enumNames)
