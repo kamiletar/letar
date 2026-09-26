@@ -30,8 +30,8 @@
 - **Предложение:** `<Form.Inline.Select<T> value onValueChange options clearable size />`,
   `<Form.Inline.Combobox.Supplier value onValueChange clearable />`; внутри форма без схемы, `dirtyGuard=false`,
   no-op submit, поле + синхронизация `value` внутрь при внешнем изменении; `clearable` → `null` или `''` по опции.
-- **Вопросы к ревью:** (1) есть ли готовое — по поиску в `libs/forms/src` нет (`form-simple` с optional
-  `onSubmit` не найден); (2) место и имя (`Form.Inline.*` в `createForm`-неймспейсе, не пересекается с
+- **Вопросы к ревью:** (1) есть ли готовое — ⚠️ поправка координатора 2026-09-27: обычный `Form` уже работает без
+  `schema` и `onSubmit` (`form-simple.tsx`, `types/form-types.ts:93–95`); нет короткой обёртки и внешнего сброса `value`; (2) место и имя (`Form.Inline.*` в `createForm`-неймспейсе, не пересекается с
   `Form.Field.*`/`Form.Select.*`); (3) оценка объёма — за `forms-dev` после решения владельца.
 - **Статус:** ⏸ отложено владельцем 2026-09-26 («инлайновые элементы — редкость, возможно, там они и не нужны»). Код не
   начат. Разведка: в domwellbes `onSubmit={async () => {}}` — 59 мест в 37 файлах; обычный `Form` уже работает без
