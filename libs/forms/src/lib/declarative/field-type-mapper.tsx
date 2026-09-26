@@ -1,5 +1,6 @@
 'use client'
 
+import { parseFieldRegistryType } from '@letar/forms-core/schema'
 import type { ReactElement, ReactNode } from 'react'
 import type { ZodConstraints } from './schema-constraints'
 import type { SchemaFieldInfo } from './schema-traversal'
@@ -51,6 +52,7 @@ import { FieldPinInput } from './form-fields/specialized/field-pin-input'
 import { FieldMaskedInput } from './form-fields/text/field-masked-input'
 
 import { camelCaseToLabel } from './form-fields/auto/field-auto'
+import { RegistryField } from './registry-field'
 import { type RelationOption, useRelationFieldContext } from './relation-field-provider'
 
 /**
@@ -234,10 +236,37 @@ function resolveNativeSelectOptions(
   return undefined
 }
 
+/** Типы, о которых уже предупредили: один раз на тип, не на каждый рендер */
+const warnedFieldTypes = new Set<string>()
+
+function warnUnknownFieldType(type: string, name: string): void {
+  const env = typeof process === 'undefined' ? undefined : process.env.NODE_ENV
+  if ((env !== 'development' && env !== 'test') || warnedFieldTypes.has(type)) {
+    return
+  }
+  warnedFieldTypes.add(type)
+  console.warn(
+    `Form field "${name}": fieldType "${type}" is unknown or not supported by auto fields — rendering a text field. Check the spelling.`,
+  )
+}
+
 /**
  * Render a field component by type
  */
 export function renderFieldByType(type: FieldComponentType, props: FieldRenderProps): ReactElement {
+  // Ссылка на компонент реестра createForm ('Select.WorkCategory'): элемент `RegistryField` найдёт его в контексте формы
+  const reference = parseFieldRegistryType(type)
+  if (reference) {
+    return (
+      <RegistryField
+        key={props.name}
+        reference={reference}
+        fieldRenderProps={props}
+        renderBuiltin={(builtin) => renderFieldByType(builtin, props)}
+      />
+    )
+  }
+
   const {
     name,
     label: labelProp,
@@ -475,7 +504,9 @@ export function renderFieldByType(type: FieldComponentType, props: FieldRenderPr
     }
 
     default:
-      // Fallback to string
+      // Неизвестный (или не поддержанный автоформой) тип молча становился бы текстовым полем — для справочника это
+      // ловушка «выглядит как успех»: предупреждаем один раз на тип
+      warnUnknownFieldType(type, name)
       return <FieldString key={name} {...baseProps} {...fieldProps} />
   }
 }

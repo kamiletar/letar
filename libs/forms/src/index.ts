@@ -74,6 +74,7 @@ export {
   useDeclarativeForm,
   useDeclarativeFormOptional,
   useFormRef,
+  useFormRegistry,
   useFormServerAction,
   useFormUrlSync,
   useRelationFieldContext,
@@ -86,6 +87,7 @@ export {
 
 export type { FormSubscribeProps, FormUrlSyncOptions, FormUrlSyncProps } from './lib/declarative'
 export type { FormServerActionToaster, UseFormServerActionOptions, UseFormServerActionResult } from './lib/declarative'
+export type { FormRegistry } from './lib/declarative'
 
 export type {
   BaseFieldProps,
@@ -106,6 +108,7 @@ export type {
   FormInfoBlockProps,
   FormProps,
   FormPropsWithApi,
+  FormRegistryCheck,
   FormWatchProps,
   HiddenFieldProps,
   ListboxFieldProps,

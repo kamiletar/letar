@@ -36,6 +36,7 @@ import type {
 import type { CreditCardFieldProps } from './form-fields/specialized/credit-card'
 import type { DataGridFieldProps, TableEditorFieldProps } from './form-fields/table'
 import type { FormFromSchemaProps } from './form-from-schema'
+import { type FormRegistry, FormRegistryContext } from './form-registry-context'
 import type { SelectionSlotComponents } from './form-root/form-compound-types'
 import type {
   FormStepsIndicatorProps,
@@ -72,17 +73,35 @@ import type {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyComponent = ComponentType<any>
 
-interface CreateFormOptions {
+type ComponentRecord = Record<string, AnyComponent>
+type LazyRecord = Record<string, LazyComponentImport>
+
+/**
+ * Ключи реестра из синхронных и ленивых компонентов. Обе опции не заданы — `string` (прежнее поведение: любое имя
+ * компилируется, опечатка падает в рантайме); задана хоть одна — точные ключи, опечатка `AppForm.Select.Опечатка`
+ * становится ошибкой типов.
+ */
+type RegistryKeys<TExtra, TLazy> = [keyof TExtra | keyof TLazy] extends [never] ? string
+  : Extract<keyof TExtra | keyof TLazy, string>
+
+interface CreateFormOptions<
+  TExtraSelects extends ComponentRecord = ComponentRecord,
+  TExtraComboboxes extends ComponentRecord = ComponentRecord,
+  TExtraListboxes extends ComponentRecord = ComponentRecord,
+  TLazySelects extends LazyRecord = LazyRecord,
+  TLazyComboboxes extends LazyRecord = LazyRecord,
+  TLazyListboxes extends LazyRecord = LazyRecord,
+> {
   /** Extra field components to add to Form.Field */
   extraFields?: Record<string, AnyComponent>
   /** Extra button components to add to Form.Button */
   extraButtons?: Record<string, AnyComponent>
   /** Extra select components to add to Form.Select (synchronous) */
-  extraSelects?: Record<string, AnyComponent>
+  extraSelects?: TExtraSelects
   /** Extra combobox components to add to Form.Combobox (synchronous) */
-  extraComboboxes?: Record<string, AnyComponent>
+  extraComboboxes?: TExtraComboboxes
   /** Extra listbox components to add to Form.Listbox (synchronous) */
-  extraListboxes?: Record<string, AnyComponent>
+  extraListboxes?: TExtraListboxes
   /**
    * Default address suggestion provider for Form.Field.Address and Form.Field.City.
    * Set once here instead of passing `provider` prop to every field.
@@ -112,7 +131,7 @@ interface CreateFormOptions {
    * }
    * ```
    */
-  lazySelects?: Record<string, LazyComponentImport>
+  lazySelects?: TLazySelects
 
   /**
    * Lazy Combobox components — loaded only at render time
@@ -124,7 +143,7 @@ interface CreateFormOptions {
    * }
    * ```
    */
-  lazyComboboxes?: Record<string, LazyComponentImport>
+  lazyComboboxes?: TLazyComboboxes
 
   /**
    * Настройки CAPTCHA по умолчанию для всех форм приложения.
@@ -169,7 +188,7 @@ interface CreateFormOptions {
    * }
    * ```
    */
-  lazyListboxes?: Record<string, LazyComponentImport>
+  lazyListboxes?: TLazyListboxes
 }
 
 interface ListButton {
@@ -245,18 +264,6 @@ interface ExtendedFormButton {
   [key: string]: AnyComponent
 }
 
-interface ExtendedFormSelect {
-  [key: string]: AnyComponent
-}
-
-interface ExtendedFormCombobox {
-  [key: string]: AnyComponent
-}
-
-interface ExtendedFormListbox {
-  [key: string]: AnyComponent
-}
-
 interface ExtendedFormSteps {
   (props: FormStepsProps): ReactElement
   Step: (props: FormStepsStepProps) => ReactElement
@@ -265,14 +272,22 @@ interface ExtendedFormSteps {
   CompletedContent: (props: { children: ReactNode }) => ReactElement
 }
 
-export interface ExtendedForm {
+/**
+ * Инстанс формы приложения. Параметры — ключи реестра (`AppForm.Select.<ключ>`); по умолчанию `string`: аннотация
+ * `: ExtendedForm` компилируется, но ключи стёрты (для проверки схемы см. `FormRegistryCheck`).
+ */
+export interface ExtendedForm<
+  TSelectKey extends string = string,
+  TComboboxKey extends string = string,
+  TListboxKey extends string = string,
+> {
   <TData extends object>(props: FormPropsWithApi<TData>): ReactElement
   Group: ExtendedFormGroup
   Field: ExtendedFormField
   Button: ExtendedFormButton
-  Select: ExtendedFormSelect
-  Combobox: ExtendedFormCombobox
-  Listbox: ExtendedFormListbox
+  Select: Record<TSelectKey, AnyComponent>
+  Combobox: Record<TComboboxKey, AnyComponent>
+  Listbox: Record<TListboxKey, AnyComponent>
   Errors: (props: { title?: ReactNode }) => ReactElement | null
   DirtyGuard: (props: {
     message?: string
@@ -337,16 +352,36 @@ export interface ExtendedForm {
  * </AppForm>
  * ```
  */
-export function createForm(options: CreateFormOptions = {}): ExtendedForm {
+export function createForm<
+  TExtraSelects extends ComponentRecord = ComponentRecord,
+  TExtraComboboxes extends ComponentRecord = ComponentRecord,
+  TExtraListboxes extends ComponentRecord = ComponentRecord,
+  TLazySelects extends LazyRecord = LazyRecord,
+  TLazyComboboxes extends LazyRecord = LazyRecord,
+  TLazyListboxes extends LazyRecord = LazyRecord,
+>(
+  options: CreateFormOptions<
+    TExtraSelects,
+    TExtraComboboxes,
+    TExtraListboxes,
+    TLazySelects,
+    TLazyComboboxes,
+    TLazyListboxes
+  > = {},
+): ExtendedForm<
+  RegistryKeys<TExtraSelects, TLazySelects>,
+  RegistryKeys<TExtraComboboxes, TLazyComboboxes>,
+  RegistryKeys<TExtraListboxes, TLazyListboxes>
+> {
   const {
     extraFields = {},
     extraButtons = {},
-    extraSelects = {},
-    extraComboboxes = {},
-    extraListboxes = {},
-    lazySelects = {},
-    lazyComboboxes = {},
-    lazyListboxes = {},
+    extraSelects = {} as TExtraSelects,
+    extraComboboxes = {} as TExtraComboboxes,
+    extraListboxes = {} as TExtraListboxes,
+    lazySelects = {} as TLazySelects,
+    lazyComboboxes = {} as TLazyComboboxes,
+    lazyListboxes = {} as TLazyListboxes,
     addressProvider,
     captcha,
     dirtyGuard,
@@ -383,6 +418,13 @@ export function createForm(options: CreateFormOptions = {}): ExtendedForm {
     ...lazyListboxComponents,
   }
 
+  // Одна ссылка на вызов createForm: значение контекста стабильно, лишних перерисовок нет
+  const registry: FormRegistry = {
+    Select: ExtendedSelect,
+    Combobox: ExtendedCombobox,
+    Listbox: ExtendedListbox,
+  }
+
   const ExtendedForm = Object.assign(
     // Root component — оборачивает в CaptchaContext если captcha задан
     function ExtendedFormRoot<TData extends object>(props: FormPropsWithApi<TData>) {
@@ -393,7 +435,12 @@ export function createForm(options: CreateFormOptions = {}): ExtendedForm {
       const mergedProps = dirtyGuard === undefined && props.dirtyGuard === undefined
         ? withAddress
         : { ...withAddress, dirtyGuard: resolvedDirtyGuard ?? false }
-      const formElement = Form(mergedProps)
+      // Реестр инстанса — автоформам (`Form.AutoFields`, `Form.Field.Auto`): ключ `Select.WorkCategory` из схемы
+      const formElement = (
+        <FormRegistryContext value={registry}>
+          {Form(mergedProps)}
+        </FormRegistryContext>
+      )
 
       // Оборачиваем в CaptchaContext если captcha конфиг задан
       if (captcha) {
@@ -430,5 +477,42 @@ export function createForm(options: CreateFormOptions = {}): ExtendedForm {
     },
   )
 
-  return ExtendedForm as ExtendedForm
+  return ExtendedForm as unknown as ExtendedForm<
+    RegistryKeys<TExtraSelects, TLazySelects>,
+    RegistryKeys<TExtraComboboxes, TLazyComboboxes>,
+    RegistryKeys<TExtraListboxes, TLazyListboxes>
+  >
 }
+
+/** Ключи из схемы, которых нет в записи реестра; индексная сигнатура (`string`) — ключи стёрты, проверять нечего */
+type MissingRegistryKeys<TRecord, TKeys extends string> = [TKeys] extends [never] ? never
+  : string extends keyof TRecord ? 'ключи стёрты до string: инстанс аннотирован ExtendedForm'
+  : Exclude<TKeys, keyof TRecord>
+
+/**
+ * Проверка «все ключи реестра из `schema.zmodel` зарегистрированы в инстансе». `true` — да; иначе объект с недостающими
+ * ключами, и присваивание `= true` покажет их в тексте ошибки. Индексная сигнатура (инстанс аннотирован `: ExtendedForm`)
+ * — тоже ошибка: иначе проверка тихо зеленела бы на любых ключах.
+ *
+ * @example
+ * ```ts
+ * import type { FormComboboxKey, FormSelectKey } from '@/generated/form-schemas'
+ *
+ * export const appFormRegistryCheck: FormRegistryCheck<typeof AppForm, FormSelectKey, FormComboboxKey> = true
+ * ```
+ */
+export type FormRegistryCheck<
+  TForm extends { Select: unknown; Combobox: unknown; Listbox: unknown },
+  TSelectKey extends string,
+  TComboboxKey extends string = never,
+  TListboxKey extends string = never,
+> = [
+  | MissingRegistryKeys<TForm['Select'], TSelectKey>
+  | MissingRegistryKeys<TForm['Combobox'], TComboboxKey>
+  | MissingRegistryKeys<TForm['Listbox'], TListboxKey>,
+] extends [never] ? true
+  : {
+    missingSelectKeys: MissingRegistryKeys<TForm['Select'], TSelectKey>
+    missingComboboxKeys: MissingRegistryKeys<TForm['Combobox'], TComboboxKey>
+    missingListboxKeys: MissingRegistryKeys<TForm['Listbox'], TListboxKey>
+  }

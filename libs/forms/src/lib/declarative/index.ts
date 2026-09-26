@@ -343,6 +343,7 @@ export {
   useFormGroupListContext,
   useFormGroupListItemContext,
 } from './form-group/form-group-list-context'
+export { type FormRegistry, FormRegistryContext, useFormRegistry } from './form-registry-context'
 
 // Export individual components for extension
 export { ButtonReset, ButtonSubmit, type ResetButtonProps } from './form-buttons'
@@ -449,7 +450,7 @@ export {
 } from './form-group/form-group-list-sortable'
 
 // Factory for app-specific forms
-export { createForm, type ExtendedForm } from './create-form'
+export { createForm, type ExtendedForm, type FormRegistryCheck } from './create-form'
 
 // Lazy component helpers (for lazy loading form components)
 export { createLazyComponent, createLazyComponents, type LazyComponentImport } from './lazy-component'
