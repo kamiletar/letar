@@ -33,6 +33,15 @@ const serverEnum = z.enum(['s1', 's2'], {
 })
 const E2E_GATE_MAX_AGE_MS = 24 * 60 * 60 * 1000
 
+// Белый список аргументов сида. Те же значения — в apps/dashboard-agent/src/lib/seed-args.ts и в
+// deploy-affected.sh (`--seed-arg`): агент собирается образом без монорепо, общего модуля нет.
+const SEED_ARGS_ALLOWED = ['--sync-texts', '--dry-run'] as const
+
+/** Массивы строк равны как последовательности; отсутствующее значение не равно ничему. */
+function sameStrings(a: readonly string[] | undefined, b: readonly string[]): boolean {
+  return Array.isArray(a) && a.length === b.length && a.every((v, i) => v === b[i])
+}
+
 /** Форма ответа `/api/e2e/status` — то же поле, что читает e2e-гейт в deploy_app(production). */
 interface E2eStatusResponse {
   lastStatus: {
@@ -459,6 +468,11 @@ export function createDeployMcpServer(options: DeployMcpOptions = {}): McpServer
       'production-вызове: правка действует сразу, рестарт MCP не нужен; не смог прочитать — отказ,',
       'а не молчаливый откат на s2 или деплой без гейта.',
       'seed: true → deploy-affected.sh --seed (nx run <app>:db:seed после успешного деплоя).',
+      'seedArgs (только вместе с seed: true) — аргументы сида из белого списка: "--sync-texts" (правка текстов',
+      'СУЩЕСТВУЮЩИХ записей, если сид это умеет) и "--dry-run" (только вместе с --sync-texts,',
+      'ничего не пишет, печатает отчёт). --sync-texts без --dry-run скрипт сам сначала гоняет как dry-run и при',
+      'его отказе реальную запись не начинает. Хочешь сперва посмотреть отчёт — первым деплоем',
+      'seedArgs: ["--sync-texts","--dry-run"], вторым — ["--sync-texts"].',
       'Возвращает deployId — опрашивай прогресс через deploy_status({ server, deployId, sinceLine }).',
       '⚠️ Изменяет production. Перед деплоем убедись, что коммиты запушены (git_status).',
       '⛔ Для приложений из E2E_GATED_APPS (libs/infra-config; актуальный список — в файле, здесь он не',
@@ -475,8 +489,21 @@ export function createDeployMcpServer(options: DeployMcpOptions = {}): McpServer
         .optional()
         .describe('production (по умолчанию, сервер приложения) или staging (s1)'),
       seed: z.boolean().optional().describe('Запустить nx run <app>:db:seed после успешного деплоя (--seed)'),
+      seedArgs: z
+        .array(z.enum(SEED_ARGS_ALLOWED))
+        .optional()
+        .describe('Аргументы сида (белый список), только вместе с seed: true; --dry-run — только с --sync-texts'),
     }),
-  }, async ({ app, target = 'production', seed = false }) => {
+  }, async ({ app, target = 'production', seed = false, seedArgs: rawSeedArgs = [] }) => {
+    // Дубли схлопываем. Ту же проверку делают агент и deploy-affected.sh: здесь — чтобы отказать до
+    // e2e-гейта и вызова агента.
+    const seedArgs = [...new Set(rawSeedArgs)]
+    if (seedArgs.length > 0 && !seed) {
+      return errorText('❌ seedArgs требует seed: true')
+    }
+    if (seedArgs.includes('--dry-run') && !seedArgs.includes('--sync-texts')) {
+      return errorText('❌ seedArgs: --dry-run имеет смысл только вместе с --sync-texts')
+    }
     const staging = target === 'staging'
     // Списки маршрута и гейтов читаются из файла на КАЖДЫЙ production-вызов, а не берутся из значений,
     // вычисленных при старте процесса: иначе приложение, добавленное в BUILD_ON_S1_APPS после запуска MCP,
@@ -525,14 +552,41 @@ export function createDeployMcpServer(options: DeployMcpOptions = {}): McpServer
       const res = await agentRequest(server, {
         method: 'POST',
         path: '/api/deploy/app',
-        body: { appName: app, staging, seed },
+        body: { appName: app, staging, seed, ...(seedArgs.length > 0 ? { seedArgs } : {}) },
       })
       if (!res.success) {
         return errorText(
           [...gatePrefix, `❌ Не удалось запустить деплой ${app} (${target}) на ${server}: ${res.error}`].join('\n'),
         )
       }
-      const data = res.data as { deployId?: string } | undefined
+      const data = res.data as { deployId?: string; seedArgs?: string[] } | undefined
+      // Агент старой версии неизвестное поле `seedArgs` молча игнорирует и запустил бы обычный сид без
+      // аргументов (для `--dry-run` — с реальной записью). Эхо в ответе — признак, что агент аргументы понял.
+      if (seedArgs.length > 0 && !sameStrings(data?.seedArgs, seedArgs)) {
+        let cancelNote = 'Деплой отменён.'
+        try {
+          const cancel = await agentRequest(server, { method: 'POST', path: '/api/deploy/cancel' })
+          if (!cancel.success) {
+            cancelNote = `⚠️ Отмена не удалась (${
+              cancel.error ?? 'нет подробностей'
+            }) — проверь deploy_status и отмени вручную.`
+          }
+        } catch (err) {
+          cancelNote = `⚠️ Отмена не удалась (${
+            err instanceof Error ? err.message : String(err)
+          }) — проверь deploy_status и отмени вручную.`
+        }
+        return errorText(
+          [
+            ...gatePrefix,
+            `⛔ Агент на ${server} не подтвердил seedArgs (ответ: ${
+              JSON.stringify(data?.seedArgs ?? null)
+            }) — вероятно, его версия старше поддержки seedArgs; сид без аргументов запускать нельзя.`,
+            cancelNote,
+            'Обнови dashboard-agent на этом сервере и повтори вызов.',
+          ].join('\n'),
+        )
+      }
       return text(
         [
           ...gatePrefix,

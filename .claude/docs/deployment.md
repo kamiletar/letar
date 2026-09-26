@@ -982,6 +982,16 @@ git submodule update --recursive
 
 Скрипт сам построит корректный `DATABASE_URL` из `.env.docker` + `docker-compose.production.yml` и передаст его в `nx db:seed`.
 
+### ✅ Seed с аргументами через штатный деплой: `seedArgs`
+
+Сиды, умеющие больше append-only (`--sync-texts` правит тексты уже существующих записей,
+`--dry-run` — только отчёт), запускаются штатно: `deploy_app({ app, seed: true, seedArgs: [...] })`
+или `./deploy-affected.sh --app <app> --seed --seed-arg --sync-texts [--seed-arg --dry-run]`.
+Белый список (`--sync-texts`, `--dry-run`), правила и ограничения — в
+[libs/deploy-mcp/README.md § Аргументы сида](/libs/deploy-mcp/README.md#аргументы-сида-seedargs).
+Коротко: `--sync-texts` без `--dry-run` скрипт сам сначала гоняет как dry-run; каждый вызов — полный
+деплой; агент должен быть новой версии (≥0.19.0), иначе MCP отменит деплой.
+
 ### ✅ Запуск seed вручную (без деплоя)
 
 Нужно явно передать `DATABASE_URL`, собранный из реальных credentials:
@@ -999,6 +1009,20 @@ grep -A1 'ports:' apps/<app>/docker-compose.production.yml | grep '5432'
 # 4. Запустить seed с явным DATABASE_URL
 DATABASE_URL='postgresql://<user>:<password>@localhost:<port>/<db>' nx db:seed <app>
 ```
+
+**Аргументы сида руками** (первый раз так и делали, 2026-09-26): на s2, из `~/letar/apps/<app>`,
+`DATABASE_URL` берётся у работающего контейнера приложения, docker-внутренний хост заменяется на
+`127.0.0.1` и проброшенный порт БД (внутри docker-сети хост с хоста не резолвится):
+
+```bash
+DATABASE_URL=$(docker exec <контейнер-app> printenv DATABASE_URL | sed 's#@[^/]*/#@127.0.0.1:<порт-БД>/#')
+export DATABASE_URL
+tsx prisma/<seed-файл>.ts --sync-texts --dry-run   # сперва отчёт
+tsx prisma/<seed-файл>.ts --sync-texts             # затем запись
+```
+
+Имя контейнера — из `docker ps`, порт БД — из `docker-compose.production.yml`. Запуск руками — только
+когда деплой не нужен или недоступен.
 
 **Пример для aboi:**
 

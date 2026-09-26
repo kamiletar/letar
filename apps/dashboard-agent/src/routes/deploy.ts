@@ -35,6 +35,7 @@ import {
 import { hostExecArgs } from '../lib/host-exec'
 import { getHostLock, releaseHostLock, tryAcquireHostLock } from '../lib/host-lock'
 import { REDIS_READY_TIMEOUT_MS } from '../lib/redis'
+import { parseSeedArgs } from '../lib/seed-args'
 import { getCurrentServer } from '../lib/server-config'
 import { withTimeout } from '../lib/with-timeout'
 import type { ApiResponse } from '../types'
@@ -375,24 +376,34 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
 
   /**
    * POST /api/deploy/app — полный деплой приложения через deploy-affected.sh
-   * Body: { appName: string; staging?: boolean; seed?: boolean }
+   * Body: { appName: string; staging?: boolean; seed?: boolean; seedArgs?: string[] }
    * staging: true → deploy-affected.sh --staging (образ <app>:staging, для s1)
    * seed: true → deploy-affected.sh --seed (nx run <app>:db:seed после успешного деплоя)
+   * seedArgs: белый список (lib/seed-args.ts: --sync-texts, --dry-run) → `--seed-arg <arg>` на каждый;
+   *   только вместе с seed: true. --sync-texts без --dry-run скрипт сам сначала гоняет как dry-run.
    *
    * Асинхронный: сразу возвращает deployId, клиент опрашивает /api/deploy/status.
    * Аргументы передаются spawn'у массивом — без промежуточного bash -c,
    * инъекция через body структурно невозможна.
    */
-  fastify.post<{ Body: { appName: string; staging?: boolean; seed?: boolean } }>(
+  fastify.post<{ Body: { appName: string; staging?: boolean; seed?: boolean; seedArgs?: string[] } }>(
     '/api/deploy/app',
     async (
       request,
     ): Promise<
-      ApiResponse<{ deployId: string; appName: string; staging: boolean; seed: boolean; started: boolean }>
+      ApiResponse<{
+        deployId: string
+        appName: string
+        staging: boolean
+        seed: boolean
+        seedArgs: string[]
+        started: boolean
+      }>
     > => {
       const REPO_PATH = process.env.REPO_PATH || '/home/deploy/letar'
 
       const { appName, staging = false, seed = false } = request.body
+      const seedArgsParsed = parseSeedArgs(request.body.seedArgs, seed)
 
       if (!appName) {
         return errorResponse('App name is required')
@@ -402,6 +413,11 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
       if (!/^[a-z0-9-]+$/.test(appName)) {
         return errorResponse('Invalid app name format')
       }
+
+      if (!seedArgsParsed.ok) {
+        return errorResponse(seedArgsParsed.error)
+      }
+      const seedArgs = seedArgsParsed.args
 
       // Серверный guard: staging-деплои идут только на s1, s2 (прод) staging не принимает —
       // не даёт случайно задеплоить staging-мусор на прод, независимо от того, кто и как вызвал
@@ -443,7 +459,7 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
         deploy,
         `🚀 Deploying app: ${appName}${staging ? ' (staging)' : ''}${
           remoteRelease ? ' (сборка на s1 → релиз на s2)' : ''
-        }${seed ? ' [+seed]' : ''}`,
+        }${seed ? ` [+seed${seedArgs.length > 0 ? ` ${seedArgs.join(' ')}` : ''}]` : ''}`,
       )
 
       // nsenter выполняет скрипт на хосте (pid: host + privileged), скрипт сам делает cd
@@ -456,6 +472,7 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
         ...(staging ? ['--staging'] : []),
         ...(remoteRelease ? ['--remote-release'] : []),
         ...(seed ? ['--seed'] : []),
+        ...seedArgs.flatMap((arg) => ['--seed-arg', arg]),
       ]
       const args = hostExecArgs(command)
       appendOutput(deploy, `📋 Command: nsenter ${args.join(' ')}`)
@@ -481,6 +498,7 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
           appName,
           staging,
           seed,
+          seedArgs,
           started: true,
         },
         timestamp: new Date().toISOString(),

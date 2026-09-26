@@ -397,3 +397,116 @@ describe('deploy_app — E2E_GATED_APPS перечитывается при ка
     }
   })
 })
+
+// seedArgs: белый список, отказ до вызова агента и эхо-проверка версии агента.
+describe('deploy_app — seedArgs', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'deploy-mcp-seedargs-'))
+  afterAll(() => rmSync(dir, { recursive: true, force: true }))
+
+  // Вне BUILD_ON_S1_APPS и E2E_GATED_APPS — на поведение влияет только seedArgs.
+  const app = 'seed-args-app'
+  const file = join(dir, 'infra-config.ts')
+  writeFileSync(file, infraConfig())
+  const connectSeed = () => connectedClient(() => createDeployMcpServer({ infraConfigPath: file }))
+  const deployBodies = () =>
+    vi.mocked(agentRequest).mock.calls.filter(([, req]) => req?.path === '/api/deploy/app').map(([, req]) => req?.body)
+  const cancelCalls = () => vi.mocked(agentRequest).mock.calls.filter(([, req]) => req?.path === '/api/deploy/cancel')
+
+  // Агент новой версии возвращает принятые seedArgs (эхо), старой — нет.
+  const agentEchoes = () =>
+    vi.mocked(agentRequest).mockImplementation(async (_server, req) =>
+      req?.path === '/api/deploy/app'
+        ? {
+          success: true,
+          data: { deployId: 'd-1', seedArgs: (req.body as { seedArgs?: string[] }).seedArgs ?? [] },
+        }
+        : { success: true, data: {} }
+    )
+
+  beforeEach(() => {
+    vi.mocked(agentRequest).mockReset()
+    agentEchoes()
+  })
+
+  it('seed + seedArgs уходят в тело запроса к агенту', async () => {
+    const { client } = await connectSeed()
+    const result = await client.callTool({
+      name: 'deploy_app',
+      arguments: { app, seed: true, seedArgs: ['--sync-texts', '--dry-run'] },
+    })
+    expect(result.isError).toBeFalsy()
+    expect(deployBodies()).toEqual([
+      { appName: app, staging: false, seed: true, seedArgs: ['--sync-texts', '--dry-run'] },
+    ])
+  })
+
+  it('без seedArgs тело прежнее: поля seedArgs нет', async () => {
+    const { client } = await connectSeed()
+    await client.callTool({ name: 'deploy_app', arguments: { app, seed: true } })
+    expect(deployBodies()).toEqual([{ appName: app, staging: false, seed: true }])
+  })
+
+  it('дубли схлопываются', async () => {
+    const { client } = await connectSeed()
+    await client.callTool({
+      name: 'deploy_app',
+      arguments: { app, seed: true, seedArgs: ['--sync-texts', '--sync-texts'] },
+    })
+    expect(deployBodies()).toEqual([{ appName: app, staging: false, seed: true, seedArgs: ['--sync-texts'] }])
+  })
+
+  it('значение вне белого списка отвергается схемой, агент не вызывается', async () => {
+    const { client } = await connectSeed()
+    const result = await client.callTool({
+      name: 'deploy_app',
+      arguments: { app, seed: true, seedArgs: ['--fresh'] },
+    })
+    expect(result.isError).toBe(true)
+    expect(agentRequest).not.toHaveBeenCalled()
+  })
+
+  it('seedArgs без seed: true — отказ, агент не вызывается', async () => {
+    const { client } = await connectSeed()
+    const result = await client.callTool({ name: 'deploy_app', arguments: { app, seedArgs: ['--sync-texts'] } })
+    expect(result.isError).toBe(true)
+    expect(textOf(result)).toContain('seed: true')
+    expect(agentRequest).not.toHaveBeenCalled()
+  })
+
+  it('--dry-run без --sync-texts — отказ, агент не вызывается', async () => {
+    const { client } = await connectSeed()
+    const result = await client.callTool({
+      name: 'deploy_app',
+      arguments: { app, seed: true, seedArgs: ['--dry-run'] },
+    })
+    expect(result.isError).toBe(true)
+    expect(textOf(result)).toContain('--sync-texts')
+    expect(agentRequest).not.toHaveBeenCalled()
+  })
+
+  it('агент старой версии не вернул эхо seedArgs: деплой отменяется, вызов — ошибка', async () => {
+    vi.mocked(agentRequest).mockImplementation(async (_server, req) =>
+      req?.path === '/api/deploy/app'
+        ? { success: true, data: { deployId: 'd-old' } }
+        : { success: true, data: {} }
+    )
+    const { client } = await connectSeed()
+    const result = await client.callTool({
+      name: 'deploy_app',
+      arguments: { app, seed: true, seedArgs: ['--sync-texts', '--dry-run'] },
+    })
+    expect(result.isError).toBe(true)
+    expect(textOf(result)).toContain('не подтвердил seedArgs')
+    expect(cancelCalls()).toHaveLength(1)
+  })
+
+  it('без seedArgs эхо не требуется: старый агент работает как раньше', async () => {
+    vi.mocked(agentRequest).mockImplementation(async (_server, req) =>
+      req?.path === '/api/deploy/app' ? { success: true, data: { deployId: 'd-old' } } : { success: true, data: {} }
+    )
+    const { client } = await connectSeed()
+    const result = await client.callTool({ name: 'deploy_app', arguments: { app, seed: true } })
+    expect(result.isError).toBeFalsy()
+    expect(cancelCalls()).toHaveLength(0)
+  })
+})

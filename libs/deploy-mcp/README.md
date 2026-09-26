@@ -17,7 +17,7 @@ MCP-сервер: структурированный слой над REST API da
 | `deploy_status({ server, deployId?, sinceLine?, grep?, regex?, context?, routeTable? })` | Статус деплоя + инкрементальные логи по курсору `sinceLine`; включает `phases[]`/`stalled`; `grep`/`routeTable` — поиск по логу, ответ ограничен ~30 тыс. символов ([ниже](#поиск-по-большому-логу-деплоя)) | `GET /api/deploy/status`  |
 | `deploy_wait({ server, deployId?, waitSeconds? })`                                       | Long-poll вместо ручного опроса по таймеру — отпускает раньше `waitSeconds` (≤120с) при терминальном статусе/смене фазы/смене `stalled`                                                                     | `GET /api/deploy/wait`    |
 | `deploy_cancel({ server })`                                                              | Отмена текущего деплоя (SIGTERM)                                                                                                                                                                            | `POST /api/deploy/cancel` |
-| `deploy_app({ app, target, seed? })`                                                     | Запуск деплоя (`target`: `production`\|`staging`, `seed`: `--seed`) + fail-closed e2e-gate для `E2E_GATED_APPS`                                                                                             | `POST /api/deploy/app`    |
+| `deploy_app({ app, target, seed?, seedArgs? })`                                          | Запуск деплоя (`target`: `production`\|`staging`, `seed`: `--seed`, `seedArgs`: [аргументы сида](#аргументы-сида-seedargs)) + fail-closed e2e-gate для `E2E_GATED_APPS`                                     | `POST /api/deploy/app`    |
 | `deploy_infra({ service, server })`                                                      | Деплой `infra/<service>` (Traefik, acme-dns, ...) — расшифровка `secrets/deploy.conf` + `docker compose up -d`, без e2e-gate (§18.8.1)                                                                      | `POST /api/deploy/infra`  |
 | `run_e2e({ app, baseUrl, project?, grep?, workers? })`                                   | Запуск Playwright e2e на s1 против `baseUrl`; `grep` — точечный прогон. Схема строгая: неизвестные аргументы (`extraArgs`) отвергаются                                                                      | `POST /api/e2e/run`       |
 | `e2e_status({ app?, runId?, sinceLine? })`                                               | Статус e2e-прогона + персистентный `lastStatus` (что читает gate)                                                                                                                                           | `GET /api/e2e/status`     |
@@ -177,6 +177,36 @@ deploy_status({ server: "s1", deployId, grep: "ECONNREFUSED|P1001|No pending mig
 синтетическим логом — на живом логе деплоя фильтр не запускался (деплоить можно только через
 `deploy-agent-dev`). Первая проверка на реальном деплое — `routeTable: true`: если сводка пишет
 «не распознано», поправь `TOP_ROUTE_RE`/`CHILD_PATH_RE` в `src/log-tools.ts`.
+
+### Аргументы сида (`seedArgs`)
+
+`seed: true` запускает `nx run <app>:db:seed` — по умолчанию без аргументов. Для сидов, умеющих больше
+(сейчас — правка текстов уже существующих записей: `db:seed -- --sync-texts [--dry-run]`),
+`deploy_app` принимает `seedArgs` — **только** значения из белого списка:
+
+| Значение       | Смысл                                                                           |
+| -------------- | ------------------------------------------------------------------------------- |
+| `--sync-texts` | Обновить формулировки существующих записей (что именно — решает сид приложения) |
+| `--dry-run`    | Только отчёт, ничего не пишет; допустим **только** вместе с `--sync-texts`      |
+
+```
+deploy_app({ app, seed: true, seedArgs: ["--sync-texts", "--dry-run"] })   // 1) отчёт
+deploy_app({ app, seed: true, seedArgs: ["--sync-texts"] })                // 2) запись
+```
+
+- `seedArgs` без `seed: true` и `--dry-run` без `--sync-texts` отвергаются — в MCP, в dashboard-agent и в
+  `deploy-affected.sh` (три независимых проверки, один и тот же список: агент собирается образом без
+  монорепо, общего модуля нет — расширяя список, правь все три места).
+- `--sync-texts` без `--dry-run` скрипт сам сначала гоняет как dry-run; не прошёл — реальная запись не
+  начинается. Отчёт dry-run остаётся в логе деплоя.
+- Каждый вызов — **полный деплой** (сборка, раскатка) на текущем коммите: сид идёт после успешной раскатки.
+  Отдельного режима «только сид» нет. Нужен только сид без деплоя — ручной запуск, рецепт в
+  [deployment.md § Seed](../../.claude/docs/deployment.md#seed-базы-данных).
+- Агент старой версии неизвестный `seedArgs` молча игнорирует и запустил бы сид без аргументов. Поэтому агент
+  возвращает принятые `seedArgs` эхом, а MCP при расхождении отменяет деплой и возвращает ошибку.
+  **Сначала задеплой dashboard-agent** (self-deploy), потом используй `seedArgs`.
+- Сид получает аргументы через `nx run <app>:db:seed -- <arg>`; таргет `db:seed` приложения должен передавать
+  их своей команде (`nx:run-commands` делает это по умолчанию).
 
 ## Соединение и безопасность
 

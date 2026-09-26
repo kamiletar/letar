@@ -11,6 +11,16 @@
 - Отправка метрик в Dashboard
 - WebSocket для real-time
 
+## [0.19.0] — 2026-09-26
+
+### Added
+
+- **`POST /api/deploy/app`: необязательное `seedArgs`** (`lib/seed-args.ts`, `routes/deploy.ts`) —
+  аргументы сида из белого списка (`--sync-texts`, `--dry-run`), уходят в `deploy-affected.sh` как
+  `--seed-arg <arg>`. Только вместе с `seed: true`; `--dry-run` только с `--sync-texts`. Принятые
+  `seedArgs` возвращаются в ответе эхом — по нему `deploy-mcp` отличает старого агента, который
+  неизвестное поле молча игнорирует. Разбор — `libs/deploy-mcp/README.md § Аргументы сида`.
+
 ## [0.18.4] — 2026-09-23
 
 ### Fixed

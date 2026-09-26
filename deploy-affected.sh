@@ -194,6 +194,9 @@ SKIP_NX_CACHE=false
 CLEAN_INSTALL=false
 STAGING=false  # Деплой на staging окружение (docker-compose.staging.yml + .env.staging)
 RUN_SEED=false  # Запустить nx db:seed после деплоя
+# Дополнительные аргументы сида (--seed-arg, можно повторять). Белый список — здесь же, независимо
+# от dashboard-agent и deploy-mcp: скрипт запускают ещё и руками по SSH. Сид получает их после `--`.
+SEED_ARGS=()
 # PLAN-INFRA-6.md §157: production-сборка на s1, релиз на s2. Флаг ставит dashboard-agent на s1
 # для production-деплоя приложений из BUILD_ON_S1_APPS (libs/infra-config); руками — только при
 # отладке. Без флага скрипт ведёт себя ровно как раньше (сборка и запуск на одной машине).
@@ -237,6 +240,18 @@ while [[ $# -gt 0 ]]; do
       RUN_SEED=true
       shift
       ;;
+    --seed-arg)
+      case "${2:-}" in
+        --sync-texts|--dry-run)
+          SEED_ARGS+=("$2")
+          shift 2
+          ;;
+        *)
+          echo -e "${RED}--seed-arg: допустимы только --sync-texts и --dry-run (получено: '${2:-}')${NC}"
+          exit 1
+          ;;
+      esac
+      ;;
     --help)
       echo "Usage: ./deploy-affected.sh [OPTIONS]"
       echo ""
@@ -247,7 +262,8 @@ while [[ $# -gt 0 ]]; do
       echo "  --skip-cache      Skip Nx cache (default, for backwards compatibility)"
       echo "  --clean           Clean reinstall node_modules (fixes stale dependencies)"
       echo "  --staging         Deploy to staging (docker-compose.staging.yml + .env.staging)"
-  echo "  --seed            Run nx db:seed after successful deploy"
+      echo "  --seed            Run nx db:seed after successful deploy"
+      echo "  --seed-arg ARG    Extra arg for db:seed (repeatable): --sync-texts | --dry-run (needs --seed)"
       echo "  --remote-release  (s1) Собрать образ здесь, запушить в registry, релиз выполнить на s2 (§157)"
       echo "  --dry-run         Show what would be deployed without actually deploying"
       echo "  --help            Show this help message"
@@ -267,6 +283,11 @@ while [[ $# -gt 0 ]]; do
       ;;
   esac
 done
+
+if [ ${#SEED_ARGS[@]} -gt 0 ] && [ "$RUN_SEED" != true ]; then
+  echo -e "${RED}--seed-arg требует --seed${NC}"
+  exit 1
+fi
 
 # Staging/Production конфигурация
 # BASE_COMPOSE_FILE — общее имя compose-файла по умолчанию. Конкретное приложение может
@@ -370,6 +391,29 @@ remote_ssh() {
     -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
     -o ConnectTimeout=15 -o ServerAliveInterval=30 -o ServerAliveCountMax=10 \
     "$REMOTE_RELEASE_HOST" "$@"
+}
+
+# Запуск db:seed приложения с DATABASE_URL (первый аргумент) и SEED_ARGS.
+# `--sync-texts` без `--dry-run` сначала гоняется как dry-run: если план правок не строится, реальная
+# запись не начинается. Отчёт dry-run остаётся в логе деплоя. Сбой сида — предупреждение, не отказ деплоя.
+run_app_seed() {
+  local db_url="$1" app="$2" a has_sync=false has_dry=false
+  for a in ${SEED_ARGS[@]+"${SEED_ARGS[@]}"}; do
+    [ "$a" = "--sync-texts" ] && has_sync=true
+    [ "$a" = "--dry-run" ] && has_dry=true
+  done
+  if [ "$has_dry" = true ] && [ "$has_sync" = false ]; then
+    echo -e "${RED}⚠️  --seed-arg --dry-run без --sync-texts не имеет смысла — сид не запущен${NC}"
+    return 1
+  fi
+  if [ "$has_sync" = true ] && [ "$has_dry" = false ]; then
+    echo -e "${YELLOW}🌱 ${app}: dry-run перед реальной синхронизацией текстов...${NC}"
+    if ! DATABASE_URL="$db_url" nx run "${app}:db:seed" -- --sync-texts --dry-run; then
+      echo -e "${RED}⚠️  dry-run не прошёл — реальная синхронизация не запущена${NC}"
+      return 1
+    fi
+  fi
+  DATABASE_URL="$db_url" nx run "${app}:db:seed" ${SEED_ARGS[@]+-- "${SEED_ARGS[@]}"}
 }
 
 # Туннель к Postgres приложения на s2: s1:localhost:<порт+20000> → s2:127.0.0.1:<порт>.
@@ -1459,7 +1503,7 @@ for app in $AFFECTED_APPS; do
         # nx и prisma есть только здесь (на s2 после переезда их не будет), БД — через тот же туннель
         echo -e "${YELLOW}🌱 Running db:seed for ${app} (через туннель к s2)...${NC}"
         SEED_DATABASE_URL="postgresql://${DB_USER:-lena_user}:${ENCODED_PASSWORD}@localhost:${BUILD_DB_PORT}/${DB_NAME}?schema=public"
-        if DATABASE_URL="$SEED_DATABASE_URL" nx run "${app}:db:seed"; then
+        if run_app_seed "$SEED_DATABASE_URL" "$app"; then
           echo -e "${GREEN}✅ Seed completed for ${app}${NC}"
         else
           echo -e "${RED}⚠️  Seed failed for ${app} (deploy succeeded)${NC}"
@@ -1645,7 +1689,7 @@ RESTART_EOF
       # $DATABASE_URL выше: тот резолвится только изнутри docker-сети и с хоста даёт
       # `getaddrinfo ESERVFAIL` (найдено 2026-07-16, деплой auth-hub --seed для aprel8008-prod).
       SEED_DATABASE_URL="postgresql://${DB_USER:-lena_user}:${ENCODED_PASSWORD}@localhost:${DB_PORT:-5432}/${DB_NAME}?schema=public"
-      if DATABASE_URL="$SEED_DATABASE_URL" nx run "${app}:db:seed"; then
+      if run_app_seed "$SEED_DATABASE_URL" "$app"; then
         echo -e "${GREEN}✅ Seed completed for ${app}${NC}"
       else
         echo -e "${RED}⚠️  Seed failed for ${app} (deploy succeeded)${NC}"
