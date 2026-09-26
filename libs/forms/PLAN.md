@@ -1499,6 +1499,8 @@ export interface SelectFieldProps<TData = unknown> extends BaseFieldProps {
   searchable?: SelectSearchable<TData>
   /** Пустой результат поиска: своё содержимое вместо «Ничего не найдено» (например с CreateButton) */
   renderEmpty?: (search: string) => ReactNode
+  /** Опции ещё грузятся (`useFindMany`): спиннер, текст загрузки в списке и в триггере (§16.3, вопрос 23) */
+  loading?: boolean
   // valueType, clearable, size, variant — без изменений
 }
 
@@ -1518,6 +1520,8 @@ export interface ComboboxFieldProps<T = string, TData = unknown> extends BaseFie
   listFooter?: ReactNode
   /** Пустой список: своё содержимое вместо emptyMessage (например с CreateButton) */
   renderEmpty?: (search: string) => ReactNode
+  /** Догрузка выбранной записи по value (`useFindUnique`), когда её нет в выдаче (§16.4, вопрос 24) */
+  useSelected?: (value: string) => { data?: TData | null; isLoading?: boolean }
 }
 ```
 
@@ -1796,7 +1800,9 @@ Combobox: опция выбрана → setInputValue(result.label)
 - **apply для create** — как сейчас (`addCreatedOption` + `applyValue`), плюс `data`.
 - **Окно приложения** — по образцу `useQuickCreate` потребителя `onCreate` (Promise + resolver, повторный вызов
   отвечает `null` старому обещанию). Урок оттуда в доку: без вложенного `<form>` в окне — React-событие `submit`
-  всплывает из портала по дереву компонентов до внешней формы и отправляет её.
+  всплывает из портала по дереву компонентов до внешней формы и отправляет её. Уточнение (§16.6): это про
+  **сырой** `<form>`. Форма приложения на `@letar/forms` в окне безопасна — корень формы сам гасит всплытие
+  (`e.preventDefault(); e.stopPropagation()`, `form-root/form-simple.tsx:221–223`, `form-with-api.tsx:239–241`).
 
 ### 6. Наложение правок и слияние с опциями приложения
 
@@ -1898,9 +1904,34 @@ final      = withEdits + служебный пункт создания (есл�
   `formSelection.editHotkeyHint`).
 - Новые i18n-ключи в `selection-field-strings.ts` (ru/en): `formSelection.editOption` («Изменить»),
   `formSelection.editOptionAria` («Изменить «{label}»»), `formSelection.editHotkeyHint` («F2 — изменить пункт»).
-- **Тач:** наведения нет — карандаш виден всегда (приглушённый, ярче на `[data-highlighted]`), не «по hover».
-  `_hover` Chakra уже под `@media (hover: hover)` — не оборачивать повторно
-  (`.claude/docs/chakra-hover-condition-already-media-gated.md`).
+- **Видимость карандаша в пункте** (✅ решено владельцем 2026-09-26, уточнение к вопросу 8): на устройствах с
+  наведением карандаш появляется только у подсвеченного пункта; на тач-устройствах виден всегда, приглушённый.
+  - **Подсветка = наведение мыши + клавиатура.** zag подсвечивает пункт по `pointermove` мыши и снимает подсветку
+    по `pointerleave` (Select: `ZS/select.connect.mjs:255–260, 266–272`, `ZS/select.machine.mjs:397–399`;
+    Combobox: `ZC/combobox.connect.mjs:371–381`); стрелки ставят тот же `data-highlighted`
+    (`ZS/select.connect.mjs:252`). Radix при наведении переводит DOM-фокус на пункт (`RX:877–883`), а
+    `data-highlighted` ставит на пункт в фокусе (`RX:858`). Поэтому условие одно — `[data-highlighted]` у пункта,
+    `:hover` не нужен. Наведение на сам карандаш подсветку не снимает: `pointermove` всплывает к пункту.
+  - **Стиль (Chakra), на самом карандаше через `css`:** по умолчанию `opacity` приглушённая (тач);
+    `'@media (hover: hover) and (pointer: fine)': { opacity: 0, visibility: 'hidden' }`;
+    `'[data-part=item][data-highlighted] &': { opacity: 1, visibility: 'visible' }`. Готовые условия не подходят:
+    `_hover` действительно уже под `@media (hover: hover)` (Chakra `preset-base.js:67–70`), но он про наведение на
+    сам элемент. А `_groupHover` медиа-условием **не** обёрнут (`preset-base.js:114`) и залипал бы на таче.
+    Свою обёртку вокруг `_hover` не делаем (`.claude/docs/chakra-hover-condition-already-media-gated.md`).
+  - **Скрываем через `opacity` + `visibility`, не `display: none`:** место под карандаш всегда занято, текст
+    пункта не прыгает при наведении, цель для мыши стабильна. `visibility: hidden` ещё и не пропускает клик по
+    невидимому карандашу (у `opacity: 0` клик прошёл бы). Скрытый карандаш вне Tab-порядка (`tabIndex=-1`) и
+    `aria-hidden` — как и видимый; путь с клавиатуры — F2.
+  - **Гибридные устройства** (ноутбук с сенсорным экраном: основной указатель — мышь): касание пункт не
+    подсвечивает (zag подсвечивает только при `pointerType === 'mouse'`, `ZS/select.connect.mjs:256`), поэтому
+    карандаш при касании не появится; остаются мышь и F2. Принимаем.
+  - **shadcn:** Select — то же правило по `data-highlighted` (Radix). Combobox shadcn подсветки не имеет (§10) —
+    там `group-hover` Tailwind; обёрнут ли он в `@media (hover: hover)` в установленной версии Tailwind — **не
+    проверено**, при реализации сверить, иначе обернуть вручную.
+  - **Карандаш у выбранного значения** (рядом с триггером) виден всегда: он один на поле, шума нет, а скрытый
+    по наведению был бы недоступен на таче и хуже находился бы с клавиатуры (он в Tab-порядке). Причин делать
+    иначе не вижу.
+- **Тач:** наведения нет — карандаш в пункте виден всегда (приглушённый, ярче на `[data-highlighted]`).
 - **Цель 44px:** на `@media (pointer: coarse)` пункт `minH="11"`, карандаш 44×44; на мыши — `IconButton` `xs` с
   расширенной зоной нажатия (`_before` с отрицательным `inset`).
 - **Фокус-ловушки:** Chakra Content — не ловушка, но Tab без tabbable внутри гасится
@@ -2081,6 +2112,10 @@ matches > 0: как сейчас (пункт создания в конце, е�
 **Этап Б.**
 
 9. Карандаш есть в каждой опции при `onUpdate`; нет без `onUpdate`, при `editable: false`, `disabled`, value `''`.
+   Видимость (jsdom наведение и медиа-запросы не эмулирует — проверяем состояние, не пиксели): у карандаша стоит
+   маркер слота (`data-letar-slot="edit-option"`), `tabIndex=-1`, `aria-hidden`; после ArrowDown у подсвеченного
+   пункта `data-highlighted`, у остальных нет; в DOM карандаш есть у всех редактируемых пунктов (скрытие — только
+   стилем, не условным рендером). Карандаш у значения рендерится всегда, когда разрешён.
 10. Клик по карандашу пункта: `onUpdate` получил публичную опцию с `data`; значение поля не изменилось; список
     закрыт до резолва; `document.activeElement` — триггер в момент вызова `onUpdate`.
 11. Резолв `{ label: 'Новое', value: тот же }` у выбранной: подпись в списке и триггере обновилась; `isDirty` формы
@@ -2139,13 +2174,34 @@ matches > 0: как сейчас (пункт создания в конце, е�
 37. Регрессия существующих Select (все спеки Select без изменений при ≤ 9 опциях), `getGroup`, `valueType: 'number'`,
     `onCreate`, `Form.UrlSync` с Select.
 
+**ZenStack + Query (§16).** Unit — без TanStack Query: «рефетч» = перерендер с новыми `options` до или после резолва
+промиса `onUpdate`/`onCreate`. Z1–Z5 — этап Б (шаг 3), Z6 — этап В, Z7–Z8 — этап Б (шаги 4 и 7).
+
+- Z1–Z6 — как в §16.2 (новая подпись до резолва; старая подпись; нормализованный текст после резолва;
+  copy-on-write; `onCreate` без дубля; `loading` у Select при `options = []` и непустом значении — текст загрузки
+  в триггере вместо placeholder, спиннер, затем подпись).
+- Z7 — Combobox `useSelected`: значения нет в выдаче → подпись из `useSelected().data`; `initialLabel` побеждает;
+  при пустом value хук вызывается с `''` (приложение гасит `enabled`); карандаш у значения передаёт в `onUpdate`
+  опцию с `data` из `useSelected`; правка → новый `data` от хука → подпись обновилась.
+- Z8 — `RelationFieldProvider`: `data` — исходная запись в опциях; `RelationConfig.fieldProps` (`onUpdate`,
+  `renderOption`) доходят до `SchemaFieldWithRelations`; relation + `fieldType: "combobox"` получает опции провайдера;
+  `relation` не попадает в пропсы поля.
+
 **e2e (`form-develop-app`, реальный браузер).** Демо «Адрес доставки»: карандаш пункта → окно → сохранить →
 подпись обновилась, пункт не выбран; фокус после закрытия окна — на триггере (правка из пункта) и на карандаше
 (правка значения); F2; геометрия триггера (§8) на узкой ширине и на мобильном вьюпорте; `pointer: coarse` — 44px;
 axe на открытом списке (`aria-hidden-focus`). Ассерты скоупить на своё поле (`.claude/docs/e2e-testing.md`).
+Видимость карандаша на настоящем наведении (Playwright, десктопный проект): до наведения карандаш пункта
+`toBeHidden()` (visibility: hidden), `page.hover()` на пункт → `toBeVisible()`, увод мыши → снова скрыт; ArrowDown →
+виден у подсвеченного; геометрия текста пункта до и после наведения совпадает (`boundingBox`) — раскладка не
+прыгает. Мобильный проект (`hasTouch`, `isMobile`): карандаши видны без наведения. Карандаш у значения виден всегда.
 Этап В: Select на 30 опций — поиск, выбор с клавиатуры, мобильный вьюпорт (нет автофокуса, поле поиска не
 уезжает при скролле списка, шрифт поля ≥ 16px — иначе iOS зумит страницу), axe (`aria-dialog-name`,
 `aria-required-children`).
+ZenStack (§16.2, этап Б): демо на модели `Category` и настоящих `useFindMany`/`useCreate`/`useUpdate` — правка
+карандашом → новая подпись в списке и триггере без перезагрузки, ровно один запрос `findMany` после `update`
+(`page.waitForResponse`/счётчик запросов); создание из пустого поиска → запись выбрана, дубля нет. Этап В — там же
+`loading`: медленный ответ (`page.route` с задержкой) → в триггере текст загрузки, затем подпись.
 
 ### 13. Порядок реализации для `forms-dev`
 
@@ -2176,11 +2232,17 @@ axe на открытом списке (`aria-hidden-focus`). Ассерты с�
    headless-хуки кнопок; тесты с фейковым `controlRef`.
 3. Chakra Select: слоты (`selection-slots.tsx`), `controlActions`/`renderOptionActions`/`listFooter`/`controlRef`/F2
    в `uikit-chakra.tsx`; `field-select.tsx`: `onCreate` на `runCreate` (удалить `creatingRef`), `onUpdate`,
-   `createItem`; статики через `Object.assign`; типы в `form-compound-types.ts` и `create-form.tsx`; тесты 9–24, 26.
+   `createItem`; статики через `Object.assign`; типы в `form-compound-types.ts` и `create-form.tsx`; тесты 9–24, 26,
+   Z1–Z5.
 4. Chakra Combobox (§9), включая пустой результат при `onCreate` (§9.1, тест 27; `resolveEmptyState` — в
-   `forms-core` шагом 1).
+   `forms-core` шагом 1). Если владелец примет вопрос 24 — проп `useSelected` (§16.4) в
+   `ComboboxFieldProps`/`use-async-search`, тест Z7.
 5. shadcn (§10), тест 25; §9.1 в shadcn Combobox — тем же правилом.
-6. Цикл синхронизации, e2e-демо.
+6. Цикл синхронизации, e2e-демо (включая ZenStack-демо §16.2 на `Category`; адаптер `useUpdateCategory` в
+   `apps/form-develop-app/src/lib/hooks.ts` — добавить).
+7. Если владелец примет вопросы 25 и 27 — `relation-field-provider.tsx`: `data: record` в опциях,
+   `RelationConfig.fieldProps`; `field-type-mapper.tsx`: опции провайдера в Combobox, `relation` не распылять в
+   поле; тест Z8. Отдельный коммит, версии этапа Б покрывают (новые необязательные поля).
 
 **Этап В** — `forms` 2.21.0, `forms-core` 0.18.0, `forms-react` 0.13.0, `forms-shadcn` 0.42.0 (подробно — §15.9):
 
@@ -2189,7 +2251,7 @@ axe на открытом списке (`aria-hidden-focus`). Ассерты с�
 2. `forms-react/selection/`: `useSelectionSearch` (строка поиска, гистерезис порога, сброс на закрытии).
 3. Chakra: поле поиска в `uikit-chakra.tsx` (`composite: false`, `Select.List`, ARIA, клавиши, подсветка первой,
    автофокус), `field-select.tsx` — `searchable`, `renderEmpty`, `onCreate(search)`; JSDoc — вернуть «search»;
-   тесты 28–37.
+   тесты 28–37. Если владелец примет вопрос 23 — проп `loading` у Select (§16.3), тест Z6.
 4. shadcn: проп в типах, `searchable` не действует, dev-предупреждение при `true` — долг (§15.6).
 5. Цикл синхронизации, e2e; в CHANGELOG — «Изменения поведения»: у Select с 10+ опциями в выпадашке появилось
    поле поиска, выключается `searchable={false}`.
@@ -2208,6 +2270,12 @@ axe на открытом списке (`aria-hidden-focus`). Ассерты с�
 6. **`libs/form-mcp`:** новые пропсы Select/Combobox в `get_field_props`/`get_field_example`; в `pattern-registry.ts`
    — паттерн «справочник с правкой и созданием из формы», если реестр ведёт такие паттерны. Этап В: `searchable` в
    `get_field_props`, правило выбора «Select или Combobox» (§15.7) в описании полей `list_fields`/`get_form_pattern`.
+
+**ZenStack (§16) в цикле синхронизации:** в группе 1 — пример §16.6 и правила §16.2 (возвращать ответ сервера, не
+включать `optimisticUpdate`, `keepPreviousData` у Combobox) в `docs/fields.md`; в группе 3 — тот же пример в
+`select.mdx`/`select.ru.mdx`; в группе 6 — паттерн «справочник из ZenStack» в `get_form_pattern` и примеры
+`form.props.searchable`/`form.props.searchable.threshold`/`form.props.createItem` в `get_directives`.
+`zenstack-form-plugin` не меняется: новых директив нет (§16.5).
 
 Вне `libs/forms` (не правка этого плана — сообщить координатору): `.claude/rules/forms.md` в пункте про
 `Field.NativeSelect` говорит, что `Field.Select` закрывает мобильный UX «(поиск, кнопка очистки)». До этапа В
@@ -2236,13 +2304,16 @@ axe на открытом списке (`aria-hidden-focus`). Ассерты с�
   `searchable={false}`, прогон e2e потребителей до релиза.
 - **Р7. Поиск в Select держится на ручной ARIA и гашении трёх клавиш** поверх внутренностей zag (§15.2): обновление
   Chakra/Ark может сдвинуть порядок обработки. Закрыто тестами 32, 36 и axe в e2e.
+- **Р8. Оптимистичный режим ZenStack** (`optimisticUpdate: true`) на время `create` кладёт в `options` временную
+  строку с чужим id (§16.1–16.2). Приложения монорепо его не включают; смягчение — правило в доке (не включать для
+  справочников или фильтровать `$optimistic`) и вопрос 28.
 
 **Открытые вопросы к владельцу** (по каждому — рекомендация):
 
 ✅ **2026-09-26 владелец принял рекомендации по всем вопросам 1–21** (14, 16, 18 — отдельно, с уточнениями ниже).
 Дополнение владельца: приложения во всю используют **ZenStack (хуки `useFindMany*`/`useCreate*`/`useUpdate*`) и
 TanStack Query** — сценарии, примеры в доке и взаимодействие `onCreate`/`onUpdate` с инвалидацией кэша нужно
-проверять на этой связке (см. подраздел «ZenStack + Query» в разделе архитектуры, когда он будет дописан).
+проверять на этой связке — разобрано в §16 «ZenStack + TanStack Query», новые вопросы 22–28.
 
 1. **Горячая клавиша.** F2 для подсвеченного пункта и для выбранного значения на закрытом триггере? —
    _Рекомендую F2_ (стандарт, zag и Radix её не занимают; Ctrl/Shift+Enter конфликтуют с выбором, §7). Сделать
@@ -2262,8 +2333,14 @@ TanStack Query** — сценарии, примеры в доке и взаим�
 7. **Combobox с `useQuery`:** значение, которого нет на текущей странице выдачи, уходит в `onUpdate` без `data`
    (только value и текст) — приемлемо? — _Рекомендую принять_ и описать; приложение само догружает запись по
    value. Проп `initialData` — только при реальном запросе.
+   Дополнение (§16.4): для ZenStack есть штатный путь догрузки — проп `useSelected` (`useFindUnique` по value),
+   вынесен отдельным вопросом 24; принятое решение по вопросу 7 без него остаётся в силе.
 8. **Видимость карандаша на десктопе:** всегда (приглушённый) или только у подсвеченного пункта? —
    _Рекомендую всегда:_ находимость и одинаковое поведение с тачем, где наведения нет.
+   ✅ **Решено владельцем 2026-09-26, уточнено:** «всегда» шумно на длинных списках. На устройствах с наведением
+   карандаш в пункте появляется при наведении и при клавиатурной подсветке (`data-highlighted`), на таче виден
+   всегда (приглушённый); скрытие — `opacity` + `visibility`, без сдвига раскладки. Карандаш у выбранного
+   значения виден всегда. Детали — §7 «Видимость карандаша в пункте».
 9. **`readOnly`-поле:** карандаш у значения скрыт? — _Рекомендую скрыть_, как у `disabled`: режим просмотра не
    правит справочники.
 10. **Опция со значением `''`** («Все категории») по умолчанию не редактируема? — _Рекомендую да_ (это не запись
@@ -2306,6 +2383,29 @@ TanStack Query** — сценарии, примеры в доке и взаим�
     создания остаётся пунктом списка (единственный клавиатурный путь), свои тексты потребителя не трогаем.
 21. **Искать ли по названию группы** (`getGroup`)? — _Рекомендую нет_: ищем по тексту опции; совпадение по
     заголовку группы вывалило бы всю группу.
+
+Вопросы 22–28 — по связке ZenStack + TanStack Query (§16), открыты:
+
+22. **Хелпер `useOptionsFromQuery` в `@letar/forms`?** — _Рекомендую нет_ (§16.2): маппинг — одна строка `useMemo`,
+    а пакет из npm не должен зависеть от TanStack Query/ZenStack. Вместо хелпера — пример в доке (§16.6), паттерн в
+    `form-mcp` и e2e на настоящих хуках.
+23. **Проп `loading` у `Field.Select`** (справочник из `useFindMany` ещё грузится: спиннер, текст «Загрузка…» в
+    списке и в триггере при непустом значении)? — _Рекомендую да, этап В_ (§16.3): сейчас поле со значением до
+    ответа сервера выглядит пустым.
+24. **Проп `useSelected` у Combobox** — догрузка выбранной записи через `useFindUnique` по value (подпись в форме
+    редактирования, `data` для карандаша у значения и `onUpdate`)? — _Рекомендую да, этап Б, шаг 4_ (§16.4);
+    `initialLabel` остаётся и имеет приоритет.
+25. **`RelationConfig.fieldProps` + `data: record` в опциях `RelationFieldProvider`** — чтобы автоформы получали
+    `onCreate`/`onUpdate`/`renderOption` один раз на модель? — _Рекомендую да, этап Б_ (§16.5, п. 2).
+26. **`form.fieldType` со ссылкой на компонент инстанса** (`"Select.WorkCategory"`)? — _Рекомендую нет_ (§16.5,
+    п. 3): маппер работает по фиксированному `switch`; поле-справочник ставится в форму явно, в `AutoFields` —
+    `exclude`.
+27. **Relation + `fieldType: "combobox"`** сейчас без опций (`field-type-mapper.tsx:374–375`) — отдавать опции
+    провайдера как статичные `options` и перестать распылять служебный `relation` в поле? — _Рекомендую да,
+    попутно в этапе Б_ (§16.5, п. 4).
+28. **Оптимистичный режим ZenStack для справочников** — поддерживать в библиотеке (фильтр `$optimistic` внутри
+    поля) или только правило в доке? — _Рекомендую только доку_ (§16.2, правило 3, Р8): приложения его не
+    включают, а знание о флаге ZenStack внутри `@letar/forms` — та же лишняя зависимость, что в вопросе 22.
 
 ### 15. Поиск в `Field.Select` (этап В)
 
@@ -2509,6 +2609,9 @@ Combobox (Popover) после его клавиатурного долга (§10
 клиенте? Хватит Select: поиск включится сам». Правило «растущий каталог → Combobox» в `.claude/rules/forms.md` уже
 есть и не противоречит.
 
+Пересмотрено с учётом ZenStack (§16.3): вывод тот же — `useQuery` в Select не нужен. Появляется только проп
+`loading` у Select (справочник из `useFindMany` ещё грузится) и догрузка выбранной записи у Combobox (§16.4).
+
 #### 15.8. Обратная совместимость
 
 - Закрытое поле, значение, `onChange`, `UrlSync` — без изменений у всех.
@@ -2531,13 +2634,249 @@ Combobox (Popover) после его клавиатурного долга (§10
 Версии: `forms` 2.21.0, `forms-core` 0.18.0, `forms-react` 0.13.0, `forms-shadcn` 0.42.0 (только типы и
 предупреждение). Шаги — §13 «Этап В». Цикл 6 групп:
 
-1. `libs/forms`: CHANGELOG, README (проп `searchable`), `docs/fields.md` — раздел «Поиск в Select» и таблица §15.7.
+1. `libs/forms`: CHANGELOG, README (пропсы `searchable` и `loading` — §16.3, если принят вопрос 23),
+   `docs/fields.md` — раздел «Поиск в Select» и таблица §15.7.
 2. `form-develop-app`: демо `/select-search-demo` — 9, 10 и 30 опций, группы, «Все» с `''`, `onCreate` с текстом
    поиска, переключатель числа опций в рантайме; e2e.
 3. `form-docs`: `select.mdx` + `select.ru.mdx` (раздел «Поиск»), страница Combobox (строка про выбор поля).
 4. `form-example`: выбор из длинного списка (например, регион) с поиском.
 5. `NEW_COMPONENTS.md`.
 6. `form-mcp`: `searchable` в `get_field_props`/`get_field_example`, правило выбора §15.7 в `get_form_pattern`.
+
+### 16. ZenStack + TanStack Query
+
+Дополнение владельца: приложения держат справочники на хуках ZenStack (`useFindMany*`/`useFindUnique*`/
+`useCreate*`/`useUpdate*` поверх TanStack Query). Эта связка — основной сценарий для `options`, `onCreate`,
+`onUpdate` и `useQuery`, и правила §6 должны на ней работать без сюрпризов.
+
+#### 16.1. Как устроены хуки (проверено по исходникам)
+
+Установлено: `@zenstackhq/tanstack-query` 3.9.5 (корневой `package.json:343`), `@tanstack/query-core` 5.103.2.
+Сокращения: `ZQR/` = `node_modules/.bun/@zenstackhq+tanstack-query@3.9.5+07834b9a026b4f80/node_modules/@zenstackhq/tanstack-query/dist/`,
+`ZCH/` = `node_modules/.bun/@zenstackhq+client-helpers@3.9.5+a3a44f2c05f1807a/node_modules/@zenstackhq/client-helpers/dist/`,
+`TQ/` = `node_modules/.bun/@tanstack+query-core@5.103.2/node_modules/@tanstack/query-core/build/modern/`.
+
+- **Хуки v3:** `useClientQueries(schema).<model>.useFindMany/useFindUnique/useCreate/useUpdate` (`ZQR/react.js:52,
+  103–152`). Приложения часто оборачивают их в `useFindMany<Model>` — образец адаптеров
+  `apps/form-develop-app/src/lib/hooks.ts`.
+- **Запрос** — обычный `useQuery` TanStack с ключом ZenStack; второй аргумент хука распыляется в `useQuery`
+  (`...options`, `ZQR/react.js:190–204`): можно передать `placeholderData`, `staleTime`, `enabled`.
+- **Мутация по умолчанию** (без `optimisticUpdate`): в `onSuccess` сначала `await` инвалидации, потом
+  пользовательский `onSuccess` (`ZQR/react.js:285–297`). Инвалидируются запросы затронутых моделей и запросы,
+  читающие их вложенно (`ZCH/index.mjs:338–362`).
+- **`invalidateQueries`** помечает запросы устаревшими и перезапрашивает **активные**; промис ждёт окончания
+  всех перезапросов, ошибки перезапроса глотает (`TQ/queryClient.js:297–308, 324–334`). Запрос на паузе
+  (офлайн) не ждётся (`:332`), `staleTime: 'static'` не перезапрашивается (`:329`).
+- **`mutateAsync`** возвращает данные только после `onSuccess`/`onSettled` (`TQ/mutation.js:179–188`).
+- **Итог:** `await update.mutateAsync(...)` возвращается, когда активный `useFindMany` **уже перезапрошен**. К
+  моменту, когда `onUpdate`/`onCreate` отдаёт результат полю, у поля обычно уже новые `options`.
+- **Оптимистичный режим** (`optimisticUpdate: true`): кэш правится сразу на `mutate`. `create` вставляет временную
+  запись с чужим id (`crypto.randomUUID()` или max+1) и флагом `$optimistic` (`ZCH/index.mjs:471–505`, строки 502,
+  504), `update` — копию с `$optimistic` (`:508–528`); инвалидация — на `onSettled` (`ZQR/react.js:298–317`).
+  В приложениях монорепо `optimisticUpdate` не используется (поиск по `apps/` — 0 вхождений).
+
+#### 16.2. Точное правило «мутация → рефетч → наложение»
+
+Правило §6 не меняется («правка побеждает, пока приложение не пришлёт **другой** текст этой опции»). Ниже —
+как оно ложится на хронологию ZenStack.
+
+| # | Что произошло                                                                                                                                              | Что видит пользователь                                                                                                                                                                                              |
+| - | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1 | Штатно: `await mutateAsync` → рефетч пришёл **до** резолва `onUpdate`                                                                                      | Новая подпись от приложения. При `apply` запись наложения заводится и тут же снимается прюнингом (текст приложения ≠ `baselineText`). Мигания нет: список закрыт, подпись уже новая                                 |
+| 2 | То же при смене value (copy-on-write)                                                                                                                      | Пару миллисекунд триггер держит старую подпись из кеша выбранных zag (`ZL/selection-map.mjs:4–15`), затем `applyValue` переключает на новую запись                                                                  |
+| 3 | Рефетч вернул **старую** подпись (реплика, HTTP-кеш), упал или стоял на паузе офлайн                                                                       | Результат `onUpdate` (текст приложения = `baselineText` → запись держится) до первой отличной подписи от приложения. Принято вопросом 5                                                                             |
+| 4 | Рефетча нет: `options` не из активного запроса (пропсы Server Component, `enabled: false`, другой ключ, `invalidateQueries: false`, `staleTime: 'static'`) | Результат `onUpdate` до смены данных. Для RSC — server action с `revalidatePath` или `router.refresh()` → новые пропсы → прюнинг                                                                                    |
+| 5 | Приложение не ждёт мутацию (`mutate` без `await`) или возвращает введённое в окне, а не ответ сервера                                                      | Сразу введённое. Пришёл рефетч с текстом, отличным от `baselineText` (например сервер обрезал пробелы) → побеждает сервер. Правильно, но заметен скачок                                                             |
+| 6 | Оптимистичный режим                                                                                                                                        | update: кэш с новой подписью уже на `mutate` → запись снимается сразу. create: на время запроса в `options` временная строка `$optimistic` с чужим id — открой пользователь список, увидел бы два одинаковых пункта |
+| 7 | `onCreate`: рефетч до резолва                                                                                                                              | Запись уже в списке приложения, `mergeCreatedOptions` отдаёт приоритет приложению (`creatable-options.ts:35–42`) — дубля нет                                                                                        |
+
+**Правила для приложений (в доку):**
+
+1. Из `onUpdate`/`onCreate` возвращать **ответ сервера** — запись из `await mutateAsync(...)`, а не введённое в окне
+   (строка 5 таблицы).
+2. Ошибку мутации либо пробрасывать (станет unhandled rejection — политика `onCreate`), либо ловить, показывать
+   тост и возвращать `null`.
+3. Для справочников в полях выбора `optimisticUpdate` не включать. Включён — фильтровать при маппинге:
+   `data.filter((r) => !r.$optimistic)` (строка 6; вопрос 28).
+4. `staleTime` на правило не влияет: инвалидация перезапрашивает активные запросы независимо от него. Исключение —
+   `'static'` (строка 4).
+5. Combobox с `useQuery`: передавать `placeholderData: keepPreviousData` вторым аргументом хука. Иначе на каждый
+   новый поиск `data` пропадает до ответа и список мигает сообщением «Загрузка…» вместо прошлых результатов
+   (`field-combobox.tsx:446–448`).
+
+**Хелпер вроде `useOptionsFromQuery` в `@letar/forms` — не нужен** (вопрос 22). Маппинг — одна строка
+`useMemo`, а зависимость пакета, публикуемого в npm, от TanStack Query/ZenStack ради неё не оправдана.
+Достаточно примера в доке (§16.6), паттерна в `form-mcp` и e2e-демо на настоящих хуках.
+
+**Тесты** (unit в `libs/forms` — без TanStack Query: «рефетч» имитируется перерендером с новыми `options` в нужный
+момент относительно резолва промиса; настоящая связка — e2e):
+
+- Z1 — новая подпись приходит до резолва `onUpdate`: итог — подпись приложения; следующая подпись от приложения
+  тоже видна сразу (записи наложения не осталось).
+- Z2 — «рефетч» со старой подписью: виден результат `onUpdate`; затем другая подпись — побеждает приложение.
+- Z3 — «рефетч» после резолва с нормализованным текстом: сначала результат `onUpdate`, затем текст приложения.
+- Z4 — copy-on-write + новый список до резолва: значение переключено на новый id, старой опции нет.
+- Z5 — `onCreate` + список с новой записью до резолва: одна опция, значение выбрано.
+- Z6 — опции `[]` (загрузка) → данные: выбранное значение показывается, `loading` у Select (§16.3).
+- Z7 (`useSelected`) и Z8 (`RelationFieldProvider`) — в §12.
+- **e2e** в `apps/form-develop-app` — там уже ZenStack v3, модель `Category` с `@@allow('all', true)`
+  (`schema.zmodel:56–72`) и адаптеры `useFindManyCategory`/`useCreateCategory` (`src/lib/hooks.ts:73–82`;
+  адаптера `update` для `Category` там нет — добавить). Демо на настоящих `useFindMany`/`useCreate`/
+  `useUpdate`: правка категории карандашом → подпись в списке и триггере новая без перезагрузки, после `update` —
+  ровно один запрос `findMany` в сети; создание из Select с поиском → запись выбрана, дубля нет.
+
+#### 16.3. Select и «много записей из запроса» — пересмотр §15.7
+
+- **(а) Справочник целиком из `useFindMany`** (десятки–сотни строк): для поля это обычные `options`, клиентский
+  поиск Select (`searchable`) подходит. Ориентир для доки — до нескольких сотен записей, которые не растут без
+  предела.
+- **(б) Тысячи записей или поиск на сервере:** Combobox + `useQuery(search)`.
+
+**Чего не хватает Select для (а) — состояния загрузки.** Пока `useFindMany` грузится, `options = []`: список пуст,
+а у выбранного значения нет подписи. zag показывает пустую строку (нет ни в коллекции, ни в кеше выбранных,
+`ZL/selection-map.mjs:4–15`), и `ValueText` рисует placeholder (`children || select.valueAsString || placeholder`,
+`ARK/select/select-value-text.js:15`) — поле выглядит
+пустым, хотя значение есть. Нужен проп `loading?: boolean`: спиннер в `IndicatorGroup` (как у Combobox,
+`field-combobox.tsx:436`), в списке — `formSelection.combobox.loadingMessage`, в триггере при непустом значении —
+тот же текст вместо placeholder. Этап В, вопрос 23. `useQuery` в Select по-прежнему не нужен: весь список
+приложение и так получает снаружи через `useFindMany`, а поиск на сервере — работа Combobox.
+
+**Как `useQuery` Combobox стыкуется с ZenStack сейчас:**
+
+- Тип: `AsyncQueryFn<TData> = (search) => { data?: TData[]; isLoading?; error? }` (`libs/forms-react/src/lib/field/use-async-search.ts:9–19`).
+  Результат хука ZenStack подходит структурно (`{ queryKey, ...useQuery() }`, `ZQR/react.js:197–203`).
+- Хук вызывается в `useFieldState` на каждом рендере; до `minChars` — с пустой строкой
+  (`use-async-search.ts:123, 127`), то есть запрос с `contains: ''` всё равно уходит и отдаёт первую страницу. Не нужен
+  запрос без текста — `enabled: search.length > 0` во втором аргументе хука.
+- Вызов хука внутри стрелки требует отключения правила хуков (`apps/driving-school/.../combobox-lesson-type.tsx:35–37`) —
+  это цена API, менять не предлагаю.
+- `getLabel`/`getValue` получают `unknown`, приложения приводят типы вручную (`combobox-lesson-type.tsx:47–48`),
+  потому что `createField` возвращает не-generic компонент. Этап А (generic `ComboboxFieldComponent`, §2.3) это
+  чинит: `TData` выводится из результата `useQuery`. Проверить вывод при порядке пропсов `useQuery` → `getLabel`
+  тем же compile-only тестом (§12, п. 6).
+- `debounce` 300 мс по умолчанию (`field-combobox.tsx:255`) и кеш TanStack по ключу вместе дают один запрос на
+  паузу в наборе; повтор того же текста берётся из кеша.
+
+#### 16.4. Выбранная запись вне выдачи Combobox — `useSelected` (к вопросу 7)
+
+Вопрос 7 закрыт как «принять, кешировать последнюю выбранную». С `useFindUnique` есть штатный путь лучше —
+предлагаю **дополнительный необязательный** проп, решение за владельцем (вопрос 24):
+
+```ts
+// ComboboxFieldProps<T, TData>
+/**
+ * Догрузка выбранной записи по value, когда её нет в текущей выдаче. Вызывается как хук на каждом рендере
+ * (правила хуков): при пустом value приложение само выключает запрос через `enabled`
+ */
+useSelected?: (value: string) => { data?: TData | null; isLoading?: boolean }
+
+// <Form.Field.Combobox
+//   useQuery={(s) => client.workCategory.useFindMany({ where: { name: { contains: s } }, take: 20 })}
+//   useSelected={(id) => client.workCategory.useFindUnique({ where: { id } }, { enabled: !!id })}
+//   getLabel={(c) => c.name} getValue={(c) => c.id} />
+```
+
+- Что даёт: подпись выбранного значения в форме редактирования без ручного `initialLabel` (он остаётся для
+  совместимости и имеет приоритет); `data` для `renderOption`, карандаша у значения и `onUpdate` (закрывает дыру
+  вопроса 7); после правки `findUnique` той же модели инвалидируется вместе с `findMany` (`ZCH/index.mjs:345–351`) —
+  подпись свежая.
+- Цена: один запрос на поле с непустым значением при монтировании; TanStack дедуплицирует по ключу.
+- Select такой проп не нужен: весь список у него на руках (при загрузке — `loading`, §16.3).
+- Этап Б, шаг 4 (Combobox): без этого карандаш у значения вне выдачи получает опцию без `data`.
+
+#### 16.5. Схемная генерация (`zenstack-form-plugin`, `field-type-mapper.tsx`)
+
+**Как сейчас:**
+
+- `@meta("form.props.<ключ>", значение)` → любой UI-проп поля; вложенный путь собирается в объект
+  (`setDeep`, `libs/zenstack-form-plugin/src/parser.ts:151–163`, вызов `:209–211`), не-Zod ключи уходят в
+  `uiProps` (`parser.ts:80–96`). В рантайме это `fieldProps`, они распыляются в поле **после** `options`
+  (`field-type-mapper.tsx:370–371`). Известные ключи директив — `parser.ts:100–109`; объектный литерал в `@meta`
+  ломает `zenstack generate` (`parser.ts:125–128`, комментарий к `metaValueToPlain`).
+- `@meta("form.relation.labelField"/"model")` → `fieldProps.relation` → `SchemaFieldWithRelations` берёт опции из
+  `RelationFieldProvider` по модели (`field-type-mapper.tsx:500–515`). Провайдер зовёт хук приложения
+  (`useQuery(queryArgs)` — обычно ZenStack `useFindMany`) и строит опции в эффекте (`relation-field-provider.tsx:111–138`).
+- Пробелы: запись в опции не кладётся (только `value`/`label`/`description`, `relation-field-provider.tsx:128–134`) —
+  `data` пуста; relation + `fieldType: "combobox"` опций не получает вовсе (`field-type-mapper.tsx:374–375`);
+  служебный `fieldProps.relation` распыляется в поле как лишний проп.
+
+**Рекомендация — минимальный набор:**
+
+1. **Скалярные новые пропсы — через существующий `form.props.*`, новых директив нет.** Работают сразу:
+   `@meta("form.props.searchable", false)`, `@meta("form.props.searchable.threshold", 20)` (соберётся в
+   `{ threshold: 20 }`), `@meta("form.props.createItem", false)`, `@meta("form.props.createLabel", "Новая категория…")`.
+   В `form-mcp` `get_directives` — добавить эти примеры.
+2. **Функции** (`renderOption`, `renderValue`, `onCreate`, `onUpdate`, `useSelected`) в схему не выносим: в ZModel нет
+   функций, а окно и мутации — логика приложения. Два пути:
+   - **основной — компонент-справочник в `createForm`-инстансе**: `extraSelects: lazySelects({ WorkCategory: () =>
+     import('./selects/work-category-select') })`, внутри `useFindMany` + `useCreate`/`useUpdate` + окно; в форме
+     `<AppForm.Select.WorkCategory name="categoryId" />`, в `Form.AutoFields` это поле — в `exclude` и рядом явно;
+   - **для автоформ — `RelationConfig.fieldProps`** (вопрос 25): `fieldProps?: Partial<SelectFieldProps>` в конфиге
+     модели у `RelationFieldProvider`. Функции там допустимы: конфиг собирается в компоненте приложения, хуки
+     мутаций доступны. `SchemaFieldWithRelations` добавляет их к полю. Плюс `data: record` в опциях провайдера.
+     Один раз на модель — «категория с созданием и правкой во всех автоформах».
+3. **Не делаем:** `form.fieldType` со ссылкой на компонент инстанса (`"Select.WorkCategory"`) — маппер работает по
+   фиксированному `switch` (вопрос 26).
+4. **Попутно (этап Б):** relation + `fieldType: "combobox"` — отдавать опции провайдера в Combobox как статичные
+   `options`; `relation` не распылять в поле (вопрос 27).
+
+#### 16.6. Пример для доки (нейтральная модель)
+
+```zmodel
+model WorkCategory {
+  id          String  @id @default(cuid())
+  name        String  @meta("form.title", "Название")
+  description String? @meta("form.title", "Описание") @meta("form.fieldType", "textarea")
+  works       Work[]
+  @@allow('all', auth() != null)
+}
+```
+
+```tsx
+'use client'
+// selects/work-category-select.tsx — справочник в extraSelects инстанса приложения
+export function WorkCategorySelect(props: { name: string; label?: string }): ReactElement {
+  const client = useClientQueries(schema)
+  const { data, isLoading } = client.workCategory.useFindMany({ orderBy: { name: 'asc' } })
+  const create = client.workCategory.useCreate()
+  const update = client.workCategory.useUpdate()
+  const dialog = useWorkCategoryDialog() // окно приложения: Promise + resolver, внутри — своя AppForm
+
+  const options = useMemo(
+    () => (data ?? []).map((c) => ({ label: c.name, value: c.id, data: c })),
+    [data],
+  )
+
+  return (
+    <>
+      <FieldSelect
+        {...props}
+        options={options}
+        loading={isLoading}
+        renderOption={(o) => <OptionWithHint title={o.label} hint={o.data?.description} />}
+        onCreate={async (search) => {
+          const input = await dialog.open({ name: search })
+          if (!input) { return null }
+          const c = await create.mutateAsync({ data: input }) // ответ сервера, а не input
+          return { label: c.name, value: c.id, data: c }
+        }}
+        onUpdate={async (o) => {
+          const input = await dialog.open(o.data)
+          if (!input) { return null }
+          const c = await update.mutateAsync({ where: { id: String(o.value) }, data: input })
+          return { label: c.name, value: c.id, data: c }
+        }}
+      />
+      {dialog.element}
+    </>
+  )
+}
+```
+
+- Окно — своя форма приложения на `@letar/forms` внутри Chakra Dialog; её `submit` во внешнюю форму не всплывает
+  (корень формы гасит всплытие, §5). Сырой `<form>` в окне недопустим.
+- Правка и создание работают без ручной инвалидации: к возврату `mutateAsync` список уже перезапрошен (§16.1).
+- Модель, имена и тексты — нейтральные; в публичной доке без справочников приватных приложений.
 
 ## ✅ [2026-09-04] Миграция `zenstack-form-plugin` на нативные возможности ZModel
 
