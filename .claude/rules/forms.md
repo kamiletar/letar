@@ -113,6 +113,23 @@ export const appFormRegistryCheck: FormRegistryCheck<typeof AppForm, FormSelectK
 Загрузчики получают `deps`. ⚠️ У `Combobox` по умолчанию `minChars=1` — в зависимом списке без ввода
 поставь `minChars={0}`. Полностью — `libs/forms/docs/fields.md`.
 
+### Заготовка справочника и связи из ZenStack
+
+Новый `Select`/`Combobox` под модель — не руками, а генератором (`libs/generators` ≥ 0.2.0):
+
+```bash
+nx g @letar/generators:reference-select <app> --model=Supplier --kind=combobox
+```
+
+Файл создаётся один раз (существующий не перезаписывается), генератор печатает строку для
+`lazySelects`/`lazyComboboxes`; окно создания и правки в заготовке — `window.prompt` с `TODO`, замени на
+диалог приложения. Загрузка связей формы целиком без своего компонента — `useZenStackRelations(zenSchema,
+formSchema, options?)` из `@letar/forms-query/zenstack` (≥ 0.4.0): сигнатура именно с `zenSchema`, не с
+клиентом, иначе массив `relations` пересоздавался бы каждый рендер. Поля с ключом реестра хук пропускает.
+
+⚠️ Очистка nullable-поля Select/Combobox пишет `null` (`forms` ≥ 2.28.0), не `''`; для не-nullable и форм без
+`schema` — по-прежнему `''`. `onChange`, завязанный на `''`, надо проверить.
+
 ### Memory optimization
 
 - **Все Select/Combobox** через `lazySelects`/`lazyComboboxes` (dynamic imports)
