@@ -37,6 +37,41 @@ function renderChart() {
   )
 }
 
+describe('PersonalityRadarChart: расшифровка сокращений', () => {
+  it('черты идут по убыванию балла, состояния (BAR/DPR) — отдельной группой', () => {
+    const { container } = render(
+      <ChakraProvider value={defaultSystem}>
+        <NextIntlClientProvider locale="ru" messages={ruMessages}>
+          <PersonalityRadarChart
+            data={[...data, { type: 'DPR', label: 'Философ', value: 36 }, { type: 'BAR', label: 'Маятник', value: 46 }]}
+            title="Профиль"
+            color="currentColor"
+          />
+        </NextIntlClientProvider>
+      </ChakraProvider>,
+    )
+    const legend = container.querySelector('[data-scope="collapsible"][data-part="root"]')
+    expect(legend).toBeTruthy()
+    const text = legend?.textContent ?? ''
+    const at = (s: string) => text.indexOf(s)
+
+    // Черты: Архитектор 70 → Бдительный Страж 55 → Отшельник 20
+    expect(at('Архитектор')).toBeGreaterThan(at('Черты'))
+    expect(at('Бдительный Страж')).toBeGreaterThan(at('Архитектор'))
+    expect(at('Отшельник')).toBeGreaterThan(at('Бдительный Страж'))
+    // Состояния — после всех черт, тоже по убыванию: Маятник 46 → Философ 36
+    expect(at('Состояния')).toBeGreaterThan(at('Отшельник'))
+    expect(at('Маятник')).toBeGreaterThan(at('Состояния'))
+    expect(at('Философ')).toBeGreaterThan(at('Маятник'))
+  })
+
+  it('без состояний заголовка «Состояния» нет', () => {
+    const { container } = renderChart()
+    const legend = container.querySelector('[data-scope="collapsible"][data-part="root"]')
+    expect(legend?.textContent).not.toContain('Состояния')
+  })
+})
+
 describe('PersonalityRadarChart: доступ с клавиатуры', () => {
   it('поверхность диаграммы фокусируется по Tab (accessibilityLayer)', () => {
     const { container } = renderChart()

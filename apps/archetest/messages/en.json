@@ -503,6 +503,8 @@
   },
   "radar": {
     "abbreviations": "Abbreviations",
+    "traits": "Traits",
+    "states": "States",
     "legendBold": "Bold codes — 40% and above",
     "legendFaded": ", faded — few answers",
     "lowConfidence": "Few answers — rough estimate"

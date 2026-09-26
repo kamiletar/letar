@@ -1,11 +1,12 @@
 'use client'
 
 import { useShowClinicalNames } from '@/app/_hooks/use-psychologist'
-import { Box, Collapsible, Heading, HStack, SimpleGrid, Text, useToken } from '@chakra-ui/react'
+import { Box, Collapsible, Heading, HStack, Text, useToken, VStack } from '@chakra-ui/react'
 import { useTranslations } from 'next-intl'
 import { useEffect, useMemo, useState } from 'react'
 import { LuChevronDown } from 'react-icons/lu'
 import { PolarAngleAxis, PolarGrid, Radar, RadarChart, ResponsiveContainer, Tooltip } from 'recharts'
+import { groupLegendPoints } from '../_lib/radar-legend'
 
 /** Порог ширины для мобильной адаптации */
 const MOBILE_BREAKPOINT = 640
@@ -189,9 +190,72 @@ function RadarTooltip({
   )
 }
 
+/** Строка расшифровки: код → название → балл (и средний балл слоя сравнения) */
+function LegendRow({ point: p, hasComparison }: { point: RadarPoint; hasComparison: boolean }) {
+  return (
+    <HStack gap={2} fontSize="sm" py={0.5} opacity={p.lowConfidence ? 0.7 : 1} minW={0} breakInside="avoid">
+      <Text fontFamily="mono" fontWeight="bold" fontSize="xs" w="2.5rem" flexShrink={0}>
+        {p.code}
+      </Text>
+      <Text flex="1" minW={0} truncate title={p.clinical ? `${p.name} (${p.clinical})` : p.name}>
+        {p.name}
+        {p.clinical && (
+          <Box asChild color="fg.muted">
+            <span>{` (${p.clinical})`}</span>
+          </Box>
+        )}
+      </Text>
+      <Text fontWeight={p.value >= HIGH_SCORE ? 'bold' : 'normal'} flexShrink={0}>
+        {Math.round(p.value)}%
+      </Text>
+      {hasComparison && (
+        <Text color="fg.muted" fontSize="xs" flexShrink={0} w="2.75rem" textAlign="end">
+          ⌀ {Math.round(p.comparison ?? 0)}
+        </Text>
+      )}
+    </HStack>
+  )
+}
+
+/** Группа расшифровки с подзаголовком; `columns` — две колонки на экране от `sm` */
+function LegendGroup({
+  title,
+  points,
+  hasComparison,
+  columns = false,
+}: {
+  title: string
+  points: RadarPoint[]
+  hasComparison: boolean
+  columns?: boolean
+}) {
+  return (
+    <Box>
+      <Text
+        fontSize="xs"
+        fontWeight="semibold"
+        color="fg.muted"
+        textTransform="uppercase"
+        letterSpacing="0.06em"
+        mb={1}
+      >
+        {title}
+      </Text>
+      {
+        /* Многоколоночная раскладка, а не сетка: сетка шла бы по строкам (1-й слева, 2-й справа),
+          а ранжированный список читается столбцом */
+      }
+      <Box columnCount={columns ? { base: 1, sm: 2 } : 1} columnGap={6}>
+        {points.map((p) => <LegendRow key={p.code} point={p} hasComparison={hasComparison} />)}
+      </Box>
+    </Box>
+  )
+}
+
 /**
  * Расшифровка кодов под диаграммой (свёрнута по умолчанию). На телефоне тултип по тапу
  * неточен — список «код → название → балл» даёт тот же ответ без прицеливания в ось.
+ * Шкалы отсортированы по баллу, «Состояния» (BAR/DPR) вынесены отдельной группой.
  */
 function RadarLegend({
   points,
@@ -201,6 +265,7 @@ function RadarLegend({
   hasComparison: boolean
 }) {
   const t = useTranslations('radar')
+  const { traits, states } = useMemo(() => groupLegendPoints(points), [points])
 
   return (
     <Collapsible.Root mt={3}>
@@ -225,31 +290,11 @@ function RadarLegend({
         </HStack>
       </Collapsible.Trigger>
       <Collapsible.Content>
-        <SimpleGrid columns={{ base: 1, sm: 2 }} columnGap={6} rowGap={1} mt={2} px={1} textAlign="start">
-          {points.map((p) => (
-            <HStack key={p.code} gap={2} fontSize="sm" opacity={p.lowConfidence ? 0.7 : 1} minW={0}>
-              <Text fontFamily="mono" fontWeight="bold" fontSize="xs" w="2.5rem" flexShrink={0}>
-                {p.code}
-              </Text>
-              <Text flex="1" minW={0} truncate title={p.clinical ? `${p.name} (${p.clinical})` : p.name}>
-                {p.name}
-                {p.clinical && (
-                  <Box asChild color="fg.muted">
-                    <span>{` (${p.clinical})`}</span>
-                  </Box>
-                )}
-              </Text>
-              <Text fontWeight={p.value >= HIGH_SCORE ? 'bold' : 'normal'} flexShrink={0}>
-                {Math.round(p.value)}%
-              </Text>
-              {hasComparison && (
-                <Text color="fg.muted" fontSize="xs" flexShrink={0} w="2.75rem" textAlign="end">
-                  ⌀ {Math.round(p.comparison ?? 0)}
-                </Text>
-              )}
-            </HStack>
-          ))}
-        </SimpleGrid>
+        <VStack align="stretch" gap={4} mt={2} px={1} textAlign="start">
+          {/* Черты: по убыванию, две колонки заполняются сверху вниз — самые выраженные вверху слева */}
+          <LegendGroup title={t('traits')} points={traits} hasComparison={hasComparison} columns />
+          {states.length > 0 && <LegendGroup title={t('states')} points={states} hasComparison={hasComparison} />}
+        </VStack>
       </Collapsible.Content>
     </Collapsible.Root>
   )
