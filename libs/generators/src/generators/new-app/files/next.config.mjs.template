@@ -1,9 +1,18 @@
 import createMDX from '@next/mdx'
 import { composePlugins, withNx } from '@nx/next'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+// Корень монорепо. Приложение может стать отдельным git submodule (приватное), и тогда Turbopack
+// принимает его `.git` за workspace root и не видит node_modules в корне монорепо («Could not find
+// the Next.js package»). Для публичного приложения значение совпадает с автоопределением — безвредно.
+// См. .claude/docs/turbopack-private-submodule-root.md
+const workspaceRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 
 const nextConfig = {
   pageExtensions: ['js', 'jsx', 'ts', 'tsx', 'md', 'mdx'],
   nx: {},
+  turbopack: { root: workspaceRoot },
 
   // Если это приложение подключит @letar/query-provider И в его project.json стоит
   // `next dev --webpack` (не Turbopack по умолчанию) — раскомментируй блок ниже.

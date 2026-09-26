@@ -1,7 +1,13 @@
 import type { Tree } from '@nx/devkit'
 import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing'
+import { readFileSync } from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { beforeEach, describe, expect, it } from 'vitest'
 import newAppGenerator from './generator'
+
+/** Корень монорепо: libs/generators/src/generators/new-app → ../../../../.. */
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../../..')
 
 describe('new-app generator', () => {
   let tree: Tree
@@ -214,6 +220,67 @@ describe('new-app generator', () => {
 
     const gitignore = tree.read('apps/my-app/.gitignore', 'utf-8') ?? ''
     expect(gitignore).not.toContain('src/generated/')
+  })
+
+  describe('дефекты каркаса, найденные при заведении flora', () => {
+    /** tsconfig.json — JSONC-подобный, но шаблон без комментариев: парсится как обычный JSON. */
+    const readTsconfig = () => JSON.parse(tree.read('apps/my-app/tsconfig.json', 'utf-8') ?? '{}')
+
+    it('tsconfig.json без references — иначе typecheck:tsgo падает с TS6305', async () => {
+      await newAppGenerator(tree, { name: 'my-app' })
+
+      expect(readTsconfig().references).toBeUndefined()
+    })
+
+    it('tsconfig.json содержит paths на ВСЕ subpath-экспорты forms, forms-core и forms-react', async () => {
+      await newAppGenerator(tree, { name: 'my-app' })
+
+      // Ожидание считаем по реальным `exports` библиотек, а не по зашитому списку: неполный набор
+      // подпутей — мина замедленного действия (.claude/rules/libs.md, check-lib-subpath-paths).
+      // Wildcard-ключ здесь невозможен: раскладка файлов подпутей не единообразна.
+      const paths = readTsconfig().compilerOptions.paths as Record<string, string[]>
+      for (const lib of ['forms', 'forms-core', 'forms-react']) {
+        const pkg = JSON.parse(readFileSync(path.join(repoRoot, 'libs', lib, 'package.json'), 'utf-8'))
+        for (const subpath of Object.keys(pkg.exports as Record<string, unknown>)) {
+          if (subpath === './package.json') {
+            continue
+          }
+          const key = `@letar/${lib}${subpath === '.' ? '' : subpath.slice(1)}`
+          expect(paths[key], key).toBeDefined()
+        }
+      }
+    })
+
+    it('providers.tsx импортирует FormI18nProvider из @letar/forms (paths обязаны это покрывать)', async () => {
+      await newAppGenerator(tree, { name: 'my-app' })
+
+      const providers = tree.read('apps/my-app/src/app/_components/providers.tsx', 'utf-8') ?? ''
+      expect(providers).toContain("from '@letar/forms'")
+      expect(readTsconfig().compilerOptions.paths['@letar/forms']).toBeDefined()
+    })
+
+    it('next.config.mjs фиксирует turbopack.root на корень монорепо — приватный submodule иначе не стартует', async () => {
+      await newAppGenerator(tree, { name: 'my-app' })
+
+      const config = tree.read('apps/my-app/next.config.mjs', 'utf-8') ?? ''
+      expect(config).toContain('turbopack: { root: workspaceRoot }')
+      expect(config).toContain("'../..'")
+    })
+
+    it('шаблоны не используют проп as= у Heading — только asChild с нативным элементом', async () => {
+      await newAppGenerator(tree, { name: 'my-app' })
+
+      const page = tree.read('apps/my-app/src/app/page.tsx', 'utf-8') ?? ''
+      const mdx = tree.read('apps/my-app/src/mdx-components.tsx', 'utf-8') ?? ''
+      for (const source of [page, mdx]) {
+        expect(source).not.toMatch(/<Heading[^>]*\sas=/)
+        expect(source).toContain('asChild')
+      }
+      expect(page).toMatch(/<Heading asChild[^>]*>\s*<h1>/)
+      for (const level of ['h1', 'h2', 'h3', 'h4']) {
+        expect(mdx).toContain(`<${level} {...props} />`)
+      }
+    })
   })
 
   it('документация соответствует documentation-guidelines: дата на момент запуска, Keep a Changelog', async () => {
