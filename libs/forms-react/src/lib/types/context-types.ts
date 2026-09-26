@@ -1,6 +1,7 @@
 'use client'
 
 import type { AddressProvider } from '@letar/forms-core/address'
+import type { PendingRegistry } from '@letar/forms-core/uikit'
 import type { $ZodType } from 'zod/v4/core'
 
 /**
@@ -73,4 +74,14 @@ export interface DeclarativeFormContextValue {
   readOnly?: boolean
   /** Address suggestion provider (set via createForm or Form props) */
   addressProvider?: AddressProvider
+  /**
+   * Реестр неподтверждённых оптимистичных действий полей (§16.7). Ставит корень формы; без него (тестовые
+   * обёртки) поля работают, но отправку не держат
+   */
+  pending?: PendingRegistry
+  /**
+   * Отправить форму с ожиданием подтверждения оптимистичных действий. Программная отправка должна идти через него,
+   * а не через `form.handleSubmit()`, который реестр обходит
+   */
+  submit?: () => Promise<void>
 }

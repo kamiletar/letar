@@ -37,7 +37,7 @@ describe('useSelectionActionsState', () => {
     expect(control.focusTrigger).toHaveBeenCalledTimes(1)
     expect(call).toHaveBeenCalledTimes(1)
     await act(async () => {})
-    expect(apply).toHaveBeenCalledWith({ label: 'X' })
+    expect(apply).toHaveBeenCalledWith({ label: 'X' }, { optimistic: false, selectionHeld: false })
     expect(result.current.pending).toBe(false)
   })
 

@@ -26,6 +26,7 @@ describe('isOptionEditable', () => {
   it('editable: false, disabled, пустое и служебное value — нельзя', () => {
     expect(isOptionEditable({ value: 'a', editable: false }, true)).toBe(false)
     expect(isOptionEditable({ value: 'a', disabled: true }, true)).toBe(false)
+    expect(isOptionEditable({ value: 'a', pending: true }, true)).toBe(false)
     expect(isOptionEditable({ value: '' }, true)).toBe(false)
     expect(isOptionEditable({ value: CREATE_OPTION_VALUE }, true)).toBe(false)
   })

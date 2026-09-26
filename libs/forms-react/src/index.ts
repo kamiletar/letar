@@ -11,6 +11,12 @@
 
 // Контекст декларативной формы
 export { DeclarativeFormContext, useDeclarativeForm, useDeclarativeFormOptional } from './lib/context/form-context'
+export {
+  useFormPending,
+  useFormPendingRegistry,
+  useFormPendingSnapshot,
+  useFormSubmit,
+} from './lib/context/form-pending'
 
 // Контекст вложенных групп полей (построение путей вида `user.address.street`)
 export { FormGroup, useFormGroup } from './lib/context/form-group'
@@ -123,10 +129,11 @@ export type {
   SelectionOptionContextValue,
   SelectionSlotScope,
 } from './lib/selection/selection-context'
-export { useSelectionActionsState } from './lib/selection/use-selection-actions-state'
+export { DEFAULT_SETTLE_TIMEOUT, useSelectionActionsState } from './lib/selection/use-selection-actions-state'
 export type {
   RunSelectionActionOptions,
   SelectionActionsState,
+  SelectionCreatedOption,
   UseSelectionActionsStateOptions,
 } from './lib/selection/use-selection-actions-state'
 export {

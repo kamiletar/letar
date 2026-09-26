@@ -55,14 +55,15 @@ export interface OptionOverlayEntry {
 }
 
 /**
- * `onUpdate` есть, `editable !== false`, опция не `disabled`, value не пустой и не служебный
+ * `onUpdate` есть, `editable !== false`, опция не `disabled` и не `pending`, value не пустой и не служебный
  * `CREATE_OPTION_VALUE`.
  */
 export function isOptionEditable(
-  option: { value: unknown; disabled?: boolean; editable?: boolean },
+  option: { value: unknown; disabled?: boolean; editable?: boolean; pending?: boolean },
   hasOnUpdate: boolean,
 ): boolean {
-  if (!hasOnUpdate || option.editable === false || option.disabled) {
+  // Опция в ожидании подтверждения не правится: два подтверждения спорили бы за её value (§16.7, случай 4)
+  if (!hasOnUpdate || option.editable === false || option.disabled || option.pending) {
     return false
   }
   if (option.value === '' || option.value === null || option.value === undefined) {
