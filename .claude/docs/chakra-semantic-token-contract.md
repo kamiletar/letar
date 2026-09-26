@@ -10,7 +10,7 @@ emphasized, focusRing, border`). Если приложение не переоп
 провал WCAG AA по контрасту.
 
 Референс полной реализации — `apps/domwellbes/src/theme/semanticTokens/colors.ts` +
-`apps/domwellbes/src/theme/semanticTokens/radii.ts` + `apps/domwellbes/src/theme/recipes/controls.ts`
+`apps/domwellbes/src/theme/semanticTokens/radii.ts` + `libs/ui/src/lib/control-recipes.ts` (`createControlRecipes`)
 (коммит «контракт статусных токенов, контраст границ полей и радиусы контролов», 2026-08-19).
 domwellbes — единственное приложение монорепо, где контракт замкнут полностью **на 2026-08-19**.
 
@@ -107,7 +107,7 @@ bg: "colorPalette.subtle", color: "colorPalette.fg",
 - **`_invalid` в собственных рецептах.** Chakra зашивает `red.500` литералом в `_invalid`-состоянии
   части рецептов (checkmark/radiomark) в обход семантики — единственное место, где переопределение
   `border.error` в `semanticTokens` не достаточно, нужно явно перекрыть в своём `recipes/*.ts`
-  (см. `apps/domwellbes/src/theme/recipes/controls.ts`).
+  (см. `libs/ui/src/lib/control-recipes.ts` (`createControlRecipes`)).
 
 ## 3. Как подбирать оттенок по контрасту — не на глаз
 

@@ -60,7 +60,7 @@ CSS другого слота (`input`) резолвится в ничто, и �
 позиции (no-op для остальных). Источник правильного порядка — сам компонент из
 `@ark-ui/react`/`@zag-js/*` (`*.anatomy.js`/`.mjs` внутри `node_modules`) плюс
 `.extendWith(...)`-довески из `@chakra-ui/react/dist/esm/anatomy.js` (если есть — не все
-компоненты их имеют). Пример — `apps/domwellbes/src/theme/recipes/controls.ts`
+компоненты их имеют). Пример — `libs/ui/src/lib/control-recipes.ts` (`createControlRecipes`)
 (`selectAnatomyOrder`/`nativeSelectAnatomyOrder`/`comboboxAnatomyOrder`).
 
 `@chakra-ui/react` не экспортирует эти anatomy-объекты из публичного `index.js` — их нельзя

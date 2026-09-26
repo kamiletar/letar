@@ -78,6 +78,7 @@ export { RoleStat, type RoleStatProps, StatCard, type StatCardProps } from './li
 
 // Интерактивность и обратная связь
 export { createAppToaster, type CreateAppToasterOptions } from './lib/app-toaster'
+export { type ControlRecipesOptions, createControlRecipes } from './lib/control-recipes'
 export { CopyToClipboardButton, type CopyToClipboardButtonProps } from './lib/copy-to-clipboard-button'
 export { AppEmptyState, type AppEmptyStateProps } from './lib/empty-state'
 export { FaqAccordion, type FaqAccordionProps, type FaqItem } from './lib/faq-accordion'
