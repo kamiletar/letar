@@ -24,6 +24,7 @@ import {
   linkPsychologistAction,
   revokePsychologistAction,
 } from '../_actions/psychologist.action'
+import { PsychologistMessages } from './_components/psychologist-messages'
 
 /**
  * Страница настроек пользователя — привязка психолога
@@ -117,6 +118,9 @@ export default function SettingsPage() {
       <VStack gap={8} align="start" w="100%">
         <Heading size="xl">{t('title')}</Heading>
 
+        {/* Сообщения от привязанных психологов (волна 7.5) — если есть */}
+        <PsychologistMessages />
+
         {/* Секция привязки психолога */}
         <Card.Root w="100%" variant="outline">
           <Card.Body>
@@ -140,10 +144,16 @@ export default function SettingsPage() {
               {activeLinks.map((link) => (
                 <Card.Root key={link.id} w="100%" variant="subtle">
                   <Card.Body>
-                    <HStack justify="space-between" w="100%">
-                      <VStack align="start" gap={0}>
-                        <Text fontWeight="bold">{link.psychologist.name || link.psychologist.email}</Text>
-                        <Text fontSize="sm" color="fg.muted">
+                    {
+                      /* wrap + minW=0: на 390px длинный email и кнопка не помещаются в строку —
+                        кнопка уходит вниз, а не за край карточки */
+                    }
+                    <HStack justify="space-between" w="100%" wrap="wrap" gap={3}>
+                      <VStack align="start" gap={0} minW={0}>
+                        <Text fontWeight="bold" overflowWrap="anywhere">
+                          {link.psychologist.name || link.psychologist.email}
+                        </Text>
+                        <Text fontSize="sm" color="fg.muted" overflowWrap="anywhere">
                           {link.psychologist.email}
                         </Text>
                       </VStack>

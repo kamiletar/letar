@@ -17,6 +17,7 @@ import {
 } from '../../_data/personality-types'
 import { computeDarkCore } from '../../_lib/dark-core'
 import { computeIpsativeRanking } from '../../_lib/ipsative'
+import { ClientMessages } from './_components/client-messages'
 import { DarkCoreBlock } from './_components/dark-core-block'
 import { DarkCoreDynamicsChart } from './_components/dark-core-dynamics-chart'
 import { ExperimentalScalesBlock } from './_components/experimental-scales-block'
@@ -263,6 +264,9 @@ export default function ClientDetailPage({ params }: { params: Promise<{ clientI
             relevantCounts={detail.scoreRelevantCounts ?? undefined}
           />
         )}
+
+        {/* Сообщения клиенту (волна 7.5) — в отличие от заметок, клиент их видит */}
+        <ClientMessages linkId={detail.link.id} messages={detail.messages} onSent={loadDetail} />
 
         {/* Заметки психолога */}
         <PsychologistNotes linkId={detail.link.id} notes={detail.notes} onUpdate={loadDetail} />

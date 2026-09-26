@@ -106,6 +106,12 @@ export async function getClientDetailAction(clientId: string) {
     include: {
       client: { select: { id: true, name: true, email: true, image: true } },
       notes: { orderBy: { createdAt: 'desc' } },
+      // Отправленные клиенту сообщения (7.5) — с отметкой прочтения
+      messages: {
+        orderBy: { createdAt: 'desc' },
+        take: 50,
+        select: { id: true, body: true, createdAt: true, readAt: true },
+      },
     },
   })
 
@@ -196,6 +202,7 @@ export async function getClientDetailAction(clientId: string) {
       scoreConfidence,
       totalAnswered: uniqueAnswered.size,
       sessionsHistory,
+      messages: link.messages,
       notes: link.notes.map((n) => ({
         id: n.id,
         content: n.content,

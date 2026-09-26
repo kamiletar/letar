@@ -296,7 +296,19 @@
       "empty": "No clients match the filters.",
       "shown": "Showing {shown} of {total}"
     },
-    "newSessions": "{count, plural, one {# new session} other {# new sessions}}"
+    "newSessions": "{count, plural, one {# new session} other {# new sessions}}",
+    "messages": {
+      "title": "Messages to client",
+      "hint": "The client will see this message in their settings. Unlike notes, it is not private.",
+      "label": "Message",
+      "placeholder": "For example: a reminder that we will go over your results next session",
+      "send": "Send",
+      "sent": "{count, plural, one {Sent to # client} other {Sent to # clients}}",
+      "sendError": "Could not send the message",
+      "read": "Read",
+      "unread": "Unread",
+      "writeAll": "Message all active clients ({count})"
+    }
   },
   "settings": {
     "title": "Settings",
@@ -319,7 +331,12 @@
     "deleteDataConfirm": "All your sessions and answers will be permanently deleted. Achievements and rank may reset. Continue?",
     "deleteDataAction": "Delete permanently",
     "deleteDataSuccess": "Sessions deleted: {count}",
-    "deleteDataError": "Failed to delete data. Please try again later."
+    "deleteDataError": "Failed to delete data. Please try again later.",
+    "messages": {
+      "title": "Messages from your psychologist",
+      "unread": "{count, plural, one {# new} other {# new}}",
+      "new": "new"
+    }
   },
   "forProfessionals": {
     "lead": {

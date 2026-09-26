@@ -176,7 +176,7 @@ describe('getClientDetailAction', () => {
   })
 
   it('кумулятивные баллы — по последнему ответу на каждый вопрос; вопросы грузятся один раз', async () => {
-    st.link = { id: 'l1', displayName: null, createdAt: new Date(), client: { id: 'c1' }, notes: [] }
+    st.link = { id: 'l1', displayName: null, createdAt: new Date(), client: { id: 'c1' }, notes: [], messages: [] }
     st.answers = [
       { sessionId: 's1', questionId: 'q1', selectedOption: 0 },
       { sessionId: 's1', questionId: 'q2', selectedOption: 1 },
@@ -192,13 +192,13 @@ describe('getClientDetailAction', () => {
   })
 
   it('открытие карточки отмечает просмотр (lastSeenAt) — и только его', async () => {
-    st.link = { id: 'l1', displayName: null, createdAt: new Date(), client: { id: 'c1' }, notes: [] }
+    st.link = { id: 'l1', displayName: null, createdAt: new Date(), client: { id: 'c1' }, notes: [], messages: [] }
     await cabinet.getClientDetailAction('c1')
     expect(st.writes).toEqual(['link.update:lastSeenAt'])
   })
 
   it('динамика — только валидные завершённые сессии, по баллам самой сессии', async () => {
-    st.link = { id: 'l1', displayName: null, createdAt: new Date(), client: { id: 'c1' }, notes: [] }
+    st.link = { id: 'l1', displayName: null, createdAt: new Date(), client: { id: 'c1' }, notes: [], messages: [] }
     st.answers = [{ sessionId: 's1', questionId: 'q1', selectedOption: 3 }]
     const res = await cabinet.getClientDetailAction('c1')
     expect(st.sessionsWhere).toEqual({ userId: 'c1', completedAt: { not: null }, isValid: true })
@@ -210,7 +210,7 @@ describe('getClientDetailAction', () => {
   })
 
   it('клиент без ответов — баллов нет, а не нули; банк не запрашивается', async () => {
-    st.link = { id: 'l1', displayName: null, createdAt: new Date(), client: { id: 'c1' }, notes: [] }
+    st.link = { id: 'l1', displayName: null, createdAt: new Date(), client: { id: 'c1' }, notes: [], messages: [] }
     const res = await cabinet.getClientDetailAction('c1')
     expect(res).toMatchObject({ data: { totalAnswered: 0, cumulativeScores: null, scoreRelevantCounts: null } })
     expect(st.questionQueries).toBe(0)

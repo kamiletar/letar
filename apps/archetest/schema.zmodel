@@ -271,6 +271,7 @@ model ClientPsychologistLink {
   /// Меняется только из getClientDetailAction; null — ещё не открывал, считаем от createdAt
   lastSeenAt      DateTime?
   notes           PsychologistNote[]
+  messages        PsychologistMessage[]
 
   @@unique([clientId, psychologistId])
   @@index([psychologistId])
@@ -286,6 +287,32 @@ model ClientPsychologistLink {
   @@allow('update', clientId == auth().id)
   // Психолог может обновить displayName
   @@allow('update', psychologistId == auth().id && 'PSYCHOLOGIST' in auth().roles)
+  @@allow('all', 'ADMIN' in auth().roles)
+}
+
+/// Сообщение психолога привязанному клиенту (Фаза 3, пул 2026-09-24, волна 7.5) — внутри приложения.
+/// Одностороннее: психолог пишет, клиент читает во «Входящих» (настройки). Рассылка «всем активным» —
+/// по строке на связь.
+model PsychologistMessage {
+  id        String   @id @default(cuid())
+  linkId    String
+  link      ClientPsychologistLink @relation(fields: [linkId], references: [id], onDelete: Cascade)
+  /// Текст сообщения (до 2000 символов — валидация в действии)
+  body      String
+  createdAt DateTime @default(now())
+  /// Когда клиент открыл входящие с этим сообщением; null — не прочитано
+  readAt    DateTime?
+
+  @@index([linkId])
+
+  // Психолог пишет только по своей АКТИВНОЙ связи; читает свои отправленные (и после отзыва —
+  // это его собственный текст)
+  @@allow('create', link.psychologistId == auth().id && link.status == 'ACTIVE' && 'PSYCHOLOGIST' in auth().roles)
+  @@allow('read', link.psychologistId == auth().id && 'PSYCHOLOGIST' in auth().roles)
+  // Клиент читает сообщения по своим связям. Права update у клиента НЕТ намеренно: отметку
+  // «прочитано» ставит действие после проверки владения чтением через эту же политику,
+  // иначе клиент смог бы переписать body/linkId (field-level @allow права не сужает)
+  @@allow('read', link.clientId == auth().id)
   @@allow('all', 'ADMIN' in auth().roles)
 }
 

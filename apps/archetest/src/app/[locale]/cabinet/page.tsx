@@ -5,10 +5,11 @@ import { useSession } from '@/lib/auth-client'
 import { Button, Card, Container, Heading, HStack, Spinner, Text, VStack } from '@chakra-ui/react'
 import { useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
-import { LuBriefcase, LuUsers } from 'react-icons/lu'
+import { LuBriefcase, LuMessageSquare, LuUsers } from 'react-icons/lu'
 import { getClientsListAction } from '../_actions/cabinet.action'
 import { becomePsychologistAction } from '../_actions/psychologist.action'
 import { FilteredClientsTable } from './_components/filtered-clients-table'
+import { MessageComposer } from './_components/message-composer'
 
 type ClientItem = Awaited<ReturnType<typeof getClientsListAction>>['data'][number]
 
@@ -23,6 +24,8 @@ export default function CabinetPage() {
   const [clients, setClients] = useState<ClientItem[]>([])
   const [loading, setLoading] = useState(true)
   const [becomingPsychologist, setBecomingPsychologist] = useState(false)
+  const [broadcastOpen, setBroadcastOpen] = useState(false)
+  const activeCount = clients.filter((c) => c.status === 'ACTIVE').length
 
   useEffect(() => {
     if (isPsychologist) {
@@ -110,7 +113,19 @@ export default function CabinetPage() {
               </Card.Body>
             </Card.Root>
           )
-          : <FilteredClientsTable clients={clients} />}
+          : (
+            <VStack gap={4} align="start" w="100%">
+              {/* Рассылка всем активным (волна 7.5): форма раскрывается по кнопке */}
+              {activeCount > 0 && (
+                <Button size="sm" variant="outline" onClick={() => setBroadcastOpen((v) => !v)}>
+                  <LuMessageSquare size={14} />
+                  {t('messages.writeAll', { count: activeCount })}
+                </Button>
+              )}
+              {broadcastOpen && <MessageComposer onSent={() => setBroadcastOpen(false)} />}
+              <FilteredClientsTable clients={clients} />
+            </VStack>
+          )}
       </VStack>
     </Container>
   )
