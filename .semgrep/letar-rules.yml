@@ -227,6 +227,33 @@ rules:
       См. .claude/rules/forms.md § «Не делай».
     pattern-regex: '\.Field\.NativeSelect\b'
 
+  # ⚠️ WARNING, не ERROR: на момент завода (2026-09-27) в монорепо нет ни одного потребителя, кроме
+  # демо form-develop-app*, где компонент оставлен намеренно как e2e-страховка. Правило нужно
+  # для нового кода, а не для миграции.
+  - id: letar-forms-cascading-select-deprecated
+    languages: [generic]
+    severity: WARNING
+    paths:
+      include:
+        - '*.tsx'
+      exclude:
+        - /libs/forms/**
+        - /libs/forms-core/**
+        - /libs/forms-react/**
+        - /libs/forms-shadcn/**
+        - /libs/forms-vue/**
+        - /libs/forms-vue-shadcn/**
+        - /libs/forms-angular/**
+        - /apps/form-develop-app/**
+        - /apps/form-develop-app-shadcn/**
+    message: >-
+      CascadingSelect устарел (@letar/forms >= 2.27.0) — используй dependsOn у Field.Select /
+      Field.Combobox: <Form.Field.Select name="city" dependsOn="country" ... />. Дочернее поле
+      очищается только по правке родителя (reset, UrlSync, prefill и черновик его не стирают),
+      блокируется с подсказкой, загрузчики получают deps. Директива в схеме —
+      @meta("form.dependsOn", "country"). См. .claude/rules/forms.md § «Зависимые селекты».
+    pattern-regex: '\bCascadingSelect\b'
+
   # ⚠️ WARNING, не ERROR: правило ловит и встроенные в карточку мини-формы (панели сделок, рейсы),
   # где одиночная кнопка на месте, — их перевод на FormActions отдельная задача, а не повод
   # блокировать коммит. Ловит только «голую» обёртку прямо перед Submit: футер, у которого между
