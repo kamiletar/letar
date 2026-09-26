@@ -37,12 +37,7 @@ model Recipe {
 import { RelationFieldProvider } from '@letar/forms'
 
 ;<RelationFieldProvider
-  relations={{
-    category: {
-      useQuery: useFindManyCategory,
-      labelField: 'name',
-    },
-  }}
+  relations={[{ model: 'Category', useQuery: useFindManyCategory, labelField: 'name' }]}
 >
   <Form schema={RecipeCreateFormSchema} onSubmit={save}>
     <Form.Field.String name="title" />
@@ -51,6 +46,39 @@ import { RelationFieldProvider } from '@letar/forms'
   </Form>
 </RelationFieldProvider>
 ```
+
+## Связи из схемы: useZenStackRelations
+
+Писать `relations` руками — значит заводить адаптер `useFindMany` на каждую модель. С ZenStack `useZenStackRelations`
+из `@letar/forms-query/zenstack` собирает список из самой form-схемы: обходит поля с `fieldProps.relation` и берёт
+`useFindMany` модели из схемы ZenStack.
+
+```tsx
+import { schema } from '@/generated/schema'
+import { useZenStackRelations } from '@letar/forms-query/zenstack'
+
+// Вне компонента: литерал в JSX пересобирал бы массив на каждом рендере
+const overrides = { Category: { queryArgs: { orderBy: { name: 'asc' } }, descriptionField: 'note' } }
+
+function RecipeForm() {
+  const relations = useZenStackRelations(schema, RecipeCreateFormSchema, { overrides })
+
+  return (
+    <RelationFieldProvider relations={relations}>
+      <Form schema={RecipeCreateFormSchema} onSubmit={save}>
+        <Form.AutoFields />
+      </Form>
+    </RelationFieldProvider>
+  )
+}
+```
+
+- Одна модель у нескольких полей грузится один раз.
+- Поля с ключом реестра `createForm` (`Select.Category`) пропускаются: такой компонент грузит данные сам.
+- Модели нет в схеме ZenStack — исключение со списком доступных моделей.
+- Два поля просят разные `labelField` одной модели: побеждает первое, печатается предупреждение — подпись задай в
+  `overrides`.
+- Третий аргумент принимает `overrides`, `exclude` и `clientOptions` (второй аргумент `useClientQueries`).
 
 ## Хук useRelationOptions
 
