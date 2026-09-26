@@ -5,6 +5,7 @@
     "conditional-fields",
     "multi-step",
     "groups-arrays",
+    "dependent-selects",
     "auto-fields",
     "offline",
     "i18n",

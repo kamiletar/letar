@@ -10,6 +10,7 @@
     "controlled-state",
     "file-upload",
     "relation-fields",
+    "dependent-selects",
     "tanstack-query",
     "create-form",
     "smart-autofill",

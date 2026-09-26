@@ -1,0 +1,89 @@
+---
+title: Dependent Selects (dependsOn)
+description: Country → region → city, company → employee — dependsOn on Form.Field.Select and Form.Field.Combobox (v2.27.0+)
+---
+
+## Overview
+
+A dependent list is a property of the ordinary `Form.Field.Select` and `Form.Field.Combobox`, not a separate component.
+Set `dependsOn` and the field waits for its parent, passes the parent value (`deps`) to every loader and to `onCreate`,
+and clears itself when the user changes the parent.
+
+```tsx
+<Form.Field.Select
+  name="countryId"
+  loadOptions={(_search, { signal }) => fetchCountries(signal)}
+  getLabel={(c) => c.name}
+  getValue={(c) => c.id}
+/>
+<Form.Field.Combobox
+  name="cityId"
+  dependsOn="countryId"
+  loadOptions={(search, { signal, deps }) => searchCities({ countryId: deps.countryId, search }, signal)}
+  loadSelected={(value, { signal, deps }) => getCity(value, deps.countryId, signal)}
+  getLabel={(c) => c.name}
+  getValue={(c) => c.id}
+  onCreate={(search, { deps }) => openCityDialog({ countryId: deps.countryId, name: search })}
+/>
+```
+
+## Props
+
+| Prop                      | Type                 | Default                 | Description                                                     |
+| ------------------------- | -------------------- | ----------------------- | --------------------------------------------------------------- |
+| `dependsOn`               | `string \| string[]` | —                       | Parent field(s). Relative to the group; leading `/` = form root |
+| `depsReady`               | `(deps) => boolean`  | all values non-empty    | Custom readiness check                                          |
+| `clearOnParentChange`     | `boolean`            | `true`                  | Clear the value when the user changes the parent                |
+| `disableWhenParentEmpty`  | `boolean`            | `true`                  | Disable the field until the parents are ready                   |
+| `placeholderWhenDisabled` | `string`             | "Select «Parent» first" | Text of the disabled field                                      |
+
+`deps` holds the parent values under the keys written in `dependsOn` (without the leading `/`). It reaches
+`loadOptions`, `loadSelected`, `useQuery(search, deps)`, `useSelected(value, deps)`, `onCreate(search, { deps })`,
+`onUpdate(option, { deps })` and `onSettleError({ deps })`. In actions it is a snapshot from the moment the action began.
+
+`Select` takes exactly one source: `options` (an array or a function `(deps) => array`), `loadOptions` (one request per
+parent value) or `useOptions(deps)`.
+
+## Paths
+
+`dependsOn="countryId"` is resolved like `name` — relative to the current group, so in a `Form.Group.List` row it means
+the field of the same row. A leading slash means the form root: `dependsOn="/countryId"` from inside a row.
+
+## When the child is cleared
+
+Only when the parent is **edited** (user selection, `field.handleChange`, `form.setFieldValue`). Hydration,
+`reset(values)`, a new `initialValue`, `UrlSync`, `useUrlPrefill` and restoring a `useFormPersistence` draft never clear
+anything. A chain (country → region → city) is cleared in one go, and no city request is sent while the region is empty.
+
+To write the parent and the child together, wrap it: `dependents.suppress(() => { … })` from
+`useDeclarativeForm().dependents`.
+
+The parent must be a rendered field: the clearing hook is TanStack Form's form-level listener, which only fires for a
+mounted `form.Field`.
+
+## Accessibility
+
+A disabled dependent field keeps a visible hint under it linked by `aria-describedby`; clearing is announced through a
+polite live region ("Field «City» cleared: field «Country» changed").
+
+## The server checks the pair
+
+The form cannot guarantee that a city belongs to the chosen country. The server action must check the pair and return the
+error on the **child field** through `errorMap.onServer`.
+
+## TanStack Query and ZenStack
+
+With `@letar/forms-query` 0.3.0+: `fromSearchQuery((search, options, deps) => …)`, `useLoaderQuery` puts `deps` into the
+query key, `useInvalidateAfter((ctx) => keys)` invalidates only the list of the relevant parent.
+
+## From the schema
+
+`@meta("form.dependsOn", "countryId")` (an array for several parents) produces `fieldProps.dependsOn`. The plugin checks on
+generate that the field exists, does not depend on itself, has no cycle and that the parent is not excluded. There is no
+automatic dependency inference from foreign keys.
+
+## Migrating from CascadingSelect
+
+`Form.Field.CascadingSelect` is deprecated and unchanged. Replace `loadOptions(parentValue)` with
+`loadOptions(search, { deps })` on `Form.Field.Select`; the property names `dependsOn`, `clearOnParentChange`,
+`disableWhenParentEmpty` and `placeholderWhenDisabled` are the same.

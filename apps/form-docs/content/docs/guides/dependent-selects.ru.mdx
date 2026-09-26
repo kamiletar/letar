@@ -1,0 +1,87 @@
+---
+title: Зависимые селекты (dependsOn)
+description: Страна → регион → город, компания → сотрудник — dependsOn у Form.Field.Select и Form.Field.Combobox (v2.27.0+)
+---
+
+## Обзор
+
+Зависимый список — свойство обычных `Form.Field.Select` и `Form.Field.Combobox`, а не отдельный компонент. Задайте
+`dependsOn`: поле ждёт родителя, передаёт его значение (`deps`) во все загрузчики и в `onCreate` и очищается, когда
+пользователь сменил родителя.
+
+```tsx
+<Form.Field.Select
+  name="countryId"
+  loadOptions={(_search, { signal }) => fetchCountries(signal)}
+  getLabel={(c) => c.name}
+  getValue={(c) => c.id}
+/>
+<Form.Field.Combobox
+  name="cityId"
+  dependsOn="countryId"
+  loadOptions={(search, { signal, deps }) => searchCities({ countryId: deps.countryId, search }, signal)}
+  loadSelected={(value, { signal, deps }) => getCity(value, deps.countryId, signal)}
+  getLabel={(c) => c.name}
+  getValue={(c) => c.id}
+  onCreate={(search, { deps }) => openCityDialog({ countryId: deps.countryId, name: search })}
+/>
+```
+
+## Свойства
+
+| Свойство                  | Тип                  | По умолчанию                | Описание                                                       |
+| ------------------------- | -------------------- | --------------------------- | -------------------------------------------------------------- |
+| `dependsOn`               | `string \| string[]` | —                           | Родитель(и). Относительно группы; ведущий `/` — от корня формы |
+| `depsReady`               | `(deps) => boolean`  | все значения непустые       | Своя проверка готовности                                       |
+| `clearOnParentChange`     | `boolean`            | `true`                      | Очищать значение, когда пользователь сменил родителя           |
+| `disableWhenParentEmpty`  | `boolean`            | `true`                      | Блокировать поле, пока родители не готовы                      |
+| `placeholderWhenDisabled` | `string`             | «Сначала выберите «Страна»» | Текст заблокированного поля                                    |
+
+`deps` — значения родителей по ключам из `dependsOn` (без ведущего `/`). Он приходит в `loadOptions`, `loadSelected`,
+`useQuery(search, deps)`, `useSelected(value, deps)`, `onCreate(search, { deps })`, `onUpdate(option, { deps })` и
+`onSettleError({ deps })`. В действиях это снимок на момент их начала.
+
+У `Select` ровно один источник: `options` (массив или функция `(deps) => массив`), `loadOptions` (один запрос на каждое
+значение родителя) или `useOptions(deps)`.
+
+## Пути
+
+`dependsOn="countryId"` читается как `name` — относительно текущей группы: в строке `Form.Group.List` это поле той же
+строки. Ведущий слэш — от корня формы: `dependsOn="/countryId"` из строки массива.
+
+## Когда очищается дочернее поле
+
+Только когда родителя **правят** (выбор пользователем, `field.handleChange`, `form.setFieldValue`). Гидратация,
+`reset(values)`, новый `initialValue`, `UrlSync`, `useUrlPrefill` и восстановление черновика `useFormPersistence` ничего не
+очищают. Цепочка страна → регион → город очищается целиком, а запрос городов при пустом регионе не уходит.
+
+Записать родителя и ребёнка вместе: `dependents.suppress(() => { … })` из `useDeclarativeForm().dependents`.
+
+Родитель должен быть отрисованным полем: очистку запускает form-level листенер TanStack Form, а он срабатывает только у
+смонтированного `form.Field`.
+
+## Доступность
+
+У заблокированного зависимого поля под ним видна подсказка, связанная `aria-describedby`; очистка объявляется вежливой
+live-областью («Поле «Город» очищено: изменилось поле «Страна»»).
+
+## Пару проверяет сервер
+
+Форма не гарантирует, что город принадлежит выбранной стране. Server action проверяет пару и возвращает ошибку **поля
+ребёнка** через `errorMap.onServer`.
+
+## TanStack Query и ZenStack
+
+С `@letar/forms-query` 0.3.0+: `fromSearchQuery((search, options, deps) => …)`, `useLoaderQuery` кладёт `deps` в ключ
+запроса, `useInvalidateAfter((ctx) => keys)` инвалидирует только список нужного родителя.
+
+## Из схемы
+
+`@meta("form.dependsOn", "countryId")` (несколько родителей — массивом) даёт `fieldProps.dependsOn`. На generate плагин
+проверяет, что поле есть, не зависит от себя, цикла нет и родитель не исключён. Автовывода зависимости по внешнему ключу
+нет.
+
+## Переезд с CascadingSelect
+
+`Form.Field.CascadingSelect` устарел и не меняется. Замените `loadOptions(parentValue)` на `loadOptions(search, { deps })`
+у `Form.Field.Select`; имена `dependsOn`, `clearOnParentChange`, `disableWhenParentEmpty`, `placeholderWhenDisabled` те же.
