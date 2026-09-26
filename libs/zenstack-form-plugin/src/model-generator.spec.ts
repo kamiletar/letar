@@ -1167,6 +1167,37 @@ describe('generateModelCode', () => {
     expect(code).toContain(`fieldProps: { relation: {"model":"User","labelField":"name"} }`)
   })
 
+  it('P3: form.props.* и form.relation.* на одном поле — один ключ fieldProps со всеми значениями', () => {
+    const modelInfo: ModelInfo = {
+      name: 'Order',
+      excludedFields: [],
+      fields: [
+        field({
+          name: 'authorId',
+          type: 'String',
+          formMeta: {
+            props: { createItem: true, searchable: false },
+            relation: { model: 'User', labelField: 'name' },
+          },
+        }),
+      ],
+    }
+
+    const code = generateModelCode(modelInfo, new Set())
+
+    // Дубль ключа в объектном литерале — TS1117, а в JS побеждает последний (props терялись)
+    expect(code.match(/fieldProps:/g)).toHaveLength(1)
+
+    // Значение fieldProps — JSON-литерал: разбираем его и проверяем, что props и relation на месте
+    const fieldPropsJson = code.match(/fieldProps: (\{.*\}) \}\n/)?.[1]
+    expect(fieldPropsJson).toBeDefined()
+    expect(JSON.parse(fieldPropsJson as string)).toEqual({
+      createItem: true,
+      searchable: false,
+      relation: { model: 'User', labelField: 'name' },
+    })
+  })
+
   it('кладёт tooltip в ui-мету (то же ui.tooltip, что читают поля)', () => {
     const modelInfo: ModelInfo = {
       name: 'Product',

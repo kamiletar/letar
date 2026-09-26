@@ -920,10 +920,13 @@ function generateUIMeta(params: GenerateUIMetaParams): string | null {
   if (formMeta.fieldType) {
     parts.push(`fieldType: ${quoteTsString(formMeta.fieldType)}`)
   }
-  if (formMeta.props) {
+  // Ключ `fieldProps` строго один: дубль в объектном литерале — TS1117, а в JS побеждает последний
+  // (раньше `form.props.*` молча терялись, если у поля был ещё и `form.relation.*`)
+  if (formMeta.props && formMeta.relation) {
+    parts.push(`fieldProps: ${JSON.stringify({ ...formMeta.props, relation: formMeta.relation })}`)
+  } else if (formMeta.props) {
     parts.push(`fieldProps: ${JSON.stringify(formMeta.props)}`)
-  }
-  if (formMeta.relation) {
+  } else if (formMeta.relation) {
     parts.push(`fieldProps: { relation: ${JSON.stringify(formMeta.relation)} }`)
   }
   if (formMeta.tooltip) {
