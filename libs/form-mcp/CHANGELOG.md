@@ -1,5 +1,13 @@
 # Changelog — @letar/form-mcp
 
+## 2.4.0 (2026-09-26)
+
+### Added
+
+- `get_directives('fieldType')` и паттерн `reference-select`: автоподбор компонента реестра по имени модели/enum без
+  ключа руками (`@letar/forms` 2.26.0, `@letar/zenstack-form-plugin` 4.3.0) — подсказка `ui.registryName`, только
+  `Select.*`, отказ — любой `form.fieldType`; тип `FormRegistryUnregistered` для ревью кандидатов.
+
 ## 2.3.0 (2026-09-26)
 
 ### Added

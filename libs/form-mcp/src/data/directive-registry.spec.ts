@@ -62,6 +62,9 @@ describe('getDirectives', () => {
     const fieldType = getDirectives(registry, 'fieldType')[0]
     expect(fieldType.description).toContain('Select.WorkCategory')
     expect(fieldType.description).toContain('FormRegistryCheck')
+    // Этап Ж: имя модели/enum подбирается само, отказ — явный fieldType
+    expect(fieldType.description).toContain('registryName')
+    expect(fieldType.description).toContain('>= 2.26.0')
     const relation = getDirectives(registry, 'relation')[0]
     expect(relation.output).not.toContain('fieldType')
     expect(relation.output).toContain('fieldProps')

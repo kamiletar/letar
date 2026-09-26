@@ -490,6 +490,24 @@ type MissingRegistryKeys<TRecord, TKeys extends string> = [TKeys] extends [never
   : Exclude<TKeys, keyof TRecord>
 
 /**
+ * Кандидаты автоподбора (`FormSelectCandidate` из `form-registry-keys.ts`), для которых в инстансе нет компонента
+ * `Select.<Имя>`. `never` — все покрыты. Это справка для ревью, а не проверка: поле без компонента рисуется обычным
+ * полем и это законно (§17.9), поэтому в `FormRegistryCheck` кандидаты не входят.
+ *
+ * @example
+ * ```ts
+ * import type { FormSelectCandidate } from '@/generated/form-schemas'
+ *
+ * type Left = FormRegistryUnregistered<typeof AppForm, FormSelectCandidate> // 'Unit' | 'Status'
+ * ```
+ */
+export type FormRegistryUnregistered<TForm extends { Select: unknown }, TCandidate extends string> =
+  MissingRegistryKeys<
+    TForm['Select'],
+    TCandidate
+  >
+
+/**
  * Проверка «все ключи реестра из `schema.zmodel` зарегистрированы в инстансе». `true` — да; иначе объект с недостающими
  * ключами, и присваивание `= true` покажет их в тексте ошибки. Индексная сигнатура (инстанс аннотирован `: ExtendedForm`)
  * — тоже ошибка: иначе проверка тихо зеленела бы на любых ключах.

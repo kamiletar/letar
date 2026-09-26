@@ -51,6 +51,7 @@ import { FieldPhone } from './form-fields/specialized/field-phone'
 import { FieldPinInput } from './form-fields/specialized/field-pin-input'
 import { FieldMaskedInput } from './form-fields/text/field-masked-input'
 
+import { useConventionalRegistryType } from './conventional-registry-type'
 import { camelCaseToLabel } from './form-fields/auto/field-auto'
 import { RegistryField } from './registry-field'
 import { type RelationOption, useRelationFieldContext } from './relation-field-provider'
@@ -521,8 +522,10 @@ export function renderSchemaField(
   field: SchemaFieldInfo,
   relationOptions?: RelationOption[],
   relationFieldProps?: Record<string, unknown>,
+  /** Ключ реестра, подобранный по имени модели/enum (§17.9): вместо типа по Zod-схеме */
+  conventionalType?: FieldComponentType,
 ): ReactElement {
-  const fieldType = resolveFieldType(field)
+  const fieldType = conventionalType ?? resolveFieldType(field)
 
   return renderFieldByType(fieldType, {
     name: field.name,
@@ -553,6 +556,8 @@ export function renderSchemaField(
  */
 export function SchemaFieldWithRelations({ field }: { field: SchemaFieldInfo }): ReactElement {
   const relationContext = useRelationFieldContext()
+  // Автоподбор `Select.<Модель|Enum>` из реестра createForm (§17.9); нет компонента — прежний путь
+  const conventionalType = useConventionalRegistryType(field.ui)
 
   // Check if relation config exists in fieldProps
   const relationConfig = field.ui?.fieldProps?.relation as RelationFieldConfig | undefined
@@ -568,5 +573,5 @@ export function SchemaFieldWithRelations({ field }: { field: SchemaFieldInfo }):
     relationFieldProps = relationContext.getFieldProps(relationConfig.model)
   }
 
-  return renderSchemaField(field, relationOptions, relationFieldProps)
+  return renderSchemaField(field, relationOptions, relationFieldProps, conventionalType)
 }

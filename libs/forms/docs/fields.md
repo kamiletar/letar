@@ -242,6 +242,35 @@ export const appFormRegistryCheck: FormRegistryCheck<typeof AppForm, FormSelectK
 | своё окно создания/правки, свои хуки, `renderOption`, оптимистичный режим                    | ключ реестра (`form.fieldType`)                 |
 | только подписи и поиск по модели, короткий `onCreate` без окна, поле встречается лишь в авто | `form.relation.*` + `RelationConfig.fieldProps` |
 
+### Автоподбор по имени модели или enum (v2.26.0+)
+
+Писать ключ руками не обязательно. Для поля-FK (`@relation` на модель) и для enum-поля `zenstack-form-plugin` ≥ 4.3.0
+кладёт в мету `registryName` — имя целевой модели или enum. `Form.AutoFields` и `Form.Field.Auto` ищут в реестре
+`createForm` компонент `Select.<Имя>`:
+
+```tsx
+// schema.zmodel: categoryId String + category WorkCategory @relation(fields: [categoryId], references: [id])
+export const AppForm = createForm({
+  lazySelects: { WorkCategory: () => import('./selects/work-category-select').then((m) => m.WorkCategorySelect) },
+})
+
+<AppForm schema={WorkCreateFormSchema} initialValue={initial} onSubmit={save}>
+  <AppForm.AutoFields /> {/* categoryId рисует AppForm.Select.WorkCategory — без @meta("form.fieldType", …) */}
+</AppForm>
+```
+
+- Компонент есть — рисуется он (пропсы, как у явного ключа). Компонента нет — обычное поле, **без ошибки и без
+  предупреждения**: отсутствие законно.
+- Подбираются только `Select.*`. `Combobox.*` и `Listbox.*` — только по явному ключу.
+- **Отказаться:** любой `form.fieldType` на поле (например `"select"`). Явный ключ побеждает подсказку. Подсказки нет и у
+  поля с `form.relation.*`, у списков (`Category[]`, m:n) и у составного FK.
+- Набор полей формы не меняется: подсказка меняет только то, чем рисуется уже включённое поле.
+- Какие кандидаты остались без компонента — справка для ревью:
+  `FormRegistryUnregistered<typeof AppForm, FormSelectCandidate>` (`never` — все покрыты; `FormSelectCandidate` пишет
+  плагин в `form-registry-keys.ts`). В `FormRegistryCheck` кандидаты не входят.
+- ⚠️ После обновления `@letar/forms` и `zenstack generate` любой существующий `Select.X` в реестре, имя которого
+  совпало с моделью или enum автоформы, начнёт рисоваться вместо базового поля. Если это не нужно — `form.fieldType`.
+
 ### Свой рендер опций: `renderOption`, `renderValue`, `textValue`, `data` (v2.19.0+)
 
 Опция несёт типизированные данные приложения (`data`), а рисовать её можно любым узлом. Chakra-скин

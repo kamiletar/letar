@@ -163,6 +163,13 @@ export const check: FormRegistryCheck<typeof AppForm, FormSelectKey, FormCombobo
 `@letar/zenstack-form-plugin` ≥ 4.2.0 в `form-registry-keys.ts`. Неизвестный ключ в dev/test — исключение со списком
 доступных, в production — один `console.error` и базовый `Select`.
 
+### Автоподбор по имени модели или enum (v2.26.0+)
+
+Ключ часто не нужен. Для поля-FK и enum-поля `@letar/zenstack-form-plugin` ≥ 4.3.0 кладёт в мету имя целевой модели или
+enum, и автоформа рисует `AppForm.Select.<МодельИлиEnum>`, если приложение его зарегистрировало. Компонента нет —
+обычное поле, без ошибки. Так подбираются только `Select.*`; `Combobox.*` и `Listbox.*` — только по явному ключу.
+Отказаться — любой `form.fieldType` на поле (например `"select"`).
+
 ## Возвращаемый тип
 
 | Свойство              | Описание                        |

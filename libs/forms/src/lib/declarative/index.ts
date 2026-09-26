@@ -450,7 +450,7 @@ export {
 } from './form-group/form-group-list-sortable'
 
 // Factory for app-specific forms
-export { createForm, type ExtendedForm, type FormRegistryCheck } from './create-form'
+export { createForm, type ExtendedForm, type FormRegistryCheck, type FormRegistryUnregistered } from './create-form'
 
 // Lazy component helpers (for lazy loading form components)
 export { createLazyComponent, createLazyComponents, type LazyComponentImport } from './lazy-component'

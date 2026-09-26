@@ -4,6 +4,13 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.23.0] - 2026-09-26
+
+### Added
+
+- `FieldUIMeta.registryName` (`@letar/forms-core/schema`): имя модели/enum, под которым автоформа ищет компонент
+  `Select.<Имя>` в реестре `createForm` (пишет `zenstack-form-plugin` ≥ 4.3.0).
+
 ## [0.22.0] - 2026-09-26
 
 ### Added

@@ -328,7 +328,10 @@ function ProductEditor() {
       + 'registered in createForm. The schema points at it with `form.fieldType = "Select.<Name>"`, so Form.AutoFields, '
       + 'Form.Field.Auto and a hand-written <AppForm.Select.<Name>> use the same component. Needs @letar/forms >= 2.25.0 '
       + 'and @letar/zenstack-form-plugin >= 4.2.0. If the field is used only in auto forms and needs only labels or a short '
-      + 'onCreate without a dialog, `form.relation.*` + RelationConfig.fieldProps is lighter.',
+      + 'onCreate without a dialog, `form.relation.*` + RelationConfig.fieldProps is lighter. With @letar/forms >= 2.26.0 and plugin >= 4.3.0 '
+      + 'the key is often not needed at all: for an FK field and an enum field the plugin writes `ui.registryName` (model / enum name), '
+      + 'and auto forms render `AppForm.Select.<ModelOrEnum>` when it is registered (otherwise the ordinary field, no error). '
+      + 'Only Select is picked by name; Combobox/Listbox need the explicit key. Opt out with any `form.fieldType`.',
     example: `// schema.zmodel — the key lives in the schema
 model Work {
   id         String @id @default(cuid())
@@ -336,7 +339,7 @@ model Work {
 }
 
 // src/app-form/app-form.tsx — register the component; typecheck checks the keys of the schema
-import { createForm, type FormRegistryCheck } from '@letar/forms'
+import { createForm, type FormRegistryCheck, type FormRegistryUnregistered } from '@letar/forms'
 import type { FormComboboxKey, FormSelectKey } from '@/generated/form-schemas'
 
 export const AppForm = createForm({
@@ -347,6 +350,11 @@ export const AppForm = createForm({
 
 // Not every key from schema.zmodel is registered → compile error listing the missing keys
 export const appFormRegistryCheck: FormRegistryCheck<typeof AppForm, FormSelectKey, FormComboboxKey> = true
+
+// Without an explicit key (forms >= 2.26.0, plugin >= 4.3.0): a categoryId field with @relation to WorkCategory and an enum
+// field are matched by name. Which candidates from the schema still have no component (info, not a check):
+import type { FormSelectCandidate } from '@/generated/form-schemas'
+type Unregistered = FormRegistryUnregistered<typeof AppForm, FormSelectCandidate> // 'Unit' | 'Status' | never
 
 // Form: the field is drawn by AppForm.Select.WorkCategory
 <AppForm schema={WorkCreateFormSchema} initialValue={initial} onSubmit={save}>

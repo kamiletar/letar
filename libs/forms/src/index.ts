@@ -109,6 +109,7 @@ export type {
   FormProps,
   FormPropsWithApi,
   FormRegistryCheck,
+  FormRegistryUnregistered,
   FormWatchProps,
   HiddenFieldProps,
   ListboxFieldProps,

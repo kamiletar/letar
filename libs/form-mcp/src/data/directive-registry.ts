@@ -52,7 +52,11 @@ const KNOWN_DIRECTIVES: DirectiveInfo[] = [
       + '`AppForm.Select.<Name>`, so a dictionary with its own dialog, hooks and optimistic mode works in auto forms. '
       + 'The key needs `@letar/forms` >= 2.25.0. The plugin writes the keys to `form-registry-keys.ts`; add '
       + '`const check: FormRegistryCheck<typeof AppForm, FormSelectKey, FormComboboxKey> = true` next to createForm '
-      + 'so typecheck fails when a key from the schema is not registered. Do not combine with form.relation.* — the key wins.',
+      + 'so typecheck fails when a key from the schema is not registered. Do not combine with form.relation.* — the key wins. '
+      + 'You often need no key at all: for an FK field (`@relation`) and an enum field the plugin (>= 4.3.0) writes `ui.registryName` '
+      + '(the target model / enum name), and with `@letar/forms` >= 2.26.0 auto forms render `AppForm.Select.<ModelOrEnum>` when it is registered, '
+      + 'otherwise the ordinary field (no error). Only `Select.*` is picked this way. To opt out set any `form.fieldType` '
+      + '(for example "select"); `form.relation.*` on the field also turns it off.',
     example:
       '@meta("form.fieldType", "tags")  // built-in\n@meta("form.fieldType", "Select.WorkCategory")  // registry key',
     output: '.meta({ ui: { fieldType: "tags" } })  |  .meta({ ui: { fieldType: "Select.WorkCategory" } })',

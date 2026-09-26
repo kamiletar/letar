@@ -107,6 +107,13 @@ export interface FieldUIMeta {
    */
   fieldType?: FieldComponentType
   /**
+   * Имя модели (для FK) или enum, под которым автоформа ищет компонент реестра `createForm`:
+   * есть `Select.<registryName>` — рисуется он, нет — обычное поле. Пишет `zenstack-form-plugin` ≥ 4.3.0;
+   * `fieldType` (явный ключ или встроенный тип) подсказку отключает.
+   * @example registryName: 'WorkCategory' → `AppForm.Select.WorkCategory`, если он зарегистрирован
+   */
+  registryName?: string
+  /**
    * Additional props for specific field type
    * @example { countries: ['RU', 'US'] } for phone
    */

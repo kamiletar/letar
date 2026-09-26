@@ -212,6 +212,13 @@ The key grammar is `Select.<Name>` / `Combobox.<Name>` / `Listbox.<Name>`. The k
 `@letar/zenstack-form-plugin` >= 4.2.0 to `form-registry-keys.ts`. An unknown key throws in dev/test with the list of
 available keys; in production it logs once and renders a plain `Select`.
 
+### Auto-matching by model or enum name (v2.26.0+)
+
+You often need no key at all. For an FK field and an enum field `@letar/zenstack-form-plugin` >= 4.3.0 writes the target
+model / enum name to the field meta, and auto forms render `AppForm.Select.<ModelOrEnum>` when the app registered it.
+No such component — the ordinary field, no error. Only `Select.*` is matched this way; `Combobox.*` / `Listbox.*` need
+the explicit key. To opt out set any `form.fieldType` on the field (for example `"select"`).
+
 ## Full Return Type
 
 `createForm()` returns an extended `Form` component with all built-in features:

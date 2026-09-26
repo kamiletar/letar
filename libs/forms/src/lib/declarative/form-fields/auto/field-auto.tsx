@@ -2,8 +2,10 @@
 
 import type { ReactElement } from 'react'
 import { useFormGroup } from '../../../form-group'
+import { resolveConventionalRegistryType } from '../../conventional-registry-type'
 import { renderFieldByType } from '../../field-type-mapper'
 import { useDeclarativeForm } from '../../form-context'
+import { useFormRegistry } from '../../form-registry-context'
 import { getZodConstraints } from '../../schema-constraints'
 import type { BaseFieldProps } from '../../types'
 import type { FieldUIMeta } from '../../types/meta-types'
@@ -237,6 +239,7 @@ export function camelCaseToLabel(str: string): string {
 export function FieldAuto({ name, config, ...baseProps }: AutoFieldProps): ReactElement {
   const { schema } = useDeclarativeForm()
   const parentGroup = useFormGroup()
+  const registry = useFormRegistry()
 
   if (!name) {
     throw new Error('Form.Field.Auto requires a name prop')
@@ -255,11 +258,14 @@ export function FieldAuto({ name, config, ...baseProps }: AutoFieldProps): React
   // Auto-label if not specified
   const label = baseProps.label ?? uiMeta?.title ?? camelCaseToLabel(name)
 
+  // Явный fieldType из меты; без него — `Select.<Модель|Enum>` из реестра createForm по подсказке плагина (§17.9)
+  const explicitType = uiMeta?.fieldType ?? resolveConventionalRegistryType(uiMeta, registry?.Select)
+
   // If explicit fieldType in meta — use renderFieldByType
-  if (uiMeta?.fieldType) {
+  if (uiMeta && explicitType) {
     const constraints = getZodConstraints(schema, fullPath)
     const { label: _label, placeholder, helperText, required, disabled, readOnly, ...restProps } = baseProps
-    return renderFieldByType(uiMeta.fieldType, {
+    return renderFieldByType(explicitType, {
       name,
       label,
       placeholder: (placeholder as string | undefined) ?? uiMeta.placeholder,

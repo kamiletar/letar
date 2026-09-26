@@ -35,6 +35,9 @@ describe('getPatterns', () => {
     const byKey = registry.get('reference-select' as never)
     expect(byKey?.example).toContain('form.fieldType')
     expect(byKey?.example).toContain('FormRegistryCheck')
+    // Этап Ж: без ключа руками, по имени модели
+    expect(byKey?.description).toContain('registryName')
+    expect(byKey?.example).toContain('FormRegistryUnregistered')
     const zenstack = registry.get('reference-zenstack' as never)
     expect(zenstack?.example).toContain('useZenStackOptions')
     expect(zenstack?.example).toContain('optimistic')

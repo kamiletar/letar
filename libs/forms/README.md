@@ -132,7 +132,9 @@ export const AppForm = createForm({ /* ... */ })
 
 `createForm` — generic: ключи `extraSelects`/`lazySelects` и т.д. выводятся в типы. На них ссылаются из
 `schema.zmodel` (`@meta("form.fieldType", "Select.WorkCategory")`), а `FormRegistryCheck` роняет typecheck, если ключ
-из схемы не зарегистрирован — [docs/fields.md § Справочник по ключу из схемы](./docs/fields.md) (v2.25.0+).
+из схемы не зарегистрирован — [docs/fields.md § Справочник по ключу из схемы](./docs/fields.md) (v2.25.0+). С v2.26.0
+ключ часто не нужен: FK и enum-поля автоформа подбирает по имени модели/enum
+([§ Автоподбор по имени](./docs/fields.md)).
 
 ### Form-level компоненты
 
