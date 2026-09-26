@@ -1,5 +1,11 @@
 # Changelog — @letar/ui
 
+## [0.23.0] — 2026-09-26
+
+### Added
+
+- `createControlRecipes({ borderToken })` — рецепты рамки полей (`input`, `textarea`, `checkmark`, `radiomark`, `select`, `nativeSelect`, `combobox`) с семантическим токеном рамки (по умолчанию `border.control`, WCAG 2.2 §1.4.11) и полным порядком anatomy. Приложение само определяет токен в `semanticTokens`.
+
 ## [0.22.3] — 2026-09-24
 
 ### Changed
