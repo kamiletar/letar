@@ -3,7 +3,7 @@ import { act, renderHook, waitFor } from '@testing-library/react'
 import { getQueryKey } from '@zenstackhq/tanstack-query/react'
 import type { ReactNode } from 'react'
 import { describe, expect, it, vi } from 'vitest'
-import { useInvalidateModels } from '../zenstack'
+import { useInvalidateModels, useZenStackOptions } from '../zenstack'
 import { fromSearchQuery } from './from-search-query'
 import { fromSelectedQuery } from './from-selected-query'
 import { useInvalidateAfter } from './use-invalidate-after'
@@ -101,11 +101,40 @@ describe('useQueryOptions (Q2)', () => {
     expect(result.current.error).toBe(error)
   })
 
+  it('isPending помечает строки опций pending: true, остальные без флага', () => {
+    const data = [rows[0]!, { id: 'tmp', name: 'Новая' }]
+    const isPending = (row: Category) => row.id === 'tmp'
+    const { result } = renderHook(() => useQueryOptions({ data, isLoading: false }, map, { isPending }))
+    expect(result.current.fieldProps.options).toEqual([
+      { label: 'Кровля', value: 'a', data: data[0] },
+      { label: 'Новая', value: 'tmp', data: data[1], pending: true },
+    ])
+  })
+
   it('стабильные data и map — тот же массив опций между рендерами', () => {
     const { result, rerender } = renderHook(() => useQueryOptions({ data: rows, isLoading: false }, map))
     const first = result.current.fieldProps.options
     rerender()
     expect(result.current.fieldProps.options).toBe(first)
+  })
+})
+
+describe('useZenStackOptions (Q5)', () => {
+  const map = (row: Category & { $optimistic?: boolean }) => ({ label: row.name, value: row.id })
+
+  it('строки с $optimistic получают pending, обычные — нет', () => {
+    const data = [{ id: 'a', name: 'Кровля' }, { id: 'tmp', name: 'Новая', $optimistic: true }]
+    const { result } = renderHook(() => useZenStackOptions({ data, isLoading: false }, map))
+    expect(result.current.fieldProps.options).toEqual([
+      { label: 'Кровля', value: 'a', data: data[0] },
+      { label: 'Новая', value: 'tmp', data: data[1], pending: true },
+    ])
+  })
+
+  it('$optimistic: false — не pending', () => {
+    const data = [{ id: 'a', name: 'Кровля', $optimistic: false }]
+    const { result } = renderHook(() => useZenStackOptions({ data, isLoading: false }, map))
+    expect(result.current.fieldProps.options[0]).not.toHaveProperty('pending')
   })
 })
 

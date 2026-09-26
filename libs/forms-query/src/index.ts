@@ -7,4 +7,9 @@ export { useInvalidateAfter } from './lib/use-invalidate-after'
 export { useLoaderQuery } from './lib/use-loader-query'
 export type { UseLoaderQueryOptions } from './lib/use-loader-query'
 export { useQueryOptions } from './lib/use-query-options'
-export type { OptionsQueryResult, QueryOption, UseQueryOptionsResult } from './lib/use-query-options'
+export type {
+  OptionsQueryResult,
+  QueryOption,
+  UseQueryOptionsResult,
+  UseQueryOptionsSettings,
+} from './lib/use-query-options'
