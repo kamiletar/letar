@@ -73,6 +73,23 @@ import { MyAppForm } from '@/my-app-form'
 </MyAppForm>
 ```
 
+### Ключ реестра в схеме (`@letar/forms` ≥ 2.25.0, `zenstack-form-plugin` ≥ 4.2.0)
+
+Поле-справочник со своим компонентом из инстанса привязывается строкой в схеме:
+`@meta("form.fieldType", "Select.WorkCategory")` (или `Combobox.<Имя>`). `Form.AutoFields` и `Form.Field.Auto`
+рисуют компонент из `lazySelects`/`extraSelects`/`lazyComboboxes`; исключать такое поле из `AutoFields`
+больше не нужно. Плагин пишет `src/generated/form-schemas/form-registry-keys.ts`, а в модуле `createForm`
+одна строка проверяет typecheck'ом, что все ключи из схемы зарегистрированы:
+
+```typescript
+export const appFormRegistryCheck: FormRegistryCheck<typeof AppForm, FormSelectKey, FormComboboxKey> = true
+```
+
+⚠️ Забыли строку `FormRegistryCheck` или не запустили `zenstack generate` после правки схемы — ошибку
+даёт только рантайм (в dev и тестах исключение, в production один `console.error` и базовое поле).
+Со старой `@letar/forms` (< 2.25.0) ключ молча превращается в текстовое поле. Полностью —
+`libs/zenstack-form-plugin/README.md`, раздел «Проверка, что все ключи зарегистрированы».
+
 ### Memory optimization
 
 - **Все Select/Combobox** через `lazySelects`/`lazyComboboxes` (dynamic imports)
