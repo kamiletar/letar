@@ -1,5 +1,14 @@
 # Changelog — @letar/form-mcp
 
+## 2.5.0 (2026-09-27)
+
+### Added
+
+- `get_directives('dependsOn')` и паттерн `dependent-select` (страна → город, компания → сотрудник): свойства
+  `dependsOn`/`depsReady`/`clearOnParentChange`/`disableWhenParentEmpty`/`placeholderWhenDisabled`, `deps` в загрузчиках
+  (`@letar/forms` 2.27.0, `@letar/zenstack-form-plugin` 4.4.0).
+- `get_field_props` знает свойства зависимых полей у `Select` и `Combobox`; `CascadingSelect` помечен устаревшим.
+
 ## 2.4.0 (2026-09-26)
 
 ### Added

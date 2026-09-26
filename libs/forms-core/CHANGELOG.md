@@ -4,6 +4,16 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.24.0] - 2026-09-27
+
+### Added
+
+- Основа зависимых полей (`libs/forms/PLAN.md` §18): реестр `createDependentsRegistry` (очистка дочернего по правке
+  родителя, `suppress`, обнаружение циклов), `FieldDeps`, `resolveDependsOn`, `serializeDeps`, `isEmptyDepValue`,
+  `buildDeps`, `areDepsReady`, `getValueAtPath`.
+- `LoadContext.deps` во всех загрузчиках, `SelectionActionContext.deps`, `SettleErrorInfo.deps`.
+- `UIKitSelectProps.describedBy` — связь подсказки заблокированного зависимого поля с триггером.
+
 ## [0.23.0] - 2026-09-26
 
 ### Added

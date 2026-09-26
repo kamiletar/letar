@@ -4,6 +4,18 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.46.0] - 2026-09-27
+
+### Added
+
+- **`dependsOn` у `Field.Select` и `Field.Combobox`** — паритет с `@letar/forms` 2.27.0: `deps` в загрузчиках и
+  действиях, блокировка с подсказкой и `aria-describedby`, очистка по правке родителя, live-область (встроенный словарь
+  ru/en). Корня формы у shadcn-скина нет — приложение подключает реестр зависимостей по образцу `TestForm`.
+
+### Deprecated
+
+- `Field.CascadingSelect` — `@deprecated`, поведение не менялось.
+
 ## [0.45.0] - 2026-09-26
 
 ### Added

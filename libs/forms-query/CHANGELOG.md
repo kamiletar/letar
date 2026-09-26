@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.0
+
+- `fromSearchQuery` и `fromSelectedQuery` вызывают хук третьим аргументом `deps` — значения родителей зависимого поля.
+- `useLoaderQuery` кладёт `deps` в ключ запроса: `[...key, deps, search]`. ⚠️ Ключ запроса изменился — кэш прежних
+  ключей не используется.
+- `useInvalidateAfter` принимает функцию `(ctx) => keys` — инвалидировать только список нужного родителя.
+- Готовность зависимого поля (`depsReady`) совпадает с готовностью адаптера: запрос при пустом родителе не уходит.
+
 ## 0.2.0
 
 - `useZenStackOptions(result, map)` в `@letar/forms-query/zenstack` — `useQueryOptions` для чтений ZenStack: строки

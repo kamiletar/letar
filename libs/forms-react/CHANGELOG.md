@@ -4,6 +4,16 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.17.0] - 2026-09-27
+
+### Added
+
+- Хуки зависимых полей: `useDependentField`, `useFieldDeps`, `useCreateDependentsRegistry`,
+  `useFormDependentsRegistry`; `dependents` в `DeclarativeFormContextValue`, `TestForm` несёт реестр и листенер.
+- `deps` в `usePromiseSearch`, `useSelectedLoader`, `useOptionsLoader` (опции `fieldDeps`, `enabled`, `keepPrevious`),
+  `useAsyncSearch` (скрывает `placeholderData` чужого родителя) и `useSelectionActionsState` (смена родителя сбрасывает
+  созданные опции и ожидающий выбор).
+
 ## [0.16.0] - 2026-09-26
 
 ### Added

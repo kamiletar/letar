@@ -4,6 +4,38 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.27.0] - 2026-09-27
+
+### Added
+
+- **Зависимые (каскадные) селекты — этап З.** `dependsOn` (строка или массив имён, ведущий `/` — от корня формы),
+  `depsReady`, `clearOnParentChange`, `disableWhenParentEmpty`, `placeholderWhenDisabled` у обычных
+  `Form.Field.Select` и `Form.Field.Combobox`. Значения родителей приходят как `deps` в `loadOptions`, `loadSelected`,
+  `useQuery(search, deps)`, `useSelected(value, deps)`, `useOptions(deps)`, `options(deps)`, `onCreate`, `onUpdate`
+  и `onSettleError`. Дочернее поле очищается только по **правке** родителя (выбор, `handleChange`, `setFieldValue`);
+  гидратация, `reset(values)`, `UrlSync`, `useUrlPrefill` и восстановление черновика ничего не очищают. Пока родители не
+  готовы, поле заблокировано с видимой подсказкой (`aria-describedby`), запрос не уходит; очистка объявляется
+  вежливой live-областью. Смена родителя отменяет запрос прежнего и скрывает его опции.
+- `useFieldDeps`, тип `FieldDeps`, `dependents.suppress(fn)` в `useDeclarativeForm()` — записать родителя и ребёнка
+  разом без очистки.
+- Корень формы (`Form`, `Form` с `api`) ведёт реестр зависимостей и form-level листенер; строки `Form.Group.List`
+  наследуют реестр.
+
+### Changed
+
+- `Form.Field.Combobox`: внешняя смена значения (восстановление черновика, `reset`, `setFieldValue`) обновляет
+  подпись в поле ввода; раньше подпись выставлялась один раз при монтировании.
+
+### Deprecated
+
+- `Form.Field.CascadingSelect` — `@deprecated`, поведение не менялось. Для новых форм — `dependsOn` у
+  `Field.Select`/`Field.Combobox`.
+
+### Изменения поведения
+
+- Очистка зависимого поля пишет пустое значение поля (`''`), как его кнопка очистки; для nullable-схемы `null` —
+  в очереди (`PLAN.md` §14, вопрос 50).
+
 ## [2.26.0] - 2026-09-26
 
 ### Added
