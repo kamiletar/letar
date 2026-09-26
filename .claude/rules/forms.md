@@ -90,6 +90,29 @@ export const appFormRegistryCheck: FormRegistryCheck<typeof AppForm, FormSelectK
 Со старой `@letar/forms` (< 2.25.0) ключ молча превращается в текстовое поле. Полностью —
 `libs/zenstack-form-plugin/README.md`, раздел «Проверка, что все ключи зарегистрированы».
 
+Для FK и enum ключ чаще всего **не нужен**: с `@letar/forms` ≥ 2.26.0 и плагином ≥ 4.3.0
+`Form.AutoFields`/`Form.Field.Auto` сами подбирают `Select.<Имя>` из реестра по имени модели (по
+`@relation`) или enum. Отказ — любой `form.fieldType` на поле; явный `form.relation.*` тоже отключает
+автоподбор. ⚠️ Поведение меняется при обновлении и `zenstack generate`: если в реестре есть `X` и в схеме
+есть FK/enum с таким именем, поле начнёт рисовать `Select.X` вместо базового.
+
+### Зависимые селекты (`@letar/forms` ≥ 2.27.0)
+
+Выбор второго поля зависит от первого (страна → город, компания → сотрудник) — `dependsOn`, не
+`Form.Watch` + ручной сброс и не `CascadingSelect` (он `@deprecated`, semgrep
+`letar-forms-cascading-select-deprecated`):
+
+```tsx
+<AppForm.Field.Select name="companyId" options={companies} />
+<AppForm.Field.Select name="accountId" dependsOn="companyId" options={accounts} />
+```
+
+Или в схеме: `@meta("form.dependsOn", "companyId")`. Дочернее поле очищается **только когда
+пользователь меняет родителя** (reset, `UrlSync`, prefill и восстановление черновика его не стирают), пока
+родитель пуст, дочернее заблокировано с подсказкой. Путь — строка или массив, `/` в начале — от корня формы.
+Загрузчики получают `deps`. ⚠️ У `Combobox` по умолчанию `minChars=1` — в зависимом списке без ввода
+поставь `minChars={0}`. Полностью — `libs/forms/docs/fields.md`.
+
 ### Memory optimization
 
 - **Все Select/Combobox** через `lazySelects`/`lazyComboboxes` (dynamic imports)
