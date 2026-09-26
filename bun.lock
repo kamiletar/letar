@@ -1272,7 +1272,7 @@
     },
     "libs/form-mcp": {
       "name": "@letar/form-mcp",
-      "version": "2.4.0",
+      "version": "2.5.0",
       "dependencies": {
         "@modelcontextprotocol/server": "2.0.0",
         "zod": "4.6.5",
@@ -1287,7 +1287,7 @@
     },
     "libs/forms": {
       "name": "@letar/forms",
-      "version": "2.26.0",
+      "version": "2.27.0",
       "dependencies": {
         "@letar/format-utils": "workspace:*",
         "@tanstack/react-table": "^9.2.4",
@@ -1340,14 +1340,14 @@
     },
     "libs/forms-core": {
       "name": "@letar/forms-core",
-      "version": "0.23.0",
+      "version": "0.24.0",
       "dependencies": {
         "@tanstack/table-core": "^9.1.2",
       },
     },
     "libs/forms-query": {
       "name": "@letar/forms-query",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "devDependencies": {
         "@letar/forms": "workspace:*",
         "@letar/forms-core": "workspace:*",
@@ -1364,7 +1364,7 @@
     },
     "libs/forms-react": {
       "name": "@letar/forms-react",
-      "version": "0.16.0",
+      "version": "0.17.0",
       "dependencies": {
         "@letar/forms-core": "workspace:*",
       },
@@ -1379,7 +1379,7 @@
     },
     "libs/forms-shadcn": {
       "name": "@letar/forms-shadcn",
-      "version": "0.45.0",
+      "version": "0.46.0",
       "devDependencies": {
         "@letar/eager-jsx-check": "workspace:*",
         "@letar/forms-core": "workspace:*",
@@ -1775,7 +1775,7 @@
     },
     "libs/zenstack-form-plugin": {
       "name": "@letar/zenstack-form-plugin",
-      "version": "4.3.0",
+      "version": "4.4.0",
       "peerDependencies": {
         "@zenstackhq/sdk": ">=3.0.0",
         "@zenstackhq/zod": ">=3.0.0",
