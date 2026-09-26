@@ -238,3 +238,16 @@ model MetaSyntaxDemo {
 
   @@allow('all', true)
 }
+
+/// Демо ключа реестра createForm (`libs/forms/PLAN.md` §17): справочник рисует компонент, зарегистрированный в
+/// `DevelopAppForm` (`lazySelects.Category`), а не базовый Select. `form.props.*` доходят до компонента как есть.
+model RegistryKeyDemo {
+  id         String  @id @default(cuid())
+
+  title      String  @meta("form.title", "Название работы")
+
+  categoryId String? @meta("form.title", "Категория (компонент из createForm)")
+    @meta("form.fieldType", "Select.Category") @meta("form.props.createLabel", "Добавить категорию")
+
+  @@allow('all', true)
+}

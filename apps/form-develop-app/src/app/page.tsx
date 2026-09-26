@@ -75,6 +75,9 @@ export default function HomePage() {
             ZenStack + справочник (onUpdate/onCreate/useSelected/loading на настоящих хуках)
           </Link>
         </Button>
+        <Button asChild colorPalette="purple" variant="outline" size="lg" width="fit-content">
+          <Link href="/registry-key-demo">Ключ реестра createForm в схеме (Select.Category в Form.AutoFields)</Link>
+        </Button>
         <Button asChild colorPalette="orange" variant="outline" size="lg" width="fit-content">
           <Link href="/dirty-guard-demo">DirtyGuard (защита от потери данных в createForm и на форме)</Link>
         </Button>
