@@ -6,6 +6,24 @@
 
 ## Backlog (запросы от агентов)
 
+### [2026-09-26] `Form.Inline.Select/Combobox/String` — контролируемое одиночное поле без формы-моста (от domwellbes)
+
+- **Запросил:** domwellbes-dev (msg 2135), **предварительная оценка**: реализацию владелец ещё не подтвердил.
+- **Приоритет:** normal. Ставим после этапа Д; связка с этапом Е — реестр `extraSelects/extraComboboxes` (§17)
+  уже нужен для `Inline.Combobox.<Имя>`, поэтому раньше Е не начинать.
+- **Проблема:** в domwellbes 55 форм вида `<Form schema={XFieldSchema} initialValue={{x}} onSubmit={async () => {}}
+  dirtyGuard={false}>` + одно поле (46 Select, 7 Combobox, 2 String) + `Form.Watch` → `setState`: ~14 строк на
+  поле, 43 схемы-однострочника, ручное сужение типа в `onChange`, статичный `initialValue` — внешний сброс state
+  в поле не доходит.
+- **Предложение:** `<Form.Inline.Select<T> value onValueChange options clearable size />`,
+  `<Form.Inline.Combobox.Supplier value onValueChange clearable />`; внутри форма без схемы, `dirtyGuard=false`,
+  no-op submit, поле + синхронизация `value` внутрь при внешнем изменении; `clearable` → `null` или `''` по опции.
+- **Вопросы к ревью:** (1) есть ли готовое — по поиску в `libs/forms/src` нет (`form-simple` с optional
+  `onSubmit` не найден); (2) место и имя (`Form.Inline.*` в `createForm`-неймспейсе, не пересекается с
+  `Form.Field.*`/`Form.Select.*`); (3) оценка объёма — за `forms-dev` после решения владельца.
+- **Статус:** ожидание решения владельца; правило проекта («сырой Select запрещён») делает этот компонент
+  законным путём для фильтров и построчных контролов.
+
 ### [2026-09-26] Select/Combobox: кастомный рендер значения/опций + `onUpdate` с кнопкой `Form.Field.Select.EditButton` (от владельца)
 
 - **Запросил:** владелец (по опыту прежнего проекта: адрес доставки правился карандашом в модалке, без перехода
