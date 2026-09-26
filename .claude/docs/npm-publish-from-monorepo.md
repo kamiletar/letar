@@ -17,8 +17,10 @@ grep -l '"build:npm"' libs/*/project.json apps/*/project.json
 
 Отдельно: наличие `build:npm` ≠ пакет опубликован. Что реально уходит на npm, задаёт список тегов
 в [publish-npm.yml](/.github/workflows/publish-npm.yml) (`forms-v*`, `form-mcp-v*`,
-`zenstack-form-plugin-v*`) — `forms-shadcn` там на 2026-09-03 нет, а у `form-mcp` в `package.json`
-стоит `"private": true`.
+`zenstack-form-plugin-v*`) — `forms-shadcn` там на 2026-09-03 нет. У `form-mcp` до 2026-09-26 в
+`package.json` стояло `"private": true` (наследие первого коммита; на публикацию не влияло — на npm уходит
+`dist/package.json`, собранный из `package.publish.json`). Владелец решил публиковать: флаг убран. На npm
+при этом лежат только `1.0.0`/`1.0.1` (2026-03-31), версии `2.x` не выходили; тегов `form-mcp-v*` в репо нет.
 
 ## Конвейер целиком
 
