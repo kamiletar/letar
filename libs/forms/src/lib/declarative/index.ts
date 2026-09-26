@@ -685,3 +685,6 @@ export {
   FieldSNILS,
 } from './form-fields/document'
 export type { BirthCertificateFieldProps, DocumentFieldConfig, DocumentFieldProps } from './form-fields/document'
+
+// Поиск внутри Select — типы пропа `searchable`
+export type { SelectSearchable, SelectSearchSettings } from '@letar/forms-core/uikit'

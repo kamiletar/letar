@@ -42,6 +42,34 @@ const options = [
 <Form.Field.Select name="role" options={options} />
 ```
 
+## Поиск внутри Select (`searchable`)
+
+**API:** `searchable`, `renderEmpty` у `Form.Field.Select` (Chakra-скин)
+
+С 10-й опции в открытом списке `Select` появляется поле поиска с автофокусом — проп не нужен.
+
+```tsx
+<Form.Field.Select name="region" options={regions} />                          {/* 10+ опций: поиск появится сам */}
+<Form.Field.Select name="region" options={regions} searchable={false} />       {/* выключен */}
+<Form.Field.Select name="region" options={few} searchable />                   {/* всегда */}
+<Form.Field.Select
+  name="region"
+  options={regions}
+  searchable={{ threshold: 20, placeholder: 'Найти регион', emptyMessage: 'Такого региона нет' }}
+/>
+```
+
+- Ищет по тексту опции без регистра и диакритики, `ё` ≡ `е`, и по запросу, набранному не в той раскладке
+  («ghbdtn» находит «Привет»). Выбранное значение остаётся в кнопке, пока список отфильтрован.
+- Первая подходящая опция подсвечена: Enter выбирает её, стрелки ходят по списку, Escape закрывает и сбрасывает запрос.
+- С `onCreate` текст поиска попадает в обработчик: `onCreate('введённый текст')`; пункт «+ Добавить "…"» идёт после
+  фильтра. `renderEmpty({ search })` заменяет текст «Ничего не найдено».
+- ⚠️ Изменение поведения: у `Select` с 10+ опциями печать после открытия теперь фильтрует список, а не прыгает
+  typeahead-ом. Выключается `searchable={false}`. В shadcn-скине поля поиска нет (`true`/объект пишут одно
+  предупреждение) — там берите `Form.Field.Combobox`.
+- **Select или Combobox?** Все варианты уже на клиенте (enum, справочник до сотен записей) — `Select`. Варианты
+  приходят с сервера по тексту поиска или каталог растёт — `Combobox` с `useQuery`.
+
 ## Combobox
 
 **API:** `Form.Field.Combobox`

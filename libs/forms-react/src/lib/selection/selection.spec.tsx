@@ -9,6 +9,7 @@ import {
 } from './selection-context'
 import { useSelectionActionsState } from './use-selection-actions-state'
 import { resetSelectionButtonWarnings, useSelectionCreateButton, useSelectionEditButton } from './use-selection-buttons'
+import { useSelectionSearch } from './use-selection-search'
 
 const deferred = <T,>() => {
   let resolve!: (value: T) => void
@@ -257,5 +258,68 @@ describe('слоты-кнопки (headless)', () => {
       renderHook(() => useSelectionCreateButton(), { wrapper: wrap(actions({ canCreate: false }), null) }).result
         .current,
     ).toBeNull()
+  })
+})
+
+describe('useSelectionSearch', () => {
+  const many = Array.from({ length: 12 }, (_, i) => ({ value: `v${i}`, label: i === 0 ? 'Кровля' : `Работа ${i}` }))
+  const few = many.slice(0, 5)
+  const getText = (o: { label: string }) => o.label
+  const base = { getText, placeholder: 'Поиск…', ariaLabel: 'Поиск по списку' }
+
+  it('до порога поиска нет, с 10-й опции — есть', () => {
+    const nine = renderHook(() => useSelectionSearch({ ...base, searchable: 'auto', options: many.slice(0, 9) }))
+    expect(nine.result.current.search).toBeUndefined()
+    const ten = renderHook(() => useSelectionSearch({ ...base, searchable: 'auto', options: many.slice(0, 10) }))
+    expect(ten.result.current.search?.placeholder).toBe('Поиск…')
+    expect(ten.result.current.search?.ariaLabel).toBe('Поиск по списку')
+  })
+
+  it('фильтрует и отдаёт visibleValues; пустой запрос — всё', () => {
+    const { result } = renderHook(() => useSelectionSearch({ ...base, searchable: true, options: few }))
+    expect(result.current.filtered).toHaveLength(5)
+    act(() => result.current.setQuery('кров'))
+    expect(result.current.filtered.map((o) => o.value)).toEqual(['v0'])
+    expect([...result.current.search!.visibleValues]).toEqual(['v0'])
+    act(() => result.current.setQuery(''))
+    expect(result.current.filtered).toHaveLength(5)
+  })
+
+  it('раскладка: «rhjdkz» находит «Кровля»', () => {
+    const { result } = renderHook(() => useSelectionSearch({ ...base, searchable: true, options: few }))
+    act(() => result.current.setQuery('rhjdkz'))
+    expect(result.current.filtered.map((o) => o.value)).toEqual(['v0'])
+  })
+
+  it('гистерезис: опций стало меньше порога, но запрос непустой — поле остаётся', () => {
+    const { result, rerender } = renderHook(
+      ({ options }) => useSelectionSearch({ ...base, searchable: 'auto', options }),
+      { initialProps: { options: many } },
+    )
+    act(() => result.current.setQuery('раб'))
+    rerender({ options: few })
+    expect(result.current.enabled).toBe(true)
+    act(() => result.current.setQuery(''))
+    expect(result.current.enabled).toBe(false)
+  })
+
+  it('searchable=false — поиска нет, запрос не фильтрует', () => {
+    const { result } = renderHook(() => useSelectionSearch({ ...base, searchable: false, options: many }))
+    expect(result.current.search).toBeUndefined()
+    act(() => result.current.setQuery('кров'))
+    expect(result.current.filtered).toHaveLength(12)
+  })
+
+  it('объект: свой placeholder и свой фильтр', () => {
+    const { result } = renderHook(() =>
+      useSelectionSearch({
+        ...base,
+        searchable: { threshold: 0, placeholder: 'Найти работу', filter: (o, q) => o.label === q },
+        options: few,
+      })
+    )
+    expect(result.current.search?.placeholder).toBe('Найти работу')
+    act(() => result.current.setQuery('Работа 2'))
+    expect(result.current.filtered.map((o) => o.value)).toEqual(['v2'])
   })
 })

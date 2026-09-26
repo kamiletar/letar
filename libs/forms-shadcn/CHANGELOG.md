@@ -4,6 +4,15 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.42.0] - 2026-09-26
+
+### Added
+
+- **`searchable` у `Field.Select`** — паритет API с `@letar/forms` 2.21.0. ⚠️ Поля поиска в этом скине нет (фокусная
+  модель Radix Select конфликтует с полем ввода): `'auto'`/`false` ничего не делают, `true` и объект — одно
+  предупреждение в консоли (dev/test). Нужен поиск — `Field.Combobox`.
+- `Field.Combobox`: статичные опции ищутся с учётом раскладки («ghbdtn» → «Привет»), `ё` ≡ `е`.
+
 ## [0.41.0] - 2026-09-26
 
 ### Added

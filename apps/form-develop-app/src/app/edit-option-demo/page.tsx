@@ -37,7 +37,6 @@ async function askName(current: string): Promise<string | null> {
 export default function EditOptionDemoPage() {
   const [submitted, setSubmitted] = useState<EditOptionData | null>(null)
   const [records] = useState(initialRecords)
-  let counter = 0
 
   const options = records.map((r) => ({ value: r.id, label: r.name, data: r, editable: !r.system }))
 
@@ -67,8 +66,7 @@ export default function EditOptionDemoPage() {
               }}
               onCreate={async () => {
                 const name = await askName('')
-                counter += 1
-                return name ? { label: name, value: `new-${Date.now()}-${counter}` } : null
+                return name ? { label: name, value: `new-${crypto.randomUUID()}` } : null
               }}
             />
           </Box>

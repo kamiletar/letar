@@ -15,7 +15,7 @@ import {
   useSelectionActionsState,
 } from '@letar/forms-react'
 import type { ReactElement } from 'react'
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { createField } from '../uikit/primitives'
 import { shadcnUIKit } from '../uikit/uikit-shadcn'
 import { SelectCreateButton, SelectEditButton } from './selection-slots'
@@ -27,6 +27,26 @@ import type { SelectFieldProps, SelectOption } from './types'
  * значение подменяется служебным токеном, наружу (в форму) всегда уходит настоящее `''`.
  */
 const EMPTY_OPTION_TOKEN = '__letar_empty_option__'
+
+/** Предупреждение про `searchable` — один раз на процесс и только в dev/test */
+let searchWarned = false
+
+function warnSearchUnsupported(): void {
+  const env = process.env.NODE_ENV
+  if ((env !== 'development' && env !== 'test') || searchWarned) {
+    return
+  }
+  searchWarned = true
+  console.warn(
+    '[@letar/forms-shadcn] Field.Select: `searchable` пока не поддержан — в списке Radix Select нет поля поиска '
+      + '(конфликт фокусной модели). Нужен поиск — используйте Field.Combobox.',
+  )
+}
+
+/** Только для тестов: сбросить флаг «предупреждение уже было» */
+export function resetSelectSearchWarning(): void {
+  searchWarned = false
+}
 
 interface NormalizedOption {
   label: React.ReactNode
@@ -91,6 +111,14 @@ const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFie
     const hasEmptyOption = normalizedOptions.some((opt) => opt.value === EMPTY_OPTION_TOKEN)
 
     useNodeLabelWarning('Select', normalizedOptions)
+
+    // `'auto'`/`false`/`undefined` — тихо; `true` и объект просят поиск, которого в этом скине нет
+    const searchRequested = componentProps.searchable === true || typeof componentProps.searchable === 'object'
+    useEffect(() => {
+      if (searchRequested) {
+        warnSearchUnsupported()
+      }
+    }, [searchRequested])
 
     return { normalizedOptions, optionByValue, resolvedClearable, hasEmptyOption, actions, createLabel }
   },

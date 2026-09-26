@@ -20,6 +20,7 @@ import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { FieldError } from './field-error'
 import { FieldLabel } from './field-label'
 import { FieldTooltip } from './field-tooltip'
+import { SelectSearchField } from './select-search-field'
 
 /**
  * Maps the contract's semantic tone onto Chakra's colour system. The contract deliberately
@@ -166,6 +167,8 @@ export const chakraUIKit: ChakraUIKit = {
     controlRef,
     onEditHotkey,
     editHotkeyHint,
+    emptyContent,
+    search,
     ...rest
   }): ReactElement {
     // Управляемое открытие: поле закрывает список перед окном приложения (`controlRef.close`)
@@ -173,6 +176,7 @@ export const chakraUIKit: ChakraUIKit = {
     const triggerRef = useRef<HTMLButtonElement | null>(null)
     const highlightedRef = useRef<string | null>(null)
     const hintId = useId()
+    const listId = useId()
     useEffect(() => {
       if (!controlRef) {
         return
@@ -185,10 +189,27 @@ export const chakraUIKit: ChakraUIKit = {
         controlRef.current = null
       }
     }, [controlRef])
+    // Закрытие сбрасывает поиск (любым путём: выбор, Escape, клик снаружи, `controlRef.close`)
+    useEffect(() => {
+      if (!open && search && search.query !== '') {
+        search.onQueryChange('')
+      }
+    }, [open, search])
     // Группировка — та же framework-free логика, что использует `useGroupedOptions` для
     // Combobox/Listbox (`use-grouped-options.ts`) — вынесена в `@letar/forms-core/uikit`.
     // Здесь остаётся только Chakra-специфичная обвязка (`createListCollection`).
-    const groups = useMemo(() => groupOptions(options), [options])
+    // Поиск: `options` — полный список (по нему `selected`, «пустой вариант», подпись в триггере),
+    // в списке и коллекции — только прошедшие фильтр; группы строятся из оставшихся
+    const visibleOptions = useMemo(
+      () => (search ? options.filter((opt) => search.visibleValues.has(String(opt.value))) : options),
+      [options, search],
+    )
+    const groups = useMemo(() => groupOptions(visibleOptions), [visibleOptions])
+    // Первая доступная опция в порядке отображения — её подсвечивает поле поиска
+    const firstVisibleValue = useMemo(() => {
+      const ordered = groups ? Array.from(groups.values()).flat() : visibleOptions
+      return ordered.find((opt) => !opt.disabled)?.value
+    }, [groups, visibleOptions])
 
     // `''` — «ничего не выбрано», если такой опции нет, и настоящее значение, если есть
     // («Все категории» в фильтрах). Прежнее `value ? [value] : []` превращало его в `[]`, и
@@ -199,13 +220,13 @@ export const chakraUIKit: ChakraUIKit = {
     const collection = useMemo(
       () =>
         createListCollection({
-          items: options,
+          items: visibleOptions,
           itemToString: (item: (typeof options)[number]) => getOptionText(item),
           itemToValue: (item: (typeof options)[number]) => item.value,
           isItemDisabled: (item: (typeof options)[number]) => item.disabled ?? false,
           ...(groups && { groupBy: (item: (typeof options)[number]) => item.group ?? '' }),
         }),
-      [options, groups],
+      [visibleOptions, groups],
     )
 
     // Содержимое пункта: своё (`renderOption`) или label как есть (узел не сплющивается в строку)
@@ -220,6 +241,28 @@ export const chakraUIKit: ChakraUIKit = {
     const hasCustomValue = customValue !== undefined && customValue !== null && customValue !== false
       && customValue !== ''
 
+    // Пункты списка (с группами или плоские); в режиме поиска — внутри `Select.List`
+    const itemsContent = groups
+      ? Array.from(groups.entries()).map(([groupName, groupItems]) => (
+        <ChakraSelect.ItemGroup key={groupName}>
+          {groupName && <ChakraSelect.ItemGroupLabel>{groupName}</ChakraSelect.ItemGroupLabel>}
+          {groupItems.map((opt) => (
+            <ChakraSelect.Item item={opt} key={opt.value}>
+              <ChakraSelect.ItemText>{renderItemContent(opt)}</ChakraSelect.ItemText>
+              {renderOptionActions?.(opt)}
+              <ChakraSelect.ItemIndicator />
+            </ChakraSelect.Item>
+          ))}
+        </ChakraSelect.ItemGroup>
+      ))
+      : visibleOptions.map((opt) => (
+        <ChakraSelect.Item item={opt} key={opt.value}>
+          <ChakraSelect.ItemText>{renderItemContent(opt)}</ChakraSelect.ItemText>
+          {renderOptionActions?.(opt)}
+          <ChakraSelect.ItemIndicator />
+        </ChakraSelect.Item>
+      ))
+
     return (
       <ChakraSelect.Root
         collection={collection}
@@ -231,6 +274,8 @@ export const chakraUIKit: ChakraUIKit = {
         disabled={disabled}
         readOnly={readOnly}
         open={open}
+        // С полем поиска фокус остаётся в нём: listbox переезжает с Content на `Select.List`
+        composite={search ? false : undefined}
         onOpenChange={(details) => setOpen(details.open)}
         onHighlightChange={(details) => {
           highlightedRef.current = details.highlightedValue
@@ -260,7 +305,8 @@ export const chakraUIKit: ChakraUIKit = {
               : undefined}
           >
             <ChakraSelect.ValueText placeholder={placeholder}>
-              {hasCustomValue ? customValue : undefined}
+              {/* В режиме поиска выбранной опции может не быть в отфильтрованной коллекции: подпись даём сами */}
+              {hasCustomValue ? customValue : search && selectedOption ? getOptionText(selectedOption) : undefined}
             </ChakraSelect.ValueText>
           </ChakraSelect.Trigger>
           <ChakraSelect.IndicatorGroup>
@@ -276,6 +322,8 @@ export const chakraUIKit: ChakraUIKit = {
         <Portal>
           <ChakraSelect.Positioner>
             <ChakraSelect.Content
+              // Роль dialog (composite: false) получает имя от метки; без метки — своё
+              aria-label={search && !label ? search.ariaLabel : undefined}
               onKeyDown={onEditHotkey
                 ? (event) => {
                   // Открытый список: F2 правит подсвеченный пункт
@@ -287,26 +335,14 @@ export const chakraUIKit: ChakraUIKit = {
                 }
                 : undefined}
             >
-              {groups
-                ? Array.from(groups.entries()).map(([groupName, groupItems]) => (
-                  <ChakraSelect.ItemGroup key={groupName}>
-                    {groupName && <ChakraSelect.ItemGroupLabel>{groupName}</ChakraSelect.ItemGroupLabel>}
-                    {groupItems.map((opt) => (
-                      <ChakraSelect.Item item={opt} key={opt.value}>
-                        <ChakraSelect.ItemText>{renderItemContent(opt)}</ChakraSelect.ItemText>
-                        {renderOptionActions?.(opt)}
-                        <ChakraSelect.ItemIndicator />
-                      </ChakraSelect.Item>
-                    ))}
-                  </ChakraSelect.ItemGroup>
-                ))
-                : options.map((opt) => (
-                  <ChakraSelect.Item item={opt} key={opt.value}>
-                    <ChakraSelect.ItemText>{renderItemContent(opt)}</ChakraSelect.ItemText>
-                    {renderOptionActions?.(opt)}
-                    <ChakraSelect.ItemIndicator />
-                  </ChakraSelect.Item>
-                ))}
+              {search && <SelectSearchField search={search} listId={listId} firstValue={firstVisibleValue} />}
+              {search && emptyContent}
+              {search
+                ? (
+                  // tabIndex={-1}: иначе Tab из поля поиска остановится на самом списке
+                  <ChakraSelect.List id={listId} tabIndex={-1}>{itemsContent}</ChakraSelect.List>
+                )
+                : itemsContent}
               {listFooter && (
                 <Box position="sticky" bottom={0} bg="bg.panel" borderTopWidth="1px" mt={1} pt={1}>{listFooter}</Box>
               )}

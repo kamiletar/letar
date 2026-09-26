@@ -40,3 +40,14 @@ export { CREATE_OPTION_VALUE, isCreateOptionValue, mergeCreatedOptions, shouldOf
 export type { CreatedOption, CreateOptionHandler } from './creatable-options'
 export { applyOptionOverlay, isOptionEditable, pruneOptionOverlay, upsertOptionOverlay } from './editable-options'
 export type { OptionOverlayEntry, SelectionActionKind, UpdatedOption, UpdateOptionHandler } from './editable-options'
+
+// Поиск внутри Select: порог показа, фильтр с учётом раскладки, контракт поля поиска для скина
+export { correctKeyboardLayout, detectLayout } from './keyboard-layout'
+export {
+  createSearchMatcher,
+  filterSelectionOptions,
+  matchesSearchQuery,
+  resolveSearchable,
+  SELECT_SEARCH_THRESHOLD,
+} from './search'
+export type { SelectSearchable, SelectSearchSettings, UIKitSelectSearch } from './search'

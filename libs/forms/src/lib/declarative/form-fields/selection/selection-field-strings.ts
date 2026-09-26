@@ -19,6 +19,8 @@ export type SelectionStringKey =
   | 'formSelection.createOption'
   | 'formSelection.editOption'
   | 'formSelection.editHotkeyHint'
+  | 'formSelection.search.placeholder'
+  | 'formSelection.search.aria'
 
 /**
  * Встроенный словарь дефолтов — отдельный от `min-chars-hint.ts` (та подсказка требует
@@ -36,6 +38,9 @@ const BUILTIN_SELECTION_STRINGS: Record<SelectionStringKey, Record<string, strin
   // Подпись карандаша (`title`; `aria-label` = «<подпись>: <текст опции>») и подсказка про F2
   'formSelection.editOption': { en: 'Edit', ru: 'Изменить' },
   'formSelection.editHotkeyHint': { en: 'F2 — edit the item', ru: 'F2 — изменить запись' },
+  // Поле поиска внутри списка Select: подсказка и `aria-label`
+  'formSelection.search.placeholder': { en: 'Search...', ru: 'Поиск...' },
+  'formSelection.search.aria': { en: 'Search options', ru: 'Поиск по списку' },
 }
 
 function buildBuiltinString(key: SelectionStringKey, locale: string): string {

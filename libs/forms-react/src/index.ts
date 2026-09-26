@@ -134,3 +134,5 @@ export type {
   SelectionEditButtonProps,
   SelectionEditButtonState,
 } from './lib/selection/use-selection-buttons'
+export { useSelectionSearch } from './lib/selection/use-selection-search'
+export type { SelectionSearchState, UseSelectionSearchOptions } from './lib/selection/use-selection-search'

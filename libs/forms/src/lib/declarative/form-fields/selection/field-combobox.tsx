@@ -5,6 +5,7 @@ import {
   applyOptionOverlay,
   CREATE_OPTION_VALUE,
   type CreateOptionHandler,
+  createSearchMatcher,
   getOptionText,
   isCreateOptionValue,
   isOptionEditable,
@@ -425,9 +426,11 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
     // созданные опции фильтруются так же, как остальные
     const baseOptions = useMemo((): ComboboxItem[] => {
       const createdValues = new Set(createdOptions.map((opt) => String(opt.value)))
+      // Запрос, набранный не в той раскладке, тоже находит («ghbdtn» → «Привет»)
+      const matcher = createSearchMatcher(inputValue, contains)
       return allOptions.filter((opt) => {
         const isLocal = componentProps.options !== undefined || createdValues.has(String(opt.value))
-        return !isLocal || !inputValue || contains(getOptionLabel(opt), inputValue)
+        return !isLocal || !matcher || matcher(getOptionLabel(opt))
       })
     }, [allOptions, createdOptions, componentProps.options, inputValue, contains])
 

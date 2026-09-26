@@ -14,6 +14,7 @@
  */
 
 import type { FieldTooltipMeta } from '../schema/types/meta-types'
+import type { UIKitSelectSearch } from './search'
 
 // === Core primitives (implemented + consumed by the Этап 4 proof) ===
 
@@ -127,6 +128,8 @@ export interface UIKitSelectionSlotProps<TNode = unknown, TData = unknown> {
   onEditHotkey?: (value: string, scope: 'option' | 'value') => void
   /** Localized hint for `aria-describedby`/`title` when `onEditHotkey` is set */
   editHotkeyHint?: string
+  /** Content of the empty list instead of the «nothing found» text (e.g. with the create button) */
+  emptyContent?: TNode
 }
 
 export interface UIKitSelectProps<TNode = unknown, TData = unknown> extends UIKitSelectionSlotProps<TNode, TData> {
@@ -147,6 +150,11 @@ export interface UIKitSelectProps<TNode = unknown, TData = unknown> extends UIKi
   /** Pass-through: zag takes `readOnly` into account, Radix ignores it (the field hides the slots) */
   readOnly?: boolean
   clearable?: boolean
+  /**
+   * Search field inside the open list. `undefined` — no search. The skin gets the FULL `options` and
+   * the set of visible values (`selected` / the empty option are resolved over the full list).
+   */
+  search?: UIKitSelectSearch
   size?: string
   variant?: string
   'data-field-name'?: string
@@ -211,8 +219,6 @@ export interface UIKitComboboxProps<TNode = unknown, TData = unknown> extends UI
   options: UIKitSelectOption<TNode, TData>[]
   /** Own content of an option; the skin wraps it in its own item text. Not called for service items. */
   renderOption?: (option: UIKitSelectOption<TNode, TData>, state: UIKitOptionRenderState) => TNode
-  /** Content of the empty list instead of the «nothing found» text (e.g. with the create button) */
-  emptyContent?: TNode
   loading?: boolean
   placeholder?: string
   disabled?: boolean

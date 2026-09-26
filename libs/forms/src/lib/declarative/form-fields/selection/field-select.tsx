@@ -1,5 +1,6 @@
 'use client'
 
+import { Box } from '@chakra-ui/react'
 import {
   applyOptionOverlay,
   CREATE_OPTION_VALUE,
@@ -8,6 +9,9 @@ import {
   isCreateOptionValue,
   isOptionEditable,
   mergeCreatedOptions,
+  type SelectSearchable,
+  shouldOfferCreate,
+  type UIKitSelectSearch,
   type UpdateOptionHandler,
 } from '@letar/forms-core/uikit'
 import {
@@ -15,6 +19,7 @@ import {
   SelectionOptionProvider,
   useNodeLabelWarning,
   useSelectionActionsState,
+  useSelectionSearch,
 } from '@letar/forms-react'
 import type { ReactElement, ReactNode } from 'react'
 import { useMemo } from 'react'
@@ -117,6 +122,20 @@ export interface SelectFieldProps<TData = unknown> extends BaseFieldProps {
   onUpdate?: UpdateOptionHandler<SelectFieldOption<TData>, TData>
   /** Own footer of the list, after the items (e.g. `<Form.Field.Select.CreateButton />`) */
   listFooter?: ReactNode
+  /**
+   * Search field inside the open list. `'auto'` (default) — appears when there are more than 9 options
+   * (from the 10th). `false` — off; `true` — always; an object — `'auto'` with own settings
+   * (`threshold`, `placeholder`, `emptyMessage`, `filter`). Matches the text of the option
+   * without case and diacritics, `ё` ≡ `е`, and also the query typed in the wrong keyboard layout
+   * («ghbdtn» finds «Привет»). The selected value stays in the trigger while the list is filtered.
+   * Long lists that come from the server by search text — use `Form.Field.Combobox` with `useQuery`.
+   */
+  searchable?: SelectSearchable<SelectFieldOption<TData>>
+  /**
+   * Own content of the «nothing found» state of the search (instead of the localized message). With `onCreate`
+   * the «+ Add "…"» item goes under it; with `createItem={false}` put `<Form.Field.Select.CreateButton />` here.
+   */
+  renderEmpty?: (context: { search: string }) => ReactNode
   /** Show clear button (auto-determined: true if optional, false if required) */
   clearable?: boolean
   /** Size */
@@ -133,8 +152,14 @@ interface SelectFieldState {
   actions: ReturnType<typeof useSelectionActionsState>
   /** Options in the app's own shape (with `data`) by string value — for the render functions */
   optionByValue: Map<string, SelectFieldOption>
+  /** Search inside the list; `undefined` — the field has no search now */
+  search: UIKitSelectSearch | undefined
+  /** Options that passed the filter (real ones, without the service item) */
+  matchedCount: number
+  /** Own message of an empty search result (`searchable.emptyMessage` or the localized default) */
+  emptyMessage: string
   /** Localized strings of the slots */
-  strings: { edit: string; hotkeyHint: string; create: string }
+  strings: { edit: string; hotkeyHint: string; create: string; createVerb: string }
 }
 
 /**
@@ -181,15 +206,16 @@ const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFie
     const actions = useSelectionActionsState({ appOptions })
     const { createdOptions, overlay } = actions
 
-    // Normalize options — value always string for the UIKit contract
-    const { normalizedOptions, optionByValue } = useMemo(() => {
+    // Options after the created ones and the overlay of edits, before search and the service item
+    const { merged, normalized, optionByValue } = useMemo(() => {
       const getGroup = componentProps.getGroup
       // Local edits lie over the app's options until it revalidates the list
       const edited = applyOptionOverlay(appOptions, overlay)
       // Created option loses to the app's own option with the same value (no duplicate after revalidation)
-      const merged = mergeCreatedOptions<SelectFieldOption>(edited, createdOptions)
+      const mergedOptions = mergeCreatedOptions<SelectFieldOption>(edited, createdOptions)
       const hasOnUpdate = !!componentProps.onUpdate
-      const normalized: NormalizedOption[] = merged.map((opt) => ({
+      // Normalize options — value always string for the UIKit contract
+      const normalizedOptions: NormalizedOption[] = mergedOptions.map((opt) => ({
         label: opt.label,
         textValue: opt.textValue,
         data: opt.data,
@@ -198,22 +224,49 @@ const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFie
         editable: isOptionEditable(opt, hasOnUpdate),
         group: getGroup?.(opt),
       }))
-      // The «+ Добавить…» item is service-only: intercepted in onValueChange, never reaches the form
-      const withCreate: NormalizedOption[] = showCreateItem
-        ? [...normalized, { label: `+ ${createLabel}`, value: CREATE_OPTION_VALUE }]
-        : normalized
       // The app's own shape by string value — what the render functions receive
-      const byValue = new Map<string, SelectFieldOption>(merged.map((opt) => [String(opt.value), opt]))
-      return { normalizedOptions: withCreate, optionByValue: byValue }
-    }, [
-      appOptions,
-      componentProps.getGroup,
-      componentProps.onUpdate,
-      overlay,
-      createdOptions,
-      showCreateItem,
-      createLabel,
-    ])
+      const byValue = new Map<string, SelectFieldOption>(mergedOptions.map((opt) => [String(opt.value), opt]))
+      return { merged: mergedOptions, normalized: normalizedOptions, optionByValue: byValue }
+    }, [appOptions, componentProps.getGroup, componentProps.onUpdate, overlay, createdOptions])
+
+    // Search: threshold and the query live here (hooks are not allowed in `render`)
+    const searchPlaceholder = useSelectionString('formSelection.search.placeholder')
+    const searchAria = useSelectionString('formSelection.search.aria')
+    const defaultEmptyMessage = useSelectionString('formSelection.combobox.emptyMessage')
+    const searchState = useSelectionSearch<SelectFieldOption>({
+      searchable: componentProps.searchable as SelectSearchable<SelectFieldOption> | undefined,
+      options: merged,
+      getText: getOptionText,
+      placeholder: searchPlaceholder,
+      ariaLabel: searchAria,
+    })
+    const query = searchState.search ? searchState.query : ''
+
+    // «+ Добавить…»: empty search — plain; a search text without an exact match — «+ Добавить "<текст>"»
+    const trimmedQuery = query.trim()
+    const offerCreate = showCreateItem
+      && (trimmedQuery === '' || shouldOfferCreate(trimmedQuery, merged.map((opt) => getOptionText(opt))))
+    const createVerb = componentProps.createLabel ?? defaultCreateVerb
+    const createOptionLabel = trimmedQuery ? `+ ${createVerb} "${trimmedQuery}"` : `+ ${createLabel}`
+
+    // The «+ Добавить…» item is service-only: intercepted in onValueChange, never reaches the form.
+    // It comes AFTER the filter and is not filtered itself
+    const normalizedOptions = useMemo<NormalizedOption[]>(
+      () => offerCreate ? [...normalized, { label: createOptionLabel, value: CREATE_OPTION_VALUE }] : normalized,
+      [normalized, offerCreate, createOptionLabel],
+    )
+
+    // The skin gets the FULL list and the visible values; the service item is always visible
+    const skinSearch = useMemo<UIKitSelectSearch | undefined>(
+      () =>
+        searchState.search
+          ? {
+            ...searchState.search,
+            visibleValues: new Set([...searchState.search.visibleValues, CREATE_OPTION_VALUE]),
+          }
+          : undefined,
+      [searchState.search],
+    )
 
     // Auto-determine clearable: show clear button if field is optional
     const resolvedClearable = componentProps.clearable ?? !resolved.required
@@ -225,7 +278,12 @@ const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFie
       optionByValue,
       resolvedClearable,
       actions,
-      strings: { edit, hotkeyHint, create: `+ ${createLabel}` },
+      search: skinSearch,
+      matchedCount: searchState.filtered.length,
+      emptyMessage: typeof componentProps.searchable === 'object' && componentProps.searchable.emptyMessage
+        ? componentProps.searchable.emptyMessage
+        : defaultEmptyMessage,
+      strings: { edit, hotkeyHint, create: `+ ${createLabel}`, createVerb },
     }
   },
   render: ({ field, fullPath, resolved, hasError, errorMessage, componentProps, fieldState }): ReactElement => {
@@ -234,6 +292,8 @@ const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFie
     const stringValue = currentValue !== null && currentValue !== undefined ? String(currentValue) : undefined
 
     const { actions, strings } = fieldState
+    // Text of the search field: goes to `onCreate` and to the «+ Add "…"» item
+    const searchText = fieldState.search?.query ?? ''
     const hasOnUpdate = !!componentProps.onUpdate
     const interactive = !resolved.disabled && !resolved.readOnly
 
@@ -255,7 +315,7 @@ const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFie
       }
       actions.run({
         scope: 'option',
-        call: () => onCreate(''),
+        call: () => onCreate(searchText.trim()),
         apply: (created) => {
           actions.addCreatedOption(created)
           applyValue(String(created.value))
@@ -288,14 +348,14 @@ const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFie
       canCreate: !!componentProps.onCreate,
       hasOnUpdate,
       interactive,
-      search: '',
+      search: searchText,
       runCreate,
       runEdit,
       strings: {
         edit: strings.edit,
         editAria: (text: string) => `${strings.edit}: ${text}`,
         create: strings.create,
-        createWithSearch: () => strings.create,
+        createWithSearch: (text: string) => `+ ${strings.createVerb} "${text}"`,
         hotkeyHint: strings.hotkeyHint,
       },
     }
@@ -377,6 +437,16 @@ const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFie
               )
               : undefined}
             listFooter={componentProps.listFooter}
+            search={fieldState.search}
+            emptyContent={fieldState.search && fieldState.matchedCount === 0
+              ? (
+                <Box px={3} py={2} color="fg.muted" fontSize="sm">
+                  {componentProps.renderEmpty
+                    ? componentProps.renderEmpty({ search: searchText })
+                    : fieldState.emptyMessage}
+                </Box>
+              )
+              : undefined}
             controlRef={actions.controlRef}
             onEditHotkey={hasOnUpdate && interactive
               ? (value, scope) => {

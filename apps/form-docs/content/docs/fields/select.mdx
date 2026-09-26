@@ -53,11 +53,39 @@ const Schema = z.object({
 })
 ```
 
+## Search inside Select (`searchable`)
+
+**API:** `searchable`, `renderEmpty` on `Form.Field.Select` (Chakra skin)
+
+From the 10th option the open list of a `Select` shows a search field with autofocus — no prop needed.
+
+```tsx
+<Form.Field.Select name="region" options={regions} />                          {/* 10+ options: search appears */}
+<Form.Field.Select name="region" options={regions} searchable={false} />       {/* off */}
+<Form.Field.Select name="region" options={few} searchable />                   {/* always */}
+<Form.Field.Select
+  name="region"
+  options={regions}
+  searchable={{ threshold: 20, placeholder: 'Find a region', emptyMessage: 'No such region' }}
+/>
+```
+
+- Matches the option text without case and diacritics, `ё` ≡ `е`, and also a query typed in the wrong keyboard
+  layout ("ghbdtn" finds "Привет"). The selected value stays in the button while the list is filtered.
+- The first matching option is highlighted: Enter picks it, arrows move, Escape closes and clears the query.
+- With `onCreate` the query goes to the handler: `onCreate('typed text')`; the «+ Add "…"» item comes after the filter.
+  `renderEmpty({ search })` replaces the «nothing found» text.
+- ⚠️ Behaviour change: in a `Select` with 10+ options, typing after opening now filters the list instead of jumping
+  by typeahead. Turn it off with `searchable={false}`. The shadcn skin has no search field (`true`/object log one
+  warning) — use `Form.Field.Combobox` there.
+- **Select or Combobox?** All options are already on the client (enum, a dictionary up to hundreds of records) —
+  `Select`. Options come from the server by the search text, or the catalog keeps growing — `Combobox` with `useQuery`.
+
 ## Combobox
 
 **API:** `Form.Field.Combobox`
 
-Searchable select with autocomplete. Great for large option lists.
+Searchable select with autocomplete. Great for large option lists. All options already on the client? A plain `Select` is enough: its search field appears by itself from the 10th option.
 
 ```tsx
 const Schema = z.object({

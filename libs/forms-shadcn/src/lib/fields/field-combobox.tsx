@@ -3,6 +3,7 @@
 import {
   applyOptionOverlay,
   CREATE_OPTION_VALUE,
+  filterSelectionOptions,
   getOptionText,
   isCreateOptionValue,
   isOptionEditable,
@@ -84,9 +85,8 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
     const matchedOptions = useMemo(() => {
       const minChars = componentProps.minChars ?? 0
       if (inputValue.length < minChars) { return [] }
-      if (!inputValue) { return normalized }
-      const needle = inputValue.toLowerCase()
-      return normalized.filter((opt) => getOptionText(opt).toLowerCase().includes(needle))
+      // Без регистра, ё ≡ е, с учётом раскладки («ghbdtn» находит «Привет»)
+      return filterSelectionOptions(normalized, inputValue, getOptionText)
     }, [normalized, inputValue, componentProps.minChars])
 
     // Служебный пункт «+ Добавить "<поиск>"» — в конце списка; в форму не попадает

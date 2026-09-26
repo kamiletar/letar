@@ -3,7 +3,7 @@
 import type { AddressProvider } from '@letar/forms-core/address'
 import type { PhoneCountry } from '@letar/forms-core/phone'
 import type { FileSecurityConfig } from '@letar/forms-core/security'
-import type { CreateOptionHandler, UpdateOptionHandler } from '@letar/forms-core/uikit'
+import type { CreateOptionHandler, SelectSearchable, UpdateOptionHandler } from '@letar/forms-core/uikit'
 import type { BaseFieldProps } from '@letar/forms-react'
 import type { ReactNode } from 'react'
 import type { ToolbarButton } from './rich-text-toolbar-config'
@@ -136,6 +136,13 @@ export interface SelectFieldProps<TData = unknown> extends BaseFieldProps {
   onUpdate?: UpdateOptionHandler<SelectOption<TData>, TData>
   /** Свой низ списка после пунктов (например `<Form.Field.Select.CreateButton />`) */
   listFooter?: ReactNode
+  /**
+   * Поле поиска внутри списка — паритет API с `@letar/forms` (Chakra). ⚠️ В shadcn-скине поиска нет:
+   * фокусная модель Radix Select (наведение мыши уводит фокус на пункт, typeahead забирает символы и Tab)
+   * конфликтует с полем ввода. `'auto'`/`false` ничего не делают; `true` и объект — одно предупреждение в
+   * консоли. Нужен поиск — `Form.Field.Combobox`.
+   */
+  searchable?: SelectSearchable<SelectOption<TData>>
   /** Show clear button (auto-determined: true if optional, false if required) */
   clearable?: boolean
 }

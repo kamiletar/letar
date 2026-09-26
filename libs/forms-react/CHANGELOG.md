@@ -4,6 +4,14 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.14.0] - 2026-09-26
+
+### Added
+
+- **`selection`: `useSelectionSearch`** — строка поиска, порог показа с гистерезисом и фильтр (с учётом раскладки)
+  для `useFieldState` полей выбора; отдаёт `search` для UIKit-контракта. Типы `UseSelectionSearchOptions`,
+  `SelectionSearchState`.
+
 ## [0.13.0] - 2026-09-26
 
 ### Added

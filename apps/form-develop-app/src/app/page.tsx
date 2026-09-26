@@ -67,6 +67,9 @@ export default function HomePage() {
         <Button asChild colorPalette="pink" variant="outline" size="lg" width="fit-content">
           <Link href="/edit-option-demo">Правка записи из поля (onUpdate/EditButton у Select/Combobox)</Link>
         </Button>
+        <Button asChild colorPalette="teal" variant="outline" size="lg" width="fit-content">
+          <Link href="/select-search-demo">Поиск в Select (searchable: порог 10, раскладка, onCreate с текстом)</Link>
+        </Button>
         <Button asChild colorPalette="orange" variant="outline" size="lg" width="fit-content">
           <Link href="/dirty-guard-demo">DirtyGuard (защита от потери данных в createForm и на форме)</Link>
         </Button>

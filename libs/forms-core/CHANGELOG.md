@@ -4,6 +4,21 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.18.0] - 2026-09-26
+
+### Added
+
+- **`uikit`: поиск внутри Select.** `SELECT_SEARCH_THRESHOLD = 9`, `resolveSearchable` (порог и гистерезис — пока запрос
+  непустой, поле поиска не пропадает), `createSearchMatcher`/`filterSelectionOptions` (совпадение по исходной ИЛИ
+  исправленной раскладке), `matchesSearchQuery` (без регистра, диакритики, `ё` ≡ `е`). Типы `SelectSearchable`,
+  `SelectSearchSettings`, `UIKitSelectSearch`; `UIKitSelectProps.search`.
+- **`correctKeyboardLayout`, `detectLayout`** перенесены из `@letar/fuzzy-search` (тот реэкспортирует их отсюда);
+  карта раскладки дополнена клавишами `,` и `.` («б» и «ю»).
+
+### Changed
+
+- `emptyContent` переехал из `UIKitComboboxProps` в `UIKitSelectionSlotProps` (доступен и у Select).
+
 ## [0.17.0] - 2026-09-26
 
 ### Added
