@@ -25,5 +25,7 @@ export { getFieldMeta } from './schema-meta'
 export type { UnwrapResult } from './zod-utils'
 export { getZodType, hasDefaultValue, isOptionalSchema, unwrapSchema, unwrapSchemaWithRequired } from './zod-utils'
 
+export { parseFieldRegistryType } from './types/field-registry-type'
+export type { FieldRegistryNamespace, FieldRegistryType } from './types/field-registry-type'
 export type { FieldComponentType, FieldOptionMeta, FieldTooltipMeta, FieldUIMeta } from './types/meta-types'
 export type { FieldSize, FieldSizeExtended, FieldSizeWithoutXs } from './types/size-types'

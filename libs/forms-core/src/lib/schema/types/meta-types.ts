@@ -1,3 +1,5 @@
+import type { FieldRegistryType } from './field-registry-type'
+
 /**
  * Tooltip metadata for field hints
  * Displayed as a help icon (?) next to the label with popover on hover
@@ -72,6 +74,8 @@ export type FieldComponentType =
   | 'tableEditor'
   // Явная замена значения без передачи старого (API key/Client Secret)
   | 'editIntent'
+  // Ссылка на компонент реестра createForm (`extraSelects`/`lazySelects`, …): 'Select.WorkCategory'
+  | FieldRegistryType
 
 /**
  * Option for select/enum fields with i18n support
