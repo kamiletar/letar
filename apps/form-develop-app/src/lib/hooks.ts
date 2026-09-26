@@ -101,3 +101,40 @@ export function useUpdateCategory() {
   const client = useClientQueries(schema)
   return client.category.useUpdate()
 }
+
+// ============================================================================
+// Company / Employee хуки (демо зависимых селектов)
+// ============================================================================
+
+/** Query хук для useFindMany компаний */
+export function useFindManyCompany(args?: { orderBy?: object; where?: object; take?: number }) {
+  const client = useClientQueries(schema)
+  return client.company.useFindMany(args)
+}
+
+/** Mutation хук для создания компании */
+export function useCreateCompany() {
+  const client = useClientQueries(schema)
+  return client.company.useCreate()
+}
+
+/** Query хук для useFindMany сотрудников (`enabled: false`, пока компания не выбрана) */
+export function useFindManyEmployee(
+  args?: { orderBy?: object; where?: object; take?: number },
+  options?: { enabled?: boolean },
+) {
+  const client = useClientQueries(schema)
+  return client.employee.useFindMany(args, options)
+}
+
+/** Query хук для useFindUnique сотрудника (`enabled: false` при пустом id) */
+export function useFindUniqueEmployee(args: { where: { id: string } }, options?: { enabled?: boolean }) {
+  const client = useClientQueries(schema)
+  return client.employee.useFindUnique(args, options)
+}
+
+/** Mutation хук для создания сотрудника */
+export function useCreateEmployee() {
+  const client = useClientQueries(schema)
+  return client.employee.useCreate()
+}

@@ -266,3 +266,26 @@ model AutoNameDemo {
 
   @@allow('all', true)
 }
+
+/// Демо зависимых селектов (этап З, `libs/forms/PLAN.md` §18): компания → сотрудник. Сотрудник принадлежит компании;
+/// Combobox сотрудника получает компанию в `deps` — и в поиске, и в окне создания.
+model Company {
+  id        String     @id @default(cuid())
+
+  name      String
+
+  employees Employee[]
+
+  @@allow('all', true)
+}
+
+model Employee {
+  id        String  @id @default(cuid())
+
+  name      String
+
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id])
+
+  @@allow('all', true)
+}

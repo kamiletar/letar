@@ -81,6 +81,11 @@ export default function HomePage() {
         <Button asChild colorPalette="purple" variant="outline" size="lg" width="fit-content">
           <Link href="/auto-name-demo">Автоподбор компонента реестра по имени модели (без form.fieldType)</Link>
         </Button>
+        <Button asChild colorPalette="purple" variant="outline" size="lg" width="fit-content">
+          <Link href="/dependent-select-demo">
+            Зависимые селекты (dependsOn: страна → регион → город, компания → сотрудник)
+          </Link>
+        </Button>
         <Button asChild colorPalette="orange" variant="outline" size="lg" width="fit-content">
           <Link href="/dirty-guard-demo">DirtyGuard (защита от потери данных в createForm и на форме)</Link>
         </Button>
