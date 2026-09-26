@@ -32,7 +32,7 @@ import { FieldSwitch } from './form-fields/boolean/field-switch'
 
 import { FieldAutocomplete } from './form-fields/selection/field-autocomplete'
 import { FieldCheckboxCard } from './form-fields/selection/field-checkbox-card'
-import { FieldCombobox } from './form-fields/selection/field-combobox'
+import { type ComboboxFieldProps, FieldCombobox } from './form-fields/selection/field-combobox'
 import { FieldListbox } from './form-fields/selection/field-listbox'
 import { FieldNativeSelect } from './form-fields/selection/field-native-select'
 import { FieldRadioCard } from './form-fields/selection/field-radio-card'
@@ -377,17 +377,19 @@ export function renderFieldByType(type: FieldComponentType, props: FieldRenderPr
       return <FieldSelect key={name} {...baseProps} options={selectOptions ?? []} {...fieldProps} />
     case 'nativeSelect':
       return <FieldNativeSelect key={name} {...baseProps} options={nativeSelectOptions ?? []} {...fieldProps} />
-    case 'combobox':
+    case 'combobox': {
       // Справочник из RelationFieldProvider: его записи — статичные опции Combobox (с `data`),
-      // если приложение не дало свои `options`/`useQuery`
-      return (
-        <FieldCombobox
-          key={name}
-          {...baseProps}
-          {...(relationOptions && relationOptions.length > 0 && !fieldProps.useQuery && { options: selectOptions })}
-          {...fieldProps}
-        />
-      )
+      // если приложение не дало свой источник (`options`/`useQuery`/`loadOptions`).
+      // Пропсы из схемы не типизированы — источник «ровно один» проверяет вызывающий код
+      const useProviderOptions = !!relationOptions && relationOptions.length > 0 && !fieldProps.useQuery
+        && !fieldProps.loadOptions
+      const comboboxProps = {
+        ...baseProps,
+        ...(useProviderOptions && { options: selectOptions }),
+        ...fieldProps,
+      } as unknown as ComboboxFieldProps
+      return <FieldCombobox key={name} {...comboboxProps} />
+    }
     case 'autocomplete':
       return <FieldAutocomplete key={name} {...baseProps} {...fieldProps} />
     case 'listbox':

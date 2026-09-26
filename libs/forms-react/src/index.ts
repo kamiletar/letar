@@ -59,7 +59,13 @@ export type {
 } from './lib/field/use-mask-field'
 export { useMaskField } from './lib/field/use-mask-field'
 export { useNodeLabelWarning } from './lib/field/use-node-label-warning'
+export { useOptionsLoader } from './lib/field/use-options-loader'
+export type { UseOptionsLoaderResult } from './lib/field/use-options-loader'
+export { usePromiseSearch } from './lib/field/use-promise-search'
+export type { UsePromiseSearchOptions, UsePromiseSearchResult } from './lib/field/use-promise-search'
 export { useResolvedFieldProps } from './lib/field/use-resolved-field-props'
+export { useSelectedLoader } from './lib/field/use-selected-loader'
+export type { UseSelectedLoaderOptions, UseSelectedLoaderResult } from './lib/field/use-selected-loader'
 export { useActionFormErrors } from './lib/form/use-action-form-errors'
 export type {
   FormServerActionToaster,

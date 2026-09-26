@@ -51,3 +51,6 @@ export {
   SELECT_SEARCH_THRESHOLD,
 } from './search'
 export type { SelectSearchable, SelectSearchSettings, UIKitSelectSearch } from './search'
+
+// Асинхронные источники данных полей выбора: промис-загрузчики и общая форма «список из любого источника»
+export type { LoadContext, LoadOptionsFn, LoadSelectedFn, OptionsSourceProps } from './load-options'

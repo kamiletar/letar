@@ -3,7 +3,8 @@
 import { isCreateOptionValue, type UIKitComboboxProps } from '@letar/forms-core/uikit'
 import { cn } from '@letar/tailwind-utils'
 import * as PopoverPrimitive from '@radix-ui/react-popover'
-import { type ReactNode, useEffect, useRef, useState } from 'react'
+import { Loader2 } from 'lucide-react'
+import { type ReactNode, useCallback, useEffect, useRef, useState } from 'react'
 
 export function Combobox(
   {
@@ -19,12 +20,22 @@ export function Combobox(
     controlRef,
     emptyContent,
     loading,
+    onOpenChange,
     placeholder,
     disabled,
     ...rest
   }: UIKitComboboxProps<ReactNode>,
 ) {
-  const [open, setOpen] = useState(false)
+  const [open, setOpenState] = useState(false)
+  // Обработчик держим в ref: стрелка приложения не должна пересоздавать `setOpen` и перезапускать эффект ниже
+  const onOpenChangeRef = useRef(onOpenChange)
+  useEffect(() => {
+    onOpenChangeRef.current = onOpenChange
+  })
+  const setOpen = useCallback((next: boolean) => {
+    setOpenState(next)
+    onOpenChangeRef.current?.(next)
+  }, [])
   const inputRef = useRef<HTMLInputElement | null>(null)
   // Программный фокус (после окна приложения) не должен снова открывать список
   const skipOpenOnFocusRef = useRef(false)
@@ -42,7 +53,7 @@ export function Combobox(
     return () => {
       controlRef.current = null
     }
-  }, [controlRef])
+  }, [controlRef, setOpen])
 
   // Служебный пункт создания делает список непустым — «пусто» считаем по обычным опциям
   const realOptionsCount = options.filter((opt) => !isCreateOptionValue(opt.value)).length
@@ -76,9 +87,15 @@ export function Combobox(
               'border-input placeholder:text-muted-foreground flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-sm shadow-xs outline-none',
               'focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
               'disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
-              controlActions && 'pr-9',
+              (controlActions || loading) && 'pr-9',
             )}
           />
+          {loading && !controlActions && (
+            <Loader2
+              className="text-muted-foreground pointer-events-none absolute inset-y-0 right-2.5 my-auto size-4 animate-spin"
+              aria-hidden
+            />
+          )}
           {controlActions && <div className="absolute inset-y-0 right-1.5 flex items-center">{controlActions}</div>}
         </div>
       </PopoverPrimitive.Anchor>
@@ -92,11 +109,14 @@ export function Combobox(
             'bg-popover text-popover-foreground z-50 max-h-60 w-[var(--radix-popover-trigger-width)] overflow-auto rounded-md border p-1 shadow-md',
           )}
         >
-          {loading && <div className="text-muted-foreground px-2 py-1.5 text-sm">Загрузка...</div>}
+          {loading && realOptionsCount === 0 && (
+            <div className="text-muted-foreground px-2 py-1.5 text-sm">Загрузка...</div>
+          )}
           {!loading && realOptionsCount === 0 && (
             <div className="text-muted-foreground px-2 py-1.5 text-sm">{emptyContent ?? 'Ничего не найдено'}</div>
           )}
-          {!loading && options.map((opt) => (
+          {/* Прошлые результаты остаются на экране, пока идёт новый запрос (спиннер — в поле ввода) */}
+          {options.map((opt) => (
             <div
               key={opt.value}
               role="option"

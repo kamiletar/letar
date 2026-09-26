@@ -227,6 +227,8 @@ export interface UIKitComboboxProps<TNode = unknown, TData = unknown> extends UI
   /** Own content of an option; the skin wraps it in its own item text. Not called for service items. */
   renderOption?: (option: UIKitSelectOption<TNode, TData>, state: UIKitOptionRenderState) => TNode
   loading?: boolean
+  /** The list was opened or closed (the field starts async loading on the first opening) */
+  onOpenChange?: (open: boolean) => void
   placeholder?: string
   disabled?: boolean
   'data-field-name'?: string

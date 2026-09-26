@@ -13,6 +13,8 @@ export type SelectionStringKey =
   | 'formSelection.combobox.placeholder'
   | 'formSelection.combobox.loadingMessage'
   | 'formSelection.combobox.emptyMessage'
+  | 'formSelection.combobox.errorMessage'
+  | 'formSelection.combobox.retry'
   | 'formSelection.autocomplete.placeholder'
   | 'formSelection.autocomplete.loadingMessage'
   | 'formSelection.autocomplete.emptyMessage'
@@ -30,6 +32,9 @@ const BUILTIN_SELECTION_STRINGS: Record<SelectionStringKey, Record<string, strin
   'formSelection.combobox.placeholder': { en: 'Search...', ru: 'Поиск...' },
   'formSelection.combobox.loadingMessage': { en: 'Loading...', ru: 'Загрузка...' },
   'formSelection.combobox.emptyMessage': { en: 'Nothing found', ru: 'Ничего не найдено' },
+  // Ошибка `loadOptions` и кнопка повтора в пустом состоянии списка
+  'formSelection.combobox.errorMessage': { en: 'Failed to load', ru: 'Не удалось загрузить' },
+  'formSelection.combobox.retry': { en: 'Retry', ru: 'Повторить' },
   'formSelection.autocomplete.placeholder': { en: 'Start typing...', ru: 'Начните вводить...' },
   'formSelection.autocomplete.loadingMessage': { en: 'Loading...', ru: 'Загрузка...' },
   'formSelection.autocomplete.emptyMessage': { en: 'No suggestions', ru: 'Нет подсказок' },

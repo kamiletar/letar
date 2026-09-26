@@ -3,7 +3,13 @@
 import type { AddressProvider } from '@letar/forms-core/address'
 import type { PhoneCountry } from '@letar/forms-core/phone'
 import type { FileSecurityConfig } from '@letar/forms-core/security'
-import type { CreateOptionHandler, SelectSearchable, UpdateOptionHandler } from '@letar/forms-core/uikit'
+import type {
+  CreateOptionHandler,
+  LoadOptionsFn,
+  LoadSelectedFn,
+  SelectSearchable,
+  UpdateOptionHandler,
+} from '@letar/forms-core/uikit'
 import type { BaseFieldProps } from '@letar/forms-react'
 import type { ReactNode } from 'react'
 import type { ToolbarButton } from './rich-text-toolbar-config'
@@ -273,8 +279,7 @@ export interface PasswordStrengthFieldProps extends BaseFieldProps {
  * группировки — оба требуют больше инфраструктуры, чем нужно для доказательства контракта.
  * Фильтрация — по вхождению подстроки в `label` (регистронезависимо), на стороне поля.
  */
-export interface ComboboxFieldProps<TData = unknown> extends BaseFieldProps {
-  options: SelectOption<TData>[]
+export interface ComboboxFieldBaseProps<TData = unknown> extends BaseFieldProps {
   /** Своё содержимое опции в списке. Для служебного пункта создания не вызывается */
   renderOption?: (option: SelectOption<TData>, state: OptionRenderState) => ReactNode
   /** Минимум символов для показа списка (по умолчанию 0 — показывать сразу) */
@@ -299,7 +304,57 @@ export interface ComboboxFieldProps<TData = unknown> extends BaseFieldProps {
   listFooter?: ReactNode
   /** Своё содержимое состояния «ничего не найдено» (вместо текста по умолчанию) */
   renderEmpty?: (context: { search: string }) => ReactNode
+  /** Задержка перед запросом `loadOptions`, мс (по умолчанию 300) */
+  debounce?: number
+  /** Подпись значения, когда его запись пришла из `loadOptions`/`loadSelected` и `getLabel` возвращает не строку */
+  getTextValue?: (item: TData) => string
+  /** Подпись выбранного значения, пока запись не загружена (`loadOptions`: нет в выдаче) */
+  initialLabel?: string
 }
+
+/** Как запись `loadOptions` становится опцией: обязательно на промис-пути */
+interface ComboboxGetItem<TData> {
+  getLabel: (item: TData) => ReactNode
+  getValue: (item: TData) => string | number
+  getDisabled?: (item: TData) => boolean
+  getEditable?: (item: TData) => boolean
+}
+
+/** Ровно ОДИН источник опций — второй источник рядом не проходит по типам (`?: never`) */
+type ComboboxSource<TData> =
+  | {
+    /** Статичные опции. `loading` — их ещё загружают: спиннер и «Загрузка...» в списке */
+    options: SelectOption<TData>[]
+    loading?: boolean
+    loadOptions?: never
+    loadSelected?: never
+    onLoadError?: never
+    getLabel?: never
+    getValue?: never
+    getDisabled?: never
+    getEditable?: never
+  }
+  | (
+    & ComboboxGetItem<TData>
+    & {
+      options?: never
+      loading?: never
+      /**
+       * Промис-путь: записи по строке поиска (server action, `fetch`, SDK). Запрос уходит через
+       * `debounce`, когда набрано `minChars` (по умолчанию 1; `0` — с пустой строкой при открытии
+       * списка). Новый запрос отменяет прошлый (`signal`), применяется только последний, прошлая выдача
+       * остаётся на экране со спиннером. При ошибке в списке «Не удалось загрузить» и «Повторить», автоповторов нет.
+       */
+      loadOptions: LoadOptionsFn<TData>
+      /** Запись текущего значения, когда её нет в выдаче и нет `initialLabel`; кэш на экземпляр поля */
+      loadSelected?: LoadSelectedFn<TData>
+      /** Ошибка `loadOptions`/`loadSelected` (отменённый запрос — не ошибка): лог или тост */
+      onLoadError?: (error: unknown) => void
+    }
+  )
+
+/** Props for Form.Field.Combobox (shadcn-скин): общие пропсы и ровно один источник опций */
+export type ComboboxFieldProps<TData = unknown> = ComboboxFieldBaseProps<TData> & ComboboxSource<TData>
 
 /**
  * Props for Form.Field.PinInput (shadcn-скин).

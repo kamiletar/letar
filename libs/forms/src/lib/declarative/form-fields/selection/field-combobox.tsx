@@ -1,6 +1,6 @@
 'use client'
 
-import { Box, Combobox, Field, Portal, Spinner, useFilter } from '@chakra-ui/react'
+import { Box, Button, Combobox, Field, Portal, Spinner, useFilter } from '@chakra-ui/react'
 import {
   applyOptionOverlay,
   CREATE_OPTION_VALUE,
@@ -9,6 +9,8 @@ import {
   getOptionText,
   isCreateOptionValue,
   isOptionEditable,
+  type LoadOptionsFn,
+  type LoadSelectedFn,
   mergeCreatedOptions,
   shouldOfferCreate,
   type UpdateOptionHandler,
@@ -17,10 +19,12 @@ import {
   SelectionActionsProvider,
   SelectionOptionProvider,
   useNodeLabelWarning,
+  usePromiseSearch,
+  useSelectedLoader,
   useSelectionActionsState,
 } from '@letar/forms-react'
 import { useStore } from '@tanstack/react-form'
-import { type ReactElement, type ReactNode, useEffect, useMemo, useRef, useState } from 'react'
+import { type ReactElement, type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { BaseFieldProps, EditableOptionFlag, FieldSize, GroupableOption, OptionRenderState } from '../../types'
 import {
   type AsyncQueryFn,
@@ -41,34 +45,9 @@ import { SelectCreateButton, SelectEditButton } from './selection-slots'
 type ComboboxItem = GroupableOption & EditableOptionFlag
 
 /**
- * Props for Form.Field.Combobox
+ * Props of Form.Field.Combobox that do not depend on where the options come from
  */
-export interface ComboboxFieldProps<T = string, TData = unknown> extends BaseFieldProps {
-  /**
-   * Static options (mutually exclusive with useQuery)
-   */
-  options?: (GroupableOption<T, TData> & EditableOptionFlag)[]
-
-  /**
-   * Async function for loading options
-   * Should return { data, isLoading, error } similar to TanStack Query
-   *
-   * @example
-   * ```tsx
-   * useQuery={(search) => useFindManyUser({
-   *   where: { name: { contains: search, mode: 'insensitive' } },
-   *   take: 20,
-   * })}
-   * ```
-   */
-  useQuery?: AsyncQueryFn<TData>
-
-  /**
-   * Get label from data element
-   * Required when using useQuery
-   */
-  getLabel?: (item: TData) => ReactNode
-
+export interface ComboboxFieldBaseProps<T = string, TData = unknown> extends BaseFieldProps {
   /**
    * String form of a data element — for filtering, typeahead and the input text after a pick.
    * Needed when `getLabel` returns a node (otherwise the option falls back to its value).
@@ -82,12 +61,6 @@ export interface ComboboxFieldProps<T = string, TData = unknown> extends BaseFie
    * `renderValue`: the input holds plain text.
    */
   renderOption?: (option: GroupableOption<T, TData>, state: OptionRenderState) => ReactNode
-
-  /**
-   * Get value from data element
-   * Required when using useQuery
-   */
-  getValue?: (item: TData) => T
 
   /**
    * Label to show for `initialValue`/`defaultValues` when using `useQuery`.
@@ -109,30 +82,6 @@ export interface ComboboxFieldProps<T = string, TData = unknown> extends BaseFie
    * ```
    */
   initialLabel?: string
-
-  /**
-   * Loads the record of the CURRENT value by its id — a hook, called on every render with the
-   * field value (an empty string when nothing is selected; make the query `enabled` only for a
-   * non-empty value). Solves what `useQuery` cannot: the selected record may be absent from the
-   * current search page, so there is nothing to take its label, `renderOption` data or
-   * `onUpdate` argument from.
-   *
-   * The loaded record becomes the option of the selected value: the input shows its label
-   * (`getLabel`/`getTextValue`), the pencil and F2 work on it and `onUpdate` receives its `data`.
-   * It does not enter the dropdown list. `initialLabel`, when passed, wins for the initial text.
-   *
-   * @example
-   * ```tsx
-   * <Form.Field.Combobox
-   *   name="categoryId"
-   *   useQuery={(search) => useFindManyCategory({ where: { name: { contains: search } } })}
-   *   useSelected={(id) => useFindUniqueCategory({ where: { id } }, { enabled: !!id })}
-   *   getLabel={(c) => c.name}
-   *   getValue={(c) => c.id}
-   * />
-   * ```
-   */
-  useSelected?: (value: string) => { data?: TData | null; isLoading?: boolean }
 
   /**
    * Get group key from data element
@@ -253,11 +202,145 @@ export interface ComboboxFieldProps<T = string, TData = unknown> extends BaseFie
   loadingMessage?: string
 }
 
+/** How an item of an async source becomes an option — required for `useQuery` and `loadOptions` */
+interface ComboboxGetItem<T, TData> {
+  /** Label of a data element */
+  getLabel: (item: TData) => ReactNode
+  /** Value of a data element */
+  getValue: (item: TData) => T
+}
+
+/** No other source may be passed next to the one in use — the type says so (`?: never`) */
+interface NoStaticOptions {
+  options?: never
+  loading?: never
+}
+interface NoHookSource {
+  useQuery?: never
+  useSelected?: never
+}
+interface NoPromiseSource {
+  loadOptions?: never
+  loadSelected?: never
+  onLoadError?: never
+}
+
+/**
+ * Exactly ONE source of options (§16.8 of the plan): static `options`, the hook path `useQuery`
+ * (TanStack Query / ZenStack hooks) or the promise path `loadOptions` (server action, `fetch`, SDK).
+ * `getLabel`/`getValue` are required for both async paths.
+ */
+export type ComboboxSource<T = string, TData = unknown> =
+  | (
+    & NoHookSource
+    & NoPromiseSource
+    & {
+      /** Static options. `loading` — they are still being loaded (spinner, «Loading...» in the list) */
+      options: (GroupableOption<T, TData> & EditableOptionFlag)[]
+      loading?: boolean
+      /** Not used with static options (the data of an option is its own `data`) */
+      getLabel?: (item: TData) => ReactNode
+      getValue?: (item: TData) => T
+    }
+  )
+  | (
+    & NoStaticOptions
+    & NoPromiseSource
+    & ComboboxGetItem<T, TData>
+    & {
+      /**
+       * Hook path: async function that returns `{ data, isLoading, error }` like TanStack Query.
+       * It is called on every render — pass `enabled`/`placeholderData` yourself or use
+       * `fromSearchQuery` from `@letar/forms-query`.
+       *
+       * @example
+       * ```tsx
+       * useQuery={(search) => useFindManyUser({
+       *   where: { name: { contains: search, mode: 'insensitive' } },
+       *   take: 20,
+       * })}
+       * ```
+       */
+      useQuery: AsyncQueryFn<TData>
+      /**
+       * Loads the record of the CURRENT value by its id — a hook, called on every render with the
+       * field value (an empty string when nothing is selected; make the query `enabled` only for a
+       * non-empty value). Solves what `useQuery` cannot: the selected record may be absent from the
+       * current search page, so there is nothing to take its label, `renderOption` data or
+       * `onUpdate` argument from.
+       *
+       * The loaded record becomes the option of the selected value: the input shows its label
+       * (`getLabel`/`getTextValue`), the pencil and F2 work on it and `onUpdate` receives its `data`.
+       * It does not enter the dropdown list. `initialLabel`, when passed, wins for the initial text.
+       *
+       * @example
+       * ```tsx
+       * <Form.Field.Combobox
+       *   name="categoryId"
+       *   useQuery={(search) => useFindManyCategory({ where: { name: { contains: search } } })}
+       *   useSelected={(id) => useFindUniqueCategory({ where: { id } }, { enabled: !!id })}
+       *   getLabel={(c) => c.name}
+       *   getValue={(c) => c.id}
+       * />
+       * ```
+       */
+      useSelected?: (value: string) => { data?: TData | null; isLoading?: boolean }
+    }
+  )
+  | (
+    & NoStaticOptions
+    & NoHookSource
+    & ComboboxGetItem<T, TData>
+    & {
+      /**
+       * Promise path: records by the search string. The request starts after `debounce` once
+       * `minChars` is reached (`minChars: 0` — with an empty string when the list is opened). A new
+       * request cancels the previous one (`signal`), only the last result is applied, previous results
+       * stay on screen with a spinner while the next request runs. On an error the list shows the
+       * message and «Retry» — there are no automatic retries. After a confirmed `onCreate`/`onUpdate`
+       * the current search is requested again. No cache — `useLoaderQuery` from
+       * `@letar/forms-query` turns the same loader into a TanStack query with a key.
+       *
+       * @example
+       * ```tsx
+       * <Form.Field.Combobox
+       *   name="userId"
+       *   loadOptions={(search, { signal }) => searchUsers({ search }, signal)}
+       *   getLabel={(u) => u.name}
+       *   getValue={(u) => u.id}
+       * />
+       * ```
+       */
+      loadOptions: LoadOptionsFn<TData>
+      /**
+       * Record of the current value when it is not among the loaded results and there is no
+       * `initialLabel` (the pair of `useSelected` for the promise path). Kept per field instance,
+       * dropped after `onUpdate` of that record.
+       */
+      loadSelected?: LoadSelectedFn<TData>
+      /** An error of `loadOptions`/`loadSelected` (a cancelled request is not an error) — for a log or a toast */
+      onLoadError?: (error: unknown) => void
+    }
+  )
+
+/**
+ * Props for Form.Field.Combobox: the common props and exactly one source of options
+ */
+export type ComboboxFieldProps<T = string, TData = unknown> =
+  & ComboboxFieldBaseProps<T, TData>
+  & ComboboxSource<T, TData>
+
 /** State type for useFieldState */
 interface ComboboxFieldState extends GroupedOptionsResult {
   inputValue: string
   setInputValue: (value: string) => void
   isLoading: boolean
+  /** Ошибка `loadOptions` для текущей строки поиска (`null` — нет) */
+  loadError: unknown
+  /** Повторить запрос `loadOptions` с той же строкой; для `onCreate`/`onUpdate` — перезапрос после подтверждения */
+  retryLoad: () => void
+  /** Сбросить закэшированную запись значения (`loadSelected`) — после `onUpdate` этой записи */
+  invalidateSelected: (value: string) => void
   options: ComboboxItem[]
   resolvedClearable: boolean
   /** Локализованная подсказка «введите ещё символов» для пустого списка */
@@ -268,6 +351,8 @@ interface ComboboxFieldState extends GroupedOptionsResult {
   defaultLoadingMessage: string
   /** Локализованный дефолт `emptyMessage`, когда проп не задан */
   defaultEmptyMessage: string
+  /** Локализованные «Не удалось загрузить» и «Повторить» для ошибки `loadOptions` */
+  loadErrorStrings: { message: string; retry: string }
   /** Подпись служебного пункта «+ Добавить "<поиск>"» (пусто, если пункт сейчас не предлагается) */
   createItemLabel: string
   /** Действия (`onCreate`/`onUpdate`): pending, наложение правок, созданные опции, конвейер */
@@ -319,6 +404,29 @@ interface ComboboxFieldState extends GroupedOptionsResult {
  * />
  * ```
  */
+/** Предупреждение про два источника опций — один раз на процесс и только в dev/test (типы ловят это в TS, JS — нет) */
+let multipleSourcesWarned = false
+
+/** Сброс флага предупреждения — для тестов */
+export function resetComboboxSourceWarning(): void {
+  multipleSourcesWarned = false
+}
+
+function warnMultipleSources(props: { options?: unknown; useQuery?: unknown; loadOptions?: unknown }): void {
+  const env = typeof process === 'undefined' ? undefined : process.env?.['NODE_ENV']
+  if ((env !== 'development' && env !== 'test') || multipleSourcesWarned) {
+    return
+  }
+  const used = [props.options, props.useQuery, props.loadOptions].filter((source) => source !== undefined).length
+  if (used > 1) {
+    multipleSourcesWarned = true
+    console.warn(
+      '[@letar/forms] Field.Combobox: передано больше одного источника опций (`options`, `useQuery`, `loadOptions`) — '
+        + 'нужен ровно один (побеждает `options`).',
+    )
+  }
+}
+
 const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldState>({
   displayName: 'FieldCombobox',
   useFieldState: (
@@ -332,12 +440,14 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
     // значения приоритет: показывать вместо него текст затравки было бы неверно.
     const fieldValue = useStore(form.store, () => form.getFieldValue(fullPath)) as string | undefined
 
-    // Async search with debounce via shared hook
+    // Ввод и дебаунс — общие для обоих асинхронных путей; хук-путь (`useQuery`) — прямо здесь
     const {
       inputValue,
       setInputValue,
-      isLoading,
-      data: queryData,
+      isLoading: hookLoading,
+      data: hookData,
+      debouncedSearch,
+      shouldQuery,
     } = useAsyncSearch({
       useQuery: componentProps.useQuery,
       debounce: componentProps.debounce ?? 300,
@@ -345,9 +455,45 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
       initialValue: fieldValue ? undefined : componentProps.initialSearchValue,
     })
 
-    // Запись текущего значения по id (`useSelected`) — хук вызывается на каждом рендере, как `useQuery`
-    const selectedResult = componentProps.useSelected?.(fieldValue ? String(fieldValue) : '')
-    const selectedItem = selectedResult?.data
+    useEffect(() => {
+      warnMultipleSources(componentProps)
+    }, [componentProps])
+
+    // Ручка выпадашки для конвейера действий: закрыть список / вернуть фокус в инпут.
+    // Промис-путь стартует, когда список хоть раз открывали — N полей на странице не шлют N запросов на монтировании
+    const [open, setOpenState] = useState(false)
+    const [everOpened, setEverOpened] = useState(false)
+    const setOpen = useCallback((next: boolean) => {
+      setOpenState(next)
+      if (next) {
+        setEverOpened(true)
+      }
+    }, [])
+
+    // Промис-путь (`loadOptions`): запрос на дебаунсенную строку поиска, отмена, гонки, ошибка + повтор
+    const promiseSearch = usePromiseSearch({
+      loadOptions: componentProps.loadOptions,
+      search: debouncedSearch,
+      enabled: everOpened && shouldQuery,
+      onLoadError: componentProps.onLoadError,
+    })
+    const queryData = componentProps.loadOptions ? promiseSearch.data : hookData
+    const isLoading = hookLoading || promiseSearch.isLoading || !!componentProps.loading
+
+    // `loadSelected`: значение непустое, его нет в текущих результатах и нет `initialLabel`
+    const valueKey = fieldValue ? String(fieldValue) : ''
+    const valueInResults = !!queryData && !!componentProps.getValue
+      && (queryData as unknown[]).some((item) => String(componentProps.getValue?.(item)) === valueKey)
+    const promiseSelected = useSelectedLoader({
+      loadSelected: componentProps.loadSelected,
+      value: valueKey,
+      enabled: !valueInResults && componentProps.initialLabel === undefined,
+      onLoadError: componentProps.onLoadError,
+    })
+
+    // Запись текущего значения по id: хук `useSelected` (вызывается на каждом рендере, как `useQuery`) или `loadSelected`
+    const selectedResult = componentProps.useSelected?.(valueKey)
+    const selectedItem = componentProps.useSelected ? selectedResult?.data : promiseSelected.data
 
     // Опция выбранного значения из `useSelected`: в список не попадает, только в `optionByValue` и подпись
     const selectedSourceOption = useMemo((): ComboboxItem | undefined => {
@@ -451,8 +597,6 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
     const actions = useSelectionActionsState({ appOptions: sourceOptions })
     const { createdOptions, overlay } = actions
 
-    // Ручка выпадашки для конвейера действий: закрыть список / вернуть фокус в инпут
-    const [open, setOpen] = useState(false)
     const inputRef = useRef<HTMLInputElement | null>(null)
     const highlightedRef = useRef<string | null>(null)
     const { controlRef } = actions
@@ -536,11 +680,16 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
     const defaultPlaceholder = useSelectionString('formSelection.combobox.placeholder')
     const defaultLoadingMessage = useSelectionString('formSelection.combobox.loadingMessage')
     const defaultEmptyMessage = useSelectionString('formSelection.combobox.emptyMessage')
+    const loadErrorMessage = useSelectionString('formSelection.combobox.errorMessage')
+    const loadRetry = useSelectionString('formSelection.combobox.retry')
 
     return {
       inputValue,
       setInputValue,
       isLoading,
+      loadError: promiseSearch.error,
+      retryLoad: promiseSearch.reload,
+      invalidateSelected: promiseSelected.invalidate,
       options,
       collection,
       groups,
@@ -549,6 +698,7 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
       defaultPlaceholder,
       defaultLoadingMessage,
       defaultEmptyMessage,
+      loadErrorStrings: { message: loadErrorMessage, retry: loadRetry },
       createItemLabel,
       actions,
       optionByValue,
@@ -578,6 +728,10 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
           actions.addCreatedOption(created)
           field.handleChange(String(created.value))
           fieldState.setInputValue(created.label)
+          // Промис-путь: внешнего кэша, который обновил бы список, нет — запрашиваем текущий поиск заново
+          if (componentProps.loadOptions) {
+            fieldState.retryLoad()
+          }
         },
       })
     }
@@ -594,6 +748,10 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
         call: () => onUpdate(source as Parameters<typeof onUpdate>[0]),
         apply: (result) => {
           actions.recordEdit(fromValue, result)
+          if (componentProps.loadOptions) {
+            fieldState.retryLoad()
+          }
+          fieldState.invalidateSelected(fromValue)
           // Правили выбранное: инпут показывает новую подпись, а замена записи переносит значение
           if (currentValue !== undefined && String(currentValue) === fromValue) {
             if (String(result.value) !== fromValue) {
@@ -672,7 +830,9 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
     // Пустой результат: сообщение (или своё `renderEmpty`) + пункт «+ Добавить "…"» под ним.
     // Служебный пункт делает список непустым, поэтому «пусто» считаем по опциям без него
     const realOptionsCount = fieldState.options.filter((opt) => !isCreateOptionValue(String(opt.value))).length
-    const nothingFound = !fieldState.isLoading && realOptionsCount === 0 && fieldState.inputValue.length >= minChars
+    const hasLoadError = fieldState.loadError !== null && fieldState.loadError !== undefined
+    const nothingFound = !fieldState.isLoading && !hasLoadError && realOptionsCount === 0
+      && fieldState.inputValue.length >= minChars
     const emptyContent = componentProps.renderEmpty
       ? componentProps.renderEmpty({ search })
       : (componentProps.emptyMessage ?? fieldState.defaultEmptyMessage)
@@ -726,21 +886,25 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
                 pe={showValueEdit ? '6.5rem' : undefined}
                 aria-keyshortcuts={hasOnUpdate && interactive ? 'F2' : undefined}
                 title={hasOnUpdate && interactive ? strings.hotkeyHint : undefined}
-                onKeyDown={hasOnUpdate && interactive
-                  ? (event) => {
-                    if (event.key !== 'F2') {
-                      return
-                    }
-                    // Открытый список: подсвеченный пункт; закрытый — выбранное значение
-                    const highlighted = dropdown.open ? dropdown.highlightedRef.current : null
-                    const value = highlighted ?? (currentValue ? String(currentValue) : null)
-                    const source = value ? fieldState.optionByValue.get(value) : undefined
-                    if (source && isOptionEditable(source, true)) {
-                      event.preventDefault()
-                      runEdit(source, highlighted ? 'option' : 'value')
-                    }
+                onKeyDown={(event) => {
+                  // Ошибка `loadOptions`: Enter в поле повторяет запрос (кнопка «Повторить» — в списке)
+                  if (event.key === 'Enter' && hasLoadError && dropdown.open) {
+                    event.preventDefault()
+                    fieldState.retryLoad()
+                    return
                   }
-                  : undefined}
+                  if (event.key !== 'F2' || !hasOnUpdate || !interactive) {
+                    return
+                  }
+                  // Открытый список: подсвеченный пункт; закрытый — выбранное значение
+                  const highlighted = dropdown.open ? dropdown.highlightedRef.current : null
+                  const value = highlighted ?? (currentValue ? String(currentValue) : null)
+                  const source = value ? fieldState.optionByValue.get(value) : undefined
+                  if (source && isOptionEditable(source, true)) {
+                    event.preventDefault()
+                    runEdit(source, highlighted ? 'option' : 'value')
+                  }
+                }}
               />
               <Combobox.IndicatorGroup>
                 {fieldState.isLoading && <Spinner size="xs" />}
@@ -765,6 +929,16 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
                     <Combobox.Empty>{componentProps.loadingMessage ?? fieldState.defaultLoadingMessage}</Combobox.Empty>
                   )}
 
+                  {/* Ошибка `loadOptions`: сообщение и «Повторить» на месте пустого состояния */}
+                  {hasLoadError && (
+                    <Box px={3} py={2} display="flex" alignItems="center" justifyContent="space-between" gap={2}>
+                      <Box color="fg.error" fontSize="sm" role="alert">{fieldState.loadErrorStrings.message}</Box>
+                      <Button size="xs" variant="outline" onClick={fieldState.retryLoad}>
+                        {fieldState.loadErrorStrings.retry}
+                      </Button>
+                    </Box>
+                  )}
+
                   {/* Empty result: с пунктом создания — своим блоком, `Combobox.Empty` прячется при непустой коллекции */}
                   {nothingFound && fieldState.createItemLabel && (
                     <Box px={3} py={2} color="fg.muted" fontSize="sm">{emptyContent}</Box>
@@ -773,6 +947,7 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
 
                   {/* Hint about minimum characters */}
                   {!fieldState.isLoading
+                    && !hasLoadError
                     && fieldState.options.length === 0
                     && fieldState.inputValue.length < minChars
                     && fieldState.inputValue.length > 0 && <Combobox.Empty>{fieldState.minCharsHint}</Combobox.Empty>}
