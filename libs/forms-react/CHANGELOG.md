@@ -4,6 +4,12 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.18.0] - 2026-09-27
+
+### Added
+
+- `TestForm` принимает `schema` — по ней поля выбирают пустое значение при очистке (`null` у nullable).
+
 ## [0.17.0] - 2026-09-27
 
 ### Added

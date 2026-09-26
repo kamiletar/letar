@@ -5,6 +5,7 @@ import type { ReactElement, ReactNode } from 'react'
 import { DeclarativeFormContext } from '../context/form-context'
 import { useCreateDependentsRegistry } from '../context/form-dependents'
 import { useCreatePendingRegistry, useFormPendingSubmit } from '../context/form-pending'
+import type { ZodSchema } from '../types/context-types'
 
 /**
  * Минимальный TanStack Form + `DeclarativeFormContext` для изолированного рендера одного
@@ -21,8 +22,10 @@ import { useCreatePendingRegistry, useFormPendingSubmit } from '../context/form-
  * `form.handleSubmit()`.
  */
 export function TestForm<TData extends Record<string, unknown>>(
-  { defaultValues, children, onFormReady }: {
+  { defaultValues, children, onFormReady, schema }: {
     defaultValues: TData
+    /** Zod-схема формы: по ней поля выбирают пустое значение при очистке (`null` у nullable) */
+    schema?: ZodSchema
     children: ReactNode
     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- инстанс TanStack Form генерик по 8 параметрам, не выводится из TData
     onFormReady?: (form: any) => void
@@ -41,7 +44,7 @@ export function TestForm<TData extends Record<string, unknown>>(
   const submit = useFormPendingSubmit(pending, form)
 
   return (
-    <DeclarativeFormContext.Provider value={{ form, pending, submit, dependents }}>
+    <DeclarativeFormContext.Provider value={{ form, pending, submit, dependents, schema }}>
       {children}
     </DeclarativeFormContext.Provider>
   )
