@@ -1485,7 +1485,7 @@
     },
     "libs/generators": {
       "name": "@letar/generators",
-      "version": "0.1.4",
+      "version": "0.1.5",
     },
     "libs/github-releases": {
       "name": "@letar/github-releases",
