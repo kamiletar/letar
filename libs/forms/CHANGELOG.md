@@ -4,6 +4,18 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.29.0] - 2026-09-27
+
+### Добавлено
+
+- `getOptionText(option)` — публичный экспорт из `@letar/forms` (раньше был только в `@letar/forms-core/uikit`). Строка
+  для окна правки в `onUpdate`, где `option.label` — `ReactNode`: `textValue`, иначе строковая или числовая подпись,
+  иначе `String(value)`. Пример — `docs/fields.md`, раздел «Правка записи из поля».
+
+### Исправлено
+
+- `FileUploadFieldProps` (Chakra) получил проп `placeholder`: компонент его читал (`variant="input"`), но в типе его не было, и `<Form.Field.FileUpload placeholder=…>` не проходил typecheck.
+
 ## [2.28.0] - 2026-09-27
 
 ### Изменения поведения

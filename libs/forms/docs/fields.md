@@ -395,6 +395,19 @@ export const AppForm = createForm({
 />
 ```
 
+- **Начальное значение окна правки — строка, не `option.label`.** `label` в `onUpdate` — `ReactNode` (подпись
+  бывает иконкой с текстом), в `<input defaultValue>` его не поставить. Текст опции даёт `getOptionText` — тот же,
+  по которому поле ищет: `textValue`, иначе строковая или числовая подпись, иначе `String(value)`.
+
+  ```tsx
+  import { getOptionText } from '@letar/forms' // или '@letar/forms-shadcn'
+
+  onUpdate={async (option) => {
+    const saved = await openDialog({ name: getOptionText(option), record: option.data })
+    return saved ? { label: saved.name, value: saved.id, data: saved } : null
+  }}
+  ```
+
 - **Тот же `value`** — правка подписи: подпись обновляется сразу, форма **не** становится dirty.
   **Другой `value`** — запись заменена (copy-on-write): выбранное значение переезжает на новое.
 - Правка лежит поверх `options` приложения, пока оно не перезапросит список (пришла свежая подпись —

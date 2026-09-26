@@ -1,6 +1,6 @@
 import { ChakraProvider, defaultSystem } from '@chakra-ui/react'
 import { FormI18nProvider } from '@letar/forms-react'
-import { act, render, waitFor } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { useState } from 'react'
 import { beforeAll, describe, expect, it, vi } from 'vitest'
 
@@ -25,13 +25,12 @@ beforeAll(() => {
 describe('Field.CascadingSelect — лишние загрузки', () => {
   it('перерисовка внешнего компонента без смены родителя не перезапускает loadOptions', async () => {
     const loadOptions = vi.fn(async () => [{ label: 'Москва', value: 'msk' }])
-    let rerender: () => void = () => {}
 
     const Host = () => {
       const [, setTick] = useState(0)
-      rerender = () => setTick((n) => n + 1)
       return (
         <ChakraProvider value={defaultSystem}>
+          <button type="button" data-testid="rerender" onClick={() => setTick((n) => n + 1)} />
           <FormI18nProvider locale="ru">
             <Form initialValue={{ country: 'ru', city: '' }} onSubmit={vi.fn()}>
               <Form.Field.String name="country" label="Страна" />
@@ -46,9 +45,7 @@ describe('Field.CascadingSelect — лишние загрузки', () => {
     await waitFor(() => expect(loadOptions).toHaveBeenCalledTimes(1))
 
     for (let i = 0; i < 3; i++) {
-      await act(async () => {
-        rerender()
-      })
+      fireEvent.click(screen.getByTestId('rerender'))
     }
     await act(async () => {
       await new Promise((resolve) => setTimeout(resolve, 50))

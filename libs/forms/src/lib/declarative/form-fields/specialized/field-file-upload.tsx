@@ -30,6 +30,8 @@ export interface FileUploadFieldProps {
   label?: string
   /** Helper text below the field */
   helperText?: string
+  /** Текст-заглушка варианта 'input' (по умолчанию «Выберите файл(ы)») */
+  placeholder?: string
   /** Required field */
   required?: boolean
   /** Disabled field */
