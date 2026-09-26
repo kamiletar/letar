@@ -1,16 +1,24 @@
 'use client'
 
 import {
+  applyOptionOverlay,
   CREATE_OPTION_VALUE,
-  type CreatedOption,
+  getOptionText,
   isCreateOptionValue,
+  isOptionEditable,
   mergeCreatedOptions,
 } from '@letar/forms-core/uikit'
-import { useNodeLabelWarning } from '@letar/forms-react'
+import {
+  SelectionActionsProvider,
+  SelectionOptionProvider,
+  useNodeLabelWarning,
+  useSelectionActionsState,
+} from '@letar/forms-react'
 import type { ReactElement } from 'react'
-import { useCallback, useMemo, useRef, useState } from 'react'
+import { useMemo } from 'react'
 import { createField } from '../uikit/primitives'
 import { shadcnUIKit } from '../uikit/uikit-shadcn'
+import { SelectCreateButton, SelectEditButton } from './selection-slots'
 import type { SelectFieldProps, SelectOption } from './types'
 
 /**
@@ -25,6 +33,7 @@ interface NormalizedOption {
   textValue?: string
   value: string
   disabled?: boolean
+  editable?: boolean
   data?: unknown
 }
 
@@ -35,30 +44,29 @@ interface SelectFieldState {
   hasEmptyOption: boolean
   /** Опции в форме приложения (с `data`) по нормализованному значению — для render-функций */
   optionByValue: Map<string, SelectOption>
-  /** Добавляет опцию, возвращённую `onCreate`, в локальный список */
-  addCreatedOption: (option: CreatedOption) => void
-  /** `true`, пока `onCreate` не завершился (повторный выбор пункта игнорируется) */
-  creatingRef: { current: boolean }
+  /** Действия (`onCreate`/`onUpdate`): pending, наложение правок, созданные опции, конвейер */
+  actions: ReturnType<typeof useSelectionActionsState>
+  /** Подпись служебного пункта создания */
+  createLabel: string
 }
 
 /** Form.Field.Select — shadcn-скин. */
 const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFieldState>({
   displayName: 'FieldSelect',
   useFieldState: (componentProps, resolved): SelectFieldState => {
-    const sourceOptions = componentProps.options ?? resolved.options ?? []
-
-    // Опции, созданные через `onCreate`, живут локально, пока поле смонтировано
-    const [createdOptions, setCreatedOptions] = useState<CreatedOption[]>([])
-    const addCreatedOption = useCallback((option: CreatedOption) => {
-      setCreatedOptions((prev) => [...prev, option])
-    }, [])
-    const creatingRef = useRef(false)
-    const hasOnCreate = !!componentProps.onCreate
+    const sourceOptions = (componentProps.options ?? resolved.options ?? []) as SelectOption[]
+    const showCreateItem = !!componentProps.onCreate && componentProps.createItem !== false
+    const hasOnUpdate = !!componentProps.onUpdate
     const createLabel = componentProps.createLabel ?? 'Добавить…'
 
+    const actions = useSelectionActionsState({ appOptions: sourceOptions })
+    const { createdOptions, overlay } = actions
+
     const { normalizedOptions, optionByValue } = useMemo(() => {
+      // Правки лежат поверх опций приложения, пока оно не перезапросит список
+      const edited = applyOptionOverlay(sourceOptions, overlay)
       // Опция приложения сильнее созданной с тем же значением — дубля после перезагрузки нет
-      const merged = mergeCreatedOptions<SelectOption>(sourceOptions, createdOptions)
+      const merged = mergeCreatedOptions<SelectOption>(edited, createdOptions)
       const toKey = (opt: SelectOption) => (String(opt.value) === '' ? EMPTY_OPTION_TOKEN : String(opt.value))
       const normalized: NormalizedOption[] = merged.map((opt) => ({
         label: opt.label,
@@ -66,16 +74,17 @@ const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFie
         data: opt.data,
         value: toKey(opt),
         disabled: opt.disabled,
+        editable: isOptionEditable(opt, hasOnUpdate),
       }))
       // Служебный пункт: перехватывается в onValueChange, в форму не попадает
-      const withCreate: NormalizedOption[] = hasOnCreate
+      const withCreate: NormalizedOption[] = showCreateItem
         ? [...normalized, { label: `+ ${createLabel}`, value: CREATE_OPTION_VALUE }]
         : normalized
       return {
         normalizedOptions: withCreate,
         optionByValue: new Map<string, SelectOption>(merged.map((opt) => [toKey(opt), opt])),
       }
-    }, [sourceOptions, createdOptions, hasOnCreate, createLabel])
+    }, [sourceOptions, overlay, createdOptions, hasOnUpdate, showCreateItem, createLabel])
 
     const resolvedClearable = componentProps.clearable ?? !resolved.required
 
@@ -83,67 +92,169 @@ const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFie
 
     useNodeLabelWarning('Select', normalizedOptions)
 
-    return { normalizedOptions, optionByValue, resolvedClearable, hasEmptyOption, addCreatedOption, creatingRef }
+    return { normalizedOptions, optionByValue, resolvedClearable, hasEmptyOption, actions, createLabel }
   },
   render: ({ field, fullPath, resolved, hasError, errorMessage, componentProps, fieldState }): ReactElement => {
     const currentValue = field.state.value
     const rawValue = currentValue !== null && currentValue !== undefined ? String(currentValue) : undefined
     // `''` при наличии опции с пустым значением — это выбранная опция, а не «пусто»
     const stringValue = rawValue === '' && fieldState.hasEmptyOption ? EMPTY_OPTION_TOKEN : rawValue
+    const { actions } = fieldState
+    const hasOnUpdate = !!componentProps.onUpdate
+    const interactive = !resolved.disabled && !resolved.readOnly
+
+    const applyValue = (raw: string | undefined) => {
+      if (componentProps.valueType === 'number') {
+        field.handleChange(raw ? Number(raw) : 0)
+      } else {
+        field.handleChange(raw ?? '')
+      }
+    }
+
+    // Ошибки `onCreate`/`onUpdate` — забота приложения, всплывают как unhandled rejection
+    const runCreate = () => {
+      const onCreate = componentProps.onCreate
+      if (!onCreate) {
+        return
+      }
+      actions.run({
+        scope: 'option',
+        call: () => onCreate(''),
+        apply: (created) => {
+          actions.addCreatedOption(created)
+          applyValue(String(created.value))
+        },
+      })
+    }
+
+    const runEdit = (option: unknown, scope: 'option' | 'value') => {
+      const onUpdate = componentProps.onUpdate
+      const source = option as SelectOption
+      if (!onUpdate) {
+        return
+      }
+      const fromValue = String(source.value)
+      actions.run({
+        scope,
+        call: () => onUpdate(source),
+        apply: (result) => {
+          actions.recordEdit(fromValue, result)
+          // Замена записи (другой value): выбранное переезжает на новую. Тот же value — форма не dirty
+          if (String(result.value) !== fromValue && rawValue === fromValue) {
+            applyValue(String(result.value))
+          }
+        },
+      })
+    }
+
+    const optionContext = (key: string, scope: 'option' | 'value' | 'value-text') => {
+      const source = fieldState.optionByValue.get(key)
+      return {
+        option: source,
+        text: source ? getOptionText(source) : '',
+        editable: !!source && isOptionEditable(source, hasOnUpdate),
+        scope,
+      }
+    }
+
+    const createText = `+ ${fieldState.createLabel}`
+    const actionsValue = {
+      pending: actions.pending,
+      canCreate: !!componentProps.onCreate,
+      hasOnUpdate,
+      interactive,
+      search: '',
+      runCreate,
+      runEdit,
+      strings: {
+        edit: 'Изменить',
+        editAria: (text: string) => `Изменить: ${text}`,
+        create: createText,
+        createWithSearch: () => createText,
+        hotkeyHint: 'F2 — изменить запись',
+      },
+    }
+
+    const selectedSource = stringValue !== undefined ? fieldState.optionByValue.get(stringValue) : undefined
 
     return (
       <shadcnUIKit.FieldRoot invalid={hasError} required={resolved.required} disabled={resolved.disabled}>
-        <shadcnUIKit.Select
-          value={stringValue}
-          onValueChange={(pickedValue) => {
-            const newStringValue = pickedValue === EMPTY_OPTION_TOKEN ? '' : pickedValue
-            const applyValue = (raw: string | undefined) => {
-              if (componentProps.valueType === 'number') {
-                field.handleChange(raw ? Number(raw) : 0)
-              } else {
-                field.handleChange(raw ?? '')
+        <SelectionActionsProvider value={actionsValue}>
+          <shadcnUIKit.Select
+            value={stringValue}
+            onValueChange={(pickedValue) => {
+              const newStringValue = pickedValue === EMPTY_OPTION_TOKEN ? '' : pickedValue
+              if (isCreateOptionValue(newStringValue)) {
+                // Служебный пункт: значение не применяется
+                runCreate()
+                return
               }
-            }
-
-            if (isCreateOptionValue(newStringValue)) {
-              // Служебный пункт: значение не применяется. Ошибки `onCreate` — забота приложения,
-              // всплывают как unhandled rejection, здесь не глотаются
-              if (componentProps.onCreate && !fieldState.creatingRef.current) {
-                fieldState.creatingRef.current = true
-                void componentProps.onCreate('').then((created) => {
-                  if (created) {
-                    fieldState.addCreatedOption(created)
-                    applyValue(String(created.value))
-                  }
-                }).finally(() => {
-                  fieldState.creatingRef.current = false
-                })
+              applyValue(newStringValue)
+            }}
+            onBlur={field.handleBlur}
+            options={fieldState.normalizedOptions}
+            renderOption={componentProps.renderOption
+              ? (opt, state) => {
+                // Служебный пункт «+ Добавить…» через renderer приложения не проходит
+                const source = fieldState.optionByValue.get(opt.value)
+                return source
+                  ? (
+                    <SelectionOptionProvider value={optionContext(opt.value, 'option')}>
+                      {componentProps.renderOption?.(source, state)}
+                    </SelectionOptionProvider>
+                  )
+                  : opt.label
               }
-              return
-            }
-            applyValue(newStringValue)
-          }}
-          onBlur={field.handleBlur}
-          options={fieldState.normalizedOptions}
-          renderOption={componentProps.renderOption
-            ? (opt, state) => {
-              // Служебный пункт «+ Добавить…» через renderer приложения не проходит
-              const source = fieldState.optionByValue.get(opt.value)
-              return source ? componentProps.renderOption?.(source, state) : opt.label
-            }
-            : undefined}
-          renderValue={componentProps.renderValue
-            ? (opt) => {
-              const source = fieldState.optionByValue.get(opt.value)
-              return source ? componentProps.renderValue?.(source) : undefined
-            }
-            : undefined}
-          label={resolved.label}
-          placeholder={resolved.placeholder}
-          disabled={resolved.disabled}
-          clearable={fieldState.resolvedClearable}
-          data-field-name={fullPath}
-        />
+              : undefined}
+            // Свой renderOption — свои кнопки (`Select.EditButton`); карандаш по умолчанию только без него
+            renderOptionActions={hasOnUpdate && !componentProps.renderOption
+              ? (opt) => (
+                <SelectionOptionProvider value={optionContext(opt.value, 'option')}>
+                  <SelectEditButton />
+                </SelectionOptionProvider>
+              )
+              : undefined}
+            renderValue={componentProps.renderValue
+              ? (opt) => {
+                const source = fieldState.optionByValue.get(opt.value)
+                const custom = source ? componentProps.renderValue?.(source) : undefined
+                // Пустой результат отдаём как есть — примитив откатится к тексту опции
+                if (custom === undefined || custom === null || custom === false || custom === '') {
+                  return custom
+                }
+                return (
+                  <SelectionOptionProvider value={optionContext(opt.value, 'value-text')}>
+                    {custom}
+                  </SelectionOptionProvider>
+                )
+              }
+              : undefined}
+            controlActions={hasOnUpdate && selectedSource && stringValue !== undefined
+              ? (
+                <SelectionOptionProvider value={optionContext(stringValue, 'value')}>
+                  <SelectEditButton />
+                </SelectionOptionProvider>
+              )
+              : undefined}
+            listFooter={componentProps.listFooter}
+            controlRef={actions.controlRef}
+            onEditHotkey={hasOnUpdate && interactive
+              ? (key, scope) => {
+                const source = fieldState.optionByValue.get(key)
+                if (source && isOptionEditable(source, true)) {
+                  runEdit(source, scope)
+                }
+              }
+              : undefined}
+            editHotkeyHint="F2 — изменить запись"
+            label={resolved.label}
+            placeholder={resolved.placeholder}
+            disabled={resolved.disabled}
+            readOnly={resolved.readOnly}
+            clearable={fieldState.resolvedClearable}
+            data-field-name={fullPath}
+          />
+        </SelectionActionsProvider>
         <shadcnUIKit.FieldError hasError={hasError} errorMessage={errorMessage} helperText={resolved.helperText} />
       </shadcnUIKit.FieldRoot>
     )
@@ -154,6 +265,12 @@ const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFie
  * `createField` не generic — generic-сигнатура восстанавливается приведением: `TData` выводится
  * из `options` и попадает в `renderOption`/`renderValue`.
  */
-export const FieldSelect = FieldSelectBase as unknown as <TData = unknown>(
+const FieldSelectGeneric = FieldSelectBase as unknown as <TData = unknown>(
   props: SelectFieldProps<TData>,
 ) => ReactElement
+
+/** Слоты `Form.Field.Select.EditButton` / `.CreateButton` — для своего `renderOption`/`listFooter` */
+export const FieldSelect = Object.assign(FieldSelectGeneric, {
+  EditButton: SelectEditButton,
+  CreateButton: SelectCreateButton,
+})

@@ -4,6 +4,28 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.20.0] - 2026-09-26
+
+### Added
+
+- **Правка записи из поля Select/Combobox** (тред `forms-select-render-onupdate`, этап Б). Проп
+  `onUpdate(option) → Promise<{ label, value, data? } | null>`: карандаш у каждого пункта и у выбранного
+  значения (соседом триггера, не внутри `<button>`); `editable: false` у опции (у Combobox с `useQuery` —
+  `getEditable`) прячет карандаш. Тот же `value` — правка подписи (форма не dirty), другой — замена записи,
+  выбранное переезжает. Правка накладывается на `options` приложения, пока оно не перезапросит список.
+  F2 (Fn+F2) на подсвеченном пункте и на значении. Слоты `Form.Field.Select.EditButton`/`.CreateButton`
+  (и то же у Combobox) — для своего `renderOption`/`listFooter`; принимают `asChild`. Проп `createItem={false}`
+  убирает служебный пункт «+ Добавить…», `listFooter` — свой низ списка. У Combobox: `renderEmpty` — пустой
+  результат = сообщение + пункт «+ Добавить "…"». Единый конвейер `onCreate`/`onUpdate` (`pending`,
+  закрытие списка, возврат фокуса на триггер). i18n-ключи `formSelection.editOption`, `formSelection.editHotkeyHint`.
+  Типы `EditableOptionFlag`, `SelectionSlotComponents`.
+
+### Fixed
+
+- Типы: `Form.Field.Select` в `createForm()`/`Form` объявлен generic — `TData` выводится из `options`
+  (в 2.19.0 `option.data` в `renderOption` оставалась `unknown`).
+- ⚠️ Со своим `renderOption` карандаш по умолчанию не рисуется — ставьте `<Form.Field.Select.EditButton />` сами.
+
 ## [2.19.0] - 2026-09-26
 
 ### Added

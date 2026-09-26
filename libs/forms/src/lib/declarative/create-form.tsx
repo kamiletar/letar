@@ -36,6 +36,7 @@ import type {
 import type { CreditCardFieldProps } from './form-fields/specialized/credit-card'
 import type { DataGridFieldProps, TableEditorFieldProps } from './form-fields/table'
 import type { FormFromSchemaProps } from './form-from-schema'
+import type { SelectionSlotComponents } from './form-root/form-compound-types'
 import type {
   FormStepsIndicatorProps,
   FormStepsNavigationProps,
@@ -207,9 +208,11 @@ interface ExtendedFormField {
   PinInput: (props: PinInputFieldProps) => ReactElement
   OTPInput: (props: OTPInputFieldProps) => ReactElement
   Slider: (props: SliderFieldProps) => ReactElement
-  Select: (props: SelectFieldProps) => ReactElement
+  Select: (<TData = unknown>(props: SelectFieldProps<TData>) => ReactElement) & SelectionSlotComponents
   NativeSelect: <T extends string>(props: NativeSelectFieldProps<T>) => ReactElement
-  Combobox: <T extends string, TData = unknown>(props: ComboboxFieldProps<T, TData>) => ReactElement
+  Combobox:
+    & (<T extends string, TData = unknown>(props: ComboboxFieldProps<T, TData>) => ReactElement)
+    & SelectionSlotComponents
   Autocomplete: <TData = unknown>(props: AutocompleteFieldProps<TData>) => ReactElement
   Listbox: <T extends string>(props: ListboxFieldProps<T>) => ReactElement
   RadioGroup: <T extends string>(props: RadioGroupFieldProps<T>) => ReactElement

@@ -1,18 +1,26 @@
 'use client'
 
-import { Combobox, Field, Portal, Spinner, useFilter } from '@chakra-ui/react'
+import { Box, Combobox, Field, Portal, Spinner, useFilter } from '@chakra-ui/react'
 import {
+  applyOptionOverlay,
   CREATE_OPTION_VALUE,
-  type CreatedOption,
   type CreateOptionHandler,
+  getOptionText,
   isCreateOptionValue,
+  isOptionEditable,
   mergeCreatedOptions,
   shouldOfferCreate,
+  type UpdateOptionHandler,
 } from '@letar/forms-core/uikit'
-import { useNodeLabelWarning } from '@letar/forms-react'
+import {
+  SelectionActionsProvider,
+  SelectionOptionProvider,
+  useNodeLabelWarning,
+  useSelectionActionsState,
+} from '@letar/forms-react'
 import { useStore } from '@tanstack/react-form'
-import { type ReactElement, type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import type { BaseFieldProps, FieldSize, GroupableOption, OptionRenderState } from '../../types'
+import { type ReactElement, type ReactNode, useEffect, useMemo, useRef, useState } from 'react'
+import type { BaseFieldProps, EditableOptionFlag, FieldSize, GroupableOption, OptionRenderState } from '../../types'
 import {
   type AsyncQueryFn,
   createField,
@@ -26,6 +34,10 @@ import {
 } from '../base'
 import { useMinCharsHint } from './min-chars-hint'
 import { useSelectionString } from './selection-field-strings'
+import { SelectCreateButton, SelectEditButton } from './selection-slots'
+
+/** Option of the field: groupable + the «cannot be edited» flag */
+type ComboboxItem = GroupableOption & EditableOptionFlag
 
 /**
  * Props for Form.Field.Combobox
@@ -34,7 +46,7 @@ export interface ComboboxFieldProps<T = string, TData = unknown> extends BaseFie
   /**
    * Static options (mutually exclusive with useQuery)
    */
-  options?: GroupableOption<T, TData>[]
+  options?: (GroupableOption<T, TData> & EditableOptionFlag)[]
 
   /**
    * Async function for loading options
@@ -167,6 +179,33 @@ export interface ComboboxFieldProps<T = string, TData = unknown> extends BaseFie
   createLabel?: string
 
   /**
+   * Show the service «+ Add "<search>"» item (default `true` when `onCreate` is set). `false` — no
+   * item: put `<Form.Field.Combobox.CreateButton />` into `listFooter` or `renderEmpty`.
+   */
+  createItem?: boolean
+
+  /**
+   * Edit a dictionary record without leaving the form: a pencil at every item and at the selected
+   * value (with `useQuery` — while the selected item is in the loaded page). The app opens its own
+   * dialog and returns `{ label, value, data? }` or `null` on cancel. Same `value` = caption fix
+   * (the form stays clean); another `value` = replaced record (the selected one follows it).
+   * Shortcut: F2 in the input.
+   */
+  onUpdate?: UpdateOptionHandler<GroupableOption<T, TData> & EditableOptionFlag, TData>
+
+  /** With `useQuery`: `false` hides the pencil for this data element (system records) */
+  getEditable?: (item: TData) => boolean
+
+  /** Own footer of the list, after the items (e.g. `<Form.Field.Combobox.CreateButton />`) */
+  listFooter?: ReactNode
+
+  /**
+   * Own content of the «nothing found» state (instead of `emptyMessage`). With `onCreate` the
+   * «+ Add "<search>"» item still follows it.
+   */
+  renderEmpty?: (context: { search: string }) => ReactNode
+
+  /**
    * Component size
    */
   size?: FieldSize
@@ -194,7 +233,7 @@ interface ComboboxFieldState extends GroupedOptionsResult {
   inputValue: string
   setInputValue: (value: string) => void
   isLoading: boolean
-  options: GroupableOption[]
+  options: ComboboxItem[]
   resolvedClearable: boolean
   /** Локализованная подсказка «введите ещё символов» для пустого списка */
   minCharsHint: string
@@ -206,10 +245,19 @@ interface ComboboxFieldState extends GroupedOptionsResult {
   defaultEmptyMessage: string
   /** Подпись служебного пункта «+ Добавить "<поиск>"» (пусто, если пункт сейчас не предлагается) */
   createItemLabel: string
-  /** Добавляет опцию, возвращённую `onCreate`, в локальный список */
-  addCreatedOption: (option: CreatedOption) => void
-  /** `true`, пока `onCreate` не завершился (повторный выбор пункта игнорируется) */
-  creatingRef: { current: boolean }
+  /** Действия (`onCreate`/`onUpdate`): pending, наложение правок, созданные опции, конвейер */
+  actions: ReturnType<typeof useSelectionActionsState>
+  /** Все опции (с правками и созданными, без фильтра по тексту) по строковому значению */
+  optionByValue: Map<string, ComboboxItem>
+  /** Локализованные строки слотов */
+  strings: { edit: string; hotkeyHint: string; createVerb: string }
+  /** Управляемое открытие списка + ссылки для F2 и возврата фокуса */
+  dropdown: {
+    open: boolean
+    setOpen: (open: boolean) => void
+    inputRef: { current: HTMLInputElement | null }
+    highlightedRef: { current: string | null }
+  }
 }
 
 /**
@@ -296,52 +344,34 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
     // Filter for static options
     const { contains } = useFilter({ sensitivity: 'base' })
 
-    // Опции, созданные через `onCreate`, живут локально, пока поле смонтировано
-    const [createdOptions, setCreatedOptions] = useState<CreatedOption[]>([])
-    const addCreatedOption = useCallback((option: CreatedOption) => {
-      setCreatedOptions((prev) => [...prev, option])
-    }, [])
-    const creatingRef = useRef(false)
-    const hasOnCreate = !!componentProps.onCreate
+    const hasOnCreate = !!componentProps.onCreate && componentProps.createItem !== false
     const createVerb = useSelectionString('formSelection.createOption')
+    const editVerb = useSelectionString('formSelection.editOption')
+    const hotkeyHint = useSelectionString('formSelection.editHotkeyHint')
 
-    // Build options from static or async source
-    const baseOptions = useMemo((): GroupableOption[] => {
-      // Опция приложения сильнее созданной с тем же значением — после перезагрузки справочника
-      // дубля нет. Созданные опции фильтруются по тексту поиска так же, как остальные
-      const withCreated = (list: GroupableOption[]): GroupableOption[] => {
-        // Значения Combobox — строки: числовое значение из `onCreate` приводится к строке
-        const visibleCreated = createdOptions
-          .filter((opt) => !inputValue || contains(opt.label, inputValue))
-          .map((opt): GroupableOption => ({ label: opt.label, value: String(opt.value), data: opt.data }))
-        return mergeCreatedOptions(list, visibleCreated)
-      }
-
+    // Опции приложения без фильтра по тексту: статические или загруженные `useQuery`
+    const sourceOptions = useMemo((): ComboboxItem[] => {
       if (componentProps.options) {
-        // Filtering static options by input value
-        const filtered = inputValue
-          ? componentProps.options.filter((opt) => contains(getOptionLabel(opt), inputValue))
-          : componentProps.options
-        return withCreated(filtered)
+        return componentProps.options as ComboboxItem[]
       }
-
       if (queryData && componentProps.getLabel && componentProps.getValue) {
         const getLabel = componentProps.getLabel
         const getTextValue = componentProps.getTextValue
         const getValue = componentProps.getValue
         const getGroup = componentProps.getGroup
         const getDisabled = componentProps.getDisabled
-        return withCreated((queryData as unknown[]).map((item) => ({
+        const getEditable = componentProps.getEditable
+        return (queryData as unknown[]).map((item) => ({
           label: getLabel(item),
           textValue: getTextValue?.(item),
           data: item,
           value: getValue(item),
           group: getGroup?.(item),
           disabled: getDisabled?.(item),
-        })))
+          editable: getEditable?.(item),
+        }))
       }
-
-      return withCreated([])
+      return []
     }, [
       componentProps.options,
       queryData,
@@ -350,10 +380,56 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
       componentProps.getValue,
       componentProps.getGroup,
       componentProps.getDisabled,
-      inputValue,
-      contains,
-      createdOptions,
+      componentProps.getEditable,
     ])
+
+    const actions = useSelectionActionsState({ appOptions: sourceOptions })
+    const { createdOptions, overlay } = actions
+
+    // Ручка выпадашки для конвейера действий: закрыть список / вернуть фокус в инпут
+    const [open, setOpen] = useState(false)
+    const inputRef = useRef<HTMLInputElement | null>(null)
+    const highlightedRef = useRef<string | null>(null)
+    const { controlRef } = actions
+    useEffect(() => {
+      controlRef.current = {
+        close: () => setOpen(false),
+        focusTrigger: () => inputRef.current?.focus(),
+      }
+      return () => {
+        controlRef.current = null
+      }
+    }, [controlRef])
+
+    // Все опции с правками и созданными — по ним ищется опция для карандаша у значения
+    const allOptions = useMemo((): ComboboxItem[] => {
+      // Значения Combobox — строки: числовое значение из `onCreate`/`onUpdate` приводится к строке
+      const edited = applyOptionOverlay(sourceOptions, overlay).map((opt): ComboboxItem =>
+        typeof opt.value === 'string' ? opt : { ...opt, value: String(opt.value) }
+      )
+      const created = createdOptions.map((opt): ComboboxItem => ({
+        label: opt.label,
+        value: String(opt.value),
+        data: opt.data,
+      }))
+      // Опция приложения сильнее созданной с тем же значением — после перезагрузки справочника дубля нет
+      return mergeCreatedOptions(edited, created)
+    }, [sourceOptions, overlay, createdOptions])
+
+    const optionByValue = useMemo(
+      () => new Map<string, ComboboxItem>(allOptions.map((opt) => [String(opt.value), opt])),
+      [allOptions],
+    )
+
+    // Фильтр по тексту: статичные опции фильтруем сами (правки уже наложены), `useQuery` — на сервере;
+    // созданные опции фильтруются так же, как остальные
+    const baseOptions = useMemo((): ComboboxItem[] => {
+      const createdValues = new Set(createdOptions.map((opt) => String(opt.value)))
+      return allOptions.filter((opt) => {
+        const isLocal = componentProps.options !== undefined || createdValues.has(String(opt.value))
+        return !isLocal || !inputValue || contains(getOptionLabel(opt), inputValue)
+      })
+    }, [allOptions, createdOptions, componentProps.options, inputValue, contains])
 
     // Служебный пункт «+ Добавить "<поиск>"» — в конце списка, вне групп. Значение перехватывается
     // в `onValueChange` и в форму не попадает
@@ -362,7 +438,7 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
       ? `+ ${componentProps.createLabel ?? createVerb} "${search}"`
       : ''
     const options = useMemo(
-      (): GroupableOption[] =>
+      (): ComboboxItem[] =>
         createItemLabel ? [...baseOptions, { label: createItemLabel, value: CREATE_OPTION_VALUE }] : baseOptions,
       [baseOptions, createItemLabel],
     )
@@ -395,13 +471,87 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
       defaultLoadingMessage,
       defaultEmptyMessage,
       createItemLabel,
-      addCreatedOption,
-      creatingRef,
+      actions,
+      optionByValue,
+      strings: { edit: editVerb, hotkeyHint, createVerb },
+      dropdown: { open, setOpen, inputRef, highlightedRef },
     }
   },
   render: ({ field, fullPath, resolved, hasError, errorMessage, componentProps, fieldState }): ReactElement => {
     const currentValue = field.state.value as string | undefined
     const minChars = componentProps.minChars ?? 1
+    const { actions, strings, dropdown } = fieldState
+    const hasOnUpdate = !!componentProps.onUpdate
+    const interactive = !resolved.disabled && !resolved.readOnly
+    const search = fieldState.inputValue.trim()
+
+    // Ошибки `onCreate`/`onUpdate` — забота приложения: всплывают как unhandled rejection
+    // (GlitchTip), здесь не глотаются
+    const runCreate = () => {
+      const onCreate = componentProps.onCreate
+      if (!onCreate) {
+        return
+      }
+      actions.run({
+        scope: 'option',
+        call: () => onCreate(search),
+        apply: (created) => {
+          actions.addCreatedOption(created)
+          field.handleChange(String(created.value))
+          fieldState.setInputValue(created.label)
+        },
+      })
+    }
+
+    const runEdit = (option: unknown, scope: 'option' | 'value') => {
+      const onUpdate = componentProps.onUpdate
+      const source = option as ComboboxItem
+      if (!onUpdate) {
+        return
+      }
+      const fromValue = String(source.value)
+      actions.run({
+        scope,
+        call: () => onUpdate(source as Parameters<typeof onUpdate>[0]),
+        apply: (result) => {
+          actions.recordEdit(fromValue, result)
+          // Правили выбранное: инпут показывает новую подпись, а замена записи переносит значение
+          if (currentValue !== undefined && String(currentValue) === fromValue) {
+            if (String(result.value) !== fromValue) {
+              field.handleChange(String(result.value))
+            }
+            fieldState.setInputValue(result.label)
+          }
+        },
+      })
+    }
+
+    const actionsValue = {
+      pending: actions.pending,
+      canCreate: !!componentProps.onCreate,
+      hasOnUpdate,
+      interactive,
+      search,
+      runCreate,
+      runEdit,
+      strings: {
+        edit: strings.edit,
+        editAria: (text: string) => `${strings.edit}: ${text}`,
+        create: `+ ${componentProps.createLabel ?? strings.createVerb}…`,
+        createWithSearch: (text: string) => `+ ${componentProps.createLabel ?? strings.createVerb} "${text}"`,
+        hotkeyHint: strings.hotkeyHint,
+      },
+    }
+
+    const optionContext = (opt: { value: unknown }, scope: 'option' | 'value') => {
+      const source = fieldState.optionByValue.get(String(opt.value))
+      return {
+        option: source,
+        text: source ? getOptionText(source) : '',
+        editable: !!source && isOptionEditable(source, hasOnUpdate),
+        scope,
+      }
+    }
 
     // Содержимое пункта: своё (`renderOption`) или label как есть (узел не сплющивается в строку).
     // Служебный пункт «+ Добавить…» через renderOption не проходит
@@ -409,114 +559,166 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
       if (!componentProps.renderOption || isCreateOptionValue(String(opt.value))) {
         return opt.label
       }
-      return componentProps.renderOption(opt, {
-        selected: currentValue !== undefined && currentValue !== '' && String(currentValue) === String(opt.value),
-        disabled: opt.disabled ?? false,
-      })
+      return (
+        <SelectionOptionProvider value={optionContext(opt, 'option')}>
+          {componentProps.renderOption(opt, {
+            selected: currentValue !== undefined && currentValue !== '' && String(currentValue) === String(opt.value),
+            disabled: opt.disabled ?? false,
+          })}
+        </SelectionOptionProvider>
+      )
     }
+
+    // Карандаш по умолчанию — только без своего `renderOption` (там свои кнопки)
+    const renderItemActions = (opt: GroupableOption): ReactNode =>
+      hasOnUpdate && !componentProps.renderOption && !isCreateOptionValue(String(opt.value))
+        ? (
+          <SelectionOptionProvider value={optionContext(opt, 'option')}>
+            <SelectEditButton />
+          </SelectionOptionProvider>
+        )
+        : null
+
+    const renderItem = (opt: GroupableOption) => (
+      <Combobox.Item item={opt} key={opt.value}>
+        <Combobox.ItemText>{renderItemContent(opt)}</Combobox.ItemText>
+        {renderItemActions(opt)}
+        <Combobox.ItemIndicator />
+      </Combobox.Item>
+    )
+
+    const selectedSource = currentValue ? fieldState.optionByValue.get(String(currentValue)) : undefined
+    const showValueEdit = hasOnUpdate && !!selectedSource && isOptionEditable(selectedSource, true)
+
+    // Пустой результат: сообщение (или своё `renderEmpty`) + пункт «+ Добавить "…"» под ним.
+    // Служебный пункт делает список непустым, поэтому «пусто» считаем по опциям без него
+    const realOptionsCount = fieldState.options.filter((opt) => !isCreateOptionValue(String(opt.value))).length
+    const nothingFound = !fieldState.isLoading && realOptionsCount === 0 && fieldState.inputValue.length >= minChars
+    const emptyContent = componentProps.renderEmpty
+      ? componentProps.renderEmpty({ search })
+      : (componentProps.emptyMessage ?? fieldState.defaultEmptyMessage)
 
     return (
       <Field.Root invalid={hasError} required={resolved.required} disabled={resolved.disabled}>
-        <Combobox.Root
-          collection={fieldState.collection}
-          size={componentProps.size ?? 'md'}
-          variant={componentProps.variant ?? 'outline'}
-          value={currentValue ? [currentValue] : []}
-          inputValue={fieldState.inputValue}
-          onInputValueChange={(details) => {
-            // Выбор служебного пункта подставил бы его подпись в инпут — текст поиска остаётся
-            if (fieldState.createItemLabel && details.inputValue === fieldState.createItemLabel) {
-              return
-            }
-            fieldState.setInputValue(details.inputValue)
-          }}
-          onValueChange={(details) => {
-            const newValue = details.value[0] as string | undefined
-            if (isCreateOptionValue(newValue)) {
-              // Ошибки `onCreate` — забота приложения: всплывают как unhandled rejection
-              // (GlitchTip), здесь не глотаются
-              if (componentProps.onCreate && !fieldState.creatingRef.current) {
-                fieldState.creatingRef.current = true
-                void componentProps.onCreate(fieldState.inputValue.trim()).then((created) => {
-                  if (created) {
-                    fieldState.addCreatedOption(created)
-                    field.handleChange(String(created.value))
-                    fieldState.setInputValue(created.label)
-                  }
-                }).finally(() => {
-                  fieldState.creatingRef.current = false
-                })
+        <SelectionActionsProvider value={actionsValue}>
+          <Combobox.Root
+            collection={fieldState.collection}
+            size={componentProps.size ?? 'md'}
+            variant={componentProps.variant ?? 'outline'}
+            value={currentValue ? [currentValue] : []}
+            inputValue={fieldState.inputValue}
+            open={dropdown.open}
+            onOpenChange={(details) => dropdown.setOpen(details.open)}
+            onHighlightChange={(details) => {
+              dropdown.highlightedRef.current = details.highlightedValue
+            }}
+            onInputValueChange={(details) => {
+              // Выбор служебного пункта подставил бы его подпись в инпут — текст поиска остаётся
+              if (fieldState.createItemLabel && details.inputValue === fieldState.createItemLabel) {
+                return
               }
-              return
-            }
-            field.handleChange(newValue ?? '')
-          }}
-          onInteractOutside={() => field.handleBlur()}
-          disabled={resolved.disabled}
-          allowCustomValue={componentProps.allowCustomValue ?? false}
-          openOnClick
-          data-field-name={fullPath}
-        >
-          {resolved.label && (
-            <Combobox.Label>
-              <SelectionFieldLabel label={resolved.label} tooltip={resolved.tooltip} required={resolved.required} />
-            </Combobox.Label>
-          )}
+              fieldState.setInputValue(details.inputValue)
+            }}
+            onValueChange={(details) => {
+              const newValue = details.value[0] as string | undefined
+              if (isCreateOptionValue(newValue)) {
+                runCreate()
+                return
+              }
+              field.handleChange(newValue ?? '')
+            }}
+            onInteractOutside={() => field.handleBlur()}
+            disabled={resolved.disabled}
+            readOnly={resolved.readOnly}
+            allowCustomValue={componentProps.allowCustomValue ?? false}
+            openOnClick
+            data-field-name={fullPath}
+          >
+            {resolved.label && (
+              <Combobox.Label>
+                <SelectionFieldLabel label={resolved.label} tooltip={resolved.tooltip} required={resolved.required} />
+              </Combobox.Label>
+            )}
 
-          <Combobox.Control>
-            <Combobox.Input placeholder={resolved.placeholder ?? fieldState.defaultPlaceholder} />
-            <Combobox.IndicatorGroup>
-              {fieldState.isLoading && <Spinner size="xs" />}
-              {fieldState.resolvedClearable && <Combobox.ClearTrigger />}
-              <Combobox.Trigger />
-            </Combobox.IndicatorGroup>
-          </Combobox.Control>
-
-          <Portal>
-            <Combobox.Positioner>
-              <Combobox.Content>
-                {/* Loading state */}
-                {fieldState.isLoading && fieldState.options.length === 0 && (
-                  <Combobox.Empty>{componentProps.loadingMessage ?? fieldState.defaultLoadingMessage}</Combobox.Empty>
+            <Combobox.Control>
+              <Combobox.Input
+                ref={dropdown.inputRef}
+                placeholder={resolved.placeholder ?? fieldState.defaultPlaceholder}
+                pe={showValueEdit ? '6.5rem' : undefined}
+                aria-keyshortcuts={hasOnUpdate && interactive ? 'F2' : undefined}
+                title={hasOnUpdate && interactive ? strings.hotkeyHint : undefined}
+                onKeyDown={hasOnUpdate && interactive
+                  ? (event) => {
+                    if (event.key !== 'F2') {
+                      return
+                    }
+                    // Открытый список: подсвеченный пункт; закрытый — выбранное значение
+                    const highlighted = dropdown.open ? dropdown.highlightedRef.current : null
+                    const value = highlighted ?? (currentValue ? String(currentValue) : null)
+                    const source = value ? fieldState.optionByValue.get(value) : undefined
+                    if (source && isOptionEditable(source, true)) {
+                      event.preventDefault()
+                      runEdit(source, highlighted ? 'option' : 'value')
+                    }
+                  }
+                  : undefined}
+              />
+              <Combobox.IndicatorGroup>
+                {fieldState.isLoading && <Spinner size="xs" />}
+                {fieldState.resolvedClearable && <Combobox.ClearTrigger />}
+                {showValueEdit && (
+                  // IndicatorGroup не принимает клики (pointer-events: none) — кнопке возвращаем их
+                  <Box display="flex" alignItems="center" pointerEvents="auto">
+                    <SelectionOptionProvider value={optionContext(selectedSource, 'value')}>
+                      <SelectEditButton />
+                    </SelectionOptionProvider>
+                  </Box>
                 )}
+                <Combobox.Trigger />
+              </Combobox.IndicatorGroup>
+            </Combobox.Control>
 
-                {/* Empty result */}
-                {!fieldState.isLoading
-                  && fieldState.options.length === 0
-                  && fieldState.inputValue.length >= minChars && (
-                  <Combobox.Empty>{componentProps.emptyMessage ?? fieldState.defaultEmptyMessage}</Combobox.Empty>
-                )}
+            <Portal>
+              <Combobox.Positioner>
+                <Combobox.Content>
+                  {/* Loading state */}
+                  {fieldState.isLoading && fieldState.options.length === 0 && (
+                    <Combobox.Empty>{componentProps.loadingMessage ?? fieldState.defaultLoadingMessage}</Combobox.Empty>
+                  )}
 
-                {/* Hint about minimum characters */}
-                {!fieldState.isLoading
-                  && fieldState.options.length === 0
-                  && fieldState.inputValue.length < minChars
-                  && fieldState.inputValue.length > 0 && <Combobox.Empty>{fieldState.minCharsHint}</Combobox.Empty>}
+                  {/* Empty result: с пунктом создания — своим блоком, `Combobox.Empty` прячется при непустой коллекции */}
+                  {nothingFound && fieldState.createItemLabel && (
+                    <Box px={3} py={2} color="fg.muted" fontSize="sm">{emptyContent}</Box>
+                  )}
+                  {nothingFound && !fieldState.createItemLabel && <Combobox.Empty>{emptyContent}</Combobox.Empty>}
 
-                {/* Grouped options */}
-                {fieldState.groups
-                  ? Array.from(fieldState.groups.entries()).map(([groupName, groupOptions]) => (
-                    <Combobox.ItemGroup key={groupName}>
-                      {groupName && <Combobox.ItemGroupLabel>{groupName}</Combobox.ItemGroupLabel>}
-                      {groupOptions.map((opt) => (
-                        <Combobox.Item item={opt} key={opt.value}>
-                          <Combobox.ItemText>{renderItemContent(opt)}</Combobox.ItemText>
-                          <Combobox.ItemIndicator />
-                        </Combobox.Item>
-                      ))}
-                    </Combobox.ItemGroup>
-                  ))
-                  /* Flat options */
-                  : fieldState.options.map((opt) => (
-                    <Combobox.Item item={opt} key={opt.value}>
-                      <Combobox.ItemText>{renderItemContent(opt)}</Combobox.ItemText>
-                      <Combobox.ItemIndicator />
-                    </Combobox.Item>
-                  ))}
-              </Combobox.Content>
-            </Combobox.Positioner>
-          </Portal>
-        </Combobox.Root>
+                  {/* Hint about minimum characters */}
+                  {!fieldState.isLoading
+                    && fieldState.options.length === 0
+                    && fieldState.inputValue.length < minChars
+                    && fieldState.inputValue.length > 0 && <Combobox.Empty>{fieldState.minCharsHint}</Combobox.Empty>}
+
+                  {/* Grouped options */}
+                  {fieldState.groups
+                    ? Array.from(fieldState.groups.entries()).map(([groupName, groupOptions]) => (
+                      <Combobox.ItemGroup key={groupName}>
+                        {groupName && <Combobox.ItemGroupLabel>{groupName}</Combobox.ItemGroupLabel>}
+                        {groupOptions.map(renderItem)}
+                      </Combobox.ItemGroup>
+                    ))
+                    /* Flat options */
+                    : fieldState.options.map(renderItem)}
+
+                  {componentProps.listFooter && (
+                    <Box position="sticky" bottom={0} bg="bg.panel" borderTopWidth="1px" mt={1} pt={1}>
+                      {componentProps.listFooter}
+                    </Box>
+                  )}
+                </Combobox.Content>
+              </Combobox.Positioner>
+            </Portal>
+          </Combobox.Root>
+        </SelectionActionsProvider>
 
         <FieldError hasError={hasError} errorMessage={errorMessage} helperText={resolved.helperText} />
       </Field.Root>
@@ -528,6 +730,12 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
  * `createField` is not generic, so the generic signature is restored by a cast: `TData` is
  * inferred from `options`/`useQuery` and flows into `renderOption`/`getTextValue`/`getLabel`.
  */
-export const FieldCombobox = FieldComboboxBase as unknown as <T = string, TData = unknown>(
+const FieldComboboxGeneric = FieldComboboxBase as unknown as <T = string, TData = unknown>(
   props: ComboboxFieldProps<T, TData>,
 ) => ReactElement
+
+/** Slots `Form.Field.Combobox.EditButton` / `.CreateButton` — for your own `renderOption`/`listFooter`/`renderEmpty` */
+export const FieldCombobox = Object.assign(FieldComboboxGeneric, {
+  EditButton: SelectEditButton,
+  CreateButton: SelectCreateButton,
+})

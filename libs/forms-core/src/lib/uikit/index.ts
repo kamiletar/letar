@@ -21,6 +21,8 @@ export type {
   UIKitRadioOption,
   UIKitRequiredIndicatorProps,
   UIKitSegmentGroupProps,
+  UIKitSelectControl,
+  UIKitSelectionSlotProps,
   UIKitSelectOption,
   UIKitSelectProps,
   UIKitTextProps,
@@ -36,3 +38,5 @@ export type { GroupableLike } from './group-options'
 // `onCreate` у Select/Combobox — создание записи справочника, не уходя из формы
 export { CREATE_OPTION_VALUE, isCreateOptionValue, mergeCreatedOptions, shouldOfferCreate } from './creatable-options'
 export type { CreatedOption, CreateOptionHandler } from './creatable-options'
+export { applyOptionOverlay, isOptionEditable, pruneOptionOverlay, upsertOptionOverlay } from './editable-options'
+export type { OptionOverlayEntry, SelectionActionKind, UpdatedOption, UpdateOptionHandler } from './editable-options'

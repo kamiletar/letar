@@ -186,6 +186,35 @@ render-функции.
 - У Combobox `renderValue` нет: в инпуте обычный текст.
 - ⚠️ **Изменение поведения:** опции с `label`-узлом раньше показывали `value`, теперь — узел.
 
+## Правка записи из поля (`onUpdate`)
+
+**API:** `onUpdate`, `createItem`, `listFooter`, `Form.Field.Select.EditButton`, `Form.Field.Select.CreateButton`
+у `Form.Field.Select`; то же плюс `renderEmpty` и `getEditable` у `Form.Field.Combobox`. Chakra- и shadcn-скины.
+
+Карандаш есть у каждого пункта и у выбранного значения. Приложение открывает своё окно (его server action)
+и возвращает `{ label, value, data? }` — либо `null`, если пользователь отказался.
+
+```tsx
+<Form.Field.Select
+  name="workTypeId"
+  options={workTypes.map((w) => ({ value: w.id, label: w.name, data: w, editable: !w.system }))}
+  onUpdate={async (option) => {
+    const saved = await openWorkTypeDialog(option.data)
+    return saved ? { label: saved.name, value: saved.id, data: saved } : null
+  }}
+/>
+```
+
+- Тот же `value` — правка подписи (форма не dirty). Другой `value` — запись заменена, выбранное переезжает на новую.
+- Правка лежит поверх `options` приложения, пока оно не перезапросит список.
+- Список закрывается до окна приложения; пока действие идёт, карандаши `disabled`.
+- **F2** (на ноутбуках Fn+F2) правит подсвеченный пункт или выбранное значение. У Combobox в shadcn нет
+  клавиатурной навигации по списку — там F2 не работает.
+- `editable: false` у опции прячет её карандаш. При своём `renderOption` карандаш по умолчанию не рисуется —
+  поставь внутрь `<Form.Field.Select.EditButton />`. Внутри `renderValue` слоты не рисуются (в `<button>` нельзя вложить кнопку).
+- `createItem={false}` убирает служебный пункт «+ Добавить…»: поставь `<Form.Field.Select.CreateButton />` в `listFooter`.
+  Оба слота принимают `asChild`.
+
 ## RadioGroup
 
 **API:** `Form.Field.RadioGroup`

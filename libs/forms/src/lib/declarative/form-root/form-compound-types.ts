@@ -1,5 +1,6 @@
 'use client'
 
+import type { SelectionCreateButtonProps, SelectionEditButtonProps } from '@letar/forms-react'
 import type { ReactElement, ReactNode } from 'react'
 import type { CaptchaFieldProps } from '../../captcha/types'
 import type { OfflineIndicatorProps, SyncStatusProps } from '../../offline'
@@ -66,6 +67,14 @@ import type {
  * Typeы componentов для кнопок Form.Group.List
  * (Add, Remove, DragHandle)
  */
+/** Slots of the selection fields: buttons for own `renderOption`/`listFooter`/`renderEmpty` */
+export interface SelectionSlotComponents {
+  /** Pencil «Edit» of an option or of the selected value (needs `onUpdate` on the field) */
+  EditButton: (props: SelectionEditButtonProps) => ReactElement | null
+  /** Button «+ Add…» (needs `onCreate` on the field) */
+  CreateButton: (props: SelectionCreateButtonProps) => ReactElement | null
+}
+
 export interface ListButtonComponents {
   /** Add new element to array */
   Add: (props: { children?: ReactNode; defaultValue?: unknown }) => ReactElement
@@ -152,9 +161,11 @@ export interface FormFieldComponents {
   Schedule: (props: ScheduleFieldProps) => ReactElement
 
   // Выбор из списка
-  Select: (props: SelectFieldProps) => ReactElement
+  Select: (<TData = unknown>(props: SelectFieldProps<TData>) => ReactElement) & SelectionSlotComponents
   NativeSelect: <T extends string = string>(props: NativeSelectFieldProps<T>) => ReactElement
-  Combobox: <T extends string = string, TData = unknown>(props: ComboboxFieldProps<T, TData>) => ReactElement
+  Combobox:
+    & (<T extends string = string, TData = unknown>(props: ComboboxFieldProps<T, TData>) => ReactElement)
+    & SelectionSlotComponents
   Listbox: <T extends string = string>(props: ListboxFieldProps<T>) => ReactElement
   RadioGroup: <T extends string = string>(props: RadioGroupFieldProps<T>) => ReactElement
   RadioCard: <T extends string = string>(props: RadioCardFieldProps<T>) => ReactElement

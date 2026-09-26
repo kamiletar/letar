@@ -103,6 +103,52 @@
 - Подсветку (`highlighted`) в `state` не передаём — оба скина ставят `[data-highlighted]`, стилизуйте CSS.
 - ⚠️ **Изменение поведения:** пункты с `label`-узлом раньше показывали `value`, теперь — узел.
 
+### Правка записи из поля: `onUpdate`, `Select.EditButton`, `Select.CreateButton` (v2.20.0+)
+
+Карандаш у каждого пункта списка и у выбранного значения: приложение открывает своё окно правки
+(server action — на его стороне) и возвращает сохранённую запись. Chakra-скин и shadcn-скин,
+`Form.Field.Select` и `Form.Field.Combobox`.
+
+| Проп / поле                                      | Где              | Описание                                                                                                         |
+| ------------------------------------------------ | ---------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `onUpdate`                                       | Select, Combobox | `(option) => Promise<{ label, value, data? } \| null>`; `null` — пользователь отказался                          |
+| `editable: false`                                | опция            | Прячет карандаш у системной записи. У Combobox с `useQuery` — `getEditable={(item) => boolean}`                  |
+| `createItem={false}`                             | Select, Combobox | Убирает служебный пункт «+ Добавить…» — кнопку ставят сами (`listFooter`, `renderOption`, `renderEmpty`)         |
+| `listFooter`                                     | Select, Combobox | Свой низ списка после пунктов; в Chakra «прилипает» к нижнему краю                                               |
+| `renderEmpty`                                    | только Combobox  | `({ search }) => ReactNode` — содержимое состояния «ничего не найдено»; с `onCreate` пункт создания идёт под ним |
+| `Form.Field.Select.EditButton` / `.CreateButton` | Select           | Кнопки для своего `renderOption`/`listFooter`. Те же слоты — `Form.Field.Combobox.*`; принимают `asChild`        |
+
+```tsx
+<Form.Field.Select
+  name="workTypeId"
+  options={workTypes.map((w) => ({ value: w.id, label: w.name, data: w, editable: !w.system }))}
+  onUpdate={async (option) => {
+    const saved = await openWorkTypeDialog(option.data) // окно приложения + его server action
+    return saved ? { label: saved.name, value: saved.id, data: saved } : null
+  }}
+/>
+```
+
+- **Тот же `value`** — правка подписи: подпись обновляется сразу, форма **не** становится dirty.
+  **Другой `value`** — запись заменена (copy-on-write): выбранное значение переезжает на новое.
+- Правка лежит поверх `options` приложения, пока оно не перезапросит список (пришла свежая подпись —
+  наложение снимается). Пока `options = []` (идёт загрузка), наложение не сбрасывается.
+- Список закрывается до окна приложения; из пункта фокус возвращается на триггер. Пока действие идёт,
+  карандаши `disabled`, повторные запуски игнорируются. `reject` не глотается (unhandled rejection → GlitchTip).
+- **F2** (на ноутбуках — Fn+F2) на подсвеченном пункте или на выбранном значении правит запись. В shadcn
+  у Combobox клавиатурной навигации по списку нет — там F2 не работает, карандаш только мышью.
+- Карандаш в пункте — вне Tab-порядка и скрыт от скринридеров (иначе Enter выберет пункт, а фокус прыгнет на
+  кнопку); у значения — обычная кнопка в Tab-порядке, соседом триггера (в `<button>` вложенная кнопка невалидна).
+  На устройствах без hover карандаш виден всегда.
+- ⚠️ **Свой `renderOption` — свои кнопки:** карандаш по умолчанию рисуется только когда `renderOption` не задан.
+  Внутри своего рендера поставь `<Form.Field.Select.EditButton />`. Внутри `renderValue` слоты не рисуются
+  (там `<button>`) — dev-предупреждение.
+- ⚠️ `EditButton`/`CreateButton` вне поля, без `onUpdate`/`onCreate` — рисуют `null` и один раз пишут в консоль в dev.
+- ⚠️ Окно приложения не должно содержать вложенный `<form>` внутри формы поля — нативный `<form>` в `<form>`
+  невалиден; окно живёт в портале приложения.
+- Обёртки из `createForm()` (`extraSelects`/`extraComboboxes`) должны пробрасывать `onUpdate`/`createItem`/`listFooter`.
+- У Combobox с `useQuery` карандаш у значения виден, пока выбранный элемент есть в загруженной странице.
+
 ### `onCreate` — создать запись справочника, не уходя из формы (v2.17.0+)
 
 Проп `onCreate` есть у `Form.Field.Select` и `Form.Field.Combobox` (Chakra-скин и shadcn-скин).

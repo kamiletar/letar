@@ -31,8 +31,14 @@ export interface OptionRenderState {
   disabled: boolean
 }
 
+/** Flag «the option cannot be edited» for fields with `onUpdate` (default: editable) */
+export interface EditableOptionFlag {
+  /** `false` hides the pencil for this option (system records) */
+  editable?: boolean
+}
+
 /** Option of `Form.Field.Select` — `data` type is inferred from `options` */
-export type SelectFieldOption<TData = unknown> = BaseOption<string | number, TData>
+export type SelectFieldOption<TData = unknown> = BaseOption<string | number, TData> & EditableOptionFlag
 
 /** Option of `Form.Field.Combobox` with static `options` */
 export type ComboboxFieldOption<T = string, TData = unknown> = GroupableOption<T, TData>

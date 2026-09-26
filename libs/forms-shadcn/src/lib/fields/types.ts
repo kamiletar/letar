@@ -3,7 +3,7 @@
 import type { AddressProvider } from '@letar/forms-core/address'
 import type { PhoneCountry } from '@letar/forms-core/phone'
 import type { FileSecurityConfig } from '@letar/forms-core/security'
-import type { CreateOptionHandler } from '@letar/forms-core/uikit'
+import type { CreateOptionHandler, UpdateOptionHandler } from '@letar/forms-core/uikit'
 import type { BaseFieldProps } from '@letar/forms-react'
 import type { ReactNode } from 'react'
 import type { ToolbarButton } from './rich-text-toolbar-config'
@@ -60,6 +60,8 @@ export interface SelectOption<TData = unknown> {
   disabled?: boolean
   /** Данные приложения: поле их не читает, только передаёт в `renderOption`/`renderValue` */
   data?: TData
+  /** `false` прячет карандаш этой опции у полей с `onUpdate` (системные записи) */
+  editable?: boolean
 }
 
 /** Состояние опции для `renderOption` (подсветка — забота CSS: `data-highlighted`) */
@@ -120,6 +122,20 @@ export interface SelectFieldProps<TData = unknown> extends BaseFieldProps {
   onCreate?: CreateOptionHandler<TData>
   /** Текст пункта создания после «+ » (по умолчанию «Добавить…») */
   createLabel?: string
+  /**
+   * Показывать служебный пункт «+ Добавить…» (по умолчанию `true` при `onCreate`). `false` — пункта
+   * нет: поставь `<Form.Field.Select.CreateButton />` в `listFooter` или в свой `renderOption`.
+   */
+  createItem?: boolean
+  /**
+   * Править запись справочника, не уходя из формы: карандаш у каждого пункта и у выбранного
+   * значения. Приложение открывает своё окно и возвращает `{ label, value, data? }` либо `null`.
+   * Тот же `value` — правка подписи (форма не dirty); другой — запись заменена (copy-on-write), и
+   * выбранная опция переезжает на новую. Горячая клавиша — F2 на подсвеченном пункте или значении.
+   */
+  onUpdate?: UpdateOptionHandler<SelectOption<TData>, TData>
+  /** Свой низ списка после пунктов (например `<Form.Field.Select.CreateButton />`) */
+  listFooter?: ReactNode
   /** Show clear button (auto-determined: true if optional, false if required) */
   clearable?: boolean
 }
@@ -260,6 +276,17 @@ export interface ComboboxFieldProps<TData = unknown> extends BaseFieldProps {
   onCreate?: CreateOptionHandler<TData>
   /** Глагол пункта создания: «+ <createLabel> "<текст>"» (по умолчанию «Добавить») */
   createLabel?: string
+  /** Показывать служебный пункт «+ Добавить "<текст>"» (по умолчанию `true` при `onCreate`) */
+  createItem?: boolean
+  /**
+   * Править запись справочника: карандаш у каждого пункта и у выбранного значения (мышью; в этом
+   * скине у Combobox нет клавиатурной навигации по списку, поэтому без F2). Контракт как у Select.
+   */
+  onUpdate?: UpdateOptionHandler<SelectOption<TData>, TData>
+  /** Свой низ списка после пунктов */
+  listFooter?: ReactNode
+  /** Своё содержимое состояния «ничего не найдено» (вместо текста по умолчанию) */
+  renderEmpty?: (context: { search: string }) => ReactNode
 }
 
 /**

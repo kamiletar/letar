@@ -4,6 +4,17 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.17.0] - 2026-09-26
+
+### Added
+
+- **`uikit`: правка записи из списка.** Типы `UpdatedOption`, `UpdateOptionHandler`, `OptionOverlayEntry`,
+  `SelectionActionKind`, `UIKitSelectControl`, `UIKitSelectionSlotProps` (`renderOptionActions`,
+  `controlActions`, `listFooter`, `controlRef`, `onEditHotkey`, `editHotkeyHint`); у `UIKitSelectOption` —
+  `editable`, у Select — `readOnly`, у Combobox — `emptyContent`. Чистые функции `isOptionEditable`,
+  `upsertOptionOverlay`, `pruneOptionOverlay`, `applyOptionOverlay` (локальное наложение правок, сброс
+  только по положительному сигналу от приложения).
+
 ## [0.16.0] - 2026-09-26
 
 ### Added

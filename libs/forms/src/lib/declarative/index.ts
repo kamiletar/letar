@@ -296,6 +296,7 @@ export type {
   DateTimePickerFieldProps,
   DeclarativeFormContextValue,
   DurationFieldProps,
+  EditableOptionFlag,
   FieldChangeApi,
   FieldTooltipMeta,
   FieldUIMeta,

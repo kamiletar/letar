@@ -2375,7 +2375,14 @@ ZenStack (§16.2, этап Б): демо на модели `Category` и нас�
 5. shadcn Select/Combobox: `textValue` у `Item`, `Value` с `children`, `renderOption`.
 6. Цикл синхронизации (ниже), версии, `bun.lock`.
 
-**Этап Б** — `forms` 2.20.0, `forms-core` 0.17.0, `forms-react` 0.12.0, `forms-shadcn` 0.41.0:
+**Этап Б** — `forms` 2.20.0, `forms-core` 0.17.0, `forms-react` 0.13.0, `forms-shadcn` 0.41.0:
+
+> ✅ **Статус 2026-09-26:** шаги 1–5 выполнены (Chakra и shadcn, Select и Combobox; тесты 9–24, 26, 27; `asChild` у
+> слотов; `Form.Field.Select` в составных типах стал generic — в 2.19.0 `o.data` было `unknown`). `forms-react`
+> получил новый публичный слой `selection`, поэтому версия 0.13.0, а не 0.12.0. **Не сделано:** шаг 6 (e2e-демо и
+> ZenStack-демо §16.2 — есть демо `apps/form-develop-app/src/app/edit-option-demo`), шаг 7 (relation-провайдер,
+> ждёт ответов владельца на вопросы 24/25/27), `useSelected` (§16.4). form-mcp/README про `onUpdate` не обновлялись
+> (про `onCreate` там тоже нет). У shadcn Combobox F2 нет — нет клавиатурной навигации по списку (долг).
 
 1. `forms-core/uikit/editable-options.ts`: `isOptionEditable`, `upsert/prune/applyOptionOverlay`,
    `SelectionActionKind`, `UpdatedOption` — чистые функции, таблица случаев §6 целиком в unit-тестах.

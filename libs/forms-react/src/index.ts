@@ -104,3 +104,33 @@ export type {
   ValidateOn,
   ZodSchema,
 } from './lib/types'
+
+export {
+  SelectionActionsProvider,
+  SelectionOptionProvider,
+  useSelectionActions,
+  useSelectionOption,
+} from './lib/selection/selection-context'
+export type {
+  SelectionActionsContextValue,
+  SelectionActionStrings,
+  SelectionOptionContextValue,
+  SelectionSlotScope,
+} from './lib/selection/selection-context'
+export { useSelectionActionsState } from './lib/selection/use-selection-actions-state'
+export type {
+  RunSelectionActionOptions,
+  SelectionActionsState,
+  UseSelectionActionsStateOptions,
+} from './lib/selection/use-selection-actions-state'
+export {
+  resetSelectionButtonWarnings,
+  useSelectionCreateButton,
+  useSelectionEditButton,
+} from './lib/selection/use-selection-buttons'
+export type {
+  SelectionCreateButtonProps,
+  SelectionCreateButtonState,
+  SelectionEditButtonProps,
+  SelectionEditButtonState,
+} from './lib/selection/use-selection-buttons'

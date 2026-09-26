@@ -91,6 +91,8 @@ export interface UIKitSelectOption<TNode = unknown, TData = unknown> {
   group?: string
   /** App data. The skin never reads it — it only hands it to the render functions. */
   data?: TData
+  /** Computed by the field (`isOptionEditable`): whether the item gets the edit pencil */
+  editable?: boolean
 }
 
 /**
@@ -102,7 +104,32 @@ export interface UIKitOptionRenderState {
   disabled: boolean
 }
 
-export interface UIKitSelectProps<TNode = unknown, TData = unknown> {
+/** Handle of the dropdown: the skin fills it, the field calls it before the app's own dialog */
+export interface UIKitSelectControl {
+  close: () => void
+  focusTrigger: () => void
+}
+
+/** Slots shared by Select and Combobox (buttons of the selection field) */
+export interface UIKitSelectionSlotProps<TNode = unknown, TData = unknown> {
+  /** Default buttons of an item (the pencil). The field passes them only when there is no own `renderOption` */
+  renderOptionActions?: (option: UIKitSelectOption<TNode, TData>) => TNode
+  /** Buttons next to the selected value — OUTSIDE the trigger (a `<button>`); Chakra: in the indicator group */
+  controlActions?: TNode
+  /** Footer of the list inside the content, after the items (e.g. the create button) */
+  listFooter?: TNode
+  /** The skin puts `{ close, focusTrigger }` here while the root is mounted */
+  controlRef?: { current: UIKitSelectControl | null }
+  /**
+   * F2: value of the highlighted item (list open → `'option'`) or of the selected one (list closed →
+   * `'value'`)
+   */
+  onEditHotkey?: (value: string, scope: 'option' | 'value') => void
+  /** Localized hint for `aria-describedby`/`title` when `onEditHotkey` is set */
+  editHotkeyHint?: string
+}
+
+export interface UIKitSelectProps<TNode = unknown, TData = unknown> extends UIKitSelectionSlotProps<TNode, TData> {
   value?: string
   onValueChange: (value: string | undefined) => void
   onBlur?: () => void
@@ -117,6 +144,8 @@ export interface UIKitSelectProps<TNode = unknown, TData = unknown> {
   label?: TNode
   placeholder?: string
   disabled?: boolean
+  /** Pass-through: zag takes `readOnly` into account, Radix ignores it (the field hides the slots) */
+  readOnly?: boolean
   clearable?: boolean
   size?: string
   variant?: string
@@ -174,7 +203,7 @@ export interface UIKitNativeSelectProps {
   'data-field-name'?: string
 }
 
-export interface UIKitComboboxProps<TNode = unknown, TData = unknown> {
+export interface UIKitComboboxProps<TNode = unknown, TData = unknown> extends UIKitSelectionSlotProps<TNode, TData> {
   value?: string
   inputValue: string
   onInputChange: (value: string) => void
@@ -182,6 +211,8 @@ export interface UIKitComboboxProps<TNode = unknown, TData = unknown> {
   options: UIKitSelectOption<TNode, TData>[]
   /** Own content of an option; the skin wraps it in its own item text. Not called for service items. */
   renderOption?: (option: UIKitSelectOption<TNode, TData>, state: UIKitOptionRenderState) => TNode
+  /** Content of the empty list instead of the «nothing found» text (e.g. with the create button) */
+  emptyContent?: TNode
   loading?: boolean
   placeholder?: string
   disabled?: boolean

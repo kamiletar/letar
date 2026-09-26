@@ -204,6 +204,34 @@ An option carries typed app data (`data`) and can be drawn as any node. `TData` 
 - Combobox has no `renderValue`: the input holds plain text.
 - ⚠️ **Behavior change:** options with a node `label` used to show their `value`, now they show the node.
 
+## Editing a record from the field (`onUpdate`)
+
+**API:** `onUpdate`, `createItem`, `listFooter`, `Form.Field.Select.EditButton`, `Form.Field.Select.CreateButton`
+on `Form.Field.Select`; the same plus `renderEmpty` and `getEditable` on `Form.Field.Combobox`. Chakra and shadcn skins.
+
+A pencil sits at every item and at the selected value. The app opens its own dialog (its server action)
+and returns `{ label, value, data? }` — or `null` if the user cancelled.
+
+```tsx
+<Form.Field.Select
+  name="workTypeId"
+  options={workTypes.map((w) => ({ value: w.id, label: w.name, data: w, editable: !w.system }))}
+  onUpdate={async (option) => {
+    const saved = await openWorkTypeDialog(option.data)
+    return saved ? { label: saved.name, value: saved.id, data: saved } : null
+  }}
+/>
+```
+
+- Same `value` = caption fix (the form stays clean). Another `value` = the record was replaced; the selected one follows it.
+- The edit lies over the app's `options` until the app refetches the list.
+- The list closes before the app's dialog; while the action runs the pencils are disabled.
+- **F2** (Fn+F2 on laptops) edits the highlighted item or the selected value. The shadcn Combobox has no keyboard list navigation, so no F2 there.
+- `editable: false` on an option hides its pencil. With your own `renderOption` the default pencil is not drawn — put
+  `<Form.Field.Select.EditButton />` inside. Slots inside `renderValue` draw nothing (a `<button>` cannot nest a button).
+- `createItem={false}` removes the service "+ Add…" item: use `<Form.Field.Select.CreateButton />` in `listFooter`.
+  Both slots accept `asChild`.
+
 ## RadioGroup
 
 **API:** `Form.Field.RadioGroup`

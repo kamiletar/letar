@@ -64,6 +64,9 @@ export default function HomePage() {
         <Button asChild colorPalette="cyan" variant="outline" size="lg" width="fit-content">
           <Link href="/render-option-demo">Свой рендер опций (renderOption/renderValue у Select/Combobox)</Link>
         </Button>
+        <Button asChild colorPalette="pink" variant="outline" size="lg" width="fit-content">
+          <Link href="/edit-option-demo">Правка записи из поля (onUpdate/EditButton у Select/Combobox)</Link>
+        </Button>
         <Button asChild colorPalette="orange" variant="outline" size="lg" width="fit-content">
           <Link href="/dirty-guard-demo">DirtyGuard (защита от потери данных в createForm и на форме)</Link>
         </Button>

@@ -4,6 +4,15 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.41.0] - 2026-09-26
+
+### Added
+
+- **`onUpdate`, `createItem`, `listFooter`, `EditButton`/`CreateButton` у `Field.Select` и `Field.Combobox`,
+  `renderEmpty` у Combobox** (паритет с `@letar/forms` 2.20.0). Карандаш у пункта и у значения; F2 у Select
+  (Radix `onKeyDown` пункта и триггера). У Combobox клавиатурной навигации по списку нет — карандаш только мышью.
+  Пустой результат Combobox: сообщение + пункт «+ Добавить "…"». `SelectOption.editable`.
+
 ## [0.40.0] - 2026-09-26
 
 ### Added

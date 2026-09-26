@@ -4,6 +4,15 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.13.0] - 2026-09-26
+
+### Added
+
+- **Слой `selection`** — общая для скинов логика действий поля выбора: `useSelectionActionsState`
+  (конвейер `run` для `onCreate`/`onUpdate`, `pending`, наложение правок, созданные опции),
+  `useSelectionEditButton`/`useSelectionCreateButton` (видимость, `disabled`, `aria-*`, гашение событий),
+  контексты `SelectionActionsProvider`/`SelectionOptionProvider`.
+
 ## [0.12.0] - 2026-09-26
 
 ### Added

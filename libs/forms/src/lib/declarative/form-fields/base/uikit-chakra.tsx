@@ -16,7 +16,7 @@ import {
 import { getOptionText, groupOptions } from '@letar/forms-core/uikit'
 import type { UIKitCorePrimitives, UIKitExtendedPrimitives, UIKitTone } from '@letar/forms-core/uikit'
 import type { ReactElement, ReactNode } from 'react'
-import { useMemo } from 'react'
+import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { FieldError } from './field-error'
 import { FieldLabel } from './field-label'
 import { FieldTooltip } from './field-tooltip'
@@ -159,8 +159,32 @@ export const chakraUIKit: ChakraUIKit = {
     clearable,
     size,
     variant,
+    readOnly,
+    renderOptionActions,
+    controlActions,
+    listFooter,
+    controlRef,
+    onEditHotkey,
+    editHotkeyHint,
     ...rest
   }): ReactElement {
+    // Управляемое открытие: поле закрывает список перед окном приложения (`controlRef.close`)
+    const [open, setOpen] = useState(false)
+    const triggerRef = useRef<HTMLButtonElement | null>(null)
+    const highlightedRef = useRef<string | null>(null)
+    const hintId = useId()
+    useEffect(() => {
+      if (!controlRef) {
+        return
+      }
+      controlRef.current = {
+        close: () => setOpen(false),
+        focusTrigger: () => triggerRef.current?.focus(),
+      }
+      return () => {
+        controlRef.current = null
+      }
+    }, [controlRef])
     // Группировка — та же framework-free логика, что использует `useGroupedOptions` для
     // Combobox/Listbox (`use-grouped-options.ts`) — вынесена в `@letar/forms-core/uikit`.
     // Здесь остаётся только Chakra-специфичная обвязка (`createListCollection`).
@@ -205,6 +229,12 @@ export const chakraUIKit: ChakraUIKit = {
         onValueChange={(details) => onValueChange(details.value[0] as string | undefined)}
         onInteractOutside={onBlur}
         disabled={disabled}
+        readOnly={readOnly}
+        open={open}
+        onOpenChange={(details) => setOpen(details.open)}
+        onHighlightChange={(details) => {
+          highlightedRef.current = details.highlightedValue
+        }}
         data-field-name={rest['data-field-name']}
       >
         <ChakraSelect.HiddenSelect />
@@ -214,19 +244,49 @@ export const chakraUIKit: ChakraUIKit = {
           </ChakraSelect.Label>
         )}
         <ChakraSelect.Control>
-          <ChakraSelect.Trigger>
+          <ChakraSelect.Trigger
+            ref={triggerRef}
+            pe={controlActions ? (clearable ? '5.5rem' : '4rem') : undefined}
+            aria-keyshortcuts={onEditHotkey ? 'F2' : undefined}
+            aria-describedby={onEditHotkey && editHotkeyHint ? hintId : undefined}
+            onKeyDown={onEditHotkey
+              ? (event) => {
+                // Закрытый список: F2 правит выбранное значение
+                if (event.key === 'F2' && !open && selected[0] !== undefined && selected[0] !== '') {
+                  event.preventDefault()
+                  onEditHotkey(String(selected[0]), 'value')
+                }
+              }
+              : undefined}
+          >
             <ChakraSelect.ValueText placeholder={placeholder}>
               {hasCustomValue ? customValue : undefined}
             </ChakraSelect.ValueText>
           </ChakraSelect.Trigger>
           <ChakraSelect.IndicatorGroup>
             {clearable && <ChakraSelect.ClearTrigger />}
+            {controlActions && (
+              // IndicatorGroup не принимает клики (pointer-events: none) — кнопке возвращаем их
+              <Box display="flex" alignItems="center" pointerEvents="auto">{controlActions}</Box>
+            )}
             <ChakraSelect.Indicator />
           </ChakraSelect.IndicatorGroup>
         </ChakraSelect.Control>
+        {onEditHotkey && editHotkeyHint && <Box id={hintId} srOnly>{editHotkeyHint}</Box>}
         <Portal>
           <ChakraSelect.Positioner>
-            <ChakraSelect.Content>
+            <ChakraSelect.Content
+              onKeyDown={onEditHotkey
+                ? (event) => {
+                  // Открытый список: F2 правит подсвеченный пункт
+                  const value = highlightedRef.current
+                  if (event.key === 'F2' && value) {
+                    event.preventDefault()
+                    onEditHotkey(value, 'option')
+                  }
+                }
+                : undefined}
+            >
               {groups
                 ? Array.from(groups.entries()).map(([groupName, groupItems]) => (
                   <ChakraSelect.ItemGroup key={groupName}>
@@ -234,6 +294,7 @@ export const chakraUIKit: ChakraUIKit = {
                     {groupItems.map((opt) => (
                       <ChakraSelect.Item item={opt} key={opt.value}>
                         <ChakraSelect.ItemText>{renderItemContent(opt)}</ChakraSelect.ItemText>
+                        {renderOptionActions?.(opt)}
                         <ChakraSelect.ItemIndicator />
                       </ChakraSelect.Item>
                     ))}
@@ -242,9 +303,13 @@ export const chakraUIKit: ChakraUIKit = {
                 : options.map((opt) => (
                   <ChakraSelect.Item item={opt} key={opt.value}>
                     <ChakraSelect.ItemText>{renderItemContent(opt)}</ChakraSelect.ItemText>
+                    {renderOptionActions?.(opt)}
                     <ChakraSelect.ItemIndicator />
                   </ChakraSelect.Item>
                 ))}
+              {listFooter && (
+                <Box position="sticky" bottom={0} bg="bg.panel" borderTopWidth="1px" mt={1} pt={1}>{listFooter}</Box>
+              )}
             </ChakraSelect.Content>
           </ChakraSelect.Positioner>
         </Portal>
