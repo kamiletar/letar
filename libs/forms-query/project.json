@@ -1,0 +1,180 @@
+{
+  "name": "@letar/forms-query",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/forms-query/src",
+  "projectType": "library",
+  "tags": [
+    "scope:shared",
+    "type:util",
+    "owner:letar"
+  ],
+  "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --build tsconfig.lib.json --emitDeclarationOnly",
+        "cwd": "libs/forms-query"
+      },
+      "dependsOn": [
+        "^typecheck"
+      ],
+      "cache": true,
+      "inputs": [
+        "default",
+        "^production",
+        "{projectRoot}/tsconfig.json",
+        "{projectRoot}/tsconfig.lib.json",
+        "{workspaceRoot}/tsconfig.base.json"
+      ],
+      "outputs": [
+        "{projectRoot}/dist/**/*.d.ts",
+        "{projectRoot}/dist/**/*.d.ts.map",
+        "{projectRoot}/dist/tsconfig.lib.tsbuildinfo"
+      ],
+      "metadata": {
+        "description": "Type-check library and generate declarations",
+        "technologies": [
+          "typescript"
+        ]
+      }
+    },
+    "typecheck:tsgo": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsgo --build tsconfig.lib.json --emitDeclarationOnly",
+        "cwd": "libs/forms-query"
+      },
+      "dependsOn": [
+        "^typecheck:tsgo"
+      ],
+      "cache": true,
+      "inputs": [
+        "default",
+        "^production",
+        "{projectRoot}/tsconfig.json",
+        "{projectRoot}/tsconfig.lib.json",
+        "{workspaceRoot}/tsconfig.base.json"
+      ],
+      "outputs": [
+        "{projectRoot}/dist/**/*.d.ts",
+        "{projectRoot}/dist/**/*.d.ts.map",
+        "{projectRoot}/dist/tsconfig.lib.tsbuildinfo"
+      ],
+      "metadata": {
+        "description": "Type-check library with tsgo (faster)",
+        "technologies": [
+          "typescript",
+          "tsgo"
+        ]
+      }
+    },
+    "test": {
+      "options": {
+        "config": "vitest.config.mts"
+      }
+    },
+    "oxlint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bunx oxlint src --config ../../.oxlintrc.json",
+        "cwd": "libs/forms-query"
+      },
+      "cache": true,
+      "inputs": [
+        "default",
+        "{workspaceRoot}/.oxlintrc.json"
+      ],
+      "metadata": {
+        "description": "Fast lint with oxlint",
+        "technologies": [
+          "oxlint"
+        ]
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "dependsOn": [
+        "oxlint"
+      ]
+    },
+    "format": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bunx dprint fmt \"**/*.{ts,tsx,js,jsx,json,md}\"",
+        "cwd": "libs/forms-query"
+      },
+      "cache": false,
+      "metadata": {
+        "description": "Format files with dprint (~30x faster than Prettier)",
+        "technologies": [
+          "dprint"
+        ]
+      }
+    },
+    "format:check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bunx dprint check \"**/*.{ts,tsx,js,jsx,json,md}\"",
+        "cwd": "libs/forms-query"
+      },
+      "cache": true,
+      "inputs": [
+        "default",
+        "{workspaceRoot}/dprint.json"
+      ],
+      "metadata": {
+        "description": "Check file formatting with dprint",
+        "technologies": [
+          "dprint"
+        ]
+      }
+    },
+    "build:npm": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "default",
+        "{projectRoot}/tsup.config.ts",
+        "{projectRoot}/package.publish.json",
+        "{projectRoot}/scripts/write-publish-package-json.mjs"
+      ],
+      "outputs": [
+        "{projectRoot}/dist"
+      ],
+      "metadata": {
+        "description": "Сборка @letar/forms-query для публикации на npm",
+        "technologies": [
+          "tsup"
+        ]
+      },
+      "options": {
+        "commands": [
+          "tsup",
+          "node scripts/write-publish-package-json.mjs",
+          "cp README.md dist/",
+          "cp CHANGELOG.md dist/",
+          "cp LICENSE dist/"
+        ],
+        "cwd": "libs/forms-query",
+        "parallel": false
+      }
+    },
+    "publish:npm": {
+      "executor": "nx:run-commands",
+      "dependsOn": [
+        "build:npm"
+      ],
+      "cache": false,
+      "metadata": {
+        "description": "Публикация @letar/forms-query на npmjs.com",
+        "technologies": [
+          "npm"
+        ]
+      },
+      "options": {
+        "command": "npm publish --access public",
+        "cwd": "libs/forms-query/dist"
+      }
+    }
+  }
+}

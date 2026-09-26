@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "emitDeclarationOnly": true,
+    "importHelpers": true,
+    "isolatedModules": true,
+    "lib": ["es2022", "dom", "dom.iterable"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "noEmitOnError": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "es2022",
+    "jsx": "react-jsx",
+    "types": ["node"],
+    "ignoreDeprecations": "6.0",
+    "paths": {
+      "@letar/forms-core/uikit": ["../forms-core/src/lib/uikit/index.ts"]
+    }
+  },
+  "exclude": ["dist", "**/*.spec.ts", "**/*.spec.tsx", "**/*.test.ts", "**/*.test.tsx"],
+  "include": ["src/**/*.ts", "src/**/*.tsx", "../forms-core/src/lib/uikit/**/*.ts"]
+}

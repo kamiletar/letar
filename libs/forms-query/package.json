@@ -1,0 +1,38 @@
+{
+  "name": "@letar/forms-query",
+  "version": "0.1.0",
+  "description": "Интеграция @letar/forms с TanStack Query: источники опций для Select и Combobox",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "@letar/source": "./src/index.ts",
+      "types": "./src/index.ts",
+      "import": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./zenstack": {
+      "@letar/source": "./src/zenstack.ts",
+      "types": "./src/zenstack.ts",
+      "import": "./src/zenstack.ts",
+      "default": "./src/zenstack.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "peerDependencies": {
+    "@tanstack/react-query": ">=5.0.0",
+    "@zenstackhq/tanstack-query": ">=3.0.0",
+    "react": ">=18.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@zenstackhq/tanstack-query": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@letar/forms": "workspace:*",
+    "@letar/forms-core": "workspace:*",
+    "@letar/forms-shadcn": "workspace:*"
+  }
+}

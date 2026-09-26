@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./out-tsc/spec",
+    "lib": ["es2022", "dom", "dom.iterable"],
+    "types": ["vitest/globals", "node"],
+    "rootDir": ".",
+    "jsx": "react-jsx"
+  },
+  "include": ["vitest.config.mts", "src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "vitest.setup.ts"]
+}

@@ -1,0 +1,58 @@
+{
+  "name": "@letar/forms-query",
+  "description": "TanStack Query adapters for @letar/forms — option sources for Select and Combobox (search, selected record, invalidation), works with both the Chakra and the shadcn skin. ZenStack helpers in a separate entry point.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./index.js"
+    },
+    "./zenstack": {
+      "types": "./zenstack.d.ts",
+      "import": "./zenstack.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./index.js",
+  "types": "./index.d.ts",
+  "files": [
+    "**/*.js",
+    "**/*.js.map",
+    "**/*.d.ts",
+    "**/*.d.ts.map",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "react",
+    "forms",
+    "tanstack-query",
+    "react-query",
+    "zenstack",
+    "combobox",
+    "select",
+    "typescript"
+  ],
+  "homepage": "https://forms.letar.best",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kamiletar/letar.git",
+    "directory": "libs/forms-query"
+  },
+  "bugs": {
+    "url": "https://github.com/kamiletar/letar/issues"
+  },
+  "peerDependencies": {
+    "@tanstack/react-query": ">=5.0.0",
+    "@zenstackhq/tanstack-query": ">=3.0.0",
+    "react": ">=18.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@zenstackhq/tanstack-query": {
+      "optional": true
+    }
+  }
+}

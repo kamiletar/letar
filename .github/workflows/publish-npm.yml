@@ -8,6 +8,7 @@ on:
   push:
     tags:
       - 'forms-v*.*.*'
+      - 'forms-query-v*.*.*'
       - 'form-mcp-v*.*.*'
       - 'zenstack-form-plugin-v*.*.*'
   workflow_dispatch:
@@ -18,6 +19,7 @@ on:
         type: choice
         options:
           - '@letar/forms'
+          - '@letar/forms-query'
           - '@letar/form-mcp'
           - '@letar/zenstack-form-plugin'
 
@@ -33,7 +35,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          # Сабмодули рекурсивно — но приватные не понадобятся, актуальные npm libs (forms, form-mcp, zenstack-form-plugin) лежат в публичной части letar.
+          # Сабмодули рекурсивно — но приватные не понадобятся, актуальные npm libs (forms, forms-query, form-mcp, zenstack-form-plugin) лежат в публичной части letar.
           # Если в будущем npm lib зависит от приватного — добавь token: ${{ secrets.PRIVATE_SUBMODULES_PAT }}
           submodules: false
 
