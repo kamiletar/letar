@@ -84,6 +84,32 @@ nx g @letar/generators:electron-app <name> --displayName="Моё приложе�
 сгенерированном `README.md`. Nextron не поддерживает `nx generate` из коробки — второй референс для
 более сложного приложения (БД, автообновление, сканер) — `apps/label-printer-desktop`.
 
+### `reference-select`
+
+Заготовка компонента справочника для `createForm` приложения: `Select` (весь справочник одним `useFindMany`)
+или `Combobox` (поиск на сервере через `fromSearchQuery`/`fromSelectedQuery`) на хуках ZenStack, с `onCreate` и
+`onUpdate`. Файл кладётся в `apps/<app>/src/<форма>-form/selects` (`comboboxes`); папка формы — единственная
+`src/*-form`, иначе `<app>-form`.
+
+```bash
+nx g @letar/generators:reference-select <app> --model=WorkCategory
+nx g @letar/generators:reference-select <app> --model=WorkCategory --kind=combobox --labelField=title
+```
+
+Параметры: `--kind=select|combobox` (по умолчанию `select`), `--labelField` (`name`), `--dir` (своя папка),
+`--schemaImport` (`@/generated/schema`, откуда берётся `schema` ZenStack).
+
+Генератор **пишет файл один раз и не перезаписывает существующий** — дальше файл принадлежит человеку.
+Поэтому это генератор, а не плагин `zenstack-form-plugin`: плагин регенерирует свои файлы целиком, а раскладка
+приложения (`src/<app>-form/…`, путь `@/generated/schema`) ему не принадлежит
+([forms/PLAN.md §17.6](/libs/forms/PLAN.md), вопрос 42). После записи печатает строку для `lazySelects` /
+`lazyComboboxes` — в форму приложения она **не вставляется**, добавляй руками.
+
+⚠️ Окно создания и правки в шаблоне — `window.prompt` с пометкой `TODO`: замени диалогом приложения. Модель с
+обязательными полями кроме подписи (например внешний ключ) генератор находит по `schema.zmodel` и предупреждает:
+`create` создаёт запись только с подписью, `typecheck` подсветит место. Мульти-файловая схема (`import`) не
+разбирается — модели в главном файле нет, это только предупреждение.
+
 ### `new-lib`
 
 Скаффолдит новую shared-библиотеку `libs/<name>` (`@letar/<name>`) по актуальной конвенции монорепо

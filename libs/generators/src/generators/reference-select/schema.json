@@ -1,0 +1,43 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "$id": "ReferenceSelect",
+  "title": "Reference Select Generator",
+  "type": "object",
+  "properties": {
+    "app": {
+      "type": "string",
+      "description": "Имя Next.js-приложения в apps/<app>, где живёт форма (createForm)",
+      "$default": {
+        "$source": "argv",
+        "index": 0
+      },
+      "x-prompt": "Для какого приложения (apps/<app>) создать компонент справочника?"
+    },
+    "model": {
+      "type": "string",
+      "description": "Модель ZenStack в PascalCase, справочник которой рисует компонент (например WorkCategory)",
+      "x-prompt": "Модель справочника (PascalCase, как в schema.zmodel)?"
+    },
+    "kind": {
+      "type": "string",
+      "description": "Вид поля: select (весь справочник одним запросом) или combobox (поиск на сервере)",
+      "enum": ["select", "combobox"],
+      "default": "select"
+    },
+    "labelField": {
+      "type": "string",
+      "description": "Поле модели, которое показывается подписью опции",
+      "default": "name"
+    },
+    "dir": {
+      "type": "string",
+      "description": "Папка для файла. По умолчанию apps/<app>/src/<app>-form/selects (для combobox — comboboxes)"
+    },
+    "schemaImport": {
+      "type": "string",
+      "description": "Путь импорта сгенерированной схемы ZenStack (экспорт `schema`)",
+      "default": "@/generated/schema"
+    }
+  },
+  "required": ["app", "model"]
+}

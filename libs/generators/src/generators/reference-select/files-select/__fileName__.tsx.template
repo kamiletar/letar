@@ -1,0 +1,75 @@
+'use client'
+
+import { schema } from '<%= schemaImport %>'
+import { FieldSelect } from '@letar/forms'
+import { useZenStackOptions } from '@letar/forms-query/zenstack'
+import { useClientQueries } from '@zenstackhq/tanstack-query/react'
+import type { ReactElement } from 'react'
+
+interface <%= model %>Record {
+  id: string
+  <%= labelField %>: string
+  $optimistic?: boolean
+}
+
+const map<%= model %> = (row: <%= model %>Record) => ({ label: row.<%= labelField %>, value: row.id })
+
+/**
+ * TODO: заменить `window.prompt` окном приложения (диалог с формой модели `<%= model %>`).
+ * Вернуть `null` — пользователь отказался, ничего не создаём и не меняем.
+ */
+function askValue(current: string): string | null {
+  const value = window.prompt('<%= model %>', current)
+  return value && value.trim() ? value.trim() : null
+}
+
+export interface <%= componentName %>Props {
+  name?: string
+  label?: string
+  placeholder?: string
+  helperText?: string
+  required?: boolean
+  disabled?: boolean
+}
+
+/**
+ * Справочник «<%= model %>» как компонент реестра `createForm` (ключ `Select.<%= model %>`).
+ * Весь список грузится одним `useFindMany`; создание и правка записи — мутации ZenStack.
+ *
+ * Подключение: в `createForm` приложения
+ * `lazySelects: { <%= model %>: () => import('./selects/<%= fileName %>').then((m) => m.<%= componentName %>) }`.
+ */
+export function <%= componentName %>(props: <%= componentName %>Props): ReactElement {
+  const client = useClientQueries(schema)
+  const all = client.<%= modelKey %>.useFindMany({ orderBy: { <%= labelField %>: 'asc' } })
+  const options = useZenStackOptions(all as { data?: <%= model %>Record[]; isLoading?: boolean }, map<%= model %>)
+  const create = client.<%= modelKey %>.useCreate({ optimisticUpdate: true })
+  const update = client.<%= modelKey %>.useUpdate()
+
+  return (
+    <FieldSelect
+      {...props}
+      {...options.fieldProps}
+      onCreate={async (_search, { optimistic }) => {
+        const value = askValue('')
+        if (!value) {
+          return null
+        }
+        optimistic({ label: value })
+        const created = (await create.mutateAsync({ data: { <%= labelField %>: value } })) as <%= model %>Record | null
+        return created ? { label: created.<%= labelField %>, value: created.id, data: created } : null
+      }}
+      onUpdate={async (option) => {
+        const value = askValue(String(option.label))
+        if (!value) {
+          return null
+        }
+        const saved = (await update.mutateAsync({
+          where: { id: String(option.value) },
+          data: { <%= labelField %>: value },
+        })) as <%= model %>Record | null
+        return saved ? { label: saved.<%= labelField %>, value: saved.id, data: saved } : null
+      }}
+    />
+  )
+}

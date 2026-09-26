@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { toCamelCase, toDisplayName } from './naming'
+import { toCamelCase, toDisplayName, toKebabCase, toLowerFirst } from './naming'
 
 describe('toDisplayName', () => {
   it('превращает kebab-case в Title Case', () => {
@@ -26,5 +26,26 @@ describe('toCamelCase', () => {
 
   it('поднимает цифру после дефиса, не теряя её', () => {
     expect(toCamelCase('app-2fa')).toBe('app2fa')
+  })
+})
+
+describe('toLowerFirst', () => {
+  it('опускает первую букву имени модели', () => {
+    expect(toLowerFirst('WorkCategory')).toBe('workCategory')
+  })
+})
+
+describe('toKebabCase', () => {
+  it('превращает PascalCase в kebab-case', () => {
+    expect(toKebabCase('WorkCategory')).toBe('work-category')
+  })
+
+  it('не дробит аббревиатуры и цифры', () => {
+    expect(toKebabCase('HTTPServer')).toBe('http-server')
+    expect(toKebabCase('Level2Item')).toBe('level2-item')
+  })
+
+  it('однословное имя просто опускает', () => {
+    expect(toKebabCase('Category')).toBe('category')
   })
 })

@@ -22,6 +22,11 @@
       "schema": "./src/generators/new-app/schema.json",
       "description": "Скаффолдит новое минимальное Next.js приложение apps/<name> — чистый шаблон Chakra UI v3 + MDX (см. .claude/commands/create/new-app.md)"
     },
+    "reference-select": {
+      "factory": "./src/generators/reference-select/generator",
+      "schema": "./src/generators/reference-select/schema.json",
+      "description": "Заготовка компонента справочника для createForm (lazySelects/lazyComboboxes): Select или Combobox на хуках ZenStack с onCreate/onUpdate. Пишет файл один раз, существующий не перезаписывает (см. libs/forms/PLAN.md §17.6)"
+    },
     "glitchtip-integrate": {
       "factory": "./src/generators/glitchtip-integrate/generator",
       "schema": "./src/generators/glitchtip-integrate/schema.json",

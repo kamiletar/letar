@@ -1,0 +1,100 @@
+'use client'
+
+import { schema } from '<%= schemaImport %>'
+import { FieldCombobox } from '@letar/forms'
+import {
+  fromSearchQuery,
+  fromSelectedQuery,
+  type SearchQueryOptions,
+  type SelectedQueryOptions,
+} from '@letar/forms-query'
+import { useClientQueries } from '@zenstackhq/tanstack-query/react'
+import type { ReactElement } from 'react'
+
+interface <%= model %>Record {
+  id: string
+  <%= labelField %>: string
+}
+
+type QueryResult<T> = { data?: T; isLoading?: boolean }
+
+/** Хуки — на уровне модуля: правило хуков не разрешает вызывать их внутри стрелки в JSX */
+function use<%= model %>Search(search: string, options: SearchQueryOptions): QueryResult<<%= model %>Record[]> {
+  const client = useClientQueries(schema)
+  return client.<%= modelKey %>.useFindMany(
+    {
+      where: { <%= labelField %>: { contains: search, mode: 'insensitive' } },
+      orderBy: { <%= labelField %>: 'asc' },
+      take: 20,
+    },
+    options,
+  ) as QueryResult<<%= model %>Record[]>
+}
+
+function use<%= model %>ById(id: string, options: SelectedQueryOptions): QueryResult<<%= model %>Record | null> {
+  const client = useClientQueries(schema)
+  return client.<%= modelKey %>.useFindUnique({ where: { id } }, options) as QueryResult<<%= model %>Record | null>
+}
+
+const search<%= model %> = fromSearchQuery(use<%= model %>Search)
+const selected<%= model %> = fromSelectedQuery(use<%= model %>ById)
+
+/**
+ * TODO: заменить `window.prompt` окном приложения (диалог с формой модели `<%= model %>`).
+ * Вернуть `null` — пользователь отказался, ничего не создаём и не меняем.
+ */
+function askValue(current: string): string | null {
+  const value = window.prompt('<%= model %>', current)
+  return value && value.trim() ? value.trim() : null
+}
+
+export interface <%= componentName %>Props {
+  name?: string
+  label?: string
+  placeholder?: string
+  helperText?: string
+  required?: boolean
+  disabled?: boolean
+}
+
+/**
+ * Справочник «<%= model %>» как компонент реестра `createForm` (ключ `Combobox.<%= model %>`).
+ * Поиск идёт на сервере (`contains`), подпись выбранного значения — отдельным `useFindUnique`.
+ *
+ * Подключение: в `createForm` приложения
+ * `lazyComboboxes: { <%= model %>: () => import('./comboboxes/<%= fileName %>').then((m) => m.<%= componentName %>) }`.
+ */
+export function <%= componentName %>(props: <%= componentName %>Props): ReactElement {
+  const client = useClientQueries(schema)
+  const create = client.<%= modelKey %>.useCreate()
+  const update = client.<%= modelKey %>.useUpdate()
+
+  return (
+    <FieldCombobox<string, <%= model %>Record>
+      {...props}
+      useQuery={search<%= model %>}
+      useSelected={selected<%= model %>}
+      getLabel={(row) => row.<%= labelField %>}
+      getValue={(row) => row.id}
+      onCreate={async (search) => {
+        const value = askValue(search)
+        if (!value) {
+          return null
+        }
+        const created = (await create.mutateAsync({ data: { <%= labelField %>: value } })) as <%= model %>Record | null
+        return created ? { label: created.<%= labelField %>, value: created.id, data: created } : null
+      }}
+      onUpdate={async (option) => {
+        const value = askValue(String(option.label))
+        if (!value) {
+          return null
+        }
+        const saved = (await update.mutateAsync({
+          where: { id: String(option.value) },
+          data: { <%= labelField %>: value },
+        })) as <%= model %>Record | null
+        return saved ? { label: saved.<%= labelField %>, value: saved.id, data: saved } : null
+      }}
+    />
+  )
+}

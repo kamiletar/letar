@@ -15,3 +15,13 @@ export function toDisplayName(name: string): string {
 export function toCamelCase(name: string): string {
   return name.replace(/-([a-z0-9])/g, (_, char: string) => char.toUpperCase())
 }
+
+/** `WorkCategory` → `workCategory` — ключ модели в клиенте ZenStack (`client.workCategory`) */
+export function toLowerFirst(name: string): string {
+  return name.charAt(0).toLowerCase() + name.slice(1)
+}
+
+/** `WorkCategory` → `work-category` — имя файла компонента по имени модели */
+export function toKebabCase(name: string): string {
+  return name.replace(/([a-z0-9])([A-Z])/g, '$1-$2').replace(/([A-Z])([A-Z][a-z])/g, '$1-$2').toLowerCase()
+}
