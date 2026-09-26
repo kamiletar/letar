@@ -199,6 +199,12 @@
       "runtimeExecutable": "nx",
       "runtimeArgs": ["start:prodcheck", "studio"],
       "port": 3125
+    },
+    {
+      "name": "flora",
+      "runtimeExecutable": "nx",
+      "runtimeArgs": ["dev", "flora"],
+      "port": 3126
     }
   ]
 }
