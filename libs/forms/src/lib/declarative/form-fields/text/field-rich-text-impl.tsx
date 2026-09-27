@@ -1,6 +1,7 @@
 'use client'
 
 import { Box, Field, HStack, IconButton } from '@chakra-ui/react'
+import { resolveToolbarString, useFormI18n } from '@letar/forms-react'
 import type { AnyFieldApi } from '@tanstack/react-form'
 import TiptapImage from '@tiptap/extension-image'
 import { Link } from '@tiptap/extension-link'
@@ -162,6 +163,10 @@ function RichTextEditor({
   fieldName,
   imageUpload,
 }: RichTextEditorProps) {
+  // Подписи кнопок тулбара — общий словарь `formToolbar.*` (`@letar/forms-react`), см. toolbar-config.tsx.
+  // Без noProviderLocale: контракт Chakra-скина без `FormI18nProvider` — английский.
+  const i18n = useFormI18n()
+
   // Build extensions dynamically
   const extensions = useMemo(() => {
     // Base extensions
@@ -278,7 +283,7 @@ function RichTextEditor({
             return (
               <IconButton
                 key={button}
-                aria-label={config.label}
+                aria-label={resolveToolbarString(i18n, config.labelKey)}
                 size="sm"
                 variant={isActive ? 'solid' : 'ghost'}
                 colorPalette={isActive ? 'brand' : undefined}

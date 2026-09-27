@@ -1,5 +1,35 @@
 # Выполненные задачи — @letar/forms
 
+## 2026-09-27 (`DustyBrook`, временная identity — `forms-dev` был занят живой сессией) — подписи тулбара RichText через общий словарь (forms 2.33.0, forms-react 0.23.0, forms-shadcn 0.57.0)
+
+**Контекст:** побочная находка пакета №5 координатора (i18n placeholder-хардкодов shadcn, п.5,
+`formFieldPlaceholder.*`) — подписи кнопок тулбара `Form.Field.RichText` остались хардкодом в
+обоих скинах, причём в Chakra-конфиге (`toolbar-config.tsx`) вперемешку: `underline`/`code`/
+`heading1-3`/`link` — по-русски, `bold`/`italic`/`strike`/`bulletList`/`orderedList`/`blockquote`/
+`undo`/`redo`/`image` — по-английски (исторический артефакт разных сессий); в shadcn-версии
+(`rich-text-toolbar-config.tsx`) все 14 кнопок уже были на русском.
+
+**Решение:** источником истины для русского текста взят shadcn (внутренне последовательный).
+Заведён **один** словарь `formToolbar.*` (`toolbar-strings.ts`, `@letar/forms-react`) на оба
+скина сразу — не по одному на скин, как у `formFieldPlaceholder.*`/`formSignature.*`: у тулбара
+набор строк и так одинаковый, а `TOOLBAR_CONFIG` каждого скина хранит `labelKey` вместо готового
+текста. Резолв — `resolveToolbarString(i18n, key, noProviderLocale?)`, чистая функция (не хук):
+компонент тулбара берёт `useFormI18n()` один раз, а подписи кнопок резолвит внутри `.map()` по
+`toolbarButtons` (переменная длина списка запрещает вызывать хук в цикле). Chakra — без
+`noProviderLocale` (английский без провайдера, тот же контракт, что у `formField.*`), shadcn — с
+`SHADCN_NO_PROVIDER_LOCALE` ('ru').
+
+⚠️ Кнопки `link`/`image` в Chakra-рендере (`field-rich-text-impl.tsx`) особый случай — подменяются
+на `LinkPopover`/`ImagePopover` со своими независимыми `aria-label` (`"Remove ссылку"`/
+`"Add ссылку"`/`"Insert image"`, не через `TOOLBAR_CONFIG.labelKey`), не портированы на словарь в
+этой сессии — вне заявленного скоупа задачи.
+
+**Тесты:** `toolbar-strings.spec.ts` (forms-react, по образцу `field-placeholder-strings.spec.ts`)
+
+- по интеграционному i18n-спеку на скин (`field-rich-text-toolbar-i18n.spec.tsx` в forms и
+  forms-shadcn, по образцу `field-rich-text-i18n.spec.tsx`, с прогревом ленивого модуля). `nx test
+forms,forms-react,forms-shadcn`, `nx lint`, `nx typecheck:tsgo` — зелёные.
+
 ## 2026-09-24 (`forms-dev`) — `onCreate` у Select/Combobox (forms 2.17.0)
 
 **Контекст:** запрос `domwellbes-dev`, тред `forms-domwellbes-2026-09-24`, п.3.

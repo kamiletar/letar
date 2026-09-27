@@ -4,6 +4,19 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.33.0] - 2026-09-27
+
+### Added
+
+- Подписи кнопок тулбара `Form.Field.RichText` — из общего словаря `formToolbar.*`
+  (`@letar/forms-react` ≥ 0.23.0, один словарь на Chakra- и shadcn-скин): без `FormI18nProvider` —
+  английский (контракт скина), с провайдером — перевод приложения или встроенный по `locale`.
+  `TOOLBAR_CONFIG.label` (готовый текст) заменён на `TOOLBAR_CONFIG.labelKey` (ключ словаря). Заодно
+  выровнена внутренняя непоследовательность конфига: до словаря `underline`/`code`/`heading1-3`/`link`
+  были захардкожены по-русски, а `bold`/`italic`/`strike`/`bulletList`/`orderedList`/`blockquote`/
+  `undo`/`redo`/`image` — по-английски (исторический артефакт разных сессий); английские значения
+  словаря выровнены под этот же список кнопок.
+
 ## [2.32.1] - 2026-09-27
 
 ### Изменено
