@@ -167,3 +167,7 @@ export type { SelectionSearchState, UseSelectionSearchOptions } from './lib/sele
 // Строки поля подписи (`Form.Field.Signature`, shadcn-скин) — отдельный словарь от `formSelection.*`
 export { resolveSignatureString, useSignatureString } from './lib/field/signature-strings'
 export type { SignatureStringKey } from './lib/field/signature-strings'
+
+// Placeholder-строки Address/City/PasswordStrength/RichText/Editable (shadcn-скин) — по одной строке на поле
+export { resolveFieldPlaceholderString, useFieldPlaceholderString } from './lib/field/field-placeholder-strings'
+export type { FieldPlaceholderStringKey } from './lib/field/field-placeholder-strings'

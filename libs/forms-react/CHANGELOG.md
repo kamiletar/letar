@@ -4,6 +4,16 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.22.0] - 2026-09-27
+
+### Added
+
+- `resolveFieldPlaceholderString`, `useFieldPlaceholderString`, тип `FieldPlaceholderStringKey`: словарь
+  placeholder-строк `Form.Field.Address`/`City`/`PasswordStrength`/`RichText`/`Editable` (`formFieldPlaceholder.*`) для
+  shadcn-скина — по одной встроенной строке на поле, один общий файл вместо отдельного на каждое. Тот же принцип, что у
+  `formSignature.*`: отдельный от `formField.*` Chakra-скина (общего рантайма между скинами для несписочных полей пока
+  нет), английские значения совпадают с Chakra-версией там, где для ключа есть аналог.
+
 ## [0.21.0] - 2026-09-27
 
 ### Added
