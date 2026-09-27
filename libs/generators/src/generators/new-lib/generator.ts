@@ -34,10 +34,12 @@ export default async function newLibGenerator(tree: Tree, options: NewLibGenerat
   await formatFiles(tree)
 
   logger.info(`✅ libs/${name} создан (@letar/${name}).`)
-  logger.info(`Дальше: nx sync — синхронизировать TypeScript references корня.`)
   logger.info(
-    `Подключение к приложению (3 обязательных места, см. .claude/rules/libs.md): 'paths' и 'references' `
-      + `в tsconfig.json приложения, 'implicitDependencies' в package.json приложения.`,
+    `Подключение к приложению (обязательно, см. .claude/rules/libs.md#подключение-к-приложению): `
+      + `'@letar/${name}': 'workspace:*' в реальные dependencies приложения + bun install.`,
+  )
+  logger.info(
+    `'paths' в tsconfig.json и 'implicitDependencies' — вспомогательные, не обязательные (nx sync здесь не поможет — отключён в nx.json).`,
   )
   logger.info(`nx typecheck:tsgo ${name} && nx lint ${name} && nx test ${name} — проверить сгенерированный каркас.`)
 }

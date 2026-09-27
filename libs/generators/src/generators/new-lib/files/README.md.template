@@ -28,9 +28,10 @@ nx typecheck:tsgo <%= name %>
 
 ## Подключение к приложению
 
-Обязательное — одно: добавь `@letar/<%= name %>` в `nx.implicitDependencies` в `package.json`
-приложения (если библиотеки нет в его `dependencies`). Это ребро графа Nx; сам импорт
-`@letar/<%= name %>` резолвится и без настроек приложения.
+Обязательное — одно: добавь `@letar/<%= name %>` в реальные `dependencies` приложения
+(`workspace:*`) и запусти `bun install` — только так bun создаст симлинк в его
+`node_modules/@letar/<%= name %>`, без которого не резолвится `typecheck:tsgo`/vitest.
+`nx.implicitDependencies` — необязательный резервный канал, не замена `dependencies`.
 
 Когда дополнительно нужны `paths` в его `tsconfig.json` и почему `nx sync` здесь не поможет —
 [libs.md](/.claude/rules/libs.md#подключение-к-приложению).
