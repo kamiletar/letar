@@ -7,6 +7,16 @@
 
 ## [Unreleased]
 
+## [0.17.0] - 2026-09-27
+
+### Added
+
+- `withCredentialAccountIssuer()` / `CREDENTIAL_ACCOUNT_ISSUER` в `@letar/auth/server` — хук `databaseHooks.account.create.before`, проставляющий `issuer = 'local:credential'` credential-аккаунту (сброс пароля создавал его с NULL, см. `.claude/docs/better-auth-1.7-account-issuer-field.md`).
+
+### Changed
+
+- `createAuth`/`createAuthAsync` оборачивают `profile.databaseHooks` этим хуком автоматически.
+
 ## [0.16.0] - 2026-09-21
 
 ### Changed

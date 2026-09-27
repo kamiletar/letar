@@ -3,6 +3,7 @@ import { betterAuth } from 'better-auth'
 import { nextCookies } from 'better-auth/next-js'
 import { genericOAuth, jwt } from 'better-auth/plugins'
 
+import { withCredentialAccountIssuer } from '../account-issuer'
 import type { AuthProfile, HubClientAuthProfile, HubProviderAuthProfile, StandaloneAuthProfile } from './types'
 
 /**
@@ -116,7 +117,7 @@ function buildStandaloneAuth<TProfile extends StandaloneAuthProfile | HubProvide
     },
 
     ...resolveSocialProviders(profile),
-    ...(profile.databaseHooks && { databaseHooks: profile.databaseHooks }),
+    databaseHooks: withCredentialAccountIssuer(profile.databaseHooks),
 
     user: profile.user,
     session: buildSessionConfig(profile.session),
@@ -223,7 +224,7 @@ function buildHubProviderAuth<TProfile extends HubProviderAuthProfile>(profile: 
     },
 
     ...resolveSocialProviders(profile),
-    ...(profile.databaseHooks && { databaseHooks: profile.databaseHooks }),
+    databaseHooks: withCredentialAccountIssuer(profile.databaseHooks),
 
     user: profile.user,
     // oauthProvider требует явный storeSessionInDatabase при secondaryStorage — иначе

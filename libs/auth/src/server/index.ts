@@ -29,6 +29,7 @@
  */
 
 // Session helpers
+export { CREDENTIAL_ACCOUNT_ISSUER, withCredentialAccountIssuer } from './account-issuer'
 export { type AnonymousAuthInstance, createGetOrCreateSessionUserId } from './anonymous-session'
 export { createAuthChecks } from './checks'
 export { AuthError, createAuthGuards, type GuardOptions } from './guards'
