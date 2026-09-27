@@ -4,6 +4,14 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.20.0] - 2026-09-27
+
+### Added
+
+- `resolveSelectionString`, `useSelectionString`, тип `SelectionStringKey`: общий словарь встроенных строк полей выбора
+  (`formSelection.*`, ru/en) для Chakra- и shadcn-скина; третий аргумент `noProviderLocale` — язык без `FormI18nProvider`
+  (по умолчанию английский). Новый ключ `formSelection.clear` («Очистить» / «Clear»).
+
 ## [0.19.0] - 2026-09-27
 
 ### Added

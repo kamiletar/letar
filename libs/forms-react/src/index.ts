@@ -141,6 +141,8 @@ export type {
   SelectionOptionContextValue,
   SelectionSlotScope,
 } from './lib/selection/selection-context'
+export { resolveSelectionString, useSelectionString } from './lib/selection/selection-strings'
+export type { SelectionStringKey } from './lib/selection/selection-strings'
 export { DEFAULT_SETTLE_TIMEOUT, useSelectionActionsState } from './lib/selection/use-selection-actions-state'
 export type {
   RunSelectionActionOptions,
