@@ -5,7 +5,19 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 версионирование следует [Semantic Versioning](https://semver.org/lang/ru/).
 
-## [Unreleased]
+## [1.9.30] - 2026-09-27
+
+### Fixed
+
+- Дифференциальная загрузка обновления падала с `HttpError: 501` и откатывалась на полную
+  (110 МБ). Наш `generic`-фид (обход repo-wide `latest`, см. 1.7.4) по умолчанию шлёт все
+  изменённые блоки одним multi-range запросом, а CDN ассетов GitHub
+  (`release-assets.githubusercontent.com`) такой запрос отвергает (`501 Unsupported client`;
+  одиночный Range — `206`). Встроенный `GitHubProvider` поэтому сам выключает multi-range.
+  1.9.25 → 1.9.26 прошла случайно: дифф был в один блок, а один блок electron-updater
+  запрашивает одиночным Range. Фикс — `useMultipleRangeRequest: false` в
+  `@letar/electron-monorepo-updater` (`pointFeedAtOwnRelease`). Действует при обновлении
+  **с** 1.9.30: фид настраивает старая, работающая версия.
 
 ### Chore
 
