@@ -8,26 +8,36 @@ import {
   Injector,
   Input,
   type OnDestroy,
+  type OnInit,
   runInInjectionContext,
   signal,
   type TemplateRef,
   ViewChild,
 } from '@angular/core'
 import type { FormControl } from '@angular/forms'
+import { interpolate } from '@letar/forms-core/i18n'
+import { getFieldMeta } from '@letar/forms-core/schema'
 import {
   applyOptionOverlay,
   CREATE_OPTION_VALUE,
   type CreatedOption,
+  type FieldDeps,
+  getOptionSearchText,
+  getOptionText,
   isCreateOptionValue,
   isOptionEditable,
   mergeCreatedOptions,
   type SelectionActionContext,
+  type SelectSearchable,
   type SettleErrorInfo,
+  shouldOfferCreate,
   type UpdatedOption,
 } from '@letar/forms-core/uikit'
+import { createDependentField, type DependentFieldState } from '../core/dependent-field'
 import { FieldBase } from '../core/field-base'
 import { createListboxPopup, type ListboxPopup, type ListboxPopupOption } from '../core/listbox-popup'
 import { createSelectionActionsState, type SelectionActionsState } from '../core/selection-actions-state'
+import { createSelectionSearch, type SelectionSearchState } from '../core/selection-search'
 import { selectionStrings } from './selection-strings'
 
 export interface FieldSelectOption {
@@ -140,6 +150,34 @@ export interface SelectEditSlot {
  *   ARIA-атрибут другой (`aria-busy`, не `aria-disabled` — опция не «выключена», она «занята»).
  * - **Откат при ошибке.** Встроенное сообщение `actions.settleFailure()` под полем, если
  *   `onSettleError` не задан приложением (контракт фабрики, без изменений).
+ *
+ * Этап 3i паритета (ПОСЛЕДНИЙ кусок Select) — `searchable`/`dependsOn`, тот же дизайн, что у
+ * `forms-vue` (`field-select.ts`, Этап 3f) и её UI-хелпера `use-dependent-field-ui.ts`, но
+ * Angular-идиоматично (шаблон компонента, не отдельный composable-модуль):
+ * - **`searchable`.** Обвязка над `createSelectionSearch` (`../core/selection-search.ts`, Этап 2).
+ *   Строка поиска (`role="searchbox"`) рисуется первым элементом внутри попапа, вместе со списком
+ *   перенесена в CDK Overlay через тот же `attachFloating` — оба элемента теперь обёрнуты в общий
+ *   `<div #popupPanel>`, а не голый `<ul>`, как в Этапах 3g-3h (иначе строка поиска не попала бы в
+ *   overlay-контейнер вместе со списком). Автофокус при открытии — `@ViewChild('searchInput')`-
+ *   сеттер (тот же приём, что `attachTrigger`/`attachFloating`): вызывается заново при каждом
+ *   появлении инпута. Клавиатурная навигация внутри инпута — тот же `popup.onKeydown`, что и у
+ *   триггера (стрелки/`Enter`/`Escape` долетают до списка, печатные символы — в инпут). Пункт
+ *   создания предлагается по тексту поиска, когда ни одна опция не совпала (`shouldOfferCreate`) —
+ *   когда запрос пуст, действует прежняя политика Этапа 3h (предлагается всегда).
+ * - **`dependsOn`.** Обвязка над `createDependentField` (`../core/dependent-field.ts`, Этап 2).
+ *   Реестр очистки (`FormRootService.dependents`) и карта видимых подписей полей
+ *   (`FormRootService.labels`) заведены в Этапе 3i прямо в `FormRootService` — минимальный аналог
+ *   `AppFormContext.dependents`/`.labels` (`forms-vue`), которого раньше в этом пакете не было
+ *   (`FieldCascadingSelectComponent` — более ранняя, самодостаточная реализация того же паттерна
+ *   без общего реестра). `values()` фабрики — не прямое чтение `formRoot.form.getRawValue()`
+ *   (не сигнал, `computed()` не отследил бы правку), а мост через сигнал `formValues`,
+ *   синхронизируемый подпиской на `formRoot.form.valueChanges` — тот же приём «моста», что описан
+ *   в JSDoc `dependent-field.ts` и уже применён в `syncParentValue()`
+ *   (`field-cascading-select.component.ts`). Заблокированное поле (`dependentField.blocked()`) —
+ *   `disabled` на триггере, клик/клавиатура не открывают попап, `placeholder` подменяется
+ *   подсказкой «Сначала выберите «…»» (`placeholderWhenDisabled` либо автоматический текст).
+ *   Подпись родителя ищется сначала в `formRoot.labels` (видимая подпись, если родитель уже
+ *   смонтирован), иначе — в `ui.title` его Zod-схемы.
  */
 @Component({
   selector: 'letar-field-select',
@@ -179,18 +217,20 @@ export interface SelectEditSlot {
             [attr.aria-expanded]="popup.isOpen()"
             [attr.aria-controls]="listboxId"
             [attr.aria-activedescendant]="popup.activeDescendantId()"
+            [attr.aria-describedby]="hintText() && !hasError() ? hintId : null"
             [attr.data-field-name]="name"
             [attr.data-placeholder]="selectedOption() ? null : ''"
-            (click)="popup.togglePopup()"
-            (keydown)="popup.onKeydown($event)"
-            (blur)="onTriggerBlur(ctrl)"
+            [disabled]="dependentField.blocked()"
+            (click)="onTriggerClick()"
+            (keydown)="onTriggerKeydown($event)"
+            (blur)="onTriggerBlur(ctrl, $event)"
           >
             @if (selectedOption(); as selOpt) {
               <ng-container
                 *ngTemplateOutlet="valueTemplate ?? defaultValueTemplate; context: { $implicit: selOpt }"
               ></ng-container>
             } @else {
-              <span class="letar-field__select-placeholder">{{ resolvedPlaceholder() }}</span>
+              <span class="letar-field__select-placeholder">{{ effectivePlaceholder() }}</span>
             }
           </button>
           @if (valueEditVisible()) {
@@ -205,46 +245,81 @@ export interface SelectEditSlot {
             >✎</button>
           }
           @if (popup.isOpen()) {
-            <ul #listbox [id]="listboxId" role="listbox" class="letar-field__select-listbox">
-              @for (option of visibleOptions(); track option.value; let i = $index) {
-                @if (isCreateOption(option)) {
-                  <li
-                    [id]="popup.optionId(i)"
-                    role="option"
-                    class="letar-field__select-option letar-field__select-create-item"
-                    aria-selected="false"
-                    [attr.data-active]="i === popup.activeIndex() || null"
-                    (mousedown)="$event.preventDefault()"
-                    (click)="popup.selectIndex(i)"
-                  >{{ option.label }}</li>
-                } @else {
-                  <li
-                    [id]="popup.optionId(i)"
-                    role="option"
-                    class="letar-field__select-option"
-                    [attr.aria-selected]="option.value === currentDisplayValue()"
-                    [attr.aria-busy]="option.pending || null"
-                    [attr.data-active]="i === popup.activeIndex() || null"
-                    [attr.data-pending]="option.pending || null"
-                    (mousedown)="$event.preventDefault()"
-                    (click)="popup.selectIndex(i)"
-                  >
-                    <ng-container
-                      *ngTemplateOutlet="
-                        optionTemplate ?? defaultOptionTemplate;
-                        context: {
-                          $implicit: option,
-                          state: { selected: option.value === currentDisplayValue(), active: i === popup.activeIndex() },
-                          edit: optionEditContext(option),
-                        }
-                      "
-                    ></ng-container>
-                  </li>
-                }
+            <div #popupPanel class="letar-field__select-popup">
+              @if (searchState.search(); as search) {
+                <input
+                  #searchInput
+                  type="text"
+                  role="searchbox"
+                  autocomplete="off"
+                  class="letar-field__select-search"
+                  [value]="search.query"
+                  [attr.placeholder]="search.placeholder"
+                  [attr.aria-label]="search.ariaLabel"
+                  [attr.aria-controls]="listboxId"
+                  [attr.aria-activedescendant]="popup.activeDescendantId()"
+                  (input)="onSearchInput($event, search.onQueryChange)"
+                  (keydown)="popup.onKeydown($event)"
+                  (blur)="onTriggerBlur(ctrl, $event)"
+                />
               }
-            </ul>
+              <ul #listbox [id]="listboxId" role="listbox" class="letar-field__select-listbox">
+                @if (searchState.enabled() && realOptionCount() === 0) {
+                  <li class="letar-field__select-empty" role="presentation">{{ emptyMessage() }}</li>
+                }
+                @for (option of visibleOptions(); track option.value; let i = $index) {
+                  @if (isCreateOption(option)) {
+                    <li
+                      [id]="popup.optionId(i)"
+                      role="option"
+                      class="letar-field__select-option letar-field__select-create-item"
+                      aria-selected="false"
+                      [attr.data-active]="i === popup.activeIndex() || null"
+                      (mousedown)="$event.preventDefault()"
+                      (click)="popup.selectIndex(i)"
+                    >{{ option.label }}</li>
+                  } @else {
+                    <li
+                      [id]="popup.optionId(i)"
+                      role="option"
+                      class="letar-field__select-option"
+                      [attr.aria-selected]="option.value === currentDisplayValue()"
+                      [attr.aria-busy]="option.pending || null"
+                      [attr.data-active]="i === popup.activeIndex() || null"
+                      [attr.data-pending]="option.pending || null"
+                      (mousedown)="$event.preventDefault()"
+                      (click)="popup.selectIndex(i)"
+                    >
+                      <ng-container
+                        *ngTemplateOutlet="
+                          optionTemplate ?? defaultOptionTemplate;
+                          context: {
+                            $implicit: option,
+                            state: { selected: option.value === currentDisplayValue(), active: i === popup.activeIndex() },
+                            edit: optionEditContext(option),
+                          }
+                        "
+                      ></ng-container>
+                    </li>
+                  }
+                }
+              </ul>
+            </div>
           }
         </div>
+        @if (hintText(); as hint) {
+          @if (!hasError()) {
+            <span [id]="hintId" class="letar-field__select-depends-hint">{{ hint }}</span>
+          }
+        }
+        @if (dependentField.active()) {
+          <span
+            class="letar-field__sr-only"
+            aria-live="polite"
+            aria-atomic="true"
+            data-dependent-live
+          >{{ liveMessage() }}</span>
+        }
         @if (hasError()) {
           <span class="letar-field__error" role="alert">{{ errorMessage() }}</span>
         }
@@ -257,7 +332,7 @@ export interface SelectEditSlot {
     }
   `,
 })
-export class FieldSelectComponent extends FieldBase implements OnDestroy {
+export class FieldSelectComponent extends FieldBase implements OnDestroy, OnInit {
   @Input({ required: true })
   options: FieldSelectOption[] = []
 
@@ -286,6 +361,29 @@ export class FieldSelectComponent extends FieldBase implements OnDestroy {
   @Input()
   createItem?: boolean
 
+  /** Поиск по списку (Этап 3i): `true`/`false`/`'auto'` (сам с 10-й опции) либо точная настройка */
+  @Input()
+  searchable?: SelectSearchable<FieldSelectOption>
+  /** Искать и по `description`, не только по `label`; по умолчанию `true`, как у остальных скинов */
+  @Input()
+  searchInDescription?: boolean
+
+  /** Путь(и) родительского поля(ей) — поле блокируется, пока родитель(и) не заполнены (§18) */
+  @Input()
+  dependsOn?: string | readonly string[]
+  /** Родитель считается заполненным, если вернуть `false` — по умолчанию проверка на непустое значение */
+  @Input()
+  depsReady?: (deps: FieldDeps) => boolean
+  /** Очищать своё значение при смене родителя; по умолчанию `true` при наличии `dependsOn` */
+  @Input()
+  clearOnParentChange?: boolean
+  /** Блокировать управление, пока родитель(и) не готовы; по умолчанию `true` при наличии `dependsOn` */
+  @Input()
+  disableWhenParentEmpty?: boolean
+  /** Свой текст в заблокированном поле вместо автоматической подсказки «Сначала выберите «…»» */
+  @Input()
+  placeholderWhenDisabled?: string
+
   /** Своя разметка пункта списка; контекст — `$implicit` (опция) + `state` (`SelectOptionRenderState`) + `edit` (`SelectEditSlot | null`) */
   @ContentChild('optionTemplate')
   optionTemplate?: TemplateRef<
@@ -300,8 +398,16 @@ export class FieldSelectComponent extends FieldBase implements OnDestroy {
 
   private readonly idBase = `letar-field-select-${crypto.randomUUID()}`
   readonly listboxId = `${this.idBase}-listbox`
+  /** Id подсказки заблокированного поля (Этап 3i `dependsOn`) — для `aria-describedby` триггера */
+  readonly hintId = `${this.idBase}-depends-hint`
 
   readonly selectedValue = signal<string | undefined>(undefined)
+  /** Мост «значения формы целиком» для `createDependentField` — обычное чтение `form.getRawValue()`
+   * не сигнал, `computed()` фабрики не отследил бы правку без него (см. JSDoc `dependent-field.ts`
+   * и `syncParentValue()` в `field-cascading-select.component.ts`) */
+  private readonly formValues = signal<Record<string, unknown>>({})
+
+  readonly searchState: SelectionSearchState<FieldSelectOption>
 
   readonly popup: ListboxPopup<ListboxPopupOption>
   /**
@@ -316,8 +422,25 @@ export class FieldSelectComponent extends FieldBase implements OnDestroy {
    * Angular проставит биндинги, и не будет перезапускаться.
    */
   actions!: SelectionActionsState
+  /**
+   * В отличие от `actions` — создаётся НЕ в `effect()` конструктора, а в `ngOnInit()` (Этап 3i,
+   * фикс NG0602). `createDependentField` сама вызывает `effect()` внутри себя (учёт правки
+   * родителя без пересоздания фабрики на каждый рендер) — Angular запрещает создавать `effect()`
+   * изнутри уже выполняющегося `effect()` («cannot be called from within a reactive context»),
+   * даже через `runInInjectionContext`: он даёт только инжектор, не снимает сам запрет. `ngOnInit`
+   * выполняется вне реактивного контекста и гарантированно ПОСЛЕ того, как Angular проставит все
+   * `@Input()`-биндинги (тот же порядок, на который уже опирается `control`-эффект `FieldBase`),
+   * поэтому подходит взамен. Читается напрямую из шаблона (`dependentField.blocked()`/`.active()`),
+   * поэтому не `private`.
+   */
+  dependentField!: DependentFieldState<FieldDeps>
+
+  /** Инжектор, захваченный в конструкторе — нужен и `actions`-эффекту, и `ngOnInit()` (оба зовут
+   * фабрики с `inject(...)` внутри вне синхронной фазы построения компонента) */
+  private readonly injector = inject(Injector)
 
   private triggerElement: HTMLButtonElement | null = null
+  private popupPanelElement: HTMLElement | null = null
 
   // Не `private`: сеттер, вызываемый только Angular через метаданные `@ViewChild` (рефлексия,
   // не статическое обращение) — `noUnusedLocals` считает такой write-only `private`-сеттер
@@ -329,9 +452,23 @@ export class FieldSelectComponent extends FieldBase implements OnDestroy {
     this.popup.attachTrigger(this.triggerElement)
   }
 
-  @ViewChild('listbox')
-  set listboxElRef(ref: ElementRef<HTMLUListElement> | undefined) {
-    this.popup.attachFloating(ref?.nativeElement ?? null)
+  /**
+   * Этап 3i: было `#listbox` (голый `<ul>`) — теперь общий контейнер `<div #popupPanel>`, в
+   * котором рядом со списком лежит строка поиска (`searchable`). Перенос в overlay через
+   * `attachFloating` должен забирать оба элемента разом, иначе поле поиска осталось бы вне
+   * позиционируемого CDK-контейнера.
+   */
+  @ViewChild('popupPanel')
+  set popupPanelElRef(ref: ElementRef<HTMLElement> | undefined) {
+    this.popupPanelElement = ref?.nativeElement ?? null
+    this.popup.attachFloating(this.popupPanelElement)
+  }
+
+  /** Автофокус поля поиска при открытии попапа (Этап 3i) — сеттер вызывается заново при каждом
+   * появлении `<input>` (тот же приём, что `attachTrigger`/`attachFloating`) */
+  @ViewChild('searchInput')
+  set searchInputElRef(ref: ElementRef<HTMLInputElement> | undefined) {
+    ref?.nativeElement.focus()
   }
 
   constructor() {
@@ -347,6 +484,17 @@ export class FieldSelectComponent extends FieldBase implements OnDestroy {
       idBase: this.idBase,
     })
 
+    // `createSelectionSearch` — обычная фабрика сигналов без `inject()` внутри (Этап 2), можно
+    // создавать синхронно здесь: все её входы — геттеры, вызываются позже, из `computed()`,
+    // читаемых только во время рендера (к тому моменту `@Input()`-биндинги уже проставлены).
+    this.searchState = createSelectionSearch<FieldSelectOption>({
+      searchable: () => this.searchable,
+      options: () => this.mergedOptions(),
+      getText: (opt) => (this.searchInDescription === false ? getOptionText(opt) : getOptionSearchText(opt)),
+      placeholder: selectionStrings.searchPlaceholder,
+      ariaLabel: selectionStrings.searchAria,
+    })
+
     // Ноль читаемых сигналов внутри — выполнится один раз, сразу после того как Angular
     // проставит `@Input()`-биндинги (та же механика, что у `control`-эффекта `FieldBase`), и
     // больше не перезапустится. `onSettleError` передаётся фабрике `undefined`, если приложение
@@ -354,10 +502,9 @@ export class FieldSelectComponent extends FieldBase implements OnDestroy {
     // (`settleFailureSignal`), а не молча проглатывает отказ через always-truthy обёртку.
     // `runInInjectionContext` обязателен: колбэк `effect()` сам по себе выполняется ВНЕ контекста
     // внедрения (NG0203 на `inject(DestroyRef)` внутри фабрики без него) — инжектор захватывается
-    // заранее через `inject(Injector)` в конструкторе.
-    const injector = inject(Injector)
+    // заранее через `inject(Injector)` в конструкторе (`this.injector`).
     effect(() => {
-      runInInjectionContext(injector, () => {
+      runInInjectionContext(this.injector, () => {
         this.actions = createSelectionActionsState({
           appOptions: () => this.options,
           value: () => this.selectedValue(),
@@ -380,6 +527,56 @@ export class FieldSelectComponent extends FieldBase implements OnDestroy {
       sync()
       const subscription = ctrl.events.subscribe(sync)
       onCleanup(() => subscription.unsubscribe())
+    })
+
+    // Мост «значения формы целиком» → сигнал `formValues`, читаемый `dependentField` (см. её
+    // комментарий выше) — тот же приём, что `syncParentValue()` в `field-cascading-select`
+    effect((onCleanup) => {
+      const sync = () => this.formValues.set(this.formRoot.form.getRawValue())
+      sync()
+      const subscription = this.formRoot.form.valueChanges.subscribe(sync)
+      onCleanup(() => subscription.unsubscribe())
+    })
+
+    // Регистрирует видимую подпись этого поля в общем реестре формы (`FormRootService.labels`) —
+    // чтобы дети, зависящие от него (`dependsOn`), могли показать «Сначала выберите «<эта подпись>»».
+    // Угловой эквивалент `useRegisterFieldLabel` (`forms-vue`): каждый прогон эффекта сначала
+    // снимает подпись предыдущего прогона (если она всё ещё в реестре), затем при необходимости
+    // ставит новую — порядок держится на `onCleanup`, выполняемом ПЕРЕД следующим прогоном
+    effect((onCleanup) => {
+      const label = this.resolvedLabel()
+      if (label && label.trim() !== '') {
+        this.formRoot.labels.set(this.name, label)
+      }
+      onCleanup(() => {
+        if (label !== undefined && this.formRoot.labels.get(this.name) === label) {
+          this.formRoot.labels.delete(this.name)
+        }
+      })
+    })
+  }
+
+  /**
+   * `createDependentField` создаётся здесь, не в `effect()` конструктора — см. JSDoc поля
+   * `dependentField` выше (NG0602: `effect()` внутри фабрики нельзя создавать изнутри уже
+   * выполняющегося `effect()`). К моменту вызова `ngOnInit()` Angular уже проставил все
+   * `@Input()`-биндинги (`dependsOn`/`depsReady`/`clearOnParentChange`/`disableWhenParentEmpty`).
+   */
+  ngOnInit(): void {
+    runInInjectionContext(this.injector, () => {
+      this.dependentField = createDependentField<FieldDeps>({
+        fullPath: this.name,
+        dependsOn: () => this.dependsOn,
+        groupPath: () => null,
+        values: () => this.formValues(),
+        depsReady: this.depsReady,
+        getParentLabel: (path) => this.getParentLabel(path),
+        dependents: this.formRoot.dependents,
+        setValue: (value) => this.control()?.setValue(value),
+        clearOnParentChange: this.clearOnParentChange,
+        disableWhenParentEmpty: this.disableWhenParentEmpty,
+        emptyValue: '',
+      })
     })
   }
 
@@ -410,14 +607,47 @@ export class FieldSelectComponent extends FieldBase implements OnDestroy {
     return !!this.onCreate && this.createItem !== false
   }
 
-  private createItemLabel(): string {
-    return `+ ${this.createLabel ?? `${selectionStrings.createVerb}…`}`
+  /** Запрос поиска (пусто — если поиск не показан) — участвует в подписи пункта создания и в
+   * решении, предлагать ли его вообще (Этап 3i) */
+  private searchQuery(): string {
+    return this.searchState.enabled() ? this.searchState.query().trim() : ''
   }
 
-  /** Видимый список — с пунктом создания в конце, когда он актуален */
+  /** Без поиска — прежняя политика Этапа 3h (предлагается всегда, пока `onCreate` задан). С
+   * поиском — только если ни одна опция не совпала с запросом (`shouldOfferCreate`) */
+  private offerCreate(merged: FieldSelectOption[]): boolean {
+    if (!this.showCreateItem()) {
+      return false
+    }
+    const query = this.searchQuery()
+    return query === '' || shouldOfferCreate(query, merged.map(getOptionText))
+  }
+
+  private createItemLabel(): string {
+    const query = this.searchQuery()
+    return query !== ''
+      ? `+ ${selectionStrings.createVerb} "${query}"`
+      : `+ ${this.createLabel ?? `${selectionStrings.createVerb}…`}`
+  }
+
+  /** Видимый список — после фильтра поиска (Этап 3i, если включён), с пунктом создания в конце,
+   * когда он актуален */
   protected visibleOptions(): FieldSelectOption[] {
     const merged = this.mergedOptions()
-    return this.showCreateItem() ? [...merged, { value: CREATE_OPTION_VALUE, label: this.createItemLabel() }] : merged
+    const searched = this.searchState.enabled() ? this.searchState.filtered() : merged
+    return this.offerCreate(merged)
+      ? [...searched, { value: CREATE_OPTION_VALUE, label: this.createItemLabel() }]
+      : searched
+  }
+
+  /** Число настоящих опций в видимом списке (без служебного пункта создания) — пусто ⇒ показать `emptyMessage` */
+  protected realOptionCount(): number {
+    return this.visibleOptions().filter((opt) => !this.isCreateOption(opt)).length
+  }
+
+  protected emptyMessage(): string {
+    const settings = this.searchable
+    return (typeof settings === 'object' ? settings.emptyMessage : undefined) ?? selectionStrings.empty
   }
 
   protected isCreateOption(option: FieldSelectOption): boolean {
@@ -467,11 +697,87 @@ export class FieldSelectComponent extends FieldBase implements OnDestroy {
     return `${selectionStrings.edit}: ${this.selectedOption()?.label ?? ''}`
   }
 
-  protected onTriggerBlur(ctrl: FormControl): void {
-    // CDK `outsidePointerEvents` уже закрывает попап по клику вне (см. `listbox-popup.ts`) —
-    // здесь нужен случай ухода фокуса клавишей Tab, который CDK не ловит
+  /**
+   * Общий обработчик `blur` для триггера и поля поиска (Этап 3i): фокус, переходящий МЕЖДУ ними
+   * (открытие попапа с `searchable` переносит фокус с триггера в инпут — `#searchInput`-сеттер
+   * зовёт `.focus()` при каждом появлении инпута — закрытие переносит обратно), не должен считаться
+   * уходом с поля. Без этой проверки первый же клик по триггеру с `searchable` закрывал бы попап
+   * немедленно. CDK `outsidePointerEvents` уже закрывает попап по клику вне (см. `listbox-popup.ts`) —
+   * здесь нужен случай ухода фокуса клавишей Tab, который CDK не ловит.
+   */
+  protected onTriggerBlur(ctrl: FormControl, event: FocusEvent): void {
+    if (this.isWithinPopup(event.relatedTarget as Node | null)) {
+      return
+    }
     this.popup.closePopup()
     ctrl.markAsTouched()
+  }
+
+  private isWithinPopup(node: Node | null): boolean {
+    return !!node && !!(this.triggerElement?.contains(node) || this.popupPanelElement?.contains(node))
+  }
+
+  /** Клик по триггеру: игнорируется, пока поле заблокировано `dependsOn` (Этап 3i) */
+  protected onTriggerClick(): void {
+    if (this.dependentField.blocked()) {
+      return
+    }
+    this.popup.togglePopup()
+  }
+
+  /** Клавиатура на триггере — та же блокировка, что у клика */
+  protected onTriggerKeydown(event: KeyboardEvent): void {
+    if (this.dependentField.blocked()) {
+      return
+    }
+    this.popup.onKeydown(event)
+  }
+
+  /** `(input)` поля поиска — извлекает значение и передаёт в `UIKitSelectSearch.onQueryChange` */
+  protected onSearchInput(event: Event, onQueryChange: (query: string) => void): void {
+    onQueryChange((event.target as HTMLInputElement).value)
+  }
+
+  /** Подпись родителя: видимая подпись поля из реестра формы (`FormRootService.labels`), иначе `ui.title` схемы */
+  private getParentLabel(path: string): string | undefined {
+    const registered = this.formRoot.labels.get(path)
+    if (registered) {
+      return registered
+    }
+    const schema = this.formRoot.schema()
+    if (!schema) {
+      return undefined
+    }
+    const title = getFieldMeta(schema, path).ui?.title
+    return typeof title === 'string' && title !== '' ? title : undefined
+  }
+
+  /** Подсказка под заблокированным полем («Сначала выберите «Страна»»); `null` — поле не заблокировано */
+  protected hintText(): string | null {
+    if (!this.dependentField.blocked()) {
+      return null
+    }
+    return interpolate(selectionStrings.dependsOnHint, {
+      parent: this.dependentField.missingParentLabels().join('», «'),
+    })
+  }
+
+  /** Placeholder триггера: подсказка про родителя, пока поле заблокировано, иначе обычный `placeholder` */
+  protected effectivePlaceholder(): string {
+    if (this.dependentField.blocked()) {
+      return this.placeholderWhenDisabled ?? this.hintText() ?? this.resolvedPlaceholder() ?? ''
+    }
+    return this.resolvedPlaceholder() ?? ''
+  }
+
+  /** Текст live-области: «Поле «Город» очищено: изменилось поле «Страна»» (пусто — очистки не было) */
+  protected liveMessage(): string {
+    const cleared = this.dependentField.cleared()
+    if (!cleared) {
+      return ''
+    }
+    const fieldLabel = this.resolvedLabel() ?? this.name
+    return interpolate(selectionStrings.dependentCleared, { field: fieldLabel, parent: cleared.parentLabel })
   }
 
   private selectValue(value: string): void {
