@@ -191,6 +191,7 @@
 - [nextjs-react19-hoistable-link-mutation-pitfall](/.claude/docs/nextjs-react19-hoistable-link-mutation-pitfall.md) ⚠️ мутация React-управляемого `<link>` нестабильна на проде
 - [nextjs-intl-setrequestlocale-ssg](/.claude/docs/nextjs-intl-setrequestlocale-ssg.md) ⚠️ нужен в каждом `page.tsx`, но сперва проверь Dynamic API выше
 - [nextjs-intl-matcher-metadata-routes](/.claude/docs/nextjs-intl-matcher-metadata-routes.md) ⚠️ matcher не ловит `icon`/`opengraph-image`, ручной аудит врёт
+- [nextjs-intl-plain-link-drops-locale-prefix](/.claude/docs/nextjs-intl-plain-link-drops-locale-prefix.md) ⚠️ голый `next/link` вместо `Link` из `next-intl` молча уводит на дефолтную локаль
 - [vitest-server-action-request-scope-apis](/.claude/docs/vitest-server-action-request-scope-apis.md) ⚠️ `headers()`/`revalidatePath()` вне request-scope бросают
 - [react-pdf-hyphenate-esm-only-exports-tsx-seed-crash](/.claude/docs/react-pdf-hyphenate-esm-only-exports-tsx-seed-crash.md) ⚠️ `db:seed` + `@react-pdf/renderer`: два падения подряд
 
