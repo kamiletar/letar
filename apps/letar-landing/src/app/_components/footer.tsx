@@ -44,7 +44,7 @@ export function Footer() {
           >
             <HStack gap={4} flexWrap="wrap">
               <Text color="fg.subtle" fontSize="sm">&copy; {new Date().getFullYear()} Letar</Text>
-              <TouchLink href="/privacy" fontSize="sm" color="fg.subtle" _hover={{ color: 'fg' }}>
+              <TouchLink href="/privacy/" fontSize="sm" color="fg.subtle" _hover={{ color: 'fg' }}>
                 Конфиденциальность
               </TouchLink>
             </HStack>

@@ -4,7 +4,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return [
     {
       url: 'https://letar.best',
-      lastModified: '2026-08-28',
+      lastModified: '2026-09-27',
       changeFrequency: 'monthly',
       priority: 1,
     },

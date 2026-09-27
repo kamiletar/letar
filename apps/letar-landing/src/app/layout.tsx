@@ -15,11 +15,11 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://letar.best'),
   title: {
     template: '%s | Letar',
-    default: 'Letar — Проекты и приложения',
+    default: 'Letar (Летар) — Проекты и приложения',
   },
   description:
-    'Живая экосистема сайтов, приложений и инструментов: продукты Ками, работы Studio Letar, open source и инфраструктура.',
-  keywords: ['letar', 'проекты', 'веб-приложения', 'Next.js', 'open source'],
+    'Letar (Летар) — живая экосистема сайтов, приложений и инструментов: продукты Ками, работы Studio Letar, open source и инфраструктура.',
+  keywords: ['letar', 'летар', 'проекты', 'веб-приложения', 'Next.js', 'open source'],
   authors: [{ name: 'Letar' }],
   creator: 'Kami',
   publisher: 'Studio Letar',
@@ -57,6 +57,7 @@ const jsonLd = {
       '@type': 'WebSite',
       '@id': 'https://letar.best/#website',
       name: 'Letar',
+      alternateName: 'Летар',
       description: 'Живая экосистема сайтов, приложений и инструментов',
       url: 'https://letar.best',
       inLanguage: 'ru',

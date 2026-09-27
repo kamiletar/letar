@@ -743,7 +743,7 @@
     },
     "apps/flora": {
       "name": "@letar/flora",
-      "version": "0.3.10",
+      "version": "0.3.11",
       "dependencies": {
         "@letar/demo-protection": "workspace:*",
         "@letar/env-load": "workspace:*",
@@ -890,7 +890,7 @@
     },
     "apps/letar-landing": {
       "name": "@letar/letar-landing",
-      "version": "0.5.6",
+      "version": "0.5.7",
       "dependencies": {
         "@letar/analytics": "workspace:*",
         "@letar/chakra-provider": "workspace:*",

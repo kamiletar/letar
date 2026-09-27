@@ -40,8 +40,8 @@ export function HeroSection() {
               </Text>
 
               <Text fontSize={{ base: 'lg', md: 'xl' }} color="fg.muted" maxW="2xl" lineHeight="1.7" mt={7}>
-                Letar — связанная экосистема сайтов, приложений и инструментов. Здесь собраны продукты Ками и работы
-                Studio Letar.
+                Letar (Летар) — связанная экосистема сайтов, приложений и инструментов. Здесь собраны продукты Ками и
+                работы Studio Letar.
               </Text>
 
               <Flex gap={3} mt={9} flexWrap="wrap">
