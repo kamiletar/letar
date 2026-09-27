@@ -2,6 +2,16 @@
 
 Детальное описание всех реализованных фич.
 
+## ✅ v1.27.4 — удалён мёртвый rate-limit.ts (2026-09-27)
+
+Аудит дублирования rate-limit реализаций монорепо (задача пришла со стороны `flora`) обнаружил
+`src/lib/rate-limit.ts` — самодельный in-memory rate limiter без единого вызывающего кода нигде
+в приложении. Удалён вместе с неиспользуемой константой `RATE_LIMIT` из `src/lib/constants.ts`.
+Не мигрировался — мигрировать было нечего, приложение не защищает свои эндпоинты rate-limit'ом
+через этот механизм вовсе. Рекомендация на будущее — `createRateLimiter` из `@letar/api-server`
+(уже в `implicitDependencies` dashboard), а не своя копия. Итог — в
+[.claude/docs/rate-limit-dedup-api-server-vs-copies.md](/.claude/docs/rate-limit-dedup-api-server-vs-copies.md).
+
 ## `scrollIntoView(smooth)` автоскролла логов зависал без OS-фокуса окна (2026-09-22)
 
 Делегировано из сессии `pravda-dev` — репо-широкий грепа по паттерну, зависающему при фиксе TOC
