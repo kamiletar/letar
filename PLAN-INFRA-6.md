@@ -5111,3 +5111,24 @@ WebKit сбрасывает ранее заполненный controlled-инп�
 - [ ] ⚠️ Открытый вопрос: реальный `nx run <app>:db:seed -- --sync-texts` не прогонялся ни локально,
       ни на сервере — проверена только сборка аргументов (тесты, shell-проба функции с заглушкой
       `nx`). Первый боевой вызов сверить с логом деплоя.
+
+## §204 (2026-09-27) `fetchLatestRelease` с `tagPrefix` — `releases[0]` заменён на выбор максимальной semver
+
+Найдено попутно в сессии по фиксу `apps/animatrona-landing/src/lib/github.ts` (мёртвый источник
+релизов): `libs/github-releases` при `tagPrefix` брал `releases[0]` из ответа `GET /releases` как
+«последний релиз» — тот же баг, который уже был найден и исправлен в
+`libs/electron-monorepo-updater/src/lib/find-own-release.ts` (порядок ответа GitHub API не
+гарантирован по убыванию версии).
+
+- [x] `fetchLatestRelease`: среди релизов, совпавших по `tagPrefix`, выбирается релиз с
+      максимальной semver-версией (`compareSemver` + `reduce`), не первый по порядку ответа.
+      Регрессионный тест с релизами намеренно не по порядку версии + тест на `null` без совпадений.
+      Версия `@letar/github-releases` 0.1.0 → 0.1.1, первый `CHANGELOG.md` библиотеки.
+- [x] Потребители на момент фикса: `animatrona-landing` (`ANIMATRONA_SOURCE`,
+      `FOLDER_PLAYER_SOURCE`), `kami-key-the-landing`. `aira-web` тоже использует библиотеку, но
+      без `tagPrefix` (репозиторий на один продукт) — бага не касалось.
+- [x] Проверка: `nx test/lint/typecheck:tsgo github-releases` зелёные, `bun install
+      --lockfile-only` синхронизировал `bun.lock`.
+- [ ] ⚠️ Открытый вопрос: при typecheck `animatrona-landing`/`kami-key-the-landing` всплыла
+      пре-существующая, не связанная с этим фиксом ошибка `tsgo` на `libs/format-utils/src/lib/money.ts:58`
+      (BigInt-литерал). Не чинил — заведён отдельный чип (`task_b94201c4`) на отдельную сессию.
