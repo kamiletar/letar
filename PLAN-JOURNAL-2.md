@@ -1642,3 +1642,30 @@ push не выполнялся.
 Содержимое корректно, просто под чужим сообщением коммита — исправлять не стал. Та же сессия
 оставила дрейф `bun.lock` (версии `animatrona-landing`/`kami-key-the-landing`/`letar-landing`/
 `synth` не совпадают с их `package.json`) — вне зоны этой сессии, не трогал.
+
+## §84 — шаблон `new-lib` починен: `dependencies`, не `implicitDependencies` (2026-09-27)
+
+Закрытие побочной находки §83 (чип `task_d1ca6156`, к моменту этой сессии уже не в очереди —
+видимо, снят пользователем или устарел сам по себе; переисправление не потребовалось).
+
+`README.md.template` генератора `new-lib` и терминальный вывод `generator.ts` утверждали, что
+обязательное подключение библиотеки к приложению — запись в `nx.implicitDependencies` (вывод
+`generator.ts` вдобавок называл это «3 обязательных места» вместе с `paths`/`references`). Это
+расходится с `.claude/rules/libs.md`: реально обязательна только запись в `dependencies`
+(`workspace:*`) + `bun install` — только так bun создаёт симлинк `node_modules/@letar/<lib>` под
+изолированным линковщиком, `implicitDependencies` для bun невидим. Заодно убрана рекомендация
+`nx sync` в выводе генератора — этот sync-генератор отключён в `nx.json`
+(`disabledTaskSyncGenerators`) и ничего не синхронизирует.
+
+Оба места переписаны: обязательный шаг — `dependencies`, `implicitDependencies`/`paths` —
+вспомогательные, со ссылкой на `libs.md#подключение-к-приложению` вместо копирования подробностей.
+Заодно дополнен `libs/semver-compare/README.md` (§83) — у него раздела «Подключение к приложению»
+не было вовсе (README писался руками, не через шаблон).
+
+Проверено генерацией одноразовой библиотеки (`nx g @letar/generators:new-lib
+zz-generator-readme-check`) — сверил текст README и вывод в консоли, затем удалил каталог.
+`nx run-many -t format --projects=generators,semver-compare`, `nx lint generators`,
+`nx typecheck generators` (у `generators` таргет называется `typecheck`, не `typecheck:tsgo`) и
+спека `new-lib/generator.spec.ts` — зелёные, ни один тест не проверял текст README построчно.
+Небиллируемая инфраструктура студии (`time_discard`) — коммиты `478dab4ce` (генератор),
+`ad17b8ef1` (`semver-compare`), push не выполнялся.
