@@ -5132,3 +5132,24 @@ WebKit сбрасывает ранее заполненный controlled-инп�
 - [ ] ⚠️ Открытый вопрос: при typecheck `animatrona-landing`/`kami-key-the-landing` всплыла
       пре-существующая, не связанная с этим фиксом ошибка `tsgo` на `libs/format-utils/src/lib/money.ts:58`
       (BigInt-литерал). Не чинил — заведён отдельный чип (`task_b94201c4`) на отдельную сессию.
+
+## §205 (2026-09-27) `bun.lock` синхронизирован после фикса чипа `task_b94201c4` (tsconfig target ES2017→ES2022)
+
+Чип из §204 (BigInt-литерал в `libs/format-utils/src/lib/money.ts:58`, `tsgo` TS2737) был исправлен
+отдельной сессией через bump `tsconfig` target'а на ES2022 — следствием стал version bump в четырёх
+приложениях, не отражённый в `bun.lock`: `animatrona-landing` (0.4.13→0.4.14),
+`kami-key-the-landing` (0.4.8→0.4.9), `letar-landing` (0.5.8→0.5.9), `synth` (0.22.9→0.22.10).
+
+- [x] Перед правкой сверил рабочее дерево: незакоммиченный диф `bun.lock` на момент старта
+      (переход `electron-monorepo-updater`/`github-releases` на `@letar/semver-compare`, коммиты
+      `08ed7cf7a`/`202769190`) не чужой WIP — версии в этом дифе уже совпадали с закоммиченными
+      `package.json`, просто lock не был пересобран после них.
+- [x] `bun install --lockfile-only` из корня (дерево чистое по `bun.lock`/`package.json`) —
+      пересобрал разом обе группы расхождений. `bun scripts/check-lock-workspace-versions.mjs`
+      зелёный, 140 workspace.
+- [x] Закоммичено отдельно: `chore: синхронизировать bun.lock с package.json (4 приложения +
+      semver-compare)` (`2bc57c787`), только `bun.lock`. Pre-commit `deps-integrity` зелёный
+      (патчи на месте, намеренные пины не задеты, peer-deps — только фоновый шум eslint 10.x).
+- [ ] ⚠️ Открытый вопрос: **push не сделан** — коммит лежит локально, ждёт обычного одобрения
+      (`git.md`), отдельной заявки на деплой не требует (не деплой-блокер сам по себе, просто
+      снимает риск на будущий `--frozen-lockfile`).
