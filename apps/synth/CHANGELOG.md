@@ -4,6 +4,19 @@
 
 ---
 
+## [0.22.10] — 2026-09-27
+
+### Fixed
+
+- `tsconfig.json` держал `target: "ES2017"` — унаследовано от старого `create-next-app`-скаффолда
+  (приложение намеренно вне общего пресета `tsconfig.next-app.json`, но задокументировано как
+  «100% единообразно» с `animatrona-landing`/`kami-key-the-landing`/`letar-landing` —
+  `.claude/docs/tsconfig-presets.md`). `synth` реально импортирует `@letar/format-utils`
+  (зависимость в `package.json`), у которого `formatKopecks` использует BigInt-литерал (`100n`,
+  нужен `ES2020+`) — `nx typecheck:tsgo synth` падал на `TS2737` в
+  `libs/format-utils/src/lib/money.ts:58`. Поднят до `ES2022`, как остальные три приложения этой
+  группы и как `tsconfig.base.json`.
+
 ## [0.22.9] — 2026-09-24
 
 ### Changed
