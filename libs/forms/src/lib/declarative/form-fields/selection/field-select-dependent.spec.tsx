@@ -527,3 +527,50 @@ describe('Field.Select — без dependsOn всё как раньше (DS18)', 
     expect(document.querySelector('[data-dependent-cleared]')).toBeNull()
   })
 })
+
+describe('Field.Select — dependsOn: подпись родителя без ui.title в схеме', () => {
+  const plainSchema = z.object({ countryId: z.string(), cityId: z.string() })
+
+  it('подсказка называет родителя видимой подписью, а не именем поля `countryId`', async () => {
+    render(
+      <TestWrapper>
+        <Form initialValue={{ countryId: '', cityId: '' }} schema={plainSchema} onSubmit={vi.fn()}>
+          <Form.Field.Select name="countryId" label="Страна проживания" options={countries} />
+          <Form.Field.Select name="cityId" label="Город" dependsOn="countryId" options={() => []} />
+        </Form>
+      </TestWrapper>,
+    )
+
+    await waitFor(() =>
+      expect(document.querySelector('[data-dependent-hint]')).toHaveTextContent('Сначала выберите «Страна проживания»')
+    )
+  })
+
+  it('подпись поля важнее ui.title схемы: пользователь видит именно её', async () => {
+    render(
+      <TestWrapper>
+        <Form initialValue={{ countryId: '', cityId: '' }} schema={schema} onSubmit={vi.fn()}>
+          <Form.Field.Select name="countryId" label="Ваша страна" options={countries} />
+          <Form.Field.Select name="cityId" label="Город" dependsOn="countryId" options={() => []} />
+        </Form>
+      </TestWrapper>,
+    )
+
+    await waitFor(() =>
+      expect(document.querySelector('[data-dependent-hint]')).toHaveTextContent('Сначала выберите «Ваша страна»')
+    )
+  })
+
+  it('у родителя нет ни подписи, ни ui.title — остаётся имя поля', async () => {
+    render(
+      <TestWrapper>
+        <Form initialValue={{ countryId: '', cityId: '' }} schema={plainSchema} onSubmit={vi.fn()}>
+          <Form.Field.Select name="countryId" options={countries} />
+          <Form.Field.Select name="cityId" label="Город" dependsOn="countryId" options={() => []} />
+        </Form>
+      </TestWrapper>,
+    )
+
+    expect(document.querySelector('[data-dependent-hint]')).toHaveTextContent('Сначала выберите «countryId»')
+  })
+})

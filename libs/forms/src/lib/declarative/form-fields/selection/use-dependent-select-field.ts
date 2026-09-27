@@ -7,6 +7,7 @@ import {
   getLocalizedValue,
   useDeclarativeFormOptional,
   useDependentField,
+  useFieldLabelLookup,
   useFormI18n,
 } from '@letar/forms-react'
 import { type ReactNode, useCallback, useId } from 'react'
@@ -41,8 +42,8 @@ function lastSegment(path: string): string {
 
 /**
  * Зависимость поля Select/Combobox (§18) целиком: `useDependentField` (подписка на родителей, очистка по правке,
- * блокировка) + тексты для пользователя — подсказка под заблокированным полем и объявление очистки. Метка родителя
- * берётся из `ui.title` схемы формы (с переводом), иначе это имя поля. Вызывается из `useFieldState` поля.
+ * блокировка) + тексты для пользователя — подсказка под заблокированным полем и объявление очистки. Метка родителя —
+ * его видимая подпись (`label`), иначе `ui.title` схемы формы (с переводом), иначе имя поля. Вызывается из `useFieldState` поля.
  */
 export function useDependentSelectField<TDeps extends FieldDeps = FieldDeps>(
   props: DependentFieldProps<TDeps>,
@@ -55,14 +56,21 @@ export function useDependentSelectField<TDeps extends FieldDeps = FieldDeps>(
   const clearedTemplate = useSelectionString('formSelection.dependentCleared')
   const hintId = useId()
 
+  // Подпись родителя, как её видит пользователь, — из реестра подписей полей формы; затем `ui.title` схемы
+  const form = useDeclarativeFormOptional()?.form
+  const lookupLabel = useFieldLabelLookup(form)
   // Идентичность важна: `useFieldDeps` пересчитывает состояние при её смене
   const getParentLabel = useCallback(
     (path: string): string | undefined => {
+      const registered = lookupLabel(path)
+      if (registered) {
+        return registered
+      }
       const ui = getFieldMeta(schema, path).ui
       const title = getLocalizedValue(i18n, ui?.i18nKey, 'title', ui?.title)
       return typeof title === 'string' && title !== '' ? title : undefined
     },
-    [schema, i18n],
+    [schema, i18n, lookupLabel],
   )
 
   const state = useDependentField<TDeps>({
