@@ -38,8 +38,9 @@ nx g @letar/generators:new-lib <lib-name> --description="Утилиты для X
 
 ### 2. Подключить к приложению
 
-Добавь `@letar/<lib-name>` в `nx.implicitDependencies` в `package.json` приложения (если
-библиотеки нет в его `dependencies`) — **это единственное обязательное** (ребро графа Nx).
+Добавь `@letar/<lib-name>` в реальные `dependencies` приложения (`workspace:*`) и запусти
+`bun install` — **это единственное обязательное** (без этого нет симлинка в `node_modules` под
+изолированным линковщиком bun). `nx.implicitDependencies` — необязательный резервный канал.
 
 Всё остальное (когда нужны `paths`, почему `references` не обязательны и при чём тут `nx sync`) —
 [libs.md § Подключение к приложению](/.claude/rules/libs.md#подключение-к-приложению).
@@ -57,8 +58,8 @@ nx test <lib-name>
 - [ ] `nx g @letar/generators:new-lib <lib-name>` выполнен
 - [ ] Реализация в `src/lib/`, экспорт через `src/index.ts`
 - [ ] README.md дополнен реальным API (генератор создаёт только заглушку)
-- [ ] Подключено к нужным приложениям (обязательно — `implicitDependencies`; `paths`/`references`
-      по необходимости)
+- [ ] Подключено к нужным приложениям (обязательно — реальные `dependencies` + `bun install`;
+      `implicitDependencies`/`paths`/`references` по необходимости)
 - [ ] typecheck/lint/test зелёные
 
 ## Документация
