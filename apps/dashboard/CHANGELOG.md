@@ -2,6 +2,20 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [1.27.6] — 2026-09-27
+
+### Fixed
+
+- `requireAdmin()` вместо `requireAuth()` на write/destructive роутах, куда в 1.27.5 добавили
+  rate-limit: `docker/control`, `docker/prune`, `git/pull`, `nginx/proxy-hosts` (POST/PUT/DELETE).
+  VIEWER (по докам — только просмотр) мог запускать/останавливать контейнеры, чистить
+  build cache/images, дёргать `git pull` на хосте и писать proxy hosts в NPM — `requireAuth()`
+  ставился как «не менять поведение попутно с rate-limit», но это расходилось с ролью VIEWER и
+  с соседними роутами (`deploy/start`, `cron/jobs/[id]/run`), которые уже требовали ADMIN.
+  Заодно найдены и закрыты три роута вовсе без session-гейта в коде (только `proxy.ts`):
+  `POST /api/analytics/sites` (создание сайта в Umami), `POST /api/alerts/settings` (сохранение
+  настроек, включая Telegram-токен) и `DELETE /api/audit-log` (очистка журнала аудита).
+
 ## [1.27.5] — 2026-09-27
 
 ### Added

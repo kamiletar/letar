@@ -47,6 +47,9 @@
   control/prune, deploy, git pull, cron run, nginx proxy-hosts) — деталь в `PLAN_COMPLETED.md`
   v1.27.5. Остальные API-роуты дашборда достижимы только по OIDC-сессии Ключницы (`proxy.ts`) +
   VPN — осознанное решение не лимитировать их дополнительно, см. там же
+- Аудит RBAC на write/destructive роутах (v1.27.6, `CHANGELOG.md`) — `requireAdmin()` вместо
+  `requireAuth()` на docker/nginx/git-роутах, куда в 1.27.5 попал слишком широкий гейт, плюс три
+  роута без гейта вовсе (`analytics/sites` POST, `alerts/settings` POST, `audit-log` DELETE)
 - Алерт `AUTH_ACCOUNT_ISSUER_NULL` (PLAN.md корня §71 п.3.2) — новый тип в `AlertType`,
   создаётся `dashboard-agent` ежедневной cron-проверкой `Account.issuer IS NULL` по 14
   приложениям с моделью Account (better-auth 1.7 регрессия, не путать со статическим гейтом
