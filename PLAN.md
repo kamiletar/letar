@@ -428,6 +428,14 @@ type AuthProfile = StandaloneAuthProfile | HubClientAuthProfile | HubProviderAut
 - **Root-имя пакета** `@lena/source` (`package.json` + `bun.lock`) — ренейм требует регенерации lockfile; low-impact. ⏳ открыто (см. §0).
 - ✅ **Хвосты (публичное дерево):** submodule Dockerfile-комментарии (`imot`, `driving-school`, `premium-rosstil`) —
   исправлены (2026-06-26), коммиты внутри submodule'ов + bump SHA в letar.
+- ✅ **`label-printer-desktop`: `electron-builder.yml` публиковал релизы в `lena/label-printer-desktop`**
+  (2026-09-27) — не косметика: `lena` на GitHub оказался посторонним пользователем (аккаунт с
+  2013 года), репозитория `label-printer-desktop` у него не было. Автообновление приложения не
+  работало ни в одной версии за всю историю. Перенесено в `kamiletar/letar` по общей схеме
+  Electron-релизов монорепо. Разбор — `apps/label-printer-desktop/PLAN_COMPLETED.md`.
+  Остальные Electron-приложения проверены тут же: `animatrona`, `animatrona-folder-player`,
+  `kami-key-the` — `kamiletar/letar`; `animatrona-ipfs-player`, `poster-microtext-desktop` —
+  `publish: null` (без автообновления). Паттерна `lena` больше нигде нет.
 - **✓ DoD:** по каждому идентификатору зафиксировано решение; где мигрируем — выполнено с бэкапом; `grep -i lena`
   чист либо остаток обоснован в этом этапе.
 - **Зависимости:** БД-ренейм пересекается с бэкапами (0.3) и миграциями (§8 сквозные).
