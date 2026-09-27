@@ -1,5 +1,38 @@
 # Changelog @letar/forms-vue-shadcn
 
+## 0.21.0 (2026-09-27)
+
+Combobox паритет с React-скином, Stage 4a (начало Этапа 4 — `renderOption`/`renderValue`/
+`description`, тред `forms-vue-angular-select-parity`).
+
+- **Feature:** `Field.Combobox` — `renderOption` (своё содержимое пункта списка, получает опцию и
+  `UIKitOptionRenderState`) и вторая строка пункта (`FieldSelectOption.description`, тот же общий
+  тип, что и у `Field.Select`) — рисуется примитивом сама, только без своего `renderOption`.
+  Реализовано в `uikit/primitives/combobox.ts` тем же приёмом, что `select.ts` (Stage 3a): опция
+  формы приложения ищется по значению и передаётся в колбэк приложения, чтобы контравариантная
+  разница `FieldSelectOption.label: string` vs `UIKitSelectOption<UINode>.label: UINode` не ломала
+  типы (`field-combobox.ts`, как `optionByKey` в `field-select.ts`).
+- **Feature:** `Field.Combobox` — `renderValue` (своя подпись выбранного значения). У Combobox
+  нет отдельного триггера (значение — это и есть текст поля ввода): проброшен в нативный
+  `displayValue` примитива Reka `ComboboxInput`. Без него `ComboboxInput.vue` (`resetSearchTerm`,
+  вызывается при закрытии/блюре и на смену `modelValue`, в том числе на монтировании) подставляет
+  в поле ввода сырое строковое `value` вместо подписи опции — заметно даже без своего `renderValue`
+  (Reka сама вызывает `toString()` на выбранном значении). Контракта `renderValue` для Combobox нет
+  в `forms-core` (только у `Field.Select`) — заведён локально в скине как `RekaComboboxExtraProps`
+  (`combobox.ts`), тем же приёмом, что `ShadcnComboboxExtraProps` в React-скине; `field-combobox.ts`
+  из-за этого импортирует примитив `Combobox` напрямую, в обход строго типизированного
+  `rekaUIKit.Combobox`.
+- **Fix (найдено этой сессией, побочный эффект `renderValue`/`displayValue`):** список Combobox
+  фильтровался по подписи выбранного значения сразу после открытия, если та совпадала с текстом
+  какой-то одной опции (Reka выставляет подпись в поле ввода сама, поле принимало её за активный
+  поисковый запрос). Guard — «подпись выбранного значения в поле ввода, не запрос → список
+  целиком», как `matchedOptions` в React `field-combobox.tsx`.
+- ⚠️ **Не входит в 4a** (следующие срезы Этапа 4): `loadOptions`/`loadSelected` (4b),
+  `onCreate`/`onUpdate`/`pending` (4c), `dependsOn` (4d).
+- ⚠️ **Найдено разведкой, не расширено в этой сессии:** `UIKitSelectOption.group` (группировка
+  по optgroup) не реализован ни в одном скине Select/Combobox, кроме отдельного, более старого
+  Chakra-паттерна (`use-grouped-options.ts` в `forms`) — вне контекста паритета с `forms-shadcn`.
+
 ## 0.20.0 (2026-09-27)
 
 Select паритет с React-скином, Stage 3c (завершение Этапа 3 — searchable + `dependsOn`, последняя
