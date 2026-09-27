@@ -47,6 +47,13 @@ export const metadata: Metadata = {
     siteName: 'Animatrona',
     locale: 'ru_RU',
     type: 'website',
+    images: ['/opengraph-image'],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Animatrona Player — плеер для аниме из папки',
+    description: 'Внешние аудиодорожки и ASS-субтитры, без установки библиотеки. Играет и старые раздачи',
+    images: ['/opengraph-image'],
   },
 }
 

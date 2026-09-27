@@ -2,6 +2,12 @@
 
 Все изменения в проекте animatrona-landing документируются в этом файле.
 
+## [0.4.12] - 2026-09-27
+
+### Fixed
+
+- `og:image`/`twitter:image` отдавали 404 — `metadata.openGraph.images`/`twitter.images` в `layout.tsx` указывали на несуществующий `/og-image.png`, `metadata.icons.apple` — на несуществующий `/apple-touch-icon.png`. Динамический `opengraph-image.tsx` (Next file convention) уже существовал, но не применялся к корневому layout из-за ручного `images` рядом, а на `/player` вовсе не подхватывался автоматически — страница определяет собственный `openGraph`, и в этом случае конвенция не наследуется без явного `images: ['/opengraph-image']`. Убраны ручные ссылки из `layout.tsx`, добавлен явный `images: ['/opengraph-image']` в `openGraph`/`twitter` страницы `/player`, добавлен `apple-icon.png` (копия `icon.png`, 512×512) — Next сам генерирует `apple-touch-icon`.
+
 ## [0.4.11] - 2026-09-24
 
 ### Changed

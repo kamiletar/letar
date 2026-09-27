@@ -44,24 +44,11 @@ export const metadata: Metadata = {
     siteName: 'Animatrona',
     locale: 'ru_RU',
     type: 'website',
-    images: [
-      {
-        url: '/og-image.png',
-        width: 1200,
-        height: 630,
-        alt: 'Animatrona — Desktop приложение для аниме',
-      },
-    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Animatrona',
     description: 'Умная библиотека аниме с GPU-транскодированием',
-    images: ['/og-image.png'],
-  },
-  icons: {
-    icon: '/favicon.ico',
-    apple: '/apple-touch-icon.png',
   },
 }
 

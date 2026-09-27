@@ -2,6 +2,27 @@
 
 Детальное описание реализованных функций.
 
+## Фикс отсутствующего og-image/apple-touch-icon — версия 0.4.12 (2026-09-27)
+
+Найдено SEO-аудитом `kami-key-the-landing` (коммит `17f6f1c00`) как известная ловушка того же
+паттерна: `layout.tsx` ссылался на `/og-image.png` и `/apple-touch-icon.png` в
+`metadata.openGraph.images`/`metadata.twitter.images`/`metadata.icons.apple` — файлов не было в
+`public/`, оба пути отдавали 404, шеринг ссылки в соцсетях/мессенджерах шёл без превью.
+
+Динамический `opengraph-image.tsx` (Next file convention, `ImageResponse` 1200×630) в приложении
+уже существовал, но не подключался: ручной `images` в `layout.tsx` перекрывал автоматическую
+подстановку. Убран ручной `images` из `openGraph`/`twitter` корневого layout — конвенция
+подхватилась сама.
+
+⚠️ У `/player` — собственный объект `metadata.openGraph` (не только layout.tsx), и для него
+`opengraph-image.tsx` **не наследуется автоматически** — эмпирически подтверждённая ловушка:
+страница с собственным `openGraph` требует явного `images: ['/opengraph-image']`, иначе тег
+`og:image` вообще не рендерится. Добавлено явно в `openGraph` и `twitter` страницы `/player`.
+
+`apple-touch-icon.png` не существовал как файл — вместо восстановления ссылки на несуществующий
+путь добавлен `apple-icon.png` (копия существующего `icon.png`, 512×512) как file convention:
+Next сам генерирует `<link rel="apple-touch-icon">` с нужными атрибутами.
+
 ## Провайдер на `DarkOnlyChakraProvider` — версия 0.4.11 (2026-09-24)
 
 `_components/ui/provider.tsx` сведён к одной строке: `DarkOnlyChakraProvider` из
