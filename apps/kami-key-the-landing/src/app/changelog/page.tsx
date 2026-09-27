@@ -7,10 +7,32 @@ import { LuArrowUpRight } from 'react-icons/lu'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 
+const PAGE_URL = 'https://kamikeythe.letar.best/changelog'
+const PAGE_TITLE = 'История изменений'
+const PAGE_DESCRIPTION = 'Ченджлог KamiKeyThe — что изменилось в каждой версии.'
+
 export const metadata: Metadata = {
-  title: 'История изменений',
-  description: 'Ченджлог KamiKeyThe — что изменилось в каждой версии.',
+  title: PAGE_TITLE,
+  description: PAGE_DESCRIPTION,
   robots: { index: true, follow: true },
+  alternates: {
+    canonical: PAGE_URL,
+  },
+  openGraph: {
+    title: PAGE_TITLE,
+    description: PAGE_DESCRIPTION,
+    url: PAGE_URL,
+    siteName: 'KamiKeyThe',
+    locale: 'ru_RU',
+    type: 'website',
+    images: ['/opengraph-image'],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: PAGE_TITLE,
+    description: PAGE_DESCRIPTION,
+    images: ['/opengraph-image'],
+  },
 }
 
 /**
@@ -27,7 +49,9 @@ export default async function ChangelogPage() {
         <Container maxW="3xl" py={{ base: 16, md: 24 }}>
           <VStack gap={10} align="stretch">
             <VStack gap={2} align="start">
-              <Heading size="xl">История изменений</Heading>
+              <Heading asChild size="xl">
+                <h1>История изменений</h1>
+              </Heading>
               <Text color="fg.muted" fontSize="sm">
                 Релизы KamiKeyThe — что изменилось в каждой версии
               </Text>

@@ -36,6 +36,20 @@ const FAQ_ITEMS = [
 /**
  * Секция FAQ — аккордеон с вопросами и ответами
  */
+/** JSON-LD FAQPage — те же вопросы-ответы, что в аккордеоне, для rich snippet в выдаче */
+const faqJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: FAQ_ITEMS.map((item) => ({
+    '@type': 'Question',
+    name: item.question,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: item.answer,
+    },
+  })),
+}
+
 export function FaqSection() {
   const [openIndex, setOpenIndex] = useState<number | null>(null)
 
@@ -45,6 +59,8 @@ export function FaqSection() {
 
   return (
     <Box as="section" id="faq" py={{ base: 16, md: 24 }}>
+      {/* Статичные данные (FAQ_ITEMS как const, не пользовательский ввод) — безопасно, тот же паттерн, что jsonLd в layout.tsx */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <Container maxW="3xl" px={{ base: 4, md: 8 }}>
         <VStack gap={{ base: 8, md: 12 }}>
           {/* Заголовок */}

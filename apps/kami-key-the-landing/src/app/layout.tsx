@@ -50,20 +50,11 @@ export const metadata: Metadata = {
     siteName: 'KamiKeyThe',
     locale: 'ru_RU',
     type: 'website',
-    images: [
-      {
-        url: '/og-image.png',
-        width: 1200,
-        height: 630,
-        alt: 'KamiKeyThe — типографская утилита для Windows',
-      },
-    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'KamiKeyThe',
     description: 'Типографские символы одной клавишей',
-    images: ['/og-image.png'],
   },
 }
 

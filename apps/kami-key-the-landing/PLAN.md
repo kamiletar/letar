@@ -8,10 +8,20 @@
       [press-scale-audit-task.md](/.claude/docs/press-scale-audit-task.md)
 - [ ] Дизайн и контент лендинга
 - [ ] Адаптивная верстка
-- [ ] SEO оптимизация
 
 ### Сделано
 
+- [x] SEO-аудит (2026-09-27) — найдено и починено 4 критичных проблемы: `/robots.txt` отдавал
+      HTTP 500 (конфликт статического `public/robots.txt` и динамического `src/app/robots.ts` —
+      env-aware блок индексации на staging вообще не выполнялся, файл удалён); `/changelog` и
+      `/privacy` наследовали `canonical`/`og:url`/`og:title` главной страницы (нет своего
+      `alternates`/`openGraph` — добавлены); `og-image.png` не существовал (404 на всех
+      страницах) — заменён на динамический `src/app/opengraph-image.tsx` (`ImageResponse`, по
+      образцу `icon.tsx`); `/changelog` и `/privacy` не имели ни одного `<h1>` (`Heading` без
+      `asChild` рендерит `<h2>` — `.claude/docs/chakra-heading-defaults-to-h2.md`). Плюс важное:
+      добавлен `FAQPage` JSON-LD в `faq-section.tsx` из уже существующего контента аккордеона.
+      Всё подтверждено живым прогоном dev-сервера (`getComputedStyle`/network requests), не
+      только чтением кода.
 - [x] `transition="all ..."` заменён на явный список меняющихся CSS-свойств в 9 местах (было
       описано как 7, фактически найдено 9) — детали в `CHANGELOG.md` [0.4.7]
 - [x] Починен провалившийся деплой в production (2026-09-13) — `--frozen-lockfile` падал из-за

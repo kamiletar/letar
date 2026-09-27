@@ -2,6 +2,29 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.4.8] - 2026-09-27
+
+### Fixed
+
+- `/robots.txt` отдавал HTTP 500 — статический `public/robots.txt` конфликтовал с динамическим
+  роутом `src/app/robots.ts` (`E212: A conflicting public file and page file was found`). Из-за
+  этого env-aware блокировка индексации на staging/dev (PLAN-INFRA.md §33) не выполнялась вовсе.
+  Статический файл удалён.
+- `/changelog` и `/privacy` наследовали `canonical`/`og:url`/`og:title` главной страницы —
+  собственный `metadata` был без `alternates`/`openGraph`. Добавлены оба, с явным `images` на
+  общий `/opengraph-image`.
+- `og-image.png`, на который ссылались `openGraph.images`/`twitter.images` в `layout.tsx`, не
+  существовал (404 на всех страницах). Заменён на динамический `src/app/opengraph-image.tsx`
+  (`ImageResponse`, 1200×630, тот же приём, что уже в `icon.tsx`) — генерируется на лету, без
+  ручного экспорта PNG.
+- `/changelog` и `/privacy` не содержали ни одного `<h1>` — `Chakra Heading` без `asChild`
+  рендерит `<h2>` независимо от `size` (`.claude/docs/chakra-heading-defaults-to-h2.md`).
+
+### Added
+
+- `FAQPage` JSON-LD в `faq-section.tsx` — тот же контент, что в аккордеоне (`FAQ_ITEMS`), для
+  rich snippet в поисковой выдаче.
+
 ## [0.4.7] - 2026-09-27
 
 ### Changed

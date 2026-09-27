@@ -3,9 +3,33 @@ import { Navbar } from '@/app/_components/navbar'
 import { Box, Container, Heading, Text, VStack } from '@chakra-ui/react'
 import type { Metadata } from 'next'
 
+const PAGE_URL = 'https://kamikeythe.letar.best/privacy'
+const PAGE_TITLE = 'Политика конфиденциальности'
+const PAGE_DESCRIPTION =
+  'Политика обработки персональных данных KamiKeyThe — какие cookie использует сайт и почему на нём нет форм сбора ПДн.'
+
 export const metadata: Metadata = {
-  title: 'Политика конфиденциальности',
+  title: PAGE_TITLE,
+  description: PAGE_DESCRIPTION,
   robots: { index: true, follow: true },
+  alternates: {
+    canonical: PAGE_URL,
+  },
+  openGraph: {
+    title: PAGE_TITLE,
+    description: PAGE_DESCRIPTION,
+    url: PAGE_URL,
+    siteName: 'KamiKeyThe',
+    locale: 'ru_RU',
+    type: 'website',
+    images: ['/opengraph-image'],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: PAGE_TITLE,
+    description: PAGE_DESCRIPTION,
+    images: ['/opengraph-image'],
+  },
 }
 
 /**
@@ -22,7 +46,9 @@ export default function PrivacyPage() {
         <Navbar />
         <Container maxW="3xl" py={{ base: 16, md: 24 }}>
           <VStack gap={6} align="stretch">
-            <Heading size="xl">Политика конфиденциальности</Heading>
+            <Heading asChild size="xl">
+              <h1>Политика конфиденциальности</h1>
+            </Heading>
             <Text color="fg.muted" fontSize="sm">
               Действует с 2026 года
             </Text>
