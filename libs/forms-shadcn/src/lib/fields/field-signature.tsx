@@ -5,6 +5,7 @@ import { Eraser, Pen, Type } from 'lucide-react'
 import type { ReactElement } from 'react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createField, FieldWrapper } from '../uikit/primitives'
+import { type SignatureStrings, useSignatureStrings } from './signature-strings'
 import type { SignatureFieldProps, SignatureStroke, StrokePoint } from './types'
 
 /** Экранирование XML спецсимволов (защита от инъекций в typed mode) */
@@ -74,6 +75,8 @@ function getCoords(e: React.MouseEvent | React.TouchEvent, canvas: HTMLCanvasEle
 }
 
 interface SignatureFieldState {
+  /** Встроенные строки скина (i18n): подписи вкладок, placeholder-ы, aria-label, очистка */
+  strings: SignatureStrings
   canvasRef: React.RefObject<HTMLCanvasElement | null>
   mode: 'draw' | 'typed'
   setMode: (mode: 'draw' | 'typed') => void
@@ -99,6 +102,7 @@ export const FieldSignature = createField<SignatureFieldProps, string, Signature
   displayName: 'FieldSignature',
 
   useFieldState: (props): SignatureFieldState => {
+    const strings = useSignatureStrings()
     const canvasRef = useRef<HTMLCanvasElement | null>(null)
     const isDrawingRef = useRef(false)
     const [mode, setMode] = useState<'draw' | 'typed'>('draw')
@@ -228,6 +232,7 @@ export const FieldSignature = createField<SignatureFieldProps, string, Signature
     )
 
     return {
+      strings,
       canvasRef,
       mode,
       setMode,
@@ -243,8 +248,8 @@ export const FieldSignature = createField<SignatureFieldProps, string, Signature
   },
 
   render: ({ field, fullPath, resolved, hasError, errorMessage, componentProps, fieldState }): ReactElement => {
-    const { width = 400, height = 150, clearLabel = 'Очистить', allowTyped = true } = componentProps
-    const placeholder = resolved.placeholder ?? 'Подпишите здесь'
+    const { width = 400, height = 150, clearLabel = fieldState.strings.clear, allowTyped = true } = componentProps
+    const placeholder = resolved.placeholder ?? fieldState.strings.placeholder
     const {
       canvasRef,
       mode,
@@ -285,7 +290,7 @@ export const FieldSignature = createField<SignatureFieldProps, string, Signature
                 )}
               >
                 <Pen className="size-3" />
-                Рисовать
+                {fieldState.strings.drawTab}
               </button>
               <button
                 type="button"
@@ -296,7 +301,7 @@ export const FieldSignature = createField<SignatureFieldProps, string, Signature
                 )}
               >
                 <Type className="size-3" />
-                Ввести текст
+                {fieldState.strings.typedTab}
               </button>
             </div>
           )}
@@ -311,7 +316,7 @@ export const FieldSignature = createField<SignatureFieldProps, string, Signature
                   const dataUrl = renderTypedSignature(text)
                   field.handleChange(dataUrl || '')
                 }}
-                placeholder="Введите ваше имя..."
+                placeholder={fieldState.strings.typedPlaceholder}
                 className="w-full bg-transparent text-lg italic outline-none"
                 style={{ fontFamily: 'cursive' }}
               />
@@ -324,7 +329,7 @@ export const FieldSignature = createField<SignatureFieldProps, string, Signature
               width={width}
               height={height}
               role="img"
-              aria-label="Область подписи"
+              aria-label={fieldState.strings.ariaLabel}
               tabIndex={0}
               style={{
                 display: 'block',

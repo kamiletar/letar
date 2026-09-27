@@ -5,6 +5,7 @@ import userEvent from '@testing-library/user-event'
 import type { ReactNode } from 'react'
 import { beforeAll, describe, expect, it, vi } from 'vitest'
 import { z } from 'zod/v4'
+import { FieldAutocomplete } from './field-autocomplete'
 import { FieldCombobox } from './field-combobox'
 import { FieldSelect } from './field-select'
 
@@ -141,5 +142,32 @@ describe('Combobox (shadcn) — строки через i18n', () => {
     renderField(combobox({ onCreate: vi.fn() }), undefined, '')
     await userEvent.type(screen.getByRole('combobox'), 'Тула')
     expect(await screen.findByRole('option', { name: '+ Добавить "Тула"' })).toBeInTheDocument()
+  })
+})
+
+describe('Autocomplete (shadcn) — placeholder через i18n', () => {
+  function renderAutocomplete(i18n?: { locale: string; t?: (key: string) => string }) {
+    const form = (
+      <TestForm defaultValues={{ city: '' }}>
+        <FieldAutocomplete name="city" suggestions={['Moscow', 'Kazan']} />
+      </TestForm>
+    )
+    render(i18n ? <FormI18nProvider locale={i18n.locale} t={i18n.t}>{form}</FormI18nProvider> : form)
+  }
+
+  it('без провайдера: русский', () => {
+    renderAutocomplete()
+    expect(screen.getByRole('combobox')).toHaveAttribute('placeholder', 'Начните вводить...')
+  })
+
+  it('locale="en": английский, как у Chakra', () => {
+    renderAutocomplete({ locale: 'en' })
+    expect(screen.getByRole('combobox')).toHaveAttribute('placeholder', 'Start typing...')
+  })
+
+  it('t приложения переопределяет словарь по ключу', () => {
+    const t = (key: string) => key === 'formSelection.autocomplete.placeholder' ? 'Введите город' : key
+    renderAutocomplete({ locale: 'en', t })
+    expect(screen.getByRole('combobox')).toHaveAttribute('placeholder', 'Введите город')
   })
 })

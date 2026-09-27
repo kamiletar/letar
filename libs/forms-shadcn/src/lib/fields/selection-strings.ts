@@ -30,6 +30,8 @@ export interface SelectionStrings {
   retry: string
   /** Шаблон отказа оптимистичного действия: `{label}` подставляет поле */
   settleError: string
+  /** Placeholder `Form.Field.Autocomplete` (`allowCustomValue`, статичные `suggestions`) */
+  autocompletePlaceholder: string
 }
 
 /**
@@ -52,5 +54,6 @@ export function useSelectionStrings(): SelectionStrings {
     loadError: t('formSelection.combobox.errorMessage'),
     retry: t('formSelection.combobox.retry'),
     settleError: t('formSelection.settleError'),
+    autocompletePlaceholder: t('formSelection.autocomplete.placeholder'),
   }
 }

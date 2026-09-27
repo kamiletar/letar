@@ -4,9 +4,12 @@ import type { ReactElement } from 'react'
 import { useMemo, useState } from 'react'
 import { createField, FieldWrapper } from '../uikit/primitives'
 import { shadcnUIKit } from '../uikit/uikit-shadcn'
+import { type SelectionStrings, useSelectionStrings } from './selection-strings'
 import type { AutocompleteFieldProps } from './types'
 
 interface AutocompleteFieldState {
+  /** Встроенные строки скина (i18n): пока используется только placeholder */
+  strings: SelectionStrings
   inputValue: string
   setInputValue: (value: string) => void
   filteredSuggestions: string[]
@@ -24,6 +27,7 @@ export const FieldAutocomplete = createField<AutocompleteFieldProps, string, Aut
   displayName: 'FieldAutocomplete',
 
   useFieldState: (componentProps): AutocompleteFieldState => {
+    const strings = useSelectionStrings()
     const [inputValue, setInputValue] = useState('')
     const suggestions = componentProps.suggestions ?? []
     const minChars = componentProps.minChars ?? 1
@@ -34,7 +38,7 @@ export const FieldAutocomplete = createField<AutocompleteFieldProps, string, Aut
       return suggestions.filter((s) => s.toLowerCase().includes(needle))
     }, [suggestions, inputValue, minChars])
 
-    return { inputValue, setInputValue, filteredSuggestions }
+    return { strings, inputValue, setInputValue, filteredSuggestions }
   },
 
   render: ({ field, fullPath, resolved, hasError, errorMessage, fieldState }): ReactElement => {
@@ -54,7 +58,7 @@ export const FieldAutocomplete = createField<AutocompleteFieldProps, string, Aut
             field.handleChange(value ?? '')
           }}
           options={options}
-          placeholder={resolved.placeholder ?? 'Начните вводить...'}
+          placeholder={resolved.placeholder ?? fieldState.strings.autocompletePlaceholder}
           disabled={resolved.disabled}
           data-field-name={fullPath}
         />

@@ -4,6 +4,18 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.55.0] - 2026-09-27
+
+### Добавлено
+
+- i18n `Form.Field.Autocomplete`: placeholder («Начните вводить...» / «Start typing...») идёт через общий словарь
+  `formSelection.*` (ключ `formSelection.autocomplete.placeholder`, был захардкожен, хотя ключ в словаре уже
+  существовал).
+- i18n `Form.Field.Signature`: подписи вкладок «Рисовать»/«Ввести текст», placeholder поверх пустого canvas,
+  placeholder текстового ввода typed-режима, `aria-label` области подписи — через новый словарь `formSignature.*`
+  (`@letar/forms-react` ≥ 0.21.0). Кнопка очистки — через уже существующий общий `formSelection.clear`. Без
+  `FormI18nProvider` остаётся русский; `locale="en"` даёт английские строки, как у Chakra-версии поля.
+
 ## [0.54.0] - 2026-09-27
 
 ### Добавлено
