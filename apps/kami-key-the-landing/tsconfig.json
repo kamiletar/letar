@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "ES2017",
+    "target": "ES2022",
     "lib": [
       "dom",
       "dom.iterable",
@@ -52,6 +52,9 @@
       ],
       "@letar/github-releases": [
         "../../libs/github-releases/src/index.ts"
+      ],
+      "@letar/semver-compare": [
+        "../../libs/semver-compare/src/index.ts"
       ],
       "@letar/format-utils": [
         "../../libs/format-utils/src/index.ts"

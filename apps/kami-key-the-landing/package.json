@@ -1,6 +1,6 @@
 {
   "name": "@letar/kami-key-the-landing",
-  "version": "0.4.8",
+  "version": "0.4.9",
   "private": true,
   "nx": {
     "name": "kami-key-the-landing",
@@ -11,6 +11,7 @@
       "@letar/seo",
       "@letar/glitchtip",
       "@letar/github-releases",
+      "@letar/semver-compare",
       "@letar/format-utils"
     ]
   },
