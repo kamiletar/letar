@@ -1,6 +1,7 @@
 'use client'
 
 import { Box, Button, Combobox, Field, Portal, Spinner, Text, useFilter } from '@chakra-ui/react'
+import { interpolate } from '@letar/forms-core/i18n'
 import {
   applyOptionOverlay,
   CREATE_OPTION_VALUE,
@@ -1155,7 +1156,7 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
         <DependentSelectNotes dependent={dependent} />
         {actions.settleFailure && (
           <Box role="status" mt={1} fontSize="sm" color="fg.error" data-settle-error="">
-            {fieldState.settleErrorTemplate.replace('{label}', actions.settleFailure.label)}
+            {interpolate(fieldState.settleErrorTemplate, { label: actions.settleFailure.label })}
           </Box>
         )}
         <FieldError hasError={hasError} errorMessage={errorMessage} helperText={resolved.helperText} />

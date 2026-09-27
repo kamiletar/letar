@@ -13,9 +13,10 @@ import { useFormI18n } from '../i18n'
  * Только Chakra-скин — shadcn вообще не рисует эту кнопку (beta-упрощение, см. комментарий в
  * `rich-text-toolbar-config.tsx`: вставка изображений с загрузкой на сервер не портирована).
  *
- * `errorSizeExceeded` — с `{size}`, подставляется вызывающей стороной через `.replace('{size}',
- * ...)` (тот же приём интерполяции, что у `formSelection.settleError`/`formSelection.dependsOnHint`
- * в `selection-strings.ts`), а не отдельным аргументом резолвера.
+ * `errorSizeExceeded` — с `{size}`, подставляется вызывающей стороной через `interpolate()`
+ * (`@letar/forms-core/i18n`, тот же приём поздней интерполяции, что у
+ * `formSelection.settleError`/`formSelection.dependsOnHint` в `selection-strings.ts`), а не
+ * отдельным аргументом резолвера.
  */
 export type ImagePopoverStringKey =
   | 'formImagePopover.dropHint'

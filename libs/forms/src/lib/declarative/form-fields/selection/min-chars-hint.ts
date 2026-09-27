@@ -1,6 +1,6 @@
 'use client'
 
-import { DEFAULT_STATIC_TEXT_LOCALE, resolveStaticFormText } from '@letar/forms-core/i18n'
+import { DEFAULT_STATIC_TEXT_LOCALE, interpolate, resolveStaticFormText } from '@letar/forms-core/i18n'
 import { useFormI18n } from '@letar/forms-react'
 
 /**
@@ -64,9 +64,7 @@ function buildBuiltinHint(locale: string, minChars: number): string {
   const lang = locale.split('-')[0] ?? locale
   const template = BUILTIN_MIN_CHARS_HINT[lang] ?? BUILTIN_MIN_CHARS_HINT[DEFAULT_STATIC_TEXT_LOCALE]!
 
-  return template
-    .replace('{minChars}', String(minChars))
-    .replace('{chars}', pluralizeChars(minChars, locale, lang))
+  return interpolate(template, { minChars, chars: pluralizeChars(minChars, locale, lang) })
 }
 
 /**

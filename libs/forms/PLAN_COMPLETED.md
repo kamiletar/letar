@@ -1,5 +1,33 @@
 # Выполненные задачи — @letar/forms
 
+## 2026-09-27 (`MagentaBeacon`, временная identity — `forms-dev` был занят живой сессией) — общий `interpolate()` для builtin-строк вместо ручного `.replace()` (forms-core 0.28.0, forms 2.36.1, forms-react 0.26.1, forms-shadcn 0.58.1)
+
+**Контекст:** побочная находка предыдущей сессии, добавившей `ImagePopover.sizeHint`/
+`errorSizeExceeded` (`sizeHintTemplate.replace('{size}', ...)`) — тот же приём независимо повторялся
+ещё в 5 местах (`field-combobox.tsx`/`field-select.tsx` обоих скинов, `use-dependent-select-field.ts`,
+`min-chars-hint.ts`), 10 вызовов `.replace('{key}', value)` суммарно. Пользователь попросил оценить,
+стоит ли выносить общий хелпер.
+
+**Решение:** завести `interpolate(template, params)` в `libs/forms-core/src/lib/i18n/` — рядом с
+`resolveStaticFormText`, так как это тот же класс задачи (статичный UI-текст форм), но с поздним
+связыванием параметра (значение известно только в момент рендера/события, а не при резолве
+шаблона, поэтому его нельзя передать через `params` у `resolveStaticFormText`). Решающий довод —
+не сама экономия строк (она минимальна, ~1 строка на вызов), а то, что `settleError` дословно
+повторялся 4 раза в двух скинах (Chakra ×2, shadcn ×2) — настоящее дублирование, а не «три похожие
+строки». Побочный эффект — `console.warn` на незаменённый `{...}` после подстановки: раньше
+переименование плейсхолдера в словаре без правки `.replace()` было тихой ошибкой, теперь видно
+сразу. Компромисс явно: это НЕ защита на уровне typecheck (шаблон — рантайм-строка из
+`Record<string, string>`, TS не может проверить совпадение имени плейсхолдера статически) — только
+рантайм-предупреждение.
+
+Обновлены 3 скина/слоя: `forms-core` (новый хелпер + spec), `forms` (5 файлов: `image-popover.tsx`,
+`field-combobox.tsx`, `field-select.tsx`, `use-dependent-select-field.ts`, `min-chars-hint.ts`),
+`forms-shadcn` (`field-combobox.tsx`, `field-select.tsx`), `forms-react` (только комментарии в
+`image-popover-strings.ts`/`selection-strings.ts`, код словарей не менялся).
+
+**Проверка:** `nx test/lint/typecheck:tsgo --projects=forms-core,forms,forms-react,forms-shadcn` —
+все зелёные (0 новых ошибок). `nx run-many -t format` — без диффов.
+
 ## 2026-09-27 (`GreenForest`, временная identity — `forms-dev` был занят живой сессией) — фикс битого сообщения об ошибке размера файла в ImagePopover (forms 2.35.1)
 
 **Контекст:** прямой запрос пользователя — в `handleUpload` (`image-popover.tsx`) была

@@ -14,6 +14,7 @@ import {
   Text,
   VStack,
 } from '@chakra-ui/react'
+import { interpolate } from '@letar/forms-core/i18n'
 import { useImagePopoverString, useToolbarString } from '@letar/forms-react'
 import type { Editor } from '@tiptap/react'
 import { type ReactElement, useCallback, useRef, useState } from 'react'
@@ -106,7 +107,7 @@ export function ImagePopover({ editor, config, disabled }: ImagePopoverProps): R
       // Проверка sizeа
       if (file.size > maxSize) {
         const maxSizeMB = (maxSize / 1024 / 1024).toFixed(0)
-        setErrorMessage(errorSizeExceededTemplate.replace('{size}', maxSizeMB))
+        setErrorMessage(interpolate(errorSizeExceededTemplate, { size: maxSizeMB }))
         setUploadState('error')
         return
       }
@@ -266,7 +267,7 @@ export function ImagePopover({ editor, config, disabled }: ImagePopoverProps): R
                   </Box>
 
                   <Text fontSize="xs" color="fg.muted" textAlign="center">
-                    {sizeHintTemplate.replace('{size}', (maxSize / 1024 / 1024).toFixed(0))}
+                    {interpolate(sizeHintTemplate, { size: (maxSize / 1024 / 1024).toFixed(0) })}
                   </Text>
 
                   <input

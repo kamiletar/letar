@@ -52,10 +52,11 @@ const BUILTIN_SELECTION_STRINGS: Record<SelectionStringKey, Record<string, strin
   'formSelection.search.aria': { en: 'Search options', ru: 'Поиск по списку' },
   // `aria-label` кнопки очистки значения у Select/Combobox
   'formSelection.clear': { en: 'Clear', ru: 'Очистить' },
-  // Оптимистичное действие не подтвердилось (§16.7); `{label}` подставляет поле
+  // Оптимистичное действие не подтвердилось (§16.7); `{label}` подставляет поле через `interpolate()`
   'formSelection.settleError': { en: 'Could not save “{label}”', ru: 'Не удалось сохранить «{label}»' },
   // Зависимое поле (`dependsOn`, §18): подсказка под заблокированным полем и объявление автоочистки.
-  // `{parent}` — метка родителя (или несколько через запятую), `{field}` — метка самого поля; подставляет поле
+  // `{parent}` — метка родителя (или несколько через запятую), `{field}` — метка самого поля; подставляет
+  // поле через `interpolate()` (`@letar/forms-core/i18n`)
   'formSelection.dependsOnHint': { en: 'Select “{parent}” first', ru: 'Сначала выберите «{parent}»' },
   'formSelection.dependentCleared': {
     en: '“{field}” was cleared: “{parent}” changed',

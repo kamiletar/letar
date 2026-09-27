@@ -4,6 +4,15 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.36.1] - 2026-09-27
+
+### Изменено
+
+- `ImagePopover`, `field-combobox.tsx`/`field-select.tsx` (Select/Combobox) и
+  `use-dependent-select-field.ts` переведены с ручного `template.replace('{key}', value)` на общий
+  `interpolate()` из `@letar/forms-core/i18n` (≥ 0.28.0) — без изменения поведения, только замена
+  повторявшегося приёма интерполяции builtin-строк на общий примитив.
+
 ## [2.36.0] - 2026-09-27
 
 ### Added

@@ -1,5 +1,6 @@
 'use client'
 
+import { interpolate } from '@letar/forms-core/i18n'
 import { getFieldMeta, resolveEmptyValue } from '@letar/forms-core/schema'
 import type { DependentFieldProps, FieldDeps } from '@letar/forms-core/uikit'
 import {
@@ -83,10 +84,10 @@ export function useDependentSelectField<TDeps extends FieldDeps = FieldDeps>(
     getParentLabel,
   })
 
-  const hint = state.blocked ? hintTemplate.replace('{parent}', state.missingParentLabels.join(', ')) : ''
+  const hint = state.blocked ? interpolate(hintTemplate, { parent: state.missingParentLabels.join(', ') }) : ''
   const fieldLabel = typeof label === 'string' && label !== '' ? label : lastSegment(fullPath)
   const announcement = state.cleared
-    ? clearedTemplate.replace('{field}', fieldLabel).replace('{parent}', state.cleared.parentLabel)
+    ? interpolate(clearedTemplate, { field: fieldLabel, parent: state.cleared.parentLabel })
     : ''
 
   return {

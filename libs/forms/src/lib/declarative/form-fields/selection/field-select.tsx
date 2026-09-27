@@ -1,6 +1,7 @@
 'use client'
 
 import { Box } from '@chakra-ui/react'
+import { interpolate } from '@letar/forms-core/i18n'
 import {
   applyOptionOverlay,
   CREATE_OPTION_VALUE,
@@ -710,7 +711,7 @@ const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFie
         <DependentSelectNotes dependent={dependent} />
         {actions.settleFailure && (
           <Box role="status" mt={1} fontSize="sm" color="fg.error" data-settle-error="">
-            {fieldState.settleErrorTemplate.replace('{label}', actions.settleFailure.label)}
+            {interpolate(fieldState.settleErrorTemplate, { label: actions.settleFailure.label })}
           </Box>
         )}
         <chakraUIKit.FieldError hasError={hasError} errorMessage={errorMessage} helperText={resolved.helperText} />

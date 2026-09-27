@@ -4,6 +4,14 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.58.1] - 2026-09-27
+
+### Изменено
+
+- `field-combobox.tsx`/`field-select.tsx` переведены с ручного `template.replace('{label}', value)`
+  на общий `interpolate()` из `@letar/forms-core/i18n` (≥ 0.28.0) — без изменения поведения,
+  та же строка `settleError`, что и в Chakra-скине.
+
 ## [0.58.0] - 2026-09-27
 
 ### Добавлено

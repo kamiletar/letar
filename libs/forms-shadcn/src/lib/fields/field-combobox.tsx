@@ -1,5 +1,6 @@
 'use client'
 
+import { interpolate } from '@letar/forms-core/i18n'
 import {
   applyOptionOverlay,
   CREATE_OPTION_VALUE,
@@ -558,7 +559,7 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
         <DependentLiveRegion ui={dependent} />
         {actions.settleFailure && (
           <p role="status" className="text-destructive mt-1 text-sm" data-settle-error="">
-            {fieldState.strings.settleError.replace('{label}', actions.settleFailure.label)}
+            {interpolate(fieldState.strings.settleError, { label: actions.settleFailure.label })}
           </p>
         )}
       </FieldWrapper>

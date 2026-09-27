@@ -4,6 +4,15 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.26.1] - 2026-09-27
+
+### Изменено
+
+- Комментарии `image-popover-strings.ts`/`selection-strings.ts` обновлены: интерполяция `{size}`/
+  `{label}`/`{parent}`/`{field}` builtin-строк теперь описана через `interpolate()`
+  (`@letar/forms-core/i18n` ≥ 0.28.0) вместо ручного `.replace()` — код самих словарей не менялся,
+  подстановку по-прежнему делает вызывающая сторона (`forms`/`forms-shadcn`).
+
 ## [0.26.0] - 2026-09-27
 
 ### Added

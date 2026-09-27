@@ -580,7 +580,7 @@
     },
     "apps/dashboard": {
       "name": "@letar/dashboard",
-      "version": "1.27.5",
+      "version": "1.27.7",
       "dependencies": {
         "@letar/admin-ui": "workspace:*",
         "@letar/analytics": "workspace:*",
@@ -620,7 +620,7 @@
     },
     "apps/domwellbes": {
       "name": "@letar/domwellbes",
-      "version": "0.348.1",
+      "version": "0.348.8",
       "dependencies": {
         "@gltf-transform/core": "^4.5.0",
         "@gltf-transform/extensions": "^4.5.0",
@@ -743,11 +743,13 @@
     },
     "apps/flora": {
       "name": "@letar/flora",
-      "version": "0.3.0",
+      "version": "0.3.1",
       "dependencies": {
         "@letar/demo-protection": "workspace:*",
         "@letar/env-load": "workspace:*",
+        "@letar/file-scan": "workspace:*",
         "@letar/format-utils": "workspace:*",
+        "@letar/image-upload": "workspace:*",
       },
     },
     "apps/form-develop-app": {
@@ -1296,7 +1298,7 @@
     },
     "libs/forms": {
       "name": "@letar/forms",
-      "version": "2.36.0",
+      "version": "2.36.1",
       "dependencies": {
         "@letar/format-utils": "workspace:*",
         "@tanstack/react-table": "^9.2.4",
@@ -1320,11 +1322,12 @@
     },
     "libs/forms-angular": {
       "name": "@letar/forms-angular",
-      "version": "0.1.4",
+      "version": "0.1.6",
       "dependencies": {
         "@letar/forms-core": "workspace:*",
       },
       "devDependencies": {
+        "@angular/cdk": "^22.1.2",
         "@angular/common": "^22.1.2",
         "@angular/compiler": "^22.1.2",
         "@angular/core": "^22.1.2",
@@ -1337,6 +1340,7 @@
         "@tiptap/starter-kit": "^3.31.0",
       },
       "peerDependencies": {
+        "@angular/cdk": "^22.0.0",
         "@angular/common": "^22.0.0",
         "@angular/core": "^22.0.0",
         "@angular/forms": "^22.0.0",
@@ -1349,7 +1353,7 @@
     },
     "libs/forms-core": {
       "name": "@letar/forms-core",
-      "version": "0.26.1",
+      "version": "0.28.0",
       "dependencies": {
         "@tanstack/table-core": "^9.1.2",
       },
@@ -1373,7 +1377,7 @@
     },
     "libs/forms-react": {
       "name": "@letar/forms-react",
-      "version": "0.26.0",
+      "version": "0.26.1",
       "dependencies": {
         "@letar/forms-core": "workspace:*",
       },
@@ -1388,7 +1392,7 @@
     },
     "libs/forms-shadcn": {
       "name": "@letar/forms-shadcn",
-      "version": "0.58.0",
+      "version": "0.58.1",
       "devDependencies": {
         "@letar/eager-jsx-check": "workspace:*",
         "@letar/forms-core": "workspace:*",
@@ -1421,8 +1425,9 @@
     },
     "libs/forms-vue": {
       "name": "@letar/forms-vue",
-      "version": "0.16.0",
+      "version": "0.18.0",
       "dependencies": {
+        "@floating-ui/dom": "^1.8.0",
         "@letar/forms-core": "workspace:*",
       },
       "devDependencies": {
@@ -1845,6 +1850,8 @@
     "@ai-sdk/react": ["@ai-sdk/react@4.0.115", "", { "dependencies": { "@ai-sdk/mcp": "2.0.56", "@ai-sdk/provider": "4.0.18", "@ai-sdk/provider-utils": "5.0.46", "ai": "7.0.112", "swr": "^2.4.1", "throttleit": "2.1.0" }, "peerDependencies": { "react": "^18 || ~19.0.1 || ~19.1.2 || ^19.2.1" } }, "sha512-ZpXTqT8YmT1lZ6LBNjlDnBYkq68qO7I4WdqmCI68KFq4hq3zY8zl6B/YZZQAF4jx9U4gZbnzf6wNPk44m7zqQQ=="],
 
     "@alloc/quick-lru": ["@alloc/quick-lru@5.3.0", "", {}, "sha512-U4+70Pc5ZS9osnCBCE5Jha/ciHM+Yp+CNMNC/7HvYbNRk1Ldd+f7qO65W5qfhu/TCv+/ozljlXXe9Nj8419DMA=="],
+
+    "@angular/cdk": ["@angular/cdk@22.2.0", "", { "dependencies": { "parse5": "^8.0.0", "tslib": "^2.3.0" }, "peerDependencies": { "@angular/common": "^22.0.0 || ^23.0.0", "@angular/core": "^22.0.0 || ^23.0.0", "@angular/forms": "^22.0.0 || ^23.0.0", "@angular/platform-browser": "^22.0.0 || ^23.0.0", "rxjs": "^6.5.3 || ^7.4.0" } }, "sha512-Vxiqo03yKxzmON+hfa0UkUSC+TrWdtRgc1MtkE5l3NJQ5euF9Os4kOqDfW1nDt3/AjCplE64HX3h0gOK5m3zjw=="],
 
     "@angular/common": ["@angular/common@22.1.2", "", { "dependencies": { "tslib": "^2.3.0" }, "peerDependencies": { "@angular/core": "22.1.2", "rxjs": "^6.5.3 || ^7.4.0" } }, "sha512-8TzyYPBDvSItV8Vqq8k5u8a9fWaomC9bMEr8z1vVLRZDIPhNQ/UcCyuTYbC7GZkeqrrKGu5m8tjUrA09RCwuaQ=="],
 
@@ -8326,6 +8333,8 @@
 
     "zxing-wasm": ["zxing-wasm@3.1.2", "", { "dependencies": { "@types/emscripten": "^1.41.5", "type-fest": "^5.8.0" } }, "sha512-yHloUw+h43r9QhFwVEbdkfmsl9h3rHRpgvvVd9WdhipM3TCYYzGVACmnT+i/YPrNK/eZRgs1ZMISsyJtAoimzA=="],
 
+    "@angular/cdk/parse5": ["parse5@8.0.1", "", { "dependencies": { "entities": "^8.0.0" } }, "sha512-z1e/HMG90obSGeidlli3hj7cbocou0/wa5HacvI3ASx34PecNjNQeaHNo5WIZpWofN9kgkqV1q5YvXe3F0FoPw=="],
+
     "@apm-js-collab/code-transformer/source-map": ["source-map@0.6.1", "", {}, "sha512-UjgapumWlbMhkBgzT7Ykc5YXUT46F0iKu8SGXq0bcwP5dz/h0Plj6enJqjz1Zbq2l5WaqYnrVbwWOWMyF3F47g=="],
 
     "@apm-js-collab/code-transformer-bundler-plugins/magic-string": ["magic-string@0.30.21", "", { "dependencies": { "@jridgewell/sourcemap-codec": "^1.5.5" } }, "sha512-vd2F4YUyEXKGcLHoq+TEyCjxueSeHnFxyyjNp80yg0XV4vUhnDer/lvvlqM/arB5bXQN5K2/3oinyCRyx8T2CQ=="],
@@ -9519,6 +9528,8 @@
     "write-file-atomic/signal-exit": ["signal-exit@4.1.0", "", {}, "sha512-bzyZ1e88w9O1iNJbKnOlvYTrWPDl46O1bG0D3XInv+9tkPrxrN8jUUTiFlDkkmKWgn1M6CfIA13SuGqOa9Korw=="],
 
     "xml2js/xmlbuilder": ["xmlbuilder@11.0.1", "", {}, "sha512-fDlsI/kFEx7gLvbecc0/ohLG50fugQp8ryHzMTuW9vSa1GJ0XYWKnhsUx7oie3G98+r56aTQIUB4kht42R3JvA=="],
+
+    "@angular/cdk/parse5/entities": ["entities@8.1.0", "", {}, "sha512-kxL7msIffSuh9aaFAMD7rxAIuTRMAHMeBtgHW2yUdWw732ZNh4MehkF2gdjvtdmikkaIP9bFDDJOPlsvm7avrA=="],
 
     "@electron/asar/minimatch/brace-expansion": ["brace-expansion@5.0.12", "", { "dependencies": { "balanced-match": "^4.0.2" } }, "sha512-YovQ3rzhaLMIrDjNDMkNS01tea93qhEhG5xy8f6+R0l+dw3Ki+5sCoIoI942iuLZTHWogWktgwVDhU09iNEimQ=="],
 
