@@ -81,6 +81,20 @@ test.describe('Select/Combobox shadcn — живая проверка', () => {
     await expect(input).toHaveAttribute('aria-expanded', 'false')
   })
 
+  test('Combobox без значения: недонабранный текст стирается при закрытии списка', async ({ page }) => {
+    const input = trigger(page, 'cityCombo')
+    await input.click()
+    await page.keyboard.type('Каз')
+    await expect(page.getByRole('option')).toHaveCount(1)
+
+    // Клик мимо закрывает список: значения нет — и текста в поле быть не должно
+    await page.getByTestId('live-values').click()
+
+    await expect(input).toHaveAttribute('aria-expanded', 'false')
+    await expect(input).toHaveValue('')
+    expect((await liveValues(page))['cityCombo']).toBeNull()
+  })
+
   test('оптимистичный create: отказ сервера откатывает подпись и показывает сообщение', async ({ page }) => {
     await page.getByTestId('mode-fail').click()
 
@@ -98,6 +112,11 @@ test.describe('Select/Combobox shadcn — живая проверка', () => {
     test('пока родитель пуст, дочернее поле заблокировано; выбор города и очистка по правке страны', async ({ page }) => {
       await expect(trigger(page, 'town')).toBeDisabled()
       await expect(trigger(page, 'townCombo')).toBeDisabled()
+      // Подсказка называет родителя его подписью («Страна»), а не именем поля `country`
+      await expect(page.locator('[data-slot="dependent-hint"]')).toHaveText([
+        'Сначала выберите «Страна»',
+        'Сначала выберите «Страна»',
+      ])
 
       await trigger(page, 'country').click()
       await page.getByRole('option', { name: 'Россия' }).click()
