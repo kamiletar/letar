@@ -456,7 +456,7 @@
     },
     "apps/animatrona-landing": {
       "name": "@letar/animatrona-landing",
-      "version": "0.4.13",
+      "version": "0.4.14",
       "dependencies": {
         "@letar/chakra-provider": "workspace:*",
         "@letar/glitchtip": "workspace:*",
@@ -862,7 +862,7 @@
     },
     "apps/kami-key-the-landing": {
       "name": "@letar/kami-key-the-landing",
-      "version": "0.4.8",
+      "version": "0.4.9",
       "dependencies": {
         "@letar/chakra-provider": "workspace:*",
         "@letar/glitchtip": "workspace:*",
@@ -892,7 +892,7 @@
     },
     "apps/letar-landing": {
       "name": "@letar/letar-landing",
-      "version": "0.5.8",
+      "version": "0.5.9",
       "dependencies": {
         "@letar/analytics": "workspace:*",
         "@letar/chakra-provider": "workspace:*",
@@ -1019,7 +1019,7 @@
     },
     "apps/synth": {
       "name": "@letar/synth",
-      "version": "0.22.9",
+      "version": "0.22.10",
       "dependencies": {
         "@letar/format-utils": "workspace:*",
         "@letar/hooks": "workspace:*",
@@ -1220,7 +1220,10 @@
     },
     "libs/electron-monorepo-updater": {
       "name": "@letar/electron-monorepo-updater",
-      "version": "0.2.3",
+      "version": "0.3.0",
+      "dependencies": {
+        "@letar/semver-compare": "workspace:*",
+      },
     },
     "libs/electron-storage": {
       "name": "@letar/electron-storage",
@@ -1509,7 +1512,10 @@
     },
     "libs/github-releases": {
       "name": "@letar/github-releases",
-      "version": "0.1.1",
+      "version": "0.2.0",
+      "dependencies": {
+        "@letar/semver-compare": "workspace:*",
+      },
     },
     "libs/glitchtip": {
       "name": "@letar/glitchtip",
@@ -1659,6 +1665,10 @@
     },
     "libs/seed-utils": {
       "name": "@letar/seed-utils",
+      "version": "0.1.0",
+    },
+    "libs/semver-compare": {
+      "name": "@letar/semver-compare",
       "version": "0.1.0",
     },
     "libs/seo": {
@@ -2928,6 +2938,8 @@
     "@letar/redis-client": ["@letar/redis-client@workspace:libs/redis-client"],
 
     "@letar/seed-utils": ["@letar/seed-utils@workspace:libs/seed-utils"],
+
+    "@letar/semver-compare": ["@letar/semver-compare@workspace:libs/semver-compare"],
 
     "@letar/seo": ["@letar/seo@workspace:libs/seo"],
 
