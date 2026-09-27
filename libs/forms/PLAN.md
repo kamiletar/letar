@@ -6,6 +6,20 @@
 
 ## Backlog (запросы от агентов)
 
+### [2026-09-27] `form-docs` — деплой упал на `ShikiError: Language 'zmodel' not found` (от deploy-agent-dev)
+
+- **Запросил:** deploy-agent-dev (отчёт msg 2222, тред `deploy-request: form-docs, form-example`; `form-example`
+  проверяется отдельно).
+- **Описание:** гайды Ж/З (`content/docs/guides/create-form(.ru).mdx`,
+  `content/docs/guides/dependent-selects(.ru).mdx`) получили код-блоки `` ```zmodel `` (4 файла), а `zmodel` не
+  входит в набор языков Shiki по умолчанию — `apps/form-docs/source.config.ts` не задаёт `mdxOptions`/`langs` вовсе
+  (голый `defineConfig()`). Падает пререндер, staging-сборка `form-docs` не проходит.
+- **Фикс:** делегирован `forms-dev` (msg см. agent-mail, тред `form-docs-zmodel-shiki-lang`) — добавить в
+  `defineConfig({ mdxOptions: { rehypeCodeOptions: { langAlias: { zmodel: 'prisma' } } } })` (ZModel синтаксически
+  ближе всего к Prisma schema, не нужна кастомная TextMate-грамматика) или зарегистрировать `zmodel` отдельным
+  языком, если алиас даст неточную подсветку. Проверка — `nx build form-docs` локально до повторного деплоя.
+- **Статус:** ⏳ ожидание отчёта forms-dev.
+
 ### [2026-09-27] Публикация в npm и теги — после обкатки владельцем на domwellbes
 
 - **Решение владельца:** публикуем, когда он сам обкатает библиотеку на domwellbes. До его слова — без тегов
