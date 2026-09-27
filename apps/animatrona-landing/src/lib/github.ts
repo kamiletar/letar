@@ -12,10 +12,16 @@ export interface ReleaseSource {
   tagPrefix?: string
 }
 
-/** Полная Animatrona — собственный репозиторий, один продукт на репо, префикс не нужен */
+/**
+ * Полная Animatrona — релизы едут из монорепо `kamiletar/letar` (см.
+ * `.claude/docs/electron-monorepo-shared-releases.md`), не из зеркального `kamiletar/animatrona`
+ * (устаревшая схема, снята 2026-09-13, последний релиз там — v0.50.1 от 2026-04-21). До этого
+ * фикса лендинг продолжал брать «последний релиз» из мёртвого зеркала.
+ */
 export const ANIMATRONA_SOURCE: ReleaseSource = {
   owner: process.env.GITHUB_OWNER || 'kamiletar',
-  repo: process.env.GITHUB_REPO || 'animatrona',
+  repo: process.env.GITHUB_REPO || 'letar',
+  tagPrefix: 'animatrona-v',
 }
 
 /** Плеер аниме из папки — релизы едут прямо из монорепо `kamiletar/letar`, без зеркалирования исходников */
