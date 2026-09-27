@@ -1,5 +1,6 @@
 import { formatFiles, generateFiles, joinPathFragments, logger, type Tree } from '@nx/devkit'
 import { buildFaviconIco, iconTsxSource } from '../../utils/favicon'
+import { buildAppTsconfigPaths, buildTranspilePackages } from '../../utils/lib-paths'
 import { toCamelCase, toDisplayName } from '../../utils/naming'
 import { resolveNextFreePort } from '../../utils/ports'
 import { assertTargetIsFree, templatesDirFor } from '../../utils/tree'
@@ -59,6 +60,8 @@ export default async function newAppGenerator(tree: Tree, options: NewAppGenerat
     description,
     date: todayIso(),
     withDb,
+    tsconfigPaths: JSON.stringify(buildAppTsconfigPaths(), null, 2),
+    transpilePackages: buildTranspilePackages(),
   })
 
   if (withDb) {

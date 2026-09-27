@@ -1,5 +1,4 @@
 import createMDX from '@next/mdx'
-import { composePlugins, withNx } from '@nx/next'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -11,8 +10,15 @@ const workspaceRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)),
 
 const nextConfig = {
   pageExtensions: ['js', 'jsx', 'ts', 'tsx', 'md', 'mdx'],
-  nx: {},
   turbopack: { root: workspaceRoot },
+
+  // Workspace-либы вне корня приложения: без явного непустого `transpilePackages` webpack
+  // (`next build --webpack`) не транспилирует TS из `libs/*` (`Module parse failed`). Работает
+  // наличие ключа, а не имена в нём. См. .claude/docs/nextjs-nx-composeplugins-migration.md и
+  // .claude/docs/transpile-packages-array-presence-not-content.md
+  transpilePackages: [<% transpilePackages.forEach(function (pkg) { %>
+    '<%= pkg %>',<% }) %>
+  ],
 
   // Если это приложение подключит @letar/query-provider И в его project.json стоит
   // `next dev --webpack` (не Turbopack по умолчанию) — раскомментируй блок ниже.
@@ -35,6 +41,4 @@ const withMDX = createMDX({
   },
 })
 
-const plugins = [withNx, withMDX]
-
-export default composePlugins(...plugins)(nextConfig)
+export default withMDX(nextConfig)

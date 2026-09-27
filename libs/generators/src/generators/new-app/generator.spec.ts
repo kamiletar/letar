@@ -1,6 +1,6 @@
 import type { Tree } from '@nx/devkit'
 import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing'
-import { readFileSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { beforeEach, describe, expect, it } from 'vitest'
@@ -232,15 +232,31 @@ describe('new-app generator', () => {
       expect(readTsconfig().references).toBeUndefined()
     })
 
-    it('tsconfig.json содержит paths на ВСЕ subpath-экспорты forms, forms-core и forms-react', async () => {
+    it('tsconfig.json проходит логику lib-subpath-paths: для каждой подключённой библиотеки — paths на ВСЕ её exports', async () => {
       await newAppGenerator(tree, { name: 'my-app' })
 
       // Ожидание считаем по реальным `exports` библиотек, а не по зашитому списку: неполный набор
-      // подпутей — мина замедленного действия (.claude/rules/libs.md, check-lib-subpath-paths).
-      // Wildcard-ключ здесь невозможен: раскладка файлов подпутей не единообразна.
+      // подпутей — мина замедленного действия (.claude/rules/libs.md, scripts/check-lib-subpath-paths.mjs).
+      // Как и в скрипте: библиотека считается подключённой, если в paths есть хоть один её ключ.
       const paths = readTsconfig().compilerOptions.paths as Record<string, string[]>
-      for (const lib of ['forms', 'forms-core', 'forms-react']) {
-        const pkg = JSON.parse(readFileSync(path.join(repoRoot, 'libs', lib, 'package.json'), 'utf-8'))
+      const libsDir = path.join(repoRoot, 'libs')
+      const connected = readdirSync(libsDir).filter((lib) =>
+        Object.keys(paths).some((key) => key === `@letar/${lib}` || key.startsWith(`@letar/${lib}/`))
+      )
+      // Базовый набор шаблона обязан быть подключён
+      expect(connected).toEqual(
+        expect.arrayContaining([
+          'chakra-provider',
+          'ui',
+          'analytics',
+          'env-load',
+          'forms',
+          'forms-core',
+          'forms-react',
+        ]),
+      )
+      for (const lib of connected) {
+        const pkg = JSON.parse(readFileSync(path.join(libsDir, lib, 'package.json'), 'utf-8'))
         for (const subpath of Object.keys(pkg.exports as Record<string, unknown>)) {
           if (subpath === './package.json') {
             continue
@@ -248,6 +264,18 @@ describe('new-app generator', () => {
           const key = `@letar/${lib}${subpath === '.' ? '' : subpath.slice(1)}`
           expect(paths[key], key).toBeDefined()
         }
+      }
+    })
+
+    it('paths указывают на существующие файлы библиотек (относительно apps/<app>)', async () => {
+      await newAppGenerator(tree, { name: 'my-app' })
+
+      const paths = readTsconfig().compilerOptions.paths as Record<string, string[]>
+      for (const [key, [target]] of Object.entries(paths)) {
+        if (key === '@/*') {
+          continue
+        }
+        expect(existsSync(path.join(repoRoot, 'apps/my-app', target)), `${key} → ${target}`).toBe(true)
       }
     })
 
@@ -265,6 +293,20 @@ describe('new-app generator', () => {
       const config = tree.read('apps/my-app/next.config.mjs', 'utf-8') ?? ''
       expect(config).toContain('turbopack: { root: workspaceRoot }')
       expect(config).toContain("'../..'")
+    })
+
+    it('next.config.mjs — голый конфиг: без composePlugins/withNx, с явным transpilePackages', async () => {
+      await newAppGenerator(tree, { name: 'my-app' })
+
+      const config = tree.read('apps/my-app/next.config.mjs', 'utf-8') ?? ''
+      expect(config).not.toContain('composePlugins')
+      expect(config).not.toContain('withNx')
+      expect(config).not.toContain('@nx/next')
+      expect(config).toMatch(/transpilePackages:\s*\[/)
+      for (const lib of ['chakra-provider', 'ui', 'analytics', 'env-load', 'forms', 'forms-core', 'forms-react']) {
+        expect(config).toContain(`'@letar/${lib}'`)
+      }
+      expect(config).toContain('export default withMDX(nextConfig)')
     })
 
     it('шаблоны не используют проп as= у Heading — только asChild с нативным элементом', async () => {

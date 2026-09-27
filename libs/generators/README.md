@@ -158,6 +158,14 @@ nx g @letar/generators:new-app <name> --port=3033 --displayName="Моё прил
 nx g @letar/generators:new-app <name> --withDb
 ```
 
+`next.config.mjs` — голый конфиг без `composePlugins`/`withNx` (миграция —
+[nextjs-nx-composeplugins-migration](/.claude/docs/nextjs-nx-composeplugins-migration.md)), с явным
+`transpilePackages` и `turbopack.root`. `tsconfig.json` собирает `compilerOptions.paths` из `exports`
+каждой подключаемой библиотеки (`libs/<lib>/package.json`, см. `src/utils/lib-paths.ts`), а не из
+зашитого списка — новый подпуть библиотеки попадает в свежие приложения сам, и
+`bun scripts/check-all.mjs --only=lib-subpath-paths` не краснеет на них. Набор библиотек —
+`DEFAULT_APP_LIBS` в том же файле.
+
 Порт по умолчанию — **следующий за максимальным занятым** `3xxx` (продолжение последовательности, а не
 первая дырка в ней). Занятые порты собираются из `apps/*/.env`, `apps/*/.env.local` и `-p <порт>` /
 `--port=<порт>` в `apps/*/project.json` — часть приложений (лендинги) объявляет порт только там.
