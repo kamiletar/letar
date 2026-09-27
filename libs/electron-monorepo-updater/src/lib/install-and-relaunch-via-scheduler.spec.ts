@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest'
 
-import { buildRelaunchBatScript } from './install-and-relaunch-via-scheduler'
+import { buildRelaunchBatScript, buildSchedulerTaskCommand } from './install-and-relaunch-via-scheduler'
+
+describe('buildSchedulerTaskCommand', () => {
+  it('запускает .bat в консоли без окна, чтобы пользователь не видел cmd всё время работы приложения', () => {
+    expect(buildSchedulerTaskCommand('C:\\Temp\\app-update-1.bat')).toBe(
+      'conhost.exe --headless cmd.exe /d /c "C:\\Temp\\app-update-1.bat"',
+    )
+  })
+})
 
 describe('buildRelaunchBatScript', () => {
   const baseOptions = {
