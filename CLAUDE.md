@@ -43,6 +43,7 @@
 - [tsgo-generic-default-param-inference](/.claude/docs/tsgo-generic-default-param-inference.md) ⚠️ generic-обёртка выводит `TArgs` как `unknown[]`
 - [tsgo-excessive-stack-depth-zenstack](/.claude/docs/tsgo-excessive-stack-depth-zenstack.md) ⚠️ TS2321 на вложенных ZenStack-типах, три фикса
 - [tsgo-tsc-stale-project-reference-redirect](/.claude/docs/tsgo-tsc-stale-project-reference-redirect.md) ⚠️ project-reference уводит на устаревший `.d.ts`
+- [tsgo-incremental-tsbuildinfo-stale-diagnostics](/.claude/docs/tsgo-incremental-tsbuildinfo-stale-diagnostics.md) ⚠️ сталый `tsconfig.tsbuildinfo` держит старую ошибку после смены `target`/`lib`, хотя `--showConfig` уже показывает новый
 - [tsconfig-preset-rootdir-outdir-cascade](/.claude/docs/tsconfig-preset-rootdir-outdir-cascade.md) ⚠️ удаление `references` с унаследованным `outDir` — три побочных эффекта
 - [vitest-setup-file-tsconfig-graph-gap](/.claude/docs/vitest-setup-file-tsconfig-graph-gap.md) ⚠️ `vitest.setup.ts` вне графа `references` валит все тесты либы разом
 - [bun-lockfile-private-submodules](/.claude/docs/bun-lockfile-private-submodules.md) ⚠️ `--frozen-lockfile` падает без выкачанных submodule
