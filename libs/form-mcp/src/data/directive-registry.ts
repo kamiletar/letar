@@ -80,9 +80,13 @@ const KNOWN_DIRECTIVES: DirectiveInfo[] = [
     name: '@form.relation',
     metaKey: 'form.relation.<dotpath>',
     description:
-      'Configuration for relation fields (FK -> Select/Combobox); the plugin writes fieldProps.relation and does not choose the field type. Тот же запрет объектного литерала, что и у form.props — только плоский dot-path.',
-    example: '@meta("form.relation.labelField", "name") @meta("form.relation.searchable", true)',
-    output: '.meta({ ui: { fieldProps: { relation: { labelField: "name", searchable: true } } } })',
+      'Configuration for relation fields (FK -> Select/Combobox); the plugin writes fieldProps.relation and does not choose the field type. Тот же запрет объектного литерала, что и у form.props — только плоский dot-path. '
+      + '`form.relation.descriptionField` — поле записи для второй строки опции: Select и Combobox (Chakra и shadcn) '
+      + 'рисуют её под подписью только в выпадающем списке, не в триггере и не в поле после выбора; локальный поиск '
+      + 'ищет и по ней (`searchInDescription={false}` отключает). Нужны @letar/forms >= 2.30.0 и RelationFieldProvider '
+      + '(descriptionField из RelationConfig сильнее, чем из схемы).',
+    example: '@meta("form.relation.labelField", "name") @meta("form.relation.descriptionField", "note")',
+    output: '.meta({ ui: { fieldProps: { relation: { labelField: "name", descriptionField: "note" } } } })',
   },
   {
     name: '@form.dependsOn',

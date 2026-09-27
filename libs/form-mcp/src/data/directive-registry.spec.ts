@@ -68,6 +68,9 @@ describe('getDirectives', () => {
     const relation = getDirectives(registry, 'relation')[0]
     expect(relation.output).not.toContain('fieldType')
     expect(relation.output).toContain('fieldProps')
+    // Вопрос 44: вторая строка опции описана и в описании, и в примере
+    expect(relation.description).toContain('descriptionField')
+    expect(relation.example).toContain('form.relation.descriptionField')
   })
 
   it('MD1: form.dependsOn — строка и массив, проверки плагина, без автовывода по FK', () => {

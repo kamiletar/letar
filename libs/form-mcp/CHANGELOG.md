@@ -1,5 +1,12 @@
 # Changelog — @letar/form-mcp
 
+## 2.5.1 (2026-09-27)
+
+### Changed
+
+- `get_directives('relation')`: описана `form.relation.descriptionField` — вторая строка опции в Select и Combobox
+  (нужны `@letar/forms` >= 2.30.0 и `RelationFieldProvider`), пример и вывод обновлены.
+
 ## 2.5.0 (2026-09-27)
 
 ### Added
