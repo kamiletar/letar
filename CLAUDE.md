@@ -89,6 +89,7 @@
 - [role-gate-vs-model-policy-drift](/.claude/docs/role-gate-vs-model-policy-drift.md) ⚠️ `requireRole` шире `@@allow` модели — отказ на записи вместо гейта
 - [tree-model-parent-select](/.claude/docs/tree-model-parent-select.md) self-referencing `parentId`
 - [current-value-plus-append-only-history-pattern](/.claude/docs/current-value-plus-append-only-history-pattern.md) текущее значение + append-only журнал, история только при изменении
+- [scheduled-task-handler-self-cancel-pitfall](/.claude/docs/scheduled-task-handler-self-cancel-pitfall.md) ⚠️ обработчик не удаляет свою же отложенную задачу
 - [zenstack-append-only-terminal-event-pattern](/.claude/docs/zenstack-append-only-terminal-event-pattern.md) append-only лог, терминальность через `idempotencyKey`
 - [zenstack-multifile-schema-circular-imports](/.claude/docs/zenstack-multifile-schema-circular-imports.md) декомпозиция `schema.zmodel`, циклы рабочие
 - [zenstack-shared-fragments-across-apps](/.claude/docs/zenstack-shared-fragments-across-apps.md) `libs/*.zmodel` между приложениями, ⚠️ гранулярность affected
@@ -314,6 +315,7 @@
 - [auth](/.claude/docs/auth.md) ⭐ Better Auth, сессии, роли · [admin](/.claude/docs/admin.md) · [user-profile](/.claude/docs/user-profile.md)
 - [one-time-reveal-fragment-token-pattern](/.claude/docs/one-time-reveal-fragment-token-pattern.md) одноразовая публичная ссылка без утечки токена в лог
 - [better-auth-localhost-cookie-jar-collision](/.claude/docs/better-auth-localhost-cookie-jar-collision.md) ⚠️ dev-серверы делят cookie-jar `localhost` → 500 на Base64
+- [better-auth-emailotp-silent-send-failure](/.claude/docs/better-auth-emailotp-silent-send-failure.md) ⚠️ сбой отправки кода тонет молча
 - [better-auth-pages-option-dead-code](/.claude/docs/better-auth-pages-option-dead-code.md) ⚠️ `pages: {...}` — несуществующая опция, мёртвый код в 7 приложениях
 - [better-auth-1.7-oidc-provider-removed](/.claude/docs/better-auth-1.7-oidc-provider-removed.md) ⚠️ `bun update` в пределах `^1.6.x` убирает `oidcProvider`
 - [better-auth-1.7-account-issuer-field](/.claude/docs/better-auth-1.7-account-issuer-field.md) ⚠️ требуется поле `issuer`; коммит миграции ≠ её применение
