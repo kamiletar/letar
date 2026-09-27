@@ -2,6 +2,46 @@
 
 Детальное описание всех реализованных фич.
 
+## ✅ v1.27.6 — RBAC-аудит write/destructive роутов (2026-09-27)
+
+Продолжение v1.27.5: сессия, добавившая rate-limit, поставила на пять роутов `requireAuth()`
+(не `requireAdmin()`), явно объяснив это желанием не менять существующее поведение попутно с
+rate-limit-задачей. Но это разошлось с документированной семантикой ролей
+(`src/lib/auth.types.ts`: VIEWER — «просмотр», ADMIN — «полный доступ + управление») и с соседними
+роутами (`deploy/start`, `servers/.../deploy`, `cron/jobs/[id]/run`), которые уже требовали ADMIN.
+
+**`requireAuth()` → `requireAdmin()`:**
+
+- `POST /api/docker/control`, `POST /api/docker/prune` — VIEWER мог запускать/останавливать
+  контейнеры и чистить build cache/images
+- `POST /api/git/pull` — VIEWER мог дёргать `git pull` на хосте
+- `POST /api/nginx/proxy-hosts`, `PUT`/`DELETE /api/nginx/proxy-hosts/[id]` — VIEWER мог
+  создавать/менять/удалять proxy hosts в Nginx Proxy Manager
+
+**Найдены и закрыты роуты вовсе без session-гейта в коде** (только `proxy.ts`, значит доступны
+и VIEWER, и — при обходе proxy — потенциально шире), добавлен `requireAdmin()`:
+
+- `POST /api/analytics/sites` — создание сайта в Umami
+- `POST /api/alerts/settings` — сохранение настроек, включая Telegram-токен
+- `DELETE /api/audit-log` — **очистка журнала аудита целиком**, самая серьёзная находка: VIEWER
+  мог стереть forensic-след своих же и чужих действий
+
+**Проверено и намеренно не тронуто** (не destructive/не «управление» по смыслу VIEWER):
+`alerts/[id]/acknowledge`, `alerts/test-telegram`, `cron/validate`, `apps/[app]/metrics` POST
+(health-check по требованию). Deprecated-заглушки (`database/*/restore`, `database/*/backup`,
+`database/*/backups/[id]`, `database/backup-settings`, `cron/backup`, `backups/scheduled/run`,
+`apps/[app]/clean-uploads`) всегда возвращают `501` — гейтить нечего, реального действия нет.
+`servers/*`, `servers/[id]/apps*`, `cron/jobs*` уже были в порядке (`requireAdmin`/
+`getServerSession` + ручная проверка роли).
+
+`nx typecheck:tsgo dashboard`, `nx lint dashboard`, `nx test dashboard` — зелёные.
+
+⚠️ **`bun.lock` разошёлся с `package.json`** не только у dashboard (1.27.6), но и у
+domwellbes/forms/forms-react — чужой незакоммиченный WIP на момент бампа версии, дерево не
+чистое. `bun install --lockfile-only` не запускался (см.
+`.claude/docs/bun-lock-drift-unpushed-commits-blocks-all-deploys.md`) — кто-то должен свести lock
+перед следующим общим деплоем.
+
 ## ✅ v1.27.5 — rate-limit на дорогих/опасных API-роутах (2026-09-27)
 
 Продолжение аудита из v1.27.4: удаление мёртвого `src/lib/rate-limit.ts` показало, что dashboard
