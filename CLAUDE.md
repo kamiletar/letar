@@ -54,8 +54,7 @@
 - [zod-per-package-pin-drift](/.claude/docs/zod-per-package-pin-drift.md) ⚠️ caret не дедупает с точным корневым пином
 - [root-pin-peer-drift](/.claude/docs/root-pin-peer-drift.md) ⚠️ пин в корне тихо перебивается; намеренные пины — в `intentional-pins.json`
 - [nested-package-resolution-under-bun-isolated-installs](/.claude/docs/nested-package-resolution-under-bun-isolated-installs.md) ⚠️ импорт из `scripts/` — только через `createRequire`
-- [shared-get-client-ip-consolidation](/.claude/docs/shared-get-client-ip-consolidation.md) `getClientIpFromHeaders`, третья и четвёртая копии — с осознанным выбором делегировать или нет
-- [rate-limit-dedup-api-server-vs-copies](/.claude/docs/rate-limit-dedup-api-server-vs-copies.md) `@letar/api-server`'s `createRateLimiter` вместо своей `Map`-копии, ⚠️ Redis-исключение svoichuzhie — другое требование
+- [shared-get-client-ip-consolidation](/.claude/docs/shared-get-client-ip-consolidation.md) `getClientIpFromHeaders`, третья копия оставлена намеренно
 - [lib-consumer-missing-lib-dom](/.claude/docs/lib-consumer-missing-lib-dom.md) ⚠️ баррель либы тянет чужие `window`-файлы в typecheck потребителя
 - [webpack-emscripten-runtime-wasm-not-emitted](/.claude/docs/webpack-emscripten-runtime-wasm-not-emitted.md) ⚠️ `.wasm` не копируется, падает на пререндере
 - [webpack-createrequire-resolve-nullified](/.claude/docs/webpack-createrequire-resolve-nullified.md) ⚠️ обратный случай: `createRequire()` переписан в `undefined`, `webpackIgnore` чинит половину

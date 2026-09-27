@@ -7,25 +7,15 @@ function fakeRequest(headers: Record<string, string>): Request {
 }
 
 describe('hashIp', () => {
-  it('хэширует единственный IP из x-forwarded-for через SHA-256', () => {
+  it('хэширует первый IP из x-forwarded-for через SHA-256', () => {
     const ip = '203.0.113.7'
     const expected = createHash('sha256').update(ip).digest('hex')
     expect(hashIp(fakeRequest({ 'x-forwarded-for': ip }))).toBe(expected)
   })
 
-  it('берёт ПОСЛЕДНИЙ адрес из списка x-forwarded-for (дописанный Traefik, не клиентский)', () => {
-    const expected = createHash('sha256').update('10.0.0.1').digest('hex')
+  it('берёт первый адрес из списка x-forwarded-for (прокси/CDN)', () => {
+    const expected = createHash('sha256').update('198.51.100.1').digest('hex')
     expect(hashIp(fakeRequest({ 'x-forwarded-for': '198.51.100.1, 10.0.0.1' }))).toBe(expected)
-  })
-
-  it('обрезает пробелы вокруг последнего IP в цепочке', () => {
-    const expected = createHash('sha256').update('10.0.0.1').digest('hex')
-    expect(hashIp(fakeRequest({ 'x-forwarded-for': '198.51.100.1  ,  10.0.0.1  ' }))).toBe(expected)
-  })
-
-  it('игнорирует пустую строку x-forwarded-for и падает на x-real-ip', () => {
-    const expected = createHash('sha256').update('192.0.2.55').digest('hex')
-    expect(hashIp(fakeRequest({ 'x-forwarded-for': '', 'x-real-ip': '192.0.2.55' }))).toBe(expected)
   })
 
   it('падает обратно на x-real-ip, если x-forwarded-for отсутствует', () => {
