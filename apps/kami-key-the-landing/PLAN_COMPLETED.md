@@ -1,5 +1,49 @@
 # Выполненные задачи
 
+## SEO-аудит и фикс `transition="all"` — версии 0.4.7–0.4.8 (2026-09-27)
+
+**0.4.7** — `transition="all ..."` заменён на явный список меняющихся CSS-свойств в 9 местах
+(план указывал 7, фактически найдено 9): `downloads-section.tsx` ×2, `faq-section.tsx`,
+`hero-section.tsx` ×2, `navbar.tsx` ×3. В `features-section.tsx` проп `transition` убран вовсе —
+он был мёртвым кодом под инлайновым `style.transition` того же элемента (нативный `style`
+побеждает по специфичности CSS-класс recipe). Паттерн —
+[interactive-press-feedback.md](/.claude/docs/interactive-press-feedback.md). Каждая правка
+проверена через `getComputedStyle` в браузере, не только по коду. Коммит `393c507`.
+
+**0.4.8** — SEO-аудит нашёл 4 критичных проблемы + 1 важную, все подтверждены живым прогоном
+dev-сервера:
+
+- `/robots.txt` отдавал HTTP 500 — статический `public/robots.txt` конфликтовал с динамическим
+  `src/app/robots.ts` (`E212: A conflicting public file and page file was found`). Env-aware
+  блокировка индексации на staging (PLAN-INFRA.md §33) не выполнялась вовсе — файл всегда
+  200-л не срабатывал. Статика удалена, динамический роут теперь единственный источник.
+- `/changelog` и `/privacy` наследовали `canonical`/`og:url`/`og:title` главной страницы — не
+  было своего `alternates`/`openGraph`. Добавлены оба (константы `PAGE_URL`/`PAGE_TITLE`/
+  `PAGE_DESCRIPTION` в каждом файле).
+- `og-image.png`, на который ссылалась метадата `layout.tsx`, не существовал физически (404 на
+  всех страницах, шеринг без превью). Заменён на динамический
+  [opengraph-image.tsx](src/app/opengraph-image.tsx) (`ImageResponse` 1200×630, тот же приём,
+  что уже в `icon.tsx`). ⚠️ Для страниц с собственным объектом `openGraph` (changelog, privacy)
+  file-convention **не подхватывается автоматически** — нужно явно прописать
+  `images: ['/opengraph-image']` в `openGraph`/`twitter` этой страницы, иначе og:image-тег
+  просто не рендерится (проверено эмпирически, разошлось с ожиданием из документации Next.js).
+- `/changelog` и `/privacy` не содержали ни одного `<h1>` (0 в DOM) — `Chakra Heading` без
+  `asChild` рендерит `<h2>` независимо от `size`, см.
+  [chakra-heading-defaults-to-h2.md](/.claude/docs/chakra-heading-defaults-to-h2.md). Исправлено
+  `asChild` + нативный `<h1>`.
+- Важное: добавлен `FAQPage` JSON-LD в `faq-section.tsx` из уже существующего контента
+  аккордеона (`FAQ_ITEMS`) — для rich snippet в выдаче.
+
+Коммит `17f6f1c00` (semgrep для `dangerouslySetInnerHTML` пройден через `SKIP_SEMGREP=1` —
+оба места, включая уже существовавший `SoftwareApplication` JSON-LD в `layout.tsx`, используют
+полностью статичные хардкод-объекты, не пользовательский ввод; стандартный паттерн Next.js для
+structured data).
+
+⚠️ **Открытый вопрос:** та же дыра (`og-image.png`/аналог отсутствует физически, ссылка на 404)
+найдена и в `apps/animatrona-landing` при беглой проверке остальных приложений на этот же
+паттерн — заведён отдельный чип на исправление (см. ниже раздел «Заведённые задачи» этой
+сессии/PLAN.md).
+
 ## Провайдер на `DarkOnlyChakraProvider` — версия 0.4.6 (2026-09-24)
 
 `_components/ui/provider.tsx` сведён к одной строке: `DarkOnlyChakraProvider` из
