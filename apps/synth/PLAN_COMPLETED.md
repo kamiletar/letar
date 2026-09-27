@@ -1,5 +1,14 @@
 # PLAN_COMPLETED — synth
 
+## 2026-09-27 (`TS2737` — BigInt в `@letar/format-utils`, `target` ES2017→ES2022)
+
+Найдено попутно в сессии по `libs/github-releases`/`animatrona-landing`. `synth` реально
+импортирует `@letar/format-utils` (`dependencies` в `package.json`), у которого `formatKopecks`
+использует BigInt-литерал (`100n`, нужен `ES2020+`). `tsconfig.json` держал `target: "ES2017"` —
+наследие `create-next-app`-скаффолда, `synth` намеренно вне общего пресета
+`tsconfig.next-app.json` вместе с `animatrona-landing`/`kami-key-the-landing`/`letar-landing`
+([tsconfig-presets.md](/.claude/docs/tsconfig-presets.md)). Поднят до `ES2022`.
+
 ## 2026-09-22 (`scrollIntoView(smooth)` подсветки наставника зависал без OS-фокуса окна)
 
 Делегировано из сессии `pravda-dev` — репо-широкий грепа по паттерну, зависающему при фиксе TOC
