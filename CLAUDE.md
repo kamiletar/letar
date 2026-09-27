@@ -38,6 +38,7 @@
 - [nx-e2e-implicit-deps-public-repo-private-app-exception](/.claude/docs/nx-e2e-implicit-deps-public-repo-private-app-exception.md) ⚠️ часть e2e намеренно без `implicitDependencies`
 - [nx-cache-directory-env-not-isolated-by-cachedirectory](/.claude/docs/nx-cache-directory-env-not-isolated-by-cachedirectory.md) ⚠️ изоляция кеша требует и `NX_WORKSPACE_DATA_DIRECTORY`
 - [nx-affected-source-based-inference](/.claude/docs/nx-affected-source-based-inference.md) `nx affected` видит импорты `@letar/*` и без `dependencies`
+- [zmodel-mixed-line-endings-python-replace-miss](/.claude/docs/zmodel-mixed-line-endings-python-replace-miss.md) ⚠️ CRLF/LF-смесь в `.zmodel` ломает Python-замену, чинит Edit или `?`
 - [tsgo-stray-declarations](/.claude/docs/tsgo-stray-declarations.md) ⚠️ `.d.ts` рядом с исходником вместо `outDir`
 - [tsgo-generic-default-param-inference](/.claude/docs/tsgo-generic-default-param-inference.md) ⚠️ generic-обёртка выводит `TArgs` как `unknown[]`
 - [tsgo-excessive-stack-depth-zenstack](/.claude/docs/tsgo-excessive-stack-depth-zenstack.md) ⚠️ TS2321 на вложенных ZenStack-типах, три фикса
@@ -87,6 +88,7 @@
 - [zenstack-field-level-allow-does-not-narrow](/.claude/docs/zenstack-field-level-allow-does-not-narrow.md) ⚠️ field-level `@allow` только добавляет право, сужает лишь `@deny`
 - [role-gate-vs-model-policy-drift](/.claude/docs/role-gate-vs-model-policy-drift.md) ⚠️ `requireRole` шире `@@allow` модели — отказ на записи вместо гейта
 - [tree-model-parent-select](/.claude/docs/tree-model-parent-select.md) self-referencing `parentId`
+- [current-value-plus-append-only-history-pattern](/.claude/docs/current-value-plus-append-only-history-pattern.md) текущее значение + append-only журнал, история только при изменении
 - [zenstack-append-only-terminal-event-pattern](/.claude/docs/zenstack-append-only-terminal-event-pattern.md) append-only лог, терминальность через `idempotencyKey`
 - [zenstack-multifile-schema-circular-imports](/.claude/docs/zenstack-multifile-schema-circular-imports.md) декомпозиция `schema.zmodel`, циклы рабочие
 - [zenstack-shared-fragments-across-apps](/.claude/docs/zenstack-shared-fragments-across-apps.md) `libs/*.zmodel` между приложениями, ⚠️ гранулярность affected
