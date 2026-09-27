@@ -2,7 +2,22 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.5.8] - 2026-09-27
+
+### Added
+
+- Находимость по «Студия Летар»: в hero-абзаце и на CTA-кнопке добавлено `(Студия Летар)` рядом
+  с упоминанием Studio Letar; JSON-LD `Organization` студии получил `alternateName: 'Студия
+  Летар'` (тот же паттерн, что `WebSite.alternateName: 'Летар'` из 0.5.7).
+
 ## [0.5.7] - 2026-09-27
+
+### Added
+
+- Находимость по кириллическому «Летар»: `title`/`description`/`keywords` в `layout.tsx`
+  дополнены формой `Letar (Летар)`, JSON-LD `WebSite` получил `alternateName: 'Летар'`, hero-текст
+  на главной явно называет сайт «Letar (Летар)». `og:title`/`twitter:title` оставлены как есть
+  (`Letar`) — соцкарточки короче, сигнал уже даёт остальная метадата и видимый текст.
 
 ### Fixed
 

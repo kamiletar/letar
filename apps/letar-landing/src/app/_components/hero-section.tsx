@@ -41,7 +41,7 @@ export function HeroSection() {
 
               <Text fontSize={{ base: 'lg', md: 'xl' }} color="fg.muted" maxW="2xl" lineHeight="1.7" mt={7}>
                 Letar (Летар) — связанная экосистема сайтов, приложений и инструментов. Здесь собраны продукты Ками и
-                работы Studio Letar.
+                работы Studio Letar (Студия Летар).
               </Text>
 
               <Flex gap={3} mt={9} flexWrap="wrap">
@@ -58,7 +58,7 @@ export function HeroSection() {
                   transitionDuration="fast"
                 >
                   <a href="https://studio.letar.best" target="_blank" rel="noopener noreferrer">
-                    Перейти в Studio <ArrowUpRight aria-hidden="true" size={18} />
+                    Перейти в Studio (Студия Летар) <ArrowUpRight aria-hidden="true" size={18} />
                   </a>
                 </Button>
                 <Button

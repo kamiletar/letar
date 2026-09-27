@@ -75,6 +75,7 @@ const jsonLd = {
       '@type': 'Organization',
       '@id': 'https://studio.letar.best/#organization',
       name: 'Studio Letar',
+      alternateName: 'Студия Летар',
       url: 'https://studio.letar.best',
     },
   ],
