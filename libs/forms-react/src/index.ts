@@ -188,3 +188,9 @@ export type {
 // Подписи кнопок тулбара `Form.Field.RichText` — один словарь на Chakra- и shadcn-скин (не по одному на скин)
 export { resolveToolbarString, useToolbarString } from './lib/field/toolbar-strings'
 export type { ToolbarStringKey } from './lib/field/toolbar-strings'
+
+// Содержимое LinkPopover/ImagePopover `Form.Field.RichText` — только Chakra-скин (shadcn эти диалоги не рисует)
+export { resolveImagePopoverString, useImagePopoverString } from './lib/field/image-popover-strings'
+export type { ImagePopoverStringKey } from './lib/field/image-popover-strings'
+export { resolveLinkPopoverString, useLinkPopoverString } from './lib/field/link-popover-strings'
+export type { LinkPopoverStringKey } from './lib/field/link-popover-strings'

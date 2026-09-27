@@ -1,7 +1,7 @@
 'use client'
 
 import { Box, Button, HStack, IconButton, Input, Popover, Portal, VStack } from '@chakra-ui/react'
-import { useToolbarString } from '@letar/forms-react'
+import { useLinkPopoverString, useToolbarString } from '@letar/forms-react'
 import type { Editor } from '@tiptap/react'
 import { type ReactElement, useCallback, useState } from 'react'
 import { LuLink, LuUnlink } from 'react-icons/lu'
@@ -27,6 +27,10 @@ export function LinkPopover({ editor, disabled }: LinkPopoverProps): ReactElemen
   // Без noProviderLocale: контракт Chakra-скина без FormI18nProvider — английский (см. field-rich-text-impl.tsx).
   const linkAddLabel = useToolbarString('formToolbar.linkAdd')
   const linkRemoveLabel = useToolbarString('formToolbar.linkRemove')
+  const placeholderLabel = useLinkPopoverString('formLinkPopover.placeholder')
+  const removeLabel = useLinkPopoverString('formLinkPopover.remove')
+  const cancelLabel = useLinkPopoverString('formLinkPopover.cancel')
+  const applyLabel = useLinkPopoverString('formLinkPopover.apply')
 
   const handleOpen = useCallback(() => {
     if (isActive) {
@@ -94,7 +98,7 @@ export function LinkPopover({ editor, disabled }: LinkPopoverProps): ReactElemen
               <VStack gap={3} align="stretch">
                 <Box>
                   <Input
-                    placeholder="https://example.com"
+                    placeholder={placeholderLabel}
                     value={url}
                     onChange={(e) => setUrl(e.target.value)}
                     onKeyDown={handleKeyDown}
@@ -105,14 +109,14 @@ export function LinkPopover({ editor, disabled }: LinkPopoverProps): ReactElemen
                 <HStack gap={2} justify="flex-end">
                   {editor.isActive('link') && (
                     <Button size="sm" variant="ghost" colorPalette="red" onClick={handleRemove}>
-                      Remove
+                      {removeLabel}
                     </Button>
                   )}
                   <Button size="sm" variant="ghost" onClick={handleClose}>
-                    Cancel
+                    {cancelLabel}
                   </Button>
                   <Button size="sm" colorPalette="brand" onClick={handleSubmit} disabled={!url.trim()}>
-                    Apply
+                    {applyLabel}
                   </Button>
                 </HStack>
               </VStack>

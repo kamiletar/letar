@@ -2065,4 +2065,44 @@ Image — переиспользован существующий ключ `form
 
 ---
 
+---
+
+**8. i18n содержимого `LinkPopover`/`ImagePopover` — продолжение пункта 7.** Пункт 7 подключил
+только `aria-label` кнопок-триггеров (`formToolbar.*`). Внутри самих Popover оставался хардкод на
+английском: у `LinkPopover` — placeholder инпута (`"https://example.com"`) и кнопки Remove/Cancel/
+Apply; у `ImagePopover` — текст дропзоны (`"Drag image here"`/`"or click to select"`), подпись
+лимита размера (`"PNG, JPG, WEBP up to {size}MB"`), состояния Loading/Try again/Cancel и сообщения
+об ошибках (`errorNotImage`, `errorSizeExceeded`, `errorGeneric`, `errorUrlMissing`).
+
+Решение по архитектуре (задача была сформулирована как открытый вопрос: расширять `formToolbar.*`,
+делать общий словарь на оба скина или отдельный локальный): **два новых словаря**,
+`formLinkPopover.*`/`formImagePopover.*`, в `forms-react` (не в `libs/forms`, как `formField.*`).
+Причины: (1) `formToolbar.*` по своему докстрингу — только подписи кнопок тулбара, контент попапов
+семантически другая категория; (2) shadcn-скин эти диалоги вообще не рисует (`ImagePopover`
+отсутствует как beta-упрощение, `link` — `window.prompt`, не Popover, см.
+`rich-text-toolbar-config.tsx`), значит общий словарь на оба скина (как `formPasswordStrength.*`)
+не оправдан — общего рантайма нет; (3) размещение в `forms-react`, а не локально в `libs/forms` —
+по большинству прецедентов (`formToolbar.*`/`formFieldPlaceholder.*`/`formPasswordStrength.*`/
+`formSelection.*` там же), `field-default-strings.ts` в `libs/forms` — скорее исключение, чем
+правило размещения.
+
+`sizeHint`/`errorSizeExceeded` — с `{size}`, интерполяция `.replace('{size}', ...)` на стороне
+вызывающего, тот же приём, что у `formSelection.settleError`/`formSelection.dependsOnHint`
+(`selection-strings.ts`).
+
+Побочно: `errorSizeExceeded` пересекается с параллельной правкой другой сессии (GreenForest) —
+битая строка `` `Size fileа не must превышать ${maxSizeMB}MB` `` была исправлена на
+`` `File size must not exceed ${maxSizeMB}MB` `` конкурентно, до того как этот словарь дошёл до
+файла; итоговый ключ подхватил уже поправленный текст без конфликта (файл был перечитан после
+обнаружения гонки — Edit сообщил о правке на диске с последнего чтения).
+
+- `forms-react` 0.25.0 → 0.26.0 (`resolveLinkPopoverString`/`useLinkPopoverString`,
+  `resolveImagePopoverString`/`useImagePopoverString`, типы `LinkPopoverStringKey`/
+  `ImagePopoverStringKey`), `forms` 2.35.1 → 2.36.0.
+- Тесты: новые `link-popover-strings.spec.ts` (4) и `image-popover-strings.spec.ts` (5) в
+  forms-react. `nx test forms-react` 236/236, `nx test forms` 1109/1109, lint/typecheck:tsgo без
+  ошибок.
+
+---
+
 **Последнее обновление:** 2026-09-27

@@ -4,6 +4,18 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.36.0] - 2026-09-27
+
+### Added
+
+- `LinkPopover`/`ImagePopover` (`libs/forms/.../text/{link-popover,image-popover}.tsx`) полностью
+  подключены к i18n: placeholder инпута ссылки, кнопки Remove/Cancel/Apply, дропзона и её подпись
+  под лимитом размера, состояния Loading/Try again, сообщения об ошибках (`errorNotImage`,
+  `errorSizeExceeded`, `errorGeneric`, `errorUrlMissing`) — через новые словари `formLinkPopover.*`/
+  `formImagePopover.*` (`@letar/forms-react` ≥ 0.26.0). До этого из словаря был подключён только
+  `aria-label` кнопки-триггера (2.35.0/2.35.1) — содержимое самих попапов оставалось захардкожено
+  по-английски независимо от `FormI18nProvider`/locale.
+
 ## [2.35.1] - 2026-09-27
 
 ### Fixed

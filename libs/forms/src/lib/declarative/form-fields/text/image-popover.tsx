@@ -14,7 +14,7 @@ import {
   Text,
   VStack,
 } from '@chakra-ui/react'
-import { useToolbarString } from '@letar/forms-react'
+import { useImagePopoverString, useToolbarString } from '@letar/forms-react'
 import type { Editor } from '@tiptap/react'
 import { type ReactElement, useCallback, useRef, useState } from 'react'
 import { LuImage, LuUpload, LuX } from 'react-icons/lu'
@@ -60,6 +60,16 @@ export function ImagePopover({ editor, config, disabled }: ImagePopoverProps): R
   const fileInputRef = useRef<HTMLInputElement>(null)
   // Без noProviderLocale: контракт Chakra-скина без FormI18nProvider — английский (см. field-rich-text-impl.tsx).
   const insertImageLabel = useToolbarString('formToolbar.image')
+  const dropHintLabel = useImagePopoverString('formImagePopover.dropHint')
+  const dropHintSubLabel = useImagePopoverString('formImagePopover.dropHintSub')
+  const sizeHintTemplate = useImagePopoverString('formImagePopover.sizeHint')
+  const cancelLabel = useImagePopoverString('formImagePopover.cancel')
+  const loadingLabel = useImagePopoverString('formImagePopover.loading')
+  const tryAgainLabel = useImagePopoverString('formImagePopover.tryAgain')
+  const errorNotImageMessage = useImagePopoverString('formImagePopover.errorNotImage')
+  const errorSizeExceededTemplate = useImagePopoverString('formImagePopover.errorSizeExceeded')
+  const errorGenericMessage = useImagePopoverString('formImagePopover.errorGeneric')
+  const errorUrlMissingMessage = useImagePopoverString('formImagePopover.errorUrlMissing')
 
   const maxSize = config.maxSize ?? 10 * 1024 * 1024 // 10MB by default
   const acceptTypes = config.acceptTypes ?? ['image/*']
@@ -88,7 +98,7 @@ export function ImagePopover({ editor, config, disabled }: ImagePopoverProps): R
     async (file: File) => {
       // Проверка typeа fileа
       if (!file.type.startsWith('image/')) {
-        setErrorMessage('File must be an image')
+        setErrorMessage(errorNotImageMessage)
         setUploadState('error')
         return
       }
@@ -96,7 +106,7 @@ export function ImagePopover({ editor, config, disabled }: ImagePopoverProps): R
       // Проверка sizeа
       if (file.size > maxSize) {
         const maxSizeMB = (maxSize / 1024 / 1024).toFixed(0)
-        setErrorMessage(`File size must not exceed ${maxSizeMB}MB`)
+        setErrorMessage(errorSizeExceededTemplate.replace('{size}', maxSizeMB))
         setUploadState('error')
         return
       }
@@ -122,7 +132,7 @@ export function ImagePopover({ editor, config, disabled }: ImagePopoverProps): R
         const result = await response.json()
 
         if (!response.ok) {
-          throw new Error(result.error || 'Upload error')
+          throw new Error(result.error || errorGenericMessage)
         }
 
         if (result.url) {
@@ -131,10 +141,10 @@ export function ImagePopover({ editor, config, disabled }: ImagePopoverProps): R
           ;(editor.chain().focus() as any).setImage({ src: result.url }).run()
           handleClose()
         } else {
-          throw new Error('Image URL not received')
+          throw new Error(errorUrlMissingMessage)
         }
       } catch (err) {
-        setErrorMessage(err instanceof Error ? err.message : 'Upload error')
+        setErrorMessage(err instanceof Error ? err.message : errorGenericMessage)
         setUploadState('error')
       } finally {
         // Clean up preview URL
@@ -143,7 +153,16 @@ export function ImagePopover({ editor, config, disabled }: ImagePopoverProps): R
         }
       }
     },
-    [editor, config, maxSize, handleClose],
+    [
+      editor,
+      config,
+      maxSize,
+      handleClose,
+      errorNotImageMessage,
+      errorSizeExceededTemplate,
+      errorGenericMessage,
+      errorUrlMissingMessage,
+    ],
   )
 
   /**
@@ -237,17 +256,17 @@ export function ImagePopover({ editor, config, disabled }: ImagePopoverProps): R
                           <LuUpload />
                         </Icon>
                         <Text fontSize="sm" fontWeight="medium" textAlign="center">
-                          Drag image here
+                          {dropHintLabel}
                         </Text>
                         <Text fontSize="xs" color="fg.muted">
-                          or click to select
+                          {dropHintSubLabel}
                         </Text>
                       </VStack>
                     </Center>
                   </Box>
 
                   <Text fontSize="xs" color="fg.muted" textAlign="center">
-                    PNG, JPG, WEBP up to {(maxSize / 1024 / 1024).toFixed(0)}MB
+                    {sizeHintTemplate.replace('{size}', (maxSize / 1024 / 1024).toFixed(0))}
                   </Text>
 
                   <input
@@ -260,7 +279,7 @@ export function ImagePopover({ editor, config, disabled }: ImagePopoverProps): R
 
                   <HStack justify="flex-end">
                     <Button size="sm" variant="ghost" onClick={handleClose}>
-                      Cancel
+                      {cancelLabel}
                     </Button>
                   </HStack>
                 </VStack>
@@ -278,7 +297,7 @@ export function ImagePopover({ editor, config, disabled }: ImagePopoverProps): R
                     <HStack gap={2}>
                       <Spinner size="sm" color="colorPalette.500" />
                       <Text fontSize="sm" color="fg.muted">
-                        Loading...
+                        {loadingLabel}
                       </Text>
                     </HStack>
                   </Center>
@@ -303,10 +322,10 @@ export function ImagePopover({ editor, config, disabled }: ImagePopoverProps): R
                   </Text>
                   <HStack justify="center" gap={2}>
                     <Button size="sm" variant="ghost" onClick={handleClose}>
-                      Cancel
+                      {cancelLabel}
                     </Button>
                     <Button size="sm" colorPalette="brand" onClick={handleRetry}>
-                      Try again
+                      {tryAgainLabel}
                     </Button>
                   </HStack>
                 </VStack>

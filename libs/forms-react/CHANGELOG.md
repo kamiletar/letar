@@ -4,6 +4,23 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.26.0] - 2026-09-27
+
+### Added
+
+- `resolveLinkPopoverString`/`useLinkPopoverString` (`formLinkPopover.*`: `placeholder`, `remove`,
+  `cancel`, `apply`) и `resolveImagePopoverString`/`useImagePopoverString` (`formImagePopover.*`:
+  `dropHint`, `dropHintSub`, `sizeHint`, `cancel`, `loading`, `tryAgain`, `errorNotImage`,
+  `errorSizeExceeded`, `errorGeneric`, `errorUrlMissing`) — контент `LinkPopover`/`ImagePopover`
+  Chakra-скина (`libs/forms`), до этого захардкоженный по-английски внутри самих компонентов.
+  Отдельно от `formToolbar.*` — тот словарь описывает только `aria-label` кнопок-триггеров, не тело
+  попапов (другая семантическая категория). Только Chakra-скин: shadcn эти диалоги не рисует вовсе
+  (`ImagePopover` отсутствует как beta-упрощение, `link` — `window.prompt`, не Popover) — но словарь
+  лежит в `forms-react`, а не в `libs/forms`, по тому же принципу размещения, что у
+  `formFieldPlaceholder.*`/`formPasswordStrength.*`/`formSelection.*`.
+  `sizeHint`/`errorSizeExceeded` — с `{size}`, интерполяция `.replace('{size}', ...)` на стороне
+  вызывающего (тот же приём, что у `formSelection.settleError`).
+
 ## [0.25.0] - 2026-09-27
 
 ### Added
