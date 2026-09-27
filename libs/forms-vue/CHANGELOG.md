@@ -1,5 +1,26 @@
 # Changelog @letar/forms-vue
 
+## 0.23.0 (2026-09-27)
+
+- **Feature:** Этап 3e паритета Select/Combobox (`forms-vue-angular-select-parity`) — `Field.Select`
+  подключает `onCreate`/`onUpdate`/`pending` через готовый `useSelectionActionsState` (Этап 2,
+  `core/use-selection-actions-state.ts`) — бизнес-логика (оптимистичный create/update, наложение
+  правок, откат при отказе/таймауте) не менялась, добавлено только её UI-подключение в headless-
+  разметке этого пакета (кастомный listbox из Этапа 3d, не Reka). `FieldSelectOption` получил
+  `editable?: boolean`/`pending?: boolean`/`data?: unknown`. Новые пропсы `FieldSelect`: `onCreate`,
+  `onUpdate`, `onSettleError`, `settleTimeout`, `createLabel`, `createItem`. Служебный пункт
+  создания — обычный `<li>` в конце списка (Select без поиска, Stage 3f, поэтому предлагается
+  всегда, когда есть `onCreate`, а не только при отсутствии совпадений). Опция в ожидании
+  подтверждения сервера помечена `aria-busy`/`data-pending` на самом `<li role="option">` и не
+  выбирается ни кликом, ни клавиатурой. Слоты `Field.Select.EditButton`/`.CreateButton` —
+  headless-версия того же `provide`/`inject`-паттерна, что в `forms-vue-shadcn`
+  (`selection-context.ts`/`selection-slots.ts`), без Tailwind/`cn()` и без иконки из сторонней
+  библиотеки (по умолчанию карандаш — символ «✎»); по умолчанию поле само вставляет карандаш в
+  пункт списка (когда опция редактируема и свой `renderOption` не задан) и рядом с триггером у
+  выбранного значения — слоты нужны только своему `renderOption`. Строки — `selection-strings.ts`,
+  тот же осознанный вырез без `FormI18nProvider`, что и в `forms-vue-shadcn`. Вне объёма:
+  `searchable`/`dependsOn` (Этап 3f).
+
 ## 0.22.0 (2026-09-27)
 
 - **Feature:** Этап 3d паритета Select/Combobox (`forms-vue-angular-select-parity`) — `Field.Select`
