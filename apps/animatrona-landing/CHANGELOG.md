@@ -2,6 +2,20 @@
 
 Все изменения в проекте animatrona-landing документируются в этом файле.
 
+## [0.4.14] - 2026-09-27
+
+### Fixed
+
+- `tsconfig.json` держал `target: "ES2017"` (наследие исходного `create-next-app`-скаффолда,
+  приложение не на общем пресете `tsconfig.next-app.json` — см. `.claude/docs/tsconfig-presets.md`).
+  `@letar/format-utils` добавил в `formatKopecks` BigInt-литерал (`100n`), для которого нужен
+  `ES2020+` (`TS2737`) — `nx typecheck:tsgo animatrona-landing` падал на
+  `libs/format-utils/src/lib/money.ts:58`, хотя приложение не трогало ни эту либу, ни money.ts.
+  Поднят до `ES2022` (как `tsconfig.base.json` и все остальные приложения; Next.js для рантайма
+  всё равно не смотрит на `target` из tsconfig — только typecheck). Тот же фикс — в
+  `kami-key-the-landing` (реальный потребитель), и для сохранения задокументированной
+  идентичности четвёрки лендингов на этом старом конфиге — в `letar-landing`/`synth`.
+
 ## [0.4.13] - 2026-09-27
 
 ### Fixed
