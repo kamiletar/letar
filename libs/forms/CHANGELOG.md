@@ -4,6 +4,12 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.31.0] - 2026-09-27
+
+### Добавлено
+
+- `description` у опции `Listbox`: вторая строка под подписью пункта (сосед `ItemText`, как у `Select`/`Combobox`).
+
 ## [2.30.0] - 2026-09-27
 
 ### Добавлено

@@ -87,4 +87,30 @@ describe('FieldListbox', () => {
       expect(greenOption).toHaveAttribute('aria-selected', 'true')
     })
   })
+
+  describe('description', () => {
+    it('вторая строка пункта — сосед текста; выбор и подпись пункта от неё не зависят', () => {
+      render(
+        <TestWrapper>
+          <Form initialValue={{ city: 'msk' }} onSubmit={vi.fn()}>
+            <Form.Field.Listbox
+              name="city"
+              options={[
+                { label: 'Москва', value: 'msk', description: 'ул. Тверская, 1' },
+                { label: 'Казань', value: 'kzn' },
+              ]}
+            />
+          </Form>
+        </TestWrapper>,
+      )
+
+      const descriptions = document.querySelectorAll('[data-part="item-description"]')
+      expect(descriptions).toHaveLength(1)
+      expect(descriptions[0]).toHaveTextContent('ул. Тверская, 1')
+      const moscow = screen.getByText('Москва').closest('[role="option"]')
+      expect(moscow).toHaveAttribute('aria-selected', 'true')
+      // Описание не входит в текст пункта — подпись для типизации и поиска остаётся «Москва»
+      expect(screen.getByText('Москва')).not.toContainElement(descriptions[0] as HTMLElement)
+    })
+  })
 })
