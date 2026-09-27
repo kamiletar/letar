@@ -2,6 +2,30 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.57.1] - 2026-09-27
+
+### Fixed
+
+- **Первая попытка релиза по новой схеме (`animatrona-v0.57.0`) не выпустила ни одного
+  бинарника** — CI (`.github/workflows/release-animatrona.yml`) провалился на всех трёх
+  платформах, черновик релиза остался пустым. Тег и черновик 0.57.0 удалены, релиз перевыпущен
+  как 0.57.1 с этими фиксами. Три независимые причины:
+  - **`/player` падал при статическом экспорте Next.js** (`renderer/src/app/player/page.tsx`):
+    `useWatchProgress(localStorage)`/`useFolderHistory(localStorage)` передавали глобал
+    `localStorage` напрямую в теле компонента — `'use client'` не освобождает от прогона на
+    сервере во время пререндера, `ReferenceError: localStorage is not defined` ронял сборку.
+    Тот же паттерн уже был решён в `apps/animatrona-folder-player` (заглушка-`storage` до
+    монтирования) — применено то же решение.
+  - **Windows: `npx tsc` в шаге «Build zenstack-form-plugin»** резолвился не в локальный
+    `typescript` воркспейса, а скачивал c npm посторонний пакет-пустышку `tsc@2.0.4` — заменено
+    на `bunx tsc`, как и остальные вызовы инструментов в этом workflow.
+  - **`cd renderer && next build --webpack && cd ..` без подоболочки** — при падении `next
+    build` (см. выше) `cd ..` не выполнялся (не последний в `&&`-цепочке, `set -e` это не
+    ловит), следующая команда (`webpack --config main/webpack.config.js`) резолвила путь от
+    `renderer/` и падала второй, более непонятной ошибкой (`Cannot find module
+    '.../renderer/main/webpack.config.js'`) — маскируя реальную причину. Все три шага сборки
+    (`Build Windows`/`macOS`/`Linux`) переведены на `(cd dir && cmd)` в подоболочке.
+
 ## [0.57.0] - 2026-09-27
 
 ### Changed

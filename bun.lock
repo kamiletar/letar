@@ -393,7 +393,7 @@
     },
     "apps/animatrona": {
       "name": "@letar/animatrona",
-      "version": "0.57.0",
+      "version": "0.57.1",
       "dependencies": {
         "@letar/animatrona-types": "workspace:*",
         "@letar/animatrona-ui": "workspace:*",
@@ -743,7 +743,7 @@
     },
     "apps/flora": {
       "name": "@letar/flora",
-      "version": "0.3.12",
+      "version": "0.3.14",
       "dependencies": {
         "@letar/demo-protection": "workspace:*",
         "@letar/env-load": "workspace:*",
@@ -874,7 +874,7 @@
     },
     "apps/label-printer-desktop": {
       "name": "@letar/label-printer-desktop",
-      "version": "0.5.21",
+      "version": "0.5.22",
       "dependencies": {
         "@letar/chakra-provider": "workspace:*",
         "@letar/electron-monorepo-updater": "workspace:*",
@@ -884,6 +884,7 @@
         "@letar/label-printer-core": "workspace:*",
         "canvas": "^3.1.0",
         "pdfjs-dist": "^4.10.38",
+        "serialport": "^13.0.0",
       },
       "devDependencies": {
         "electron": "44.4.5",
@@ -957,7 +958,7 @@
     },
     "apps/studio": {
       "name": "@letar/studio",
-      "version": "0.71.0",
+      "version": "0.72.0",
       "dependencies": {
         "@letar/admin-ui": "workspace:*",
         "@letar/consent": "workspace:*",
@@ -1327,7 +1328,7 @@
     },
     "libs/forms-angular": {
       "name": "@letar/forms-angular",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "dependencies": {
         "@letar/forms-core": "workspace:*",
       },
@@ -1430,7 +1431,7 @@
     },
     "libs/forms-vue": {
       "name": "@letar/forms-vue",
-      "version": "0.22.0",
+      "version": "0.24.0",
       "dependencies": {
         "@floating-ui/dom": "^1.8.0",
         "@letar/forms-core": "workspace:*",

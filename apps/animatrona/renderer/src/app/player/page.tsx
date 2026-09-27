@@ -15,6 +15,7 @@ import { useRouter } from 'next/navigation'
 import {
   EpisodeSidebar,
   type FolderPlayerHost,
+  type FolderPlayerStorage,
   type MediaProbeResult,
   RecentFoldersCard,
   useFolderHistory,
@@ -109,6 +110,18 @@ const folderPlayerHost: FolderPlayerHost = {
   toMediaUrl: (path) => toMediaUrl(path) ?? path,
 }
 
+/**
+ * Заглушка `FolderPlayerStorage` для серверного рендера (статический экспорт Next.js).
+ * `localStorage` — глобал браузера, а `'use client'` не освобождает от прогона на сервере
+ * во время `next build`/пререндера: прямое обращение к нему в теле компонента падает
+ * `ReferenceError: localStorage is not defined` (см. `apps/animatrona-folder-player/renderer/app/page.tsx`,
+ * где для того же `@letar/folder-player-react` уже применён этот паттерн).
+ */
+const noopStorage: FolderPlayerStorage = {
+  getItem: () => null,
+  setItem: () => {},
+}
+
 // Dynamic import для VideoPlayer — загружается только когда нужен (~500KB)
 const VideoPlayer = dynamic(() => import('@/components/player/VideoPlayer').then((mod) => mod.VideoPlayer), {
   ssr: false,
@@ -130,15 +143,18 @@ export default function PlayerPage() {
   const [singleVideoName, setSingleVideoName] = useState<string>('')
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [showImportWizard, setShowImportWizard] = useState(false)
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
 
   // === Refs ===
   const playerRef = useRef<VideoPlayerRef | null>(null)
   const lastSavedTimeRef = useRef<number>(0)
 
   // === Hooks ===
+  const storage = mounted ? localStorage : noopStorage
   const folderPlayer = useFolderPlayer(folderPlayerHost)
-  const watchProgress = useWatchProgress(localStorage)
-  const folderHistory = useFolderHistory(localStorage)
+  const watchProgress = useWatchProgress(storage)
+  const folderHistory = useFolderHistory(storage)
 
   // === Computed ===
   const isFolderMode = folderPlayer.isFolderMode
