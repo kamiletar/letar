@@ -128,7 +128,8 @@ formSchema, options?)` из `@letar/forms-query/zenstack` (≥ 0.4.0): сигн�
 клиентом, иначе массив `relations` пересоздавался бы каждый рендер. Поля с ключом реестра хук пропускает.
 
 ⚠️ Очистка nullable-поля Select/Combobox пишет `null` (`forms` ≥ 2.28.0), не `''`; для не-nullable и форм без
-`schema` — по-прежнему `''`. `onChange`, завязанный на `''`, надо проверить.
+`schema` — по-прежнему `''`. `onChange`, завязанный на `''`, надо проверить. У shadcn `Combobox` с
+`@letar/forms-shadcn` ≥ 0.50.0 появился `clearable` (по умолчанию, когда поле не required).
 
 ### Memory optimization
 
