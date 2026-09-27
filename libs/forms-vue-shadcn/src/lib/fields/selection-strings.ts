@@ -14,10 +14,24 @@ export interface SelectionStrings {
   edit: string
   /** Шаблон отказа оптимистичного действия: `{label}` подставляет поле */
   settleError: string
+  /** Поле поиска внутри списка (Stage 3c `searchable`): подсказка и `aria-label` */
+  searchPlaceholder: string
+  searchAria: string
+  /** Пустой результат поиска/список без опций */
+  empty: string
+  /** Зависимое поле (`dependsOn`, §18, Stage 3c): подсказка под заблокированным полем и объявление
+   * автоочистки. `{parent}`/`{field}` подставляет `interpolate()` (`@letar/forms-core/i18n`) */
+  dependsOnHint: string
+  dependentCleared: string
 }
 
 export const selectionStrings: SelectionStrings = {
   createVerb: 'Добавить',
   edit: 'Изменить',
   settleError: 'Не удалось сохранить «{label}»',
+  searchPlaceholder: 'Поиск...',
+  searchAria: 'Поиск по списку',
+  empty: 'Ничего не найдено',
+  dependsOnHint: 'Сначала выберите «{parent}»',
+  dependentCleared: 'Поле «{field}» очищено: изменилось поле «{parent}»',
 }

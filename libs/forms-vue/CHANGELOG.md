@@ -1,5 +1,22 @@
 # Changelog @letar/forms-vue
 
+## 0.21.0 (2026-09-27)
+
+- **Fix (критично для `dependsOn`):** `AppForm` (`core/app-form.ts`) теперь подключает
+  `DependentsRegistry.handleFieldChange` через `useForm({ listeners: { onChange } })` —
+  form-level слушатель TanStack Form, который зовётся из `FieldApi.handleChange` при **реальной**
+  правке смонтированного поля. До этой правки `createDependentsRegistry()` заводился на форму
+  (Этап 2), но `handleFieldChange` не вызывался нигде в продакшен-коде — только собственным
+  изолированным unit-тестом реестра, который зовёт метод вручную. `dependsOn` (Этап 2, `Field.Select`
+  Stage 3c `forms-vue-shadcn`) прошёл бы тесты композабла, но не работал бы ни в одной настоящей
+  форме — родитель менялся, `clear()`-колбэк дочернего поля просто никогда не вызывался. Приём —
+  тот же, что уже стоит в `TestForm` (`@letar/forms-react`, `testing/test-form.tsx`), который сам
+  смоделирован на боевом коде Chakra-скина (`libs/forms/.../form-simple.tsx`/`form-with-api.tsx`).
+- Реактивная карта `labels: Map<string, string>` в `AppFormContext` (`core/form-context.ts`) —
+  подписи полей формы, которые ищет зависимое поле для подсказки родителя («Сначала выберите
+  «Страна»»); заполняется через новый `useRegisterFieldLabel(labels, path, () => label)`, вызывать
+  из `setup()` каждого поля со своей видимой подписью.
+
 ## 0.20.0 (2026-09-27)
 
 - **Feature:** `useSelectionActionsState` (и сопутствующие типы `DEFAULT_SETTLE_TIMEOUT`,

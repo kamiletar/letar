@@ -1,5 +1,38 @@
 # Changelog @letar/forms-vue-shadcn
 
+## 0.20.0 (2026-09-27)
+
+Select паритет с React-скином, Stage 3c (завершение Этапа 3 — searchable + `dependsOn`, последняя
+фича-срез перед публикацией в npm, тред `forms-vue-angular-select-parity`).
+
+- **Feature:** `Field.Select` — `searchable` (`true`/`false`/`'auto'`/`{ threshold, filter,
+  emptyMessage }`) и `searchInDescription`. Тонкая обвязка над готовым `useSelectionSearch`
+  (`@letar/forms-vue/core`, Этап 2) — сама фильтрация, порог (10 опций по умолчанию) и допуск
+  раскладки клавиатуры не менялись, только подключение к `field-select.ts`: список опций вынесен в
+  `computed()` уровня `setup()` (нужен стабильный геттер для композабла), `search.visibleValues`
+  композабла построен по сырым значениям опций и переотображён через тот же `toKey()`
+  (`EMPTY_OPTION_TOKEN`), что и остальной список — иначе опция с пустым значением пропадала бы из
+  видимых при активном поиске. Поле поиска и список — Popover-примитив
+  (`uikit/primitives/select-searchable.ts`, уже существовал), не нативный Reka `SelectRoot`.
+- **Feature:** `Field.Select` — `dependsOn`/`depsReady`/`clearOnParentChange`/
+  `disableWhenParentEmpty`/`placeholderWhenDisabled` (§18). Обвязка над `useDependentField`
+  (`@letar/forms-vue/core`, Этап 2) через новый `use-dependent-field-ui.ts` (подсказка «Сначала
+  выберите «Страна»», `aria-describedby`, live-область объявления автоочистки) — портирован с
+  React `useDependentFieldUi` (`forms-shadcn`) без изменения поведения. Подпись родителя для
+  подсказки — реактивная карта `AppFormContext.labels` (`fullPath → label`, заполняется каждым
+  полем через `useRegisterFieldLabel`), с откатом на `ui.title` схемы, если родитель ещё не
+  отрендерился или не регистрирует подпись.
+- **Fix (обнаружено этой сессией, не специфично для Select):** `AppForm`
+  (`@letar/forms-vue`, `core/app-form.ts`) не вызывал `DependentsRegistry.handleFieldChange` нигде
+  в продакшен-коде — реестр очистки (Этап 2) был протестирован только собственным изолированным
+  unit-тестом, который зовёт `handleFieldChange` вручную. Без этой правки `dependsOn` в любой
+  реальной Vue-форме тихо не работал бы: `useDependentField` регистрирует `clear()`-колбэк, но
+  ничто не сообщало реестру, что родитель изменился. См. запись в CHANGELOG `@letar/forms-vue`
+  0.21.0 — фикс сделан там, здесь только следствие (`dependsOn` теперь работает end-to-end).
+- Осознанно не портирован `showUnknownValue` — его нет в framework-free контракте
+  `UIKitSelectProps` (`@letar/forms-core/uikit`), а у Vue-скина нет `loadOptions`/асинхронных
+  источников опций, для которых он нужен в React-версии (страховка от «опция ещё не подгрузилась»).
+
 ## 0.19.0 (2026-09-27)
 
 Select паритет с React-скином, Stage 3b (продолжение Stage 3a — `onCreate`/`onUpdate`, `pending`,

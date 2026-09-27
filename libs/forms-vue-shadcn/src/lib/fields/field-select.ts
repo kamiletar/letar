@@ -3,12 +3,16 @@ import {
   applyOptionOverlay,
   CREATE_OPTION_VALUE,
   type CreatedOption,
+  type FieldDeps,
+  getOptionSearchText,
   getOptionText,
   isCreateOptionValue,
   isOptionEditable,
   mergeCreatedOptions,
   type SelectionActionContext,
+  type SelectSearchable,
   type SettleErrorInfo,
+  shouldOfferCreate,
   type UIKitOptionRenderState,
   type UIKitSelectControl,
   type UpdatedOption,
@@ -16,15 +20,19 @@ import {
 import {
   resolveFieldMeta,
   useAppFormContext,
+  useFormGroup,
+  useRegisterFieldLabel,
   useSelectionActionsState,
+  useSelectionSearch,
   withFieldValidation,
 } from '@letar/forms-vue/core'
-import { defineComponent, h, onErrorCaptured, type PropType, ref } from 'vue'
+import { computed, defineComponent, h, onErrorCaptured, type PropType, ref } from 'vue'
 import type { UINode } from '../uikit/ui-node'
 import { rekaUIKit } from '../uikit/uikit-reka'
 import { SelectionActionsProvider, SelectionOptionProvider } from './selection-context'
 import { SelectCreateButton, SelectEditButton } from './selection-slots'
 import { selectionStrings } from './selection-strings'
+import { dependentHelperText, DependentLiveRegion, useDependentFieldUi } from './use-dependent-field-ui'
 
 /**
  * Reka `SelectItem` запрещает `value=""` (пустая строка у `SelectRoot` — «сбросить выбор и
@@ -101,15 +109,30 @@ const FieldSelectBase = defineComponent({
     },
     /** Мс до признания оптимистичного действия неподтверждённым; по умолчанию 30 000 (`DEFAULT_SETTLE_TIMEOUT`) */
     settleTimeout: { type: Number, required: false, default: undefined },
+    /** Поиск по списку (§Stage 3c): `true`/`'auto'` — сам с 10-й опции, `false` — никогда, объект — точная настройка */
+    searchable: { type: [Boolean, String, Object] as PropType<SelectSearchable>, required: false, default: undefined },
+    /** Искать и по `description`, не только по `label`; по умолчанию `true`, как у остальных скинов */
+    searchInDescription: { type: Boolean, required: false, default: true },
+    /** Путь(и) родительского поля(ей) — поле блокируется, пока родитель(и) не заполнены (§18) */
+    dependsOn: { type: [String, Array] as PropType<string | readonly string[]>, required: false, default: undefined },
+    /** Родитель считается заполненным, если вернуть `false` — по умолчанию проверка на непустое значение */
+    depsReady: { type: Function as PropType<(deps: FieldDeps) => boolean>, required: false, default: undefined },
+    /** Очищать своё значение при смене родителя; по умолчанию `true` при наличии `dependsOn` */
+    clearOnParentChange: { type: Boolean, required: false, default: undefined },
+    /** Блокировать управление, пока родитель(и) не готовы; по умолчанию `true` при наличии `dependsOn` */
+    disableWhenParentEmpty: { type: Boolean, required: false, default: undefined },
+    /** Свой текст в заблокированном поле вместо автоматической подсказки «Сначала выберите «…»» */
+    placeholderWhenDisabled: { type: String, required: false, default: undefined },
   },
   setup(props) {
-    const { form, schema } = useAppFormContext()
+    const { form, schema, dependents, labels } = useAppFormContext()
     const { fieldSchema, label, placeholder, required, fullPath } = resolveFieldMeta(
       schema,
       props.name,
       props.label,
       props.placeholder,
     )
+    const formGroup = useFormGroup()
 
     const renderError = ref<Error | null>(null)
     onErrorCaptured((error) => {
@@ -129,12 +152,76 @@ const FieldSelectBase = defineComponent({
       }
       return value as string | number | undefined
     })
+    // Снимок значений всей формы — источник для `dependsOn` (родительские поля читаются по имени
+    // из общего дерева, не из этого поля). Тот же приём, что у `fieldValueRef` выше
+    const valuesRef = form.useStore((state: { values: Record<string, unknown> }) => state.values)
 
     const actions = useSelectionActionsState({
       appOptions: () => props.options,
       value: () => fieldValueRef.value,
       onSettleError: props.onSettleError,
       settleTimeout: props.settleTimeout,
+    })
+
+    // Видимая подпись поля — в общий реестр формы (`AppFormContext.labels`), чтобы дети,
+    // зависящие от этого поля (`dependsOn`), могли показать «Сначала выберите «<эта подпись>»»
+    useRegisterFieldLabel(labels, fullPath, () => label)
+
+    const dependent = useDependentFieldUi({
+      fullPath,
+      label,
+      groupPath: () => formGroup?.name ?? null,
+      values: () => valuesRef.value,
+      schema,
+      labels,
+      dependents,
+      setValue: (value) => form.setFieldValue(fullPath, value),
+      dependsOn: () => props.dependsOn,
+      depsReady: props.depsReady,
+      clearOnParentChange: props.clearOnParentChange,
+      disableWhenParentEmpty: props.disableWhenParentEmpty,
+      placeholderWhenDisabled: props.placeholderWhenDisabled,
+    })
+
+    const toKey = (opt: { value: string }) => (opt.value === '' ? EMPTY_OPTION_TOKEN : opt.value)
+
+    // Полный список опций (приложение + правки + оптимистично созданные), БЕЗ служебного пункта
+    // создания — вынесено в `computed`, а не в render-замыкание: `useSelectionSearch` вызывается
+    // из `setup()` (как и остальные Vue-композиции), ей нужен геттер, читающий актуальный список
+    // на каждый вызов
+    const merged = computed<FieldSelectOption[]>(() => {
+      // Пока свой create в полёте, `pending`-опции приложения скрыты: почти всегда это та же запись,
+      // иначе в списке была бы запись дважды (§16.7)
+      const shownApp = actions.hasOwnCreatePending.value
+        ? props.options.filter((opt) => !opt.pending)
+        : props.options
+      // Правки лежат поверх опций приложения, пока оно не перезапросит список
+      const edited = applyOptionOverlay(shownApp, actions.overlay.value)
+      // `SelectionCreatedOption.value` — `string | number` (framework-free контракт `onCreate`),
+      // `FieldSelectOption.value` в Vue-скине — всегда `string` (значение примитива Reka —
+      // атрибут `value` реального `<option>`-подобного элемента). Приводим к строке здесь же,
+      // тем же приёмом, что и `toKey` ниже. `createdOptions.value` публично `readonly` —
+      // `mergeCreatedOptions` ждёт обычный массив, копия дешёвая, список коротких
+      const createdAsOptions: FieldSelectOption[] = actions.createdOptions.value.map((opt) => ({
+        ...opt,
+        value: String(opt.value),
+      }))
+      // Опция приложения сильнее созданной с тем же значением — дубля после перезагрузки нет
+      return mergeCreatedOptions<FieldSelectOption>(edited, createdAsOptions)
+    })
+
+    // Текст для поиска: описание участвует, если `searchInDescription` не выключен явно —
+    // читаем проп внутри самой функции (не на вызове), чтобы поздняя смена пропа не осталась
+    // в замкнутом на старое значение геттере (композиция получает эту функцию один раз)
+    const getSearchText = (opt: FieldSelectOption) =>
+      props.searchInDescription === false ? getOptionText(opt) : getOptionSearchText(opt)
+
+    const searchState = useSelectionSearch<FieldSelectOption>({
+      searchable: () => props.searchable,
+      options: () => merged.value,
+      getText: getSearchText,
+      placeholder: selectionStrings.searchPlaceholder,
+      ariaLabel: selectionStrings.searchAria,
     })
 
     return () => {
@@ -148,33 +235,20 @@ const FieldSelectBase = defineComponent({
         const showCreateItem = !!props.onCreate && props.createItem !== false
         const createLabel = props.createLabel ?? `${selectionStrings.createVerb}…`
 
-        const toKey = (opt: { value: string }) => (opt.value === '' ? EMPTY_OPTION_TOKEN : opt.value)
-
-        // Пока свой create в полёте, `pending`-опции приложения скрыты: почти всегда это та же запись,
-        // иначе в списке была бы запись дважды (§16.7)
-        const shownApp = actions.hasOwnCreatePending.value
-          ? props.options.filter((opt) => !opt.pending)
-          : props.options
-        // Правки лежат поверх опций приложения, пока оно не перезапросит список
-        const edited = applyOptionOverlay(shownApp, actions.overlay.value)
-        // `SelectionCreatedOption.value` — `string | number` (framework-free контракт `onCreate`),
-        // `FieldSelectOption.value` в Vue-скине — всегда `string` (значение примитива Reka —
-        // атрибут `value` реального `<option>`-подобного элемента). Приводим к строке здесь же,
-        // тем же приёмом, что и `toKey` ниже. `createdOptions.value` публично `readonly` —
-        // `mergeCreatedOptions` ждёт обычный массив, копия дешёвая, список коротких
-        const createdAsOptions: FieldSelectOption[] = actions.createdOptions.value.map((opt) => ({
-          ...opt,
-          value: String(opt.value),
-        }))
-        // Опция приложения сильнее созданной с тем же значением — дубля после перезагрузки нет
-        const merged = mergeCreatedOptions<FieldSelectOption>(edited, createdAsOptions)
+        const mergedOptions = merged.value
 
         // Ключ примитива (после подмены `''` → токен) → исходная опция приложения. Нужен, чтобы
         // `renderOption`/`renderValue` приложения никогда не увидели `EMPTY_OPTION_TOKEN` — как
         // `optionByValue` в shadcn-React-скине (`field-select.tsx`)
-        const optionByKey = new Map(merged.map((opt) => [toKey(opt), opt]))
+        const optionByKey = new Map(mergedOptions.map((opt) => [toKey(opt), opt]))
 
-        const normalizedOptions = merged.map((opt) => ({
+        // Поиск фильтрует `mergedOptions`; сам список пункта строится из отфильтрованного —
+        // без совпадений список пуст, но порог/строка запроса считаются по полному `mergedOptions`
+        // (см. `useSelectionSearch`, геттер `options`)
+        const searchActive = searchState.search.value
+        const visibleOptions = searchActive ? searchState.filtered.value : mergedOptions
+
+        const normalizedOptions = visibleOptions.map((opt) => ({
           value: toKey(opt),
           label: opt.label,
           description: opt.description,
@@ -183,12 +257,26 @@ const FieldSelectBase = defineComponent({
           editable: isOptionEditable(opt, hasOnUpdate),
         }))
 
-        // «+ Добавить…»: без `searchable` (Stage 3c) поиска нет, служебный пункт всегда с фиксированной подписью
-        const withCreateItem = showCreateItem
-          ? [...normalizedOptions, { value: CREATE_OPTION_VALUE, label: `+ ${createLabel}` }]
+        // Поисковый запрос (только пока поле поиска реально показано) — участвует в подписи
+        // служебного пункта («+ Добавить "текст"») и в решении, предлагать ли создание вообще
+        const searchQuery = searchActive ? searchState.query.value.trim() : ''
+        const offerCreate = showCreateItem
+          && (searchQuery === '' || shouldOfferCreate(searchQuery, mergedOptions.map(getOptionText)))
+        const createItemLabel = searchQuery !== ''
+          ? `+ ${selectionStrings.createVerb} "${searchQuery}"`
+          : `+ ${createLabel}`
+        const withCreateItem = offerCreate
+          ? [...normalizedOptions, { value: CREATE_OPTION_VALUE, label: createItemLabel }]
           : normalizedOptions
 
-        const hasEmptyOption = merged.some((opt) => opt.value === '')
+        // `visibleValues` контракта поиска строит `useSelectionSearch` из «сырых» `option.value` —
+        // здесь их нужно провести через тот же `toKey`, что и сам список пунктов, иначе пустая
+        // опция (`''` → `EMPTY_OPTION_TOKEN`) выпадала бы из видимых при активном поиске
+        const search = searchActive
+          ? { ...searchActive, visibleValues: new Set(searchState.filtered.value.map((opt) => toKey(opt))) }
+          : undefined
+
+        const hasEmptyOption = mergedOptions.some((opt) => opt.value === '')
 
         const rawFieldValue = field.state.value as string | number | undefined
         const formRawValue = rawFieldValue !== null && rawFieldValue !== undefined ? String(rawFieldValue) : undefined
@@ -255,15 +343,15 @@ const FieldSelectBase = defineComponent({
           }
         }
 
+        // Поле заблокировано `dependsOn` (§18) — родители ещё не готовы: свои действия недоступны
+        const blocked = dependent.blocked.value
         const createText = `+ ${createLabel}`
         const actionsValue = {
           pending: actions.pending.value,
           canCreate: !!props.onCreate,
           hasOnUpdate,
-          // Родители/dependsOn (Stage 3c) вне объёма — поле само по себе не бывает заблокировано
-          interactive: true,
-          // Combobox (Stage 3c) подставит сюда текст поиска; у Select всегда пусто
-          search: '',
+          interactive: !blocked,
+          search: searchQuery,
           runCreate,
           runEdit,
           strings: {
@@ -288,18 +376,26 @@ const FieldSelectBase = defineComponent({
           },
         }
 
+        // Заблокированное поле: placeholder — подсказка про родителя, значение не редактируется
+        const effectivePlaceholder = blocked ? dependent.blockedPlaceholder.value : placeholder
+        const { helperText, describedBy } = dependentHelperText(dependent, hasError)
+
         // `Select` рисует свою метку сам (см. `uikit/primitives/select.ts`) — в отличие от
         // остальных полей, здесь не `FieldWrapper` (он бы продублировал `FieldLabel`), а
         // `FieldRoot` напрямую вокруг `Select` + `FieldError`, как и в React-скине.
         return rekaUIKit.FieldRoot({
           invalid: hasError,
           required,
+          disabled: blocked,
           children: [
             h(SelectionActionsProvider, { value: actionsValue }, {
               default: () => [
                 rekaUIKit.Select({
                   value,
                   onValueChange: (pickedValue) => {
+                    if (blocked) {
+                      return
+                    }
                     const newValue = pickedValue === EMPTY_OPTION_TOKEN ? '' : pickedValue
                     if (newValue !== undefined && isCreateOptionValue(newValue)) {
                       // Служебный пункт: значение не применяется
@@ -310,6 +406,11 @@ const FieldSelectBase = defineComponent({
                   },
                   onBlur: field.handleBlur,
                   options: withCreateItem,
+                  disabled: blocked,
+                  search,
+                  emptyContent: (typeof props.searchable === 'object' ? props.searchable.emptyMessage : undefined)
+                    ?? selectionStrings.empty,
+                  describedBy,
                   renderOption: props.renderOption
                     ? (opt, state) => {
                       // Служебный пункт «+ Добавить…» через renderer приложения не проходит
@@ -350,11 +451,12 @@ const FieldSelectBase = defineComponent({
                     : undefined,
                   controlRef: controlRefBridge,
                   label,
-                  placeholder,
-                  clearable,
+                  placeholder: effectivePlaceholder,
+                  clearable: clearable && !blocked,
                   listFooter: props.listFooter,
                   'data-field-name': props.name,
                 }),
+                DependentLiveRegion(dependent),
               ],
             }),
             actions.settleFailure.value
@@ -364,7 +466,7 @@ const FieldSelectBase = defineComponent({
                 interpolate(selectionStrings.settleError, { label: actions.settleFailure.value.label }),
               )
               : null,
-            rekaUIKit.FieldError({ hasError, errorMessage }),
+            rekaUIKit.FieldError({ hasError, errorMessage, helperText }),
             // eslint-disable-next-line @typescript-eslint/no-explicit-any -- children принимает VNode[], контракт типизирован как единичный TNode
           ] as any,
         })

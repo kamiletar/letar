@@ -12,7 +12,7 @@ export { createLazyField } from './lib/core/create-lazy-field'
 export type { DataGridColumnDef, DataGridFieldProps } from './lib/core/data-grid-types'
 export { extractFieldNames } from './lib/core/field-name-extraction'
 export { type ResolvedFieldMeta, resolveFieldMeta, withFieldValidation } from './lib/core/field-wiring'
-export { type AppFormContext, provideAppForm, useAppFormContext } from './lib/core/form-context'
+export { type AppFormContext, provideAppForm, useAppFormContext, useRegisterFieldLabel } from './lib/core/form-context'
 export { FormGroup, type FormGroupContextValue, type FormGroupProps, useFormGroup } from './lib/core/form-group'
 export { type FormStepsContextValue, provideFormSteps, useFormStepsContext } from './lib/core/form-steps-context'
 export {
@@ -65,6 +65,14 @@ export {
   type UseDataGridTableResult,
 } from './lib/core/use-data-grid'
 export {
+  type DependentFieldState,
+  type FieldDepsState,
+  useDependentField,
+  type UseDependentFieldOptions,
+  useFieldDeps,
+  type UseFieldDepsOptions,
+} from './lib/core/use-dependent-field'
+export {
   type MaskFieldFormatMode,
   type MaskFieldMask,
   useMaskField,
@@ -92,6 +100,11 @@ export {
   useSelectionActionsState,
   type UseSelectionActionsStateOptions,
 } from './lib/core/use-selection-actions-state'
+export {
+  type SelectionSearchState,
+  useSelectionSearch,
+  type UseSelectionSearchOptions,
+} from './lib/core/use-selection-search'
 export {
   useSignatureField,
   type UseSignatureFieldOptions,

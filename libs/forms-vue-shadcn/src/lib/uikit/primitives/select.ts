@@ -21,25 +21,19 @@ import {
 } from 'reka-ui'
 import { defineComponent, h, type PropType, ref, type VNode, watchEffect } from 'vue'
 import type { UINode } from '../ui-node'
-
-const SELECT_TRIGGER_CLASS = cn(
-  'border-input flex h-9 w-full items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm shadow-xs outline-none',
-  'focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
-  'disabled:cursor-not-allowed disabled:opacity-50',
-  'data-[placeholder]:text-muted-foreground',
-)
+import { SELECT_TRIGGER_CLASS } from './select-common'
+import { SearchableSelect } from './select-searchable'
 
 /**
  * `Select` — тонкая функция-обёртка (контракт `RekaUIKit.Select: (props) => TNode`, см.
- * комментарий в `uikit-reka.ts` — примитивы не хранят своё состояние). `controlRef.close()`/
- * `focusTrigger()` (Stage 3b, вызывается из `run()` конвейера `useSelectionActionsState` перед
- * окном приложения `onCreate`/`onUpdate`) нужен `open`-стейт, переживающий ре-рендеры того же
- * логического Select — обычная функция такое состояние не хранит. Поэтому реализация — настоящий
- * Vue-компонент (`SelectImpl`, персистентный инстанс), а `Select` лишь монтирует его через `h()`,
- * не нарушая внешний контракт `(props) => TNode`.
+ * комментарий в `uikit-reka.ts` — примитивы не хранят своё состояние). Без поля поиска — Reka
+ * `SelectRoot` (нативная типизация по буквам, скрытый `<select>`); с поиском (`search`, Stage 3c) —
+ * Popover со своим списком (`select-searchable.ts`): фокусная модель Reka Select (наведение уводит
+ * фокус на пункт, typeahead забирает символы и Tab) с полем ввода внутри списка несовместима — тот
+ * же вывод, что у React-скина (`select.tsx`).
  */
 export function Select(props: UIKitSelectProps<UINode>): VNode {
-  return h(SelectImpl, props as SelectImplBoundProps)
+  return props.search ? SearchableSelect(props as SelectImplBoundProps) : h(SelectImpl, props as SelectImplBoundProps)
 }
 
 // Мостик типов: Vue prop-декларации ниже не выражают дженерик `UIKitSelectProps<UINode>` напрямую —
@@ -87,6 +81,8 @@ const SelectImpl = defineComponent({
     // резолвится сюда верно (Vue сверяет входящий ключ через camelize/hyphenate), а вот
     // `props['data-field-name']` внутри `setup()` был бы всегда `undefined`
     dataFieldName: { type: String, required: false, default: undefined },
+    /** `id` подсказки под полем (`dependsOn`, Stage 3c, §18) — в `aria-describedby` триггера */
+    describedBy: { type: String, required: false, default: undefined },
   },
   setup(props) {
     // Управляемое открытие: поле закрывает список перед окном приложения (`controlRef.close()`),
@@ -133,6 +129,7 @@ const SelectImpl = defineComponent({
         controlActions,
         listFooter,
         clearLabel,
+        describedBy,
       } = props
 
       // Подпись триггера: своя (`renderValue`), пустой результат откатывается на текст опции
@@ -171,6 +168,7 @@ const SelectImpl = defineComponent({
                   'data-slot': 'select-trigger',
                   onBlur,
                   'data-field-name': props.dataFieldName,
+                  'aria-describedby': describedBy,
                   class: cn(SELECT_TRIGGER_CLASS, sideButtons && 'pr-16'),
                 },
                 {
