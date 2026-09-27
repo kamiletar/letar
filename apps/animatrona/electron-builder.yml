@@ -188,6 +188,10 @@ linux:
     - target: AppImage
       arch:
         - x64
+  # По умолчанию electron-builder берёт executableName из package.json `name`
+  # (`@letar/animatrona`) — после сборки строки получается `@letaranimatrona` (`@` не входит в
+  # разрешённый набор символов для исполняемого файла), AppImage падал на этом до сборки бинарника.
+  executableName: animatrona
   icon: resources/icon.png
   category: Video
   extraResources:
@@ -233,7 +237,12 @@ mac:
       arch:
         - x64
         - arm64
-  icon: resources/icon.icns
+  # resources/icon.icns никогда не существовал (generate-icons.js прямо просит сгенерировать его
+  # вручную внешним конвертером — этот шаг никогда не выполнялся). electron-builder падал на
+  # отсутствующем файле молча откатываясь на 256×256-фолбэк и требовал ≥512×512. icon-1024.png уже
+  # генерируется тем же скриптом (DEFAULT_SIZES в libs/icon-generator) — electron-builder сам
+  # конвертирует PNG ≥512×512 в .icns на лету, отдельный файл не нужен.
+  icon: resources/icon-1024.png
   category: public.app-category.video
   extraResources:
     # Kubo (Go IPFS) для стабильного P2P и DHT
