@@ -76,8 +76,8 @@ From the 10th option the open list of a `Select` shows a search field with autof
 - With `onCreate` the query goes to the handler: `onCreate('typed text')`; the «+ Add "…"» item comes after the filter.
   `renderEmpty({ search })` replaces the «nothing found» text.
 - ⚠️ Behaviour change: in a `Select` with 10+ options, typing after opening now filters the list instead of jumping
-  by typeahead. Turn it off with `searchable={false}`. The shadcn skin has no search field (`true`/object log one
-  warning) — use `Form.Field.Combobox` there.
+  by typeahead. Turn it off with `searchable={false}`. The shadcn skin (`@letar/forms-shadcn` 0.51.0+) searches
+  the same way: with search on, the list is drawn on a Popover instead of Radix Select; arrows, Enter, Escape and F2 work.
 - **Select or Combobox?** All options are already on the client (enum, a dictionary up to hundreds of records) —
   `Select`. Options come from the server by the search text, or the catalog keeps growing — `Combobox` with `useQuery`.
 

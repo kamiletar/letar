@@ -4,11 +4,15 @@ import {
   applyOptionOverlay,
   CREATE_OPTION_VALUE,
   type FieldDeps,
+  getOptionSearchText,
   getOptionText,
   isCreateOptionValue,
   isOptionEditable,
   mergeCreatedOptions,
+  type SelectSearchable,
   type SettleErrorInfo,
+  shouldOfferCreate,
+  type UIKitSelectSearch,
 } from '@letar/forms-core/uikit'
 import {
   SelectionActionsProvider,
@@ -17,10 +21,11 @@ import {
   useNodeLabelWarning,
   usePromiseSearch,
   useSelectionActionsState,
+  useSelectionSearch,
 } from '@letar/forms-react'
 import { useStore } from '@tanstack/react-form'
 import type { ReactElement } from 'react'
-import { useEffect, useMemo } from 'react'
+import { useMemo } from 'react'
 import { createField } from '../uikit/primitives'
 import { Select as SelectControl } from '../uikit/primitives/select'
 import { shadcnUIKit } from '../uikit/uikit-shadcn'
@@ -40,25 +45,12 @@ import {
  */
 const EMPTY_OPTION_TOKEN = '__letar_empty_option__'
 
-/** Предупреждение про `searchable` — один раз на процесс и только в dev/test */
-let searchWarned = false
+/** Глагол пункта создания по умолчанию: «+ Добавить "<текст>"» (пустой поиск — `+ Добавить…`) */
+const CREATE_VERB_DEFAULT = 'Добавить'
 
-function warnSearchUnsupported(): void {
-  const env = process.env.NODE_ENV
-  if ((env !== 'development' && env !== 'test') || searchWarned) {
-    return
-  }
-  searchWarned = true
-  console.warn(
-    '[@letar/forms-shadcn] Field.Select: `searchable` пока не поддержан — в списке Radix Select нет поля поиска '
-      + '(конфликт фокусной модели). Нужен поиск — используйте Field.Combobox.',
-  )
-}
-
-/** Только для тестов: сбросить флаг «предупреждение уже было» */
-export function resetSelectSearchWarning(): void {
-  searchWarned = false
-}
+/** Подсказка и `aria-label` поля поиска в списке */
+const SEARCH_PLACEHOLDER = 'Поиск...'
+const SEARCH_ARIA_LABEL = 'Поиск по списку'
 
 interface NormalizedOption {
   label: React.ReactNode
@@ -82,10 +74,18 @@ interface SelectFieldState {
   actions: ReturnType<typeof useSelectionActionsState>
   /** Подпись служебного пункта создания */
   createLabel: string
+  /** Глагол пункта создания с текстом поиска: «Добавить» из `createLabel` без хвостового «…» */
+  createVerb: string
   /** Зависимое поле (`dependsOn`): значения родителей, блокировка, подсказка, объявление очистки */
   dependent: DependentFieldUi<FieldDeps>
   /** Опции ещё грузятся: свой `loading`, запрос `loadOptions` или хук `useOptions` */
   loading: boolean
+  /** Поиск в списке (`searchable`); `undefined` — поля поиска нет */
+  search: UIKitSelectSearch | undefined
+  /** Текст запроса поиска; без поля поиска — `''` */
+  searchQuery: string
+  /** Своё сообщение пустого результата (`searchable.emptyMessage`) */
+  emptyMessage: string | undefined
 }
 
 /** Form.Field.Select — shadcn-скин. */
@@ -170,7 +170,8 @@ const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFie
     })
     const { createdOptions, overlay } = actions
 
-    const { normalizedOptions, optionByValue } = useMemo(() => {
+    const toKey = (opt: SelectOption) => (String(opt.value) === '' ? EMPTY_OPTION_TOKEN : String(opt.value))
+    const { baseOptions, mergedOptions, optionByValue } = useMemo(() => {
       // Пока свой оптимистичный create в полёте, `pending`-опции приложения скрыты: почти всегда это та же запись,
       // иначе в списке две «Кровли» (§16.7)
       const shownApp = actions.hasOwnCreatePending ? sourceOptions.filter((opt) => !opt.pending) : sourceOptions
@@ -178,7 +179,6 @@ const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFie
       const edited = applyOptionOverlay(shownApp, overlay)
       // Опция приложения сильнее созданной с тем же значением — дубля после перезагрузки нет
       const merged = mergeCreatedOptions<SelectOption>(edited, createdOptions)
-      const toKey = (opt: SelectOption) => (String(opt.value) === '' ? EMPTY_OPTION_TOKEN : String(opt.value))
       const normalized: NormalizedOption[] = merged.map((opt) => ({
         label: opt.label,
         textValue: opt.textValue,
@@ -189,29 +189,51 @@ const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFie
         pending: opt.pending,
         editable: isOptionEditable(opt, hasOnUpdate),
       }))
-      // Служебный пункт: перехватывается в onValueChange, в форму не попадает
-      const withCreate: NormalizedOption[] = showCreateItem
-        ? [...normalized, { label: `+ ${createLabel}`, value: CREATE_OPTION_VALUE }]
-        : normalized
       return {
-        normalizedOptions: withCreate,
+        baseOptions: normalized,
+        mergedOptions: merged,
         optionByValue: new Map<string, SelectOption>(merged.map((opt) => [toKey(opt), opt])),
       }
-    }, [sourceOptions, overlay, createdOptions, hasOnUpdate, showCreateItem, createLabel, actions.hasOwnCreatePending])
+    }, [sourceOptions, overlay, createdOptions, hasOnUpdate, actions.hasOwnCreatePending])
+
+    // Поиск в списке: порог и строка запроса живут здесь (хуки в `render` недопустимы). Ищет и по строковому
+    // описанию, пока не выключен `searchInDescription={false}`
+    const searchState = useSelectionSearch<SelectOption>({
+      searchable: componentProps.searchable as SelectSearchable<SelectOption> | undefined,
+      options: mergedOptions,
+      getText: componentProps.searchInDescription === false ? getOptionText : getOptionSearchText,
+      placeholder: SEARCH_PLACEHOLDER,
+      ariaLabel: SEARCH_ARIA_LABEL,
+    })
+    const searchQuery = searchState.search ? searchState.query.trim() : ''
+    const searchSettings = typeof componentProps.searchable === 'object' ? componentProps.searchable : undefined
+    // `visibleValues` хука — по «сырым» значениям; список примитива живёт на нормализованных ключах (`''` → токен)
+    const search = useMemo<UIKitSelectSearch | undefined>(
+      () =>
+        searchState.search
+          ? { ...searchState.search, visibleValues: new Set(searchState.filtered.map((opt) => toKey(opt))) }
+          : undefined,
+      [searchState.search, searchState.filtered],
+    )
+
+    // «+ Добавить…»: пустой поиск — обычный пункт, текст без точного совпадения — «+ Добавить "<текст>"».
+    // Служебный пункт идёт ПОСЛЕ фильтра и сам не фильтруется; в форму не попадает (перехватывается в onValueChange)
+    const createVerb = (componentProps.createLabel ?? CREATE_VERB_DEFAULT).replace(/\s*(…|\.{3})$/, '')
+    const offerCreate = showCreateItem
+      && (searchQuery === '' || shouldOfferCreate(searchQuery, mergedOptions.map((opt) => getOptionText(opt))))
+    const normalizedOptions = useMemo((): NormalizedOption[] => {
+      if (!offerCreate) {
+        return baseOptions
+      }
+      const label = searchQuery ? `+ ${createVerb} "${searchQuery}"` : `+ ${createLabel}`
+      return [...baseOptions, { label, value: CREATE_OPTION_VALUE }]
+    }, [baseOptions, offerCreate, searchQuery, createVerb, createLabel])
 
     const resolvedClearable = componentProps.clearable ?? !resolved.required
 
     const hasEmptyOption = normalizedOptions.some((opt) => opt.value === EMPTY_OPTION_TOKEN)
 
     useNodeLabelWarning('Select', normalizedOptions)
-
-    // `'auto'`/`false`/`undefined` — тихо; `true` и объект просят поиск, которого в этом скине нет
-    const searchRequested = componentProps.searchable === true || typeof componentProps.searchable === 'object'
-    useEffect(() => {
-      if (searchRequested) {
-        warnSearchUnsupported()
-      }
-    }, [searchRequested])
 
     return {
       normalizedOptions,
@@ -220,8 +242,12 @@ const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFie
       hasEmptyOption,
       actions,
       createLabel,
+      createVerb,
       dependent,
       loading,
+      search,
+      searchQuery,
+      emptyMessage: searchSettings?.emptyMessage,
     }
   },
   render: ({ field, fullPath, resolved, hasError, errorMessage, componentProps, fieldState }): ReactElement => {
@@ -257,7 +283,7 @@ const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFie
       actions.run({
         scope: 'option',
         kind: 'create',
-        call: (ctx) => onCreate('', ctx),
+        call: (ctx) => onCreate(fieldState.searchQuery, ctx),
         apply: (created, info) => {
           actions.addCreatedOption(created)
           // Выбор пользователя, сделанный за время оптимистичного ожидания, подтверждение не перебивает
@@ -308,14 +334,14 @@ const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFie
       canCreate: !!componentProps.onCreate,
       hasOnUpdate,
       interactive,
-      search: '',
+      search: fieldState.searchQuery,
       runCreate,
       runEdit,
       strings: {
         edit: 'Изменить',
         editAria: (text: string) => `Изменить: ${text}`,
         create: createText,
-        createWithSearch: () => createText,
+        createWithSearch: (text: string) => `+ ${fieldState.createVerb} "${text}"`,
         hotkeyHint: 'F2 — изменить запись',
       },
     }
@@ -382,6 +408,8 @@ const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFie
               )
               : undefined}
             listFooter={componentProps.listFooter}
+            search={fieldState.search}
+            emptyContent={fieldState.emptyMessage}
             loading={fieldState.loading}
             loadingMessage="Загрузка..."
             controlRef={actions.controlRef}

@@ -182,12 +182,14 @@ export interface SelectFieldBaseProps<TData = unknown, TDeps extends FieldDeps =
   /** Свой низ списка после пунктов (например `<Form.Field.Select.CreateButton />`) */
   listFooter?: ReactNode
   /**
-   * Поле поиска внутри списка — паритет API с `@letar/forms` (Chakra). ⚠️ В shadcn-скине поиска нет:
-   * фокусная модель Radix Select (наведение мыши уводит фокус на пункт, typeahead забирает символы и Tab)
-   * конфликтует с полем ввода. `'auto'`/`false` ничего не делают; `true` и объект — одно предупреждение в
-   * консоли. Нужен поиск — `Form.Field.Combobox`.
+   * Поле поиска внутри списка — паритет API с `@letar/forms` (Chakra). `'auto'` (по умолчанию) показывает поле с
+   * 10-й опции, `true` — всегда, `false` — никогда, объект — настройки (`threshold`, `placeholder`, `emptyMessage`,
+   * `filter`). Ищет без учёта регистра, диакритики и «ё»/«е», с поправкой на раскладку («ghbdtn» → «привет»).
+   * Со включённым поиском список рисуется на Popover, а не на Radix Select (см. `SearchableSelect`).
    */
   searchable?: SelectSearchable<SelectOption<TData>>
+  /** Поиск ищет и по строковому `description` опции (по умолчанию `true`); `false` — только по тексту опции */
+  searchInDescription?: boolean
   /** Show clear button (auto-determined: true if optional, false if required) */
   clearable?: boolean
 }

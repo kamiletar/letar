@@ -5,27 +5,21 @@ import { cn } from '@letar/tailwind-utils'
 import * as SelectPrimitive from '@radix-ui/react-select'
 import { Check, ChevronDown, Loader2, X } from 'lucide-react'
 import { type ReactNode, useEffect, useId, useRef, useState } from 'react'
+import { hasDescription, resolveSelectValue, SELECT_TRIGGER_CLASS, type ShadcnSelectExtraProps } from './select-common'
+import { SearchableSelect } from './select-searchable'
+
+export type { ShadcnSelectExtraProps } from './select-common'
 
 /**
- * Расширение контракта `UIKitSelectProps`, нужное зависимым полям (§18.10): подсказка «Сначала выберите…»
- * связывается с триггером, а значение вне загруженных опций показывается как есть.
+ * Select shadcn-скина. Без поля поиска — Radix Select (нативная типизация по буквам, скрытый `<select>`); с поиском
+ * (`search`) — Popover со своим списком: фокусная модель Radix Select (наведение уводит фокус на пункт, typeahead
+ * забирает символы и Tab) с полем ввода внутри списка несовместима
  */
-export interface ShadcnSelectExtraProps {
-  /** Id элемента с подсказкой; дописывается к `aria-describedby` триггера */
-  'aria-describedby'?: string
-  /**
-   * Значение есть, а записи с таким `value` в списке нет (несогласованные данные): в триггере показать само
-   * значение, а не пустое место. Идущая загрузка («Загрузка...») сильнее.
-   */
-  showUnknownValue?: boolean
+export function Select(props: UIKitSelectProps<ReactNode> & ShadcnSelectExtraProps) {
+  return props.search ? <SearchableSelect {...props} /> : <RadixSelect {...props} />
 }
 
-/** Есть ли что рисовать второй строкой: пустая строка и пустой узел — нет */
-function hasDescription(description: ReactNode): boolean {
-  return description !== undefined && description !== null && description !== false && description !== ''
-}
-
-export function Select(
+function RadixSelect(
   {
     value,
     onValueChange,
@@ -70,19 +64,14 @@ export function Select(
   // Подпись триггера Radix копирует порталом из ItemText, если у `Value` нет children — тогда
   // туда попал бы узел из `label`/`renderOption`. Поэтому при найденной выбранной опции children
   // задаём всегда: `renderValue` (пустой результат — строка опции). Нет выбора — placeholder
-  const selectedOption = value !== undefined ? options.find((opt) => opt.value === value) : undefined
-  const customValue = selectedOption && renderValue ? renderValue(selectedOption) : undefined
-  const hasCustomValue = customValue !== undefined && customValue !== null && customValue !== false
-    && customValue !== ''
-  // Значение есть, а его опция ещё грузится: в триггере текст загрузки, а не пустой placeholder
-  const showLoadingValue = !!loading && !!loadingMessage && !!value && !selectedOption
-  const valueContent = selectedOption
-    ? (hasCustomValue ? customValue : getOptionText(selectedOption))
-    : showLoadingValue
-    ? loadingMessage
-    : showUnknownValue && value
-    ? value
-    : undefined
+  const { selectedOption, valueContent } = resolveSelectValue({
+    value,
+    options,
+    renderValue,
+    loading,
+    loadingMessage,
+    showUnknownValue,
+  })
 
   // Кнопка очистки — настоящая кнопка рядом с триггером; недоступна, когда поле заблокировано или только для чтения
   const showClear = !!clearable && !!value && !disabled && !readOnly
@@ -128,10 +117,7 @@ export function Select(
             }
             : undefined}
           className={cn(
-            'border-input flex h-9 w-full items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm shadow-xs outline-none',
-            'focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
-            'disabled:cursor-not-allowed disabled:opacity-50',
-            'data-[placeholder]:text-muted-foreground',
+            SELECT_TRIGGER_CLASS,
             // Место под кнопки рядом со значением
             sideButtons && 'pr-16',
           )}

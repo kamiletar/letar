@@ -25,6 +25,9 @@ const LiveSchema = z
     country: z.string().nullable(),
     town: z.string().nullable(),
     townCombo: z.string().nullable(),
+    searchCity: z.string().nullable(),
+    searchNoDesc: z.string().nullable(),
+    searchCreate: z.string().nullable(),
   })
   .strip()
 
@@ -40,6 +43,9 @@ const defaultValues: LiveValues = {
   country: null,
   town: null,
   townCombo: null,
+  searchCity: null,
+  searchNoDesc: null,
+  searchCreate: null,
 }
 
 const cityOptions = [
@@ -76,6 +82,22 @@ const townsByCountry: Record<string, { value: string; label: string }[]> = {
 }
 
 const countryOptions = [{ value: 'ru', label: 'Россия' }, { value: 'kz', label: 'Казахстан' }]
+
+/** 12 городов: с 10-й опции Select показывает поле поиска; у двух — вторая строка для `searchInDescription` */
+const manyCities = [
+  { value: 'msk', label: 'Москва', description: 'ул. Тверская, 1' },
+  { value: 'spb', label: 'Санкт-Петербург', description: 'Невский пр., 10' },
+  { value: 'kzn', label: 'Казань' },
+  { value: 'nsk', label: 'Новосибирск' },
+  { value: 'ekb', label: 'Екатеринбург' },
+  { value: 'nn', label: 'Нижний Новгород' },
+  { value: 'chel', label: 'Челябинск' },
+  { value: 'sam', label: 'Самара' },
+  { value: 'omsk', label: 'Омск' },
+  { value: 'rnd', label: 'Ростов-на-Дону' },
+  { value: 'ufa', label: 'Уфа' },
+  { value: 'yolk', label: 'Ёлкино' },
+]
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
@@ -221,7 +243,37 @@ export default function SelectLiveDemoPage() {
           <p data-testid="town-loads" className="text-muted-foreground text-xs">Загрузок городов: {townLoads}</p>
         </Section>
 
-        <Section title="5. Значения формы вживую" hint="Очистка nullable-поля пишет null, а не пустую строку.">
+        <Section
+          title="5. Поиск в Select"
+          hint="С 10-й опции в списке появляется поле поиска: регистр, «ё»/«е», раскладка («vjcr» → «Москва»), описание («тверск»). Стрелки и Enter выбирают, Escape закрывает, F2 правит."
+        >
+          <FieldSelect
+            name="searchCity"
+            label="Город (поиск + описание)"
+            options={manyCities}
+            placeholder="Выберите город"
+          />
+          <FieldSelect
+            name="searchNoDesc"
+            label="Город (searchInDescription={false})"
+            options={manyCities}
+            searchInDescription={false}
+            placeholder="Выберите город"
+          />
+          <FieldSelect
+            name="searchCreate"
+            label="Город («+ Добавить» с текстом поиска)"
+            options={manyCities}
+            createLabel="Добавить город…"
+            placeholder="Выберите город"
+            onCreate={async (search) => {
+              await sleep(200)
+              return { label: search, value: `new-${search}` }
+            }}
+          />
+        </Section>
+
+        <Section title="6. Значения формы вживую" hint="Очистка nullable-поля пишет null, а не пустую строку.">
           <LiveValuesView />
         </Section>
       </DemoForm>

@@ -4389,7 +4389,7 @@ PJ5 слитые фрагменты `libs/*.zmodel` (поле-связь в ми
   из `itemToString`, Radix копирует содержимое `ItemText` в триггер, поэтому описание внутри `ItemText` протекло бы в поле.
   Со своим `renderOption` поле описание не добавляет (пункт целиком у приложения). Тест «триггер без описания» — в обоих скинах.
 - **Поиск.** `getOptionSearchText` = текст + `` + строковое описание (перевод строки — чтобы запрос не склеивал их границу).
-  Узел не ищется. `searchInDescription={false}` у Select (Chakra; в shadcn у Select поиска нет) и статичного Combobox.
+  Узел не ищется. `searchInDescription={false}` у Select (Chakra; в shadcn с 0.51.0 тоже, см. §17.12) и статичного Combobox.
   Серверный поиск (`useQuery`/`loadOptions`) флагом не управляется.
 - **Источник значения.** `useZenStackRelations` уже клал `descriptionField` из meta поля в `RelationConfig` (§17.10), провайдер —
   в `description` опции. Добавлено: при ручном `RelationFieldProvider` без `descriptionField` в конфиге
@@ -4434,7 +4434,20 @@ F2 у Select, оптимистичный create/update с откатом и со
 - Подсказка блокировки зависимого поля называет родителя по имени поля («Сначала выберите «country»»), если в схеме нет
   `title`, — вопрос схемы демо, не поля.
 - У `Combobox` без выбранного значения недонабранный текст при закрытии списка остаётся (у Chakra стирается).
-- shadcn `Select` без поиска (`searchable` не действует) — берём следующим, если появится потребность.
+- ✅ shadcn `Select` без поиска — закрыто в 0.51.0 (пакет №4, п. 1), см. ниже.
+
+**Поиск в shadcn `Select` (2026-09-27, `@letar/forms-shadcn` 0.51.0).**
+
+- Причина отсутствия — фокусная модель Radix Select (наведение уводит фокус на пункт, typeahead забирает символы и Tab).
+  Решение: при включённом поиске (`UIKitSelectProps.search`) `Select` рисуется на **Popover** (`SearchableSelect`,
+  `primitives/select-searchable.tsx`): триггер-кнопка `role=combobox`, поле `role=searchbox`, список `role=listbox`,
+  подсветка через `aria-activedescendant`. Без поиска остаётся Radix Select — общий код (`select-common.tsx`).
+- Логика поиска общая с Chakra: `useSelectionSearch` (порог с гистерезисом, раскладка, «ё»/«е», `getOptionSearchText`).
+  Поле лишь пересчитывает `visibleValues` на нормализованные ключи (`''` → токен пустой опции).
+- Оба дефекта Radix Select в версии на Popover не воспроизводятся — нативного `<select>` нет.
+- Tab в поле поиска закрывает список (Radix Popover иначе зацикливает фокус на одном поле).
+- ⚠️ Смена режима на лету (опций стало 10) пересоздаёт триггер — фокус теряется; допустимо, справочники редко растут
+  при открытом поле.
 
 ### 18. Зависимые (каскадные) селекты (этап З)
 
