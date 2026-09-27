@@ -107,6 +107,22 @@
   существующих потребителей полей, если такие есть в приватных приложениях на Vue/Angular — сейчас таких нет).
 - **Порядок:** сначала присылает план (Select-листбокс + Combobox-ревизия + оценка объёма по обоим пакетам),
   дожидается согласования координатора/владельца, потом делает.
+- **Этап 3 (Select, 3a-3i) — ✅ полностью закрыт (2026-09-27, отчёты msg 2280-2293).** `Field.Select` на
+  полном паритете с React/Chakra во всех трёх пакетах: `renderOption`/`renderValue`/`description`,
+  `onCreate`/`onUpdate`/`pending`, `searchable`, `dependsOn`. Кастомный листбокс на `useListboxPopup`
+  (`forms-vue`, `@floating-ui/dom`) и `createListboxPopup` (`forms-angular`, `@angular/cdk` Overlay) —
+  Этап 1, переиспользован всеми полями Select. По пути найдено и починено три архитектурных бага
+  фреймворка: не вызывался `DependentsRegistry.handleFieldChange` в `forms-vue`'s `AppForm`; всегда-truthy
+  обёртка `onSettleError` в `forms-angular` из-за таймингов Angular Ivy (`@Input()` ещё не применён в
+  конструкторе); `NG0602` от `effect()` внутри уже выполняющегося `effect()` (перенос в `ngOnInit()`).
+  Версии: `forms-vue` → 0.24.0, `forms-vue-shadcn` → 0.20.0, `forms-angular` → 0.5.0.
+- **Этап 4 (Combobox) — план согласован координатором (2026-09-27, msg 2294).** Разведка forms-dev:
+  `forms-vue`/`forms-angular` Combobox физически лишены клавиатурной навигации и позиционирования (не
+  только вопрос паритета фич — реальный пробел юзабилити); `forms-vue-shadcn` (Reka) имеет базу, но без
+  `loadOptions`/`onCreate`/`onUpdate`/`dependsOn`/`renderOption`. План — по фиче-срезу на пакет, порядок
+  `forms-vue-shadcn` → `forms-vue` → `forms-angular`, 12 под-этапов (4a-4l): рендер/группировка →
+  `loadOptions`/`loadSelected` (асинхронные источники) → `onCreate`/`onUpdate`/`pending` → `dependsOn`.
+  Не breaking (потребителей `Field.Combobox` в Vue/Angular пока нет). В работе.
 
 ### [2026-09-26] Обязательство координатора: отчёт `domwellbes-dev` о новых возможностях Select/Combobox
 
