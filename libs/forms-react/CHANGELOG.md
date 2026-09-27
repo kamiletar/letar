@@ -4,6 +4,15 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.21.0] - 2026-09-27
+
+### Added
+
+- `resolveSignatureString`, `useSignatureString`, тип `SignatureStringKey`: словарь встроенных строк поля подписи
+  (`formSignature.*` — режимы «Рисовать»/«Ввести текст», placeholder, `aria-label`) для shadcn-скина. Отдельный от
+  `formSelection.*` (не про выбор) и от `formField.*` Chakra-скина (тот локальный, без общего рантайма между скинами) —
+  ключи намеренно с другим префиксом, английские значения совпадают с Chakra-версией поля.
+
 ## [0.20.0] - 2026-09-27
 
 ### Added

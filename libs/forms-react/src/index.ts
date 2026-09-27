@@ -163,3 +163,7 @@ export type {
 } from './lib/selection/use-selection-buttons'
 export { useSelectionSearch } from './lib/selection/use-selection-search'
 export type { SelectionSearchState, UseSelectionSearchOptions } from './lib/selection/use-selection-search'
+
+// Строки поля подписи (`Form.Field.Signature`, shadcn-скин) — отдельный словарь от `formSelection.*`
+export { resolveSignatureString, useSignatureString } from './lib/field/signature-strings'
+export type { SignatureStringKey } from './lib/field/signature-strings'
