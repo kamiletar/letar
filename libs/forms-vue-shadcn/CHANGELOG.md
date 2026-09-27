@@ -1,5 +1,34 @@
 # Changelog @letar/forms-vue-shadcn
 
+## 0.19.0 (2026-09-27)
+
+Select паритет с React-скином, Stage 3b (продолжение Stage 3a — `onCreate`/`onUpdate`, `pending`,
+провайдеры карандашей, оптимистичный отказ §16.7). Searchable + `dependsOn` — Stage 3c, отдельной
+сессией.
+
+- **Feature:** `Field.Select` — `onCreate(search, ctx)` (создание записи справочника без ухода из
+  формы, служебный пункт «+ Добавить…»/`Field.Select.CreateButton` в своём `listFooter`) и
+  `onUpdate(option, ctx)` (карандаш «Изменить» у пункта списка и у выбранного значения). Общий
+  конвейер `useSelectionActionsState` (`@letar/forms-vue/core`, портирован в предыдущей сессии) —
+  `pending`, наложение правок, оптимистичный режим и встроенное сообщение отказа `settleFailure`
+  зеркалят React-скин без изменений контракта.
+- **Feature:** `Field.Select` — новый проп `listFooter` (подвал списка, обычно
+  `Field.Select.CreateButton`, для своего `renderOption` без встроенного пункта создания). Раньше
+  проп существовал только у примитива (`uikit/primitives/select.ts`), но не был объявлен и не
+  форвардился из `field-select.ts` — молча терялся.
+- Провайдеры контекста карандашей — `SelectionActionsProvider`/`SelectionOptionProvider`
+  (`selection-context.ts`, Vue `provide`/`inject` с `computed()`, чтобы значение оставалось
+  реактивным между рендерами), кнопки `Field.Select.EditButton`/`Field.Select.CreateButton`
+  (`selection-slots.ts`) и захардкоженные RU-строки (`selection-strings.ts` — в Vue-стеке ещё нет
+  `FormI18nProvider`, портирование i18n вне объёма этой стадии).
+- **Fix:** `SelectValue` (примитив, `uikit/primitives/select.ts`) больше не полагается на
+  внутренний кеш текста Reka UI. Родной слот Reka ищет подпись по `optionsSet`, зарегистрированному
+  DOM-элементами `SelectItem`, и не переоценивает её, если у уже выбранного пункта поменялся только
+  `textContent` (тот же `value`, ровно случай `onUpdate` на текущем значении) — Vue-реактивность
+  этой прямой мутации DOM не отслеживает. Теперь свой слот передаётся всегда, когда опция известна
+  (не только при своём `renderValue`), и подпись читается из реактивного `options`, минуя кеш
+  примитива.
+
 ## 0.18.0 (2026-09-27)
 
 Select/Combobox паритет с React-скином (`@letar/forms-shadcn`) и Chakra-скином, Stage 3a

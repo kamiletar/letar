@@ -1,5 +1,13 @@
 # Changelog @letar/forms-vue
 
+## 0.20.0 (2026-09-27)
+
+- **Feature:** `useSelectionActionsState` (и сопутствующие типы `DEFAULT_SETTLE_TIMEOUT`,
+  `RunSelectionActionOptions`, `SelectionActionsState`, `SelectionCreatedOption`,
+  `UseSelectionActionsStateOptions`) экспортированы из `core.ts` — первый потребитель,
+  `Field.Select` в `forms-vue-shadcn` (Stage 3b паритета Select, `onCreate`/`onUpdate`). Композабл
+  сам не менялся с 0.19.0 (Этап 2), менялась только публичность подпути.
+
 ## 0.19.0 (2026-09-27)
 
 - **Feature:** Этап 2 паритета Select/Combobox с `forms`/`forms-shadcn` (`libs/forms/PLAN.md`,

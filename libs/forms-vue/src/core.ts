@@ -85,6 +85,14 @@ export {
   type UseRichTextFieldResult,
 } from './lib/core/use-rich-text-field'
 export {
+  DEFAULT_SETTLE_TIMEOUT,
+  type RunSelectionActionOptions,
+  type SelectionActionsState,
+  type SelectionCreatedOption,
+  useSelectionActionsState,
+  type UseSelectionActionsStateOptions,
+} from './lib/core/use-selection-actions-state'
+export {
   useSignatureField,
   type UseSignatureFieldOptions,
   type UseSignatureFieldResult,
