@@ -1,5 +1,17 @@
 # Changelog — @letar/ui
 
+## [0.24.0] — 2026-09-27
+
+### Added
+
+- `CookieBanner` — все статические тексты вынесены в пропы-переопределения (`messageText`,
+  `privacyLinkText`, `customizeButtonText`, `acceptAllButtonText`, `necessaryLabel`,
+  `necessaryHint`, `saveChoiceButtonText`), с русскими значениями по умолчанию — не breaking
+  change. Раньше был переопределяем только `analyticsLabel`/`marketingLabel`, остальной текст был
+  зашит намертво — мультиязычный потребитель (Flora, ru/en) не мог перевести баннер без форка
+  библиотеки. Первый потребитель нового контракта — `apps/flora`
+  (`storefront.legal.cookieBanner` в `messages/{ru,en}/storefront.json`).
+
 ## [0.23.0] — 2026-09-26
 
 ### Added

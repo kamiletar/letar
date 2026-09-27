@@ -34,6 +34,20 @@ export interface CookieBannerProps {
    * рендерится поверх развёртки/гало и выпадает из «изображения на экране» целиком.
    */
   zIndex?: number | string
+  /** Текст перед ссылкой на политику ПДн */
+  messageText?: string
+  /** Текст ссылки на политику ПДн */
+  privacyLinkText?: string
+  /** Подпись кнопки, открывающей гранулярные чекбоксы */
+  customizeButtonText?: string
+  /** Подпись кнопки принятия всех категорий */
+  acceptAllButtonText?: string
+  /** Подпись категории «Необходимые» (всегда включена, чекбокс disabled) */
+  necessaryLabel?: string
+  /** Уточнение под подписью «Необходимые», напр. «(сессия)» */
+  necessaryHint?: string
+  /** Подпись кнопки сохранения выбранных категорий в развёрнутой панели */
+  saveChoiceButtonText?: string
 }
 
 export function CookieBanner({
@@ -44,6 +58,13 @@ export function CookieBanner({
   analyticsLabel = 'Аналитика (Я.Метрика)',
   marketingLabel = 'Маркетинг (ретаргетинг)',
   zIndex = 1000,
+  messageText = 'Мы используем cookie. Необходимые — всегда активны.',
+  privacyLinkText = 'Подробнее в политике ПДн',
+  customizeButtonText = 'Настроить',
+  acceptAllButtonText = 'Принять все',
+  necessaryLabel = 'Необходимые',
+  necessaryHint = '(сессия)',
+  saveChoiceButtonText = 'Сохранить выбор',
 }: CookieBannerProps) {
   const config = createConsentConfig(appKey, policyVersion)
   // ⚠️ По умолчанию `true`, не `false` — рендерится сразу на сервере вместе с остальным
@@ -171,13 +192,13 @@ export function CookieBanner({
         <Stack gap={2}>
           <Stack direction={{ base: 'column', md: 'row' }} justify="space-between" align={{ md: 'center' }} gap={2}>
             <Text fontSize="xs" color="fg.muted">
-              Мы используем cookie. Необходимые — всегда активны. {
+              {messageText} {
                 /* Постоянный underline, не только по `_hover` — иначе ссылка отличается от
                   окружающего текста только цветом (WCAG 1.4.1), axe (link-in-text-block) ловит
                   это в WebKit при недостаточном контрасте brand.solid/fg.muted. */
               }
               <Box asChild color="brand.solid" textDecoration="underline" textUnderlineOffset="2px" display="inline">
-                <Link href={privacyUrl}>Подробнее в политике ПДн</Link>
+                <Link href={privacyUrl}>{privacyLinkText}</Link>
               </Box>
             </Text>
 
@@ -191,10 +212,10 @@ export function CookieBanner({
                   minH={{ base: '2.75rem', md: 'auto' }}
                   onClick={() => setExpanded(true)}
                 >
-                  Настроить
+                  {customizeButtonText}
                 </Button>
                 <Button size="sm" colorPalette="brand" minH={{ base: '2.75rem', md: 'auto' }} onClick={handleAcceptAll}>
-                  Принять все
+                  {acceptAllButtonText}
                 </Button>
               </HStack>
             )}
@@ -207,9 +228,9 @@ export function CookieBanner({
                 <Checkbox.Control />
                 <Checkbox.Label>
                   <Text as="span" fontSize="xs">
-                    Необходимые{' '}
+                    {necessaryLabel}{' '}
                     <Text as="span" fontSize="xs" color="fg.subtle">
-                      (сессия)
+                      {necessaryHint}
                     </Text>
                   </Text>
                 </Checkbox.Label>
@@ -254,10 +275,10 @@ export function CookieBanner({
           {expanded && (
             <HStack gap={2} justify="flex-end">
               <Button size="sm" variant="ghost" minH={{ base: '2.75rem', md: 'auto' }} onClick={handleSaveCustom}>
-                Сохранить выбор
+                {saveChoiceButtonText}
               </Button>
               <Button size="sm" colorPalette="brand" minH={{ base: '2.75rem', md: 'auto' }} onClick={handleAcceptAll}>
-                Принять все
+                {acceptAllButtonText}
               </Button>
             </HStack>
           )}

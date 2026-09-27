@@ -127,6 +127,36 @@ describe('CookieBanner', () => {
     expect(screen.queryByText(/Мы используем cookie/)).not.toBeInTheDocument()
   })
 
+  it('все тексты переопределяются пропсами (контракт i18n для потребителей)', async () => {
+    const user = userEvent.setup()
+    renderWithProvider(
+      <CookieBanner
+        appKey="test-app"
+        messageText="We use cookies. Necessary ones are always on."
+        privacyLinkText="Read the privacy policy"
+        customizeButtonText="Customize"
+        acceptAllButtonText="Accept all"
+        necessaryLabel="Necessary"
+        necessaryHint="(session)"
+        saveChoiceButtonText="Save choice"
+        analyticsLabel="Analytics"
+        marketingLabel="Marketing"
+      />,
+    )
+
+    expect(screen.getByText(/We use cookies/)).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Read the privacy policy' })).toBeInTheDocument()
+    expect(screen.queryByText(/Мы используем cookie/)).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Customize' }))
+    expect(screen.getByRole('checkbox', { name: /Necessary/ })).toBeInTheDocument()
+    expect(screen.getByText('(session)')).toBeInTheDocument()
+    expect(screen.getByRole('checkbox', { name: 'Analytics' })).toBeInTheDocument()
+    expect(screen.getByRole('checkbox', { name: 'Marketing' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Save choice' })).toBeInTheDocument()
+    expect(screen.getAllByRole('button', { name: 'Accept all' })).not.toHaveLength(0)
+  })
+
   it('не отправляет POST при consentApiUrl=null', async () => {
     const user = userEvent.setup()
     renderWithProvider(<CookieBanner appKey="test-app" consentApiUrl={null} />)
