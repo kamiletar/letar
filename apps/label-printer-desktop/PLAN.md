@@ -131,7 +131,12 @@ RAW TSPL, автопечать и защита от дубликатов) — п
       Тег `label-printer-desktop-v<semver>`, рантайм — `pointFeedAtOwnRelease`. Релиз — вручную,
       как у kami-key-the: `nx build:win` → переименовать ассеты под дефисы из `latest.yml` →
       `gh release create label-printer-desktop-vX.Y.Z <exe> <exe.blockmap> <latest.yml>`.
-      ⚠️ 0.5.20 и старше смотрят в `lena` — 0.5.21 заказчик ставит вручную, один раз.
+      ⚠️ 0.5.20 и старше смотрят в `lena` — 0.5.22 заказчик ставит вручную, один раз (0.5.21
+      помечен на GitHub сломанным, см. следующий пункт).
+- [x] **0.5.21 падал сразу при запуске** (`Cannot find module 'serialport'`) — найдено первой же
+      живой проверкой обновления. Пакет резолвился только из корневого `package.json` монорепо,
+      electron-builder не включил его в упаковку. Добавлен как прямая зависимость приложения,
+      выпущен 0.5.22, 0.5.21 отмечен на GitHub как сломанный релиз.
 - [ ] CI-workflow релиза (`release-label-printer-desktop.yml` по образцу
       `release-animatrona-folder-player.yml`, но с загрузкой `latest.yml` и `.blockmap` — эталон
       их не грузит, для автообновления этого мало).
