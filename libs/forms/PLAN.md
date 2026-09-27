@@ -6,6 +6,44 @@
 
 ## Backlog (запросы от агентов)
 
+### [2026-09-27] `parseActionInput` — перенести из `apps/domwellbes` в `@letar/forms-core/server-errors` (от domwellbes-dev)
+
+- **Запросил:** domwellbes-dev. **Приоритет:** high (владелец объявил `ActionFailure` единственно
+  рекомендованным контрактом для server actions во всём монорепо, `.claude/rules/server-actions.md`
+  уже переписан под это — но хелпер физически виден только `domwellbes`).
+- **Что нужно:** перенести в `libs/forms-core/src/lib/server-errors/action-failure.ts` (рядом с
+  `actionFailure`/`catchActionFailure`/`isActionFailure`) функцию:
+  ```typescript
+  export function parseActionInput<T>(
+    schema: z.ZodType<T>,
+    input: unknown,
+    fallbackMessage: string,
+  ): T | ActionFailure {
+    const parsed = schema.safeParse(input)
+    if (!parsed.success) {
+      const issue = parsed.error.issues[0]
+      return actionFailure(issue?.message ?? fallbackMessage, issue?.path[0]?.toString())
+    }
+    return parsed.data
+  }
+  ```
+  Экспортировать через `libs/forms-core/src/lib/server-errors/index.ts` и подпуть
+  `@letar/forms/server-errors` (уже реэкспортирует остальные функции этого модуля).
+- **Зачем:** сейчас `parseActionInput` — локальный хелпер `apps/domwellbes/src/lib/
+  catch-action-failure.ts`, ничем не отличающийся от общей части `actionFailure`/`catchActionFailure`
+  рядом. `domwellbes` в этой сессии мигрировал 51 файл `_actions/*.action.ts` на него (владелец
+  видит подробности в `apps/domwellbes/PLAN.md`); другим приложениям (`studio`, `archetest`,
+  `aprel8008` и любым новым) этот хелпер сейчас недоступен — им пришлось бы копировать те же 5
+  строк `safeParse`+`actionFailure` руками, что и порождало разнобой конвенций до сегодняшнего дня.
+- **Что НЕ трогать:** `apps/domwellbes/src/lib/catch-action-failure.ts` оставляет свою локальную
+  `catchActionFailure`-обёртку с `COMMON_UNIQUE_MESSAGES` (проектные тексты дублей) — после переноса
+  она просто переимпортирует `parseActionInput` из `@letar/forms/server-errors` вместо локального
+  определения; саму обёртку с текстами дублей никуда переносить не нужно, это специфика приложения.
+- **Проверка:** сигнатура и поведение 1:1 совпадают с текущей `apps/domwellbes/src/lib/
+  catch-action-failure.ts:42-53` (уже покрыта косвенно ~100 вызовами в мигрированных action-файлах
+  domwellbes — после переноса достаточно прогнать `nx typecheck:tsgo domwellbes`/`nx test domwellbes`,
+  чтобы убедиться, что реэкспорт не сломал существующие импорты).
+
 ### [2026-09-27] `zenstack-form-plugin` — `@@validate` со сравнением с членом enum молча всегда true (от domwellbes-dev)
 
 - **Запросил:** domwellbes-dev, побочная находка в приватном приложении (workaround уже поставлен
