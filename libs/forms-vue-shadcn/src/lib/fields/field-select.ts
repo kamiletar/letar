@@ -1,5 +1,7 @@
+import type { UIKitOptionRenderState } from '@letar/forms-core/uikit'
 import { resolveFieldMeta, useAppFormContext, withFieldValidation } from '@letar/forms-vue/core'
 import { defineComponent, onErrorCaptured, type PropType, ref } from 'vue'
+import type { UINode } from '../uikit/ui-node'
 import { rekaUIKit } from '../uikit/uikit-reka'
 
 /**
@@ -12,6 +14,8 @@ const EMPTY_OPTION_TOKEN = '__letar_empty_option__'
 export interface FieldSelectOption {
   value: string
   label: string
+  /** Вторая строка пункта списка (под `label`), как в shadcn-React-скине — не отображается в триггере */
+  description?: string
   disabled?: boolean
 }
 
@@ -28,6 +32,18 @@ export const FieldSelect = defineComponent({
     placeholder: { type: String as PropType<string | undefined>, required: false, default: undefined },
     options: { type: Array as PropType<FieldSelectOption[]>, required: true },
     clearable: { type: Boolean, required: false, default: undefined },
+    /** Своё содержимое пункта списка; служебные пункты (здесь их нет) через рендерер не проходят */
+    renderOption: {
+      type: Function as PropType<(option: FieldSelectOption, state: UIKitOptionRenderState) => UINode>,
+      required: false,
+      default: undefined,
+    },
+    /** Своя подпись выбранного значения в триггере; пустой результат откатывается на текст опции */
+    renderValue: {
+      type: Function as PropType<(option: FieldSelectOption) => UINode>,
+      required: false,
+      default: undefined,
+    },
   },
   setup(props) {
     const { form, schema } = useAppFormContext()
@@ -57,6 +73,13 @@ export const FieldSelect = defineComponent({
         // `''` при наличии опции с пустым значением — выбранная опция, а не «пусто»
         const value = rawValue === '' && hasEmptyOption ? EMPTY_OPTION_TOKEN : rawValue || undefined
 
+        // Ключ примитива (после подмены `''` → токен) → исходная опция приложения. Нужен, чтобы
+        // `renderOption`/`renderValue` приложения никогда не увидели `EMPTY_OPTION_TOKEN` — как
+        // `optionByValue` в shadcn-React-скине (`field-select.tsx`), только без create/update-конвейера
+        const optionByKey = new Map(
+          props.options.map((opt) => [opt.value === '' ? EMPTY_OPTION_TOKEN : opt.value, opt]),
+        )
+
         // `Select` рисует свою метку сам (см. `uikit/primitives/select.ts`) — в отличие от
         // остальных полей, здесь не `FieldWrapper` (он бы продублировал `FieldLabel`), а
         // `FieldRoot` напрямую вокруг `Select` + `FieldError`, как и в React-скине.
@@ -71,6 +94,12 @@ export const FieldSelect = defineComponent({
               options: hasEmptyOption
                 ? props.options.map((opt) => (opt.value === '' ? { ...opt, value: EMPTY_OPTION_TOKEN } : opt))
                 : props.options,
+              renderOption: props.renderOption
+                ? (opt, state) => props.renderOption!(optionByKey.get(opt.value) ?? (opt as FieldSelectOption), state)
+                : undefined,
+              renderValue: props.renderValue
+                ? (opt) => props.renderValue!(optionByKey.get(opt.value) ?? (opt as FieldSelectOption))
+                : undefined,
               label,
               placeholder,
               clearable,

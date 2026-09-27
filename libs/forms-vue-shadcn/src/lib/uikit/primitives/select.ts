@@ -1,4 +1,9 @@
-import type { UIKitSelectProps } from '@letar/forms-core/uikit'
+import {
+  getOptionDescriptionText,
+  getOptionText,
+  type UIKitOptionRenderState,
+  type UIKitSelectProps,
+} from '@letar/forms-core/uikit'
 import { cn } from '@letar/tailwind-utils'
 import { Check, ChevronDown, X } from 'lucide-vue-next'
 import {
@@ -17,10 +22,25 @@ import { h, type VNode } from 'vue'
 import type { UINode } from '../ui-node'
 
 export function Select(
-  { value, onValueChange, onBlur, options, label, placeholder, disabled, clearable, ...rest }: UIKitSelectProps<
-    UINode
-  >,
+  {
+    value,
+    onValueChange,
+    onBlur,
+    options,
+    renderOption,
+    renderValue,
+    label,
+    placeholder,
+    disabled,
+    clearable,
+    ...rest
+  }: UIKitSelectProps<UINode>,
 ): VNode {
+  // Подпись триггера: своя (`renderValue`), пустой результат откатывается на текст опции — тот же
+  // контракт, что и в React-скине (`resolveSelectValue`), без `loading`/`showUnknownValue` (вне Stage 3a)
+  const selectedOption = value !== undefined ? options.find((opt) => opt.value === value) : undefined
+  const customValue = selectedOption && renderValue ? renderValue(selectedOption) : undefined
+  const hasCustomValue = customValue !== undefined && customValue !== null && customValue !== ''
   return h(
     SelectRoot,
     {
@@ -49,7 +69,13 @@ export function Select(
           },
           {
             default: () => [
-              h(SelectValue, { placeholder }),
+              h(
+                SelectValue,
+                { placeholder },
+                selectedOption && renderValue
+                  ? { default: () => (hasCustomValue ? customValue : getOptionText(selectedOption)) }
+                  : undefined,
+              ),
               h(SelectIcon, { asChild: true }, {
                 default: () =>
                   clearable && value
@@ -89,8 +115,35 @@ export function Select(
                     { class: 'p-1' },
                     {
                       default: () =>
-                        options.map((opt) =>
-                          h(
+                        options.map((opt) => {
+                          const state: UIKitOptionRenderState = {
+                            selected: opt.value === value,
+                            disabled: opt.disabled ?? false,
+                            // Ожидание сервера (`pending`) — вне Stage 3a, опция никогда не в ожидании
+                            pending: false,
+                          }
+                          const itemText = h(
+                            SelectItemText,
+                            {},
+                            { default: () => (renderOption ? renderOption(opt, state) : opt.label) },
+                          )
+                          // Вторая строка — сосед `ItemText`, как в React-скине; со своим `renderOption`
+                          // пункт рисует приложение целиком, второй строки от примитива нет.
+                          // `getOptionDescriptionText` уже сузила описание до строки (или `''`) —
+                          // `h()` не принимает `null`/`VNode` третьим аргументом как обычный текст
+                          const descriptionText = getOptionDescriptionText(opt)
+                          const content = !renderOption && descriptionText !== ''
+                            ? h('div', { class: 'flex min-w-0 flex-1 flex-col' }, [
+                              itemText,
+                              h(
+                                'span',
+                                { 'data-slot': 'select-item-description', class: 'text-muted-foreground text-xs' },
+                                descriptionText,
+                              ),
+                            ])
+                            : itemText
+
+                          return h(
                             SelectItem,
                             {
                               key: opt.value,
@@ -104,7 +157,7 @@ export function Select(
                             },
                             {
                               default: () => [
-                                h(SelectItemText, {}, { default: () => opt.label }),
+                                content,
                                 h(
                                   SelectItemIndicator,
                                   { class: 'absolute right-2 flex size-3.5 items-center justify-center' },
@@ -113,7 +166,7 @@ export function Select(
                               ],
                             },
                           )
-                        ),
+                        }),
                     },
                   ),
               },

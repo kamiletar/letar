@@ -1,5 +1,25 @@
 # Changelog @letar/forms-vue-shadcn
 
+## 0.18.0 (2026-09-27)
+
+Select/Combobox паритет с React-скином (`@letar/forms-shadcn`) и Chakra-скином, Stage 3a
+(из общего плана Этапа 3, разбитого по фичам вместо пакетов целиком — create/update/pending/
+optimistic/`searchable`/`dependsOn` остаются в Stage 3b/3c, отдельными сессиями):
+
+- **Feature:** `Field.Select` — новые пропы `renderOption(option, state)` (своё содержимое пункта
+  списка; сигнатура и семантика зеркалят `UIKitSelectProps.renderOption` из `@letar/forms-core`,
+  уже общий контракт с React-скином) и `renderValue(option)` (своя подпись выбранного значения в
+  триггере; пустой результат откатывается на текст опции). `FieldSelectOption.description?: string`
+  — вторая строка пункта списка под `label`, скрывается автоматически при своём `renderOption`
+  (приложение рисует пункт целиком).
+- Опция со значением `''` (служебный токен `EMPTY_OPTION_TOKEN` внутри примитива Reka, см.
+  комментарий в `field-select.ts`) больше не течёт в колбэки приложения — `renderOption`/
+  `renderValue` всегда получают исходную опцию с настоящим `value`, как `optionByValue` в
+  shadcn-React-скине.
+- `libs/forms-vue-shadcn/src/lib/uikit/primitives/select.ts` реализует уже существовавший в
+  `UIKitSelectProps<TNode>` (`@letar/forms-core/uikit`) контракт — тип не менялся, только его
+  реализация на Reka UI.
+
 ## 0.17.0 (2026-09-21)
 
 - **Feature:** `FormStepsNavigation` принимает пропсы кнопок `prevProps`/`nextProps`/`submitProps`/
