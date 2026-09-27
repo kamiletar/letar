@@ -29,6 +29,7 @@ describe('pointFeedAtOwnRelease', () => {
     expect(setFeedURL).toHaveBeenCalledWith({
       provider: 'generic',
       url: 'https://github.com/kamiletar/letar/releases/download/animatrona-v0.55.72',
+      useMultipleRangeRequest: false,
     })
   })
 
