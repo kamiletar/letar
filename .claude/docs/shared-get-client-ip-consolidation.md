@@ -89,3 +89,48 @@ grep -rn "x-forwarded-for" --include="*.ts" libs apps | grep -v "@letar/demo-pro
 падающий тест `aboi:test` (`related-products.spec.ts` → `@letar/auth/server` не резолвится
 под vitest) — предсуществующий, не связан с этой правкой (не трогает `prisma.ts`/`auth`,
 воспроизводится и на исходном коде до правки).
+
+## ✅ 2026-09-27: полный грепом-аудит `x-forwarded-for` по монорепо — 7 мест исправлено
+
+Грепом `x-forwarded-for` по `apps`+`libs` (за вычетом `hash-ip.ts`/`get-client-ip.ts` и
+`.spec.`/`.test.`) найдено 12 мест для ручной проверки. Итог:
+
+**Исправлено (7 мест, все брали первый элемент вместо последнего):**
+
+| Приложение       | Файл                                                         | Контекст                                                    | Делегировано в `@letar/demo-protection`?                                              |
+| ---------------- | ------------------------------------------------------------ | ----------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `dsperevod`      | `src/lib/action-helpers.ts` (`logAudit`)                     | 152-ФЗ журнал доступа, `ipAddress` в `AuditLog`             | Нет — локальный хелпер (1 место, нет зависимости на демо-protection ради него одного) |
+| `svoichuzhie`    | `order.action.ts`, `ticket.action.ts`, `subscribe.action.ts` | ключ rate-limit (`order:${ip}` и т.п.)                      | Да — добавлен как реальная зависимость (3 места)                                      |
+| `aboi`           | `src/lib/checkout.ts` (проверка пина сертификата)            | `hashIp(clientIp)` для `validateCertificate`                | Да — `getClientIpFromHeaders` уже был импортирован, использован не везде              |
+| `domwellbes`     | `src/lib/render-agent/route-auth.ts`                         | rate-limit устройства рендер-агента                         | Да — уже был реальной зависимостью                                                    |
+| `driving-school` | `register.action.ts`, `accept-oauth-consent.action.ts`       | `ipAddress` в записи принятия оферты/политики (юр. значимо) | Да — добавлен как реальная зависимость (2 места)                                      |
+
+Для `svoichuzhie` и `driving-school` добавление `@letar/demo-protection` в реальные
+`dependencies` потребовало три места (см. [libs.md](/.claude/rules/libs.md) — dependencies +
+`tsconfig.json` paths + `next.config` `transpilePackages`), по образцу `domwellbes`. Для
+`dsperevod` (единственное место в приложении) заведён локальный хелпер вместо новой
+workspace-зависимости — то же решение, что уже описано выше для `driving-school`/`api-logger.ts`
+и `@letar/consent`: цена подключения новой либы ради одного call site выше пользы.
+
+**Проверены и оставлены без изменений — уже корректны:**
+
+- `apps/auth-hub/src/lib/geo.ts` — уже использует `getClientIp()` из `@letar/demo-protection`,
+  комментарий соответствует коду.
+- `apps/auth-hub/src/app/(auth)/sign-in/page.tsx` — только упоминание в JSDoc-комментарии, разбора
+  заголовка в коде нет.
+
+**Осознанно не тронуто (не в скоупе этого аудита):**
+
+- `apps/domwellbes/src/lib/auth.ts`, `libs/auth/src/server/create-auth/index.ts` — `ipAddressHeaders:
+  ['x-forwarded-for', ...]` это опция конфигурации Better Auth (framework сам решает алгоритм
+  выбора хопа), не самописный парсинг.
+- `apps/flora/src/modules/identity/server/auth.ts` — тот же случай, `advanced.ipAddress.ipAddressHeaders`.
+- `apps/driving-school/src/lib/api-logger.ts` — см. раздел выше, третья копия с другим контрактом
+  (`cf-connecting-ip`, `string | null`).
+
+Проверено на каждое затронутое приложение: `nx typecheck:tsgo`, `nx test`
+(`dsperevod`/`svoichuzhie`/`aboi`/`domwellbes`/`driving-school` — все зелёные), `nx lint`
+(без новых предупреждений/ошибок), `nx build` для `svoichuzhie` (успешно) и `driving-school`
+(упал OOM на этой машине — `nextjs-build-worker-count-oom-shared-host.md`, к резолву импорта
+`@letar/demo-protection` не относится: тайпчек уже подтвердил резолв через project references,
+и тот же патторн уже работает в собранном `domwellbes`).
