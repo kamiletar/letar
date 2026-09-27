@@ -393,6 +393,9 @@ const options = [
 
 ```tsx
 <Form.Field.Listbox name="permissions" options={permissionOptions} multiple />
+
+// Вторая строка под подписью — `description` у опции (Chakra- и shadcn-скины)
+<Form.Field.Listbox name="plan" options={[{ value: 'pro', label: 'Pro', description: 'Для команд' }]} />
 ```
 
 ## NativeSelect

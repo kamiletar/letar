@@ -439,6 +439,9 @@ Dropdown list for single or multiple selection. Alternative to Select for larger
 
 // Multiple selection
 <Form.Field.Listbox name="permissions" options={permissionOptions} selectionMode="multiple" />
+
+// Second line under the label — `description` on an option (Chakra and shadcn skins)
+<Form.Field.Listbox name="plan" options={[{ value: 'pro', label: 'Pro', description: 'For teams' }]} />
 ```
 
 ## NativeSelect
