@@ -263,6 +263,23 @@ CHANGELOG.md).
 
 ## Бэклог
 
+- [ ] ⚠️ Открытый вопрос: промо-ролик `/brag` собран и прошёл все технические проверки
+      (`hyperframes lint`/`check` — 0 ошибок, contrast 75/75 WCAG AA), но не отрендерен —
+      сессия 2026-09-27 остановилась на гейте одобрения перед рендером (правило `/brag`:
+      рендер только после явного «го» от пользователя). Материалы: `apps/kami-key-the/
+      brag-output-2026-09-27-165625/` (`brag-plan.md`, `composition-brief.md`,
+      `composition/index.html`) — готовый к рендеру, но пока незакоммиченный черновик; каталог
+      не игнорируется git (проверить, не стоит ли добавить `brag-output-*/` в `.gitignore`
+      приложения, если ролик не предполагается коммитить целиком). Сценарий: хук-тайпинг →
+      neon-логотип → настоящий GDI-оверлей (`overlay.ts`, реальные цвета/раскладка, обе стороны
+      AltGr/AltGr+Shift видны одновременно) → 2 карточки фич → SmartScreen-панчлайн → CTA
+      «Скачать .exe» v1.9.28. Чтобы продолжить: `cd apps/kami-key-the/
+      brag-output-2026-09-27-165625/composition && HYPERFRAMES_SKIP_SKILLS=1 npx hyperframes
+      preview --background`, показать `http://127.0.0.1:3002/#project/composition`
+      пользователю, при одобрении — `HYPERFRAMES_SKIP_SKILLS=1 npx hyperframes render --quality
+      looks --output ../brag.mp4`, выбрать poster-frame, вшить его как frame 0, написать
+      `share-copy.txt`.
+
 - [ ] ⚠️ **Открытый вопрос: `installAndRelaunchViaScheduler` из `@letar/electron-monorepo-updater`
       (2026-09-17, v1.9.29) не проверена живым тестом после переноса в либу** — только
       typecheck/lint/юнит-тесты `buildRelaunchBatScript`. Сама логика не менялась (перенесена
