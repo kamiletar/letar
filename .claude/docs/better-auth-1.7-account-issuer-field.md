@@ -116,6 +116,42 @@ SELECT count(*) FROM "Account" WHERE "providerId" = 'credential' AND issuer IS N
 Ноль — миграция и backfill применены. Ненулевое значение на приложении, где фикс якобы уже
 задеплоен, — верный признак разрыва между коммитом и деплоем, а не нового бага.
 
+## ⚠️ Backfill не вечен: сброс пароля создаёт `Account` без `issuer`
+
+2026-09-27 алерт `account-issuer-null-check` на aboi: одна `credential`-строка с `issuer = NULL`,
+созданная 25.09 — через месяц после backfill. Источник — `reset-password`
+(`better-auth/dist/api/routes/password.mjs`): у пользователя нет credential-аккаунта (например,
+только соц-вход) → `internalAdapter.createAccount({ providerId: 'credential', … })` без `issuer`,
+и `internal-adapter` его не подставляет. Backfill-миграция выполняется один раз и такие строки
+не покрывает.
+
+Фикс на приложение — хук, дублирующий значение backfill (образец: `apps/aboi/src/lib/auth.ts`):
+
+```ts
+databaseHooks: {
+  account: {
+    create: {
+      before: async (account) => {
+        const data = account as typeof account & { issuer?: string | null }
+        if (data.providerId === 'credential' && !data.issuer) {
+          return { data: { ...data, issuer: 'local:credential' } }
+        }
+        return undefined // без явного return — TS7030
+      },
+    },
+  },
+},
+```
+
+Хук добавлен только в aboi; остальные 13 приложений с моделью `Account` уязвимы так же, пока
+не получат его. Разовая починка строки — `UPDATE "Account" SET issuer = 'local:credential'
+WHERE "providerId" = 'credential' AND issuer IS NULL`.
+
+⚠️ В установленной `better-auth@1.7.6` в `dist/` нет ни `createLocalAccountIssuer`, ни сравнения
+`issuer` в `sign-in.mjs` — описанный выше механизм тихого 401 для этой версии по исходникам
+не подтверждается (проверено грепом 2026-09-27). NULL-строка при этом всё равно нарушает
+инвариант, на который смотрит алерт.
+
 ## Живая проверка (2026-08-25, domwellbes)
 
 `POST /api/auth/sign-up/email` — было 500 `Unrecognized key: issuer`, стало 200 с созданным
