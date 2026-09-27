@@ -14,7 +14,7 @@ describe('buildRelaunchBatScript', () => {
 
   it('ждёт выхода процесса по PID перед запуском инсталлятора', () => {
     const script = buildRelaunchBatScript(baseOptions)
-    const installerCommand = `"${baseOptions.installerPath}" "--updated" "/S"`
+    const installerCommand = `"${baseOptions.installerPath}" --updated /S`
 
     expect(script).toContain('tasklist /fi "PID eq 4242" /fo csv /nh')
     expect(script.indexOf('tasklist /fi')).toBeLessThan(script.indexOf(installerCommand))
@@ -23,8 +23,15 @@ describe('buildRelaunchBatScript', () => {
   it('запускает инсталлятор синхронно с переданными аргументами и сохраняет его errorlevel', () => {
     const script = buildRelaunchBatScript(baseOptions)
 
-    expect(script).toContain(`"${baseOptions.installerPath}" "--updated" "/S"`)
+    expect(script).toContain(`"${baseOptions.installerPath}" --updated /S\r\n`)
     expect(script).toContain('set "INSTALL_RESULT=%errorlevel%"')
+  })
+
+  it('не берёт аргументы инсталлятора в кавычки — NSIS не узнаёт "/S" и показывает мастер', () => {
+    const script = buildRelaunchBatScript(baseOptions)
+
+    expect(script).not.toContain('"/S"')
+    expect(script).not.toContain('"--updated"')
   })
 
   it('запускает приложение по exe-пути напрямую, а не через .lnk, после установки', () => {
@@ -53,7 +60,7 @@ describe('buildRelaunchBatScript', () => {
   it('использует другие аргументы инсталлятора, если переданы не дефолтные', () => {
     const script = buildRelaunchBatScript({ ...baseOptions, installerArgs: ['--silent'] })
 
-    expect(script).toContain(`"${baseOptions.installerPath}" "--silent"`)
+    expect(script).toContain(`"${baseOptions.installerPath}" --silent\r\n`)
     expect(script).not.toContain('/S')
   })
 })
