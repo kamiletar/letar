@@ -1,5 +1,9 @@
 @import 'tailwindcss';
 
+/* Tailwind v4 сканирует только каталог приложения: классы скина лежат в libs/ и без этих строк не генерируются */
+@source '../../../../libs/forms-shadcn/src';
+@source '../../../../libs/tailwind-utils/src';
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

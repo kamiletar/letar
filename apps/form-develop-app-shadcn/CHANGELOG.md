@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.2.4 (2026-09-27)
+
+### Added
+
+- `/select-live-demo`: живая проверка `Select`/`Combobox` shadcn-скина — `description`, `onUpdate` (карандаш, F2),
+  оптимистичные `onCreate`/`onUpdate` (режимы ok/slow/fail), `dependsOn`, очистка nullable, значения формы вживую.
+
+### Fixed
+
+- `globals.css`: `@source` на `libs/forms-shadcn` и `libs/tailwind-utils` — классы скина не генерировались, списки были без стилей.
+- `DemoForm`: реестры `dependents`/`pending` и `submit()` в контексте, как у корня формы (без них не работали `dependsOn` и
+  ожидание оптимистичных действий).
+
 ## 0.2.3 (2026-09-24)
 
 ### Added

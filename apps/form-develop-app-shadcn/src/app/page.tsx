@@ -8,6 +8,11 @@ const demoLinks: { href: string; label: string; description: string }[] = [
   },
   { href: '/select-demo', label: 'Select-поля', description: 'Select, NativeSelect, Combobox, CascadingSelect' },
   {
+    href: '/select-live-demo',
+    label: 'Select/Combobox — живая проверка',
+    description: 'description, onUpdate, оптимистичные onCreate/onUpdate, dependsOn, null при очистке',
+  },
+  {
     href: '/choice-demo',
     label: 'Поля выбора',
     description: 'RadioGroup, SegmentGroup, RadioCard, CheckboxCard, Listbox',
