@@ -1,3 +1,4 @@
+import { withCredentialAccountIssuer } from '@letar/auth/server'
 import { betterAuth } from 'better-auth'
 import { prismaAdapter } from 'better-auth/adapters/prisma'
 import { nextCookies } from 'better-auth/next-js'
@@ -11,6 +12,8 @@ import { prismaAuth } from './prisma'
  * Используется локальная БД для хранения сессий и OAuth state.
  */
 export const auth = betterAuth({
+  // credential-аккаунт без issuer (сброс пароля) → local:credential; см. better-auth-1.7-account-issuer-field.md
+  databaseHooks: withCredentialAccountIssuer(),
   secret: process.env.BETTER_AUTH_SECRET,
 
   database: prismaAdapter(prismaAuth, {
