@@ -1,5 +1,31 @@
 # Changelog @letar/forms-vue
 
+## 0.19.0 (2026-09-27)
+
+- **Feature:** Этап 2 паритета Select/Combobox с `forms`/`forms-shadcn` (`libs/forms/PLAN.md`,
+  тред `forms-vue-angular-select-parity`) — реактивная обвязка над framework-free логикой
+  `@letar/forms-core/uikit`, портированная механически с React-хуков `forms-react` без изменения
+  поведения:
+  - `useSelectionActionsState` (`core/use-selection-actions-state.ts`) — оптимистичный
+    create/update пайплайн: превью до подтверждения сервера, таймаут settle
+    (`DEFAULT_SETTLE_TIMEOUT = 30_000`), откат при отказе, интеграция с `PendingRegistry`, сброс
+    при смене `depsKey` родителя. В отличие от React-версии не нужны `xxxRef`-зеркала — реактивные
+    геттеры (`() => ...`) читаются свежими при каждом обращении.
+  - `useOptionsLoader` (`core/use-options-loader.ts`) — асинхронная загрузка опций с
+    race-safety через токен (устаревший ответ игнорируется даже без отмены `AbortController`),
+    `keepPrevious`, `enabled`, `reload()`.
+  - `useSelectionSearch` (`core/use-selection-search.ts`) — клиентская фильтрация с гистерезисом
+    (once shown, stays shown) и допуском раскладки клавиатуры.
+  - `useFieldDeps`/`useDependentField` (`core/use-dependent-field.ts`) — обвязка `dependsOn`:
+    готовность родителя, блокировка с текстом недостающих меток, авто-очистка при правке
+    родителя через `DependentsRegistry`. В отличие от React (читает форму из контекста
+    автоматически) принимает `values`/`dependents`/`setValue` явными параметрами — контракт не
+    завязан на то, как Этапы 3–4 расширят `AppFormContext`.
+
+  Ни один из четырёх композаблов пока не экспортируется из `src/index.ts` — как и
+  `useListboxPopup` на Этапе 1, у них ещё нет потребителя (`Field.Select`/`Field.Combobox`
+  переезжают на них отдельными этапами). Это подключение UI-компонентов, не обвязки.
+
 ## 0.18.0 (2026-09-27)
 
 - **Feature:** `useListboxPopup` позиционируется через `@floating-ui/dom` (`computePosition`,
