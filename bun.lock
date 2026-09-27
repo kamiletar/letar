@@ -848,7 +848,7 @@
     },
     "apps/kami-key-the": {
       "name": "kami-key-the",
-      "version": "1.9.32",
+      "version": "1.9.33",
       "dependencies": {
         "@letar/electron-monorepo-updater": "workspace:*",
       },
