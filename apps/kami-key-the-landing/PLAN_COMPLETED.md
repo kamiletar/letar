@@ -1,5 +1,13 @@
 # Выполненные задачи
 
+## Фикс `TS2737` (BigInt в @letar/format-utils) — версия 0.4.9 (2026-09-27)
+
+Найдено при попутном `nx typecheck:tsgo` во время несвязанной сессии по `libs/github-releases`.
+Тот же root cause и тот же фикс, что в `animatrona-landing` (см. PLAN_COMPLETED.md там):
+`target: "ES2017"` (старый `create-next-app`-скаффолд, приложение вне пресета
+`tsconfig.next-app.json`) не поддерживает BigInt-литерал (`100n`) в `formatKopecks` —
+поднят до `ES2022`.
+
 ## SEO-аудит и фикс `transition="all"` — версии 0.4.7–0.4.8 (2026-09-27)
 
 **0.4.7** — `transition="all ..."` заменён на явный список меняющихся CSS-свойств в 9 местах
