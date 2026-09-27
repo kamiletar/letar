@@ -180,6 +180,7 @@
 - [nextjs-streaming-soft-404-loading-boundary](/.claude/docs/nextjs-streaming-soft-404-loading-boundary.md) ⚠️ любой `loading.tsx` выше по дереву превращает 404 в 200
 - [nextjs-compound-component-server-boundary](/.claude/docs/nextjs-compound-component-server-boundary.md) ⚠️ compound-экспорт и константы из `'use client'` резолвятся в `undefined`
 - [nextjs-revalidatepath-outside-request-scope](/.claude/docs/nextjs-revalidatepath-outside-request-scope.md) ⚠️ Invariant в фоновой задаче без request scope
+- [nextjs-instrumentation-module-singleton-split](/.claude/docs/nextjs-instrumentation-module-singleton-split.md) ⚠️ реестр из `instrumentation.ts` невидим server action: тесты зелёные, процесс мёртв
 - [nextjs-client-page-metadata-wrapper](/.claude/docs/nextjs-client-page-metadata-wrapper.md) `'use client'` + `metadata` — разбить на server-обёртку
 - [nextjs-metadata-inheritance-canonical-trap](/.claude/docs/nextjs-metadata-inheritance-canonical-trap.md) ⚠️ страница без своей `metadata` наследует canonical главной
 - [nextjs-favicon-icon-tsx-both-needed](/.claude/docs/nextjs-favicon-icon-tsx-both-needed.md) ⚠️ `icon.tsx` не заменяет `favicon.ico`
