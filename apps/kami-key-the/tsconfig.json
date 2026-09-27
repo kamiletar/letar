@@ -11,6 +11,7 @@
     "paths": {
       "@/*": ["./src/*"],
       "@letar/electron-monorepo-updater": ["../../libs/electron-monorepo-updater/src/index.ts"],
+      "@letar/semver-compare": ["../../libs/semver-compare/src/index.ts"],
       "@letar/electron-storage": ["../../libs/electron-storage/src/index.ts"]
     },
     "types": ["node"],
@@ -23,7 +24,8 @@
     "main/**/*.ts",
     "shared/**/*.ts",
     "../../libs/electron-storage/src/**/*.ts",
-    "../../libs/electron-monorepo-updater/src/**/*.ts"
+    "../../libs/electron-monorepo-updater/src/**/*.ts",
+    "../../libs/semver-compare/src/**/*.ts"
   ],
   "exclude": ["node_modules", "dist", "app", "renderer", "../../libs/**/*.spec.ts"]
 }

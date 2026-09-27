@@ -15,7 +15,8 @@
     "paths": {
       "@letar/label-printer-core": ["../../../libs/label-printer-core/src/index.ts"],
       "@letar/electron-storage": ["../../../libs/electron-storage/src/index.ts"],
-      "@letar/electron-monorepo-updater": ["../../../libs/electron-monorepo-updater/src/index.ts"]
+      "@letar/electron-monorepo-updater": ["../../../libs/electron-monorepo-updater/src/index.ts"],
+      "@letar/semver-compare": ["../../../libs/semver-compare/src/index.ts"]
     },
     "noUncheckedSideEffectImports": false,
     "ignoreDeprecations": "6.0"
