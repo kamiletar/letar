@@ -4431,13 +4431,19 @@ F2 у Select, оптимистичный create/update с откатом и со
 
 - Два дефекта Radix Select (пустая строка от нативного `<select>`, неконтролируемый режим) не воспроизводятся в jsdom:
   ловятся только живым прогоном. Сценарий — страница `/select-live-demo`. ✅ Постоянный e2e заведён 2026-09-27:
-  `apps/form-develop-app-shadcn-e2e/src/select-live-demo.spec.ts` (10 сценариев × chromium/firefox/webkit): два дефекта
+  `apps/form-develop-app-shadcn-e2e/src/select-live-demo.spec.ts` (11 сценариев × chromium/firefox/webkit): два дефекта
   Radix Select (мутационно проверено — без фиксов оба падают), очистка nullable → `null`, `clearable` у Combobox,
   `dependsOn`, откат при отказе сервера, поиск в Select (фокус, раскладка, Enter/Escape/Tab, «+ Добавить»).
   Локально: `nx run form-develop-app-shadcn:dev`, затем `bunx playwright test` из каталога e2e-проекта.
+  К `run_e2e` на s1 проект **не подключён намеренно**: `run_e2e` бьёт в публичный staging-домен
+  `https://<app>-stage.s1.letar.best`, а демо-стенды форм (`form-develop-app`, `form-develop-app-shadcn`) не деплоятся —
+  их нет в `SERVER_APPS`/`E2E_GATED_APPS` (`libs/infra-config`), домена и staging-контейнера нет; у соседнего
+  `form-develop-app-e2e` то же. Конфигурация каноническая (`@nx/playwright:playwright`, `implicitDependencies` на
+  публичное приложение — безопасно, оба каталога в публичном репо), так что `nx affected -t e2e` его подхватит.
+  Подключить можно только вместе с деплоем демо на staging — отдельное решение владельца. Локально 39/39 (13 × 3 браузера).
 - ✅ Подсказка блокировки зависимого поля называла родителя по имени поля («Сначала выберите «country»») — закрыто
   2026-09-27 (`forms-react` 0.19.0, `forms-shadcn` 0.52.0): реестр видимых подписей `useFieldLabelLookup`; порядок —
-  подпись поля → `ui.title` схемы → имя. Chakra-скин ещё берёт только `ui.title` (`use-dependent-select-field.ts`) — долг.
+  подпись поля → `ui.title` схемы → имя. Chakra-скин тоже — ✅ `forms` 2.32.0.
 - ✅ `Combobox` без значения: недонабранный текст при закрытии стирается (как у Chakra) — закрыто в `forms-shadcn` 0.52.0.
 - ✅ shadcn `Select` без поиска — закрыто в 0.51.0 (пакет №4, п. 1), см. ниже.
 
