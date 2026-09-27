@@ -1,6 +1,6 @@
 # План развития Dashboard
 
-> **Версия:** 1.27.6
+> **Версия:** 1.27.7
 > **Последнее обновление:** 2026-09-27
 
 **✅ Фикс: `strategy: 'jwt'` убран из `session.cookieCache` (2026-09-03, 1.26.4).** Dashboard был
@@ -51,6 +51,9 @@
   docker/nginx/git-роутах, куда в 1.27.5 попал слишком широкий гейт, плюс три роута без гейта
   вовсе (`analytics/sites` POST, `alerts/settings` POST, `audit-log` DELETE) — деталь в
   `PLAN_COMPLETED.md` v1.27.6
+- Пять write/destructive роутов `servers*` сведены с ручного инлайн-паттерна проверки роли на
+  общий хелпер `requireAdmin()` (семантика доступа не менялась, только устранено дублирование) —
+  деталь в `PLAN_COMPLETED.md` v1.27.7
 - Алерт `AUTH_ACCOUNT_ISSUER_NULL` (PLAN.md корня §71 п.3.2) — новый тип в `AlertType`,
   создаётся `dashboard-agent` ежедневной cron-проверкой `Account.issuer IS NULL` по 14
   приложениям с моделью Account (better-auth 1.7 регрессия, не путать со статическим гейтом

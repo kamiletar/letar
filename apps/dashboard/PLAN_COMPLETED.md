@@ -2,6 +2,36 @@
 
 Детальное описание всех реализованных фич.
 
+## ✅ v1.27.7 — унификация проверки доступа в `servers*` на `requireAdmin()`/`requireAuth()` (2026-09-27)
+
+Продолжение v1.27.6: там `servers/*`, `servers/[id]/apps*` были отмечены как «уже в порядке» —
+семантика доступа (ADMIN на запись/удаление) была верной, но реализована не общим хелпером, а
+пятикратно продублированным ручным паттерном `getServerSession()` +
+`if (session.user.role !== 'ADMIN')`. Сведено на `requireAdmin()` из `auth-utils.ts`, как во всех
+остальных роутах приложения (образец — `docker/control/route.ts`):
+
+- `POST /api/servers`
+- `PATCH /api/servers/[id]`, `DELETE /api/servers/[id]`
+- `POST /api/servers/[id]/apps`
+- `PATCH /api/servers/[id]/apps/[appId]`, `DELETE /api/servers/[id]/apps/[appId]`
+- `POST /api/servers/[id]/apps/[appId]/deploy`
+
+GET-хендлеры тех же пяти файлов (требуют только сессию, не ADMIN) переведены на `requireAuth()`
+для единообразия внутри файла — уровень доступа не менялся.
+
+Поведение везде идентично прежнему: во всех местах и раньше требовался именно ADMIN, `requireAdmin()`
+даёт тот же результат (throw → catch-блок → `500` с текстом ошибки, как и у остальных
+`requireAdmin()`-роутов монорепо — статусы `401`/`403`, которые были в ручном паттерне, туда не
+переносились, это уже устоявшийся стиль приложения, не регрессия).
+
+`nx typecheck:tsgo dashboard`, `nx lint dashboard`, `nx test dashboard` — зелёные.
+
+⚠️ **`bun.lock` снова разошёлся с `package.json`** — как и в v1.27.6, дерево не чистое: параллельно
+шёл WIP по domwellbes/flora/forms (`@letar/file-scan`/`@letar/image-upload` ещё не в lock).
+`bun install --lockfile-only` не запускался — риск затащить в lock чужие незакоммиченные версии.
+Кто-то должен свести lock перед следующим общим деплоем
+(`.claude/docs/bun-lock-drift-unpushed-commits-blocks-all-deploys.md`).
+
 ## ✅ v1.27.6 — RBAC-аудит write/destructive роутов (2026-09-27)
 
 Продолжение v1.27.5: сессия, добавившая rate-limit, поставила на пять роутов `requireAuth()`
