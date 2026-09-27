@@ -1601,3 +1601,44 @@ push не выполнялся.
 Проверено на 60-секундном тестовом отрезке — GPU-путь рабочий, ~4 сек на 1 мин аудио. Расшифровки и
 клиентские hotword-словари по-прежнему не коммитятся (правило в самом `SKILL.md`). Работа
 небиллируемая (`time_discard`) — инфраструктура студии, не клиентский проект.
+
+## §83 — `compareSemver` продублирован в двух libs, вынесен в `@letar/semver-compare` (2026-09-27)
+
+Отдельная сессия-бэклог: `compareSemver` (сравнение `X.Y.Z` без диапазонов/пререлиза, нужен там,
+где GitHub Releases API не гарантирует порядок по убыванию версии) был дословно продублирован в
+`libs/github-releases/src/lib/fetch-releases.ts` (появился в предыдущей сессии, коммит
+`88d4777c4`) и в `libs/electron-monorepo-updater/src/lib/find-own-release.ts` (уже существовал
+раньше) — идентичный алгоритм и идентичный doc-комментарий, один файл уже ссылался на другой по
+пути в своём же комментарии.
+
+Извлечён в новую `libs/semver-compare` через `nx g @letar/generators:new-lib`. Обе библиотеки
+переключены на импорт из неё, добавлены в реальные `dependencies` (не только
+`implicitDependencies` — см. `.claude/rules/libs.md`), версии подняты (`github-releases`
+0.1.1→0.2.0, `electron-monorepo-updater` 0.2.3→0.3.0), у обеих CHANGELOG.md.
+
+**Транзитивная проводка путей.** Приложения, которые компилируют исходники этих двух libs
+напрямую (через `paths`, без `references`), сами не импортируют `@letar/semver-compare`, но их
+`tsc`/`tsgo` всё равно должен резолвить этот транзитивный импорт — иначе `TS2307` у всех разом
+при первом использовании (тот же класс ловушки, что уже описан в `libs.md` на примере
+`@letar/forms-core` Фазы 7.3). Дописаны `paths`/`references` в: `apps/animatrona-landing`,
+`apps/kami-key-the-landing` (через `@letar/github-releases`), `apps/animatrona/main`,
+`apps/label-printer-desktop/main`, `apps/kami-key-the` (через `@letar/electron-monorepo-updater`).
+Веб-бандлеры (webpack main-процессов) правки не потребовали — резолв идёт через существующую
+цепочку symlink'ов `node_modules`, без явных алиасов на `@letar/electron-monorepo-updater` тоже
+нет.
+
+Проверено: `nx test/lint/typecheck:tsgo` зелёные на всех трёх libs, `typecheck:tsgo` зелёный на
+всех пяти потребителей, `scripts/check-lib-subpath-paths.mjs` без расхождений.
+
+**Побочная находка:** шаблон `nx g @letar/generators:new-lib` (`README.md.template`) советует
+новым библиотекам вариант с `nx.implicitDependencies` как достаточный — расходится с реальным
+требованием `libs.md` (нужна настоящая `dependencies`-запись ради bun-симлинка). Заведён отдельный
+чип (`task_d1ca6156`) — не чинилось в этой сессии.
+
+**Замечено, не связано с задачей:** параллельная сессия (фикс `ES2017→ES2022` под BigInt в
+четырёх лендингах) закоммитила мои незакоммиченные правки `apps/animatrona-landing` и
+`apps/kami-key-the-landing` (tsconfig/package.json) вместе со своими — известный класс проблемы
+`git commit -- <pathspec>` берёт рабочее дерево, не индекс (`git-pathspec-commit-worktree-not-index.md`).
+Содержимое корректно, просто под чужим сообщением коммита — исправлять не стал. Та же сессия
+оставила дрейф `bun.lock` (версии `animatrona-landing`/`kami-key-the-landing`/`letar-landing`/
+`synth` не совпадают с их `package.json`) — вне зоны этой сессии, не трогал.
