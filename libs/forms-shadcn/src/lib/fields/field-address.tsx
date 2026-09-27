@@ -1,13 +1,14 @@
 'use client'
 
 import type { AddressSuggestion } from '@letar/forms-core/address'
-import { useDebounce } from '@letar/forms-react'
+import { useDebounce, useFieldPlaceholderString } from '@letar/forms-react'
 import { useStore } from '@tanstack/react-form'
 import type { ReactElement } from 'react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createField, FieldWrapper } from '../uikit/primitives'
 import { shadcnUIKit } from '../uikit/uikit-shadcn'
 import { useResolvedAddressProvider } from '../utils/use-address-provider'
+import { SHADCN_NO_PROVIDER_LOCALE } from './selection-strings'
 import type { AddressFieldProps, AddressValue } from './types'
 
 interface AddressFieldState {
@@ -16,6 +17,7 @@ interface AddressFieldState {
   suggestions: AddressSuggestion[]
   isLoading: boolean
   initializedRef: React.RefObject<boolean>
+  placeholder: string
 }
 
 /**
@@ -43,6 +45,7 @@ export const FieldAddress = createField<AddressFieldProps, AddressValue | string
     const justSelectedRef = useRef(false)
 
     const debouncedQuery = useDebounce(inputValue, debounceMs)
+    const placeholder = useFieldPlaceholderString('formFieldPlaceholder.address', SHADCN_NO_PROVIDER_LOCALE)
 
     // Инициализация `inputValue` из значения поля — на верхнем уровне `FieldComponent`, не
     // внутри render-prop `<form.Field>`. См. подробный комментарий в field-city.tsx: синхронный
@@ -119,12 +122,13 @@ export const FieldAddress = createField<AddressFieldProps, AddressValue | string
       suggestions,
       isLoading,
       initializedRef,
+      placeholder,
     }
   },
 
   render: ({ field, fullPath, resolved, hasError, errorMessage, componentProps, fieldState }): ReactElement => {
     const { valueOnly = false } = componentProps
-    const { inputValue, setInputValue, suggestions, isLoading } = fieldState
+    const { inputValue, setInputValue, suggestions, isLoading, placeholder } = fieldState
 
     const options = suggestions.map((s) => ({ label: s.label, value: s.value }))
 
@@ -149,7 +153,7 @@ export const FieldAddress = createField<AddressFieldProps, AddressValue | string
           onValueChange={handleValueChange}
           options={options}
           loading={isLoading}
-          placeholder={resolved.placeholder ?? 'Начните вводить адрес...'}
+          placeholder={resolved.placeholder ?? placeholder}
           disabled={resolved.disabled}
           data-field-name={fullPath}
         />

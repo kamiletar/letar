@@ -4,6 +4,18 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.56.0] - 2026-09-27
+
+### Добавлено
+
+- i18n placeholder-хардкодов пяти полей — через новый словарь `formFieldPlaceholder.*` (`@letar/forms-react` ≥ 0.22.0):
+  `Form.Field.Address` («Начните вводить адрес...» / «Start typing address...»), `Form.Field.City` («Введите город...» /
+  «Enter city»), `Form.Field.PasswordStrength` («Введите пароль» / «Enter password»), `Form.Field.RichText`
+  («Начните вводить...» / «Start typing...», атрибут `data-placeholder` пустого параграфа Tiptap), `Form.Field.Editable`
+  (фолбэк превью при пустом значении и без явного `placeholder`: «Нажмите для редактирования» / «Click to edit»). Без
+  `FormI18nProvider` остаётся русский (прежний хардкод скина); `locale="en"` даёт английские строки, как у
+  Chakra-версии; `t` приложения сильнее словаря.
+
 ## [0.55.0] - 2026-09-27
 
 ### Добавлено

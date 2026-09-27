@@ -1,13 +1,14 @@
 'use client'
 
 import type { AddressSuggestion } from '@letar/forms-core/address'
-import { useDebounce } from '@letar/forms-react'
+import { useDebounce, useFieldPlaceholderString } from '@letar/forms-react'
 import { useStore } from '@tanstack/react-form'
 import type { ReactElement } from 'react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createField, FieldWrapper } from '../uikit/primitives'
 import { shadcnUIKit } from '../uikit/uikit-shadcn'
 import { useResolvedAddressProvider } from '../utils/use-address-provider'
+import { SHADCN_NO_PROVIDER_LOCALE } from './selection-strings'
 import type { CityFieldProps } from './types'
 
 interface CityFieldState {
@@ -16,6 +17,7 @@ interface CityFieldState {
   suggestions: AddressSuggestion[]
   isLoading: boolean
   initializedRef: React.RefObject<boolean>
+  placeholder: string
 }
 
 /**
@@ -44,6 +46,7 @@ export const FieldCity = createField<CityFieldProps, string, CityFieldState>({
     const justSelectedRef = useRef(false)
 
     const debouncedQuery = useDebounce(inputValue, debounceMs)
+    const placeholder = useFieldPlaceholderString('formFieldPlaceholder.city', SHADCN_NO_PROVIDER_LOCALE)
 
     // Инициализация `inputValue` из значения поля (сценарий `defaultValues` при редактировании) —
     // хук вызывается здесь, на верхнем уровне `FieldComponent`, а не внутри render-prop
@@ -91,11 +94,11 @@ export const FieldCity = createField<CityFieldProps, string, CityFieldState>({
       }
     }, [debouncedQuery, fetchSuggestions])
 
-    return { inputValue, setInputValue, suggestions, isLoading, initializedRef }
+    return { inputValue, setInputValue, suggestions, isLoading, initializedRef, placeholder }
   },
 
   render: ({ field, fullPath, resolved, hasError, errorMessage, fieldState }): ReactElement => {
-    const { inputValue, setInputValue, suggestions, isLoading } = fieldState
+    const { inputValue, setInputValue, suggestions, isLoading, placeholder } = fieldState
 
     const options = suggestions.map((s) => ({ label: s.label, value: s.value }))
 
@@ -121,7 +124,7 @@ export const FieldCity = createField<CityFieldProps, string, CityFieldState>({
           onValueChange={handleValueChange}
           options={options}
           loading={isLoading}
-          placeholder={resolved.placeholder ?? 'Введите город...'}
+          placeholder={resolved.placeholder ?? placeholder}
           disabled={resolved.disabled}
           data-field-name={fullPath}
         />

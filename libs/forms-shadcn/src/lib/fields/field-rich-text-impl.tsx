@@ -1,5 +1,6 @@
 'use client'
 
+import { useFieldPlaceholderString } from '@letar/forms-react'
 import { cn } from '@letar/tailwind-utils'
 import TiptapLink from '@tiptap/extension-link'
 import Placeholder from '@tiptap/extension-placeholder'
@@ -10,6 +11,7 @@ import type { ReactElement } from 'react'
 import { useEffect, useMemo } from 'react'
 import { createField, FieldWrapper } from '../uikit/primitives'
 import { DEFAULT_TOOLBAR_BUTTONS, ICON_SIZE, TOOLBAR_CONFIG, type ToolbarButton } from './rich-text-toolbar-config'
+import { SHADCN_NO_PROVIDER_LOCALE } from './selection-strings'
 import type { RichTextFieldProps } from './types'
 
 /** Безопасный парсинг JSON — не роняет редактор на битом значении из БД */
@@ -55,6 +57,7 @@ function RichTextEditor({
   hasError,
   fieldName,
 }: RichTextEditorProps): ReactElement | null {
+  const builtinPlaceholder = useFieldPlaceholderString('formFieldPlaceholder.richText', SHADCN_NO_PROVIDER_LOCALE)
   const extensions = useMemo(
     () => [
       StarterKit,
@@ -63,9 +66,9 @@ function RichTextEditor({
         openOnClick: false,
         HTMLAttributes: { rel: 'noopener noreferrer', target: '_blank' },
       }),
-      Placeholder.configure({ placeholder: placeholder ?? 'Начните вводить текст...' }),
+      Placeholder.configure({ placeholder: placeholder ?? builtinPlaceholder }),
     ],
-    [placeholder],
+    [placeholder, builtinPlaceholder],
   )
 
   const editor = useEditor({

@@ -1,9 +1,11 @@
 'use client'
 
+import { useFieldPlaceholderString } from '@letar/forms-react'
 import { cn } from '@letar/tailwind-utils'
 import type { ReactElement } from 'react'
 import { useState } from 'react'
 import { createField, FieldWrapper } from '../uikit/primitives'
+import { SHADCN_NO_PROVIDER_LOCALE } from './selection-strings'
 import type { EditableFieldProps } from './types'
 
 const inputClass = cn(
@@ -23,18 +25,19 @@ const inputClass = cn(
 export const FieldEditable = createField<
   EditableFieldProps,
   string,
-  { isEditing: boolean; setIsEditing: (v: boolean) => void }
+  { isEditing: boolean; setIsEditing: (v: boolean) => void; placeholder: string }
 >({
   displayName: 'FieldEditable',
 
   useFieldState: (props) => {
     const [isEditing, setIsEditing] = useState(props.activationMode === 'none')
-    return { isEditing, setIsEditing }
+    const placeholder = useFieldPlaceholderString('formFieldPlaceholder.editable', SHADCN_NO_PROVIDER_LOCALE)
+    return { isEditing, setIsEditing, placeholder }
   },
 
   render: ({ field, fullPath, resolved, hasError, errorMessage, componentProps, fieldState }): ReactElement => {
     const { multiline = false, activationMode = 'click', submitOnBlur = true } = componentProps
-    const { isEditing, setIsEditing } = fieldState
+    const { isEditing, setIsEditing, placeholder } = fieldState
     const currentValue = (field.state.value as string) ?? ''
 
     const commit = () => {
@@ -56,7 +59,7 @@ export const FieldEditable = createField<
               !currentValue && 'text-muted-foreground',
             )}
           >
-            {currentValue || resolved.placeholder || 'Нажмите для редактирования'}
+            {currentValue || resolved.placeholder || placeholder}
           </button>
         </FieldWrapper>
       )

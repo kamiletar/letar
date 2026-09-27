@@ -1,10 +1,12 @@
 'use client'
 
+import { useFieldPlaceholderString } from '@letar/forms-react'
 import { cn } from '@letar/tailwind-utils'
 import { Check, Eye, EyeOff, X } from 'lucide-react'
 import { type ReactElement, useState } from 'react'
 import { createField, FieldWrapper } from '../uikit/primitives'
 import { shadcnUIKit } from '../uikit/uikit-shadcn'
+import { SHADCN_NO_PROVIDER_LOCALE } from './selection-strings'
 import type { PasswordRequirement, PasswordStrengthFieldProps } from './types'
 
 const DEFAULT_REQUIREMENTS: PasswordRequirement[] = ['minLength:8', 'uppercase', 'lowercase', 'number', 'special']
@@ -58,6 +60,7 @@ function getStrengthInfo(strength: number): { label: string; barClass: string; t
 interface PasswordStrengthFieldState {
   visible: boolean
   toggle: () => void
+  placeholder: string
 }
 
 /**
@@ -72,7 +75,8 @@ export const FieldPasswordStrength = createField<PasswordStrengthFieldProps, str
 
   useFieldState: (componentProps): PasswordStrengthFieldState => {
     const [visible, setVisible] = useState(componentProps.defaultVisible ?? false)
-    return { visible, toggle: () => setVisible((v) => !v) }
+    const placeholder = useFieldPlaceholderString('formFieldPlaceholder.passwordStrength', SHADCN_NO_PROVIDER_LOCALE)
+    return { visible, toggle: () => setVisible((v) => !v), placeholder }
   },
 
   render: ({ field, fullPath, resolved, hasError, errorMessage, componentProps, fieldState }): ReactElement => {
@@ -90,7 +94,7 @@ export const FieldPasswordStrength = createField<PasswordStrengthFieldProps, str
               value={value}
               onChange={(v) => field.handleChange(v)}
               onBlur={field.handleBlur}
-              placeholder={resolved.placeholder ?? 'Введите пароль'}
+              placeholder={resolved.placeholder ?? fieldState.placeholder}
               maxLength={componentProps.maxLength}
               autoComplete={componentProps.autoComplete ?? resolved.autocomplete}
               disabled={resolved.disabled}
