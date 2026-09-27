@@ -46,6 +46,7 @@ export { createLazyComponent, type LazyComponentImport } from './lib/lazy/create
 // Хуки и утилиты поля
 export { resolveAutoComplete } from './lib/field/autocomplete-map'
 export { useDeclarativeField } from './lib/field/base-field'
+export { useFieldLabelLookup } from './lib/field/field-labels'
 export { type FieldErrorsResult, formatFieldErrors, getFieldErrors, hasFieldErrors } from './lib/field/field-utils'
 export { createAsyncActionQuery, useAsyncActionQuery } from './lib/field/use-async-action-query'
 export { useAsyncFieldValidation } from './lib/field/use-async-field-validation'

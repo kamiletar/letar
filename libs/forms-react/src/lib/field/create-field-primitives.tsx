@@ -6,6 +6,7 @@ import { useStore } from '@tanstack/react-form'
 import { Component, type ErrorInfo, memo, type ReactElement, type ReactNode } from 'react'
 import { useDeclarativeFormOptional } from '../context/form-context'
 import type { AppFormApi, BaseFieldProps } from '../types'
+import { useRegisterFieldLabel } from './field-labels'
 import { formatFieldErrors, hasFieldErrors } from './field-utils'
 import type { ResolvedFieldProps } from './resolved-field-props'
 import { useAsyncFieldValidation } from './use-async-field-validation'
@@ -277,6 +278,9 @@ export function createFieldPrimitives(uikit: FieldPrimitivesUIKit): FieldPrimiti
         options: resolvedRest.options,
         autocomplete: resolvedRest.autocomplete,
       }
+
+      // Подпись видна зависимым полям: «Сначала выберите «Страна»» вместо имени пути
+      useRegisterFieldLabel(form, fullPath, resolved.label)
 
       // `@meta("form.props.<key>", value)` из schema.zmodel — факт о хранении данных
       // (minorUnitScale, currency и т.п.), не о месте рендера. Явный JSX-проп на компоненте
