@@ -1,6 +1,6 @@
 {
   "name": "kami-key-the",
-  "version": "1.9.31",
+  "version": "1.9.32",
   "private": true,
   "description": "Системная утилита для ввода типографских символов через AltGr",
   "main": "app/background.js",
