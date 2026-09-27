@@ -3,11 +3,16 @@ productName: Label Printer Desktop
 copyright: Copyright © 2025
 electronVersion: 43.3.0
 
-# Автообновление через GitHub Releases
+# Автообновление через GitHub Releases общего монорепо, тег `label-printer-desktop-v<semver>`.
+# Рантайм не использует этот блок напрямую: `main/services/updater.service.ts` находит свой
+# релиз через `pointFeedAtOwnRelease` (repo-wide `/releases/latest` принадлежит чужому
+# приложению). Публикация — только `--publish never` + `gh release create` с префиксованным
+# тегом, см. `.claude/docs/electron-monorepo-shared-releases.md`.
+# ⚠️ До 0.5.21 здесь стоял `owner: lena` — чужой аккаунт GitHub, репозитория не существовало.
 publish:
   - provider: github
-    owner: lena
-    repo: label-printer-desktop
+    owner: kamiletar
+    repo: letar
     releaseType: release
 
 directories:

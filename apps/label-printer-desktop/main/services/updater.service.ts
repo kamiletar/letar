@@ -3,15 +3,46 @@
  * Использует electron-updater для проверки и установки обновлений с GitHub Releases
  */
 
-import { installAndRelaunchViaScheduler } from '@letar/electron-monorepo-updater'
+import { installAndRelaunchViaScheduler, pointFeedAtOwnRelease } from '@letar/electron-monorepo-updater'
 import type { BrowserWindow } from 'electron'
-import { app, dialog, ipcMain } from 'electron'
+import { app, dialog, ipcMain, net } from 'electron'
 import type { UpdateDownloadedEvent, UpdateInfo } from 'electron-updater'
 import { autoUpdater } from 'electron-updater'
 import { getLogger } from '../utils/logger-helper'
 import { settingsService } from './settings.service'
 
 const APP_LABEL = 'LabelPrinterDesktop'
+
+// Релизы публикуются в общий монорепо с тегом `label-printer-desktop-v<semver>`.
+// До 0.5.21 `electron-builder.yml` указывал на `lena/label-printer-desktop` — чужой аккаунт
+// GitHub без такого репозитория, поэтому ни одна версия не могла обновиться сама
+const REPO_OWNER = 'kamiletar'
+const REPO_NAME = 'letar'
+const TAG_PREFIX = 'label-printer-desktop-v'
+
+/**
+ * Направить `electron-updater` на свой релиз в общем репозитории. Штатный GithubProvider взял бы
+ * repo-wide `/releases/latest` — это релиз любого приложения монорепо, не обязательно нашего.
+ * Возвращает `false`, если своего релиза нет — тогда `checkForUpdates()` вызывать не нужно.
+ */
+function pointFeed(): Promise<boolean> {
+  return pointFeedAtOwnRelease(autoUpdater, {
+    fetchFn: net.fetch,
+    owner: REPO_OWNER,
+    repo: REPO_NAME,
+    tagPrefix: TAG_PREFIX,
+    userAgent: 'LabelPrinterDesktop-Update-Client',
+    onNotFound: (message) => getLogger().warn(`[Updater] ${message}`),
+  })
+}
+
+/** Найти свой релиз и проверить обновление; `null` — своего релиза нет */
+async function checkForOwnUpdates() {
+  if (!(await pointFeed())) {
+    return null
+  }
+  return autoUpdater.checkForUpdates()
+}
 
 /**
  * Тихо ставит скачанное обновление и перезапускает приложение через `@letar/electron-monorepo-updater`.
@@ -170,11 +201,13 @@ export function initAutoUpdater(mainWindow: BrowserWindow | null): void {
         getLogger().info('[Updater] Auto-update disabled in settings, skipping check')
         return
       }
-      autoUpdater.checkForUpdates()
     } catch (_error) {
       getLogger().error('[Updater] Failed to check autoUpdate setting, checking anyway')
-      autoUpdater.checkForUpdates()
     }
+    checkForOwnUpdates().catch((error: unknown) => {
+      const message = error instanceof Error ? error.message : String(error)
+      getLogger().error(`[Updater] Check failed: ${message}`)
+    })
   }, 5000)
 }
 
@@ -198,7 +231,7 @@ export function registerUpdaterHandlers(): void {
     }
 
     try {
-      const result = await autoUpdater.checkForUpdates()
+      const result = await checkForOwnUpdates()
       return {
         success: true,
         updateAvailable: !!result?.updateInfo,

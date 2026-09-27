@@ -125,6 +125,16 @@ RAW TSPL, автопечать и защита от дубликатов) — п
       проверен живым циклом.** Найдено сессией-аудитом: оба вызова `quitAndInstall()` в
       `main/services/updater.service.ts` показывали бы мастер NSIS вместо тихой установки при
       `nsis.oneClick: false`. Живой тест обновления не проводился — нужен перед следующим релизом.
+- [x] **Публикация перенесена из `lena/label-printer-desktop` в `kamiletar/letar`** (2026-09-27,
+      v0.5.21). `lena` — чужой аккаунт GitHub, репозитория там не было: ни одна версия не
+      обновлялась сама, а владелец аккаунта мог бы выложить установленным копиям свой exe.
+      Тег `label-printer-desktop-v<semver>`, рантайм — `pointFeedAtOwnRelease`. Релиз — вручную,
+      как у kami-key-the: `nx build:win` → переименовать ассеты под дефисы из `latest.yml` →
+      `gh release create label-printer-desktop-vX.Y.Z <exe> <exe.blockmap> <latest.yml>`.
+      ⚠️ 0.5.20 и старше смотрят в `lena` — 0.5.21 заказчик ставит вручную, один раз.
+- [ ] CI-workflow релиза (`release-label-printer-desktop.yml` по образцу
+      `release-animatrona-folder-player.yml`, но с загрузкой `latest.yml` и `.blockmap` — эталон
+      их не грузит, для автообновления этого мало).
 
 ## Идея из соседнего приложения (2026-07-28)
 

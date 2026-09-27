@@ -47,7 +47,7 @@
           "npx webpack --config main/webpack.config.js",
           "node -e \"const fs=require('fs');const p='renderer/.next/standalone/node_modules/typescript';fs.existsSync(p)&&fs.rmSync(p,{recursive:true});console.log('Removed TypeScript from standalone (~15MB saved)')\"",
           "node scripts/fix-standalone-symlinks.js",
-          "npx electron-builder --win"
+          "npx electron-builder --win --publish never"
         ],
         "cwd": "apps/label-printer-desktop",
         "parallel": false
@@ -65,7 +65,7 @@
           "npx webpack --config main/webpack.config.js",
           "node -e \"const fs=require('fs');const p='renderer/.next/standalone/node_modules/typescript';fs.existsSync(p)&&fs.rmSync(p,{recursive:true});console.log('Removed TypeScript from standalone (~15MB saved)')\"",
           "node scripts/fix-standalone-symlinks.js",
-          "npx electron-builder --linux"
+          "npx electron-builder --linux --publish never"
         ],
         "cwd": "apps/label-printer-desktop",
         "parallel": false
