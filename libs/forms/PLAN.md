@@ -67,7 +67,7 @@
   (`onSubmit={async () => {}}` в ~32 файлах). Новый API пришлось бы держать в паритете с shadcn, Vue и Angular.
 - **Когда пересмотреть:** второй потребитель просит то же, либо `key` перестаёт помогать (например, теряется фокус).
 
-### [2026-09-26] Select/Combobox: кастомный рендер значения/опций + `onUpdate` с кнопкой `Form.Field.Select.EditButton` (от владельца)
+### ✅ [2026-09-26] Select/Combobox: кастомный рендер значения/опций + `onUpdate` с кнопкой `Form.Field.Select.EditButton` (от владельца)
 
 - **Запросил:** владелец (по опыту прежнего проекта: адрес доставки правился карандашом в модалке, без перехода
   на страницу; рендер по умолчанию библиотечный или свой, кнопка — слот). Развитие `onCreate` (2.17.0).
@@ -94,7 +94,10 @@
 - **Архитектура (2026-09-26):** развёрнутое описание обоих этапов для реализации — раздел
   [«Архитектура: кастомный рендер и слоты Select/Combobox»](#архитектура-кастомный-рендер-и-слоты-selectcombobox)
   ниже в этом файле (перед записью про миграцию `zenstack-form-plugin`).
-- **Статус:** делегировано `forms-dev` 2026-09-26.
+- **Статус:** ✅ закрыто. Этап А — forms 2.19.0 (`renderOption`/`renderValue`, типизированное `data`,
+  `OptionRenderState`/`SelectFieldOption`/`ComboboxFieldOption`). Этап Б — forms 2.20.0 (`onUpdate`,
+  слоты `Form.Field.Select.EditButton`/`.CreateButton`, F2-хоткей, i18n `formSelection.editOption`/
+  `.editHotkeyHint`). Оба — тред `forms-select-render-onupdate`.
 
 ### ✅ [2026-09-26] `createForm({ dirtyGuard })` — защита от потери данных по умолчанию (закрыт forms 2.18.0, от domwellbes-dev)
 
