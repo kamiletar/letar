@@ -4,6 +4,15 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.25.0] - 2026-09-27
+
+### Added
+
+- Два новых ключа словаря `formToolbar.*`: `formToolbar.linkAdd`/`formToolbar.linkRemove` — для
+  `LinkPopover` Chakra-скина (`libs/forms`), у которого подпись кнопки переключается по `isActive`
+  между «добавить»/«убрать», в отличие от остального тулбара с одной статичной подписью на кнопку.
+  shadcn-скин ссылку не спецкейсит (общий `formToolbar.link`), новые ключи не использует.
+
 ## [0.24.0] - 2026-09-27
 
 ### Added

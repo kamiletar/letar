@@ -14,6 +14,7 @@ import {
   Text,
   VStack,
 } from '@chakra-ui/react'
+import { useToolbarString } from '@letar/forms-react'
 import type { Editor } from '@tiptap/react'
 import { type ReactElement, useCallback, useRef, useState } from 'react'
 import { LuImage, LuUpload, LuX } from 'react-icons/lu'
@@ -57,6 +58,8 @@ export function ImagePopover({ editor, config, disabled }: ImagePopoverProps): R
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [isDragging, setIsDragging] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  // Без noProviderLocale: контракт Chakra-скина без FormI18nProvider — английский (см. field-rich-text-impl.tsx).
+  const insertImageLabel = useToolbarString('formToolbar.image')
 
   const maxSize = config.maxSize ?? 10 * 1024 * 1024 // 10MB by default
   const acceptTypes = config.acceptTypes ?? ['image/*']
@@ -187,7 +190,7 @@ export function ImagePopover({ editor, config, disabled }: ImagePopoverProps): R
     <Popover.Root open={isOpen} onOpenChange={(details) => setIsOpen(details.open)}>
       <Popover.Trigger asChild>
         <IconButton
-          aria-label="Insert image"
+          aria-label={insertImageLabel}
           size="sm"
           variant="ghost"
           onClick={() => setIsOpen(true)}

@@ -4,6 +4,19 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.35.0] - 2026-09-27
+
+### Added
+
+- `LinkPopover`/`ImagePopover` тулбара `Form.Field.RichText` (Chakra-скин) подключены к словарю
+  `formToolbar.*` (`@letar/forms-react` ≥ 0.25.0): `aria-label` кнопки link (переключается между
+  `formToolbar.linkAdd`/`formToolbar.linkRemove` по `isActive`) и кнопки image (`formToolbar.image`,
+  тот же ключ, что уже резолвился для остального тулбара). До этого обе кнопки — особый случай
+  рендера (`field-rich-text-impl.tsx` подменяет их на отдельные компоненты вместо обычной
+  `IconButton` из `TOOLBAR_CONFIG`) — оставались вне подключения словаря из 2.33.0/0.23.0:
+  `link-popover.tsx` смешивал английский и русский текст в одной строке (`'Remove ссылку'`), а
+  `image-popover.tsx` был захардкожен по-английски независимо от locale.
+
 ## [2.34.0] - 2026-09-27
 
 ### Added

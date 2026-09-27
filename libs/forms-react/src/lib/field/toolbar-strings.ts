@@ -17,6 +17,11 @@ import { useFormI18n } from '../i18n'
  *
  * `formToolbar.image` используется только Chakra-версией — вставка изображений с загрузкой на
  * сервер не портирована в shadcn (beta-упрощение, см. комментарий в `rich-text-toolbar-config.tsx`).
+ *
+ * `formToolbar.linkAdd`/`formToolbar.linkRemove` используются только Chakra-версией: `LinkPopover`
+ * рендерится вместо обычной кнопки из `TOOLBAR_CONFIG` и переключает подпись по `isActive` —
+ * shadcn-скин ссылку через `TOOLBAR_CONFIG.link.labelKey` (`formToolbar.link`), без разделения на
+ * состояния добавления/снятия.
  */
 export type ToolbarStringKey =
   | 'formToolbar.bold'
@@ -31,6 +36,8 @@ export type ToolbarStringKey =
   | 'formToolbar.orderedList'
   | 'formToolbar.blockquote'
   | 'formToolbar.link'
+  | 'formToolbar.linkAdd'
+  | 'formToolbar.linkRemove'
   | 'formToolbar.undo'
   | 'formToolbar.redo'
   | 'formToolbar.image'
@@ -48,6 +55,8 @@ const BUILTIN_TOOLBAR_STRINGS: Record<ToolbarStringKey, Record<string, string>> 
   'formToolbar.orderedList': { en: 'Ordered list', ru: 'Нумерованный список' },
   'formToolbar.blockquote': { en: 'Quote', ru: 'Цитата' },
   'formToolbar.link': { en: 'Link', ru: 'Ссылка' },
+  'formToolbar.linkAdd': { en: 'Add link', ru: 'Добавить ссылку' },
+  'formToolbar.linkRemove': { en: 'Remove link', ru: 'Убрать ссылку' },
   'formToolbar.undo': { en: 'Undo', ru: 'Отменить' },
   'formToolbar.redo': { en: 'Redo', ru: 'Повторить' },
   'formToolbar.image': { en: 'Insert image', ru: 'Вставить изображение' },

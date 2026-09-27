@@ -2020,6 +2020,29 @@ aria-label кнопки-глаза вместе с видимостью паро
 
 ---
 
+**7. i18n `LinkPopover`/`ImagePopover` тулбара `Form.Field.RichText` (Chakra-скин) — особый случай,
+не покрытый пунктом про `TOOLBAR_CONFIG`.** Кнопки link/image в Chakra-рендере (`field-rich-text-
+impl.tsx`) — не обычная `IconButton` из `TOOLBAR_CONFIG`, а отдельные компоненты `LinkPopover`/
+`ImagePopover` со своим Popover-содержимым (ввод URL, drag-n-drop загрузка изображения). Подключение
+словаря `formToolbar.*` в предыдущей сессии прошло мимо них: `link-popover.tsx` смешивал английский
+и русский в одной строке (`aria-label={isActive ? 'Remove ссылку' : 'Add ссылку'}`), `image-popover
+.tsx` был захардкожен `aria-label="Insert image"` независимо от locale.
+
+Image — переиспользован существующий ключ `formToolbar.image` (уже был в словаре под остальной
+тулбар, текст совпадал слово в слово: `'Insert image'`/`'Вставить изображение'`). Link — потребовал
+два новых ключа: `formToolbar.linkAdd`/`formToolbar.linkRemove`, потому что `LinkPopover`
+переключает подпись кнопки по `isActive` (добавить vs убрать ссылку) — единственная кнопка тулбара
+с таким поведением; общий `formToolbar.link` (для shadcn, где link не спецкейсится) остался как
+статичная подпись без разделения на состояния. Оба компонента резолвят через `useToolbarString` —
+хук безопасен здесь (не в цикле по кнопкам, как в основном тулбаре, а в теле отдельно смонтированного
+компонента), без `noProviderLocale` — тот же контракт Chakra-скина (английский без провайдера).
+
+- `forms-react` 0.24.0 → 0.25.0 (два новых ключа словаря `formToolbar.*` в `toolbar-strings.ts`),
+  `forms` 2.34.0 → 2.35.0.
+- Тесты: два новых `expect` в `toolbar-strings.spec.ts` (без провайдера en/ru) — счётчик тестов не
+  меняется, это ассерты внутри существующих `it`. `nx test forms-react` 227/227, `nx test forms`
+  1109/1109, lint/typecheck:tsgo без ошибок.
+
 ---
 
 **Последнее обновление:** 2026-09-27

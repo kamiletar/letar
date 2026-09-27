@@ -8,6 +8,8 @@ describe('resolveToolbarString', () => {
   it('без провайдера — английский (контракт Chakra-скина)', () => {
     expect(resolveToolbarString(null, 'formToolbar.bold')).toBe('Bold')
     expect(resolveToolbarString(null, 'formToolbar.image')).toBe('Insert image')
+    expect(resolveToolbarString(null, 'formToolbar.linkAdd')).toBe('Add link')
+    expect(resolveToolbarString(null, 'formToolbar.linkRemove')).toBe('Remove link')
   })
 
   it('без провайдера скин выбирает язык сам (shadcn — русский)', () => {
@@ -23,6 +25,8 @@ describe('resolveToolbarString', () => {
     expect(resolveToolbarString(null, 'formToolbar.orderedList', 'ru')).toBe('Нумерованный список')
     expect(resolveToolbarString(null, 'formToolbar.blockquote', 'ru')).toBe('Цитата')
     expect(resolveToolbarString(null, 'formToolbar.link', 'ru')).toBe('Ссылка')
+    expect(resolveToolbarString(null, 'formToolbar.linkAdd', 'ru')).toBe('Добавить ссылку')
+    expect(resolveToolbarString(null, 'formToolbar.linkRemove', 'ru')).toBe('Убрать ссылку')
     expect(resolveToolbarString(null, 'formToolbar.undo', 'ru')).toBe('Отменить')
     expect(resolveToolbarString(null, 'formToolbar.redo', 'ru')).toBe('Повторить')
     expect(resolveToolbarString(null, 'formToolbar.image', 'ru')).toBe('Вставить изображение')

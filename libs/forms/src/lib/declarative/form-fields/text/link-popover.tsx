@@ -1,6 +1,7 @@
 'use client'
 
 import { Box, Button, HStack, IconButton, Input, Popover, Portal, VStack } from '@chakra-ui/react'
+import { useToolbarString } from '@letar/forms-react'
 import type { Editor } from '@tiptap/react'
 import { type ReactElement, useCallback, useState } from 'react'
 import { LuLink, LuUnlink } from 'react-icons/lu'
@@ -23,6 +24,9 @@ export function LinkPopover({ editor, disabled }: LinkPopoverProps): ReactElemen
   const [isOpen, setIsOpen] = useState(false)
 
   const isActive = editor.isActive('link')
+  // Без noProviderLocale: контракт Chakra-скина без FormI18nProvider — английский (см. field-rich-text-impl.tsx).
+  const linkAddLabel = useToolbarString('formToolbar.linkAdd')
+  const linkRemoveLabel = useToolbarString('formToolbar.linkRemove')
 
   const handleOpen = useCallback(() => {
     if (isActive) {
@@ -69,7 +73,7 @@ export function LinkPopover({ editor, disabled }: LinkPopoverProps): ReactElemen
     <Popover.Root open={isOpen} onOpenChange={(details) => setIsOpen(details.open)}>
       <Popover.Trigger asChild>
         <IconButton
-          aria-label={isActive ? 'Remove ссылку' : 'Add ссылку'}
+          aria-label={isActive ? linkRemoveLabel : linkAddLabel}
           size="sm"
           variant={isActive ? 'solid' : 'ghost'}
           colorPalette={isActive ? 'brand' : undefined}
