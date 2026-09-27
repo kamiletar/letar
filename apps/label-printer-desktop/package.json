@@ -1,6 +1,6 @@
 {
   "name": "@letar/label-printer-desktop",
-  "version": "0.5.21",
+  "version": "0.5.22",
   "private": true,
   "description": "Electron desktop application for label printing with Честный знак support",
   "author": "Kami Letar",
@@ -23,7 +23,8 @@
     "@letar/forms": "workspace:*",
     "@letar/icon-generator": "workspace:*",
     "@letar/hooks": "workspace:*",
-    "@letar/label-printer-core": "workspace:*"
+    "@letar/label-printer-core": "workspace:*",
+    "serialport": "^13.0.0"
   },
   "devDependencies": {
     "electron": "44.4.5"
