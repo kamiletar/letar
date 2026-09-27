@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest'
-import { getOptionLabel, getOptionText, groupOptions, hasGroups, isNodeLabelWithoutText } from './group-options'
+import {
+  getOptionDescriptionText,
+  getOptionLabel,
+  getOptionSearchText,
+  getOptionText,
+  groupOptions,
+  hasGroups,
+  isNodeLabelWithoutText,
+} from './group-options'
 
 describe('groupOptions', () => {
   it('returns null when no option declares a group', () => {
@@ -113,5 +121,31 @@ describe('isNodeLabelWithoutText', () => {
     expect(isNodeLabelWithoutText({ label: 'строка' })).toBe(false)
     expect(isNodeLabelWithoutText({ label: 3 })).toBe(false)
     expect(isNodeLabelWithoutText({ label: null })).toBe(false)
+  })
+})
+
+describe('getOptionDescriptionText', () => {
+  it('строка и число — строкой, узел и отсутствие — пустая строка', () => {
+    expect(getOptionDescriptionText({ description: 'ИНН 7700' })).toBe('ИНН 7700')
+    expect(getOptionDescriptionText({ description: 12 })).toBe('12')
+    expect(getOptionDescriptionText({ description: { type: 'em' } })).toBe('')
+    expect(getOptionDescriptionText({})).toBe('')
+  })
+})
+
+describe('getOptionSearchText', () => {
+  it('без описания равен getOptionText', () => {
+    expect(getOptionSearchText({ label: 'Москва', value: 'msk' })).toBe('Москва')
+  })
+
+  it('со строковым описанием добавляет его через перевод строки', () => {
+    expect(getOptionSearchText({ label: 'Москва', description: 'ул. Тверская', value: 'msk' })).toBe(
+      'Москва\nул. Тверская',
+    )
+  })
+
+  it('textValue остаётся главным текстом, узел-описание не ищется', () => {
+    expect(getOptionSearchText({ label: { type: 'b' }, textValue: 'Москва', description: { type: 'i' }, value: 1 }))
+      .toBe('Москва')
   })
 })

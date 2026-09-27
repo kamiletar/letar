@@ -70,6 +70,8 @@ export function relationMeta(config: {
   labelField: string
   /** Field for value (default 'id') */
   valueField?: string
+  /** Field of the record for the second line of an option in the dropdown list (`option.description`) */
+  descriptionField?: string
   /** Component type for display (default 'select') */
   fieldType?: SelectionFieldType
   /** Additional props */
@@ -83,6 +85,7 @@ export function relationMeta(config: {
         model: config.model,
         labelField: config.labelField,
         valueField: config.valueField ?? 'id',
+        ...(config.descriptionField && { descriptionField: config.descriptionField }),
       },
       ...config.fieldProps,
     },

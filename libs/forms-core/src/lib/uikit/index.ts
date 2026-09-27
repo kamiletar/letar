@@ -32,7 +32,15 @@ export type {
 
 // Pure grouping logic for selection fields — the framework-free half of the old
 // `use-grouped-options` hook (its other half built an Ark UI collection, an adapter detail).
-export { getOptionLabel, getOptionText, groupOptions, hasGroups, isNodeLabelWithoutText } from './group-options'
+export {
+  getOptionDescriptionText,
+  getOptionLabel,
+  getOptionSearchText,
+  getOptionText,
+  groupOptions,
+  hasGroups,
+  isNodeLabelWithoutText,
+} from './group-options'
 export type { GroupableLike } from './group-options'
 
 // `onCreate` у Select/Combobox — создание записи справочника, не уходя из формы

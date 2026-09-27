@@ -87,6 +87,11 @@ export interface UIKitSelectOption<TNode = unknown, TData = unknown> {
    * caption by default and the duplicate check of `onCreate`. Needed when `label` is not a string.
    */
   textValue?: string
+  /**
+   * Second line of the item, drawn under the label in the dropdown list only (not in the trigger or the input).
+   * Not part of the item text: a node is fine; a string or a number is also matched by the search.
+   */
+  description?: TNode
   disabled?: boolean
   /** Group key for optgroup-style rendering. Options without it render flat, ungrouped. */
   group?: string

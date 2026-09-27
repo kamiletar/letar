@@ -83,6 +83,33 @@ export function getOptionText<TValue>(
 }
 
 /**
+ * Second line of an option (`description`) as a plain string: a string or a number, otherwise `''`.
+ * A node cannot be searched — the app puts the searchable text into the option's `textValue`/`description` string.
+ */
+export function getOptionDescriptionText(item: { description?: unknown }): string {
+  if (typeof item.description === 'string') {
+    return item.description
+  }
+  if (typeof item.description === 'number') {
+    return String(item.description)
+  }
+  return ''
+}
+
+/**
+ * Text the search matches an option against: `getOptionText` plus the string `description`. Both parts are
+ * separated by a line break, so a query cannot match across the boundary («Москва» + «ул. Тверская»). Without a
+ * string description it equals `getOptionText`.
+ */
+export function getOptionSearchText<TValue>(
+  item: { label?: unknown; textValue?: string; value: TValue; description?: unknown },
+): string {
+  const text = getOptionText(item)
+  const description = getOptionDescriptionText(item)
+  return description === '' ? text : `${text}\n${description}`
+}
+
+/**
  * Label of an option as a plain string, falling back to its value.
  *
  * Kept as a public name; delegates to `getOptionText`, so `textValue` (when set) wins. For data

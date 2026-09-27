@@ -4,6 +4,15 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.26.0] - 2026-09-27
+
+### Добавлено
+
+- `description` у `UIKitSelectOption` — вторая строка опции в выпадающем списке (не в триггере и не в поле ввода).
+- `getOptionDescriptionText(option)` — строковое описание (строка или число, иначе `''`) и `getOptionSearchText(option)` —
+  текст для поиска: `getOptionText`, перевод строки и описание. Экспорт из `@letar/forms-core/uikit`.
+- `relationMeta({ descriptionField })` пишет `fieldProps.relation.descriptionField`.
+
 ## [0.25.0] - 2026-09-27
 
 ### Added
