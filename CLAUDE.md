@@ -189,6 +189,7 @@
 - [nextjs-client-page-metadata-wrapper](/.claude/docs/nextjs-client-page-metadata-wrapper.md) `'use client'` + `metadata` — разбить на server-обёртку
 - [nextjs-metadata-inheritance-canonical-trap](/.claude/docs/nextjs-metadata-inheritance-canonical-trap.md) ⚠️ страница без своей `metadata` наследует canonical главной
 - [nextjs-favicon-icon-tsx-both-needed](/.claude/docs/nextjs-favicon-icon-tsx-both-needed.md) ⚠️ `icon.tsx` не заменяет `favicon.ico`
+- [nextjs-generatesitemaps-async-string-id](/.claude/docs/nextjs-generatesitemaps-async-string-id.md) ⚠️ с Next 16 `id` — `Promise<string>`, не синхронный `number`; пустой `<urlset/>` без ошибки
 - [nextjs-react19-hoistable-link-mutation-pitfall](/.claude/docs/nextjs-react19-hoistable-link-mutation-pitfall.md) ⚠️ мутация React-управляемого `<link>` нестабильна на проде
 - [nextjs-intl-setrequestlocale-ssg](/.claude/docs/nextjs-intl-setrequestlocale-ssg.md) ⚠️ нужен в каждом `page.tsx`, но сперва проверь Dynamic API выше
 - [nextjs-intl-matcher-metadata-routes](/.claude/docs/nextjs-intl-matcher-metadata-routes.md) ⚠️ matcher не ловит `icon`/`opengraph-image`, ручной аудит врёт
