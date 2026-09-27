@@ -340,7 +340,7 @@ bun scripts/check-all.mjs --only=route-table-regex-sync
 
 ⚠️ Процесс `letar` долгоживущий: `letar.ts` один раз делает `import()` для `libs/deploy-mcp/src/server.ts`,
 тот статически берёт `@letar/infra-config`, и массив `BUILD_ON_S1_APPS` вычисляется при этом импорте.
-Приложение, добавленное в список позже (пилоты §157 PLAN-INFRA-6.md), процесс не знал: `deploy_app`
+Приложение, добавленное в список позже (пилоты §157 PLAN-INFRA-7.md), процесс не знал: `deploy_app`
 отправлял сборку на s2 (прод-хост) вместо s1, без единой ошибки. Ловили руками — по времени старта
 процесса (`Get-CimInstance Win32_Process`) против времени коммита (пилоты 1–3, mandala 2026-09-22).
 
@@ -474,7 +474,7 @@ bun .claude/mcp/smoke-call.ts letar-db sql '{"db":"domwellbes","sql":"select 1"}
 
 `.claude/mcp/*.ts` — вне графа Nx (нет `project.json`), поэтому `nx run-many -t typecheck:tsgo`
 их не видит и никогда не видел. Найдено при миграции `@modelcontextprotocol/sdk` v1→v2
-(PLAN-INFRA-6.md §184): годами копившееся расхождение типов, скрытое тем, что смоук-проверка
+(PLAN-INFRA-7.md §184): годами копившееся расхождение типов, скрытое тем, что смоук-проверка
 выше гоняет реальный процесс и типы не проверяет — `letar.ts` возвращал `Promise<unknown>` из
 хендлеров `tools/call`/`resources/read`/`prompts/get` вместо строго типизированного
 `CallToolResult`/`ReadResourceResult`/`GetPromptResult`, `letar-db.ts` падал `TS2769` на

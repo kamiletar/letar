@@ -1,7 +1,7 @@
 # Паттерн «тонкий локальный MCP-сервер по stdio»
 
 ⚠️ **2026-09-16: обновлено под `@modelcontextprotocol/{server,client}` v2** (миграция с
-раскола `@modelcontextprotocol/sdk` v1, PLAN-INFRA-6.md §184). `server.tool()`/`.resource()`
+раскола `@modelcontextprotocol/sdk` v1, PLAN-INFRA-7.md §184). `server.tool()`/`.resource()`
 удалены из API — только `server.registerTool()`/`.registerResource()`. Ниже везде актуальные
 имена пакетов и метод; исторические детали конкретных версий (`1.29.0`, `4.6.2` и т.п.) в
 разделах про пины оставлены как иллюстрация механизма — актуальную версию смотри в

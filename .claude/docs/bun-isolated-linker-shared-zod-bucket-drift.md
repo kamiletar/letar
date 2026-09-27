@@ -5,7 +5,7 @@
 [root-pin-peer-drift.md](root-pin-peer-drift.md)).
 
 ⚠️ **Статус на конец того же дня (после полной миграции
-`@modelcontextprotocol/sdk` v1 → v2, см. §182 в PLAN-INFRA-6.md): override ниже
+`@modelcontextprotocol/sdk` v1 → v2, см. §182 в PLAN-INFRA-7.md): override ниже
 СНЯТ.** `@modelcontextprotocol/sdk` больше не существует в дереве зависимостей —
 раскол на `@modelcontextprotocol/{server,client,core}` v2 требует `zod ^4.2.0`,
 и корневой пин был поднят с `4.4.3` до `4.6.5` (та же версия, на которую и так
