@@ -758,7 +758,10 @@ export function extractModelInfo(model: DataModel, enumNames: Set<string>): Mode
 
     // Check if field should be excluded
     const isSystemField = systemFields.includes(field.name)
-    const isId = field.attributes.some((attr: DataFieldAttribute) => attr.decl?.$refText === 'id')
+    // Langium хранит `@id` с `@`; голое `'id'` — форма мок-фикстур (и не срабатывало на настоящем AST)
+    const isId = field.attributes.some(
+      (attr: DataFieldAttribute) => attr.decl?.$refText === '@id' || attr.decl?.$refText === 'id',
+    )
     // Langium хранит имя атрибута с `@` (`decl.$refText === '@relation'`); голое `relation` в настоящем AST не встречается.
     // Поле-связь исключается и тогда, когда на нём стоит `form.relation.*` (объект связи в форму не попадает — FK)
     const hasRelationAttr = field.attributes.some((attr: DataFieldAttribute) => attr.decl?.$refText === '@relation')

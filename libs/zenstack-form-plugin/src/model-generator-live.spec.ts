@@ -41,6 +41,12 @@ model Catalog {
   id    String @id
   title String
 }
+
+// Первичный ключ не с именем id: системным полем он не считается — исключает его только @id
+model Country {
+  code String @id
+  name String
+}
 `
 
 describe('отбор полей формы на настоящем разборе schema.zmodel', () => {
@@ -78,6 +84,13 @@ describe('отбор полей формы на настоящем разбор�
 
     expect(info.excludedFields).toContain('id')
     expect(info.fields.map((f) => f.name)).toEqual(['title'])
+  })
+
+  it('@id на поле с другим именем (`code`) исключает его из формы', async () => {
+    const info = await load(SCHEMA, 'Country')
+
+    expect(info.excludedFields).toEqual(['code'])
+    expect(info.fields.map((f) => f.name)).toEqual(['name'])
   })
 
   it('formRegistryUsages: ключ из импортированного фрагмента виден как «Модель.поле», файл-источник из AST недоступен', async () => {
