@@ -161,9 +161,15 @@ Prisma-клиент, `grandslamcup` — TS2339 на `webkitRequestFullscreen`) �
 
 - **Лендинги на `create-next-app`-конфиге** (`animatrona-landing`, `kami-key-the-landing`,
   `letar-landing`, `synth`) — не Nx-generated структура (`**/*.ts` вместо `src/**/*.ts`,
-  `moduleResolution: "bundler"`, `target: "ES2017"`). Уже 100% единообразны между собой
-  (проверено — 0 расхождений в `compilerOptions`), отдельный пресет для них не заводился,
-  так как группа маленькая (4 приложения) и не растёт.
+  `moduleResolution: "bundler"`). Уже 100% единообразны между собой (проверено — 0 расхождений в
+  `compilerOptions`), отдельный пресет для них не заводился, так как группа маленькая
+  (4 приложения) и не растёт.
+  ⚠️ **`target` был `ES2017` (наследие исходного скаффолда) до 2026-09-27** — `@letar/format-utils`
+  добавил в `formatKopecks` BigInt-литерал (`100n`), которому нужен `ES2020+` (`TS2737`);
+  `animatrona-landing` и `kami-key-the-landing` реально импортируют библиотеку и падали на
+  типчеке. Поднят до `ES2022` (как `tsconfig.base.json`) во всех четырёх — Next.js для рантайма
+  `target` из tsconfig не читает, только typecheck. `letar-landing` эту либу не использует,
+  правка там ради сохранения инварианта «0 расхождений».
 - **Electron-стек** (`animatrona`, `label-printer-desktop`, `poster-microtext-desktop`,
   `kami-key-the`) — `target: ES2022`, `module: ESNext`, свои `include` на `main/renderer/shared`
   и библиотеки. `kami-key-the` дополнительно отличается от трёх остальных (нет `renderer/`,
