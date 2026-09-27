@@ -64,6 +64,7 @@ export {
   type UseDataGridTableOptions,
   type UseDataGridTableResult,
 } from './lib/core/use-data-grid'
+export { useDebounce } from './lib/core/use-debounce'
 export {
   type DependentFieldState,
   type FieldDepsState,
@@ -87,11 +88,21 @@ export {
   type UsePinInputFieldResult,
 } from './lib/core/use-pin-input-field'
 export {
+  usePromiseSearch,
+  type UsePromiseSearchOptions,
+  type UsePromiseSearchResult,
+} from './lib/core/use-promise-search'
+export {
   type RichTextOutputFormat,
   useRichTextField,
   type UseRichTextFieldOptions,
   type UseRichTextFieldResult,
 } from './lib/core/use-rich-text-field'
+export {
+  useSelectedLoader,
+  type UseSelectedLoaderOptions,
+  type UseSelectedLoaderResult,
+} from './lib/core/use-selected-loader'
 export {
   DEFAULT_SETTLE_TIMEOUT,
   type RunSelectionActionOptions,

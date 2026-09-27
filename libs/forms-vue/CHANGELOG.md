@@ -1,5 +1,22 @@
 # Changelog @letar/forms-vue
 
+## 0.25.0 (2026-09-27)
+
+- **Feature:** Этап 4b паритета Select/Combobox (`forms-vue-angular-select-parity`) — три новых
+  framework-слой композабла в `core/`, инфраструктура для асинхронных источников опций `Field.Combobox`:
+  - `use-debounce.ts` (`useDebounce`) — Vue-эквивалент React `useDebounce`: источник и задержка —
+    геттеры (соглашение `forms-vue/core`, не `Ref` напрямую), первое значение отдаётся без задержки.
+  - `use-promise-search.ts` (`usePromiseSearch`) — промис-путь поиска: запрос на каждую строку
+    поиска, отмена прошлого запроса (`AbortController` + токен-идентичность — тот же приём, что
+    `use-options-loader.ts`), смена `depsKey` скрывает данные другого родителя немедленно, смена
+    строки поиска по тому же родителю — оставляет прежние на экране, пока не пришёл ответ.
+  - `use-selected-loader.ts` (`useSelectedLoader`) — догрузка записи выбранного значения, когда её
+    нет в текущей выдаче; кэш по `value` на экземпляр поля, `invalidate()` для инвалидации после
+    правки записи. Кэш **не** зависит от `deps`/`depsKey` (в отличие от `usePromiseSearch`) — та же
+    запись справочника видна одинаково для любого родителя.
+  - Framework-free контракты (`LoadOptionsFn`/`LoadSelectedFn`/`LoadContext`/`FieldDeps`) уже были в
+    `@letar/forms-core/uikit` — эти три композабла реализуют только Vue-обвязку.
+
 ## 0.24.0 (2026-09-27)
 
 - **Feature:** Этап 3f паритета Select/Combobox (`forms-vue-angular-select-parity`) — последний
