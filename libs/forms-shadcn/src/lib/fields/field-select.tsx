@@ -30,6 +30,7 @@ import { createField } from '../uikit/primitives'
 import { Select as SelectControl } from '../uikit/primitives/select'
 import { shadcnUIKit } from '../uikit/uikit-shadcn'
 import { SelectCreateButton, SelectEditButton } from './selection-slots'
+import { type SelectionStrings, useSelectionStrings } from './selection-strings'
 import type { SelectFieldProps, SelectOption } from './types'
 import {
   type DependentFieldUi,
@@ -44,13 +45,6 @@ import {
  * значение подменяется служебным токеном, наружу (в форму) всегда уходит настоящее `''`.
  */
 const EMPTY_OPTION_TOKEN = '__letar_empty_option__'
-
-/** Глагол пункта создания по умолчанию: «+ Добавить "<текст>"» (пустой поиск — `+ Добавить…`) */
-const CREATE_VERB_DEFAULT = 'Добавить'
-
-/** Подсказка и `aria-label` поля поиска в списке */
-const SEARCH_PLACEHOLDER = 'Поиск...'
-const SEARCH_ARIA_LABEL = 'Поиск по списку'
 
 interface NormalizedOption {
   label: React.ReactNode
@@ -86,6 +80,8 @@ interface SelectFieldState {
   searchQuery: string
   /** Своё сообщение пустого результата (`searchable.emptyMessage`) */
   emptyMessage: string | undefined
+  /** Встроенные строки скина (i18n): подписи кнопок, загрузка, пустой результат, отказ действия */
+  strings: SelectionStrings
 }
 
 /** Form.Field.Select — shadcn-скин. */
@@ -94,7 +90,8 @@ const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFie
   useFieldState: (componentProps, resolved, { form, fullPath }): SelectFieldState => {
     const showCreateItem = !!componentProps.onCreate && componentProps.createItem !== false
     const hasOnUpdate = !!componentProps.onUpdate
-    const createLabel = componentProps.createLabel ?? 'Добавить…'
+    const strings = useSelectionStrings()
+    const createLabel = componentProps.createLabel ?? `${strings.createVerb}…`
 
     // Зависимость от других полей формы (§18): значения родителей, блокировка, автоочистка по правке родителя.
     // Пустое значение при очистке — то же, что пишет собственная очистка поля (`dependent.emptyValue`)
@@ -202,8 +199,8 @@ const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFie
       searchable: componentProps.searchable as SelectSearchable<SelectOption> | undefined,
       options: mergedOptions,
       getText: componentProps.searchInDescription === false ? getOptionText : getOptionSearchText,
-      placeholder: SEARCH_PLACEHOLDER,
-      ariaLabel: SEARCH_ARIA_LABEL,
+      placeholder: strings.searchPlaceholder,
+      ariaLabel: strings.searchAria,
     })
     const searchQuery = searchState.search ? searchState.query.trim() : ''
     const searchSettings = typeof componentProps.searchable === 'object' ? componentProps.searchable : undefined
@@ -218,7 +215,7 @@ const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFie
 
     // «+ Добавить…»: пустой поиск — обычный пункт, текст без точного совпадения — «+ Добавить "<текст>"».
     // Служебный пункт идёт ПОСЛЕ фильтра и сам не фильтруется; в форму не попадает (перехватывается в onValueChange)
-    const createVerb = (componentProps.createLabel ?? CREATE_VERB_DEFAULT).replace(/\s*(…|\.{3})$/, '')
+    const createVerb = (componentProps.createLabel ?? strings.createVerb).replace(/\s*(…|\.{3})$/, '')
     const offerCreate = showCreateItem
       && (searchQuery === '' || shouldOfferCreate(searchQuery, mergedOptions.map((opt) => getOptionText(opt))))
     const normalizedOptions = useMemo((): NormalizedOption[] => {
@@ -248,6 +245,7 @@ const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFie
       search,
       searchQuery,
       emptyMessage: searchSettings?.emptyMessage,
+      strings,
     }
   },
   render: ({ field, fullPath, resolved, hasError, errorMessage, componentProps, fieldState }): ReactElement => {
@@ -338,11 +336,11 @@ const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFie
       runCreate,
       runEdit,
       strings: {
-        edit: 'Изменить',
-        editAria: (text: string) => `Изменить: ${text}`,
+        edit: fieldState.strings.edit,
+        editAria: (text: string) => `${fieldState.strings.edit}: ${text}`,
         create: createText,
         createWithSearch: (text: string) => `+ ${fieldState.createVerb} "${text}"`,
-        hotkeyHint: 'F2 — изменить запись',
+        hotkeyHint: fieldState.strings.hotkeyHint,
       },
     }
 
@@ -409,9 +407,10 @@ const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFie
               : undefined}
             listFooter={componentProps.listFooter}
             search={fieldState.search}
-            emptyContent={fieldState.emptyMessage}
+            emptyContent={fieldState.emptyMessage ?? fieldState.strings.empty}
             loading={fieldState.loading}
-            loadingMessage="Загрузка..."
+            loadingMessage={fieldState.strings.loading}
+            clearLabel={fieldState.strings.clear}
             controlRef={actions.controlRef}
             onEditHotkey={hasOnUpdate && interactive
               ? (key, scope) => {
@@ -421,7 +420,7 @@ const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFie
                 }
               }
               : undefined}
-            editHotkeyHint="F2 — изменить запись"
+            editHotkeyHint={fieldState.strings.hotkeyHint}
             label={resolved.label}
             placeholder={dependent.blocked ? dependent.blockedPlaceholder : resolved.placeholder}
             disabled={disabled}
@@ -436,7 +435,7 @@ const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFie
         <DependentLiveRegion ui={dependent} />
         {actions.settleFailure && (
           <p role="status" className="text-destructive mt-1 text-sm" data-settle-error="">
-            {`Не удалось сохранить «${actions.settleFailure.label}»`}
+            {fieldState.strings.settleError.replace('{label}', actions.settleFailure.label)}
           </p>
         )}
         <shadcnUIKit.FieldError

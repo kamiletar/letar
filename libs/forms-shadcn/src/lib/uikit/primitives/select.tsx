@@ -41,6 +41,7 @@ function RadixSelect(
     loading,
     loadingMessage,
     showUnknownValue,
+    clearLabel = 'Очистить',
     ...rest
   }: UIKitSelectProps<ReactNode> & ShadcnSelectExtraProps,
 ) {
@@ -137,7 +138,7 @@ function RadixSelect(
               <button
                 type="button"
                 data-slot="select-clear"
-                aria-label="Очистить"
+                aria-label={clearLabel}
                 className="text-muted-foreground hover:text-foreground focus-visible:ring-ring/50 rounded-sm outline-none focus-visible:ring-[3px]"
                 onClick={() => {
                   onValueChange(undefined)

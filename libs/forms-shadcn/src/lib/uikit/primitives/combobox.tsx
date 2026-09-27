@@ -10,6 +10,10 @@ import { type KeyboardEvent, type ReactNode, useCallback, useEffect, useId, useR
 export interface ShadcnComboboxExtraProps {
   /** Id элемента с подсказкой «Сначала выберите…» */
   'aria-describedby'?: string
+  /** `aria-label` кнопки очистки (локализует поле); по умолчанию «Очистить» */
+  clearLabel?: string
+  /** Текст индикатора загрузки в списке (локализует поле); по умолчанию «Загрузка...» */
+  loadingMessage?: string
 }
 
 /** Есть ли что рисовать второй строкой: пустая строка и пустой узел — нет */
@@ -37,6 +41,8 @@ export function Combobox(
     onOpenChange,
     placeholder,
     disabled,
+    clearLabel = 'Очистить',
+    loadingMessage = 'Загрузка...',
     ...rest
   }: UIKitComboboxProps<ReactNode> & ShadcnComboboxExtraProps,
 ) {
@@ -216,7 +222,7 @@ export function Combobox(
                 <button
                   type="button"
                   data-slot="combobox-clear"
-                  aria-label="Очистить"
+                  aria-label={clearLabel}
                   className="text-muted-foreground hover:text-foreground focus-visible:ring-ring/50 rounded-sm outline-none focus-visible:ring-[3px]"
                   onClick={() => {
                     onValueChange(undefined)
@@ -255,7 +261,7 @@ export function Combobox(
           )}
         >
           {loading && realOptionsCount === 0 && (
-            <div className="text-muted-foreground px-2 py-1.5 text-sm">Загрузка...</div>
+            <div className="text-muted-foreground px-2 py-1.5 text-sm">{loadingMessage}</div>
           )}
           {!loading && realOptionsCount === 0 && (
             <div className="text-muted-foreground px-2 py-1.5 text-sm">{emptyContent ?? 'Ничего не найдено'}</div>

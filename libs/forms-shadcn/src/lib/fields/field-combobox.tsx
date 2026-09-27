@@ -27,8 +27,9 @@ import { useStore } from '@tanstack/react-form'
 import type { ReactElement } from 'react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createField, FieldWrapper } from '../uikit/primitives'
-import { shadcnUIKit } from '../uikit/uikit-shadcn'
+import { Combobox as ComboboxControl } from '../uikit/primitives/combobox'
 import { SelectCreateButton, SelectEditButton } from './selection-slots'
+import { type SelectionStrings, useSelectionStrings } from './selection-strings'
 import type { ComboboxFieldProps, SelectOption } from './types'
 import {
   type DependentFieldUi,
@@ -47,9 +48,9 @@ interface NormalizedOption {
   data?: unknown
 }
 
-const CREATE_VERB_DEFAULT = 'Добавить'
-
 interface ComboboxFieldState {
+  /** Встроенные строки скина (i18n): подписи кнопок, загрузка, пустой результат, отказ действия */
+  strings: SelectionStrings
   inputValue: string
   setInputValue: (value: string) => void
   /** Значение, чья подпись сейчас в инпуте; запись значения самим полем помечается тут, чтобы не считаться внешней */
@@ -86,12 +87,13 @@ interface ComboboxFieldState {
  * навигации — не полный аналог Chakra-версии.
  *
  * Зависимость от других полей (`dependsOn`, §18): `deps` доходит в `loadOptions`/`loadSelected` (`ctx.deps`),
- * пока родители не готовы, поле заблокировано с подсказкой, смена родителя правкой очищает значение. `shadcnUIKit.Combobox` (Popover + список) сам ничего
+ * пока родители не готовы, поле заблокировано с подсказкой, смена родителя правкой очищает значение. примитив `Combobox` (Popover + список) сам ничего
  * не фильтрует — принимает уже готовые `options`.
  */
 const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldState>({
   displayName: 'FieldCombobox',
   useFieldState: (componentProps, resolved, { form, fullPath }): ComboboxFieldState => {
+    const strings = useSelectionStrings()
     const [inputValue, setInputValue] = useState('')
     const hasOnCreate = !!componentProps.onCreate && componentProps.createItem !== false
     const isPromise = !!componentProps.loadOptions
@@ -291,7 +293,7 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
     // Служебный пункт «+ Добавить "<поиск>"» — в конце списка; в форму не попадает
     const search = inputValue.trim()
     const createItemLabel = hasOnCreate && shouldOfferCreate(search, normalized.map((opt) => getOptionText(opt)))
-      ? `+ ${componentProps.createLabel ?? CREATE_VERB_DEFAULT} "${search}"`
+      ? `+ ${componentProps.createLabel ?? strings.createVerb} "${search}"`
       : ''
     const filteredOptions = useMemo(
       () =>
@@ -302,6 +304,7 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
     )
 
     return {
+      strings,
       inputValue,
       setInputValue,
       syncedValueRef,
@@ -334,7 +337,7 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
       : resolved
     const search = fieldState.inputValue.trim()
     const resolvedClearable = componentProps.clearable ?? !resolved.required
-    const createVerb = componentProps.createLabel ?? CREATE_VERB_DEFAULT
+    const createVerb = componentProps.createLabel ?? fieldState.strings.createVerb
 
     // Ошибки `onCreate`/`onUpdate` — забота приложения: всплывают как unhandled rejection, не глотаются
     const runCreate = () => {
@@ -427,11 +430,11 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
       runCreate,
       runEdit,
       strings: {
-        edit: 'Изменить',
-        editAria: (text: string) => `Изменить: ${text}`,
+        edit: fieldState.strings.edit,
+        editAria: (text: string) => `${fieldState.strings.edit}: ${text}`,
         create: `+ ${createVerb}…`,
         createWithSearch: (text: string) => `+ ${createVerb} "${text}"`,
-        hotkeyHint: 'F2 — изменить запись',
+        hotkeyHint: fieldState.strings.hotkeyHint,
       },
     }
 
@@ -441,7 +444,7 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
     return (
       <FieldWrapper resolved={wrapperResolved} hasError={hasError} errorMessage={errorMessage} fullPath={fullPath}>
         <SelectionActionsProvider value={actionsValue}>
-          <shadcnUIKit.Combobox
+          <ComboboxControl
             value={currentValue}
             inputValue={fieldState.inputValue}
             onInputChange={fieldState.setInputValue}
@@ -524,27 +527,29 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
                 }
               }
               : undefined}
-            editHotkeyHint="F2 — изменить запись"
+            editHotkeyHint={fieldState.strings.hotkeyHint}
             emptyContent={fieldState.loadError
               ? (
                 <span className="flex items-center gap-2">
-                  Не удалось загрузить
+                  {fieldState.strings.loadError}
                   <button
                     type="button"
                     className="text-foreground underline underline-offset-2"
                     onClick={fieldState.retryLoad}
                   >
-                    Повторить
+                    {fieldState.strings.retry}
                   </button>
                 </span>
               )
               : componentProps.renderEmpty
               ? componentProps.renderEmpty({ search })
-              : undefined}
+              : fieldState.strings.empty}
             controlRef={actions.controlRef}
             placeholder={(dependent.blocked ? dependent.blockedPlaceholder : undefined)
               ?? resolved.placeholder
-              ?? 'Поиск...'}
+              ?? fieldState.strings.searchPlaceholder}
+            clearLabel={fieldState.strings.clear}
+            loadingMessage={fieldState.strings.loading}
             disabled={disabled}
             data-field-name={fullPath}
             aria-describedby={describedBy}
@@ -553,7 +558,7 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
         <DependentLiveRegion ui={dependent} />
         {actions.settleFailure && (
           <p role="status" className="text-destructive mt-1 text-sm" data-settle-error="">
-            {`Не удалось сохранить «${actions.settleFailure.label}»`}
+            {fieldState.strings.settleError.replace('{label}', actions.settleFailure.label)}
           </p>
         )}
       </FieldWrapper>

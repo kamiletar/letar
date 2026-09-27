@@ -1,10 +1,10 @@
 'use client'
 
-import { resolveStaticFormText } from '@letar/forms-core/i18n'
 import { getFieldMeta, resolveEmptyValue } from '@letar/forms-core/schema'
 import type { DependentFieldProps, FieldDeps } from '@letar/forms-core/uikit'
 import {
   type DependentFieldState,
+  resolveSelectionString,
   useDeclarativeFormOptional,
   useDependentField,
   useFieldLabelLookup,
@@ -12,37 +12,19 @@ import {
 } from '@letar/forms-react'
 import { type ReactElement, type ReactNode, useCallback, useId } from 'react'
 
-/** Ключи i18n зависимых полей (общие с Chakra-скином: `formSelection.*`) */
-type DependentStringKey = 'formSelection.dependsOnHint' | 'formSelection.dependentCleared'
-
-/**
- * Встроенный словарь. Язык по умолчанию — русский, как у остальных строк shadcn-скина («Загрузка...», «Изменить»):
- * без `FormI18nProvider` поле не превращается в англоязычное посреди русской формы. Провайдер с `t` или `locale`
- * (ru/en) переопределяет — тем же порядком, что `resolveStaticFormText`.
- */
-const BUILTIN_STRINGS: Record<DependentStringKey, Record<string, string>> = {
-  'formSelection.dependsOnHint': { en: 'First select “{parent}”', ru: 'Сначала выберите «{parent}»' },
-  'formSelection.dependentCleared': {
-    en: '“{field}” cleared: “{parent}” changed',
-    ru: 'Поле «{field}» очищено: изменилось поле «{parent}»',
-  },
-}
-
-const DEFAULT_LOCALE = 'ru'
+import { SHADCN_NO_PROVIDER_LOCALE } from './selection-strings'
 
 function interpolate(template: string, params: Record<string, string>): string {
   return template.replace(/\{(\w+)\}/g, (_match, name: string) => params[name] ?? '')
 }
 
+/** Строка из общего словаря `formSelection.*` (`@letar/forms-react`) с подстановкой `{parent}`/`{field}` */
 function resolveString(
   i18n: ReturnType<typeof useFormI18n>,
-  key: DependentStringKey,
+  key: 'formSelection.dependsOnHint' | 'formSelection.dependentCleared',
   params: Record<string, string>,
 ): string {
-  const dict = BUILTIN_STRINGS[key]
-  const builtin = (locale: string) => interpolate(dict[locale.split('-')[0] ?? locale] ?? dict[DEFAULT_LOCALE]!, params)
-  // Без провайдера — русский (см. выше); с провайдером — общая лестница: перевод приложения → словарь по локали
-  return i18n ? resolveStaticFormText(i18n, key, builtin, params) : builtin(DEFAULT_LOCALE)
+  return interpolate(resolveSelectionString(i18n, key, SHADCN_NO_PROVIDER_LOCALE), params)
 }
 
 export interface DependentFieldUiOptions<TDeps extends FieldDeps> extends DependentFieldProps<TDeps> {
