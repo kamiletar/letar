@@ -2,6 +2,18 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [1.27.7] — 2026-09-27
+
+### Changed
+
+- Пять write/destructive роутов `/api/servers*` переведены с ручного инлайн-паттерна
+  (`getServerSession()` + проверка `session.user.role !== 'ADMIN'`) на `requireAdmin()` из
+  `auth-utils.ts`: `POST /api/servers`, `PATCH`/`DELETE /api/servers/[id]`,
+  `POST /api/servers/[id]/apps`, `PATCH`/`DELETE /api/servers/[id]/apps/[appId]`,
+  `POST /api/servers/[id]/apps/[appId]/deploy`. Поведение не менялось — везде и раньше требовался
+  ADMIN. Заодно GET-хендлеры этих же файлов (требуют только сессию) переведены на `requireAuth()`
+  для единообразия внутри файла.
+
 ## [1.27.6] — 2026-09-27
 
 ### Fixed

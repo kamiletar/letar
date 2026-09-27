@@ -5,7 +5,7 @@
  */
 
 import { checkHostOpsRateLimit, tooManyRequestsResponse } from '@/lib/api-rate-limit'
-import { getServerSession } from '@/lib/auth'
+import { requireAdmin } from '@/lib/auth-utils'
 import { getEnhancedPrisma } from '@/lib/db'
 import { findContainerByName } from '@/lib/server-client'
 import { getClientByServerId } from '@/lib/server-client/get-client-by-id'
@@ -23,22 +23,14 @@ type Params = Promise<{ id: string; appId: string }>
 export async function POST(_request: Request, { params }: { params: Params }) {
   try {
     const { id, appId } = await params
-    const session = await getServerSession()
+    const user = await requireAdmin()
 
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    if (session.user.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
-
-    const rateLimit = checkHostOpsRateLimit(`app-deploy:${session.user.id}`)
+    const rateLimit = checkHostOpsRateLimit(`app-deploy:${user.id}`)
     if (!rateLimit.allowed) {
       return tooManyRequestsResponse(rateLimit.retryAfter)
     }
 
-    const db = getEnhancedPrisma(session.user)
+    const db = getEnhancedPrisma(user)
 
     // Получаем приложение с информацией о сервере
     const app = await db.deployedApp.findFirst({

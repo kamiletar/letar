@@ -3,7 +3,7 @@
  * Получение списка серверов для мониторинга
  */
 
-import { getServerSession } from '@/lib/auth'
+import { requireAdmin, requireAuth } from '@/lib/auth-utils'
 import { getEnhancedPrisma } from '@/lib/db'
 import { NextResponse } from 'next/server'
 
@@ -12,13 +12,9 @@ export const revalidate = 0
 
 export async function GET() {
   try {
-    const session = await getServerSession()
+    const user = await requireAuth()
 
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const db = getEnhancedPrisma(session.user)
+    const db = getEnhancedPrisma(user)
 
     const servers = await db.server.findMany({
       where: { isActive: true },
@@ -64,15 +60,7 @@ export async function GET() {
  */
 export async function POST(request: Request) {
   try {
-    const session = await getServerSession()
-
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    if (session.user.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
+    const user = await requireAdmin()
 
     const body = await request.json()
     const { name, displayName, host, port, isLocal, agentToken, npmUrl, npmEmail, npmPassword } = body
@@ -81,7 +69,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
-    const db = getEnhancedPrisma(session.user)
+    const db = getEnhancedPrisma(user)
 
     const server = await db.server.create({
       data: {

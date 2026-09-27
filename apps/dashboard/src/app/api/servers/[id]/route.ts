@@ -4,7 +4,7 @@
  * DELETE — удаление сервера
  */
 
-import { getServerSession } from '@/lib/auth'
+import { requireAdmin, requireAuth } from '@/lib/auth-utils'
 import { getEnhancedPrisma } from '@/lib/db'
 import { NextResponse } from 'next/server'
 
@@ -19,20 +19,12 @@ type Params = Promise<{ id: string }>
 export async function PATCH(request: Request, { params }: { params: Params }) {
   try {
     const { id } = await params
-    const session = await getServerSession()
-
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    if (session.user.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
+    const user = await requireAdmin()
 
     const body = await request.json()
     const { name, displayName, host, port, isActive, agentToken, npmUrl, npmEmail, npmPassword } = body
 
-    const db = getEnhancedPrisma(session.user)
+    const db = getEnhancedPrisma(user)
 
     // Проверяем что сервер существует
     const existing = await db.server.findUnique({ where: { id } })
@@ -80,13 +72,9 @@ export async function PATCH(request: Request, { params }: { params: Params }) {
 export async function GET(_request: Request, { params }: { params: Params }) {
   try {
     const { id } = await params
-    const session = await getServerSession()
+    const user = await requireAuth()
 
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const db = getEnhancedPrisma(session.user)
+    const db = getEnhancedPrisma(user)
 
     const server = await db.server.findUnique({
       where: { id },
@@ -154,17 +142,9 @@ export async function GET(_request: Request, { params }: { params: Params }) {
 export async function DELETE(_request: Request, { params }: { params: Params }) {
   try {
     const { id } = await params
-    const session = await getServerSession()
+    const user = await requireAdmin()
 
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    if (session.user.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
-
-    const db = getEnhancedPrisma(session.user)
+    const db = getEnhancedPrisma(user)
 
     // Проверяем что сервер существует
     const existing = await db.server.findUnique({ where: { id } })

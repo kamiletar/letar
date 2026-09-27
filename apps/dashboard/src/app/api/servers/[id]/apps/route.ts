@@ -5,7 +5,7 @@
  */
 
 import type { AppType } from '@/generated/prisma/client'
-import { getServerSession } from '@/lib/auth'
+import { requireAdmin, requireAuth } from '@/lib/auth-utils'
 import { getEnhancedPrisma } from '@/lib/db'
 import { NextResponse } from 'next/server'
 import { z } from 'zod/v4'
@@ -35,13 +35,9 @@ const createAppSchema = z
 export async function GET(_request: Request, { params }: { params: Params }) {
   try {
     const { id } = await params
-    const session = await getServerSession()
+    const user = await requireAuth()
 
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const db = getEnhancedPrisma(session.user)
+    const db = getEnhancedPrisma(user)
 
     // Проверяем что сервер существует
     const server = await db.server.findUnique({
@@ -85,15 +81,7 @@ export async function GET(_request: Request, { params }: { params: Params }) {
 export async function POST(request: Request, { params }: { params: Params }) {
   try {
     const { id } = await params
-    const session = await getServerSession()
-
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    if (session.user.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
+    const user = await requireAdmin()
 
     const body = await request.json()
     const parsed = createAppSchema.safeParse(body)
@@ -104,7 +92,7 @@ export async function POST(request: Request, { params }: { params: Params }) {
 
     const { name, displayName, containerName, port, type, imageName } = parsed.data
 
-    const db = getEnhancedPrisma(session.user)
+    const db = getEnhancedPrisma(user)
 
     // Проверяем что сервер существует
     const server = await db.server.findUnique({

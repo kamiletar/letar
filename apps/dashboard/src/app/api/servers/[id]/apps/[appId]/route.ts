@@ -6,7 +6,7 @@
  */
 
 import type { AppType } from '@/generated/prisma/client'
-import { getServerSession } from '@/lib/auth'
+import { requireAdmin, requireAuth } from '@/lib/auth-utils'
 import { getEnhancedPrisma } from '@/lib/db'
 import { NextResponse } from 'next/server'
 import { z } from 'zod/v4'
@@ -36,13 +36,9 @@ const updateAppSchema = z
 export async function GET(_request: Request, { params }: { params: Params }) {
   try {
     const { id, appId } = await params
-    const session = await getServerSession()
+    const user = await requireAuth()
 
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const db = getEnhancedPrisma(session.user)
+    const db = getEnhancedPrisma(user)
 
     const app = await db.deployedApp.findFirst({
       where: { id: appId, serverId: id },
@@ -76,15 +72,7 @@ export async function GET(_request: Request, { params }: { params: Params }) {
 export async function PATCH(request: Request, { params }: { params: Params }) {
   try {
     const { id, appId } = await params
-    const session = await getServerSession()
-
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    if (session.user.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
+    const user = await requireAdmin()
 
     const body = await request.json()
     const parsed = updateAppSchema.safeParse(body)
@@ -94,7 +82,7 @@ export async function PATCH(request: Request, { params }: { params: Params }) {
     }
 
     const data = parsed.data
-    const db = getEnhancedPrisma(session.user)
+    const db = getEnhancedPrisma(user)
 
     // Проверяем что приложение существует
     const existing = await db.deployedApp.findFirst({
@@ -142,17 +130,9 @@ export async function PATCH(request: Request, { params }: { params: Params }) {
 export async function DELETE(_request: Request, { params }: { params: Params }) {
   try {
     const { id, appId } = await params
-    const session = await getServerSession()
+    const user = await requireAdmin()
 
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    if (session.user.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
-
-    const db = getEnhancedPrisma(session.user)
+    const db = getEnhancedPrisma(user)
 
     // Проверяем что приложение существует
     const existing = await db.deployedApp.findFirst({
