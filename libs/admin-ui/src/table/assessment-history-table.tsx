@@ -73,28 +73,30 @@ export function AssessmentHistoryTable(
           {rows.length === 0
             ? <Text fontSize="sm" color="fg.muted">{emptyHistoryLabel}</Text>
             : (
-              <Table.Root size="sm">
-                <Table.Header>
-                  <Table.Row>
-                    <Table.ColumnHeader>Дата</Table.ColumnHeader>
-                    <Table.ColumnHeader>Результат</Table.ColumnHeader>
-                    <Table.ColumnHeader>{extraColumnLabel}</Table.ColumnHeader>
-                    <Table.ColumnHeader>Причины</Table.ColumnHeader>
-                  </Table.Row>
-                </Table.Header>
-                <Table.Body>
-                  {rows.map((row) => (
-                    <Table.Row key={row.id}>
-                      <Table.Cell fontSize="sm">{new Date(row.createdAt).toLocaleString('ru-RU')}</Table.Cell>
-                      <Table.Cell>
-                        <Badge colorPalette={statusPalette[row.status] ?? 'gray'}>{row.statusLabel}</Badge>
-                      </Table.Cell>
-                      <Table.Cell fontSize="sm">{row.extraColumnValue}</Table.Cell>
-                      <Table.Cell fontSize="sm">{row.reasons.length === 0 ? '—' : row.reasons.join('; ')}</Table.Cell>
+              <Table.ScrollArea>
+                <Table.Root size="sm">
+                  <Table.Header>
+                    <Table.Row>
+                      <Table.ColumnHeader>Дата</Table.ColumnHeader>
+                      <Table.ColumnHeader>Результат</Table.ColumnHeader>
+                      <Table.ColumnHeader>{extraColumnLabel}</Table.ColumnHeader>
+                      <Table.ColumnHeader>Причины</Table.ColumnHeader>
                     </Table.Row>
-                  ))}
-                </Table.Body>
-              </Table.Root>
+                  </Table.Header>
+                  <Table.Body>
+                    {rows.map((row) => (
+                      <Table.Row key={row.id}>
+                        <Table.Cell fontSize="sm">{new Date(row.createdAt).toLocaleString('ru-RU')}</Table.Cell>
+                        <Table.Cell>
+                          <Badge colorPalette={statusPalette[row.status] ?? 'gray'}>{row.statusLabel}</Badge>
+                        </Table.Cell>
+                        <Table.Cell fontSize="sm">{row.extraColumnValue}</Table.Cell>
+                        <Table.Cell fontSize="sm">{row.reasons.length === 0 ? '—' : row.reasons.join('; ')}</Table.Cell>
+                      </Table.Row>
+                    ))}
+                  </Table.Body>
+                </Table.Root>
+              </Table.ScrollArea>
             )}
 
           {actions && (
