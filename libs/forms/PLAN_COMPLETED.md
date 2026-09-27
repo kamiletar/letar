@@ -1853,7 +1853,7 @@ SSR Suspense/rAF-баг (см. запись «Баг: `Form.Field.TableEditor`/`
 `exportFormat`). Рантайм-привязка была верной, ломался только typecheck потребителей
 (`form-develop-app`). Заменён на прямую ссылку на `SignatureFieldProps`.
 
-### Пакет №5 координатора: подпись родителя (Chakra), i18n строк shadcn Select/Combobox, e2e-разведка (2026-09-27)
+### Пакет №5 координатора: подпись родителя (Chakra), i18n строк shadcn Select/Combobox/Autocomplete/Signature, e2e-разведка (2026-09-27)
 
 **1. Chakra — подпись родителя в подсказке зависимого поля.** `use-dependent-select-field.ts`
 брал только `ui.title` схемы; при пустом `ui.title` подсказка называла родителя по имени пути
@@ -1897,6 +1897,38 @@ Chakra) перенесён в `@letar/forms-react` (`lib/selection/selection-str
 публичном репо, исключение `nx-e2e-implicit-deps-public-repo-private-app-exception.md` тут не
 применяется). Локально `bunx playwright test`: 39/39 (13 сценариев × 3 браузера). Зафиксировано в
 `PLAN.md` §17.12 — подключение к staging возможно только вместе с деплоем демо, решение владельца.
+
+**4. i18n `Form.Field.Autocomplete`/`Form.Field.Signature` (shadcn) — тот же приём, что у Select/Combobox.**
+`field-autocomplete.tsx` хардкодил placeholder «Начните вводить...», хотя ключ
+`formSelection.autocomplete.placeholder` в общем словаре уже существовал — просто не был подключён;
+теперь через `useSelectionStrings()` (новое поле `autocompletePlaceholder`). `field-signature.tsx`
+хардкодил всё: подписи вкладок «Рисовать»/«Ввести текст», placeholder canvas и typed-инпута,
+`aria-label` области подписи, подпись кнопки очистки.
+
+Развилка (решена самостоятельно, координатор не в курсе): новые понятия Signature (вкладки,
+typed-placeholder, aria-label) не про выбор — заводить их в `selection-strings.ts` было бы не по
+смыслу. Заведён отдельный словарь `formSignature.*` в `@letar/forms-react`
+(`lib/field/signature-strings.ts`), по образцу `selection-strings.ts`; кнопка очистки переиспользует
+уже существующий `formSelection.clear`. Chakra-версия поля (`libs/forms`) ведёт свой словарь
+`formField.signature.*` локально (`field-default-strings.ts`, не расшарен с `forms-react`) — общего
+рантайма между Chakra и остальными скинами для несписочных полей нет, поэтому ключ `formSignature.*`
+намеренно другой, чтобы одноимённый перевод приложения не значил разное в двух пакетах.
+Английские значения при этом совпадают с Chakra (`Sign here`, `Draw`, `Type`, `Type your name...`,
+`Signature pad`) — русский текст placeholder оставлен как был в shadcn («Подпишите здесь»), не как
+у Chakra («Распишитесь здесь»), чтобы не менять устоявшийся текст без причины.
+
+- `forms-react` 0.20.0 → 0.21.0 (новый экспорт `resolveSignatureString`/`useSignatureString`/
+  `SignatureStringKey`), `forms-shadcn` 0.54.0 → 0.55.0.
+- Тесты: `signature-strings.spec.ts` в forms-react (4), `field-signature-i18n.spec.tsx` (5) и
+  расширенный `field-selection-i18n.spec.tsx` (+3, Autocomplete) в forms-shadcn. `nx test
+  forms-react` 215/215, `nx test forms-shadcn` 443/443, lint/typecheck:tsgo без ошибок.
+- Коммиты: `0c7628925` (forms-react), `ba8afd37b` (forms-shadcn).
+- **Побочная находка (не входила в задачу, заведена отдельным чипом на новую сессию):** ещё 5
+  полей shadcn-скина хардкодят placeholder тем же способом, хотя у Chakra-версии для них уже есть
+  локализация через `formField.*` (`libs/forms/.../field-default-strings.ts`) — `field-address.tsx:152`
+  («Начните вводить адрес...»), `field-city.tsx:124` («Введите город...»), `field-password-strength.tsx:93`
+  («Введите пароль»), `field-rich-text-impl.tsx:66` («Начните вводить текст...»), `field-editable.tsx`
+  (плейсхолдер компонента). Их можно локализовать тем же приёмом, что Autocomplete/Signature здесь.
 
 ---
 
