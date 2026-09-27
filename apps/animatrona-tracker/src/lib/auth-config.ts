@@ -1,3 +1,4 @@
+import { withCredentialAccountIssuer } from '@letar/auth/server'
 import { betterAuth } from 'better-auth'
 import { prismaAdapter } from 'better-auth/adapters/prisma'
 import { nextCookies } from 'better-auth/next-js'
@@ -16,6 +17,8 @@ import { prismaAuth } from './prisma'
  * - Session-based auth с cookie caching
  */
 export const auth = betterAuth({
+  // credential-аккаунт без issuer (сброс пароля) → local:credential; см. better-auth-1.7-account-issuer-field.md
+  databaseHooks: withCredentialAccountIssuer(),
   // Явное указание secret и baseURL
   secret: process.env.BETTER_AUTH_SECRET,
   baseURL: process.env.BETTER_AUTH_URL,
