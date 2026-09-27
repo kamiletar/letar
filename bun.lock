@@ -743,7 +743,7 @@
     },
     "apps/flora": {
       "name": "@letar/flora",
-      "version": "0.3.11",
+      "version": "0.3.12",
       "dependencies": {
         "@letar/demo-protection": "workspace:*",
         "@letar/env-load": "workspace:*",
@@ -1429,7 +1429,7 @@
     },
     "libs/forms-vue": {
       "name": "@letar/forms-vue",
-      "version": "0.21.0",
+      "version": "0.22.0",
       "dependencies": {
         "@floating-ui/dom": "^1.8.0",
         "@letar/forms-core": "workspace:*",
