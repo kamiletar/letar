@@ -96,7 +96,7 @@ export function ImagePopover({ editor, config, disabled }: ImagePopoverProps): R
       // Проверка sizeа
       if (file.size > maxSize) {
         const maxSizeMB = (maxSize / 1024 / 1024).toFixed(0)
-        setErrorMessage(`Size fileа не must превышать ${maxSizeMB}MB`)
+        setErrorMessage(`File size must not exceed ${maxSizeMB}MB`)
         setUploadState('error')
         return
       }

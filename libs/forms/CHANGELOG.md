@@ -4,6 +4,17 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.35.1] - 2026-09-27
+
+### Fixed
+
+- `ImagePopover` (`image-popover.tsx`, `handleUpload`) — сообщение об ошибке превышения размера
+  файла было грамматически битым (`` `Size fileа не must превышать ${maxSizeMB}MB` `` — смесь
+  английских слов с русскими окончаниями и обратным порядком). Заменено на
+  `` `File size must not exceed ${maxSizeMB}MB` `` — at parity с остальными хардкоженными
+  строками файла (`'File must be an image'`, `'Upload error'` и т.д.), которые пока не подключены
+  к словарю `formToolbar.*` (см. 2.35.0 — из словаря у `ImagePopover` только `aria-label` кнопки).
+
 ## [2.35.0] - 2026-09-27
 
 ### Added
