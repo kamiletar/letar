@@ -41,7 +41,7 @@ export interface BuildRelaunchBatScriptOptions {
   debugLogPath: string
   /** Куда перенаправить stdout/stderr перезапущенного приложения */
   appOutputLogPath: string
-  /** Аргументы инсталлятора после пути к нему, например `['--updated', '/S']` для тихой NSIS-установки */
+  /** Аргументы инсталлятора после пути к нему, например `['--updated', '/S']`. Вставляются без кавычек */
   installerArgs: string[]
 }
 
@@ -51,7 +51,8 @@ export interface BuildRelaunchBatScriptOptions {
  */
 export function buildRelaunchBatScript(options: BuildRelaunchBatScriptOptions): string {
   const { installerPath, exePath, pid, debugLogPath, appOutputLogPath, installerArgs } = options
-  const installerCommand = [installerPath, ...installerArgs].map((part) => `"${part}"`).join(' ')
+  // Аргументы — как есть, без кавычек: NSIS узнаёт только голый `/S`, на `"/S"` показывает мастер
+  const installerCommand = [`"${installerPath}"`, ...installerArgs].join(' ')
   const log = (text: string): string => `echo [%date% %time%] ${text} >> "${debugLogPath}"`
   // Внутри блоков `( ... )` `%var%` раскрывается при разборе всего блока — там нужны `!var!`
   const logInBlock = (text: string): string => `echo [!date! !time!] ${text} >> "${debugLogPath}"`
