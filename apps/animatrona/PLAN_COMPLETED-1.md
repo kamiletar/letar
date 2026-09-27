@@ -885,3 +885,51 @@ electron-monorepo-updater,animatrona-folder-player` — зелёный, кром
 по пути пуст). Удалён целиком. Актуальная схема релиза не нуждается в nx-таргете — тег
 `animatrona-v<semver>` пушится вручную, дальше работает `.github/workflows/release-animatrona.yml`
 (см. `.claude/docs/electron-monorepo-shared-releases.md`).
+
+## Релиз 0.57.0 — первая публикация animatrona под новой схемой + фиксы автообновления (2026-09-27)
+
+Задача пришла с готовыми фиксами `@letar/electron-monorepo-updater` 0.2.1–0.2.3 (multi-range 501,
+кавычки у `/S`, окно `cmd` — все три найдены и проверены живым циклом на `kami-key-the`).
+Требовалось: проверить, что `apps/animatrona/main/updater.ts` их подхватит без своих
+переопределений, выпустить релиз, по возможности проверить живым циклом.
+
+**Проверка чистоты потребителя.** `pointFeedAtOwnRelease`/`installAndRelaunchViaScheduler`
+вызывались уже без собственных `installerArgs` и без отдельного `setFeedURL` — фиксы подхватились
+через `workspace:*` без единой правки кода приложения.
+
+**Находка 1 — это был первый релиз animatrona вообще.** `gh release list -R kamiletar/letar`
+не содержал ни одного тега `animatrona-v*` до этой сессии: `release-animatrona.yml` (введён
+2026-09-13) ни разу не запускался по-настоящему. Единственный существующий релиз животного —
+`v0.50.1` в мёртвом зеркале `kamiletar/animatrona`, датирован 2026-04-21 — **старше самого этого
+монорепо** (`initial commit` от 2026-05-16). Живую проверку цикла N→N+1 (методика — [electron- monorepo-shared-releases.md](/.claude/docs/electron-monorepo-shared-releases.md)) провести не на
+чем: старого `animatrona-v*` релиза, с которого можно обновиться, не существует. Рекомендация в
+PLAN.md — выпустить короткий 0.57.1 без изменений кода специально для этой проверки, как делал
+`kami-key-the` (1.9.32→1.9.33).
+
+**Находка 2 — script injection в CI.** `release-animatrona.yml` подставлял
+`${{ steps.changelog.outputs.notes }}` прямо внутрь `--notes "..."` — текст CHANGELOG (обратные
+кавычки, кавычки) исполнялся бы как часть bash-скрипта до запуска `gh release create`. Исправлено:
+`NOTES` через `env:`, `--notes-file` вместо `--notes`.
+
+**Находка 3 — лендинг брал релизы из мёртвого репозитория.** `apps/animatrona-landing/src/lib/
+github.ts`: `ANIMATRONA_SOURCE` (дефолтный источник для главной страницы и `/player`) указывал на
+`kamiletar/animatrona`, а не на `kamiletar/letar` — раздел загрузок и changelog главной страницы
+показывали бы `v0.50.1` даже после публикации нового релиза. Исправлено по образцу уже
+существующего `FOLDER_PLAYER_SOURCE`: `owner/repo: kamiletar/letar`, `tagPrefix: 'animatrona-v'`.
+Отдельный релиз `animatrona-landing` 0.4.13.
+
+**Находка 4 — независимая порча `bun.lock` на `origin/main`.** При подготовке тега обнаружено:
+`libs/forms-vue` уже был поднят в `package.json` до 0.23.0 коммитом другой сессии, но `bun.lock`
+на `origin/main` остался на 0.22.0 — `bun install --frozen-lockfile` сломал бы **любую** сборку с
+этого коммита, не только релиз animatrona. Пофикшено точечной правкой одной строки в изолированном
+release-worktree (не полный `bun install --lockfile-only` — приватные submodule там не выкачаны,
+полный regen стёр бы их записи, см. [bun-workspace-deleted-from-worktree-breaks-all](/.claude/docs/bun-workspace-deleted-from-worktree-breaks-all.md)).
+
+**Механика релиза.** `origin/main` был на несколько коммитов позади локального `main`, но пуш
+`main` целиком блокировала чужая незапушенная `apps/flora` submodule-запись (не моя работа).
+Использован рецепт «Релиз, когда `main` не пушится» из shared-releases.md: detached-worktree от
+`origin/main`, cherry-pick только своих 5 коммитов (bump, bun.lock, ci-фикс, лендинг, PLAN),
+точечный фикс forms-vue, тег `animatrona-v0.57.0`, push тега — без касания `main`.
+
+CI (`Release Animatrona`, run 36331315453) запущен пушем тега; статус на конец сессии — в работе,
+итог смотреть в `apps/animatrona/PLAN.md` § Открытые задачи.
