@@ -393,7 +393,7 @@
     },
     "apps/animatrona": {
       "name": "@letar/animatrona",
-      "version": "0.56.3",
+      "version": "0.57.0",
       "dependencies": {
         "@letar/animatrona-types": "workspace:*",
         "@letar/animatrona-ui": "workspace:*",
@@ -456,7 +456,7 @@
     },
     "apps/animatrona-landing": {
       "name": "@letar/animatrona-landing",
-      "version": "0.4.12",
+      "version": "0.4.13",
       "dependencies": {
         "@letar/chakra-provider": "workspace:*",
         "@letar/glitchtip": "workspace:*",
