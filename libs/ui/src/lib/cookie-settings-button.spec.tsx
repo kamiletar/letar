@@ -20,6 +20,11 @@ describe('CookieSettingsButton', () => {
     expect(screen.getByRole('button', { name: 'Настройки cookie' })).toBeInTheDocument()
   })
 
+  it('переопределяет текст кнопки через label', () => {
+    renderWithProvider(<CookieSettingsButton appKey="test-app" label="Cookie settings" />)
+    expect(screen.getByRole('button', { name: 'Cookie settings' })).toBeInTheDocument()
+  })
+
   it('диспатчит событие openSettingsEvent для appKey при клике', async () => {
     const user = userEvent.setup()
     const { openSettingsEvent } = createConsentConfig('test-app')

@@ -8,10 +8,14 @@ export interface CookieSettingsButtonProps {
   appKey: string
   /** Тёмный футер: `fg.muted` даёт недостаточный контраст на тёмном фоне (WCAG AA) */
   inverted?: boolean
+  /** Текст кнопки */
+  label?: string
 }
 
 /** Кнопка для повторного открытия баннера cookie-согласий из футера */
-export function CookieSettingsButton({ appKey, inverted = false }: CookieSettingsButtonProps) {
+export function CookieSettingsButton(
+  { appKey, inverted = false, label = 'Настройки cookie' }: CookieSettingsButtonProps,
+) {
   const config = createConsentConfig(appKey)
 
   function handleClick() {
@@ -28,7 +32,7 @@ export function CookieSettingsButton({ appKey, inverted = false }: CookieSetting
       asChild
     >
       <button type="button" onClick={handleClick}>
-        Настройки cookie
+        {label}
       </button>
     </Box>
   )
