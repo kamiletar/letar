@@ -2,6 +2,26 @@
 
 Детальное описание реализованных функций.
 
+## Фикс `TS2737` (BigInt в @letar/format-utils) — версия 0.4.14 (2026-09-27)
+
+Найдено при попутном `nx typecheck:tsgo` во время несвязанной сессии по `libs/github-releases`.
+`tsconfig.json` держал `target: "ES2017"` — наследие исходного `create-next-app`-скаффолда:
+приложение намеренно вне общего пресета `tsconfig.next-app.json`
+([tsconfig-presets.md](/.claude/docs/tsconfig-presets.md)). `@letar/format-utils` использует в
+`formatKopecks` BigInt-литерал (`100n`, коммит `28222f089`, не наш), которому нужен `ES2020+` —
+`nx typecheck:tsgo` падал на `libs/format-utils/src/lib/money.ts:58`, хотя приложение не трогало
+ни либу, ни `money.ts`. Поднят до `ES2022` (как `tsconfig.base.json` и все остальные приложения;
+Next.js для рантайма `target` из tsconfig не читает — только typecheck).
+
+⚠️ Диагностику маскировал устаревший `tsconfig.tsbuildinfo` в корне приложения — с ним
+`tsgo --noEmit` продолжал показывать старую ошибку даже после правки конфига; помогло только
+удаление файла (`incremental: true` не инвалидирует его при смене `target`).
+
+Тот же фикс landed в `kami-key-the-landing` (реальный потребитель), и для сохранения
+задокументированной идентичности четвёрки лендингов на этом старом конфиге — в
+`letar-landing`/`synth` (`synth` тоже оказался реальным потребителем через `package.json`,
+просто не через `tsconfig.paths`).
+
 ## Фикс отсутствующего og-image/apple-touch-icon — версия 0.4.12 (2026-09-27)
 
 Найдено SEO-аудитом `kami-key-the-landing` (коммит `17f6f1c00`) как известная ловушка того же
