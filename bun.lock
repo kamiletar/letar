@@ -348,7 +348,7 @@
     },
     "apps/aboi": {
       "name": "@letar/aboi",
-      "version": "0.83.29",
+      "version": "0.83.30",
       "dependencies": {
         "@letar/admin-ui": "workspace:*",
         "@letar/analytics": "workspace:*",
@@ -620,7 +620,7 @@
     },
     "apps/domwellbes": {
       "name": "@letar/domwellbes",
-      "version": "0.343.0",
+      "version": "0.348.1",
       "dependencies": {
         "@gltf-transform/core": "^4.5.0",
         "@gltf-transform/extensions": "^4.5.0",
@@ -683,11 +683,12 @@
     },
     "apps/driving-school": {
       "name": "driving-school",
-      "version": "0.240.39",
+      "version": "0.240.40",
       "dependencies": {
         "@letar/admin-ui": "workspace:*",
         "@letar/auth": "workspace:*",
         "@letar/contract-generator": "workspace:*",
+        "@letar/demo-protection": "workspace:*",
         "@letar/driving-school-db": "workspace:*",
         "@letar/email": "workspace:*",
         "@letar/env-load": "workspace:*",
@@ -712,12 +713,13 @@
     },
     "apps/dsperevod": {
       "name": "@letar/dsperevod",
-      "version": "0.6.39",
+      "version": "0.6.41",
       "dependencies": {
         "@better-auth/utils": "^0.4.2",
         "@chakra-ui/react": "*",
         "@letar/admin-ui": "workspace:*",
         "@letar/analytics": "workspace:*",
+        "@letar/api-server": "workspace:*",
         "@letar/env-load": "workspace:*",
         "@letar/glitchtip": "workspace:*",
         "@letar/jobs": "workspace:*",
@@ -779,7 +781,7 @@
     },
     "apps/form-docs": {
       "name": "form-docs",
-      "version": "0.6.15",
+      "version": "0.6.16",
       "dependencies": {
         "@letar/forms-core": "workspace:*",
         "@letar/glitchtip": "workspace:*",
@@ -985,6 +987,7 @@
       "dependencies": {
         "@letar/admin-ui": "workspace:*",
         "@letar/api-server": "workspace:*",
+        "@letar/demo-protection": "workspace:*",
         "@letar/env-load": "workspace:*",
         "@letar/glitchtip": "workspace:*",
         "@letar/jobs": "workspace:*",
@@ -1293,7 +1296,7 @@
     },
     "libs/forms": {
       "name": "@letar/forms",
-      "version": "2.32.1",
+      "version": "2.34.0",
       "dependencies": {
         "@letar/format-utils": "workspace:*",
         "@tanstack/react-table": "^9.2.4",
@@ -1370,7 +1373,7 @@
     },
     "libs/forms-react": {
       "name": "@letar/forms-react",
-      "version": "0.21.0",
+      "version": "0.24.0",
       "dependencies": {
         "@letar/forms-core": "workspace:*",
       },
@@ -1385,7 +1388,7 @@
     },
     "libs/forms-shadcn": {
       "name": "@letar/forms-shadcn",
-      "version": "0.55.0",
+      "version": "0.58.0",
       "devDependencies": {
         "@letar/eager-jsx-check": "workspace:*",
         "@letar/forms-core": "workspace:*",
