@@ -63,6 +63,7 @@ export function resetSelectSearchWarning(): void {
 interface NormalizedOption {
   label: React.ReactNode
   textValue?: string
+  description?: React.ReactNode
   value: string
   disabled?: boolean
   editable?: boolean
@@ -126,13 +127,15 @@ const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFie
     const hookOptions = hookSource?.options
     const sourceOptions = useMemo((): SelectOption[] => {
       if (componentProps.loadOptions) {
-        const { getLabel, getValue, getTextValue, getDisabled, getEditable, getPending } = componentProps
+        const { getLabel, getValue, getTextValue, getDescription, getDisabled, getEditable, getPending } =
+          componentProps
         if (!promiseData || !getLabel || !getValue) {
           return []
         }
         return (promiseData as unknown[]).map((item): SelectOption => ({
           label: getLabel(item),
           textValue: getTextValue?.(item),
+          description: getDescription?.(item),
           data: item,
           value: getValue(item),
           disabled: getDisabled?.(item),
@@ -179,6 +182,7 @@ const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFie
       const normalized: NormalizedOption[] = merged.map((opt) => ({
         label: opt.label,
         textValue: opt.textValue,
+        description: opt.description,
         data: opt.data,
         value: toKey(opt),
         disabled: opt.disabled,

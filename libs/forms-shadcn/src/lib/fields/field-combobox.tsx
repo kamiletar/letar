@@ -5,6 +5,7 @@ import {
   CREATE_OPTION_VALUE,
   type FieldDeps,
   filterSelectionOptions,
+  getOptionSearchText,
   getOptionText,
   isCreateOptionValue,
   isOptionEditable,
@@ -39,6 +40,7 @@ import {
 interface NormalizedOption {
   label: React.ReactNode
   textValue?: string
+  description?: React.ReactNode
   value: string
   disabled?: boolean
   pending?: boolean
@@ -131,13 +133,14 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
       if (componentProps.options) {
         return componentProps.options
       }
-      const { getLabel, getValue, getTextValue, getDisabled, getEditable, getPending } = componentProps
+      const { getLabel, getValue, getTextValue, getDescription, getDisabled, getEditable, getPending } = componentProps
       if (!promiseSearch.data || !getLabel || !getValue) {
         return []
       }
       return (promiseSearch.data as unknown[]).map((item): SelectOption => ({
         label: getLabel(item),
         textValue: getTextValue?.(item),
+        description: getDescription?.(item),
         data: item,
         value: getValue(item),
         disabled: getDisabled?.(item),
@@ -158,13 +161,14 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
     })
     const selectedSourceOption = useMemo((): SelectOption | undefined => {
       const item = selectedLoader.data
-      const { getLabel, getValue, getTextValue, getDisabled, getEditable, getPending } = componentProps
+      const { getLabel, getValue, getTextValue, getDescription, getDisabled, getEditable, getPending } = componentProps
       if (item === undefined || item === null || !getLabel || !getValue) {
         return undefined
       }
       return {
         label: getLabel(item),
         textValue: getTextValue?.(item),
+        description: getDescription?.(item),
         data: item,
         value: getValue(item),
         disabled: getDisabled?.(item),
@@ -243,6 +247,7 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
         merged.map((opt) => ({
           label: opt.label,
           textValue: opt.textValue,
+          description: opt.description,
           data: opt.data,
           value: String(opt.value),
           // Опция в ожидании подтверждения не выбирается ни мышью, ни клавиатурой
@@ -260,12 +265,14 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
     }, [merged, selectedOption])
     useNodeLabelWarning('Combobox', normalized)
     const matchedOptions = useMemo(() => {
+      // Поиск идёт и по строковому описанию, пока не выключен `searchInDescription={false}`
+      const getText = componentProps.searchInDescription === false ? getOptionText : getOptionSearchText
       if (inputValue.length < minChars) { return [] }
       // Промис-путь: выдачу уже отфильтровал сервер — локально фильтруем только созданные опции
       if (isPromise) {
         const created = new Set(createdOptions.map((opt) => String(opt.value)))
         const localMatches = new Set(
-          filterSelectionOptions(normalized.filter((opt) => created.has(opt.value)), inputValue, getOptionText),
+          filterSelectionOptions(normalized.filter((opt) => created.has(opt.value)), inputValue, getText),
         )
         return normalized.filter((opt) => !created.has(opt.value) || localMatches.has(opt))
       }
@@ -275,8 +282,8 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
         return normalized
       }
       // Без регистра, ё ≡ е, с учётом раскладки («ghbdtn» находит «Привет»)
-      return filterSelectionOptions(normalized, inputValue, getOptionText)
-    }, [normalized, inputValue, minChars, isPromise, createdOptions, valueKey])
+      return filterSelectionOptions(normalized, inputValue, getText)
+    }, [normalized, inputValue, minChars, isPromise, createdOptions, valueKey, componentProps.searchInDescription])
 
     // Служебный пункт «+ Добавить "<поиск>"» — в конце списка; в форму не попадает
     const search = inputValue.trim()

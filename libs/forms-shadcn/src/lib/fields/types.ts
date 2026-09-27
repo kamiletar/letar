@@ -66,6 +66,11 @@ export interface SelectOption<TData = unknown> {
   label: ReactNode
   /** Строковая форма опции — поиск, typeahead, подпись в триггере. Нужна, если `label` — не строка */
   textValue?: string
+  /**
+   * Вторая строка в списке: под подписью, только в выпадающем списке — не в триггере и не в поле после выбора.
+   * В текст опции (`textValue`) не входит; строку и число ищет локальный поиск Combobox (`searchInDescription`)
+   */
+  description?: ReactNode
   value: string | number
   disabled?: boolean
   /** Данные приложения: поле их не читает, только передаёт в `renderOption`/`renderValue` */
@@ -192,6 +197,8 @@ interface SelectGetItem<TData> {
   getLabel: (item: TData) => ReactNode
   getValue: (item: TData) => string | number
   getTextValue?: (item: TData) => string
+  /** Вторая строка опции в списке (см. `SelectOption.description`) */
+  getDescription?: (item: TData) => ReactNode
   getDisabled?: (item: TData) => boolean
   getEditable?: (item: TData) => boolean
   /** Запись ещё не подтверждена сервером (оптимистичное обновление): приглушена, не выбирается и не правится */
@@ -220,6 +227,7 @@ type SelectSource<TData, TDeps extends FieldDeps> =
     getLabel?: never
     getValue?: never
     getTextValue?: never
+    getDescription?: never
     getDisabled?: never
     getEditable?: never
     getPending?: never
@@ -248,6 +256,7 @@ type SelectSource<TData, TDeps extends FieldDeps> =
     getLabel?: never
     getValue?: never
     getTextValue?: never
+    getDescription?: never
     getDisabled?: never
     getEditable?: never
     getPending?: never
@@ -423,6 +432,13 @@ export interface ComboboxFieldBaseProps<TData = unknown, TDeps extends FieldDeps
   debounce?: number
   /** Подпись значения, когда его запись пришла из `loadOptions`/`loadSelected` и `getLabel` возвращает не строку */
   getTextValue?: (item: TData) => string
+  /** Вторая строка опции в списке — для записей из `loadOptions` (статичные опции несут свой `description`) */
+  getDescription?: (item: TData) => ReactNode
+  /**
+   * Локальный фильтр статичных `options` ищет и по строковому `description` (по умолчанию `true`); `false` — только
+   * по тексту опции. На `loadOptions` не влияет: фильтрует сервер
+   */
+  searchInDescription?: boolean
   /** Подпись выбранного значения, пока запись не загружена (`loadOptions`: нет в выдаче) */
   initialLabel?: string
 }

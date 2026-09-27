@@ -20,6 +20,11 @@ export interface ShadcnSelectExtraProps {
   showUnknownValue?: boolean
 }
 
+/** Есть ли что рисовать второй строкой: пустая строка и пустой узел — нет */
+function hasDescription(description: ReactNode): boolean {
+  return description !== undefined && description !== null && description !== false && description !== ''
+}
+
 export function Select(
   {
     value,
@@ -189,15 +194,32 @@ export function Select(
                   'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
                 )}
               >
-                <SelectPrimitive.ItemText>
-                  {renderOption
-                    ? renderOption(opt, {
-                      selected: opt.value === value,
-                      disabled: opt.disabled ?? false,
-                      pending: opt.pending ?? false,
-                    })
-                    : opt.label}
-                </SelectPrimitive.ItemText>
+                {(() => {
+                  const text = (
+                    <SelectPrimitive.ItemText>
+                      {renderOption
+                        ? renderOption(opt, {
+                          selected: opt.value === value,
+                          disabled: opt.disabled ?? false,
+                          pending: opt.pending ?? false,
+                        })
+                        : opt.label}
+                    </SelectPrimitive.ItemText>
+                  )
+                  // Вторая строка — сосед `ItemText`: подпись триггера берётся из него, описания там нет.
+                  // Со своим `renderOption` пункт рисует приложение
+                  if (renderOption || !hasDescription(opt.description)) {
+                    return text
+                  }
+                  return (
+                    <div className="flex min-w-0 flex-1 flex-col">
+                      {text}
+                      <span data-slot="select-item-description" className="text-muted-foreground text-xs">
+                        {opt.description}
+                      </span>
+                    </div>
+                  )
+                })()}
                 {opt.pending
                   ? <Loader2 className="text-muted-foreground size-4 shrink-0 animate-spin" aria-hidden />
                   : renderOptionActions?.(opt)}

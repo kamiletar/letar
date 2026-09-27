@@ -4,6 +4,15 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.49.0] - 2026-09-27
+
+### Добавлено
+
+- **Вторая строка опции — `description` у `Select` и `Combobox`**, как в Chakra-скине: под подписью в списке, не в
+  триггере и не в поле после выбора. `getDescription` для записей `loadOptions`; локальный поиск статичного `Combobox`
+  ищет и по строковому описанию, `searchInDescription={false}` отключает. Со своим `renderOption` пункт рисует
+  приложение.
+
 ## [0.48.0] - 2026-09-27
 
 ### Added

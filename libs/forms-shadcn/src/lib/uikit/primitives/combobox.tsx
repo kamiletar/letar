@@ -12,6 +12,11 @@ export interface ShadcnComboboxExtraProps {
   'aria-describedby'?: string
 }
 
+/** Есть ли что рисовать второй строкой: пустая строка и пустой узел — нет */
+function hasDescription(description: ReactNode): boolean {
+  return description !== undefined && description !== null && description !== false && description !== ''
+}
+
 export function Combobox(
   {
     value,
@@ -239,13 +244,28 @@ export function Combobox(
                 'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
               )}
             >
-              {renderOption
-                ? renderOption(opt, {
-                  selected: opt.value === value,
-                  disabled: opt.disabled ?? false,
-                  pending: opt.pending ?? false,
-                })
-                : opt.label}
+              {(() => {
+                const content = renderOption
+                  ? renderOption(opt, {
+                    selected: opt.value === value,
+                    disabled: opt.disabled ?? false,
+                    pending: opt.pending ?? false,
+                  })
+                  : opt.label
+                // Вторая строка — только в списке (в поле после выбора идёт текст опции); со своим `renderOption`
+                // пункт рисует приложение. Служебный пункт «+ Добавить…» описания не имеет
+                if (renderOption || !hasDescription(opt.description)) {
+                  return content
+                }
+                return (
+                  <div className="flex min-w-0 flex-1 flex-col">
+                    {content}
+                    <span data-slot="combobox-item-description" className="text-muted-foreground text-xs">
+                      {opt.description}
+                    </span>
+                  </div>
+                )
+              })()}
               {opt.pending
                 ? <Loader2 className="text-muted-foreground ml-auto size-4 shrink-0 animate-spin" aria-hidden />
                 : renderOptionActions?.(opt)}
