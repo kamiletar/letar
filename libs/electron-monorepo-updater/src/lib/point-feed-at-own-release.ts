@@ -2,7 +2,7 @@ import { findOwnLatestTag, type FindOwnLatestTagOptions } from './find-own-relea
 
 /** Минимальный интерфейс `autoUpdater` из `electron-updater`, который нам нужен */
 export interface FeedTargetAutoUpdater {
-  setFeedURL(options: { provider: 'generic'; url: string }): void
+  setFeedURL(options: { provider: 'generic'; url: string; useMultipleRangeRequest?: boolean }): void
 }
 
 export interface PointFeedAtOwnReleaseOptions extends FindOwnLatestTagOptions {
@@ -28,6 +28,9 @@ export async function pointFeedAtOwnRelease(
   autoUpdater.setFeedURL({
     provider: 'generic',
     url: `https://github.com/${options.owner}/${options.repo}/releases/download/${tag}`,
+    // CDN ассетов GitHub отвечает 501 на multi-range запрос, и дифференциальная загрузка
+    // откатывается на полную. Встроенный GitHubProvider выключает его так же.
+    useMultipleRangeRequest: false,
   })
   return true
 }
