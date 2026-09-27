@@ -146,7 +146,8 @@ jobs:
         run: |
           for f in *.exe *.exe.blockmap; do
             [ -e "$f" ] || continue
-            mv -- "$f" "$(echo "$f" | tr ' ' '-')"
+            new="$(echo "$f" | tr ' ' '-')"
+            [ "$f" = "$new" ] || mv -- "$f" "$new"
           done
           ls -la
 
@@ -232,7 +233,8 @@ jobs:
         run: |
           for f in *.dmg *.dmg.blockmap *.zip *.zip.blockmap; do
             [ -e "$f" ] || continue
-            mv -- "$f" "$(echo "$f" | tr ' ' '-')"
+            new="$(echo "$f" | tr ' ' '-')"
+            [ "$f" = "$new" ] || mv -- "$f" "$new"
           done
           ls -la
 
@@ -313,11 +315,15 @@ jobs:
           bunx electron-builder --linux --publish never
 
       - name: Rename assets to dash-separated names (must match latest-linux.yml)
+        # electron-builder уже отдаёт AppImage без пробелов ("Animatrona-0.57.2.AppImage") —
+        # безусловный mv на исходное==целевое имя падает под set -e ("same file"), пока Windows
+        # (nsis) и macOS (dmg) кладут пробелы в имя по умолчанию и не задевают этот путь.
         working-directory: apps/animatrona/dist
         run: |
           for f in *.AppImage *.AppImage.blockmap; do
             [ -e "$f" ] || continue
-            mv -- "$f" "$(echo "$f" | tr ' ' '-')"
+            new="$(echo "$f" | tr ' ' '-')"
+            [ "$f" = "$new" ] || mv -- "$f" "$new"
           done
           ls -la
 
