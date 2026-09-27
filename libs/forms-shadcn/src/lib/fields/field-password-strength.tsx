@@ -1,6 +1,6 @@
 'use client'
 
-import { useFieldPlaceholderString } from '@letar/forms-react'
+import { type PasswordStrengthStrings, useFieldPlaceholderString, usePasswordStrengthStrings } from '@letar/forms-react'
 import { cn } from '@letar/tailwind-utils'
 import { Check, Eye, EyeOff, X } from 'lucide-react'
 import { type ReactElement, useState } from 'react'
@@ -10,14 +10,6 @@ import { SHADCN_NO_PROVIDER_LOCALE } from './selection-strings'
 import type { PasswordRequirement, PasswordStrengthFieldProps } from './types'
 
 const DEFAULT_REQUIREMENTS: PasswordRequirement[] = ['minLength:8', 'uppercase', 'lowercase', 'number', 'special']
-
-const REQUIREMENT_LABELS: Record<PasswordRequirement, string> = {
-  'minLength:8': 'Минимум 8 символов',
-  uppercase: 'Хотя бы одна заглавная буква',
-  lowercase: 'Хотя бы одна строчная буква',
-  number: 'Хотя бы одна цифра',
-  special: 'Хотя бы один спецсимвол (!@#$%^&*)',
-}
 
 function checkRequirement(password: string, requirement: PasswordRequirement): boolean {
   switch (requirement) {
@@ -44,23 +36,27 @@ function calculateStrength(password: string, requirements: PasswordRequirement[]
   return Math.round((metCount / requirements.length) * 100)
 }
 
-function getStrengthInfo(strength: number): { label: string; barClass: string; textClass: string } {
+function getStrengthInfo(
+  strength: number,
+  strengthLabels: PasswordStrengthStrings['strengthLabels'],
+): { label: string; barClass: string; textClass: string } {
   if (strength < 25) {
-    return { label: 'Слабый', barClass: 'bg-red-500', textClass: 'text-red-600' }
+    return { label: strengthLabels.weak, barClass: 'bg-red-500', textClass: 'text-red-600' }
   }
   if (strength < 50) {
-    return { label: 'Средний', barClass: 'bg-orange-500', textClass: 'text-orange-600' }
+    return { label: strengthLabels.medium, barClass: 'bg-orange-500', textClass: 'text-orange-600' }
   }
   if (strength < 75) {
-    return { label: 'Хороший', barClass: 'bg-yellow-500', textClass: 'text-yellow-600' }
+    return { label: strengthLabels.good, barClass: 'bg-yellow-500', textClass: 'text-yellow-600' }
   }
-  return { label: 'Сильный', barClass: 'bg-green-500', textClass: 'text-green-600' }
+  return { label: strengthLabels.strong, barClass: 'bg-green-500', textClass: 'text-green-600' }
 }
 
 interface PasswordStrengthFieldState {
   visible: boolean
   toggle: () => void
   placeholder: string
+  strings: PasswordStrengthStrings
 }
 
 /**
@@ -76,14 +72,16 @@ export const FieldPasswordStrength = createField<PasswordStrengthFieldProps, str
   useFieldState: (componentProps): PasswordStrengthFieldState => {
     const [visible, setVisible] = useState(componentProps.defaultVisible ?? false)
     const placeholder = useFieldPlaceholderString('formFieldPlaceholder.passwordStrength', SHADCN_NO_PROVIDER_LOCALE)
-    return { visible, toggle: () => setVisible((v) => !v), placeholder }
+    const strings = usePasswordStrengthStrings(SHADCN_NO_PROVIDER_LOCALE)
+    return { visible, toggle: () => setVisible((v) => !v), placeholder, strings }
   },
 
   render: ({ field, fullPath, resolved, hasError, errorMessage, componentProps, fieldState }): ReactElement => {
     const { requirements = DEFAULT_REQUIREMENTS, showRequirements = true } = componentProps
+    const { strings } = fieldState
     const value = (field.state.value as string) ?? ''
     const strength = calculateStrength(value, requirements)
-    const { label: strengthLabel, barClass, textClass } = getStrengthInfo(strength)
+    const { label: strengthLabel, barClass, textClass } = getStrengthInfo(strength, strings.strengthLabels)
 
     return (
       <FieldWrapper resolved={resolved} hasError={hasError} errorMessage={errorMessage} fullPath={fullPath}>
@@ -104,7 +102,7 @@ export const FieldPasswordStrength = createField<PasswordStrengthFieldProps, str
             <button
               type="button"
               tabIndex={-1}
-              aria-label="Показать/скрыть пароль"
+              aria-label={strings.togglePasswordVisibilityLabel}
               disabled={resolved.disabled}
               onClick={fieldState.toggle}
               className="text-muted-foreground hover:text-foreground absolute inset-y-0 right-2 flex items-center disabled:pointer-events-none disabled:opacity-50"
@@ -116,7 +114,7 @@ export const FieldPasswordStrength = createField<PasswordStrengthFieldProps, str
           {value && (
             <div>
               <div className="mb-1 flex items-center justify-between">
-                <span className="text-muted-foreground text-xs">Надёжность</span>
+                <span className="text-muted-foreground text-xs">{strings.strengthCaption}</span>
                 <span className={cn('text-xs font-medium', textClass)}>{strengthLabel}</span>
               </div>
               <div className="bg-muted h-1 w-full overflow-hidden rounded-full">
@@ -135,7 +133,7 @@ export const FieldPasswordStrength = createField<PasswordStrengthFieldProps, str
                       ? <Check className="size-3.5 text-green-500" />
                       : <X className="size-3.5 text-muted-foreground" />}
                     <span className={met ? 'text-foreground' : 'text-muted-foreground'}>
-                      {REQUIREMENT_LABELS[req]}
+                      {strings.requirementLabels[req]}
                     </span>
                   </li>
                 )

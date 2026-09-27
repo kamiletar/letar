@@ -4,6 +4,18 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.58.0] - 2026-09-27
+
+### Добавлено
+
+- Требования к паролю, подписи силы и `aria-label` кнопки-глаза `Form.Field.PasswordStrength`
+  подключены к общему словарю `formPasswordStrength.*` (`@letar/forms-react` ≥ 0.24.0, тот же
+  словарь, что у Chakra-скина): без `FormI18nProvider` — русский (прежний хардкод), `locale="en"` —
+  английский, как у Chakra-версии. Кнопка-глаза сохранила прежнее поведение (один статичный
+  `aria-label` независимо от видимости пароля) — отдельный ключ `togglePasswordVisibility`, не
+  унифицирован с динамическим `showPassword`/`hidePassword` у Chakra, чтобы перевод не менял
+  поведение кнопки.
+
 ## [0.57.0] - 2026-09-27
 
 ### Добавлено
