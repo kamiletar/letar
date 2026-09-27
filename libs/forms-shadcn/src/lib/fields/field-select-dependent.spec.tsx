@@ -233,7 +233,8 @@ describe('FieldSelect (shadcn) — зависимое поле (§18)', () => {
     expect(trigger('cityId')).toBeDisabled()
     expect(live()).toEqual([
       'Поле «Регион» очищено: изменилось поле «countryId»',
-      'Поле «Город» очищено: изменилось поле «regionId»',
+      // Родитель со своей подписью называется ею; `countryId` — не отрисованное поле (`Mount`), остаётся именем
+      'Поле «Город» очищено: изменилось поле «Регион»',
     ])
     await new Promise((resolve) => setTimeout(resolve, 30))
     // Регион пуст — новых запросов городов нет

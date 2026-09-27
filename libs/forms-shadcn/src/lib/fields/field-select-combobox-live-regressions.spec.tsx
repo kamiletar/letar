@@ -126,6 +126,40 @@ describe('FieldCombobox (shadcn) — живая проверка', () => {
     expect(value()).toBe('react')
   })
 
+  it('значения нет, набрали «Vu» и закрыли список — недонабранный текст стирается', async () => {
+    const { value } = setup(<FieldCombobox name="framework" options={options} />, null)
+    fireEvent.focus(input())
+    fireEvent.change(input(), { target: { value: 'Vu' } })
+    expect(input().value).toBe('Vu')
+
+    fireEvent.keyDown(input(), { key: 'Escape' })
+
+    await waitFor(() => expect(input().value).toBe(''))
+    expect(value()).toBeNull()
+  })
+
+  it('оптимистичный create без значения: текст поиска не стирается закрытием списка', async () => {
+    const server = deferred<Created>()
+    setup(
+      <FieldCombobox
+        name="framework"
+        options={options}
+        onCreate={async (_search, ctx) => {
+          ctx.optimistic({ label: 'Solid' })
+          return server.promise
+        }}
+      />,
+      null,
+    )
+    fireEvent.focus(input())
+    fireEvent.change(input(), { target: { value: 'Sol' } })
+    fireEvent.click(await screen.findByRole('option', { name: /Добавить/ }))
+
+    await waitFor(() => expect(input().value).toBe('Solid'))
+    await act(async () => server.resolve({ label: 'Solid', value: 'solid' }))
+    await waitFor(() => expect(input().value).toBe('Solid'))
+  })
+
   it('выбор пункта не откатывается подписью прежнего значения', async () => {
     const { value } = setup(<FieldCombobox name="framework" options={options} />, 'react')
     await waitFor(() => expect(input().value).toBe('React'))
@@ -158,5 +192,66 @@ describe('FieldCombobox (shadcn) — живая проверка', () => {
     await userEvent.click(input())
 
     expect(input()).toHaveAttribute('aria-expanded', 'true')
+  })
+})
+
+describe('Зависимое поле — подпись родителя в подсказке', () => {
+  const depSchema = z.object({ country: z.string().nullable(), town: z.string().nullable() })
+
+  function setupDependent(parent: React.ReactElement) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- инстанс TanStack Form
+    let form: any
+    render(
+      <TestForm
+        defaultValues={{ country: null, town: null }}
+        schema={depSchema}
+        onFormReady={(f) => (form = f)}
+      >
+        {parent}
+        <FieldSelect name="town" dependsOn="country" options={[{ label: 'Москва', value: 'msk' }]} />
+      </TestForm>,
+    )
+    return { form: () => form }
+  }
+
+  const hint = () => document.querySelector<HTMLElement>('[data-slot="dependent-hint"]')
+
+  it('подсказка называет родителя его видимой подписью, а не именем поля', async () => {
+    setupDependent(<FieldSelect name="country" label="Страна" options={[{ label: 'Россия', value: 'ru' }]} />)
+    await waitFor(() => expect(hint()).toHaveTextContent('Сначала выберите «Страна»'))
+  })
+
+  it('родитель после зависимого поля в дереве — подпись подхватывается после монтирования', async () => {
+    render(
+      <TestForm defaultValues={{ country: null, town: null }} schema={depSchema}>
+        <FieldSelect name="town" dependsOn="country" options={[]} />
+        <FieldCombobox name="country" label="Страна проживания" options={[{ label: 'Россия', value: 'ru' }]} />
+      </TestForm>,
+    )
+    await waitFor(() => expect(hint()).toHaveTextContent('Сначала выберите «Страна проживания»'))
+  })
+
+  it('без подписи у родителя остаётся имя поля', async () => {
+    setupDependent(<FieldSelect name="country" options={[{ label: 'Россия', value: 'ru' }]} />)
+    await waitFor(() => expect(hint()).toHaveTextContent('Сначала выберите «country»'))
+  })
+
+  it('очистка объявляется с подписью родителя', async () => {
+    const { form } = setupDependent(
+      <FieldSelect name="country" label="Страна" options={[{ label: 'Россия', value: 'ru' }]} />,
+    )
+    await waitFor(() => expect(hint()).toHaveTextContent('«Страна»'))
+    await act(async () => {
+      form().setFieldValue('country', 'ru')
+    })
+    await act(async () => {
+      form().setFieldValue('town', 'msk')
+    })
+    await act(async () => {
+      form().setFieldValue('country', null)
+    })
+    await waitFor(() =>
+      expect(document.querySelector('[data-dependent-live]')).toHaveTextContent('изменилось поле «Страна»')
+    )
   })
 })

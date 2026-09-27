@@ -468,12 +468,17 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
                 return
               }
               // Список закрыт (клик мимо, Tab, Escape): в поле снова подпись выбранного, а не стёртый или недонабранный
-              // текст — иначе поле выглядит пустым при живом значении. Очищает значение кнопка «Очистить»
+              // текст — иначе поле выглядит пустым при живом значении. Очищает значение кнопка «Очистить».
+              // Значения нет — недонабранный текст стирается
               // Значение читаем живым: выбор пункта и закрытие списка приходят в одном событии, до перерисовки
               const liveValue = field.form.getFieldValue(field.name) as string | null | undefined
               const source = liveValue ? fieldState.optionByValue.get(String(liveValue)) : undefined
               if (source) {
                 fieldState.setInputValue(getOptionText(source))
+              } else if (liveValue === null || liveValue === undefined || liveValue === '') {
+                // Значения нет: недонабранный текст стирается — как в Chakra, поле не притворяется выбранным
+                fieldState.syncedValueRef.current = undefined
+                fieldState.setInputValue('')
               }
             }}
             clearable={resolvedClearable}

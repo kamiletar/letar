@@ -7,6 +7,7 @@ import {
   type DependentFieldState,
   useDeclarativeFormOptional,
   useDependentField,
+  useFieldLabelLookup,
   useFormI18n,
 } from '@letar/forms-react'
 import { type ReactElement, type ReactNode, useCallback, useId } from 'react'
@@ -92,13 +93,20 @@ export function useDependentFieldUi<TDeps extends FieldDeps = FieldDeps>(
   const emptyValue = resolveEmptyValue(schema, fullPath, valueType)
   const hintId = useId()
 
-  // Метка родителя — `ui.title` схемы, иначе последний сегмент имени поля (умолчание хука)
+  // Метка родителя: видимая подпись поля (`label`), иначе `ui.title` схемы, иначе последний сегмент имени поля
+  // (умолчание хука). Подпись поля важнее `ui.title`: пользователь видит именно её
+  const form = useDeclarativeFormOptional()?.form
+  const lookupLabel = useFieldLabelLookup(form)
   const getParentLabel = useCallback(
     (path: string): string | undefined => {
+      const registered = lookupLabel(path)
+      if (registered) {
+        return registered
+      }
       const title = getFieldMeta(schema, path).ui?.title
       return typeof title === 'string' && title ? title : undefined
     },
-    [schema],
+    [schema, lookupLabel],
   )
 
   const state = useDependentField<TDeps>({
