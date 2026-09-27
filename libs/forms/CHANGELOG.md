@@ -4,6 +4,14 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.32.1] - 2026-09-27
+
+### Изменено
+
+- Словарь встроенных строк выбора (`formSelection.*`, `resolveSelectionString`, `useSelectionString`) перенесён в
+  `@letar/forms-react` — его делит с shadcn-скином; `selection-field-strings.ts` стал реэкспортом. Поведение Chakra-полей
+  не изменилось. Требует `@letar/forms-react` ≥ 0.20.0.
+
 ## [2.32.0] - 2026-09-27
 
 ### Исправлено
