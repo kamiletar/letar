@@ -1,5 +1,5 @@
 import { checkHostOpsRateLimit, tooManyRequestsResponse } from '@/lib/api-rate-limit'
-import { requireAuth } from '@/lib/auth-utils'
+import { requireAdmin } from '@/lib/auth-utils'
 import { npmApi } from '@/lib/nginx-proxy-manager'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
@@ -39,7 +39,7 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
  */
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
-    const user = await requireAuth()
+    const user = await requireAdmin()
     const rateLimit = checkHostOpsRateLimit(`nginx-write:${user.id}`)
     if (!rateLimit.allowed) {
       return tooManyRequestsResponse(rateLimit.retryAfter)
@@ -69,7 +69,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
  */
 export async function DELETE(_request: NextRequest, { params }: RouteParams) {
   try {
-    const user = await requireAuth()
+    const user = await requireAdmin()
     const rateLimit = checkHostOpsRateLimit(`nginx-write:${user.id}`)
     if (!rateLimit.allowed) {
       return tooManyRequestsResponse(rateLimit.retryAfter)

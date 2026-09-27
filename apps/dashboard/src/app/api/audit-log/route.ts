@@ -1,4 +1,5 @@
 import type { AuditLogEntry } from '@/lib/audit-log'
+import { requireAdmin } from '@/lib/auth-utils'
 import { existsSync } from 'fs'
 import { readFile, stat } from 'fs/promises'
 import { NextResponse } from 'next/server'
@@ -103,6 +104,7 @@ export async function GET(request: Request) {
  */
 export async function DELETE() {
   try {
+    await requireAdmin()
     const { writeFile } = await import('fs/promises')
 
     if (existsSync(AUDIT_LOG_FILE)) {

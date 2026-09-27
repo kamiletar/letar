@@ -1,5 +1,5 @@
 import { checkHostOpsRateLimit, tooManyRequestsResponse } from '@/lib/api-rate-limit'
-import { requireAuth } from '@/lib/auth-utils'
+import { requireAdmin } from '@/lib/auth-utils'
 import { isAllowedWorkspace, runOnHost } from '@/lib/host-exec'
 import { NextResponse } from 'next/server'
 
@@ -11,10 +11,7 @@ export const dynamic = 'force-dynamic'
  */
 export async function POST() {
   try {
-    // requireAuth (не requireAdmin) — сохраняем прежний уровень доступа: роут раньше не проверял
-    // роль вовсе и полагался только на сессионный гейт proxy.ts (ADMIN/VIEWER). Здесь сессия
-    // нужна и для rate-limit ключа, и как defense-in-depth на случай обхода proxy.
-    const user = await requireAuth()
+    const user = await requireAdmin()
     const rateLimit = checkHostOpsRateLimit(`git-pull:${user.id}`)
     if (!rateLimit.allowed) {
       return tooManyRequestsResponse(rateLimit.retryAfter)

@@ -1,5 +1,5 @@
 import { checkHostOpsRateLimit, tooManyRequestsResponse } from '@/lib/api-rate-limit'
-import { requireAuth } from '@/lib/auth-utils'
+import { requireAdmin } from '@/lib/auth-utils'
 import { getClientByServerId } from '@/lib/server-client/get-client-by-id'
 import type { RemoteServerClient } from '@/lib/server-client/remote'
 import type { NextRequest } from 'next/server'
@@ -12,7 +12,7 @@ import { NextResponse } from 'next/server'
  */
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
-    const user = await requireAuth()
+    const user = await requireAdmin()
     const rateLimit = checkHostOpsRateLimit(`docker-prune:${user.id}`)
     if (!rateLimit.allowed) {
       return tooManyRequestsResponse(rateLimit.retryAfter)

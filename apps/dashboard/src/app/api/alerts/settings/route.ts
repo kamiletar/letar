@@ -1,5 +1,6 @@
 import type { AlertSettings } from '@/lib/alerts'
 import { getAlertSettings, saveAlertSettings } from '@/lib/alerts'
+import { requireAdmin } from '@/lib/auth-utils'
 import { NextResponse } from 'next/server'
 
 const MASKED_TOKEN = '••••••••'
@@ -35,6 +36,7 @@ export async function GET() {
  */
 export async function POST(request: Request) {
   try {
+    await requireAdmin()
     const newSettings: AlertSettings = await request.json()
 
     // Получаем текущие настройки для сохранения токена, если он замаскирован

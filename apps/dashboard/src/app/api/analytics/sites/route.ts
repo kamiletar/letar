@@ -7,6 +7,8 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 
+import { requireAdmin } from '@/lib/auth-utils'
+
 export const dynamic = 'force-dynamic'
 
 const UMAMI_API_URL = process.env.UMAMI_API_URL || 'https://stats.letar.best'
@@ -57,6 +59,7 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    await requireAdmin()
     const body = await request.json()
     const { name, domain } = body
 

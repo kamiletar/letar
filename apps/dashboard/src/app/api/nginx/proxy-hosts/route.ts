@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod/v4'
 
 import { checkHostOpsRateLimit, tooManyRequestsResponse } from '@/lib/api-rate-limit'
-import { requireAuth } from '@/lib/auth-utils'
+import { requireAdmin } from '@/lib/auth-utils'
 import { getNpmClientByServerId } from '@/lib/nginx-proxy-manager-client'
 
 export const dynamic = 'force-dynamic'
@@ -84,7 +84,7 @@ const CreateProxyHostSchema = z
  */
 export async function POST(request: NextRequest) {
   try {
-    const user = await requireAuth()
+    const user = await requireAdmin()
     const rateLimit = checkHostOpsRateLimit(`nginx-write:${user.id}`)
     if (!rateLimit.allowed) {
       return tooManyRequestsResponse(rateLimit.retryAfter)
