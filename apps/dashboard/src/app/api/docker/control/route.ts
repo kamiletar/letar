@@ -1,3 +1,5 @@
+import { checkHostOpsRateLimit, tooManyRequestsResponse } from '@/lib/api-rate-limit'
+import { requireAuth } from '@/lib/auth-utils'
 import { getClientByServerId, updateServerLastSeen } from '@/lib/server-client/get-client-by-id'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
@@ -17,6 +19,12 @@ interface ControlRequest {
  */
 export async function POST(request: NextRequest) {
   try {
+    const user = await requireAuth()
+    const rateLimit = checkHostOpsRateLimit(`docker-control:${user.id}`)
+    if (!rateLimit.allowed) {
+      return tooManyRequestsResponse(rateLimit.retryAfter)
+    }
+
     const body = (await request.json()) as ControlRequest
     const { containerId, action, serverId } = body
 

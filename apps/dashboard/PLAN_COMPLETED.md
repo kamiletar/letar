@@ -2,6 +2,40 @@
 
 Детальное описание всех реализованных фич.
 
+## ✅ v1.27.5 — rate-limit на дорогих/опасных API-роутах (2026-09-27)
+
+Продолжение аудита из v1.27.4: удаление мёртвого `src/lib/rate-limit.ts` показало, что dashboard
+на самом деле **не имел** rate-limit защиты ни на одном API-роуте. Проверены все
+`src/app/api/**/route.ts` на два критерия: достижимость (за VPN, но под одной сессией/CSRF) и
+дороговизну/опасность операции (docker, deploy, git, nginx на хосте через nsenter/agent).
+
+Часть кандидатов (`database/[db]/backup`, `database/[db]/restore`, `apps/[app]/clean-uploads`,
+`database/backup-settings`, `backups/scheduled/run`, `cron/backup`) оказались deprecated-заглушками
+(`501`, логика перенесена в `dashboard-agent`) — лимитировать нечего.
+
+Подключён `createRateLimiter` из `@letar/api-server` (windowMs 60с, 10 запросов на пользователя) на:
+
+- `POST /api/docker/control`, `POST /api/docker/prune` — не имели вовсе явной проверки сессии в
+  самом роуте (полагались только на `proxy.ts`), добавлен `requireAuth()` заодно с ключом лимитера
+- `POST /api/deploy/start` (уже был `requireAdmin()`)
+- `POST /api/servers/[id]/apps/[appId]/deploy` (уже была проверка сессии+роли)
+- `POST /api/git/pull` — тоже не проверял сессию в роуте; добавлен `requireAuth()` (не
+  `requireAdmin()`, чтобы не менять существующий уровень доступа: раньше пускал и VIEWER через
+  `proxy.ts`)
+- `POST /api/cron/jobs/[id]/run` (уже был `requireAdmin()`)
+- `POST/PUT /api/nginx/proxy-hosts[/[id]]`, `DELETE /api/nginx/proxy-hosts/[id]` — тоже не
+  проверяли сессию в роуте, добавлен `requireAuth()`
+
+`@letar/api-server` переведён из `implicitDependencies` в реальные `dependencies` (симлинк в
+`node_modules` для bun создаёт только он), `bun install` прогнан. `nx typecheck:tsgo`, `nx lint`,
+`nx test` — зелёные.
+
+**Осознанно не лимитировано:** `GET`-роуты (`docker/images`, `docker/volumes`,
+`docker/containers/[id]/logs`, `nginx/proxy-hosts` GET) — не мутируют состояние и не расходуют
+ничего сверх обычного чтения; `POST /api/servers/[id]/deploy/cancel` — дешёвая идемпотентная
+операция; `POST /api/deps/scan` — уже под `X-Cron-Secret`, вызывается только из
+`scripts/deps-scan.ts` с машины разработчика, не из браузерной сессии.
+
 ## ✅ v1.27.4 — удалён мёртвый rate-limit.ts (2026-09-27)
 
 Аудит дублирования rate-limit реализаций монорепо (задача пришла со стороны `flora`) обнаружил

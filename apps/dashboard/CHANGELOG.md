@@ -2,6 +2,18 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [1.27.5] — 2026-09-27
+
+### Added
+
+- Rate limit (`createRateLimiter` из `@letar/api-server`, 10 запросов/минуту на пользователя) на
+  роутах, выполняющих дорогие/опасные операции на хосте через nsenter/dashboard-agent: управление
+  Docker-контейнерами и `docker prune`, запуск деплоя (`/api/deploy/start`,
+  `/api/servers/[id]/apps/[appId]/deploy`), `git pull`, ручной запуск cron-задачи, запись/удаление
+  proxy host в Nginx Proxy Manager. `@letar/api-server` добавлен в реальные `dependencies` (был
+  только в `implicitDependencies`), `bun install` прогнан. Разбор аудита, обнаружившего пропуск —
+  `.claude/docs/rate-limit-dedup-api-server-vs-copies.md`.
+
 ## [1.27.4] — 2026-09-27
 
 ### Removed

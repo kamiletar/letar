@@ -4,6 +4,7 @@
  * или docker pull + restart (локальный сервер)
  */
 
+import { checkHostOpsRateLimit, tooManyRequestsResponse } from '@/lib/api-rate-limit'
 import { getServerSession } from '@/lib/auth'
 import { getEnhancedPrisma } from '@/lib/db'
 import { findContainerByName } from '@/lib/server-client'
@@ -30,6 +31,11 @@ export async function POST(_request: Request, { params }: { params: Params }) {
 
     if (session.user.role !== 'ADMIN') {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
+    const rateLimit = checkHostOpsRateLimit(`app-deploy:${session.user.id}`)
+    if (!rateLimit.allowed) {
+      return tooManyRequestsResponse(rateLimit.retryAfter)
     }
 
     const db = getEnhancedPrisma(session.user)

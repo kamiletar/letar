@@ -1,7 +1,7 @@
 # План развития Dashboard
 
-> **Версия:** 1.26.4
-> **Последнее обновление:** 2026-09-03
+> **Версия:** 1.27.5
+> **Последнее обновление:** 2026-09-27
 
 **✅ Фикс: `strategy: 'jwt'` убран из `session.cookieCache` (2026-09-03, 1.26.4).** Dashboard был
 единственным приложением монорепо с этой схемой — на общем dev-`localhost` cookie-jar это ронял
@@ -43,6 +43,10 @@
   `@letar/auth/server` `createDevSessionRoute` — тот же паттерн, что в `domwellbes`/
   `grandslamcup`). `ALLOW_DEV_SESSION`/`DEV_SESSION_TOKEN` только в `.env.local`,
   **никогда в `.env.docker`** (см. `.claude/rules/env-files.md`)
+- Rate limit (`@letar/api-server` `createRateLimiter`) на дорогих/опасных роутах (docker
+  control/prune, deploy, git pull, cron run, nginx proxy-hosts) — деталь в `PLAN_COMPLETED.md`
+  v1.27.5. Остальные API-роуты дашборда достижимы только по OIDC-сессии Ключницы (`proxy.ts`) +
+  VPN — осознанное решение не лимитировать их дополнительно, см. там же
 - Алерт `AUTH_ACCOUNT_ISSUER_NULL` (PLAN.md корня §71 п.3.2) — новый тип в `AlertType`,
   создаётся `dashboard-agent` ежедневной cron-проверкой `Account.issuer IS NULL` по 14
   приложениям с моделью Account (better-auth 1.7 регрессия, не путать со статическим гейтом

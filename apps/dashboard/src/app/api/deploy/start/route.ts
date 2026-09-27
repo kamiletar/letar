@@ -1,3 +1,4 @@
+import { checkHostOpsRateLimit, tooManyRequestsResponse } from '@/lib/api-rate-limit'
 import { requireAdmin } from '@/lib/auth-utils'
 import { getLocalClient } from '@/lib/server-client'
 import { NextResponse } from 'next/server'
@@ -11,7 +12,12 @@ import { NextResponse } from 'next/server'
  */
 export async function POST(request: Request) {
   try {
-    await requireAdmin()
+    const user = await requireAdmin()
+    const rateLimit = checkHostOpsRateLimit(`deploy-start:${user.id}`)
+    if (!rateLimit.allowed) {
+      return tooManyRequestsResponse(rateLimit.retryAfter)
+    }
+
     const body = await request.json()
     const { app } = body
 

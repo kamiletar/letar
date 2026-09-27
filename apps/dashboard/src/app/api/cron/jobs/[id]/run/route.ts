@@ -1,3 +1,4 @@
+import { checkHostOpsRateLimit, tooManyRequestsResponse } from '@/lib/api-rate-limit'
 import { logFailure, logSuccess } from '@/lib/audit-log'
 import { requireAdmin } from '@/lib/auth-utils'
 import { getClientByServerId } from '@/lib/server-client/get-client-by-id'
@@ -14,6 +15,11 @@ interface RouteContext {
 export async function POST(request: Request, context: RouteContext) {
   try {
     const user = await requireAdmin()
+    const rateLimit = checkHostOpsRateLimit(`cron-run:${user.id}`)
+    if (!rateLimit.allowed) {
+      return tooManyRequestsResponse(rateLimit.retryAfter)
+    }
+
     const { id } = await context.params
 
     const { searchParams } = new URL(request.url)

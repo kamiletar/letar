@@ -1,3 +1,5 @@
+import { checkHostOpsRateLimit, tooManyRequestsResponse } from '@/lib/api-rate-limit'
+import { requireAuth } from '@/lib/auth-utils'
 import { npmApi } from '@/lib/nginx-proxy-manager'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
@@ -37,6 +39,12 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
  */
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
+    const user = await requireAuth()
+    const rateLimit = checkHostOpsRateLimit(`nginx-write:${user.id}`)
+    if (!rateLimit.allowed) {
+      return tooManyRequestsResponse(rateLimit.retryAfter)
+    }
+
     const { id } = await params
     const body = await request.json()
     const host = await npmApi.updateProxyHost(Number(id), body)
@@ -61,6 +69,12 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
  */
 export async function DELETE(_request: NextRequest, { params }: RouteParams) {
   try {
+    const user = await requireAuth()
+    const rateLimit = checkHostOpsRateLimit(`nginx-write:${user.id}`)
+    if (!rateLimit.allowed) {
+      return tooManyRequestsResponse(rateLimit.retryAfter)
+    }
+
     const { id } = await params
     await npmApi.deleteProxyHost(Number(id))
     return NextResponse.json({
