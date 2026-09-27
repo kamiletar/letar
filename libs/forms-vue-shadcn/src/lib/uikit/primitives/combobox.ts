@@ -32,6 +32,18 @@ import type { UINode } from '../ui-node'
 export interface RekaComboboxExtraProps<TNode = unknown, TData = unknown> {
   /** Свой текст поля ввода для выбранного значения; пустой результат — текст опции (`textValue`/`label`) */
   renderValue?: (option: UIKitSelectOption<TNode, TData>) => string
+  /**
+   * Резервный поиск опции для подписи поля ввода, когда её нет в `options` — записи `loadSelected`
+   * (Stage 4b) намеренно не попадают в сам список (сервер их не выдавал), но подпись показать нужно
+   */
+  resolveOption?: (value: string) => UIKitSelectOption<TNode, TData> | undefined
+  /** Ошибка `loadOptions` (Stage 4b) — вместо пустого списка показывает сообщение и кнопку повтора */
+  loadError?: unknown
+  onRetryLoad?: () => void
+  /** Строки индикатора загрузки/ошибки/повтора — по умолчанию русский текст без i18n-провайдера */
+  loadingText?: string
+  loadErrorText?: string
+  retryText?: string
 }
 
 export function Combobox(
@@ -43,9 +55,16 @@ export function Combobox(
     options,
     renderOption,
     renderValue,
+    resolveOption,
+    loadError,
+    onRetryLoad,
+    loadingText = 'Загрузка…',
+    loadErrorText = 'Не удалось загрузить',
+    retryText = 'Повторить',
     loading,
     placeholder,
     disabled,
+    onOpenChange,
     ...rest
   }: UIKitComboboxProps<UINode> & RekaComboboxExtraProps<UINode>,
 ): VNode {
@@ -55,9 +74,10 @@ export function Combobox(
     if (rootValue === undefined || rootValue === null || rootValue === '') {
       return ''
     }
-    const option = options.find((opt) => opt.value === String(rootValue))
+    const raw = String(rootValue)
+    const option = options.find((opt) => opt.value === raw) ?? resolveOption?.(raw)
     if (!option) {
-      return String(rootValue)
+      return raw
     }
     const custom = renderValue?.(option)
     return custom || getOptionText(option)
@@ -71,6 +91,7 @@ export function Combobox(
         ((next: unknown) => onValueChange(next === null || next === undefined ? undefined : String(next))) as (
           value: unknown,
         ) => void,
+      'onUpdate:open': onOpenChange,
       disabled,
     },
     {
@@ -101,7 +122,20 @@ export function Combobox(
               {
                 default: () => [
                   loading
-                    ? h('div', { class: 'text-muted-foreground p-2 text-sm' }, 'Загрузка…')
+                    ? h('div', { class: 'text-muted-foreground p-2 text-sm' }, loadingText)
+                    : loadError
+                    ? h('div', { class: 'text-muted-foreground flex items-center gap-2 p-2 text-sm' }, [
+                      loadErrorText,
+                      h(
+                        'button',
+                        {
+                          type: 'button',
+                          class: 'text-foreground underline underline-offset-2',
+                          onClick: onRetryLoad,
+                        },
+                        retryText,
+                      ),
+                    ])
                     : h(ComboboxEmpty, { class: 'text-muted-foreground p-2 text-sm' }, {
                       default: () => 'Ничего не найдено',
                     }),
@@ -137,6 +171,7 @@ export function Combobox(
                               key: opt.value,
                               value: opt.value,
                               disabled: opt.disabled,
+                              'data-slot': 'combobox-item',
                               class: cn(
                                 'relative flex w-full cursor-default items-center gap-2 rounded-sm py-1.5 pr-8 pl-2 text-sm outline-none select-none',
                                 'data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground',

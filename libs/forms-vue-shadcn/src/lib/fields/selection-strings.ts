@@ -19,6 +19,11 @@ export interface SelectionStrings {
   searchAria: string
   /** Пустой результат поиска/список без опций */
   empty: string
+  /** Индикатор загрузки `loadOptions` (Stage 4b) */
+  loading: string
+  /** Ошибка `loadOptions`/`loadSelected` (Stage 4b) и подпись кнопки повтора */
+  loadError: string
+  retry: string
   /** Зависимое поле (`dependsOn`, §18, Stage 3c): подсказка под заблокированным полем и объявление
    * автоочистки. `{parent}`/`{field}` подставляет `interpolate()` (`@letar/forms-core/i18n`) */
   dependsOnHint: string
@@ -32,6 +37,9 @@ export const selectionStrings: SelectionStrings = {
   searchPlaceholder: 'Поиск...',
   searchAria: 'Поиск по списку',
   empty: 'Ничего не найдено',
+  loading: 'Загрузка...',
+  loadError: 'Не удалось загрузить',
+  retry: 'Повторить',
   dependsOnHint: 'Сначала выберите «{parent}»',
   dependentCleared: 'Поле «{field}» очищено: изменилось поле «{parent}»',
 }

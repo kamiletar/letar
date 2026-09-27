@@ -44,6 +44,11 @@ const EMPTY_OPTION_TOKEN = '__letar_empty_option__'
 export interface FieldSelectOption<TData = unknown> {
   value: string
   label: string
+  /**
+   * Строковая форма опции — поиск, подпись в поле ввода Combobox, когда `label` не даёт готового текста
+   * (записи `loadOptions`/`loadSelected`, Stage 4b). Статичным опциям обычно не нужна: `label` уже строка
+   */
+  textValue?: string
   /** Вторая строка пункта списка (под `label`), как в shadcn-React-скине — не отображается в триггере */
   description?: string
   disabled?: boolean

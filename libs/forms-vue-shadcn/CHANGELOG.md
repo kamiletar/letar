@@ -1,5 +1,45 @@
 # Changelog @letar/forms-vue-shadcn
 
+## 0.22.0 (2026-09-27)
+
+Асинхронные источники опций Combobox, Stage 4b (тред `forms-vue-angular-select-parity`, паритет с
+React `field-combobox.tsx`).
+
+- **Feature:** `Field.Combobox` — `loadOptions` (промис-путь: server action, `fetch`, SDK) вместо
+  статичного `options`. Ровно один источник опций: `options` теперь опционален, без него и без
+  `loadOptions` поле пишет `console.error` с именем поля (проверяется в момент рендера, не бросает).
+  Запрос дебаунсится (`debounce`, по умолчанию 300мс, `useDebounce` из `forms-vue/core`), уходит
+  только когда список хоть раз открывали (`markOpened`/`everOpened`, привязано к `onOpenChange`
+  примитива — Reka уже эмитила это событие, `combobox.ts` просто прокинут `ComboboxRoot`'s
+  `update:open`) и набран порог `minChars` (по умолчанию 1). Новый запрос отменяет прошлый; при
+  ошибке список показывает «Не удалось загрузить» и кнопку «Повторить» (новые извлечённые строки
+  `loading`/`loadError`/`retry` в `selection-strings.ts`), автоповторов нет.
+- **Feature:** `Field.Combobox` — `loadSelected`: догрузка записи текущего значения, когда её нет в
+  выдаче `loadOptions` (форма открыта на редактирование записи вне первой страницы списка). Кэш на
+  экземпляр поля (`useSelectedLoader`), запись показывается только в подписи поля ввода — в сам
+  список (в отличие от опций приложения) не попадает.
+- **Feature:** `getLabel`/`getValue`/`getTextValue`/`getDescription`/`getDisabled`/`getEditable`/
+  `getPending` — конвертация сырой записи `loadOptions`/`loadSelected` в `FieldSelectOption`, тот
+  же набор callback'ов, что у React `ComboboxFieldProps`. `FieldSelectOption` пополнен `textValue?`
+  (используется, когда `getLabel` не даёт готового текста для поиска/подписи) — общее поле с Select,
+  у статичных опций не нужно.
+- **Fix (архитектурный):** нативный `displayValue` Reka (`ComboboxInput.vue`) следит только за
+  сменой самого значения поля (`watch(rootContext.modelValue)`) — если в момент этой смены запись
+  `loadOptions`/`loadSelected` ещё не пришла, подпись не появляется сама, когда ответ придёт позже.
+  Добавлена собственная синхронизация в `field-combobox.ts` (тот же приём, что `syncedValueRef` в
+  React-скине): следит за `value`/`sourceOptions`/`selectedSourceOption` и подставляет найденную
+  подпись в поле ввода, не перебивая уже набранный пользователем текст.
+- **Extended:** `uikit/primitives/combobox.ts` (`RekaComboboxExtraProps`) — `resolveOption`
+  (резервный поиск опции `loadSelected` для подписи, раз её нет в `options`), `loadError`/
+  `onRetryLoad`/`loadingText`/`loadErrorText`/`retryText` для состояния списка, `onOpenChange`
+  прокинут в `ComboboxRoot`'s `update:open`. Пункты списка получили `data-slot="combobox-item"`
+  (тестируемость, тем же приёмом, что `combobox-item-description`).
+- Новые framework-слой композаблы `useDebounce`/`usePromiseSearch`/`useSelectedLoader` — в
+  `@letar/forms-vue` (`core.ts`), не здесь: они не завязаны на Reka и рассчитаны на переиспользование
+  headless-скином `forms-vue` в Этапах 4e-4h.
+- Не в этой стадии: `onCreate`/`onUpdate`/pending-действия (4c), `dependsOn` (4d), группировка
+  (`option.group`, исключена из всего Этапа 4).
+
 ## 0.21.0 (2026-09-27)
 
 Combobox паритет с React-скином, Stage 4a (начало Этапа 4 — `renderOption`/`renderValue`/
