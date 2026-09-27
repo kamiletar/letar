@@ -23,6 +23,22 @@ export interface FetchReleasesOptions {
   tagPrefix?: string
 }
 
+/**
+ * Сравнивает два semver вида `X.Y.Z` (без суффиксов пререлиза — им тут взяться неоткуда, `draft`
+ * и `prerelease` уже отфильтрованы выше). Возвращает > 0, если `a` новее `b`.
+ */
+function compareSemver(a: string, b: string): number {
+  const pa = a.split('.').map(Number)
+  const pb = b.split('.').map(Number)
+  for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+    const diff = (pa[i] ?? 0) - (pb[i] ?? 0)
+    if (diff !== 0) {
+      return diff
+    }
+  }
+  return 0
+}
+
 function buildHeaders(token: string | undefined): Record<string, string> {
   const headers: Record<string, string> = { Accept: 'application/vnd.github+json' }
   if (token) {
@@ -59,15 +75,29 @@ export async function fetchReleases(options: FetchReleasesOptions & { limit?: nu
 
 /**
  * Fetch the latest release. Without `tagPrefix` this hits GitHub's dedicated `/releases/latest`
- * endpoint (one request). With `tagPrefix` it lists releases and returns the first match, since
- * `/releases/latest` has no way to filter by tag.
+ * endpoint (one request). With `tagPrefix` it lists releases and picks the matching one with the
+ * highest semver, since `/releases/latest` has no way to filter by tag.
+ *
+ * ⚠️ GitHub's `/releases` order is NOT a reliable freshness signal — in a shared monorepo
+ * repository with frequent releases across several products, a just-created release can sit far
+ * from the top for a while, and manual re-releases or out-of-order hotfixes make the list order
+ * diverge from semver outright. Same root cause as
+ * `libs/electron-monorepo-updater/src/lib/find-own-release.ts`; picking `releases[0]` there showed
+ * a stale/wrong "latest" version to visitors.
  */
 export async function fetchLatestRelease(options: FetchReleasesOptions): Promise<GitHubRelease | null> {
   const { owner, repo, token, tagPrefix } = options
 
   if (tagPrefix) {
     const releases = await fetchReleases({ owner, repo, token, tagPrefix, limit: 30 })
-    return releases[0] ?? null
+    if (releases.length === 0) {
+      return null
+    }
+    return releases.reduce((best, current) =>
+      compareSemver(current.tag_name.slice(tagPrefix.length), best.tag_name.slice(tagPrefix.length)) > 0
+        ? current
+        : best
+    )
   }
 
   try {

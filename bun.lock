@@ -1509,7 +1509,7 @@
     },
     "libs/github-releases": {
       "name": "@letar/github-releases",
-      "version": "0.1.0",
+      "version": "0.1.1",
     },
     "libs/glitchtip": {
       "name": "@letar/glitchtip",

@@ -28,7 +28,7 @@ describe('fetchLatestRelease', () => {
     )
   })
 
-  it('с tagPrefix берёт первый релиз из списка с совпадающим префиксом', async () => {
+  it('с tagPrefix берёт релиз с максимальной semver-версией среди совпадающих по префиксу', async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => [
@@ -42,6 +42,35 @@ describe('fetchLatestRelease', () => {
     const release = await fetchLatestRelease({ owner: 'kamiletar', repo: 'letar', tagPrefix: 'animatrona-v' })
 
     expect(release?.tag_name).toBe('animatrona-v1.5.0')
+  })
+
+  it('не полагается на порядок ответа API — GitHub может отдать релизы не по убыванию версии', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => [
+        // Именно этот порядок и был причиной бага: releases[0] возвращал устаревшую 1.4.0.
+        mockRelease('animatrona-v1.4.0'),
+        mockRelease('animatrona-v1.10.0'),
+        mockRelease('animatrona-v1.5.0'),
+      ],
+    })
+    vi.stubGlobal('fetch', fetchMock)
+
+    const release = await fetchLatestRelease({ owner: 'kamiletar', repo: 'letar', tagPrefix: 'animatrona-v' })
+
+    expect(release?.tag_name).toBe('animatrona-v1.10.0')
+  })
+
+  it('с tagPrefix возвращает null, если ни один релиз не совпал по префиксу', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => [mockRelease('other-app-v2.0.0')],
+    })
+    vi.stubGlobal('fetch', fetchMock)
+
+    const release = await fetchLatestRelease({ owner: 'kamiletar', repo: 'letar', tagPrefix: 'animatrona-v' })
+
+    expect(release).toBeNull()
   })
 
   it('возвращает null на неуспешный ответ', async () => {
