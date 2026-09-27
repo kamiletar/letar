@@ -1,5 +1,6 @@
+import { autoUpdate, computePosition, flip, offset, type Placement, shift, size } from '@floating-ui/dom'
 import { createListboxTypeAhead, moveListboxActiveIndex } from '@letar/forms-core/uikit'
-import { computed, onBeforeUnmount, onMounted, type Ref, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, reactive, type Ref, ref } from 'vue'
 
 export interface ListboxPopupOption {
   value: string
@@ -24,30 +25,42 @@ export interface UseListboxPopupOptions<T extends ListboxPopupOption> {
    * (нативное поведение `<select>`), подходит для `Field.Select`.
    */
   typeAhead?: boolean
+  /** Сторона размещения попапа относительно триггера. По умолчанию `'bottom-start'` */
+  placement?: Placement
+}
+
+export interface FloatingStyles {
+  position: 'absolute'
+  top: string
+  left: string
+  minWidth: string
 }
 
 /**
  * Headless-примитив кастомного listbox-попапа: открытие/закрытие, активная (подсвеченная)
  * опция, клавиатурная навигация (стрелки/Home/End/Enter/Escape/type-ahead), закрытие по клику
- * снаружи. Ни один из headless-скинов (`forms-vue`, `forms-angular`) не имел раньше вообще
- * никакого поп-ап движка — Select/Combobox/Autocomplete рисовали инлайн-`<ul>` без позиционирования
- * и без ARIA `listbox`-паттерна. Этот композабл не позиционирует сам попап (просто говорит,
- * открыт он или нет) — позиционирование (обычно `position: absolute` под триггером) остаётся
- * вёрстке поля, как и у остальных headless-компонентов пакета (см. `@letar/forms-vue-shadcn` для
- * примера с настоящим floating-слоем через Reka).
+ * снаружи, позиционирование через `@floating-ui/dom` (viewport-флип/shift, синхронизация ширины
+ * с триггером, пересчёт при скролле/ресайзе через `autoUpdate`). Владелец решил не откладывать
+ * позиционирующую библиотеку до полноценного Select/Combobox (Этап 3) — паритет качества с
+ * продакшен-скином `forms-vue-shadcn` (Reka UI, там та же `@floating-ui/vue` под капотом) важнее
+ * лишней зависимости.
  *
  * Чистая логика индекса и type-ahead — в `@letar/forms-core/uikit`
- * (`moveListboxActiveIndex`/`createListboxTypeAhead`), этот композабл — только Vue-реактивность
- * (`ref`) и DOM-обвязка (click-outside) вокруг неё. Angular-версия (`@letar/forms-angular`) оборачивает
- * ту же чистую логику своими `signal`.
+ * (`moveListboxActiveIndex`/`createListboxTypeAhead`), этот композабл — Vue-реактивность (`ref`),
+ * DOM-обвязка (click-outside, floating-ui) вокруг неё. Angular-версия (`@letar/forms-angular`)
+ * оборачивает ту же чистую логику `@angular/cdk` Overlay.
  */
 export function useListboxPopup<T extends ListboxPopupOption>(options: UseListboxPopupOptions<T>) {
   const isOpen = ref(false)
   const activeIndex = ref(-1)
-  const rootRef: Ref<HTMLElement | null> = ref(null)
+  const triggerRef: Ref<HTMLElement | null> = ref(null)
+  const floatingRef: Ref<HTMLElement | null> = ref(null)
+  const floatingStyles = reactive<FloatingStyles>({ position: 'absolute', top: '0px', left: '0px', minWidth: '0px' })
   const getText = options.getText ?? ((opt: T) => opt.value)
   const typeAhead = createListboxTypeAhead(getText)
   const typeAheadEnabled = options.typeAhead ?? true
+  const placement = options.placement ?? 'bottom-start'
+  let stopAutoUpdate: (() => void) | undefined
 
   function optionId(index: number): string {
     return `${options.idBase}-option-${index}`
@@ -56,6 +69,44 @@ export function useListboxPopup<T extends ListboxPopupOption>(options: UseListbo
   const activeDescendantId = computed<string | undefined>(() =>
     isOpen.value && activeIndex.value >= 0 ? optionId(activeIndex.value) : undefined
   )
+
+  function updatePosition(): void {
+    const trigger = triggerRef.value
+    const floating = floatingRef.value
+    if (!trigger || !floating) {
+      return
+    }
+    void computePosition(trigger, floating, {
+      placement,
+      middleware: [
+        offset(4),
+        flip(),
+        shift({ padding: 8 }),
+        size({
+          apply({ rects, elements }) {
+            elements.floating.style.minWidth = `${rects.reference.width}px`
+          },
+        }),
+      ],
+    }).then(({ x, y }) => {
+      floatingStyles.top = `${y}px`
+      floatingStyles.left = `${x}px`
+    })
+  }
+
+  function startAutoUpdate(): void {
+    const trigger = triggerRef.value
+    const floating = floatingRef.value
+    if (!trigger || !floating || stopAutoUpdate) {
+      return
+    }
+    stopAutoUpdate = autoUpdate(trigger, floating, updatePosition)
+  }
+
+  function stopPositioning(): void {
+    stopAutoUpdate?.()
+    stopAutoUpdate = undefined
+  }
 
   function openPopup(): void {
     if (isOpen.value) {
@@ -68,12 +119,20 @@ export function useListboxPopup<T extends ListboxPopupOption>(options: UseListbo
     activeIndex.value = selectedIndex >= 0
       ? selectedIndex
       : moveListboxActiveIndex(visible, -1, 'first')
+    // `floatingRef` попадает в DOM только после этого рендера (v-if на isOpen) — запускаем
+    // позиционирование в следующем тике через тот же приём, что и в форме без явного nextTick:
+    // startAutoUpdate сам не делает ничего, пока оба рефа не заполнены, поэтому вызов из
+    // watcher/onMounted вложенного попапа безопасен; здесь достаточно немедленной попытки —
+    // `attachFloating` (вызывается из шаблона через `:ref` на попап-элемент) досчитает остальное.
+    startAutoUpdate()
+    updatePosition()
   }
 
   function closePopup(): void {
     isOpen.value = false
     activeIndex.value = -1
     typeAhead.reset()
+    stopPositioning()
   }
 
   function togglePopup(): void {
@@ -164,19 +223,44 @@ export function useListboxPopup<T extends ListboxPopupOption>(options: UseListbo
     }
   }
 
+  function isInside(node: Node): boolean {
+    return Boolean(triggerRef.value?.contains(node) || floatingRef.value?.contains(node))
+  }
+
   function handleDocumentMousedown(event: MouseEvent): void {
-    if (isOpen.value && rootRef.value && !rootRef.value.contains(event.target as Node)) {
+    if (isOpen.value && !isInside(event.target as Node)) {
       closePopup()
     }
   }
 
+  /**
+   * Вызывается из шаблона поля через `:ref` на сам попап-элемент (обычно `<ul role="listbox">`).
+   * Отдельная функция, а не голый `floatingRef`, — чтобы сразу пересчитать позицию и запустить
+   * `autoUpdate`, как только элемент реально попал в DOM (при `v-if="isOpen"` это происходит уже
+   * после `openPopup()`, `floatingRef.value` в её теле ещё `null`).
+   */
+  function attachFloating(element: HTMLElement | null): void {
+    floatingRef.value = element
+    if (element && isOpen.value) {
+      startAutoUpdate()
+      updatePosition()
+    } else if (!element) {
+      stopPositioning()
+    }
+  }
+
   onMounted(() => document.addEventListener('mousedown', handleDocumentMousedown))
-  onBeforeUnmount(() => document.removeEventListener('mousedown', handleDocumentMousedown))
+  onBeforeUnmount(() => {
+    document.removeEventListener('mousedown', handleDocumentMousedown)
+    stopPositioning()
+  })
 
   return {
     isOpen,
     activeIndex,
-    rootRef,
+    triggerRef,
+    floatingRef: attachFloating,
+    floatingStyles,
     activeDescendantId,
     optionId,
     openPopup,

@@ -1,4 +1,6 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { provideZonelessChangeDetection } from '@angular/core'
+import { TestBed } from '@angular/core/testing'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createListboxPopup, type ListboxPopup } from './listbox-popup'
 
 interface Option {
@@ -9,12 +11,14 @@ interface Option {
 const OPTIONS: Option[] = [{ value: 'a' }, { value: 'b', disabled: true }, { value: 'c' }]
 
 function createPopup(onSelect: (option: Option) => void, opts: { typeAhead?: boolean } = {}): ListboxPopup<Option> {
-  return createListboxPopup<Option>({
-    options: () => OPTIONS,
-    onSelect,
-    idBase: 'test-field',
-    typeAhead: opts.typeAhead,
-  })
+  return TestBed.runInInjectionContext(() =>
+    createListboxPopup<Option>({
+      options: () => OPTIONS,
+      onSelect,
+      idBase: 'test-field',
+      typeAhead: opts.typeAhead,
+    })
+  )
 }
 
 function keydown(key: string): KeyboardEvent {
@@ -23,10 +27,27 @@ function keydown(key: string): KeyboardEvent {
 
 describe('createListboxPopup', () => {
   let popup: ListboxPopup<Option> | undefined
+  let trigger: HTMLElement
+  let listbox: HTMLElement
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({ providers: [provideZonelessChangeDetection()] })
+    trigger = document.createElement('button')
+    listbox = document.createElement('ul')
+    // `DomPortal` требует, чтобы переносимый узел уже имел `parentNode` (чтобы вернуть его назад
+    // при detach) — в реальном поле `<ul>` всегда лежит в шаблоне компонента, здесь имитируем
+    // тем же временным контейнером, из которого CDK его заберёт в overlay-панель.
+    const templateHost = document.createElement('div')
+    templateHost.append(listbox)
+    document.body.append(trigger, templateHost)
+  })
 
   afterEach(() => {
     popup?.destroy()
     popup = undefined
+    trigger.remove()
+    listbox.parentElement?.remove()
+    listbox.remove()
   })
 
   it('starts closed with no active option', () => {
@@ -96,37 +117,49 @@ describe('createListboxPopup', () => {
     expect(popup.isOpen()).toBe(false)
   })
 
-  it('a mousedown outside the root closes the popup', () => {
+  it('attaches the listbox to a CDK overlay once open and the element is registered', () => {
     popup = createPopup(vi.fn())
-    const root = document.createElement('div')
-    popup.attachRoot(root)
+    popup.attachTrigger(trigger)
     popup.onKeydown(keydown('ArrowDown'))
+    popup.attachFloating(listbox)
+
+    // DomPortal переносит переданный узел внутрь overlay-контейнера CDK (аппендится в body)
+    expect(listbox.isConnected).toBe(true)
+    expect(trigger.contains(listbox)).toBe(false)
+  })
+
+  it('an outside click (CDK outsidePointerEvents) closes the popup', () => {
+    popup = createPopup(vi.fn())
+    popup.attachTrigger(trigger)
+    popup.onKeydown(keydown('ArrowDown'))
+    popup.attachFloating(listbox)
     expect(popup.isOpen()).toBe(true)
 
-    document.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }))
+    // Диспетчер CDK шлёт outsidePointerEvents на 'click' (pointerdown только запоминает
+    // координаты для различения клика от драга) — см. OverlayOutsideClickDispatcher
+    document.body.dispatchEvent(new MouseEvent('click', { bubbles: true }))
     expect(popup.isOpen()).toBe(false)
   })
 
-  it('a mousedown inside the root does not close the popup', () => {
+  it('a click on the trigger does not close the popup', () => {
     popup = createPopup(vi.fn())
-    const root = document.createElement('div')
-    const trigger = document.createElement('button')
-    root.appendChild(trigger)
-    popup.attachRoot(root)
+    popup.attachTrigger(trigger)
     popup.onKeydown(keydown('ArrowDown'))
+    popup.attachFloating(listbox)
 
-    trigger.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }))
+    trigger.dispatchEvent(new MouseEvent('click', { bubbles: true }))
     expect(popup.isOpen()).toBe(true)
   })
 
-  it('destroy() stops reacting to document mousedown', () => {
+  it('destroy() disposes the overlay and stops reacting to outside clicks', () => {
     popup = createPopup(vi.fn())
-    const root = document.createElement('div')
-    popup.attachRoot(root)
+    popup.attachTrigger(trigger)
     popup.onKeydown(keydown('ArrowDown'))
+    popup.attachFloating(listbox)
     popup.destroy()
 
-    document.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }))
+    document.body.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    // closePopup() внутри destroy() не вызывался — сигнал остаётся как был до dispose()
     expect(popup.isOpen()).toBe(true)
   })
 })

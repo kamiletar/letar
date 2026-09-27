@@ -22,8 +22,13 @@ function mountHost(onSelect: (option: Option) => void, opts: { typeAhead?: boole
       return { popup }
     },
     render() {
-      return h('div', { ref: this.popup.rootRef }, [
-        h('button', { onKeydown: this.popup.onKeydown, onClick: this.popup.togglePopup }, 'trigger'),
+      return h('div', [
+        h('button', {
+          ref: this.popup.triggerRef,
+          onKeydown: this.popup.onKeydown,
+          onClick: this.popup.togglePopup,
+        }, 'trigger'),
+        this.popup.isOpen.value ? h('ul', { ref: this.popup.floatingRef, role: 'listbox' }) : null,
       ])
     },
   })
@@ -98,7 +103,7 @@ describe('useListboxPopup', () => {
     expect(wrapper.vm.popup.isOpen.value).toBe(false)
   })
 
-  it('a mousedown outside the root closes the popup', async () => {
+  it('a mousedown outside the trigger and the floating element closes the popup', async () => {
     const wrapper = mountHost(vi.fn())
     await wrapper.find('button').trigger('keydown', { key: 'ArrowDown' })
     expect(wrapper.vm.popup.isOpen.value).toBe(true)
@@ -107,10 +112,28 @@ describe('useListboxPopup', () => {
     expect(wrapper.vm.popup.isOpen.value).toBe(false)
   })
 
-  it('a mousedown inside the root does not close the popup', async () => {
+  it('a mousedown on the trigger does not close the popup', async () => {
     const wrapper = mountHost(vi.fn())
     await wrapper.find('button').trigger('keydown', { key: 'ArrowDown' })
     wrapper.find('button').element.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }))
     expect(wrapper.vm.popup.isOpen.value).toBe(true)
+  })
+
+  it('a mousedown inside the floating listbox does not close the popup', async () => {
+    const wrapper = mountHost(vi.fn())
+    await wrapper.find('button').trigger('keydown', { key: 'ArrowDown' })
+    wrapper.find('ul').element.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }))
+    expect(wrapper.vm.popup.isOpen.value).toBe(true)
+  })
+
+  it('computes floating position (floating-ui) once the listbox is attached', async () => {
+    const wrapper = mountHost(vi.fn())
+    await wrapper.find('button').trigger('keydown', { key: 'ArrowDown' })
+    // computePosition резолвится микротаской — один лишний тик, чтобы .then() успел отработать
+    await Promise.resolve()
+    await wrapper.vm.$nextTick()
+    expect(wrapper.vm.popup.floatingStyles.position).toBe('absolute')
+    expect(typeof wrapper.vm.popup.floatingStyles.top).toBe('string')
+    expect(typeof wrapper.vm.popup.floatingStyles.left).toBe('string')
   })
 })

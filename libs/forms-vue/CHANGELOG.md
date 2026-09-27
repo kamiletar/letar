@@ -1,5 +1,16 @@
 # Changelog @letar/forms-vue
 
+## 0.18.0 (2026-09-27)
+
+- **Feature:** `useListboxPopup` позиционируется через `@floating-ui/dom` (`computePosition`,
+  `flip`/`shift`/`offset`/`size`-мидлвары, пересчёт при скролле/ресайзе через `autoUpdate`) вместо
+  простого `position: absolute` без учёта viewport. Композабл возвращает `triggerRef` (якорь) и
+  `floatingRef` (теперь функция-реф на сам попап-элемент, не `Ref`) вместо единого `rootRef` —
+  click-outside проверяет оба узла напрямую, `rootRef` убран как публичный API. Владелец решил не
+  откладывать позиционирующую библиотеку до Этапа 3 (паритет качества с `forms-vue-shadcn`, где
+  Reka UI уже использует `@floating-ui/vue`) — см. `libs/forms/PLAN.md`, тред
+  `forms-vue-angular-select-parity`.
+
 ## 0.17.0 (2026-09-27)
 
 - **Feature:** `useListboxPopup` (`core/use-listbox-popup.ts`) — headless-примитив кастомного
