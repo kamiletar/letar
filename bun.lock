@@ -580,10 +580,11 @@
     },
     "apps/dashboard": {
       "name": "@letar/dashboard",
-      "version": "1.27.3",
+      "version": "1.27.5",
       "dependencies": {
         "@letar/admin-ui": "workspace:*",
         "@letar/analytics": "workspace:*",
+        "@letar/api-server": "workspace:*",
         "@letar/auth": "workspace:*",
         "@letar/chakra-provider": "workspace:*",
         "@letar/env-load": "workspace:*",
