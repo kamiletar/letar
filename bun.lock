@@ -751,6 +751,7 @@
         "@letar/format-utils": "workspace:*",
         "@letar/image-upload": "workspace:*",
         "@letar/seo": "workspace:*",
+        "@letar/theme-check": "workspace:*",
       },
     },
     "apps/form-develop-app": {
@@ -890,7 +891,7 @@
     },
     "apps/letar-landing": {
       "name": "@letar/letar-landing",
-      "version": "0.5.7",
+      "version": "0.5.8",
       "dependencies": {
         "@letar/analytics": "workspace:*",
         "@letar/chakra-provider": "workspace:*",
