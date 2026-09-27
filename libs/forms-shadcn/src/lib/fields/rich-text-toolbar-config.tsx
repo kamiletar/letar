@@ -1,5 +1,6 @@
 'use client'
 
+import type { ToolbarStringKey } from '@letar/forms-react'
 import type { Editor } from '@tiptap/react'
 import {
   Bold,
@@ -66,10 +67,13 @@ export const DEFAULT_TOOLBAR_BUTTONS: ToolbarButton[] = [
  * not defined`. См. тот же фикс в Chakra-версии (`toolbar-config.tsx`) и
  * `document-field-base.tsx`. Размер иконки применяется в render (см. `ICON_SIZE`,
  * `field-rich-text-impl.tsx`), не хранится в конфиге.
+ *
+ * `labelKey` — ключ общего словаря `formToolbar.*` (`@letar/forms-react`, `toolbar-strings.ts`),
+ * один на Chakra- и shadcn-скин; подпись резолвится в `field-rich-text-impl.tsx`.
  */
 export interface ToolbarButtonConfig {
   icon: ComponentType<{ size?: number }>
-  label: string
+  labelKey: ToolbarStringKey
   action: (editor: Editor) => void
   isActive?: (editor: Editor) => boolean
 }
@@ -79,73 +83,73 @@ export const ICON_SIZE = 14
 export const TOOLBAR_CONFIG: Record<ToolbarButton, ToolbarButtonConfig> = {
   bold: {
     icon: Bold,
-    label: 'Полужирный',
+    labelKey: 'formToolbar.bold',
     action: (editor) => editor.chain().focus().toggleBold().run(),
     isActive: (editor) => editor.isActive('bold'),
   },
   italic: {
     icon: Italic,
-    label: 'Курсив',
+    labelKey: 'formToolbar.italic',
     action: (editor) => editor.chain().focus().toggleItalic().run(),
     isActive: (editor) => editor.isActive('italic'),
   },
   underline: {
     icon: UnderlineIcon,
-    label: 'Подчёркнутый',
+    labelKey: 'formToolbar.underline',
     action: (editor) => editor.chain().focus().toggleUnderline().run(),
     isActive: (editor) => editor.isActive('underline'),
   },
   strike: {
     icon: Strikethrough,
-    label: 'Зачёркнутый',
+    labelKey: 'formToolbar.strike',
     action: (editor) => editor.chain().focus().toggleStrike().run(),
     isActive: (editor) => editor.isActive('strike'),
   },
   code: {
     icon: Code,
-    label: 'Код',
+    labelKey: 'formToolbar.code',
     action: (editor) => editor.chain().focus().toggleCode().run(),
     isActive: (editor) => editor.isActive('code'),
   },
   heading1: {
     icon: Heading1,
-    label: 'Заголовок 1',
+    labelKey: 'formToolbar.heading1',
     action: (editor) => editor.chain().focus().toggleHeading({ level: 1 }).run(),
     isActive: (editor) => editor.isActive('heading', { level: 1 }),
   },
   heading2: {
     icon: Heading2,
-    label: 'Заголовок 2',
+    labelKey: 'formToolbar.heading2',
     action: (editor) => editor.chain().focus().toggleHeading({ level: 2 }).run(),
     isActive: (editor) => editor.isActive('heading', { level: 2 }),
   },
   heading3: {
     icon: Heading3,
-    label: 'Заголовок 3',
+    labelKey: 'formToolbar.heading3',
     action: (editor) => editor.chain().focus().toggleHeading({ level: 3 }).run(),
     isActive: (editor) => editor.isActive('heading', { level: 3 }),
   },
   bulletList: {
     icon: List,
-    label: 'Маркированный список',
+    labelKey: 'formToolbar.bulletList',
     action: (editor) => editor.chain().focus().toggleBulletList().run(),
     isActive: (editor) => editor.isActive('bulletList'),
   },
   orderedList: {
     icon: ListOrdered,
-    label: 'Нумерованный список',
+    labelKey: 'formToolbar.orderedList',
     action: (editor) => editor.chain().focus().toggleOrderedList().run(),
     isActive: (editor) => editor.isActive('orderedList'),
   },
   blockquote: {
     icon: Quote,
-    label: 'Цитата',
+    labelKey: 'formToolbar.blockquote',
     action: (editor) => editor.chain().focus().toggleBlockquote().run(),
     isActive: (editor) => editor.isActive('blockquote'),
   },
   link: {
     icon: LinkIcon,
-    label: 'Ссылка',
+    labelKey: 'formToolbar.link',
     // Beta: window.prompt вместо Popover-формы (см. Chakra LinkPopover) — тот же фолбэк,
     // что уже был в Chakra-конфиге кнопки на случай использования без Popover-обвязки.
     action: (editor) => {
@@ -162,12 +166,12 @@ export const TOOLBAR_CONFIG: Record<ToolbarButton, ToolbarButtonConfig> = {
   },
   undo: {
     icon: Undo,
-    label: 'Отменить',
+    labelKey: 'formToolbar.undo',
     action: (editor) => editor.chain().focus().undo().run(),
   },
   redo: {
     icon: Redo,
-    label: 'Повторить',
+    labelKey: 'formToolbar.redo',
     action: (editor) => editor.chain().focus().redo().run(),
   },
 }

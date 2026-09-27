@@ -1,6 +1,6 @@
 'use client'
 
-import { useFieldPlaceholderString } from '@letar/forms-react'
+import { resolveToolbarString, useFieldPlaceholderString, useFormI18n } from '@letar/forms-react'
 import { cn } from '@letar/tailwind-utils'
 import TiptapLink from '@tiptap/extension-link'
 import Placeholder from '@tiptap/extension-placeholder'
@@ -58,6 +58,8 @@ function RichTextEditor({
   fieldName,
 }: RichTextEditorProps): ReactElement | null {
   const builtinPlaceholder = useFieldPlaceholderString('formFieldPlaceholder.richText', SHADCN_NO_PROVIDER_LOCALE)
+  // Подписи кнопок тулбара — общий словарь `formToolbar.*` (`@letar/forms-react`), см. rich-text-toolbar-config.tsx
+  const i18n = useFormI18n()
   const extensions = useMemo(
     () => [
       StarterKit,
@@ -117,7 +119,7 @@ function RichTextEditor({
               <button
                 key={button}
                 type="button"
-                aria-label={config.label}
+                aria-label={resolveToolbarString(i18n, config.labelKey, SHADCN_NO_PROVIDER_LOCALE)}
                 aria-pressed={isActive}
                 disabled={disabled}
                 onClick={() => config.action(editor)}

@@ -4,6 +4,15 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.57.0] - 2026-09-27
+
+### Добавлено
+
+- Подписи кнопок тулбара `Form.Field.RichText` подключены к общему словарю `formToolbar.*`
+  (`@letar/forms-react` ≥ 0.23.0, тот же словарь, что у Chakra-скина): без `FormI18nProvider` —
+  русский (прежний хардкод), `locale="en"` — английский, как у Chakra-версии. `TOOLBAR_CONFIG.label`
+  заменён на `TOOLBAR_CONFIG.labelKey`.
+
 ## [0.56.0] - 2026-09-27
 
 ### Добавлено
