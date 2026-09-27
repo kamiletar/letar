@@ -1,7 +1,7 @@
 # Animatrona — Выполненные задачи (Часть 1)
 
 > Точка входа и карта всех частей — [PLAN_COMPLETED.md](./PLAN_COMPLETED.md).
-> Диапазон: 2026-09-04 — 2026-09-16.
+> Диапазон: 2026-09-04 — 2026-09-27.
 
 ## Автообновление ставилось не тихо, вопреки тексту `UpdateDrawer` (2026-09-17, v0.56.2)
 
@@ -933,3 +933,66 @@ release-worktree (не полный `bun install --lockfile-only` — прива
 
 CI (`Release Animatrona`, run 36331315453) запущен пушем тега; статус на конец сессии — в работе,
 итог смотреть в `apps/animatrona/PLAN.md` § Открытые задачи.
+
+## Релиз 0.57.0 провалился в CI на всех трёх платформах — перевыпущен как 0.57.1 (2026-09-27)
+
+Продолжение сессии выше: run 36331315453 завершился `failure` на всех трёх build-джобах
+(`build-windows`/`build-macos`/`build-linux`), `create-release` — единственная зелёная джоба.
+Черновик релиза остался без единого загруженного файла. Три независимые причины, найденные по
+`gh run view --log-failed`:
+
+**Причина 1 (главная, ронявшая Linux/macOS сразу, а Windows — как только дошло бы до этого шага).**
+`renderer/src/app/player/page.tsx`:140-141 — `useWatchProgress(localStorage)`/
+`useFolderHistory(localStorage)` передавали глобал `localStorage` напрямую в теле компонента.
+`'use client'` не освобождает компонент от прогона на сервере во время `next build`
+(статический экспорт пререндерит и клиентские компоненты) — `ReferenceError: localStorage is
+not defined` ронял пререндер `/player` (`Next.js build worker exited with code: 1`). Тот же
+паттерн для того же `@letar/folder-player-react` уже был правильно решён в
+`apps/animatrona-folder-player/renderer/app/page.tsx` (заглушка `noopStorage`, реальный
+`window.localStorage` подставляется только после `mounted`) — применено то же решение сюда:
+модуль-level `noopStorage: FolderPlayerStorage`, `const [mounted, setMounted] = useState(false)`
+
+- `useEffect(() => setMounted(true), [])`, `storage = mounted ? localStorage : noopStorage`.
+  Проверено грепом остальных `localStorage.*` в renderer — все либо в `useEffect`/колбэках, либо
+  уже обёрнуты в `try/catch` (`app/discover/watch/page.tsx` — ловит `ReferenceError` как обычное
+  исключение), других непойманных мест не осталось.
+
+**Причина 2 (Windows).** Шаг «Build zenstack-form-plugin» — `npx tsc --project
+tsconfig.lib.json` резолвился не в локальный `typescript` воркспейса, а скачивал с npm
+посторонний пакет-пустышку `tsc@2.0.4` («This is not the tsc command you are looking for»).
+На Linux/macOS та же строка (без `npx`, просто `tsc`, полагаясь на PATH) отрабатывала
+нормально — баг специфичен для того, как `npx` резолвит бинарники на Windows в этом bun
+isolated-linker воркспейсе. Заменено на `bunx tsc`, как и остальные вызовы инструментов в этом
+workflow.
+
+**Причина 3 (маскирующая, Linux/macOS).** `cd renderer && bunx next build --webpack && cd ..`
+без подоболочки: когда `next build` падал (причина 1), `cd ..` не выполнялся — он не последний
+в `&&`-цепочке, а `set -e` ловит только сбой последней команды такой цепочки. Следующий шаг
+(`bunx webpack --config main/webpack.config.js`) резолвил путь от `renderer/`, получая
+`Cannot find module '.../renderer/main/webpack.config.js'` — вторая, гораздо более непонятная
+ошибка, маскирующая первую. Тот же паттерн был и в шаге «Build Windows», но под pwsh (шелл по
+умолчанию на этом раннере) ненулевой код внешней команды и вовсе не проваливает шаг сам по себе
+без явной проверки `$LASTEXITCODE` — то есть без причины 2 (которая уронила Windows раньше) шаг
+`Build Windows` под pwsh мог бы «успешно» завершиться на пустом `dist/`. Фикс — все три шага
+сборки переведены на `(cd dir && cmd)` в подоболочке (не меняет cwd родителя, честно роняет
+шаг), «Build Windows» дополнительно переведён на `shell: bash` (git-bash уже используется в
+этом файле в шаге «Rename assets», прецедент в этом же workflow).
+
+**Побочная находка при подготовке нового release-worktree** — независимо от animatrona, на
+`origin/main` накопился ещё один слой lock-дрейфа поверх найденного в первой попытке (та же
+природа — коммит с bump'ом версии/зависимости запушен, а `bun.lock` этого коммита не отражает,
+либо наоборот): `libs/forms-angular` (lock 0.3.0 vs package.json 0.2.0), `libs/forms-vue` (снова,
+lock 0.24.0 vs package.json 0.23.0 — уже другой инцидент, не тот же самый, что чинили в первой
+попытке) и `apps/label-printer-desktop` (lock версия 0.5.22 + лишняя зависимость `serialport`,
+которых на `origin/main` ещё не было — параллельная сессия как раз в это время дописывала этот
+самый фикс, коммит `0d8e64993` лёг на `main` уже после того, как я закончил release-worktree).
+Пофикшено той же точечной правкой в изолированном release-worktree, без касания реальных
+package.json — все три расхождения только внутри одноразового worktree, использованного для тега.
+
+**Механика повторного релиза.** Сломанный черновик и тег `animatrona-v0.57.0` удалены
+(`gh release delete --cleanup-tag`). Новый detached worktree от свежего `origin/main`,
+cherry-pick тех же 4 базовых коммитов первой попытки (bump+lock, ci-notes-фикс, лендинг, PLAN) +
+два новых фикс-коммита (`page.tsx`, `release-animatrona.yml`) + точечный lock-фикс трёх
+находок выше, версия `apps/animatrona` поднята до **0.57.1**, тег `animatrona-v0.57.1` запушен.
+CI (run 36341710951) запущен; статус на момент этой записи — в работе, итог смотреть в
+`apps/animatrona/PLAN.md` § Открытые задачи.

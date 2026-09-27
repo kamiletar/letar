@@ -647,13 +647,40 @@ creator-only: `EncodingProfilesCard`, `TranscodingSettingsCard`, `QBittorrentSet
       опубликованный. Исправлено (`animatrona-landing` 0.4.13). Итог сессии — только этот пункт
       был решением исходного открытого вопроса, ниже — новый:
 
-- [ ] ⚠️ **Открытый вопрос: после первого реального релиза (`animatrona-v0.57.0`) нет старого
-      `animatrona-v*` в `kamiletar/letar`, с которого можно проверить живой цикл N→N+1** (методика
-      — [electron-monorepo-shared-releases.md](/.claude/docs/electron-monorepo-shared-releases.md)
-      § «Живая проверка цикла обновления»). Раньше найденные баги 0.2.1–0.2.3 успевали проверить
-      на `kami-key-the`, здесь — только теоретически (код идентичен, но не прогнан). Рекомендация:
-      после публикации 0.57.0 выпустить короткий 0.57.1 без изменений кода специально для живой
-      проверки цикла, как это делал `kami-key-the` (1.9.32→1.9.33).
+- [x] ~~Открытый вопрос: после первого реального релиза (`animatrona-v0.57.0`) нет старого
+      `animatrona-v*`, с которого можно проверить живой цикл N→N+1~~ — **2026-09-27: первая
+      попытка (`animatrona-v0.57.0`) провалилась в CI на всех трёх платформах, черновик релиза
+      остался без единого файла** (`gh run view 36331315453` — `build-windows`/`build-macos`/
+      `build-linux` все red). Три независимые причины, все в самом `release-animatrona.yml`/коде
+      `apps/animatrona`, не в трёх фиксах `@letar/electron-monorepo-updater`:
+      1. `renderer/src/app/player/page.tsx` — `useWatchProgress(localStorage)`/
+      `useFolderHistory(localStorage)` передавали глобал браузера напрямую в теле компонента;
+      `'use client'` не освобождает от прогона на сервере во время статического экспорта
+      (`next build`), `ReferenceError: localStorage is not defined` ронял пререндер `/player`.
+      Тот же паттерн уже был решён в `apps/animatrona-folder-player` (заглушка-storage до
+      монтирования) — применено то же решение здесь.
+      2. Windows: `npx tsc` в шаге «Build zenstack-form-plugin» резолвился не в локальный
+      `typescript`, а тянул с npm пакет-пустышку `tsc@2.0.4` — заменено на `bunx tsc`.
+      3. `cd renderer && next build --webpack && cd ..` без подоболочки — при падении `next
+         build` (причина 1) `cd ..` не выполнялся (не последний в `&&`-цепочке, `set -e` это не
+      ловит), следующий шаг резолвил `main/webpack.config.js` от `renderer/` и падал второй,
+      более непонятной ошибкой — маскируя реальную причину на Linux/macOS. Все три шага
+      сборки переведены на `(cd dir && cmd)` в подоболочке.
+
+      Черновик 0.57.0 и его тег удалены (`gh release delete --cleanup-tag`), релиз перевыпущен
+      как **`animatrona-v0.57.1`** (тег запушен 2026-09-27, CI `36341710951` — см. ниже). Раз
+      0.57.1 содержит реальные фиксы (а не no-op, как планировалось изначально), живой цикл
+      N→N+1 для трёх фиксов 0.2.1–0.2.3 по-прежнему не проверен на этом приложении — методика
+      [electron-monorepo-shared-releases.md](/.claude/docs/electron-monorepo-shared-releases.md)
+      § «Живая проверка цикла обновления» ждёт следующего релиза после 0.57.1.
+
+- [ ] ⚠️ **Открытый вопрос: итог CI релиза `animatrona-v0.57.1` (`36341710951`) не проверен —
+      сессия прервалась на `in_progress`.** Проверить `gh run view 36341710951 -R kamiletar/letar`;
+      при успехе — свериться, что релиз опубликован (`gh release view animatrona-v0.57.1`), что
+      загружены оба Windows-файла + `latest.yml`/`latest-mac.yml`/`latest-linux.yml`, и что
+      `animatrona-landing` (после фикса `ANIMATRONA_SOURCE`, см. выше) корректно показывает
+      0.57.1 в разделе загрузок. При провале — диагностировать по логам (`gh run view
+      <id> --log-failed`), это уже второй проход, новых причин той же природы быть не должно.
 
 - [ ] ⚠️ **Открытый вопрос: судьба репозитория `kamiletar/animatrona`** (отдельный зеркальный
       репозиторий старой схемы релизов, признан устаревшим 2026-09-13). Новый CI-workflow
