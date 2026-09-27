@@ -1669,3 +1669,8 @@ zz-generator-readme-check`) — сверил текст README и вывод в 
 спека `new-lib/generator.spec.ts` — зелёные, ни один тест не проверял текст README построчно.
 Небиллируемая инфраструктура студии (`time_discard`) — коммиты `478dab4ce` (генератор),
 `ad17b8ef1` (`semver-compare`), push не выполнялся.
+
+При завершении сессии найдена та же формулировка в `.claude/commands/create/new-lib.md` — файл,
+который `libs.md` прямо называет вторым местом, обязанным давать «одну фразу, что обязательно» и
+ссылаться сюда. Тоже переписан (реальные `dependencies` + `bun install` вместо
+`implicitDependencies`).
