@@ -1,5 +1,23 @@
 # Выполненные задачи — form-docs
 
+## Сессия 2026-09-27 — фикс блокирующего деплой `ShikiError: Language 'zmodel' not found`
+
+deploy-agent-dev прогнал staging-сборку `form-docs` после того, как гайды `create-form`/
+`dependent-selects` (ru/en, 4 файла) получили код-блоки `` ```zmodel `` — сборка падала на
+пререндере, `zmodel` не входит в дефолтный набор языков Shiki. `source.config.ts` был голым
+`defineConfig()` без `mdxOptions`.
+
+Фикс (делегирован `forms-coordinator-dev`, тред `form-docs-zmodel-shiki-lang`): алиас на `prisma`
+(ZModel синтаксически ближе всего к Prisma schema) — `mdxOptions.rehypeCodeOptions = {
+...rehypeCodeDefaultOptions, langAlias: { zmodel: 'prisma' } }`. Спред дефолтов
+(`fumadocs-core/mdx-plugins`) обязателен: тип `RehypeCodeOptions` требует поле `theme`, голый
+`{ langAlias: {...} }` не тайпчекается (`TS2322`).
+
+Проверено: `nx build form-docs` (164/164 страниц), `nx typecheck:tsgo form-docs`, `nx lint
+form-docs` — все зелёные. Визуально в `next dev`: код-блок `zmodel` в `dependent-selects.mdx`
+подсвечен (DOM — 45 `<span style>` разных цветов в блоке `model Address {...}`), не выглядит
+сломанным. Коммит `a7a49a4c0`, form-docs 0.6.16.
+
 ## Сессия 2026-09-01 — фикс `nx typecheck:tsgo`: сломанный вывод типов fumadocs-core в `loader()`
 
 `[[...slug]]/page.tsx`: `TS2339: Property 'body'/'toc' does not exist on type 'PageData'` —

@@ -757,6 +757,15 @@ namespace-заголовки, сквозная вычитка EN+RU, визуа�
   прямой запрет
 - Base UI, Kobalte, Melt — не исследовались
 
+## Фикс деплоя: ShikiError zmodel (2026-09-27, v0.6.16)
+
+- [x] Гайды `create-form`/`dependent-selects` (ru/en, 4 файла) получили код-блоки `` ```zmodel ``,
+      `zmodel` не входил в дефолтный набор языков Shiki — staging-сборка падала на пререндере.
+      Фикс: `source.config.ts` → `mdxOptions.rehypeCodeOptions = { ...rehypeCodeDefaultOptions,
+  langAlias: { zmodel: 'prisma' } }` (спред дефолтов обязателен — `theme` required в типе
+      `RehypeCodeOptions`, голый `{ langAlias }` не тайпчекается). Подсветка проверена визуально в
+      `next dev` (DOM: 45 раскрашенных `<span style>` в блоке `model Address {...}`).
+
 ## Техдолг: подключить theme:check
 
 Гейт сырых цветов/теней/transition в UI-коде (`nx g @letar/generators:theme-check-integrate
