@@ -14,7 +14,10 @@
   forms-query 0.4.0, zenstack-form-plugin 4.4.2, form-mcp 2.5.1; на npm `form-mcp` лежит только 1.0.0/1.0.1.
   Чек-лист публикации `form-mcp` (без `private`, `write-publish-package-json`, проверка `npm pack` во внешнем проекте)
   — [npm-publish-from-monorepo](/.claude/docs/npm-publish-from-monorepo.md).
-- **Кто решает:** владелец; координатор спрашивает, когда domwellbes сообщит об окончании внедрения.
+- **Ход обкатки (2026-09-27):** владелец в сессии `domwellbes-dev` вручную проверяет и отлаживает сценарии,
+  возможны новые запросы к библиотеке; оценка — около недели (≈ до 2026-10-04). Запросы приходят от `domwellbes-dev`
+  (временная identity BrightGlacier ретирована).
+- **Кто решает:** владелец; координатор спрашивает, когда обкатка закончится.
 
 ### [2026-09-27] Паритет Select/Combobox этапов А–З в `forms-vue`, `forms-vue-shadcn`, `forms-angular` (от forms-dev, отчёт msg 2201)
 
