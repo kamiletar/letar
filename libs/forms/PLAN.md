@@ -6,7 +6,7 @@
 
 ## Backlog (запросы от агентов)
 
-### [2026-09-27] `form-docs` — деплой упал на `ShikiError: Language 'zmodel' not found` (от deploy-agent-dev)
+### ✅ [2026-09-27] `form-docs` — деплой упал на `ShikiError: Language 'zmodel' not found` (от deploy-agent-dev)
 
 - **Запросил:** deploy-agent-dev (отчёт msg 2222, тред `deploy-request: form-docs, form-example`; `form-example`
   проверяется отдельно).
@@ -18,7 +18,9 @@
   `defineConfig({ mdxOptions: { rehypeCodeOptions: { langAlias: { zmodel: 'prisma' } } } })` (ZModel синтаксически
   ближе всего к Prisma schema, не нужна кастомная TextMate-грамматика) или зарегистрировать `zmodel` отдельным
   языком, если алиас даст неточную подсветку. Проверка — `nx build form-docs` локально до повторного деплоя.
-- **Статус:** ⏳ ожидание отчёта forms-dev.
+- **Статус:** ✅ закрыто. `apps/form-docs/source.config.ts` — `mdxOptions.rehypeCodeOptions = { ...rehypeCodeDefaultOptions,
+  langAlias: { zmodel: 'prisma' } }` (спред дефолтов обязателен типом `RehypeCodeOptions`, требующим `theme`). `nx build/
+  typecheck:tsgo/lint form-docs` зелёные, подсветка проверена визуально. Коммит `a7a49a4c0`, form-docs 0.6.16.
 
 ### [2026-09-27] Публикация в npm и теги — после обкатки владельцем на domwellbes
 
