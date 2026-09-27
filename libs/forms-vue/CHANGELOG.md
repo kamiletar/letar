@@ -1,5 +1,15 @@
 # Changelog @letar/forms-vue
 
+## 0.17.0 (2026-09-27)
+
+- **Feature:** `useListboxPopup` (`core/use-listbox-popup.ts`) — headless-примитив кастомного
+  listbox-попапа: открытие/закрытие, активная опция, клавиатурная навигация (стрелки/Home/End/
+  Enter/Escape/type-ahead), закрытие по клику снаружи. Не экспортируется из публичного барреля
+  пока не имеет собственного потребителя — это Этап 1 паритета Select/Combobox с `forms`/
+  `forms-shadcn` (`libs/forms/PLAN.md`, тред `forms-vue-angular-select-parity`); `Field.Select`/
+  `Field.Combobox` переезжают на него отдельными этапами 3–4. Чистая логика индекса и type-ahead —
+  в `@letar/forms-core/uikit` (`moveListboxActiveIndex`/`createListboxTypeAhead`, forms-core 0.27.0).
+
 ## 0.16.0 (2026-09-21)
 
 - **Feature:** `FormStepsNavigation` принимает пропсы кнопок `prevProps`/`nextProps`/`submitProps`/

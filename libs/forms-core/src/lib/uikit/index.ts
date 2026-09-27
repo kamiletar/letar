@@ -78,6 +78,11 @@ export type {
 export { createPendingRegistry } from './pending-registry'
 export type { PendingRegistry, PendingRegistrySnapshot } from './pending-registry'
 
+// Клавиатурная навигация кастомного listbox-попапа (headless `forms-vue`/`forms-angular`, §Vue/
+// Angular parity): чистый расчёт индекса, без DOM и без сторонней позиционирующей библиотеки
+export { createListboxTypeAhead, moveListboxActiveIndex } from './listbox-navigation'
+export type { ListboxNavigationDirection, ListboxNavigationOption } from './listbox-navigation'
+
 // Поиск внутри Select: порог показа, фильтр с учётом раскладки, контракт поля поиска для скина
 export { correctKeyboardLayout, detectLayout } from './keyboard-layout'
 export {

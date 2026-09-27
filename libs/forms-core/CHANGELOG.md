@@ -4,6 +4,16 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.27.0] - 2026-09-27
+
+### Добавлено
+
+- `moveListboxActiveIndex(options, activeIndex, direction)`/`createListboxTypeAhead(getText)` —
+  framework-free клавиатурная навигация кастомного listbox-попапа (стрелки/Home/End с пропуском
+  `disabled`-опций, type-ahead по первой букве с накоплением и циклом по повторным совпадениям).
+  Экспорт из `@letar/forms-core/uikit`. Первый потребитель — Этап 1 паритета Select/Combobox в
+  `forms-vue`/`forms-angular` (headless-скины были без вообще какого-либо поп-ап движка).
+
 ## [0.26.1] - 2026-09-27
 
 ### Добавлено
