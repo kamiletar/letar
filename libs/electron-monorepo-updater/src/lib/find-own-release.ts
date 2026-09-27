@@ -9,6 +9,8 @@
  * `findOwnLatestTag` ищет свой тег через `GET /releases` (не `/latest`) по префиксу.
  */
 
+import { compareSemver } from '@letar/semver-compare'
+
 export interface GithubReleaseSummary {
   tag_name: string
   draft: boolean
@@ -39,22 +41,6 @@ export interface FindOwnLatestTagOptions {
   userAgent: string
   /** Сколько релизов запросить за один раз (сортировка — свежие первыми) */
   perPage?: number
-}
-
-/**
- * Сравнивает два semver вида `X.Y.Z` (без суффиксов пререлиза — им тут взяться неоткуда, `draft`
- * и `prerelease` уже отфильтрованы выше). Возвращает > 0, если `a` новее `b`.
- */
-function compareSemver(a: string, b: string): number {
-  const pa = a.split('.').map(Number)
-  const pb = b.split('.').map(Number)
-  for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
-    const diff = (pa[i] ?? 0) - (pb[i] ?? 0)
-    if (diff !== 0) {
-      return diff
-    }
-  }
-  return 0
 }
 
 /** Найти тег последнего (не draft, не prerelease) релиза с заданным префиксом тега */
