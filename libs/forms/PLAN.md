@@ -6,6 +6,16 @@
 
 ## Backlog (запросы от агентов)
 
+### [2026-09-27] Публикация в npm и теги — после обкатки владельцем на domwellbes
+
+- **Решение владельца:** публикуем, когда он сам обкатает библиотеку на domwellbes. До его слова — без тегов
+  (`forms-v*`, `form-mcp-v*`, `forms-query-v*`, `zenstack-form-plugin-v*`), без `npm publish` и `nx release`.
+- **Состояние на 2026-09-27:** в `main` — forms 2.30.0, forms-core 0.26.0, forms-react 0.18.0, forms-shadcn 0.49.0,
+  forms-query 0.4.0, zenstack-form-plugin 4.4.2, form-mcp 2.5.1; на npm `form-mcp` лежит только 1.0.0/1.0.1.
+  Чек-лист публикации `form-mcp` (без `private`, `write-publish-package-json`, проверка `npm pack` во внешнем проекте)
+  — [npm-publish-from-monorepo](/.claude/docs/npm-publish-from-monorepo.md).
+- **Кто решает:** владелец; координатор спрашивает, когда domwellbes сообщит об окончании внедрения.
+
 ### [2026-09-27] Паритет Select/Combobox этапов А–З в `forms-vue`, `forms-vue-shadcn`, `forms-angular` (от forms-dev, отчёт msg 2201)
 
 - **Запросил:** forms-dev по итогам проверки; решение владельца 2026-09-27 — вести **одной записью**, не по фиче.
