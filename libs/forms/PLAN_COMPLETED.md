@@ -1853,6 +1853,53 @@ SSR Suspense/rAF-баг (см. запись «Баг: `Form.Field.TableEditor`/`
 `exportFormat`). Рантайм-привязка была верной, ломался только typecheck потребителей
 (`form-develop-app`). Заменён на прямую ссылку на `SignatureFieldProps`.
 
+### Пакет №5 координатора: подпись родителя (Chakra), i18n строк shadcn Select/Combobox, e2e-разведка (2026-09-27)
+
+**1. Chakra — подпись родителя в подсказке зависимого поля.** `use-dependent-select-field.ts`
+брал только `ui.title` схемы; при пустом `ui.title` подсказка называла родителя по имени пути
+(«Сначала выберите «countryId»»). Порядок теперь: зарегистрированная видимая подпись поля
+(`useFieldLabelLookup`, реестр `forms-react`) → `ui.title` → имя. `forms` 2.31.0 → 2.32.0,
+3 новых теста. Коммит `9fd22baed`.
+
+**2. i18n встроенных строк shadcn Select/Combobox — общий словарь, не второй механизм.**
+До этого у shadcn-скина было два независимых источника хардкода: копия словаря
+`formSelection.dependsOnHint`/`dependentCleared` внутри `use-dependent-field-ui.tsx` (свой
+`BUILTIN_STRINGS`, свой `resolveString`) и десяток строк напрямую в JSX/константах
+(«Поиск...», «Ничего не найдено», «Очистить», «Загрузка...», «Добавить», «Изменить», F2-подсказка,
+«Не удалось загрузить»/«Повторить», «Не удалось сохранить «…»»).
+
+Решение: словарь `formSelection.*` (был в `libs/forms/.../selection-field-strings.ts`, только
+Chakra) перенесён в `@letar/forms-react` (`lib/selection/selection-strings.ts`) — общий для обоих
+скинов. Chakra-файл стал реэкспортом. Резолвер `resolveSelectionString` получил третий аргумент
+`noProviderLocale` — язык без `FormI18nProvider`: Chakra не передаёт его (остаётся английский, как
+раньше), shadcn передаёт `'ru'` (остаётся русский, как раньше). Новый ключ `formSelection.clear`.
+
+- `forms-shadcn`: новый `fields/selection-strings.ts` (`useSelectionStrings()` — один вызов
+  `useFormI18n`, отдаёт все строки поля разом), `use-dependent-field-ui.tsx` использует общий
+  словарь вместо своей копии (побочный эффект: английский текст подсказки зависимого поля
+  теперь совпадает с Chakra — «Select “X” first»). Примитивы `select.tsx`/`select-searchable.tsx`/
+  `combobox.tsx` получили пропы `clearLabel`/`loadingMessage` с дефолтом на русском (сам
+  UIKit-контракт `forms-core` не менялся — это локальные расширения скина). `field-combobox.tsx`
+  стал импортировать примитив `Combobox` напрямую вместо `shadcnUIKit.Combobox`, чтобы прокинуть
+  эти пропы.
+- `forms-react` 0.19.0 → 0.20.0, `forms` 2.32.0 → 2.32.1, `forms-shadcn` 0.53.0 → 0.54.0.
+- Тесты: `field-selection-i18n.spec.tsx` (13 — ru без провайдера, `locale="en"`, `t` приложения,
+  `createLabel`, loading, пункт создания для Select и Combobox), `selection-strings.spec.ts` в
+  forms-react (4). `nx test forms-react,forms-shadcn,forms` зелёные, lint/typecheck:tsgo без ошибок.
+- Коммиты: `1f56a9f88` (forms-react), `fb78ff363` (forms), `df89041ad` (forms-shadcn).
+
+**3. `form-develop-app-shadcn-e2e` и `run_e2e` на s1 — разведка, подключать не к чему.**
+`run_e2e` (dashboard-agent) гоняет `nx e2e <app>-e2e` только против публичного
+`https://<app>-stage.s1.letar.best`; `localhost` схема отвергает. Демо-приложения форм
+(`form-develop-app`, `form-develop-app-shadcn`) не деплоятся — их нет ни в `SERVER_APPS`, ни в
+`E2E_GATED_APPS` (`libs/infra-config`), staging-контейнера и домена нет. Конфигурация e2e-проекта
+каноническая (`@nx/playwright:playwright`, безопасный `implicitDependencies` — оба каталога в
+публичном репо, исключение `nx-e2e-implicit-deps-public-repo-private-app-exception.md` тут не
+применяется). Локально `bunx playwright test`: 39/39 (13 сценариев × 3 браузера). Зафиксировано в
+`PLAN.md` §17.12 — подключение к staging возможно только вместе с деплоем демо, решение владельца.
+
 ---
 
-**Последнее обновление:** 2026-08-04
+---
+
+**Последнее обновление:** 2026-09-27
