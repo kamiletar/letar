@@ -1,5 +1,30 @@
 # Changelog @letar/forms-vue
 
+## 0.24.0 (2026-09-27)
+
+- **Feature:** Этап 3f паритета Select/Combobox (`forms-vue-angular-select-parity`) — последний
+  кусок паритета `Field.Select`: `searchable`/`dependsOn`. Оба уже были готовы как композаблы
+  (Этап 2, `core/use-selection-search.ts`/`core/use-dependent-field.ts`) — этот этап только их
+  UI-подключение в headless-разметке.
+  - `searchable` (`true`/`false`/`'auto'`/`{ threshold, filter, emptyMessage }`) +
+    `searchInDescription` (по умолчанию `true`): строка поиска — обычный
+    `<input role="searchbox">` первым элементом внутри уже существующего попапа (у headless-скина
+    нет отдельного Reka/Popover-примитива, как у `forms-vue-shadcn`); фокус переходит в неё сразу
+    после открытия. Клавиатурная навигация внутри поля поиска — тот же `popup.onKeydown`, что у
+    триггера. Пункт создания и поиск работают вместе: пока запрос не пуст, «+ Добавить "текст"»
+    предлагается, только если ни одна опция не совпала (`shouldOfferCreate`) — та же политика, что
+    у React/`forms-vue-shadcn`. Пустой результат — `emptyMessage`/встроенное «Ничего не найдено».
+  - `dependsOn` + `depsReady`/`clearOnParentChange`/`disableWhenParentEmpty`/`placeholderWhenDisabled`
+    (§18): обвязка над `useDependentField` через новый headless-хелпер `use-dependent-field-ui.ts`
+    (текст/a11y идентичны `forms-vue-shadcn`, разметка — свои `<span>` без Tailwind). Подпись
+    родителя ищется в общем реестре формы (`AppFormContext.labels`, `useRegisterFieldLabel`) —
+    реестр был подключён к контексту ещё в Этапе 2, `Field.Select` теперь его использует.
+    Заблокированное поле: `disabled` на триггере, `aria-describedby` на подсказку, live-область
+    объявляет автоочистку значения при смене родителя.
+  - `selection-strings.ts` пополнен `searchPlaceholder`/`searchAria`/`empty`/`dependsOnHint`/
+    `dependentCleared` — тем же словарём, что у `forms-vue-shadcn`.
+  - Этим этапом закрыт полный паритет `Field.Select` для `forms-vue` (все стадии 3a-3f).
+
 ## 0.23.0 (2026-09-27)
 
 - **Feature:** Этап 3e паритета Select/Combobox (`forms-vue-angular-select-parity`) — `Field.Select`
