@@ -58,7 +58,8 @@ function FeaturedProjectCard({ project }: { project: ShowcaseProject }) {
       borderColor="border"
       bg="bg.card"
       overflow="hidden"
-      transition="transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease"
+      transitionProperty="transform, border-color, box-shadow"
+      transitionDuration="slow"
       _hover={{
         transform: 'translateY(-6px)',
         borderColor: 'border.emphasized',

@@ -2,6 +2,26 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.5.6] - 2026-09-27
+
+### Added
+
+- Подключён `theme:check` (`nx g @letar/generators:theme-check-integrate`) — гейт сырых
+  HEX/rgb/hsl-цветов, теней, transition-длительностей и `scale()` мимо шкалы темы. `themePrefix`
+  указан на `src/lib/theme.ts` (тема лежит в одном файле, не в каталоге `src/theme/` — тот же
+  случай, что у `kami`). Первый прогон нашёл 51 находку: 23 закрыты фиксом (magic-number
+  transition-длительности заменены на `transitionProperty` + Chakra-токен `transitionDuration`;
+  `scale(0.98)`/`scale(0.99)` в `_active` — на `pressScale.lg`/`pressScale['2xl']` из `@letar/ui`),
+  20 занесены в allowlist (`viewport.themeColor`, `SocialImage` под `next/og`, одноразовые
+  decorative-тени карточек и glow в шапке).
+
+### Fixed
+
+- `@letar/ui` и `@letar/analytics` были только в `nx.implicitDependencies`, но не в реальных
+  `dependencies` — typecheck это не видел (резолв через `paths`), а прод-сборка через `node_modules`
+  упала бы `Module not found` при следующем деплое (тот же класс бага, что у `SortablePhotoGrid`
+  в aboi/aprel8008, см. `.claude/docs/deploy-coordination.md`). Добавлены в `dependencies`.
+
 ## [0.5.5] - 2026-09-24
 
 ### Changed

@@ -3,7 +3,11 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/letar-landing/src",
   "projectType": "application",
-  "tags": ["type:app", "scope:letar", "owner:letar"],
+  "tags": [
+    "type:app",
+    "scope:letar",
+    "owner:letar"
+  ],
   "targets": {
     "build": {
       "executor": "nx:run-commands",
@@ -11,12 +15,18 @@
         "command": "next build --webpack",
         "cwd": "apps/letar-landing"
       },
-      "dependsOn": ["^build"],
+      "dependsOn": [
+        "^build"
+      ],
       "cache": true,
-      "outputs": ["{workspaceRoot}/apps/letar-landing/.next"],
+      "outputs": [
+        "{workspaceRoot}/apps/letar-landing/.next"
+      ],
       "metadata": {
         "description": "Build production bundle",
-        "technologies": ["next"]
+        "technologies": [
+          "next"
+        ]
       }
     },
     "dev": {
@@ -28,7 +38,9 @@
       "cache": false,
       "metadata": {
         "description": "Start development server on port 3015",
-        "technologies": ["next"]
+        "technologies": [
+          "next"
+        ]
       }
     },
     "start": {
@@ -37,25 +49,37 @@
         "command": "next start -p 3015",
         "cwd": "apps/letar-landing"
       },
-      "dependsOn": ["build"],
+      "dependsOn": [
+        "build"
+      ],
       "cache": false,
       "metadata": {
         "description": "Start production server",
-        "technologies": ["next"]
+        "technologies": [
+          "next"
+        ]
       }
     },
     "lint": {
       "executor": "nx:run-commands",
-      "dependsOn": ["oxlint"],
+      "dependsOn": [
+        "oxlint",
+        "theme:check"
+      ],
       "options": {
         "command": "eslint .",
         "cwd": "apps/letar-landing"
       },
       "cache": true,
-      "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
+      "inputs": [
+        "default",
+        "{workspaceRoot}/.eslintrc.json"
+      ],
       "metadata": {
         "description": "Run ESLint",
-        "technologies": ["eslint"]
+        "technologies": [
+          "eslint"
+        ]
       }
     },
     "oxlint": {
@@ -65,10 +89,15 @@
         "cwd": "apps/letar-landing"
       },
       "cache": true,
-      "inputs": ["default", "{workspaceRoot}/.oxlintrc.json"],
+      "inputs": [
+        "default",
+        "{workspaceRoot}/.oxlintrc.json"
+      ],
       "metadata": {
         "description": "Fast lint with oxlint",
-        "technologies": ["oxlint"]
+        "technologies": [
+          "oxlint"
+        ]
       }
     },
     "format": {
@@ -80,7 +109,9 @@
       "cache": false,
       "metadata": {
         "description": "Format files with dprint",
-        "technologies": ["dprint"]
+        "technologies": [
+          "dprint"
+        ]
       }
     },
     "format:check": {
@@ -90,10 +121,15 @@
         "cwd": "apps/letar-landing"
       },
       "cache": true,
-      "inputs": ["default", "{workspaceRoot}/dprint.json"],
+      "inputs": [
+        "default",
+        "{workspaceRoot}/dprint.json"
+      ],
       "metadata": {
         "description": "Check file formatting with dprint",
-        "technologies": ["dprint"]
+        "technologies": [
+          "dprint"
+        ]
       }
     },
     "typecheck": {
@@ -103,10 +139,16 @@
         "cwd": "apps/letar-landing"
       },
       "cache": true,
-      "inputs": ["default", "{workspaceRoot}/tsconfig.base.json", "{projectRoot}/tsconfig.json"],
+      "inputs": [
+        "default",
+        "{workspaceRoot}/tsconfig.base.json",
+        "{projectRoot}/tsconfig.json"
+      ],
       "metadata": {
         "description": "Type-check TypeScript files",
-        "technologies": ["typescript"]
+        "technologies": [
+          "typescript"
+        ]
       }
     },
     "typecheck:tsgo": {
@@ -116,10 +158,31 @@
         "cwd": "apps/letar-landing"
       },
       "cache": true,
-      "inputs": ["default", "{workspaceRoot}/tsconfig.base.json", "{projectRoot}/tsconfig.json"],
+      "inputs": [
+        "default",
+        "{workspaceRoot}/tsconfig.base.json",
+        "{projectRoot}/tsconfig.json"
+      ],
       "metadata": {
         "description": "Type-check with tsgo (38x faster)",
-        "technologies": ["typescript", "tsgo"]
+        "technologies": [
+          "typescript",
+          "tsgo"
+        ]
+      }
+    },
+    "theme:check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node scripts/check-theme-hardcodes.mjs",
+        "cwd": "apps/letar-landing"
+      },
+      "cache": false,
+      "metadata": {
+        "description": "Reject raw UI colors, shadows and transition durations outside theme tokens",
+        "technologies": [
+          "chakra-ui"
+        ]
       }
     }
   }

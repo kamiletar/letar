@@ -22,7 +22,8 @@ export function EcosystemPreview({ items }: EcosystemPreviewProps) {
           bg="bg.card"
           boxShadow="0 24px 80px rgba(0, 0, 0, 0.34)"
           overflow="hidden"
-          transition="transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease"
+          transitionProperty="transform, border-color, box-shadow"
+          transitionDuration="slow"
           _hover={{
             borderColor: 'brand.400',
             transform: 'translateY(-5px)',

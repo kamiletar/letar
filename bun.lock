@@ -456,7 +456,7 @@
     },
     "apps/animatrona-landing": {
       "name": "@letar/animatrona-landing",
-      "version": "0.4.11",
+      "version": "0.4.12",
       "dependencies": {
         "@letar/chakra-provider": "workspace:*",
         "@letar/glitchtip": "workspace:*",
@@ -620,7 +620,7 @@
     },
     "apps/domwellbes": {
       "name": "@letar/domwellbes",
-      "version": "0.348.8",
+      "version": "0.348.14",
       "dependencies": {
         "@gltf-transform/core": "^4.5.0",
         "@gltf-transform/extensions": "^4.5.0",
@@ -743,13 +743,14 @@
     },
     "apps/flora": {
       "name": "@letar/flora",
-      "version": "0.3.1",
+      "version": "0.3.9",
       "dependencies": {
         "@letar/demo-protection": "workspace:*",
         "@letar/env-load": "workspace:*",
         "@letar/file-scan": "workspace:*",
         "@letar/format-utils": "workspace:*",
         "@letar/image-upload": "workspace:*",
+        "@letar/seo": "workspace:*",
       },
     },
     "apps/form-develop-app": {
@@ -860,7 +861,7 @@
     },
     "apps/kami-key-the-landing": {
       "name": "@letar/kami-key-the-landing",
-      "version": "0.4.6",
+      "version": "0.4.8",
       "dependencies": {
         "@letar/chakra-provider": "workspace:*",
         "@letar/glitchtip": "workspace:*",
@@ -889,10 +890,13 @@
     },
     "apps/letar-landing": {
       "name": "@letar/letar-landing",
-      "version": "0.5.5",
+      "version": "0.5.6",
       "dependencies": {
+        "@letar/analytics": "workspace:*",
         "@letar/chakra-provider": "workspace:*",
         "@letar/glitchtip": "workspace:*",
+        "@letar/theme-check": "workspace:*",
+        "@letar/ui": "workspace:*",
       },
     },
     "apps/letar-landing-e2e": {
@@ -1322,7 +1326,7 @@
     },
     "libs/forms-angular": {
       "name": "@letar/forms-angular",
-      "version": "0.1.6",
+      "version": "0.2.0",
       "dependencies": {
         "@letar/forms-core": "workspace:*",
       },
@@ -1425,7 +1429,7 @@
     },
     "libs/forms-vue": {
       "name": "@letar/forms-vue",
-      "version": "0.18.0",
+      "version": "0.21.0",
       "dependencies": {
         "@floating-ui/dom": "^1.8.0",
         "@letar/forms-core": "workspace:*",
@@ -1451,7 +1455,7 @@
     },
     "libs/forms-vue-shadcn": {
       "name": "@letar/forms-vue-shadcn",
-      "version": "0.17.0",
+      "version": "0.20.0",
       "dependencies": {
         "@letar/forms-core": "workspace:*",
         "@letar/forms-vue": "workspace:*",

@@ -1,6 +1,7 @@
 import { EcosystemPreview } from '@/app/_components/ecosystem-preview'
 import { ecosystemEntrances, projectCount } from '@/lib/projects-data'
 import { Box, Button, Container, Flex, Grid, HStack, Text } from '@chakra-ui/react'
+import { pressScale } from '@letar/ui/press-scale'
 import { ArrowDown, ArrowUpRight } from 'lucide-react'
 
 /** Hero-секция: тезис экосистемы и два главных сайта в живых окнах */
@@ -52,8 +53,9 @@ export function HeroSection() {
                   borderRadius="full"
                   px={6}
                   _hover={{ bg: 'brand.200', transform: 'translateY(-2px)' }}
-                  _active={{ transform: 'scale(0.98)' }}
-                  transition="all 0.15s ease-out"
+                  _active={{ transform: pressScale.lg }}
+                  transitionProperty="background-color, transform"
+                  transitionDuration="fast"
                 >
                   <a href="https://studio.letar.best" target="_blank" rel="noopener noreferrer">
                     Перейти в Studio <ArrowUpRight aria-hidden="true" size={18} />
@@ -68,8 +70,9 @@ export function HeroSection() {
                   borderRadius="full"
                   px={6}
                   _hover={{ bg: 'bg.subtle', borderColor: 'brand.500' }}
-                  _active={{ transform: 'scale(0.98)' }}
-                  transition="all 0.15s ease-out"
+                  _active={{ transform: pressScale.lg }}
+                  transitionProperty="background-color, border-color, transform"
+                  transitionDuration="fast"
                 >
                   <a href="#catalog">
                     Смотреть каталог <ArrowDown aria-hidden="true" size={18} />

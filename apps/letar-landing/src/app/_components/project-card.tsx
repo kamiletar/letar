@@ -1,5 +1,6 @@
 import type { Project } from '@/lib/projects-data'
 import { Box, Flex, HStack, Text } from '@chakra-ui/react'
+import { pressScale } from '@letar/ui/press-scale'
 import { ArrowUpRight, Minus } from 'lucide-react'
 
 interface ProjectCardProps {
@@ -20,9 +21,10 @@ export function ProjectCard({ project }: ProjectCardProps) {
         borderRadius="xl"
         bg="bg.card"
         height="full"
-        transition="transform 0.18s ease, border-color 0.18s ease, background 0.18s ease"
+        transitionProperty="transform, border-color, background"
+        transitionDuration="moderate"
         _hover={{ borderColor: 'brand.600', transform: 'translateY(-3px)', bg: 'bg.cardHover' }}
-        _active={{ transform: 'scale(0.99)' }}
+        _active={{ transform: pressScale['2xl'] }}
         _focusVisible={{ outline: '3px solid', outlineColor: 'brand.300', outlineOffset: '3px' }}
       >
         <a

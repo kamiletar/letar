@@ -1,13 +1,18 @@
 # План разработки letar-landing
 
-## Текущий статус: v0.5.2 — Визуальная карта экосистемы
+## Текущий статус: v0.5.6 — theme:check подключён
 
 ### Планируется
 
-- [ ] Подключить `theme:check` и сформировать allowlist легитимных исключений
+_Пусто — следующая задача не выбрана._
 
 ### Выполнено
 
+- [x] Подключён `theme:check` (v0.5.6): `themePrefix` на `src/lib/theme.ts` (тема в одном файле, не
+      в каталоге), 23 находки исправлены (`transitionProperty`+токен вместо magic-number
+      transition, `pressScale` из `@letar/ui` вместо raw `scale()`), 20 — в allowlist (metadata,
+      `next/og`-рендер, одноразовые decorative-тени). Заодно починен латентный баг: `@letar/ui` и
+      `@letar/analytics` были только в `implicitDependencies`, не в реальных `dependencies`.
 - [x] Завершена SEO-настройка: добавлены Open Graph/Twitter-карточки, уникальные metadata и H1 для
       privacy, полный sitemap и JSON-LD со связями экосистемы и ItemList всех проектов.
 - [x] В каталог добавлены «Свои Чужие» и DomWellbes с production-ссылками и актуальными описаниями.
@@ -21,11 +26,3 @@
       карточки (внешние ссылки vs проекты без URL), footer, robots.txt/sitemap.xml, 404 на несуществующий
       маршрут, отсутствие ошибок в консоли, проверка внутренних ссылок, переход по внешней ссылке в новой
       вкладке. Приложение без БД/auth/форм — сьют не участвует в `E2E_GATED_APPS` (не в скоупе задачи).
-
-### Техдолг: подключить theme:check
-
-Гейт сырых цветов/теней/transition в UI-коде (`nx g @letar/generators:theme-check-integrate
-letar-landing`, генератор `libs/generators`, обёртка над `@letar/theme-check`) пока не
-подключён. Уже подключено: domwellbes, studio, aboi. Подключать по одному, не пакетно —
-allowlist легитимных исключений собирается руками при первом прогоне. Разбор —
-`.claude/docs/theme-hardcode-gate-coverage.md`.
