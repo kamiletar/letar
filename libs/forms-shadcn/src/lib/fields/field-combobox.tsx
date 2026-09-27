@@ -54,6 +54,8 @@ interface ComboboxFieldState {
   setInputValue: (value: string) => void
   /** Значение, чья подпись сейчас в инпуте; запись значения самим полем помечается тут, чтобы не считаться внешней */
   syncedValueRef: { current: string | undefined }
+  /** Закрытие списка следом за выбором пункта создания не возвращает подпись выбранного (текст поиска остаётся) */
+  skipRestoreTextRef: { current: boolean }
   filteredOptions: NormalizedOption[]
   /** Опции в форме приложения (с `data`) по строковому значению — для `renderOption` */
   optionByValue: Map<string, SelectOption>
@@ -209,6 +211,7 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
     // Внешняя смена значения (восстановление черновика, `reset`, `setFieldValue`) тоже меняет подпись:
     // `syncedValueRef` хранит значение, чья подпись уже в инпуте, а собственные записи поля помечают его сами
     const syncedValueRef = useRef<string | undefined>(undefined)
+    const skipRestoreTextRef = useRef(false)
     // Значение очищено сменой родителя: подпись прежнего значения в поле ввода стирается, а когда поле снова
     // получит значение — подпись выставится заново
     const clearedId = dependent.state.cleared?.id
@@ -302,6 +305,7 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
       inputValue,
       setInputValue,
       syncedValueRef,
+      skipRestoreTextRef,
       // Ошибка прячет данные: на экране «Не удалось загрузить», а не выдача прошлого поиска
       filteredOptions: promiseSearch.error ? [] : filteredOptions,
       optionByValue,
@@ -329,6 +333,7 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
       ? { ...resolved, disabled, helperText: dependentHint ?? resolved.helperText }
       : resolved
     const search = fieldState.inputValue.trim()
+    const resolvedClearable = componentProps.clearable ?? !resolved.required
     const createVerb = componentProps.createLabel ?? CREATE_VERB_DEFAULT
 
     // Ошибки `onCreate`/`onUpdate` — забота приложения: всплывают как unhandled rejection, не глотаются
@@ -442,6 +447,8 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
             onInputChange={fieldState.setInputValue}
             onValueChange={(value) => {
               if (isCreateOptionValue(value)) {
+                // Закрытие списка следом за выбором служебного пункта не возвращает подпись: текст поиска остаётся
+                fieldState.skipRestoreTextRef.current = true
                 runCreate()
                 return
               }
@@ -451,7 +458,25 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
               const picked = value === undefined ? undefined : fieldState.optionByValue.get(value)
               fieldState.setInputValue(picked ? getOptionText(picked) : '')
             }}
-            onOpenChange={fieldState.markOpened}
+            onOpenChange={(open) => {
+              fieldState.markOpened(open)
+              if (open) {
+                return
+              }
+              if (fieldState.skipRestoreTextRef.current) {
+                fieldState.skipRestoreTextRef.current = false
+                return
+              }
+              // Список закрыт (клик мимо, Tab, Escape): в поле снова подпись выбранного, а не стёртый или недонабранный
+              // текст — иначе поле выглядит пустым при живом значении. Очищает значение кнопка «Очистить»
+              // Значение читаем живым: выбор пункта и закрытие списка приходят в одном событии, до перерисовки
+              const liveValue = field.form.getFieldValue(field.name) as string | null | undefined
+              const source = liveValue ? fieldState.optionByValue.get(String(liveValue)) : undefined
+              if (source) {
+                fieldState.setInputValue(getOptionText(source))
+              }
+            }}
+            clearable={resolvedClearable}
             loading={fieldState.isLoading}
             options={fieldState.filteredOptions}
             renderOption={componentProps.renderOption

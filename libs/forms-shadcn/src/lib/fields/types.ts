@@ -400,6 +400,8 @@ export interface ComboboxFieldBaseProps<TData = unknown, TDeps extends FieldDeps
   renderOption?: (option: SelectOption<TData>, state: OptionRenderState) => ReactNode
   /** Минимум символов для показа списка (по умолчанию 0 — показывать сразу) */
   minChars?: number
+  /** Кнопка «Очистить» у поля (по умолчанию — когда поле не обязательное); пустое значение — `null` у nullable, иначе `''` */
+  clearable?: boolean
   /**
    * Создать запись справочника, не уходя из формы. Пока текст поиска непустой и точного
    * совпадения нет, список заканчивается пунктом «+ Добавить "<текст>"»; его выбор вызывает

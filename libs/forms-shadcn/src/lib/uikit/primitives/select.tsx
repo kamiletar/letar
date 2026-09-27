@@ -90,8 +90,16 @@ export function Select(
 
   return (
     <SelectPrimitive.Root
-      value={value}
-      onValueChange={onValueChange}
+      // `undefined` переводит Radix в неконтролируемый режим — он продолжил бы показывать очищенное значение
+      value={value ?? ''}
+      // Radix сам зовёт `onValueChange('')`, когда его скрытый нативный `<select>` не находит опцию текущего значения
+      // (ожидающая оптимистичная опция `disabled`, значение вне списка): выбор пользователя тут ни при чём, а форма
+      // потеряла бы значение. Пустое значение легально приходит токеном пустой опции или кнопкой очистки
+      onValueChange={(next) => {
+        if (next !== '') {
+          onValueChange(next)
+        }
+      }}
       disabled={disabled}
       open={open}
       // Radix `readOnly` не знает: не даём открыть список сами
