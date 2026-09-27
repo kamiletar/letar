@@ -1,5 +1,32 @@
 # Выполненные задачи
 
+## SEO-аудит и находимость по «Летар»/«Студия Летар» — версии 0.5.6–0.5.8 (2026-09-27)
+
+**0.5.6** — подключён `theme:check` (`themePrefix: 'src/lib/theme.ts'`, тема в одном файле, не в
+каталоге, как у `kami`). Первый прогон нашёл 51 находку: 23 закрыты реальным фиксом
+(magic-number transition-длительности → `transitionProperty` + Chakra-токен `transitionDuration`;
+`scale(0.98)`/`scale(0.99)` в `_active` → `pressScale.lg`/`pressScale['2xl']` из `@letar/ui`),
+20 — в allowlist (`viewport.themeColor`, `SocialImage` под `next/og`, decorative-тени). Заодно
+починен латентный прод-баг: `@letar/ui` и `@letar/analytics` были только в
+`nx.implicitDependencies`, не в реальных `dependencies` — typecheck это не ловил (резолв через
+`paths`), а прод-сборка через `node_modules` упала бы `Module not found`.
+
+**0.5.7** — SEO-аудит (`/audit:seo-audit`): внутренняя ссылка на `/privacy` в футере вела без
+слэша при `trailingSlash: true` — лишний 308-редирект, исправлена на `/privacy/`. `sitemap.ts`:
+`lastModified` главной был захардкожен на `2026-08-28` — обновлён на `2026-09-27`. Canonical/OG
+проверены — наследование от `layout.tsx` намеренное, не баг. Заодно добавлена находимость по
+кириллическому «Летар»: `title`/`description`/`keywords` дополнены формой `Letar (Летар)`,
+JSON-LD `WebSite` получил `alternateName: 'Летар'`, hero-текст явно называет сайт «Letar (Летар)».
+`og:title`/`twitter:title` оставлены короткими (`Letar`) — сигнал уже даёт остальная метадата.
+
+**0.5.8** — по запросу пользователя добавлена находимость по «Студия Летар»: в hero-абзаце и на
+CTA-кнопке «Перейти в Studio» добавлено `(Студия Летар)`; JSON-LD `Organization` студии получил
+`alternateName: 'Студия Летар'` (тот же паттерн, что `WebSite.alternateName` из 0.5.7).
+
+Всё проверено живьём через dev-сервер (`preview_start` + screenshot + `get_page_text`), не только
+typecheck/lint. Коммиты: часть 0.5.6 (theme:check), `89567828b` (0.5.7, «Летар»),
+`ec62157d7` (0.5.8 + дозаполнение CHANGELOG за 0.5.7).
+
 ## Провайдер на `DarkOnlyChakraProvider` — версия 0.5.5 (2026-09-24)
 
 `_components/ui/provider.tsx` сведён к одной строке: `DarkOnlyChakraProvider` из

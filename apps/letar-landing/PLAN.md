@@ -1,6 +1,6 @@
 # План разработки letar-landing
 
-## Текущий статус: v0.5.6 — theme:check подключён
+## Текущий статус: v0.5.8 — находимость по «Летар»/«Студия Летар»
 
 ### Планируется
 
@@ -8,6 +8,12 @@ _Пусто — следующая задача не выбрана._
 
 ### Выполнено
 
+- [x] Находимость по «Студия Летар» (v0.5.8): в hero-абзаце и на CTA-кнопке добавлено
+      `(Студия Летар)`, JSON-LD `Organization` студии получил `alternateName: 'Студия Летар'`.
+      Детали — `PLAN_COMPLETED.md`.
+- [x] SEO-аудит (v0.5.7): исправлена ссылка на `/privacy/` в футере (лишний 308-редирект),
+      обновлён `lastModified` в `sitemap.ts`. Добавлена находимость по «Летар»: title/description/
+      keywords, JSON-LD `alternateName`, hero-текст. Детали — `PLAN_COMPLETED.md`.
 - [x] Подключён `theme:check` (v0.5.6): `themePrefix` на `src/lib/theme.ts` (тема в одном файле, не
       в каталоге), 23 находки исправлены (`transitionProperty`+токен вместо magic-number
       transition, `pressScale` из `@letar/ui` вместо raw `scale()`), 20 — в allowlist (metadata,
