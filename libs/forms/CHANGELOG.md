@@ -4,6 +4,17 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.34.0] - 2026-09-27
+
+### Added
+
+- Требования к паролю, подписи силы («Weak/Medium/Good/Strong» + подпись «Strength») и aria-label
+  кнопки-глаза `Form.Field.PasswordStrength` — из общего словаря `formPasswordStrength.*`
+  (`@letar/forms-react` ≥ 0.24.0, один словарь на Chakra- и shadcn-скин): без `FormI18nProvider` —
+  английский (контракт скина), `locale="ru"` — русский. `REQUIREMENT_LABELS` (модульный
+  константный объект) заменён на `strings.requirementLabels` из хука `usePasswordStrengthStrings()`.
+  Placeholder не тронут — у него уже был свой ключ `formField.passwordStrength.placeholder`.
+
 ## [2.33.0] - 2026-09-27
 
 ### Added

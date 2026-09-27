@@ -1,6 +1,7 @@
 'use client'
 
 import { Box, Field, HStack, IconButton, Input, List, Progress, Text, VStack } from '@chakra-ui/react'
+import { type PasswordStrengthStrings, usePasswordStrengthStrings } from '@letar/forms-react'
 import { type ReactElement, useState } from 'react'
 import { LuCheck, LuEye, LuEyeOff, LuX } from 'react-icons/lu'
 import type { PasswordRequirement, PasswordStrengthFieldProps } from '../../types'
@@ -10,17 +11,6 @@ import { createField, FieldError, FieldLabel, useFieldDefaultString } from '../b
  * Default password requirements
  */
 const DEFAULT_REQUIREMENTS: PasswordRequirement[] = ['minLength:8', 'uppercase', 'lowercase', 'number', 'special']
-
-/**
- * Requirement descriptions
- */
-const REQUIREMENT_LABELS: Record<PasswordRequirement, string> = {
-  'minLength:8': 'Minimum 8 characters',
-  uppercase: 'At least one uppercase letter',
-  lowercase: 'At least one lowercase letter',
-  number: 'At least one digit',
-  special: 'At least one special character (!@#$%^&*)',
-}
 
 /**
  * Checks if password meets a requirement
@@ -57,17 +47,20 @@ function calculateStrength(password: string, requirements: PasswordRequirement[]
 /**
  * Gets description and color for password strength
  */
-function getStrengthInfo(strength: number): { label: string; colorPalette: string } {
+function getStrengthInfo(
+  strength: number,
+  strengthLabels: PasswordStrengthStrings['strengthLabels'],
+): { label: string; colorPalette: string } {
   if (strength < 25) {
-    return { label: 'Weak', colorPalette: 'red' }
+    return { label: strengthLabels.weak, colorPalette: 'red' }
   }
   if (strength < 50) {
-    return { label: 'Medium', colorPalette: 'orange' }
+    return { label: strengthLabels.medium, colorPalette: 'orange' }
   }
   if (strength < 75) {
-    return { label: 'Good', colorPalette: 'yellow' }
+    return { label: strengthLabels.good, colorPalette: 'yellow' }
   }
-  return { label: 'Strong', colorPalette: 'green' }
+  return { label: strengthLabels.strong, colorPalette: 'green' }
 }
 
 /**
@@ -80,6 +73,8 @@ interface PasswordStrengthFieldState {
   toggle: () => void
   /** Встроенный дефолт placeholder — сильнее только `resolved.placeholder` */
   defaultPlaceholder: string
+  /** Требования, подписи силы, aria-label кнопки-глаза — общий словарь с shadcn-скином */
+  strings: PasswordStrengthStrings
 }
 
 /**
@@ -107,16 +102,17 @@ export const FieldPasswordStrength = createField<PasswordStrengthFieldProps, str
   useFieldState: (props) => {
     const [visible, setVisible] = useState(props.defaultVisible ?? false)
     const defaultPlaceholder = useFieldDefaultString('formField.passwordStrength.placeholder')
-    return { visible, toggle: () => setVisible((v) => !v), defaultPlaceholder }
+    const strings = usePasswordStrengthStrings()
+    return { visible, toggle: () => setVisible((v) => !v), defaultPlaceholder, strings }
   },
 
   render: ({ field, fullPath, resolved, hasError, errorMessage, componentProps, fieldState }): ReactElement => {
     const { requirements = DEFAULT_REQUIREMENTS, showRequirements = true } = componentProps
-    const { visible, toggle, defaultPlaceholder } = fieldState
+    const { visible, toggle, defaultPlaceholder, strings } = fieldState
 
     const value = (field.state.value as string) ?? ''
     const strength = calculateStrength(value, requirements)
-    const { label: strengthLabel, colorPalette } = getStrengthInfo(strength)
+    const { label: strengthLabel, colorPalette } = getStrengthInfo(strength, strings.strengthLabels)
 
     return (
       <Field.Root
@@ -138,7 +134,7 @@ export const FieldPasswordStrength = createField<PasswordStrengthFieldProps, str
               flex={1}
             />
             <IconButton
-              aria-label={visible ? 'Hide password' : 'Show password'}
+              aria-label={visible ? strings.hidePasswordLabel : strings.showPasswordLabel}
               onClick={toggle}
               variant="ghost"
               size="sm"
@@ -151,7 +147,7 @@ export const FieldPasswordStrength = createField<PasswordStrengthFieldProps, str
             <Box>
               <HStack justify="space-between" mb={1}>
                 <Text fontSize="xs" color="fg.muted">
-                  Strength
+                  {strings.strengthCaption}
                 </Text>
                 <Text fontSize="xs" fontWeight="medium" color={`${colorPalette}.600`}>
                   {strengthLabel}
@@ -172,7 +168,7 @@ export const FieldPasswordStrength = createField<PasswordStrengthFieldProps, str
                 return (
                   <List.Item key={req} display="flex" alignItems="center" gap={2}>
                     <Box color={met ? 'green.500' : 'gray.400'}>{met ? <LuCheck size={14} /> : <LuX size={14} />}</Box>
-                    <Text color={met ? 'fg.default' : 'fg.muted'}>{REQUIREMENT_LABELS[req]}</Text>
+                    <Text color={met ? 'fg.default' : 'fg.muted'}>{strings.requirementLabels[req]}</Text>
                   </List.Item>
                 )
               })}

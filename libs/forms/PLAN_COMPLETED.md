@@ -1986,6 +1986,38 @@ React-компонент (не `render`-колбэк `createField`), хуки т
   forms-react` 219/219, `nx test forms-shadcn` 462/462, lint/typecheck:tsgo без ошибок.
 - Коммиты: `9189b5ce1` (forms-react), `8ffb652f1` (forms-shadcn).
 
+**6. i18n оставшихся строк `Form.Field.PasswordStrength` — требования к паролю, подписи силы,
+aria-label кнопки-глаза (обе версии поля, Chakra и shadcn).** Побочная находка из пункта 5 закрыла
+только placeholder; `REQUIREMENT_LABELS` (5 требований), подписи силы («Слабый/Средний/Хороший/
+Сильный» + подпись «Надёжность»/«Strength») и aria-label кнопки-глаза оставались хардкодом в обоих
+скинах — Chakra по-английски, shadcn по-русски, независимо от `FormI18nProvider`.
+
+В отличие от placeholder/Signature (у каждого скина свой словарь, разные ключи), эти строки нужны
+Chakra- и shadcn-версии **буквально одинаковыми** — не разное озвучание одного смысла, а один и тот
+же текст. Поэтому здесь, как у `formSelection.*`, один общий словарь `formPasswordStrength.*` в
+`@letar/forms-react` (`field-password-strength-strings.ts`) сразу для обоих скинов, а не по одному
+на каждый: резолвер/хук на один ключ (`resolvePasswordStrengthString`/`usePasswordStrengthString`,
+та же лестница `resolveStaticFormText`) и бонусом хук `usePasswordStrengthStrings()`, который
+резолвит весь набор одним вызовом `useFormI18n` — оба поля собирают из него `requirementLabels`,
+`strengthLabels`, подпись «Strength» и aria-label кнопки-глаза.
+
+Единственный нюанс, где скины расходились по поведению, не только по языку: Chakra уже переключала
+aria-label кнопки-глаза вместе с видимостью пароля (`showPassword`/`hidePassword`), а shadcn всегда
+показывала один статичный текст «Показать/скрыть пароль» независимо от состояния. Оставлено как
+было — заведён третий ключ `togglePasswordVisibility` для shadcn, а не унификация поведения кнопки
+заодно с переводом текста (это отдельное решение, не входило в задачу i18n).
+
+Английские значения — как был Chakra-хардкод, русские — как был shadcn-хардкод.
+
+- `forms-react` 0.23.0 → 0.24.0 (новый экспорт `resolvePasswordStrengthString`/
+  `usePasswordStrengthString`/`usePasswordStrengthStrings`/`PasswordStrengthStringKey`/
+  `PasswordRequirementId`/`PasswordStrengthStrings`), `forms` 2.33.0 → 2.34.0, `forms-shadcn`
+  0.57.0 → 0.58.0.
+- Тесты: `field-password-strength-strings.spec.ts` в forms-react (4), новый
+  `field-password-strength-i18n.spec.tsx` в forms (Chakra, 4) и расширенный одноимённый файл в
+  forms-shadcn (+3, помимо существующих 4 про placeholder). `nx test forms-react` 227/227, `nx test
+  forms` 1109/1109, `nx test forms-shadcn` 468/468, lint/typecheck:tsgo без ошибок.
+
 ---
 
 ---
