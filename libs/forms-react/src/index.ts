@@ -171,3 +171,7 @@ export type { SignatureStringKey } from './lib/field/signature-strings'
 // Placeholder-строки Address/City/PasswordStrength/RichText/Editable (shadcn-скин) — по одной строке на поле
 export { resolveFieldPlaceholderString, useFieldPlaceholderString } from './lib/field/field-placeholder-strings'
 export type { FieldPlaceholderStringKey } from './lib/field/field-placeholder-strings'
+
+// Подписи кнопок тулбара `Form.Field.RichText` — один словарь на Chakra- и shadcn-скин (не по одному на скин)
+export { resolveToolbarString, useToolbarString } from './lib/field/toolbar-strings'
+export type { ToolbarStringKey } from './lib/field/toolbar-strings'

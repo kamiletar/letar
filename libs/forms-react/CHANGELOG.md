@@ -4,6 +4,16 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.23.0] - 2026-09-27
+
+### Added
+
+- `resolveToolbarString`, `useToolbarString`, тип `ToolbarStringKey`: словарь подписей кнопок тулбара
+  `Form.Field.RichText` (`formToolbar.*`) — **один общий словарь на Chakra- и shadcn-скин**, в отличие от
+  `formFieldPlaceholder.*`/`formSignature.*` (у каждого скина свой). `TOOLBAR_CONFIG` обоих скинов хранит
+  `labelKey` вместо готового текста. Источником истины для русских значений взят shadcn (был внутренне
+  последовательным), Chakra-конфиг при подключении словаря выровнен под него (был вперемешку en/ru).
+
 ## [0.22.0] - 2026-09-27
 
 ### Added
