@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.0 (2026-09-27)
+
+### Changed
+
+- `compareSemver` вынесен в `@letar/semver-compare` — был дословной копией одноимённой функции
+  из `libs/electron-monorepo-updater/src/lib/find-own-release.ts`, теперь обе библиотеки делят
+  одну реализацию.
+
 ## 0.1.1 (2026-09-27)
 
 ### Fixed

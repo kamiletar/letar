@@ -1,3 +1,4 @@
+import { compareSemver } from '@letar/semver-compare'
 import type { GitHubRelease } from './types'
 
 const GITHUB_API = 'https://api.github.com/repos'
@@ -21,22 +22,6 @@ export interface FetchReleasesOptions {
    * showing another product's release. Omit when the repo hosts a single product.
    */
   tagPrefix?: string
-}
-
-/**
- * Сравнивает два semver вида `X.Y.Z` (без суффиксов пререлиза — им тут взяться неоткуда, `draft`
- * и `prerelease` уже отфильтрованы выше). Возвращает > 0, если `a` новее `b`.
- */
-function compareSemver(a: string, b: string): number {
-  const pa = a.split('.').map(Number)
-  const pb = b.split('.').map(Number)
-  for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
-    const diff = (pa[i] ?? 0) - (pb[i] ?? 0)
-    if (diff !== 0) {
-      return diff
-    }
-  }
-  return 0
 }
 
 function buildHeaders(token: string | undefined): Record<string, string> {

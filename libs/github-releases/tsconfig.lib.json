@@ -6,7 +6,8 @@
     "rootDir": "src",
     "tsBuildInfoFile": "dist/tsconfig.lib.tsbuildinfo",
     "paths": {
-      "@letar/format-utils": ["../format-utils/src/index.ts"]
+      "@letar/format-utils": ["../format-utils/src/index.ts"],
+      "@letar/semver-compare": ["../semver-compare/src/index.ts"]
     },
     "ignoreDeprecations": "6.0"
   },
@@ -24,6 +25,9 @@
   "references": [
     {
       "path": "../format-utils/tsconfig.lib.json"
+    },
+    {
+      "path": "../semver-compare/tsconfig.lib.json"
     }
   ]
 }
