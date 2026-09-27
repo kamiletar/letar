@@ -16,18 +16,34 @@ describe('Stage E — Select/CascadingSelect/Combobox/Autocomplete/Listbox/Radio
     })
   })
 
-  it('FieldSelectComponent — рендерит placeholder-опцию и опции, собирает значение в submit', async () => {
+  it('FieldSelectComponent — кастомный listbox: placeholder, открытие кликом, выбор опции собирается в submit', async () => {
     const fixture = TestBed.createComponent(StageEHostComponent)
     fixture.detectChanges()
 
-    const select = fixture.debugElement.query(By.css('[data-field-name="country"] select'))
-      .nativeElement as HTMLSelectElement
-    expect(select.options[0].textContent).toBe('Выберите страну')
+    // Этап 3g (`forms-vue-angular-select-parity`): нативный `<select>` заменён на
+    // `<button role="combobox">` + `<ul role="listbox">` поверх `createListboxPopup`
+    const trigger = fixture.debugElement.query(By.css('[data-field-name="country"] button[role="combobox"]'))
+      .nativeElement as HTMLButtonElement
+    expect(trigger.textContent?.trim()).toBe('Выберите страну')
+    expect(trigger.getAttribute('aria-expanded')).toBe('false')
 
-    select.value = 'ru'
-    select.dispatchEvent(new Event('change'))
+    trigger.click()
+    fixture.detectChanges()
+
+    expect(trigger.getAttribute('aria-expanded')).toBe('true')
+    // Попап телепортируется CDK Overlay (`DomPortal`) вне `[data-field-name]`-обёртки — селектор без неё
+    const options = fixture.debugElement.queryAll(By.css('li[role="option"]'))
+    expect(options.map((option) => (option.nativeElement as HTMLLIElement).textContent?.trim())).toEqual([
+      'Россия',
+      'Германия',
+    ])
+    ;(options[0].nativeElement as HTMLLIElement).click()
     fixture.detectChanges()
     await Promise.resolve()
+
+    // Выбор закрывает попап и подставляет label выбранной опции в триггер
+    expect(trigger.getAttribute('aria-expanded')).toBe('false')
+    expect(trigger.textContent?.trim()).toBe('Россия')
 
     const form = fixture.debugElement.query(By.css('form')).nativeElement as HTMLFormElement
     form.dispatchEvent(new Event('submit', { cancelable: true }))
@@ -40,15 +56,18 @@ describe('Stage E — Select/CascadingSelect/Combobox/Autocomplete/Listbox/Radio
     const fixture = TestBed.createComponent(StageEHostComponent)
     fixture.detectChanges()
 
-    const countrySelect = fixture.debugElement.query(By.css('[data-field-name="country"] select'))
-      .nativeElement as HTMLSelectElement
+    const countryTrigger = fixture.debugElement.query(By.css('[data-field-name="country"] button[role="combobox"]'))
+      .nativeElement as HTMLButtonElement
     const citySelect = fixture.debugElement.query(By.css('[data-field-name="city"] select'))
       .nativeElement as HTMLSelectElement
 
     expect(citySelect.disabled).toBe(true)
 
-    countrySelect.value = 'ru'
-    countrySelect.dispatchEvent(new Event('change'))
+    countryTrigger.click()
+    fixture.detectChanges()
+    // Попап телепортируется CDK Overlay (`DomPortal`) вне `[data-field-name]`-обёртки — селектор без неё
+    let countryOptions = fixture.debugElement.queryAll(By.css('li[role="option"]'))
+    ;(countryOptions[0].nativeElement as HTMLLIElement).click() // Россия
     fixture.detectChanges()
     await Promise.resolve()
     await Promise.resolve()
@@ -62,8 +81,10 @@ describe('Stage E — Select/CascadingSelect/Combobox/Autocomplete/Listbox/Radio
     citySelect.dispatchEvent(new Event('change'))
     fixture.detectChanges()
 
-    countrySelect.value = 'de'
-    countrySelect.dispatchEvent(new Event('change'))
+    countryTrigger.click()
+    fixture.detectChanges()
+    countryOptions = fixture.debugElement.queryAll(By.css('li[role="option"]'))
+    ;(countryOptions[1].nativeElement as HTMLLIElement).click() // Германия
     fixture.detectChanges()
     await Promise.resolve()
     await Promise.resolve()
