@@ -14,8 +14,9 @@
   изменённые блоки одним multi-range запросом, а CDN ассетов GitHub
   (`release-assets.githubusercontent.com`) такой запрос отвергает (`501 Unsupported client`;
   одиночный Range — `206`). Встроенный `GitHubProvider` поэтому сам выключает multi-range.
-  1.9.25 → 1.9.26 прошла случайно: дифф был в один блок, а один блок electron-updater
-  запрашивает одиночным Range. Фикс — `useMultipleRangeRequest: false` в
+  Почему 1.9.25 → 1.9.26 не упала — не установлено: план загрузки по опубликованным blockmap
+  даёт 8 диапазонов (~1 МБ) и там, и в 1.9.27 → 1.9.28, так что версия «дифф в один блок»
+  опровергнута. Вероятнее, дифф тогда не запускался вовсе, но логов нет. Фикс — `useMultipleRangeRequest: false` в
   `@letar/electron-monorepo-updater` (`pointFeedAtOwnRelease`). Действует при обновлении
   **с** 1.9.30: фид настраивает старая, работающая версия.
 
