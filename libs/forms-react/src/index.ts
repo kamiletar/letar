@@ -172,6 +172,19 @@ export type { SignatureStringKey } from './lib/field/signature-strings'
 export { resolveFieldPlaceholderString, useFieldPlaceholderString } from './lib/field/field-placeholder-strings'
 export type { FieldPlaceholderStringKey } from './lib/field/field-placeholder-strings'
 
+// Строки `Form.Field.PasswordStrength` (требования, подписи силы, aria-label кнопки-глаза) — общий
+// словарь для Chakra- и shadcn-скина, набор строк у обоих одинаков
+export {
+  resolvePasswordStrengthString,
+  usePasswordStrengthString,
+  usePasswordStrengthStrings,
+} from './lib/field/field-password-strength-strings'
+export type {
+  PasswordRequirementId,
+  PasswordStrengthStringKey,
+  PasswordStrengthStrings,
+} from './lib/field/field-password-strength-strings'
+
 // Подписи кнопок тулбара `Form.Field.RichText` — один словарь на Chakra- и shadcn-скин (не по одному на скин)
 export { resolveToolbarString, useToolbarString } from './lib/field/toolbar-strings'
 export type { ToolbarStringKey } from './lib/field/toolbar-strings'

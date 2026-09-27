@@ -4,6 +4,18 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.24.0] - 2026-09-27
+
+### Added
+
+- `resolvePasswordStrengthString`/`usePasswordStrengthString` (по одному ключу),
+  `usePasswordStrengthStrings` (все строки одним объектом), типы `PasswordStrengthStringKey`/
+  `PasswordRequirementId`/`PasswordStrengthStrings`: словарь `formPasswordStrength.*` — требования к
+  паролю, подписи силы, `aria-label` кнопки-глаза `Form.Field.PasswordStrength`. Тот же принцип, что
+  у `formToolbar.*` — **один общий словарь на Chakra- и shadcn-скин** (строки идентичны у обоих, не
+  разное озвучание одного смысла). Английские значения — как был Chakra-хардкод, русские — как был
+  shadcn-хардкод до i18n. Placeholder не входит — у него свой словарь (`field-placeholder-strings.ts`).
+
 ## [0.23.0] - 2026-09-27
 
 ### Added
