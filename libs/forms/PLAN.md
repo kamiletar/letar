@@ -2662,6 +2662,12 @@ ZenStack (§16.2, этап Б): демо на модели `Category` и нас�
 > - У shadcn корня формы нет: реестр подключает приложение по образцу `TestForm`; встроенные строки — только два ключа.
 > - Очистка nullable-поля пишет `''`, а не `null` (вопрос 50) — ✅ доделано 2026-09-27 в `forms` 2.28.0 (`resolveEmptyValue`
 >   в `forms-core`, оба скина, Select и Combobox, собственная очистка и автоочистка).
+>   ✅ Сверка потребителей 2026-09-27 (координатор): `domwellbes` — Watch-обработчики уже принимают `string | null`
+>   (подтвердил BrightGlacier, msg 2200); `studio` — `onFieldChange` только у обязательных `clientId`/`projectId`
+>   (не nullable → по-прежнему `''`), `unmatched-payment-row` проверяет значение на «ложность»; `svoichuzhie`/
+>   `grandslamcup` — Watch/`onFieldChange` по `title`, не по селектам. Влияния не найдено. Оговорка: греп по
+>   обработчикам, не по серверным схемам; `driving-school`, `kami`, `animatrona`, `dsperevod`, `mandala`, `aboi`,
+>   `archetest` в этом греп-проходе обработчиков на Select не показали.
 > - Демо `CascadingSelect` (`select-demo`, `form-develop-app-shadcn`) не переводились: компонент `@deprecated`, но не
 >   изменён, его e2e остаются как страховка от регрессии.
 > - Найдено по ходу: `Combobox` выставлял подпись значения один раз — восстановление черновика оставляло пустой инпут;
