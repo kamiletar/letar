@@ -2,6 +2,17 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.5.9] - 2026-09-27
+
+### Fixed
+
+- `tsconfig.json` держал `target: "ES2017"` — унаследовано от старого `create-next-app`-скаффолда
+  вместе с `animatrona-landing`/`kami-key-the-landing`/`synth` (эти четыре приложения намеренно вне
+  общего пресета `tsconfig.next-app.json`, но задокументированы как «100% единообразны между
+  собой» — `.claude/docs/tsconfig-presets.md`). Два из четырёх упали на `TS2737` (BigInt-литерал в
+  `@letar/format-utils`, нужен `ES2020+`) — поднят до `ES2022` во всех четырёх, чтобы не разойтись.
+  `letar-landing` сам `@letar/format-utils` не использует, правка только ради согласованности.
+
 ## [0.5.8] - 2026-09-27
 
 ### Added
