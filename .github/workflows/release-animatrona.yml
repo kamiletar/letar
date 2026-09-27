@@ -61,12 +61,17 @@ jobs:
       - name: Create draft release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Заметки — только через переменную окружения. Подстановка `${{ }}` прямо в
+          # `--notes "..."` вклеивает текст в скрипт: обратные кавычки CHANGELOG
+          # (`main/updater.ts`) bash исполнял бы как команды, а `"` рвал бы аргумент.
+          NOTES: ${{ steps.changelog.outputs.notes }}
         run: |
+          printf '%s\n' "$NOTES" > release-notes.md
           gh release create "${{ steps.parse-version.outputs.tag }}" \
             --repo kamiletar/letar \
             --draft \
             --title "Animatrona ${{ steps.parse-version.outputs.version }}" \
-            --notes "${{ steps.changelog.outputs.notes }}"
+            --notes-file release-notes.md
 
           echo "Created draft release: ${{ steps.parse-version.outputs.tag }}"
 
