@@ -157,6 +157,7 @@
 - [nextron-npx-next-build-windows-project-dir](/.claude/docs/nextron-npx-next-build-windows-project-dir.md) ⚠️ ручной `npx next build` на Windows резолвит project dir выше
 - [nextjs-standalone-tracing](/.claude/docs/nextjs-standalone-tracing.md) ⚠️ ECONNREFUSED/ERR_DLOPEN_FAILED при зелёном билде
 - [nextjs-stale-dotnext-types-tsgo-ts6305](/.claude/docs/nextjs-stale-dotnext-types-tsgo-ts6305.md) ⚠️ TS6305 от устаревшего `.next/types`, бисекция не ловит
+- [nextjs-server-worker-threads-webpack-publicpath](/.claude/docs/nextjs-server-worker-threads-webpack-publicpath.md) ⚠️ `new Worker(new URL())` на сервере: путь неверный, воркер собирается дважды, в слое `rsc` JSX пустой → `(void 0) is not a function`
 - [nextjs-dynamic-fs-path-tracing](/.claude/docs/nextjs-dynamic-fs-path-tracing.md) ⚠️ рантайм-путь в `fs` утаскивает весь проект в standalone
 - [nextjs-tracing-excludes-windows-backslash](/.claude/docs/nextjs-tracing-excludes-windows-backslash.md) ⚠️ `outputFileTracingExcludes` молча не работает при сборке под Windows
 - [prisma-upsert-empty-update-build-race](/.claude/docs/prisma-upsert-empty-update-build-race.md) ⚠️ `P2002` на «Collecting page data» на пустой БД: воркеры гоняются за singleton
