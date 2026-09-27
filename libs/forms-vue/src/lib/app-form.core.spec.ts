@@ -77,7 +77,12 @@ describe('AppForm + Field*', () => {
     const wrapper = mount(TestForm(onSubmit))
 
     await wrapper.find('input[name="title"]').setValue('Валидное название')
-    await wrapper.find('select[name="category"]').setValue('a')
+    // `Field.Select` — кастомный listbox поверх `useListboxPopup` (Этап 3d), не нативный
+    // `<select>`: открываем попап и кликаем по опции вместо `setValue`
+    await wrapper.find('[role="combobox"]').trigger('click')
+    await Promise.resolve()
+    await nextTick()
+    await wrapper.find('[role="option"]').trigger('click')
     await wrapper.find('input[name="agree"]').setValue(true)
     await nextTick()
 

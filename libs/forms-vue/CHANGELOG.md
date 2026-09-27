@@ -1,5 +1,21 @@
 # Changelog @letar/forms-vue
 
+## 0.22.0 (2026-09-27)
+
+- **Feature:** Этап 3d паритета Select/Combobox (`forms-vue-angular-select-parity`) — `Field.Select`
+  переезжает с нативного `<select>`/`<option>` на кастомный listbox-попап поверх headless-примитива
+  `useListboxPopup` (Этап 1). Нативный элемент физически не мог показать кастомный рендер опции,
+  вторую строку описания или кастомное значение триггера. Разметка — `<button role="combobox">` +
+  `<ul role="listbox">`/`<li role="option">`, без сторонней UI-библиотеки (headless-скин, в отличие
+  от `forms-vue-shadcn`, где тот же примитив обёрнут в Reka UI). `FieldSelectOption` получил
+  `description?: string` (вторая строка опции), `FieldSelect` — пропсы `renderOption`/`renderValue`
+  (та же семантика fallback-на-`label`, что у `forms-shadcn`/`forms-vue-shadcn`). Опция со значением
+  `''` работает без служебного `EMPTY_OPTION_TOKEN`, который нужен только Reka-скину. Вынесенные из
+  объёма Этапа 3d: `onCreate`/`onUpdate`/`pending` (Этап 3e), `searchable`/`dependsOn` (Этап 3f).
+  Заодно `FieldSelect` переведён с ручной обвязки на общие `resolveFieldMeta`/`withFieldValidation`
+  из `core/field-wiring.ts` — раньше был единственным полем пакета на устаревшем инлайн-паттерне
+  (без поддержки вложенности `FormGroup`), это выравнивание с остальными ~60 полями пакета.
+
 ## 0.21.0 (2026-09-27)
 
 - **Fix (критично для `dependsOn`):** `AppForm` (`core/app-form.ts`) теперь подключает
