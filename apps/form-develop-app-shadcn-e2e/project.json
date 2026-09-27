@@ -1,0 +1,42 @@
+{
+  "name": "form-develop-app-shadcn-e2e",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/form-develop-app-shadcn-e2e/src",
+  "tags": ["type:e2e", "scope:form-develop-app-shadcn", "owner:letar"],
+  "implicitDependencies": ["form-develop-app-shadcn"],
+  "targets": {
+    "e2e": {
+      "executor": "@nx/playwright:playwright",
+      "outputs": ["{workspaceRoot}/playwright-report/{projectName}"],
+      "options": {
+        "config": "apps/form-develop-app-shadcn-e2e/playwright.config.ts"
+      }
+    },
+    "format": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bunx dprint fmt \"**/*.{ts,tsx,js,jsx,json,md}\"",
+        "cwd": "apps/form-develop-app-shadcn-e2e"
+      },
+      "cache": false,
+      "metadata": {
+        "description": "Format files with dprint (~30x faster than Prettier)",
+        "technologies": ["dprint"]
+      }
+    },
+    "format:check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bunx dprint check \"**/*.{ts,tsx,js,jsx,json,md}\"",
+        "cwd": "apps/form-develop-app-shadcn-e2e"
+      },
+      "cache": true,
+      "inputs": ["default", "{workspaceRoot}/dprint.json"],
+      "metadata": {
+        "description": "Check file formatting with dprint",
+        "technologies": ["dprint"]
+      }
+    }
+  }
+}
