@@ -2,14 +2,6 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
-## [1.27.4] — 2026-09-27
-
-### Removed
-
-- Удалён мёртвый `src/lib/rate-limit.ts` и неиспользуемая константа `RATE_LIMIT` из
-  `src/lib/constants.ts` — самодельный in-memory rate limiter, на который никто в приложении не
-  ссылался (найден аудитом дублирования с `@letar/api-server`'s `createRateLimiter`).
-
 ## [1.27.3] — 2026-09-24
 
 ### Fixed
