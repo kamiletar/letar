@@ -1106,7 +1106,7 @@
     },
     "libs/auth": {
       "name": "@letar/auth",
-      "version": "0.16.0",
+      "version": "0.17.0",
       "dependencies": {
         "@better-auth/utils": "^0.4.2",
         "@letar/pin-auth": "workspace:*",
