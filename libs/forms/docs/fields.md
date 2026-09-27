@@ -100,6 +100,32 @@ Chakra-скин; в shadcn-скине поля поиска нет (`searchable:
   `searchable={false}`. Роль Content — `dialog`, `listbox` — на `Select.List`; e2e с `keyboard.type` после открытия
   проверить прогоном.
 
+### Вторая строка опции: `description` (v2.30.0+)
+
+У опции `Select` и `Combobox` (Chakra и shadcn) есть `description` — вторая строка под подписью **только в
+выпадающем списке**: в кнопке-триггере и в поле ввода после выбора её нет (там `textValue`/подпись).
+
+```tsx
+<Form.Field.Select
+  name="cityId"
+  options={[{ value: 'msk', label: 'Москва', description: 'ул. Тверская, 1' }]}
+/>
+<Form.Field.Combobox
+  name="userId"
+  useQuery={findUsers}
+  getLabel={(u) => u.name}
+  getValue={(u) => u.id}
+  getDescription={(u) => u.email} // shadcn: то же для loadOptions у Select и Combobox
+/>
+```
+
+- Строка и число участвуют в локальном поиске (`Select` — `searchable`, статичный `Combobox`): запрос «тверск»
+  найдёт «Москва». `searchInDescription={false}` оставляет поиск только по тексту опции. Узел в `description`
+  не ищется — положи искомый текст в строку. `useQuery`/`loadOptions` фильтрует сервер, флаг там ни на что не влияет.
+- Со своим `renderOption` пункт рисует приложение: поле вторую строку не добавляет, `description` лежит в `option`.
+- **Из схемы:** `@meta("form.relation.descriptionField", "note")` берёт значение из записи справочника
+  (`option.data`); `descriptionField` в `RelationConfig` провайдера сильнее. Пустое значение — без второй строки.
+
 ### Загрузка справочника: `loading`, `useSelected`, `RelationFieldProvider` (v2.22.0+)
 
 - **`loading` у `Select`.** Справочник ещё грузится (`isLoading` хука `useFindMany`) — передай `loading={isLoading}`:

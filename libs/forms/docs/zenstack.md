@@ -277,14 +277,14 @@ import { RelationFieldProvider } from '@letar/forms'
 
 ### RelationConfig props
 
-| Prop               | Тип                                | Default | Описание                                     |
-| ------------------ | ---------------------------------- | ------- | -------------------------------------------- |
-| `model`            | `string`                           | -       | Имя модели (должно совпадать с relationMeta) |
-| `useQuery`         | `() => { data, isLoading, error }` | -       | React hook для загрузки данных               |
-| `labelField`       | `string`                           | -       | Поле для отображения в option                |
-| `valueField`       | `string`                           | `'id'`  | Поле для значения                            |
-| `descriptionField` | `string`                           | -       | Поле для description (для RadioCard)         |
-| `queryArgs`        | `object`                           | -       | Аргументы для useQuery (where, orderBy)      |
+| Prop               | Тип                                | Default | Описание                                          |
+| ------------------ | ---------------------------------- | ------- | ------------------------------------------------- |
+| `model`            | `string`                           | -       | Имя модели (должно совпадать с relationMeta)      |
+| `useQuery`         | `() => { data, isLoading, error }` | -       | React hook для загрузки данных                    |
+| `labelField`       | `string`                           | -       | Поле для отображения в option                     |
+| `valueField`       | `string`                           | `'id'`  | Поле для значения                                 |
+| `descriptionField` | `string`                           | -       | Вторая строка опции (Select, Combobox, RadioCard) |
+| `queryArgs`        | `object`                           | -       | Аргументы для useQuery (where, orderBy)           |
 
 ### С фильтрацией и сортировкой
 

@@ -66,6 +66,11 @@ export interface RelationFieldConfig {
   labelField: string
   /** Field for value (default 'id') */
   valueField?: string
+  /**
+   * Field of the record for the second line of an option (`@meta("form.relation.descriptionField", "…")`).
+   * `descriptionField` of the model in `RelationFieldProvider` wins; the option's own `description` too.
+   */
+  descriptionField?: string
 }
 
 /**
@@ -542,6 +547,24 @@ export function renderSchemaField(
 }
 
 /**
+ * Вторая строка опции из `form.relation.descriptionField` поля: там, где провайдер не дал свою (`descriptionField` в
+ * `RelationConfig` сильнее). Значение — строка из записи (`option.data`); пустое или отсутствующее — без описания
+ */
+function withMetaDescription(options: RelationOption[], descriptionField?: string): RelationOption[] {
+  if (!descriptionField) {
+    return options
+  }
+  return options.map((opt) => {
+    if (opt.description !== undefined && opt.description !== '') {
+      return opt
+    }
+    const raw = (opt.data as Record<string, unknown> | null | undefined)?.[descriptionField]
+    const description = raw === undefined || raw === null ? '' : String(raw)
+    return description === '' ? opt : { ...opt, description }
+  })
+}
+
+/**
  * Component for rendering a field with auto-loading relation options
  *
  * Uses RelationFieldProvider context for automatic loading of
@@ -568,7 +591,7 @@ export function SchemaFieldWithRelations({ field }: { field: SchemaFieldInfo }):
   if (relationConfig && relationContext) {
     const state = relationContext.getState(relationConfig.model)
     if (!state.isLoading && state.options.length > 0) {
-      relationOptions = state.options
+      relationOptions = withMetaDescription(state.options, relationConfig.descriptionField)
     }
     relationFieldProps = relationContext.getFieldProps(relationConfig.model)
   }

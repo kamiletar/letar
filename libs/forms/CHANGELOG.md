@@ -4,6 +4,19 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.30.0] - 2026-09-27
+
+### Добавлено
+
+- **Вторая строка опции — `description` у `Select` и `Combobox`.** Рисуется под подписью только в выпадающем списке;
+  в триггере и в поле после выбора остаётся подпись. Для `Combobox` с `useQuery` — `getDescription={(item) => …}`.
+  Строковое описание ищет локальный поиск (`Select` — `searchable`, статичный `Combobox`); `searchInDescription={false}`
+  оставляет поиск только по тексту. Со своим `renderOption` пункт рисует приложение.
+- **`form.relation.descriptionField` из схемы.** `Form.AutoFields`/`SchemaFieldWithRelations` берут вторую строку
+  из записи справочника (`option.data[descriptionField]`); `descriptionField` в `RelationConfig` сильнее.
+  `relationMeta({ descriptionField })` — то же из TS-схемы. Пример — `docs/fields.md`, «Вторая строка опции».
+- Типы `DescribedOptionFlag`, `SelectFieldOption` и `ComboboxFieldOption` получили `description`.
+
 ## [2.29.0] - 2026-09-27
 
 ### Добавлено

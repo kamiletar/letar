@@ -6,6 +6,7 @@ export type {
   CheckboxCardOption,
   ComboboxFieldOption,
   ComboboxOption,
+  DescribedOptionFlag,
   EditableOptionFlag,
   GroupableOption,
   ListboxOption,

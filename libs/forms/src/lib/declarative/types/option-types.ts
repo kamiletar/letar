@@ -44,11 +44,24 @@ export interface EditableOptionFlag {
   editable?: boolean
 }
 
+/** Second line of an option in the dropdown list (Select and Combobox) */
+export interface DescribedOptionFlag {
+  /**
+   * Drawn under the label in the list only — not in the trigger, not in the input after a pick. Not part of the
+   * option text (`textValue`): a node is fine; a string or a number is also matched by the search
+   * (`searchInDescription={false}` turns that off).
+   */
+  description?: ReactNode
+}
+
 /** Option of `Form.Field.Select` — `data` type is inferred from `options` */
-export type SelectFieldOption<TData = unknown> = BaseOption<string | number, TData> & EditableOptionFlag
+export type SelectFieldOption<TData = unknown> =
+  & BaseOption<string | number, TData>
+  & EditableOptionFlag
+  & DescribedOptionFlag
 
 /** Option of `Form.Field.Combobox` with static `options` */
-export type ComboboxFieldOption<T = string, TData = unknown> = GroupableOption<T, TData>
+export type ComboboxFieldOption<T = string, TData = unknown> = GroupableOption<T, TData> & DescribedOptionFlag
 
 /**
  * Option with grouping support

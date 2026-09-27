@@ -2600,7 +2600,7 @@ ZenStack (§16.2, этап Б): демо на модели `Category` и нас�
 >   `'Select.Category': ['RegistryKeyDemo.categoryId']`; ключ из импортированного фрагмента — `Модель.поле`. Имя файла из AST
 >   недоступно: слияние импортов переподчиняет объявления главному документу (тест в `model-generator-live.spec.ts` упадёт,
 >   если апстрим это изменит).
-> - Не сделано (отложено): `descriptionField` в рендере (вопрос 44). ✅ Позже, 2026-09-27: nx-генератор заготовки
+> - ✅ Позже, 2026-09-27: `descriptionField` в рендере (вопрос 44, `forms` 2.30.0 — §17.11); nx-генератор заготовки
 >   справочника (вопрос 42) и `useZenStackRelations` (вопрос 43) — §17.10. Абзац «ключ реестра в схеме» (§17.8) нужен в `.claude/rules/forms.md` — за координатором.
 > - ✅ Долг вне этапа закрыт 2026-09-27: `form-develop-app` TS2322 в `file-upload-demo/page.tsx:126` — в `FileUploadFieldProps`
 >   (Chakra) не было `placeholder`, который компонент читает (`forms` 2.29.0).
@@ -2976,7 +2976,7 @@ TanStack Query** — сценарии, примеры в доке и взаим�
     схеме; модель проверяет плагин на generate. ✅ **Сделано 2026-09-27** (`forms-query` 0.4.0), сигнатура уточнена:
     `useZenStackRelations(zenSchema, formSchema, options?)` — первым аргументом схема ZenStack, не результат
     `useClientQueries` (§17.10).
-44. **Вторая строка опции:** вместо новой `form.optionHint` — `@meta("form.relation.descriptionField", …)` (уже
+44. ✅ **Сделано 2026-09-27 (`forms` 2.30.0).** **Вторая строка опции:** вместо новой `form.optionHint` — `@meta("form.relation.descriptionField", …)` (уже
     проходит парсер), провайдер берёт его из meta поля, Select и Combobox рисуют `description` второй строкой? —
     _Рекомендую да, отдельным minor после этапа А_ (нужен `ItemText`), не в Е (§17.6, п. 5).
 45. **Generic `createForm`** в этапе Е — опечатки `AppForm.Select.X` в JSX станут ошибками typecheck у потребителей?
@@ -4165,7 +4165,7 @@ export const appFormRegistryCheck: FormRegistryCheck<typeof AppForm, FormSelectK
   `fieldProps`; в `form-mcp` — описание ключа в `get_directives` (и исправление описания `form.relation`), паттерн
   «справочник по ключу из схемы» в `get_form_pattern`.
 - **Отложить:** ✅ nx-генератор заготовки справочника (вопрос 42) и ✅ `useZenStackRelations` в
-  `@letar/forms-query/zenstack` вместо генерации `relations=[…]` (вопрос 43) сделаны 2026-09-27 (§17.10); `descriptionField` из meta поля и вторая строка опции в Select/Combobox (вопрос 44).
+  `@letar/forms-query/zenstack` вместо генерации `relations=[…]` (вопрос 43) сделаны 2026-09-27 (§17.10); ✅ `descriptionField` из meta поля и вторая строка опции в Select/Combobox (вопрос 44) — 2026-09-27, §17.11.
 - **Не делать:** заготовки в плагине, кодоген окна и «справочника модели», директивы под функции,
   `form.optionHint`, `generate_reference_select`.
 
@@ -4348,6 +4348,24 @@ PJ5 слитые фрагменты `libs/*.zmodel` (поле-связь в ми
   вбандливает обход схемы из `forms-core/schema` (~15 КБ общего чанка, без `zod`); `build:npm` и guard-тесты зелёные.
 - Демо `relation-demo` переведено на хук (справочник категорий грузится, проверено в браузере); гайд `relation-fields` в
   form-docs исправлен: там был `relations={{ category: … }}` объектом, провайдер принимает массив с `model`.
+
+#### 17.11. Заметки реализации вопроса 44: вторая строка опции (2026-09-27)
+
+`forms-core` 0.26.0, `forms` 2.30.0, `forms-shadcn` 0.49.0, `form-mcp` 2.5.1.
+
+- **Один `description` на опцию, никакой новой директивы.** `UIKitSelectOption.description` → Chakra `Select`/`Combobox` и
+  shadcn `Select`/`Combobox`. Вторая строка — **сосед** `ItemText`, не его ребёнок: Chakra `ValueText` берёт подпись триггера
+  из `itemToString`, Radix копирует содержимое `ItemText` в триггер, поэтому описание внутри `ItemText` протекло бы в поле.
+  Со своим `renderOption` поле описание не добавляет (пункт целиком у приложения). Тест «триггер без описания» — в обоих скинах.
+- **Поиск.** `getOptionSearchText` = текст + `` + строковое описание (перевод строки — чтобы запрос не склеивал их границу).
+  Узел не ищется. `searchInDescription={false}` у Select (Chakra; в shadcn у Select поиска нет) и статичного Combobox.
+  Серверный поиск (`useQuery`/`loadOptions`) флагом не управляется.
+- **Источник значения.** `useZenStackRelations` уже клал `descriptionField` из meta поля в `RelationConfig` (§17.10), провайдер —
+  в `description` опции. Добавлено: при ручном `RelationFieldProvider` без `descriptionField` в конфиге
+  `SchemaFieldWithRelations` берёт его из `fieldProps.relation.descriptionField` и читает `option.data[…]`; конфиг
+  провайдера сильнее. `relationMeta({ descriptionField })` для TS-схемы.
+- **`getDescription`** — у Chakra `Combobox` (`useQuery`) и у shadcn `Select` (`loadOptions`)/`Combobox`; у Chakra `Select`
+  источника «записи» нет, там описание — в самих `options`.
 
 ### 18. Зависимые (каскадные) селекты (этап З)
 

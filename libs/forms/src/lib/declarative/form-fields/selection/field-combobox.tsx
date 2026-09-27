@@ -1,6 +1,6 @@
 'use client'
 
-import { Box, Button, Combobox, Field, Portal, Spinner, useFilter } from '@chakra-ui/react'
+import { Box, Button, Combobox, Field, Portal, Spinner, Text, useFilter } from '@chakra-ui/react'
 import {
   applyOptionOverlay,
   CREATE_OPTION_VALUE,
@@ -8,6 +8,7 @@ import {
   createSearchMatcher,
   type DependentFieldProps,
   type FieldDeps,
+  getOptionSearchText,
   getOptionText,
   isCreateOptionValue,
   isOptionEditable,
@@ -29,7 +30,14 @@ import {
 } from '@letar/forms-react'
 import { useStore } from '@tanstack/react-form'
 import { type ReactElement, type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import type { BaseFieldProps, EditableOptionFlag, FieldSize, GroupableOption, OptionRenderState } from '../../types'
+import type {
+  BaseFieldProps,
+  DescribedOptionFlag,
+  EditableOptionFlag,
+  FieldSize,
+  GroupableOption,
+  OptionRenderState,
+} from '../../types'
 import {
   type AsyncQueryFn,
   createField,
@@ -48,7 +56,7 @@ import { SelectCreateButton, SelectEditButton } from './selection-slots'
 import { type DependentSelectFieldState, useDependentSelectField } from './use-dependent-select-field'
 
 /** Option of the field: groupable + the «cannot be edited» flag */
-type ComboboxItem = GroupableOption & EditableOptionFlag
+type ComboboxItem = GroupableOption & EditableOptionFlag & DescribedOptionFlag
 
 /**
  * Props of Form.Field.Combobox that do not depend on where the options come from. `TDeps` — the shape of `deps`
@@ -62,6 +70,18 @@ export interface ComboboxFieldBaseProps<T = string, TData = unknown, TDeps exten
    * Needed when `getLabel` returns a node (otherwise the option falls back to its value).
    */
   getTextValue?: (item: TData) => string
+
+  /**
+   * Second line of an option in the dropdown list (with `useQuery`; static `options` carry their own `description`).
+   * Drawn under the label in the list only — not in the input after a pick. Not called for the «+ Add…» item.
+   */
+  getDescription?: (item: TData) => ReactNode
+
+  /**
+   * The local filter of static `options` also matches the string `description` (default `true`). `false` — the text
+   * of the option only. With `useQuery` the server filters, the flag changes nothing.
+   */
+  searchInDescription?: boolean
 
   /**
    * Own content of an option in the dropdown. The skin keeps its item frame (highlight,
@@ -570,6 +590,7 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
       selectedItem,
       componentProps.getLabel,
       componentProps.getTextValue,
+      componentProps.getDescription,
       componentProps.getValue,
       componentProps.getDisabled,
       componentProps.getEditable,
@@ -643,6 +664,7 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
       if (queryData && componentProps.getLabel && componentProps.getValue) {
         const getLabel = componentProps.getLabel
         const getTextValue = componentProps.getTextValue
+        const getDescription = componentProps.getDescription
         const getValue = componentProps.getValue
         const getGroup = componentProps.getGroup
         const getDisabled = componentProps.getDisabled
@@ -651,6 +673,7 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
         return (queryData as unknown[]).map((item) => ({
           label: getLabel(item),
           textValue: getTextValue?.(item),
+          description: getDescription?.(item),
           data: item,
           value: getValue(item),
           group: getGroup?.(item),
@@ -741,11 +764,12 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
       const createdValues = new Set(createdOptions.map((opt) => String(opt.value)))
       // Запрос, набранный не в той раскладке, тоже находит («ghbdtn» → «Привет»)
       const matcher = createSearchMatcher(inputValue, contains)
+      const getText = componentProps.searchInDescription === false ? getOptionLabel : getOptionSearchText
       return allOptions.filter((opt) => {
         const isLocal = componentProps.options !== undefined || createdValues.has(String(opt.value))
-        return !isLocal || !matcher || matcher(getOptionLabel(opt))
+        return !isLocal || !matcher || matcher(getText(opt))
       })
-    }, [allOptions, createdOptions, componentProps.options, inputValue, contains])
+    }, [allOptions, createdOptions, componentProps.options, inputValue, contains, componentProps.searchInDescription])
 
     // Служебный пункт «+ Добавить "<поиск>"» — в конце списка, вне групп. Значение перехватывается
     // в `onValueChange` и в форму не попадает
@@ -946,9 +970,29 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
         )
         : null
 
-    const renderItem = (opt: GroupableOption) => (
+    // Вторая строка — сосед `ItemText`, не его ребёнок: в поле после выбора идёт `itemToString`, описания там нет.
+    // Со своим `renderOption` пункт рисует приложение, `description` оно берёт из опции само
+    const renderItemBody = (opt: GroupableOption & DescribedOptionFlag) => {
+      const text = <Combobox.ItemText>{renderItemContent(opt)}</Combobox.ItemText>
+      if (
+        componentProps.renderOption || opt.description === undefined || opt.description === null
+        || opt.description === '' || isCreateOptionValue(String(opt.value))
+      ) {
+        return text
+      }
+      return (
+        <Box flex="1" minW="0" display="flex" flexDirection="column">
+          {text}
+          <Text data-part="item-description" textStyle="xs" color="fg.muted" fontWeight="normal">
+            {opt.description}
+          </Text>
+        </Box>
+      )
+    }
+
+    const renderItem = (opt: GroupableOption & DescribedOptionFlag) => (
       <Combobox.Item item={opt} key={opt.value} data-pending={opt.pending ? '' : undefined}>
-        <Combobox.ItemText>{renderItemContent(opt)}</Combobox.ItemText>
+        {renderItemBody(opt)}
         {opt.pending ? <Spinner size="xs" /> : renderItemActions(opt)}
         <Combobox.ItemIndicator />
       </Combobox.Item>

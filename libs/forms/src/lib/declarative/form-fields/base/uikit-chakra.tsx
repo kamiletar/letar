@@ -244,6 +244,23 @@ export const chakraUIKit: ChakraUIKit = {
         })
         : opt.label
 
+    // Пункт целиком: подпись + (без `renderOption`) вторая строка `description`. Описание — сосед `ItemText`, а не его
+    // ребёнок: `ValueText` берёт подпись из `itemToString`, и в триггер описание не попадает
+    const renderItemBody = (opt: (typeof options)[number]) => {
+      const text = <ChakraSelect.ItemText>{renderItemContent(opt)}</ChakraSelect.ItemText>
+      if (renderOption || opt.description === undefined || opt.description === null || opt.description === '') {
+        return text
+      }
+      return (
+        <Box flex="1" minW="0" display="flex" flexDirection="column">
+          {text}
+          <Text data-part="item-description" textStyle="xs" color="fg.muted" fontWeight="normal">
+            {opt.description}
+          </Text>
+        </Box>
+      )
+    }
+
     // Подпись выбранного в триггере: `renderValue`; пустой результат — откат к строке опции
     const selectedOption = selected.length > 0 ? options.find((opt) => opt.value === selected[0]) : undefined
     const customValue = selectedOption && renderValue ? renderValue(selectedOption) : undefined
@@ -259,7 +276,7 @@ export const chakraUIKit: ChakraUIKit = {
           {groupName && <ChakraSelect.ItemGroupLabel>{groupName}</ChakraSelect.ItemGroupLabel>}
           {groupItems.map((opt) => (
             <ChakraSelect.Item item={opt} key={opt.value} data-pending={opt.pending ? '' : undefined}>
-              <ChakraSelect.ItemText>{renderItemContent(opt)}</ChakraSelect.ItemText>
+              {renderItemBody(opt)}
               {opt.pending ? <Spinner size="xs" /> : renderOptionActions?.(opt)}
               <ChakraSelect.ItemIndicator />
             </ChakraSelect.Item>
@@ -268,7 +285,7 @@ export const chakraUIKit: ChakraUIKit = {
       ))
       : visibleOptions.map((opt) => (
         <ChakraSelect.Item item={opt} key={opt.value} data-pending={opt.pending ? '' : undefined}>
-          <ChakraSelect.ItemText>{renderItemContent(opt)}</ChakraSelect.ItemText>
+          {renderItemBody(opt)}
           {opt.pending ? <Spinner size="xs" /> : renderOptionActions?.(opt)}
           <ChakraSelect.ItemIndicator />
         </ChakraSelect.Item>

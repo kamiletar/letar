@@ -7,6 +7,7 @@ import {
   type CreateOptionHandler,
   type DependentFieldProps,
   type FieldDeps,
+  getOptionSearchText,
   getOptionText,
   isCreateOptionValue,
   isOptionEditable,
@@ -42,6 +43,7 @@ import { type DependentSelectFieldState, useDependentSelectField } from './use-d
 interface NormalizedOption {
   label: React.ReactNode
   textValue?: string
+  description?: React.ReactNode
   value: string
   disabled?: boolean
   editable?: boolean
@@ -151,6 +153,11 @@ export interface SelectFieldBaseProps<TData = unknown, TDeps extends FieldDeps =
    * Long lists that come from the server by search text — use `Form.Field.Combobox` with `useQuery`.
    */
   searchable?: SelectSearchable<SelectFieldOption<TData>>
+  /**
+   * The search also matches the string `description` of an option (default `true`). `false` — the text of the
+   * option only. A node description is never searched.
+   */
+  searchInDescription?: boolean
   /**
    * Own content of the «nothing found» state of the search (instead of the localized message). With `onCreate`
    * the «+ Add "…"» item goes under it; with `createItem={false}` put `<Form.Field.Select.CreateButton />` here.
@@ -393,6 +400,7 @@ const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFie
       const normalizedOptions: NormalizedOption[] = mergedOptions.map((opt) => ({
         label: opt.label,
         textValue: opt.textValue,
+        description: opt.description,
         data: opt.data,
         value: String(opt.value),
         disabled: opt.disabled,
@@ -420,7 +428,7 @@ const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFie
     const searchState = useSelectionSearch<SelectFieldOption>({
       searchable: componentProps.searchable as SelectSearchable<SelectFieldOption> | undefined,
       options: merged,
-      getText: getOptionText,
+      getText: componentProps.searchInDescription === false ? getOptionText : getOptionSearchText,
       placeholder: searchPlaceholder,
       ariaLabel: searchAria,
     })
@@ -616,6 +624,7 @@ const FieldSelectBase = createField<SelectFieldProps, string | number, SelectFie
               value: opt.value,
               label: opt.label,
               textValue: opt.textValue,
+              description: opt.description,
               disabled: opt.disabled,
               pending: opt.pending,
               group: opt.group,

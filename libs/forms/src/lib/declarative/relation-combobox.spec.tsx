@@ -1,5 +1,5 @@
 import { ChakraProvider, defaultSystem } from '@chakra-ui/react'
-import { render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { type ReactNode } from 'react'
 import { beforeAll, describe, expect, it, vi } from 'vitest'
@@ -52,7 +52,12 @@ function field(fieldProps: Record<string, unknown> = {}): SchemaFieldInfo {
   }
 }
 
-function renderRelation(schemaField: SchemaFieldInfo, relationFieldProps?: Record<string, unknown>, initial = '') {
+function renderRelation(
+  schemaField: SchemaFieldInfo,
+  relationFieldProps?: Record<string, unknown>,
+  initial = '',
+  providerDescriptionField?: string,
+) {
   render(
     <TestWrapper>
       <RelationFieldProvider
@@ -60,6 +65,7 @@ function renderRelation(schemaField: SchemaFieldInfo, relationFieldProps?: Recor
           model: 'Category',
           useQuery: () => ({ data: categories, isLoading: false }),
           labelField: 'name',
+          descriptionField: providerDescriptionField,
           fieldProps: relationFieldProps,
         }]}
       >
@@ -103,5 +109,41 @@ describe('Relation + Combobox (Z8)', () => {
   it('конфигурация relation не уходит в поле (нет атрибута relation в DOM)', async () => {
     renderRelation(field())
     expect(document.querySelector('[relation]')).toBeNull()
+  })
+})
+
+describe('Relation + descriptionField (вопрос 44)', () => {
+  const withMetaDescription = (descriptionField: string) =>
+    field({ relation: { model: 'Category', labelField: 'name', descriptionField } })
+
+  it('form.relation.descriptionField поля: вторая строка опции — поле записи, в инпуте после выбора только подпись', async () => {
+    renderRelation(withMetaDescription('color'), undefined, 'b')
+    await waitFor(() => expect(input().value).toBe('Фасад'))
+    await userEvent.click(input())
+    // Список отфильтрован по подписи выбранного («Фасад»): у неё вторая строка — цвет записи
+    await waitFor(() => expect(screen.getByText('blue')).toBeInTheDocument())
+    expect(input().value).toBe('Фасад')
+  })
+
+  it('без descriptionField второй строки нет', async () => {
+    renderRelation(field())
+    await userEvent.click(input())
+    await waitFor(() => expect(screen.getByRole('option', { name: /Кровля/ })).toBeInTheDocument())
+    expect(document.querySelector('[data-part="item-description"]')).toBeNull()
+  })
+
+  it('descriptionField провайдера сильнее описанного в meta поля', async () => {
+    renderRelation(withMetaDescription('id'), undefined, '', 'color')
+    await userEvent.click(input())
+    await waitFor(() => expect(screen.getByText('red')).toBeInTheDocument())
+    expect(screen.queryByText('a')).toBeNull()
+  })
+
+  it('локальный поиск Combobox находит по описанию', async () => {
+    renderRelation(withMetaDescription('color'))
+    await userEvent.click(input())
+    fireEvent.change(input(), { target: { value: 'blu' } })
+    await waitFor(() => expect(screen.getByRole('option', { name: /Фасад/ })).toBeInTheDocument())
+    expect(screen.queryByRole('option', { name: /Кровля/ })).toBeNull()
   })
 })

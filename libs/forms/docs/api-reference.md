@@ -285,7 +285,7 @@ interface RelationConfig {
   useQuery: () => { data: any[]; isLoading: boolean; error?: Error }
   labelField: string
   valueField?: string // default: 'id'
-  descriptionField?: string
+  descriptionField?: string // вторая строка опции; или @meta("form.relation.descriptionField", "...") в схеме
   queryArgs?: { where?: object; orderBy?: object }
 }
 ```
