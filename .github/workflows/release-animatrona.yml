@@ -100,7 +100,7 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Build zenstack-form-plugin
-        run: cd libs/zenstack-form-plugin && npx tsc --project tsconfig.lib.json && cd ../..
+        run: cd libs/zenstack-form-plugin && bunx tsc --project tsconfig.lib.json && cd ../..
 
       - name: Generate ZenStack
         run: |
@@ -117,13 +117,20 @@ jobs:
 
       - name: Build Windows
         working-directory: apps/animatrona
+        # shell: bash (как и шаг "Rename assets" ниже) — нужен -e/&&-семантика подоболочек:
+        # `(cd renderer && bunx next build --webpack)` не меняет cwd родительского скрипта и
+        # честно роняет шаг при ошибке. Раньше `cd renderer && ... && cd ..` без подоболочки —
+        # при ошибке внутри `cd ..` не выполнялся (не последний в `&&`-цепочке, `set -e` это не
+        # ловит), следующая команда резолвила пути от `renderer/`, а под pwsh (шелл по умолчанию
+        # на этом раннере) ненулевой код внешней команды и вовсе не роняет шаг сам по себе.
+        shell: bash
         run: |
           bunx tsx scripts/update-splash-version.ts
-          cd renderer && bunx next build --webpack && cd ..
+          (cd renderer && bunx next build --webpack)
           bunx tsx scripts/fix-standalone.ts
           bunx webpack --config main/webpack.config.js
           node web-player/build.mjs --prod
-          cd mobile-ui && bun run build && cd ..
+          (cd mobile-ui && bun run build)
           bunx electron-builder --win --publish never
         env:
           NODE_OPTIONS: --max-old-space-size=8192
@@ -209,12 +216,15 @@ jobs:
 
       - name: Build macOS
         working-directory: apps/animatrona
+        # Подоболочка `(cd dir && cmd)` — см. комментарий у "Build Windows": без неё ошибка
+        # внутри `next build` оставляла cwd в `renderer/`, следующая команда резолвила
+        # `main/webpack.config.js` оттуда и падала на непонятной вторичной ошибке.
         run: |
           bunx tsx scripts/update-splash-version.ts
-          cd renderer && bunx next build --webpack && cd ..
+          (cd renderer && bunx next build --webpack)
           bunx webpack --config main/webpack.config.js
           node web-player/build.mjs --prod
-          cd mobile-ui && bun run build && cd ..
+          (cd mobile-ui && bun run build)
           bunx electron-builder --mac --publish never
 
       - name: Rename assets to dash-separated names (must match latest-mac.yml)
@@ -293,12 +303,13 @@ jobs:
 
       - name: Build Linux
         working-directory: apps/animatrona
+        # Подоболочка `(cd dir && cmd)` — см. комментарий у "Build Windows".
         run: |
           bunx tsx scripts/update-splash-version.ts
-          cd renderer && bunx next build --webpack && cd ..
+          (cd renderer && bunx next build --webpack)
           bunx webpack --config main/webpack.config.js
           node web-player/build.mjs --prod
-          cd mobile-ui && bun run build && cd ..
+          (cd mobile-ui && bun run build)
           bunx electron-builder --linux --publish never
 
       - name: Rename assets to dash-separated names (must match latest-linux.yml)
