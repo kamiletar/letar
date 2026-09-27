@@ -49,6 +49,7 @@
 - [bun-lock-drift-unpushed-commits-blocks-all-deploys](/.claude/docs/bun-lock-drift-unpushed-commits-blocks-all-deploys.md) ⚠️ lock ≠ версии (не запушено/не закоммичено) роняет ЛЮБОЙ деплой
 - [bun-server-version-lockfile-format-incompatibility](/.claude/docs/bun-server-version-lockfile-format-incompatibility.md) ⚠️ старый bun на сервере блокирует все деплои разом
 - [bun-install-stale-isolated-cache](/.claude/docs/bun-install-stale-isolated-cache.md) ⚠️ несколько версий в `.bun` — норма, чинит `--force`
+- [bun-workspace-deleted-from-worktree-breaks-all](/.claude/docs/bun-workspace-deleted-from-worktree-breaks-all.md) ⚠️ пропавший из чекаута `libs/<x>` роняет `bun install` и граф Nx у всех; симлинки возвращает только `--force`
 - [bun-isolated-linker-alias-shared-bucket-collision](/.claude/docs/bun-isolated-linker-alias-shared-bucket-collision.md) ⚠️ npm-alias двух версий пакета резолвится в один bucket
 - [bun-isolated-linker-shared-zod-bucket-drift](/.claude/docs/bun-isolated-linker-shared-zod-bucket-drift.md) ⚠️ обычный `bun update` развёл zod на два экземпляра
 - [zod-per-package-pin-drift](/.claude/docs/zod-per-package-pin-drift.md) ⚠️ caret не дедупает с точным корневым пином
@@ -334,7 +335,7 @@
 ### Электрон и десктоп
 
 - [electron-app-protocol](/.claude/docs/electron-app-protocol.md) ⚠️ origin `null` под `file://` блокирует Worker и WASM
-- [electron-monorepo-shared-releases](/.claude/docs/electron-monorepo-shared-releases.md) ⭐ общий репо релизов: тег `<app>-v<semver>`, чек-лист нового приложения
+- [electron-monorepo-shared-releases](/.claude/docs/electron-monorepo-shared-releases.md) ⭐ общий репо релизов: тег `<app>-v<semver>`, чек-лист нового приложения; ⚠️ код обновления исполняет старая версия — фикс проверяется циклом N → N+1
 - [animatrona-dual-build-alias-drift](/.claude/docs/animatrona-dual-build-alias-drift.md) ⚠️ webpack и esbuild со своими списками алиасов — править оба
 - [electron-version-drift](/.claude/docs/electron-version-drift.md) точная версия electron расходится без ошибок сборки
 - [electron-net-fetch-tun-vpn](/.claude/docs/electron-net-fetch-tun-vpn.md) ⚠️ `net.fetch` падает под TUN-VPN
