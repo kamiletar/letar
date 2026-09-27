@@ -2,6 +2,15 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.6.16] - 2026-09-27
+
+### Fixed
+
+- `ShikiError: Language 'zmodel' not found` на пререндере (гайды `create-form`, `dependent-selects`,
+  4 файла ru/en получили код-блоки `` ```zmodel ``). Причина падения staging-сборки —
+  `source.config.ts` без `mdxOptions`. Фикс — алиас `zmodel: 'prisma'` в `langAlias` (ZModel
+  синтаксически близок к Prisma schema, подсветка проверена вживую в `next dev`).
+
 ## [0.6.15] - 2026-09-24
 
 ### Added
