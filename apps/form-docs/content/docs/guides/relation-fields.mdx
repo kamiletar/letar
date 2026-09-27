@@ -80,6 +80,20 @@ function RecipeForm() {
   label in `overrides`.
 - The third argument takes `overrides`, `exclude` and `clientOptions` (the second argument of `useClientQueries`).
 
+## Second option line: descriptionField
+
+`descriptionField` is the record field that `Select` and `Combobox` (Chakra and shadcn) draw as a **second line under
+the label in the dropdown list**. The trigger and the input after a pick keep the label only. Set it in the schema,
+no field code:
+
+```prisma
+categoryId String @meta("form.relation.labelField", "name") @meta("form.relation.descriptionField", "note")
+```
+
+`descriptionField` in `RelationConfig` (or in `overrides` of `useZenStackRelations`) wins over the schema. An empty
+value means no second line. The local search also matches the description; `searchInDescription={false}` on the field
+turns that off. Live example: `/relation-demo` in `form-develop-app`.
+
 ## useRelationOptions Hook
 
 Access relation options from custom components:

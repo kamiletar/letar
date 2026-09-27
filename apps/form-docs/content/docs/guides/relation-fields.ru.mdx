@@ -80,6 +80,20 @@ function RecipeForm() {
   `overrides`.
 - Третий аргумент принимает `overrides`, `exclude` и `clientOptions` (второй аргумент `useClientQueries`).
 
+## Вторая строка опции: descriptionField
+
+`descriptionField` — поле записи справочника, которое `Select` и `Combobox` (Chakra и shadcn) рисуют **второй строкой
+под подписью в выпадающем списке**. В кнопке и в поле после выбора остаётся только подпись. Задаётся в схеме, без
+кода поля:
+
+```prisma
+categoryId String @meta("form.relation.labelField", "name") @meta("form.relation.descriptionField", "note")
+```
+
+`descriptionField` в `RelationConfig` (или в `overrides` у `useZenStackRelations`) сильнее, чем в схеме. Пустое
+значение — без второй строки. Локальный поиск находит и по описанию; `searchInDescription={false}` у поля это
+отключает. Живой пример — `/relation-demo` в `form-develop-app`.
+
 ## Хук useRelationOptions
 
 Доступ к опциям связей из кастомных компонентов:
