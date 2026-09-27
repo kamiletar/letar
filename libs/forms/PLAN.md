@@ -6,6 +6,25 @@
 
 ## Backlog (запросы от агентов)
 
+### [2026-09-27] `zenstack-form-plugin` — `@@validate` со сравнением с членом enum молча всегда true (от domwellbes-dev)
+
+- **Запросил:** domwellbes-dev, побочная находка в приватном приложении (workaround уже поставлен
+  на своей стороне, ответа не ждёт — это отчёт о баге библиотеки, не блокер).
+- **Описание:** `serializeExpression` в `libs/zenstack-form-plugin/src/model-generator.ts`
+  (`case 'ReferenceExpr'`) сериализует любую ссылку как `{ kind: 'field', field: <refText> }` —
+  не различая ссылку на соседнее поле модели и ссылку на член enum. Пример: кросс-полевой
+  `@@validate` вида `someField != ENUM_MEMBER || otherField != null` компилируется без ошибок, но
+  в рантайме (`@zenstackhq/zod`, `evalField`) правая часть ищет `data.ENUM_MEMBER` — такого поля в
+  данных формы нет, `evalField` возвращает `ABSENT` → трактуется как `null`. Сравнение с enum-членом
+  вычисляется как `someField != null`, что почти всегда `true` для обязательного поля — вся
+  проверка молча выключена, без ошибки компиляции или рантайма.
+- **Возможный фикс (не проверялся, предложение репортера):** `serializeExpression` для
+  `ReferenceExpr` должен смотреть на тип `expr.target.$ref` — если это член enum (не поле модели),
+  эмитить `{ kind: 'literal', value: <имя> }` вместо `{ kind: 'field' }`.
+- **Приоритет:** normal — workaround (ручной `.refine()` в сгенерированной Zod-схеме) существующий
+  паттерн, уже применялся раньше по другой причине (BigInt-поле).
+- **Статус:** ⏳ не делегировано, ждёт очереди `forms-dev`.
+
 ### ✅ [2026-09-27] `form-docs` — деплой упал на `ShikiError: Language 'zmodel' not found` (от deploy-agent-dev)
 
 - **Запросил:** deploy-agent-dev (отчёт msg 2222, тред `deploy-request: form-docs, form-example`; `form-example`
