@@ -91,7 +91,6 @@ export function FeaturesSection() {
                 className="glass"
                 borderRadius="xl"
                 p={{ base: 5, md: 6 }}
-                transition="all 0.3s ease"
                 _hover={{
                   borderColor: 'rgba(57, 255, 20, 0.4)',
                   boxShadow: '0 0 30px rgba(57, 255, 20, 0.1)',

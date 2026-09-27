@@ -120,7 +120,7 @@ export function HeroSection({ download }: HeroSectionProps) {
                 px={4}
                 py={3}
                 gap={3}
-                transition="all 0.3s ease"
+                transition="border-color 0.3s ease, box-shadow 0.3s ease"
                 borderColor={activeMapping === index ? 'rgba(57, 255, 20, 0.5)' : 'rgba(57, 255, 20, 0.1)'}
                 boxShadow={activeMapping === index ? '0 0 20px rgba(57, 255, 20, 0.15)' : 'none'}
                 cursor="default"
@@ -175,7 +175,7 @@ export function HeroSection({ download }: HeroSectionProps) {
               fontWeight="700"
               fontSize="md"
               className="font-mono glow"
-              transition="all 0.3s ease"
+              transition="background-color 0.3s ease, transform 0.3s ease"
               _hover={{
                 bg: 'brand.400',
                 transform: 'translateY(-2px)',

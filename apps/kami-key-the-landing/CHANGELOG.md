@@ -2,6 +2,18 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.4.7] - 2026-09-27
+
+### Changed
+
+- `transition="all ..."` заменён на явный список реально меняющихся CSS-свойств в 9 местах
+  (`downloads-section.tsx` ×2, `faq-section.tsx`, `features-section.tsx`, `hero-section.tsx` ×2,
+  `navbar.tsx` ×3) — паттерн из
+  [interactive-press-feedback.md](/.claude/docs/interactive-press-feedback.md): `all` анимирует и
+  то, что меняться не должно. В `features-section.tsx` Chakra-проп `transition` вовсе убран как
+  мёртвый код — инлайновый `style.transition` того же элемента уже перекрывал его явным списком
+  свойств (нативный `style` побеждает по специфичности CSS-класс recipe).
+
 ## [0.4.6] - 2026-09-24
 
 ### Changed

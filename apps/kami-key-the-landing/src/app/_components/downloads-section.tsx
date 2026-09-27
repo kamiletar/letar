@@ -37,7 +37,7 @@ export function DownloadsSection({ download }: DownloadsSectionProps) {
             w="100%"
             mx="auto"
             border="1px solid rgba(57, 255, 20, 0.2)"
-            transition="all 0.3s ease"
+            transition="border-color 0.3s ease, box-shadow 0.3s ease"
             _hover={{
               borderColor: 'rgba(57, 255, 20, 0.4)',
               boxShadow: '0 0 40px rgba(57, 255, 20, 0.1)',
@@ -68,7 +68,7 @@ export function DownloadsSection({ download }: DownloadsSectionProps) {
                 borderRadius="lg"
                 bg="rgba(57, 255, 20, 0.15)"
                 border="1px solid rgba(57, 255, 20, 0.2)"
-                transition="all 0.2s ease"
+                transition="background-color 0.2s ease"
                 _hover={{ bg: 'rgba(57, 255, 20, 0.25)' }}
                 w="100%"
                 asChild

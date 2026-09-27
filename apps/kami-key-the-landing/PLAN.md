@@ -6,17 +6,14 @@
 
 - [ ] Аудит `_active: scale()` в теме на `pressScale` (`@letar/ui`) — задача описана в
       [press-scale-audit-task.md](/.claude/docs/press-scale-audit-task.md)
-- [ ] Заменить `transition="all ..."` на явный `transitionProperty` (сужает анимацию до реально
-      меняющихся свойств вместо любого изменения пропа при ре-рендере) — найдено 7 мест в
-      `src/app/_components/downloads-section.tsx`, `faq-section.tsx`, `features-section.tsx`,
-      `hero-section.tsx` (×2), `navbar.tsx` (×2). Паттерн фикса и разбор — в
-      [interactive-press-feedback.md](/.claude/docs/interactive-press-feedback.md)
 - [ ] Дизайн и контент лендинга
 - [ ] Адаптивная верстка
 - [ ] SEO оптимизация
 
 ### Сделано
 
+- [x] `transition="all ..."` заменён на явный список меняющихся CSS-свойств в 9 местах (было
+      описано как 7, фактически найдено 9) — детали в `CHANGELOG.md` [0.4.7]
 - [x] Починен провалившийся деплой в production (2026-09-13) — `--frozen-lockfile` падал из-за
       расхождения `bun.lock` с версиями `package.json` нескольких приложений монорепо (не
       специфично для этого приложения: kami-key-the-landing 0.4.1→0.4.3, kami-key-the

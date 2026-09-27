@@ -68,7 +68,7 @@ export function FaqSection() {
                   borderRadius="xl"
                   w="100%"
                   overflow="hidden"
-                  transition="all 0.3s ease"
+                  transition="border-color 0.3s ease, box-shadow 0.3s ease"
                   borderColor={isOpen ? 'rgba(57, 255, 20, 0.3)' : 'rgba(57, 255, 20, 0.1)'}
                   boxShadow={isOpen ? '0 0 20px rgba(57, 255, 20, 0.05)' : 'none'}
                 >

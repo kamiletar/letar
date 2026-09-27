@@ -75,7 +75,7 @@ export function Navbar() {
       left={0}
       right={0}
       zIndex={100}
-      transition="all 0.3s ease"
+      transition="background-color 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease"
       bg={scrolled ? 'rgba(10, 10, 15, 0.85)' : 'transparent'}
       backdropFilter={scrolled ? 'blur(16px)' : 'none'}
       borderBottom={scrolled ? '1px solid rgba(57, 255, 20, 0.1)' : '1px solid transparent'}
@@ -105,7 +105,7 @@ export function Navbar() {
                 className="font-mono"
                 color={activeSection === section.id ? 'brand.400' : 'gray.400'}
                 bg={activeSection === section.id ? 'rgba(57, 255, 20, 0.08)' : 'transparent'}
-                transition="all 0.2s ease"
+                transition="color 0.2s ease, background-color 0.2s ease"
                 _hover={{ color: 'brand.400', bg: 'rgba(57, 255, 20, 0.05)' }}
                 onClick={() => handleNavClick(section.id)}
                 aria-current={activeSection === section.id ? 'true' : undefined}
@@ -121,7 +121,7 @@ export function Navbar() {
               fontWeight="500"
               className="font-mono"
               color="gray.400"
-              transition="all 0.2s ease"
+              transition="color 0.2s ease, background-color 0.2s ease"
               _hover={{ color: 'brand.400', bg: 'rgba(57, 255, 20, 0.05)' }}
               asChild
             >
