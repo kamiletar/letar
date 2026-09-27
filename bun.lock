@@ -619,7 +619,7 @@
     },
     "apps/domwellbes": {
       "name": "@letar/domwellbes",
-      "version": "0.342.0",
+      "version": "0.343.0",
       "dependencies": {
         "@gltf-transform/core": "^4.5.0",
         "@gltf-transform/extensions": "^4.5.0",
@@ -740,8 +740,9 @@
     },
     "apps/flora": {
       "name": "@letar/flora",
-      "version": "0.2.2",
+      "version": "0.3.0",
       "dependencies": {
+        "@letar/demo-protection": "workspace:*",
         "@letar/env-load": "workspace:*",
         "@letar/format-utils": "workspace:*",
       },
@@ -1368,7 +1369,7 @@
     },
     "libs/forms-react": {
       "name": "@letar/forms-react",
-      "version": "0.20.0",
+      "version": "0.21.0",
       "dependencies": {
         "@letar/forms-core": "workspace:*",
       },
@@ -1383,7 +1384,7 @@
     },
     "libs/forms-shadcn": {
       "name": "@letar/forms-shadcn",
-      "version": "0.54.0",
+      "version": "0.55.0",
       "devDependencies": {
         "@letar/eager-jsx-check": "workspace:*",
         "@letar/forms-core": "workspace:*",
@@ -1700,7 +1701,7 @@
     },
     "libs/ui": {
       "name": "@letar/ui",
-      "version": "0.24.0",
+      "version": "0.24.1",
       "dependencies": {
         "@letar/hooks": "workspace:*",
       },
