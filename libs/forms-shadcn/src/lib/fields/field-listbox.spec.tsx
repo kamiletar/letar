@@ -95,4 +95,29 @@ describe('FieldListbox (shadcn)', () => {
 
   // @ts-expect-error — selectionMode обязан быть 'single' | 'multiple', негативный контроль
   const _typeCheck = <FieldListbox name="framework" options={options} selectionMode="triple" />
+
+  it('description — вторая строка пункта; выбор и имя пункта от неё не зависят', () => {
+    render(
+      <TestForm defaultValues={{ city: '' }}>
+        <FieldListbox
+          name="city"
+          options={[
+            { label: 'Москва', value: 'msk', description: 'ул. Тверская, 1' },
+            { label: 'Казань', value: 'kzn' },
+          ]}
+        />
+      </TestForm>,
+    )
+
+    const descriptions = document.querySelectorAll('[data-slot="listbox-item-description"]')
+    expect(descriptions).toHaveLength(1)
+    expect(descriptions[0]).toHaveTextContent('ул. Тверская, 1')
+    // У пункта без описания второй строки нет
+    expect(screen.getByRole('option', { name: /Казань/ }).querySelector('[data-slot="listbox-item-description"]'))
+      .toBeNull()
+
+    const moscow = screen.getByRole('option', { name: /Москва/ })
+    fireEvent.click(moscow)
+    expect(moscow).toHaveAttribute('aria-selected', 'true')
+  })
 })

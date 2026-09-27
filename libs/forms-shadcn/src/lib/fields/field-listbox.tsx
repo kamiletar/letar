@@ -56,7 +56,19 @@ export const FieldListbox = createField<ListboxFieldProps, string | string[]>({
           onClick={() => toggle(optValue)}
           className={optionButtonClass(selected, opt.disabled)}
         >
-          {getOptionLabel(opt)}
+          {opt.description === undefined || opt.description === null || opt.description === ''
+            ? getOptionLabel(opt)
+            : (
+              <span className="flex flex-col">
+                {getOptionLabel(opt)}
+                <span
+                  data-slot="listbox-item-description"
+                  className={cn('text-xs', selected ? 'text-primary-foreground/80' : 'text-muted-foreground')}
+                >
+                  {opt.description}
+                </span>
+              </span>
+            )}
         </button>
       )
     }

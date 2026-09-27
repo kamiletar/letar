@@ -811,6 +811,8 @@ export interface ListboxOption {
   disabled?: boolean
   /** Ключ группы — опции с одинаковым `group` рендерятся под общим заголовком */
   group?: string
+  /** Вторая строка под подписью пункта (текст или узел) */
+  description?: ReactNode
 }
 
 /**
