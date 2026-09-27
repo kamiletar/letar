@@ -1930,6 +1930,32 @@ typed-placeholder, aria-label) не про выбор — заводить их 
   («Введите пароль»), `field-rich-text-impl.tsx:66` («Начните вводить текст...»), `field-editable.tsx`
   (плейсхолдер компонента). Их можно локализовать тем же приёмом, что Autocomplete/Signature здесь.
 
+**5. i18n оставшихся placeholder-хардкодов shadcn — `Address`/`City`/`PasswordStrength`/`RichText`/
+`Editable` (закрывает побочную находку из пункта 4).** Те же 5 полей, тем же приёмом.
+
+В отличие от Signature/Selection, каждому полю здесь нужна ровно одна встроенная строка (только
+placeholder) — заводить пять отдельных файлов-словарей избыточно, поэтому один общий
+`field-placeholder-strings.ts` в `@letar/forms-react` с одним словарём `formFieldPlaceholder.*` на
+все пять ключей (`.address`, `.city`, `.passwordStrength`, `.richText`, `.editable`). Резолвер и
+хук — та же лестница `resolveStaticFormText`, что у `resolveSignatureString`. `field-editable.tsx`
+получил не placeholder в привычном смысле, а фолбэк текста превью при пустом значении и без
+явного пропа `placeholder` («Нажмите для редактирования» / «Click to edit») — единственный
+хардкод, который там нашёлся. `field-rich-text-impl.tsx`: хук вызывается не в `useFieldState` (у
+`FieldRichText` его нет), а в теле `RichTextEditor` — она уже отдельный смонтированный
+React-компонент (не `render`-колбэк `createField`), хуки там безопасны.
+
+Английские значения — как у Chakra (`field-default-strings.ts`); русские оставлены как в
+существующем shadcn-хардкоде там, где расходятся с Chakra (`city`: «Введите город...» с
+многоточием против «Введите город» у Chakra; `editable`: «Нажмите для редактирования» против
+«Нажмите, чтобы изменить» у Chakra) — тот же принцип, что у Signature в пункте 4.
+
+- `forms-react` 0.21.0 → 0.22.0 (новый экспорт `resolveFieldPlaceholderString`/
+  `useFieldPlaceholderString`/`FieldPlaceholderStringKey`), `forms-shadcn` 0.55.0 → 0.56.0.
+- Тесты: `field-placeholder-strings.spec.ts` в forms-react (4), пять новых `field-*-i18n.spec.tsx`
+  в forms-shadcn (address, city, password-strength, rich-text, editable). `nx test
+  forms-react` 219/219, `nx test forms-shadcn` 462/462, lint/typecheck:tsgo без ошибок.
+- Коммиты: `9189b5ce1` (forms-react), `8ffb652f1` (forms-shadcn).
+
 ---
 
 ---
