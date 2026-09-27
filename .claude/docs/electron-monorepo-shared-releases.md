@@ -58,6 +58,22 @@ Releases. Штатный `GithubProvider` из `electron-updater` всегда �
 семверу самим (`compareSemver` + `reduce`), не `.find()` по индексу первого совпадения. Затрагивает
 все приложения, использующие `@letar/electron-monorepo-updater` — не только `kami-key-the`.
 
+## ⚠️ Грабля: `generic`-фид шлёт multi-range, CDN GitHub отвечает 501
+
+Симптом: в логе обновления `HttpError: 501`, затем тихий откат на полную загрузку инсталлятора
+(у `kami-key-the` 110 МБ вместо ~1 МБ диффа). Обновление ставится — выглядит как успех.
+
+Механизм: для `generic`-провайдера `electron-updater` по умолчанию собирает все изменённые
+блоки в **один** запрос с несколькими диапазонами (`Range: bytes=a-b, c-d, …`), а
+`release-assets.githubusercontent.com` (куда редиректит ассет релиза) такой запрос отвергает:
+одиночный Range → `206`, два диапазона → `501 Unsupported client` (проверено 2026-09-27).
+Встроенный `GitHubProvider` поэтому жёстко выставляет `isUseMultipleRangeRequest: false` —
+но мы его не используем (см. п. 4 схемы), и защита теряется.
+
+**Фикс** (`point-feed-at-own-release.ts`, 0.2.1): `useMultipleRangeRequest: false` в
+`setFeedURL` — блоки качаются последовательными одиночными Range. ⚠️ Фид настраивает **старая**
+запущенная версия, значит фикс работает только при обновлении С версии, где он уже есть.
+
 ## Грабля с именами ассетов
 
 `electron-builder` называет файлы с пробелами (`KamiKeyThe Setup 1.7.4.exe`), а сам `latest.yml`
