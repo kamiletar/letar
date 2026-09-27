@@ -93,6 +93,15 @@ export function buildRelaunchBatScript(options: BuildRelaunchBatScriptOptions): 
   ].join('\r\n')
 }
 
+/**
+ * Команда задачи планировщика. Без `conhost --headless` задача открывает окно cmd (или вкладку
+ * Windows Terminal), и оно висит всё время работы приложения — `.bat` блокируется на нём до
+ * выхода. `--headless` есть с Windows 10 1809; `timeout`/`tasklist` в такой консоли работают.
+ */
+export function buildSchedulerTaskCommand(batPath: string): string {
+  return `conhost.exe --headless cmd.exe /d /c "${batPath}"`
+}
+
 export interface InstallAndRelaunchViaSchedulerOptions {
   /** Путь до скачанного инсталлятора (`installerPath` из `UpdateDownloadedEvent`) */
   installerPath: string
@@ -156,7 +165,7 @@ export function installAndRelaunchViaScheduler(options: InstallAndRelaunchViaSch
     '/tn',
     taskName,
     '/tr',
-    `cmd.exe /d /c "${batPath}"`,
+    buildSchedulerTaskCommand(batPath),
     '/sc',
     'once',
     '/st',

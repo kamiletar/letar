@@ -1212,7 +1212,7 @@
     },
     "libs/electron-monorepo-updater": {
       "name": "@letar/electron-monorepo-updater",
-      "version": "0.2.2",
+      "version": "0.2.3",
     },
     "libs/electron-storage": {
       "name": "@letar/electron-storage",

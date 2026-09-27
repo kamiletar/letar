@@ -1,6 +1,10 @@
 export { findOwnLatestTag } from './lib/find-own-release'
 export type { FindOwnLatestTagOptions, GithubReleaseSummary, MinimalFetch } from './lib/find-own-release'
-export { buildRelaunchBatScript, installAndRelaunchViaScheduler } from './lib/install-and-relaunch-via-scheduler'
+export {
+  buildRelaunchBatScript,
+  buildSchedulerTaskCommand,
+  installAndRelaunchViaScheduler,
+} from './lib/install-and-relaunch-via-scheduler'
 export type {
   BuildRelaunchBatScriptOptions,
   InstallAndRelaunchViaSchedulerOptions,
