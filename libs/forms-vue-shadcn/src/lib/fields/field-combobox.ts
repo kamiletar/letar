@@ -176,6 +176,8 @@ const FieldComboboxBase = defineComponent({
     createLabel: { type: String as PropType<string | undefined>, required: false, default: undefined },
     /** `false` прячет служебный пункт создания, оставляя саму возможность вызвать `Field.Combobox.CreateButton` вручную */
     createItem: { type: Boolean as PropType<boolean | undefined>, required: false, default: undefined },
+    /** Подвал списка (обычно `Field.Combobox.CreateButton`) — для своего `renderOption` без встроенного пункта создания */
+    listFooter: { type: null, required: false, default: undefined },
   },
   setup(props) {
     const { form, schema } = useAppFormContext()
@@ -561,6 +563,7 @@ const FieldComboboxBase = defineComponent({
                       default: () => [h(SelectEditButton)],
                     })
                     : undefined,
+                  listFooter: props.listFooter,
                   renderValue: props.renderValue
                     ? (opt) => {
                       const source = optionByValue.value.get(opt.value)
