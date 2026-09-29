@@ -1,5 +1,26 @@
 # Changelog @letar/forms-vue-shadcn
 
+## 0.24.0 (2026-09-29)
+
+`Field.Combobox` — `dependsOn` (§18), Этап 4d (тред `forms-vue-angular-select-parity`, паритет с
+React `field-combobox.tsx`) — последний под-этап Combobox для этого пакета, весь набор фич
+(renderOption/renderValue/description/loadOptions/loadSelected/onCreate/onUpdate/pending/dependsOn)
+теперь на паритете с React-референсом.
+
+- **Feature:** `dependsOn`/`depsReady`/`clearOnParentChange`/`disableWhenParentEmpty`/
+  `placeholderWhenDisabled` — тот же `useDependentFieldUi`, что у `Field.Select`: пока родители не
+  готовы, поле заблокировано (`disabled` у примитива Combobox, он его уже поддерживал), подсказка
+  вместо placeholder, правка родителя чистит значение и объявляет об этом в live-области.
+- **Feature:** `dependent.deps`/`depsKey` доходят до `usePromiseSearch`/`useSelectedLoader`/
+  `useSelectionActionsState` — смена родителя переинициализирует промис-путь (данные и
+  созданные/отредактированные опции чужого родителя не остаются на экране, §18.6), `loadSelected`
+  продолжает искать запись по `value` независимо от того, какой родитель выбран сейчас.
+- **Fix (примитив):** `combobox.ts` — добавлен `describedBy` (проброс в `aria-describedby` поля
+  ввода), тем же приёмом, что у `select.ts`; примитив уже поддерживал `disabled`.
+- **Refactor:** поле собрано напрямую по `FieldRoot`/`FieldLabel`/`FieldError` (как `field-select.ts`),
+  не через `FieldWrapper` (`../uikit/primitives`) — `FieldWrapper` не принимает `helperText`/
+  `describedBy`, нужные для подсказки заблокированного поля.
+
 ## 0.23.0 (2026-09-29)
 
 `Field.Combobox` — создание/правка записи справочника, Stage 4c (тред `forms-vue-angular-select-parity`,
