@@ -1,8 +1,19 @@
+import { interpolate } from '@letar/forms-core/i18n'
 import {
+  applyOptionOverlay,
+  CREATE_OPTION_VALUE,
+  type CreatedOption,
   getOptionText,
+  isCreateOptionValue,
+  isOptionEditable,
   type LoadOptionsFn,
   type LoadSelectedFn,
+  mergeCreatedOptions,
+  type SelectionActionContext,
+  type SettleErrorInfo,
+  shouldOfferCreate,
   type UIKitOptionRenderState,
+  type UpdatedOption,
 } from '@letar/forms-core/uikit'
 import {
   resolveFieldMeta,
@@ -10,9 +21,10 @@ import {
   useDebounce,
   usePromiseSearch,
   useSelectedLoader,
+  useSelectionActionsState,
   withFieldValidation,
 } from '@letar/forms-vue/core'
-import { computed, defineComponent, onErrorCaptured, type PropType, ref, watch } from 'vue'
+import { computed, defineComponent, h, onErrorCaptured, type PropType, ref, watch } from 'vue'
 import { FieldWrapper } from '../uikit/primitives'
 // Прямой импорт примитива, не через `rekaUIKit.Combobox`: `renderValue`/`resolveOption` — расширение
 // контракта сверх `UIKitComboboxProps` (`RekaComboboxExtraProps`, см. `combobox.ts`), которого нет в
@@ -22,6 +34,8 @@ import { Combobox } from '../uikit/primitives/combobox'
 import type { UINode } from '../uikit/ui-node'
 import { rekaUIKit } from '../uikit/uikit-reka'
 import type { FieldSelectOption } from './field-select'
+import { SelectionActionsProvider, SelectionOptionProvider } from './selection-context'
+import { SelectCreateButton, SelectEditButton } from './selection-slots'
 import { selectionStrings } from './selection-strings'
 
 /**
@@ -34,8 +48,16 @@ import { selectionStrings } from './selection-strings'
  * строку поиска, отменяет прошлый запрос и показывает «Повторить» при ошибке. `dependsOn`/`deps`
  * этой стадии нет (Stage 4d) — `usePromiseSearch`/`useSelectedLoader` уже принимают `deps`/`depsKey`,
  * здесь они не подключены за ненадобностью, а не забыты.
+ *
+ * Создание/правка записи справочника прямо из поля (`onCreate`/`onUpdate`, §16, Этап 4c) — тот же
+ * конвейер `useSelectionActionsState`, что у `Field.Select` (`field-select.ts`): служебный пункт
+ * «+ Добавить "<текст>"» в конце списка (подпись зависит от `inputValue`, не от отдельного поля
+ * поиска — у Combobox «значение» и есть текст ввода), карандаш «Изменить» у пункта и у выбранного
+ * значения, `pending`-опции приглушены и не выбираются (см. `combobox.ts`, `ComboboxItem.disabled`).
+ * Правки согласованно обновляют и значение поля, и текст ввода (`syncedValue`) — тем же приёмом,
+ * что уже даёт Stage 4a/4b для подписи `loadOptions`/`loadSelected`.
  */
-export const FieldCombobox = defineComponent({
+const FieldComboboxBase = defineComponent({
   name: 'FieldCombobox',
   props: {
     name: { type: String, required: true },
@@ -126,6 +148,34 @@ export const FieldCombobox = defineComponent({
       required: false,
       default: undefined,
     },
+    /** Создание новой записи справочника без ухода из формы (§16) — конвейер см. `useSelectionActionsState` */
+    onCreate: {
+      type: Function as PropType<
+        ((search: string, ctx: SelectionActionContext) => Promise<CreatedOption | null>) | undefined
+      >,
+      required: false,
+      default: undefined,
+    },
+    /** Правка опции на месте (карандаш) — тот же конвейер, что `onCreate` */
+    onUpdate: {
+      type: Function as PropType<
+        ((option: FieldSelectOption, ctx: SelectionActionContext) => Promise<UpdatedOption | null>) | undefined
+      >,
+      required: false,
+      default: undefined,
+    },
+    /** Отказ подтверждения оптимистичного действия; без обработчика — встроенное сообщение под полем */
+    onSettleError: {
+      type: Function as PropType<((info: SettleErrorInfo) => void) | undefined>,
+      required: false,
+      default: undefined,
+    },
+    /** Мс до признания оптимистичного действия неподтверждённым; по умолчанию 30 000 (`DEFAULT_SETTLE_TIMEOUT`) */
+    settleTimeout: { type: Number as PropType<number | undefined>, required: false, default: undefined },
+    /** Подпись служебного пункта «+ Добавить "<текст>"»; по умолчанию `«<createVerb>»` */
+    createLabel: { type: String as PropType<string | undefined>, required: false, default: undefined },
+    /** `false` прячет служебный пункт создания, оставляя саму возможность вызвать `Field.Combobox.CreateButton` вручную */
+    createItem: { type: Boolean as PropType<boolean | undefined>, required: false, default: undefined },
   },
   setup(props) {
     const { form, schema } = useAppFormContext()
@@ -209,8 +259,34 @@ export const FieldCombobox = defineComponent({
       return data.map((item) => toOption(item)).filter((opt): opt is FieldSelectOption => opt !== undefined)
     })
 
-    // `loadSelected`: значение непустое и его нет в текущей выдаче
-    const valueInResults = computed(() => sourceOptions.value.some((opt) => opt.value === valueKey.value))
+    // Действия (`onCreate`/`onUpdate`, §16, Этап 4c) — тот же конвейер, что `Field.Select`
+    // (`field-select.ts`): `pending`, наложение правок, созданные опции. Работает поверх
+    // `sourceOptions` независимо от того, откуда они пришли — статичный список или `loadOptions`
+    const actions = useSelectionActionsState({
+      appOptions: () => sourceOptions.value,
+      value: () => fieldValueRef.value,
+      onSettleError: props.onSettleError,
+      settleTimeout: props.settleTimeout,
+    })
+
+    // Правки лежат поверх опций приложения; опция приложения сильнее созданной с тем же значением
+    const mergedOptions = computed<FieldSelectOption[]>(() => {
+      // Пока свой оптимистичный create в полёте, `pending`-опции приложения скрыты: почти всегда это
+      // та же запись (§16.7), иначе в списке была бы запись дважды
+      const shownApp = actions.hasOwnCreatePending.value
+        ? sourceOptions.value.filter((opt) => !opt.pending)
+        : sourceOptions.value
+      const edited = applyOptionOverlay(shownApp, actions.overlay.value)
+      const createdAsOptions: FieldSelectOption[] = actions.createdOptions.value.map((opt) => ({
+        ...opt,
+        value: String(opt.value),
+      }))
+      return mergeCreatedOptions<FieldSelectOption>(edited, createdAsOptions)
+    })
+
+    // `loadSelected`: значение непустое и его нет в текущей выдаче (уже с учётом правок/созданных опций —
+    // только что созданная запись не должна ходить за собственной же подписью)
+    const valueInResults = computed(() => mergedOptions.value.some((opt) => opt.value === valueKey.value))
     const selectedLoader = useSelectedLoader<unknown>({
       loadSelected: props.loadSelected,
       value: () => valueKey.value,
@@ -230,7 +306,7 @@ export const FieldCombobox = defineComponent({
     // React-скине (`field-combobox.tsx`): не перебивает уже набранный пользователем текст
     const syncedValue = ref<string | undefined>(undefined)
     watch(
-      () => [valueKey.value, sourceOptions.value, selectedSourceOption.value] as const,
+      () => [valueKey.value, mergedOptions.value, selectedSourceOption.value] as const,
       ([key]) => {
         if (!key) {
           syncedValue.value = undefined
@@ -244,7 +320,7 @@ export const FieldCombobox = defineComponent({
         ) {
           return
         }
-        const found = sourceOptions.value.find((opt) => opt.value === key)
+        const found = mergedOptions.value.find((opt) => opt.value === key)
           ?? (selectedSourceOption.value?.value === key ? selectedSourceOption.value : undefined)
         if (found) {
           syncedValue.value = key
@@ -255,10 +331,16 @@ export const FieldCombobox = defineComponent({
     )
 
     const filteredOptions = computed(() => {
-      const base = sourceOptions.value
+      const base = mergedOptions.value
       if (isPromise.value) {
-        // Промис-путь: выдачу уже отфильтровал сервер — фильтровать локально нечего
-        return base
+        // Промис-путь: выдачу уже отфильтровал сервер — локально фильтруем только опции, созданные
+        // этим полем (`onCreate`): сервер о них не знает, но список не должен показывать созданную
+        // запись, если пользователь уже печатает что-то другое
+        const createdValues = new Set(actions.createdOptions.value.map((opt) => String(opt.value)))
+        const needle = inputValue.value.toLowerCase()
+        return base.filter((opt) =>
+          !createdValues.has(opt.value) || !needle || opt.label.toLowerCase().includes(needle)
+        )
       }
       const needle = inputValue.value.toLowerCase()
       if (!needle) {
@@ -276,6 +358,19 @@ export const FieldCombobox = defineComponent({
       return base.filter((opt) => opt.label.toLowerCase().includes(needle))
     })
 
+    // Опция по значению (после наложения правок/созданных) — для `optionContext` (карандаш) и `renderOption`
+    const optionByValue = computed(() => {
+      const map = new Map<string, FieldSelectOption>(mergedOptions.value.map((opt) => [opt.value, opt]))
+      if (selectedSourceOption.value) {
+        map.set(selectedSourceOption.value.value, selectedSourceOption.value)
+      }
+      return map
+    })
+
+    // Служебный пункт «+ Добавить "<текст>"» — подпись зависит от текста поля ввода (не от отдельного
+    // поля поиска, как у Select): у Combobox «значение» и есть текст, набранный пользователем
+    const showCreateItem = computed(() => !!props.onCreate && props.createItem !== false)
+
     const renderError = ref<Error | null>(null)
     onErrorCaptured((error) => {
       renderError.value = error instanceof Error ? error : new Error(String(error))
@@ -289,55 +384,222 @@ export const FieldCombobox = defineComponent({
       }
 
       return withFieldValidation(form, fullPath, fieldSchema, (field, hasError, errorMessage) => {
-        const value = (field.state.value as string | undefined) || undefined
+        const formValue = (field.state.value as string | undefined) || undefined
+        // Оптимистично созданная запись показана выбранной, пока форма хранит прежнее значение (§16.7)
+        const value = actions.pendingSelection.value ?? formValue
         const loadError = promiseSearch.error.value
+        const hasOnUpdate = !!props.onUpdate
+        const createVerb = props.createLabel ?? strings.createVerb
+
+        // Служебный пункт создания — в конце отфильтрованного списка; проверка дублей — по ПОЛНОМУ
+        // (не отфильтрованному) списку, как у Select (`shouldOfferCreate`)
+        const search = inputValue.value.trim()
+        const offerCreate = showCreateItem.value
+          && shouldOfferCreate(search, mergedOptions.value.map((opt) => getOptionText(opt)))
+        const createItemLabel = offerCreate ? `+ ${createVerb} "${search}"` : ''
+        const optionsWithCreate = createItemLabel
+          ? [...filteredOptions.value, { label: createItemLabel, value: CREATE_OPTION_VALUE }]
+          : filteredOptions.value
+
+        // Ошибки `onCreate`/`onUpdate` — забота приложения: всплывают как unhandled rejection (та же политика, что в Select)
+        const runCreate = () => {
+          const onCreate = props.onCreate
+          if (!onCreate) {
+            return
+          }
+          // Текст ввода до действия: отказ оптимистичного create возвращает поле в него
+          const previousText = inputValue.value
+          actions.run({
+            scope: 'option',
+            kind: 'create',
+            call: (ctx) => onCreate(search, ctx),
+            onOptimistic: (preview) => {
+              inputValue.value = preview.label
+            },
+            onRevert: () => {
+              inputValue.value = previousText
+            },
+            apply: (created, info) => {
+              actions.addCreatedOption(created)
+              // Выбор пользователя, сделанный за время ожидания, подтверждение не перебивает
+              if (info.optimistic && !info.selectionHeld) {
+                return
+              }
+              syncedValue.value = String(created.value)
+              field.handleChange(String(created.value))
+              inputValue.value = created.label
+              // Промис-путь: внешнего кэша, который обновил бы список, нет — запрашиваем текущий поиск заново
+              if (props.loadOptions) {
+                promiseSearch.reload()
+              }
+            },
+          })
+        }
+
+        const runEdit = (option: unknown, scope: 'option' | 'value') => {
+          const onUpdate = props.onUpdate
+          const source = option as FieldSelectOption
+          if (!onUpdate) {
+            return
+          }
+          const fromValue = source.value
+          // Выбрана ли запись СЕЙЧАС: значение читаем живым — за время оптимистичного ожидания оно могло измениться
+          const isSelectedNow = () => {
+            const live = form.getFieldValue(fullPath) as string | undefined
+            return !!live && String(live) === fromValue
+          }
+          actions.run({
+            scope,
+            kind: 'edit',
+            fromValue,
+            call: (ctx) => onUpdate(source, ctx),
+            // Правят выбранное: поле ввода показывает новую подпись сразу, не дожидаясь сервера
+            onOptimistic: (preview) => {
+              if (isSelectedNow()) {
+                inputValue.value = preview.label
+              }
+            },
+            apply: (result) => {
+              actions.recordEdit(fromValue, result)
+              if (props.loadOptions) {
+                promiseSearch.reload()
+              }
+              selectedLoader.invalidate(fromValue)
+              // Замена записи (другой value): выбранное переезжает на новую. Тот же value — форма не dirty
+              if (isSelectedNow()) {
+                if (String(result.value) !== fromValue) {
+                  syncedValue.value = String(result.value)
+                  field.handleChange(String(result.value))
+                  inputValue.value = result.label
+                } else {
+                  inputValue.value = result.label
+                }
+              }
+            },
+          })
+        }
+
+        const optionContext = (key: string, scope: 'option' | 'value') => {
+          const source = optionByValue.value.get(key)
+          return {
+            option: source,
+            text: source ? getOptionText(source) : '',
+            editable: !!source && isOptionEditable(source, hasOnUpdate),
+            scope,
+          }
+        }
+
+        const actionsValue = {
+          pending: actions.pending.value,
+          canCreate: !!props.onCreate,
+          hasOnUpdate,
+          interactive: true,
+          search,
+          runCreate,
+          runEdit,
+          strings: {
+            edit: strings.edit,
+            editAria: (text: string) => `${strings.edit}: ${text}`,
+            create: `+ ${createVerb}…`,
+            createWithSearch: (text: string) => `+ ${createVerb} "${text}"`,
+          },
+        }
+
+        const selectedSource = value !== undefined ? optionByValue.value.get(value) : undefined
+        const showValueEdit = hasOnUpdate && !!selectedSource && isOptionEditable(selectedSource, true)
 
         return FieldWrapper({
           label,
           required,
           hasError,
           errorMessage,
-          children: Combobox({
-            value,
-            inputValue: inputValue.value,
-            onInputChange: (next) => {
-              inputValue.value = next
-            },
-            onValueChange: (next) => field.handleChange(next ?? ''),
-            onOpenChange: markOpened,
-            // Ошибка прячет данные: на экране «Не удалось загрузить», а не выдача прошлого поиска
-            options: loadError ? [] : filteredOptions.value,
-            loading: !!promiseSearch.isLoading.value || !!selectedLoader.isLoading.value,
-            // Обёртка, а не прямой проброс: примитив типизирован по `UIKitSelectOption<UINode>`
-            // (`label: UINode`), опции приложения — по `FieldSelectOption` (`label: string`);
-            // ищем исходную опцию приложения по значению и передаём её, как `optionByKey` в
-            // `field-select.ts` (там та же контравариантная нестыковка сигнатур)
-            renderOption: props.renderOption
-              ? (opt, state) => {
-                const source = sourceOptions.value.find((o) => o.value === opt.value)
-                return source ? props.renderOption!(source, state) : opt.label
-              }
-              : undefined,
-            renderValue: props.renderValue
-              ? (opt) => {
-                const source = sourceOptions.value.find((o) => o.value === opt.value)
-                  ?? (selectedSourceOption.value?.value === opt.value ? selectedSourceOption.value : undefined)
-                return source ? props.renderValue!(source) : ''
-              }
-              : undefined,
-            // Подпись выбранного значения, когда запись пришла из `loadSelected` — вне `options`
-            resolveOption: (rawValue) =>
-              selectedSourceOption.value?.value === rawValue ? selectedSourceOption.value : undefined,
-            loadError,
-            onRetryLoad: promiseSearch.reload,
-            loadingText: strings.loading,
-            loadErrorText: strings.loadError,
-            retryText: strings.retry,
-            placeholder,
-            'data-field-name': props.name,
-          }),
+          // `FieldWrapper` типизирует `children` как единичный `TNode`, но `FieldRoot` рендерит
+          // массив без вопросов (см. `create-field-primitives.ts`) — тот же приём, что там
+          children: [
+            h(SelectionActionsProvider, { value: actionsValue }, {
+              default: () => [
+                Combobox({
+                  value,
+                  inputValue: inputValue.value,
+                  onInputChange: (next) => {
+                    inputValue.value = next
+                  },
+                  onValueChange: (next) => {
+                    if (next !== undefined && isCreateOptionValue(next)) {
+                      // Служебный пункт: значение в форму не попадает
+                      runCreate()
+                      return
+                    }
+                    syncedValue.value = next
+                    field.handleChange(next ?? '')
+                  },
+                  onOpenChange: markOpened,
+                  // Ошибка прячет данные: на экране «Не удалось загрузить», а не выдача прошлого поиска
+                  options: loadError ? [] : optionsWithCreate,
+                  loading: !!promiseSearch.isLoading.value || !!selectedLoader.isLoading.value,
+                  // Обёртка, а не прямой проброс: примитив типизирован по `UIKitSelectOption<UINode>`
+                  // (`label: UINode`), опции приложения — по `FieldSelectOption` (`label: string`);
+                  // ищем исходную опцию приложения по значению и передаём её, как `optionByKey` в
+                  // `field-select.ts` (там та же контравариантная нестыковка сигнатур)
+                  renderOption: props.renderOption
+                    ? (opt, state) => {
+                      const source = optionByValue.value.get(opt.value)
+                      return source ? props.renderOption!(source, state) : opt.label
+                    }
+                    : undefined,
+                  // Свой `renderOption` — свои кнопки (`Field.Combobox.EditButton`); карандаш по умолчанию только без него
+                  renderOptionActions: hasOnUpdate && !props.renderOption
+                    ? (opt) =>
+                      isCreateOptionValue(opt.value)
+                        ? null
+                        : h(SelectionOptionProvider, { value: optionContext(opt.value, 'option') }, {
+                          default: () => [h(SelectEditButton)],
+                        })
+                    : undefined,
+                  controlActions: showValueEdit && value !== undefined
+                    ? h(SelectionOptionProvider, { value: optionContext(value, 'value') }, {
+                      default: () => [h(SelectEditButton)],
+                    })
+                    : undefined,
+                  renderValue: props.renderValue
+                    ? (opt) => {
+                      const source = optionByValue.value.get(opt.value)
+                      return source ? props.renderValue!(source) : ''
+                    }
+                    : undefined,
+                  // Подпись выбранного значения, если записи нет в текущем отфильтрованном списке:
+                  // либо она пришла из `loadSelected` (вне `options`), либо это только что
+                  // созданная/отредактированная запись — `options` внутри примитива уже отфильтрован
+                  // по тексту поиска и может не содержать её в момент пересчёта `displayValue`.
+                  resolveOption: (rawValue) =>
+                    optionByValue.value.get(rawValue)
+                      ?? (selectedSourceOption.value?.value === rawValue ? selectedSourceOption.value : undefined),
+                  loadError,
+                  onRetryLoad: promiseSearch.reload,
+                  loadingText: strings.loading,
+                  loadErrorText: strings.loadError,
+                  retryText: strings.retry,
+                  placeholder,
+                  'data-field-name': props.name,
+                }),
+              ],
+            }),
+            actions.settleFailure.value
+              ? h(
+                'p',
+                { role: 'status', class: 'text-destructive mt-1 text-sm', 'data-settle-error': '' },
+                interpolate(strings.settleError, { label: actions.settleFailure.value.label }),
+              )
+              : null,
+          ] as unknown as UINode,
         })
       })
     }
   },
+})
+
+/** Слоты `Form.Field.Combobox.EditButton` / `.CreateButton` — для своего `renderOption` */
+export const FieldCombobox = Object.assign(FieldComboboxBase, {
+  EditButton: SelectEditButton,
+  CreateButton: SelectCreateButton,
 })
