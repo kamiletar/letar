@@ -35,7 +35,17 @@ export async function formatTodayReminders(cityId: string): Promise<string[]> {
     orderBy: { scheduledAt: 'asc' },
   })
 
-  return matches.map((m) => {
+  // Узкий интерфейс вместо выведенного ZenStack-типа: tsgo TS2321 (Excessive stack depth),
+  // см. .claude/docs/tsgo-excessive-stack-depth-zenstack.md, подпаттерн 1.
+  interface ReminderMatch {
+    scheduledAt: Date | null
+    homeTeam: { team: { name: string; slug: string } }
+    awayTeam: { team: { name: string; slug: string } }
+    venue: { name: string; address: string | null; latitude: number | null; longitude: number | null } | null
+  }
+  const reminderMatches: ReminderMatch[] = matches
+
+  return reminderMatches.map((m) => {
     const hLink = teamLink(m.homeTeam.team, city.slug)
     const aLink = teamLink(m.awayTeam.team, city.slug)
     const time = m.scheduledAt ? formatTime(m.scheduledAt) : ''

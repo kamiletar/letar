@@ -2,6 +2,12 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [3.39.24] - 2026-09-29
+
+### Fixed
+
+- `nx typecheck:tsgo` падал `TS2321: Excessive stack depth` в 6 файлах после `bun update` 2026-09-29 (`@zenstackhq/*` 3.9.5→3.9.6): `src/app/(public)/[citySlug]/{presenters,teams/[slug]}/page.tsx`, `src/app/(public)/{matches/[id],teams}/page.tsx`, `src/app/api/schedule/ical/route.ts`, `src/lib/telegram/messages/reminders.ts`. Это не регрессия 3.9.6 — те же ошибки воспроизводятся на 3.9.5, накопленный долг. Фикс — ручные узкие `interface` и типизированные промежуточные переменные вместо выведенных ZenStack-типов. `nx typecheck:tsgo --skip-nx-cache` — 0 ошибок.
+
 ## [3.39.23] - 2026-09-24
 
 ### Changed

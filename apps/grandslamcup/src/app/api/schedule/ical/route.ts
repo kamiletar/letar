@@ -51,8 +51,20 @@ export async function GET(request: NextRequest) {
     orderBy: { scheduledAt: 'asc' },
   })
 
+  // Узкий интерфейс вместо выведенного ZenStack-типа: tsgo TS2321 (Excessive stack depth),
+  // см. .claude/docs/tsgo-excessive-stack-depth-zenstack.md, подпаттерн 1.
+  interface ICalMatch {
+    id: string
+    scheduledAt: Date | null
+    homeTeam: { team: { name: string } }
+    awayTeam: { team: { name: string } }
+    venue: { name: string; address: string | null } | null
+    tour: { number: number; round: { number: number; season: { name: string } } } | null
+  }
+  const icalMatches: ICalMatch[] = matches
+
   // Генерируем VCALENDAR
-  const events = matches.map((match) => {
+  const events = icalMatches.map((match) => {
     const start = formatICalDate(match.scheduledAt!)
     // Матч длится ~2 часа
     const end = formatICalDate(new Date(match.scheduledAt!.getTime() + 2 * 60 * 60 * 1000))

@@ -34,17 +34,30 @@ export default async function TeamsPage() {
     },
   })
 
+  // Узкий интерфейс вместо выведенного ZenStack-типа: tsgo TS2321 (Excessive stack depth),
+  // см. .claude/docs/tsgo-excessive-stack-depth-zenstack.md, подпаттерн 1.
+  interface TeamListItem {
+    id: string
+    name: string
+    slug: string
+    logo: string | null
+    city: { name: string } | null
+    homeVenue: { name: string } | null
+    teamSeasons: { league: { name: string } }[]
+  }
+  const teamList: TeamListItem[] = teams
+
   return (
     <VStack gap={6} align="stretch">
       <Flex justify="space-between" align="center">
         <SectionHeading>Команды</SectionHeading>
         <Text fontSize="sm" color="fg.muted">
-          {teams.length} команд
+          {teamList.length} команд
         </Text>
       </Flex>
 
       <SimpleGrid columns={{ base: 1, sm: 2, lg: 3 }} gap={4}>
-        {teams.map((team) => {
+        {teamList.map((team) => {
           const currentSeason = team.teamSeasons[0]
           const initial = team.name.charAt(0).toUpperCase()
 
@@ -130,7 +143,7 @@ export default async function TeamsPage() {
         })}
       </SimpleGrid>
 
-      {teams.length === 0 && (
+      {teamList.length === 0 && (
         <VStack py={16} textAlign="center" gap={4} className="fade-in-up">
           <Circle size={20} bg="brand.50" _dark={{ bg: 'brand.950' }}>
             <LuUsers size={40} color="var(--chakra-colors-brand-solid)" />

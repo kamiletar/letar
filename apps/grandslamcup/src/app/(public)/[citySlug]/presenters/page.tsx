@@ -51,9 +51,21 @@ export default async function PresentersPage({ params }: { params: Params }) {
     },
   })
 
+  // Узкий интерфейс вместо выведенного ZenStack-типа: tsgo TS2321 (Excessive stack depth),
+  // см. .claude/docs/tsgo-excessive-stack-depth-zenstack.md, подпаттерн 1.
+  interface PresenterMatch {
+    id: string
+    scheduledAt: Date | null
+    status: string
+    presenterUser: { id: string; name: string | null; image: string | null } | null
+    homeTeam: { team: { name: string } }
+    awayTeam: { team: { name: string } }
+  }
+  const presenterMatches: PresenterMatch[] = matches
+
   // Группируем по ведущему
-  const presenterMap = new Map<string, { name: string; image: string | null; matches: typeof matches }>()
-  for (const m of matches) {
+  const presenterMap = new Map<string, { name: string; image: string | null; matches: PresenterMatch[] }>()
+  for (const m of presenterMatches) {
     if (!m.presenterUser) {
       continue
     }

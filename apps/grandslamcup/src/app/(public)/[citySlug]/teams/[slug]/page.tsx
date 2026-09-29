@@ -95,8 +95,25 @@ export default async function TeamPage({ params }: { params: Params }) {
     })
     : []
 
+  // Узкий интерфейс вместо выведенного ZenStack-типа: tsgo TS2321 (Excessive stack depth),
+  // см. .claude/docs/tsgo-excessive-stack-depth-zenstack.md, подпаттерн 1.
+  interface TeamMatchRow {
+    id: string
+    status: string
+    homeTeamId: string
+    homeScore: number
+    awayScore: number
+    homePoints: number | null
+    awayPoints: number | null
+    scheduledAt: Date | null
+    homeTeam: { team: { name: string } }
+    awayTeam: { team: { name: string } }
+    venue: { name: string } | null
+  }
+  const teamMatches: TeamMatchRow[] = matches
+
   // Статистика
-  const finishedMatches = matches.filter((m) => m.status === 'FINISHED')
+  const finishedMatches = teamMatches.filter((m) => m.status === 'FINISHED')
   let won = 0,
     drawn = 0,
     lost = 0,
@@ -447,11 +464,11 @@ export default async function TeamPage({ params }: { params: Params }) {
       )}
 
       {/* Матчи */}
-      {matches.length > 0 && (
+      {teamMatches.length > 0 && (
         <Box>
           <SectionHeading mb={4}>Матчи</SectionHeading>
           <VStack gap={2} align="stretch">
-            {matches.map((m) => (
+            {teamMatches.map((m) => (
               <MatchCard
                 key={m.id}
                 id={m.id}

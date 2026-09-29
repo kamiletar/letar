@@ -93,6 +93,16 @@ export default async function MatchPage({ params }: { params: Params }) {
   const homeTeamName = match.homeTeam.team.name
   const awayTeamName = match.awayTeam.team.name
 
+  // Узкий интерфейс вместо выведенного ZenStack-типа: tsgo TS2321 (Excessive stack depth),
+  // см. .claude/docs/tsgo-excessive-stack-depth-zenstack.md, подпаттерн 1.
+  interface MatchLineupRow {
+    id: string
+    status: string
+    teamSeason: { id: string }
+    player: { name: string; slug: string }
+  }
+  const matchLineups: MatchLineupRow[] = match.lineups
+
   // citySlug для ссылок на профили (берём из домашней команды)
   const citySlug = match.homeTeam.team.city?.slug
 
@@ -275,7 +285,7 @@ export default async function MatchPage({ params }: { params: Params }) {
                   {name}
                 </Text>
                 <VStack align="start" gap={1}>
-                  {match.lineups
+                  {matchLineups
                     .filter((l) => l.teamSeason.id === teamId)
                     .map((l) => (
                       <Text key={l.id} fontSize="sm">

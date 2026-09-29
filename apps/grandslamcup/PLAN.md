@@ -8,6 +8,11 @@
 
 ## Открытые вопросы
 
+- [x] `typecheck:tsgo` — 6 × `TS2321` после `bun update` 2026-09-29 (v3.39.24). Проверено на
+      ZenStack 3.9.5 из кеша `.bun` (временный tsconfig с `paths`, без правки общего
+      `node_modules`): те же ошибки — не регрессия 3.9.6, а накопленный долг. Закрыто ручными
+      узкими `interface`. Разбор — `.claude/docs/tsgo-excessive-stack-depth-zenstack.md`.
+
 - [x] Аудит prismaAdapter/ZenStack закрыт превентивным фиксом (2026-08-31). Первая проверка
       (2026-08-31, живой прогон) подтвердила, что `auth.ts` передавал в `prismaAdapter()` голый
       `ZenStackClient` из `db.ts` — тот же паттерн, что валил пустой 500 в
