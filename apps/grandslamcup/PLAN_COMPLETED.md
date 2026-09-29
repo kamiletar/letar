@@ -2,6 +2,21 @@
 
 Детальное описание всех реализованных фич.
 
+## Фикс TS2321 после обновления ZenStack 3.9.6 (2026-09-29, v3.39.24)
+
+`nx typecheck:tsgo` падал `TS2321: Excessive stack depth comparing types 'MapType<Schema, ?>'`
+после `bun update` (`@zenstackhq/*` 3.9.5→3.9.6). Сначала проверено, регрессия ли это: 3.9.5 из
+кеша `node_modules/.bun` подключён временным tsconfig через `paths` (общий `node_modules` не
+трогали) — те же ошибки, значит накопленный долг, не регрессия версии. Голый `tsgo --noEmit`
+показал 6 ошибок, а не 4 из отчёта (плюс `presenters/page.tsx`, `teams/page.tsx`).
+
+Фикс — локальные узкие `interface` с реально используемыми полями (`status: string` вместо enum)
+и типизированные промежуточные переменные перед `.map()`/`.filter()`: `reminders.ts`,
+`api/schedule/ical/route.ts`, `[citySlug]/teams/[slug]/page.tsx`, `matches/[id]/page.tsx`,
+`[citySlug]/presenters/page.tsx`, `teams/page.tsx`. Итог: 0 ошибок (`--skip-nx-cache`), lint и
+format зелёные. Разбор и способ сравнения версий —
+`.claude/docs/tsgo-excessive-stack-depth-zenstack.md`.
+
 ## Фикс неверного ключа регистрации radioRecipe (2026-09-10)
 
 Аудит ключей `slotRecipes` в `src/theme/index.ts` (продолжение находки truncation-бага ниже)
