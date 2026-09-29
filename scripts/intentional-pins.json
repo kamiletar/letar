@@ -39,6 +39,15 @@
       "unpinWhen": "Не относится — пин снимается только заменой на новую точную версию вместе с подъёмом версии конвертера в потребителе."
     },
     {
+      "package": "@swc/core",
+      "version": "1.16.2",
+      "field": "devDependencies",
+      "since": "2026-09-29",
+      "reason": "@swc/core 1.16.12 (и, вероятно, часть промежуточных 1.16.x) при загрузке нативного биндинга проверяет DACL каталога кеша (%LOCALAPPDATA%/swc или SWC_NATIVE_BINDING_CACHE) и отказывает, если права на замену есть у посторонних SID. На Windows-машине владельца каталог наследует ACL с SID AppContainer/CodexSandboxUsers, в результате `Failed to load native binding`: Nx не может загрузить next.config.* и граф проектов не строится вовсе (`Failed to process project graph`) — падают все nx-таргеты. 1.16.2 грузится без проверки.",
+      "doc": "PLAN-INFRA-*.md — прогон /infra:deps-update 2026-09-29",
+      "unpinWhen": "Свежая версия @swc/core грузит биндинг на этой машине: поставить её, проверить `nx show projects` (без Failed to process project graph), затем снять пин и удалить запись одним коммитом. Либо очищен ACL %LOCALAPPDATA%/swc."
+    },
+    {
       "package": "oxlint",
       "version": "1.81.0",
       "field": "devDependencies",

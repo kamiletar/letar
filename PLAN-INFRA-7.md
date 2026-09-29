@@ -2898,3 +2898,36 @@ WebKit сбрасывает ранее заполненный controlled-инп�
 - [ ] ⚠️ Открытый вопрос: **push не сделан** — коммит лежит локально, ждёт обычного одобрения
       (`git.md`), отдельной заявки на деплой не требует (не деплой-блокер сам по себе, просто
       снимает риск на будущий `--frozen-lockfile`).
+
+## §206 (2026-09-29) `/infra:deps-update`: обновление в пределах диапазонов + пин `@swc/core` 1.16.2
+
+`bun update` (только in-range, мажоры не трогал) + `bun audit fix`: ~60 пакетов на патч/минор
+(`next` 16.3.7, `@zenstackhq/*` 3.9.6, `@tanstack/react-query*` 5.104.0, `ai`/`@ai-sdk/*`,
+`fumadocs-*`, `sharp` 0.35.5, `ws`, `socket.io*` и др.). `audit`: 13 → 12 уязвимостей.
+
+- [x] `bun scripts/check-all.mjs --group=deps` — все gate зелёные; `peer-deps` — новых строк нет
+      (5 старых: `model-viewer`↔`three`, четыре `eslint-plugin-*` ↔ eslint 10).
+- [x] ⚠️ **`@swc/core` 1.16.12 ломает граф Nx на этой машине** и потому запинен на `1.16.2`
+      (запись в `scripts/intentional-pins.json`). Новая версия при загрузке нативного биндинга
+      проверяет DACL каталога кеша и отказывает, если права на замену есть у посторонних SID;
+      у `%LOCALAPPDATA%\swc` и `%TEMP%` такие есть (AppContainer/`CodexSandboxUsers`).
+      Симптом: `Failed to load native binding` → `NX Failed to process project graph`, падают ВСЕ
+      nx-таргеты, при том что `bun install` и `check-all` зелёные. Снять пин можно, когда свежая
+      версия грузится (проверка — `nx show projects`).
+- [x] `nx run-many -t typecheck:tsgo`: 112 из 114 зелёные. `animatrona-renderer` — сталые
+      `.next/dev/types` и `.next/types` (TS6305), вылечено удалением этих каталогов
+      ([nextjs-stale-dotnext-types-tsgo-ts6305](/.claude/docs/nextjs-stale-dotnext-types-tsgo-ts6305.md)).
+- [x] `nx run-many -t test`: 112 задач, 4 красных, регрессий от обновления не найдено:
+      `ipfs-kubo-core` — в либе нет тестов (vitest выходит с кодом 1); `forms-vue` — флак, зелёный
+      при повторе; `studio` — `consent.test.ts` устарел после `e9cad4e14` (`hashIp` больше не берёт
+      первый хоп `x-forwarded-for`); `domwellbes` — FK/схема общей dev-БД, чужой WIP.
+- [ ] ⚠️ **`grandslamcup:typecheck:tsgo` красный: 4 × TS2321** (`[citySlug]/teams/[slug]/page.tsx:99`,
+      `matches/[id]/page.tsx:278`, `api/schedule/ical/route.ts:55`, `lib/telegram/messages/reminders.ts:38`).
+      Класс из [tsgo-excessive-stack-depth-zenstack](/.claude/docs/tsgo-excessive-stack-depth-zenstack.md);
+      лишних копий zod в lock нет (24 записи `zod@`, как до обновления). Не проверено, вызвал ли
+      его `@zenstackhq/*` 3.9.5→3.9.6 или это накопленный техдолг. Не чинил — приватный submodule.
+- [ ] `nx build` не прогонял (58 приложений; на этой машине неподъёмно) — перед деплоем проверять
+      по приложениям.
+- [ ] Не обновлял мажоры: `typescript` 7, `prisma` 8-rc, `nodemailer` 10 (закрывает GHSA-6vj9-mwq6-2f5v),
+      `imapflow` 2, `googleapis` 182, `simple-git` 4, `@babel/*` 8, `@types/node` 26, `dotenv` 18,
+      `fast-check` 4, `oxlint` 1.86 (точный пин), `size-limit` 14.
