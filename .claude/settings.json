@@ -44,6 +44,10 @@
           {
             "type": "command",
             "command": "node -e \"const p=require('path'),f=require('fs'),n=process.argv[1];let d=process.cwd();for(;;){const s=p.join(d,'.claude','hooks',n);if(f.existsSync(s)){require(s);break}const u=p.dirname(d);if(u===d)break;d=u}\" auto-format.js"
+          },
+          {
+            "type": "command",
+            "command": "node -e \"const p=require('path'),f=require('fs'),n=process.argv[1];let d=process.cwd();for(;;){const s=p.join(d,'.claude','hooks',n);if(f.existsSync(s)){require(s);break}const u=p.dirname(d);if(u===d)break;d=u}\" chakra-as-prop-check.js"
           }
         ]
       },

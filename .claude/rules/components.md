@@ -77,23 +77,9 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
 
 ## ⛔ ЗАПРЕТ: проп `as=` в Chakra UI v3
 
-Проп `as=""` и `as={Component}` **ПОЛНОСТЬЮ ЗАПРЕЩЁН**. Использовать ТОЛЬКО `asChild` + нативный HTML-элемент внутри.
-
-```tsx
-// ❌ ЗАПРЕЩЕНО — НЕ ПИСАТЬ НИКОГДА
-<Box as="button" disabled onClick={handler}>Click</Box>
-<Box as="a" href="/page">Link</Box>
-<Box as={FaIcon} boxSize={4} />
-<Text as="label" htmlFor="id">Label</Text>
-
-// ✅ asChild + нативный элемент
-<Box px={4} py={2} asChild>
-  <button disabled onClick={handler}>Click</button>
-</Box>
-
-// ✅ Иконки — рендерить напрямую
-<FaKeyboard size={16} />
-```
+Сам запрет с примерами замены вынесен в правило без `paths:`
+[chakra-as-prop.md](/.claude/rules/chakra-as-prop.md): отсюда он не доходил до агента при
+`Write`. Здесь осталась только ловушка, специфичная для `as="label"`.
 
 ### ⚠️ Антипаттерн: `<input>` вложен в `<label>` после замены `as="label"`
 

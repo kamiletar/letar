@@ -1,5 +1,14 @@
 # Changelog — @letar/ui
 
+## [0.25.0] — 2026-09-29
+
+### Added
+
+- `OutboundLink` — текстовая ссылка на чужой сайт с иконкой ↗, новая вкладка,
+  `rel="noopener noreferrer"`, скрытая подпись для диктора (`newTabLabel`). Часть договорённости о
+  видах ссылок (`.claude/docs/link-vs-button-navigation-convention.md`). Первый потребитель — aboi
+  («Как это работает», ссылки на исследования).
+
 ## [0.24.1] — 2026-09-27
 
 ### Added

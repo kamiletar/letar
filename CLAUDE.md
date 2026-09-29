@@ -385,6 +385,7 @@
 - [time-tracker-drift-incidents](/.claude/docs/time-tracker-drift-incidents.md) ⚠️ четыре способа потерять время; `autoClosedIdle` хуки не ловят
 - [formatting](/.claude/rules/formatting.md) ⚠️ голая `nx format` молча зашита на Prettier
 - [heavy-work-off-main-thread](/.claude/rules/heavy-work-off-main-thread.md) ⭐ CPU-работа дольше ~50 мс — в воркер; ⚠️ `@letar/jobs` крутит задачи в том же процессе
+- [chakra-as-prop](/.claude/rules/chakra-as-prop.md) ⛔ `as=` запрещён, только `asChild`; хук ловит новые вхождения сразу после Write/Edit
 
 ## Быстрый старт
 

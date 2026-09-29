@@ -117,7 +117,7 @@ rules:
     severity: WARNING
     message: >-
       Проп as="..."/as={Component} на Chakra-компоненте запрещён — используй ТОЛЬКО
-      asChild + нативный HTML-элемент внутри. См. .claude/rules/components.md,
+      asChild + нативный HTML-элемент внутри. См. .claude/rules/chakra-as-prop.md,
       apps/aboi/src/app/[locale]/_components/home/scale.tsx как образец.
       ⚠️ Severity временно понижена с ERROR до WARNING (2026-08-26) — 1434 существующих
       срабатывания по репо (в основном `<Icon as={IconComponent}>` в libs/video-player-react

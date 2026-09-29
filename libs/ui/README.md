@@ -184,6 +184,21 @@ import { ExternalLink } from '@letar/ui'
 </ExternalLink>
 ```
 
+### OutboundLink
+
+Текстовая ссылка на чужой сайт с иконкой исходящей ссылки ↗ — как в десктопных программах:
+иконка заранее говорит, что пользователь уйдёт из приложения. Новая вкладка,
+`rel="noopener noreferrer"`, скрытая для глаз подпись «(откроется в новой вкладке)» для диктора
+(`newTabLabel` — для других языков). Переносится по словам вместе с фразой. Свои маршруты этим
+компонентом не оформлять — правило видов ссылок: `.claude/docs/link-vs-button-navigation-convention.md`.
+
+```tsx
+import { OutboundLink } from '@letar/ui'
+<OutboundLink href="https://doi.org/10.1126/science.273.5282.1699" color="brand.solid">
+  Greenwald et al. (1996)
+</OutboundLink>
+```
+
 ### CoverImage
 
 Клиентская граница `AspectRatio` + `next/image`/иконка-фолбэк для карточек товаров/объектов, у

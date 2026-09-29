@@ -104,6 +104,7 @@ export { Tooltip, type TooltipProps } from './lib/tooltip'
 export { BuildVersion, type BuildVersionProps } from './lib/build-version'
 export { DeleteAccountZone, type DeleteAccountZoneProps } from './lib/delete-account-zone'
 export { ExternalLink, type ExternalLinkProps } from './lib/external-link'
+export { OutboundLink, type OutboundLinkProps } from './lib/outbound-link'
 export { StudioCredit, type StudioCreditProps } from './lib/studio-credit'
 export { TopLoader, type TopLoaderProps } from './lib/top-loader'
 export {

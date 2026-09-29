@@ -5,6 +5,10 @@ Semgrep-правило `letar-chakra-as-prop-forbidden` (`.semgrep/letar-rules.y
 `libs/ui`, `apps/animatrona-landing` — коммиты `80ac608c`, `d50a078c`, `087521ce`) вывели один и
 тот же рецепт заново. Ниже — рецепт, чтобы следующая сессия его не переизобретала.
 
+Новые `as=` с 2026-09-29 ловит PostToolUse-хук `.claude/hooks/chakra-as-prop-check.js` сразу
+после Write/Edit (только вхождения, которых не было до правки), а сам запрет живёт в правиле без
+`paths:` — [chakra-as-prop.md](/.claude/rules/chakra-as-prop.md). Этот док — про чистку старого.
+
 ## 1. Статический `<Icon as={LuX} boxSize={N} color="token" />`
 
 Убрать `Icon`, рендерить react-icons компонент напрямую. `boxSize` (Chakra spacing scale) → `size`
