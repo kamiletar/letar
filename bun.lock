@@ -348,7 +348,7 @@
     },
     "apps/aboi": {
       "name": "@letar/aboi",
-      "version": "0.84.4",
+      "version": "0.84.5",
       "dependencies": {
         "@letar/admin-ui": "workspace:*",
         "@letar/analytics": "workspace:*",
