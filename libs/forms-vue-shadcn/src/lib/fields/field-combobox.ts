@@ -3,6 +3,7 @@ import {
   applyOptionOverlay,
   CREATE_OPTION_VALUE,
   type CreatedOption,
+  type FieldDeps,
   getOptionText,
   isCreateOptionValue,
   isOptionEditable,
@@ -19,13 +20,14 @@ import {
   resolveFieldMeta,
   useAppFormContext,
   useDebounce,
+  useFormGroup,
   usePromiseSearch,
+  useRegisterFieldLabel,
   useSelectedLoader,
   useSelectionActionsState,
   withFieldValidation,
 } from '@letar/forms-vue/core'
 import { computed, defineComponent, h, onErrorCaptured, type PropType, ref, watch } from 'vue'
-import { FieldWrapper } from '../uikit/primitives'
 // Прямой импорт примитива, не через `rekaUIKit.Combobox`: `renderValue`/`resolveOption` — расширение
 // контракта сверх `UIKitComboboxProps` (`RekaComboboxExtraProps`, см. `combobox.ts`), которого нет в
 // `forms-core`, и `rekaUIKit.Combobox` типизирован строго по нему (excess property error).
@@ -37,6 +39,7 @@ import type { FieldSelectOption } from './field-select'
 import { SelectionActionsProvider, SelectionOptionProvider } from './selection-context'
 import { SelectCreateButton, SelectEditButton } from './selection-slots'
 import { selectionStrings } from './selection-strings'
+import { dependentHelperText, DependentLiveRegion, useDependentFieldUi } from './use-dependent-field-ui'
 
 /**
  * `options` — тот же случай, что и `FieldSelect`: проп сверх контракта `createField`, поле
@@ -45,9 +48,22 @@ import { selectionStrings } from './selection-strings'
  *
  * Источники опций (ровно один, Stage 4b): статичные `options` — фильтр на клиенте по подписи;
  * `loadOptions` (промис-путь: server action, `fetch`, SDK) — фильтрует сервер, поле дебаунсит
- * строку поиска, отменяет прошлый запрос и показывает «Повторить» при ошибке. `dependsOn`/`deps`
- * этой стадии нет (Stage 4d) — `usePromiseSearch`/`useSelectedLoader` уже принимают `deps`/`depsKey`,
- * здесь они не подключены за ненадобностью, а не забыты.
+ * строку поиска, отменяет прошлый запрос и показывает «Повторить» при ошибке.
+ *
+ * Зависимость от других полей (`dependsOn`, §18, Этап 4d) — тот же `useDependentFieldUi`, что у
+ * `Field.Select` (`field-select.ts`): пока родители не готовы, поле заблокировано (`disabled` у
+ * примитива, `Combobox` в этом скине его уже поддерживал) с подсказкой вместо placeholder, правка
+ * родителя чистит значение. `dependent.deps`/`depsKey` доходят до `usePromiseSearch`/
+ * `useSelectedLoader`/`useSelectionActionsState` — смена родителя переинициализирует промис-путь
+ * (§18.6: данные и созданные/отредактированные опции чужого родителя не остаются на экране) и не
+ * путает кэш действий между родителями, а `loadSelected` продолжает искать запись по `value`
+ * независимо от того, какой родитель сейчас выбран (кэш `useSelectedLoader` по `deps` не сбрасывается).
+ *
+ * ⚠️ Поле собрано напрямую по `FieldRoot`/`FieldLabel`/`FieldError` (как `field-select.ts`), не через
+ * `FieldWrapper` (`../uikit/primitives`): `FieldWrapper` не принимает `helperText`/`describedBy` —
+ * этого было достаточно, пока подсказке под полем взяться было неоткуда. Расширять `FieldWrapper`
+ * ради одного потребителя рискованнее (он общий для всех простых полей `createField`), чем повторить
+ * уже рабочую сборку из `field-select.ts`.
  *
  * Создание/правка записи справочника прямо из поля (`onCreate`/`onUpdate`, §16, Этап 4c) — тот же
  * конвейер `useSelectionActionsState`, что у `Field.Select` (`field-select.ts`): служебный пункт
@@ -178,17 +194,32 @@ const FieldComboboxBase = defineComponent({
     createItem: { type: Boolean as PropType<boolean | undefined>, required: false, default: undefined },
     /** Подвал списка (обычно `Field.Combobox.CreateButton`) — для своего `renderOption` без встроенного пункта создания */
     listFooter: { type: null, required: false, default: undefined },
+    /** Путь(и) родительского поля(ей) — поле блокируется, пока родитель(и) не заполнены (§18) */
+    dependsOn: { type: [String, Array] as PropType<string | readonly string[]>, required: false, default: undefined },
+    /** Родитель считается заполненным, если вернуть `false` — по умолчанию проверка на непустое значение */
+    depsReady: { type: Function as PropType<(deps: FieldDeps) => boolean>, required: false, default: undefined },
+    /** Очищать своё значение при смене родителя; по умолчанию `true` при наличии `dependsOn` */
+    clearOnParentChange: { type: Boolean as PropType<boolean | undefined>, required: false, default: undefined },
+    /** Блокировать управление, пока родитель(и) не готовы; по умолчанию `true` при наличии `dependsOn` */
+    disableWhenParentEmpty: { type: Boolean as PropType<boolean | undefined>, required: false, default: undefined },
+    /** Свой текст в заблокированном поле вместо автоматической подсказки «Сначала выберите «…»» */
+    placeholderWhenDisabled: { type: String as PropType<string | undefined>, required: false, default: undefined },
   },
   setup(props) {
-    const { form, schema } = useAppFormContext()
+    const { form, schema, dependents, labels } = useAppFormContext()
     const { fieldSchema, label, placeholder: metaPlaceholder, required, fullPath } = resolveFieldMeta(
       schema,
       props.name,
       props.label,
       props.placeholder,
     )
+    const formGroup = useFormGroup()
     const placeholder = metaPlaceholder ?? 'Поиск...'
     const strings = selectionStrings
+
+    // Видимая подпись поля — в общий реестр формы, чтобы дети, зависящие от этого поля
+    // (`dependsOn`), могли показать «Сначала выберите «<эта подпись>»» (тот же приём, что в `field-select.ts`)
+    useRegisterFieldLabel(labels, fullPath, () => label)
 
     const isPromise = computed(() => !!props.loadOptions)
     if (!props.options && !props.loadOptions) {
@@ -209,15 +240,39 @@ const FieldComboboxBase = defineComponent({
     const minChars = computed(() => props.minChars ?? (isPromise.value ? 1 : 0))
     const debouncedSearch = useDebounce(() => inputValue.value, () => props.debounce ?? 300)
 
-    const promiseSearch = usePromiseSearch<unknown>({
+    // Снимок значений всей формы — источник для `dependsOn` (родительские поля читаются по имени
+    // из общего дерева, не из этого поля), тот же приём, что в `field-select.ts`
+    const valuesRef = form.useStore((state: { values: Record<string, unknown> }) => state.values)
+
+    const dependent = useDependentFieldUi<FieldDeps>({
+      fullPath,
+      label,
+      groupPath: () => formGroup?.name ?? null,
+      values: () => valuesRef.value,
+      schema,
+      labels,
+      dependents,
+      setValue: (value) => form.setFieldValue(fullPath, value),
+      dependsOn: () => props.dependsOn,
+      depsReady: props.depsReady,
+      clearOnParentChange: props.clearOnParentChange,
+      disableWhenParentEmpty: props.disableWhenParentEmpty,
+      placeholderWhenDisabled: props.placeholderWhenDisabled,
+    })
+
+    const promiseSearch = usePromiseSearch<unknown, FieldDeps>({
       loadOptions: props.loadOptions,
       search: () => debouncedSearch.value,
-      // Запрос уходит, когда список открывали и набран порог `minChars`
+      // Запрос уходит, когда родители готовы, список открывали и набран порог `minChars`
       enabled: () =>
-        everOpened.value
+        dependent.state.ready.value
+        && everOpened.value
         && inputValue.value.length >= minChars.value
         && debouncedSearch.value.length >= minChars.value,
       onLoadError: props.onLoadError,
+      // Смена родителя — другой список: прежние данные скрываются немедленно (§18.6), см. `usePromiseSearch`
+      deps: () => dependent.deps.value,
+      depsKey: () => dependent.state.depsKey.value,
     })
 
     // Снимок значения поля вне render-замыкания (как `fieldValueRef` у `FieldSelect`) — нужен и для
@@ -269,6 +324,10 @@ const FieldComboboxBase = defineComponent({
       value: () => fieldValueRef.value,
       onSettleError: props.onSettleError,
       settleTimeout: props.settleTimeout,
+      // Другой родитель — другой список (§18.6): созданные опции и наложение правок относились
+      // к списку прежнего родителя и сбрасываются при смене `depsKey`, см. `useSelectionActionsState`
+      deps: () => dependent.deps.value,
+      depsKey: () => dependent.state.depsKey.value,
     })
 
     // Правки лежат поверх опций приложения; опция приложения сильнее созданной с тем же значением
@@ -289,11 +348,13 @@ const FieldComboboxBase = defineComponent({
     // `loadSelected`: значение непустое и его нет в текущей выдаче (уже с учётом правок/созданных опций —
     // только что созданная запись не должна ходить за собственной же подписью)
     const valueInResults = computed(() => mergedOptions.value.some((opt) => opt.value === valueKey.value))
-    const selectedLoader = useSelectedLoader<unknown>({
+    const selectedLoader = useSelectedLoader<unknown, FieldDeps>({
       loadSelected: props.loadSelected,
       value: () => valueKey.value,
       enabled: () => !valueInResults.value,
       onLoadError: props.onLoadError,
+      // Кэш записи — по `value` (идентификаторы уникальны между родителями), смена родителя его не сбрасывает
+      deps: () => dependent.deps.value,
     })
     // Запись из `loadSelected` — вне списка (сервер её не выдавал), только для подписи поля ввода
     const selectedSourceOption = computed<FieldSelectOption | undefined>(() => toOption(selectedLoader.data.value))
@@ -392,6 +453,11 @@ const FieldComboboxBase = defineComponent({
         const loadError = promiseSearch.error.value
         const hasOnUpdate = !!props.onUpdate
         const createVerb = props.createLabel ?? strings.createVerb
+
+        // Поле заблокировано `dependsOn` (§18) — родители ещё не готовы: свои действия и правка недоступны
+        const blocked = dependent.blocked.value
+        const effectivePlaceholder = blocked ? dependent.blockedPlaceholder.value : placeholder
+        const { helperText, describedBy } = dependentHelperText(dependent, hasError)
 
         // Служебный пункт создания — в конце отфильтрованного списка; проверка дублей — по ПОЛНОМУ
         // (не отфильтрованному) списку, как у Select (`shouldOfferCreate`)
@@ -495,7 +561,7 @@ const FieldComboboxBase = defineComponent({
           pending: actions.pending.value,
           canCreate: !!props.onCreate,
           hasOnUpdate,
-          interactive: true,
+          interactive: !blocked,
           search,
           runCreate,
           runEdit,
@@ -510,23 +576,27 @@ const FieldComboboxBase = defineComponent({
         const selectedSource = value !== undefined ? optionByValue.value.get(value) : undefined
         const showValueEdit = hasOnUpdate && !!selectedSource && isOptionEditable(selectedSource, true)
 
-        return FieldWrapper({
-          label,
+        return rekaUIKit.FieldRoot({
+          invalid: hasError,
           required,
-          hasError,
-          errorMessage,
-          // `FieldWrapper` типизирует `children` как единичный `TNode`, но `FieldRoot` рендерит
-          // массив без вопросов (см. `create-field-primitives.ts`) — тот же приём, что там
+          disabled: blocked,
           children: [
+            rekaUIKit.FieldLabel({ label, required }),
             h(SelectionActionsProvider, { value: actionsValue }, {
               default: () => [
                 Combobox({
                   value,
                   inputValue: inputValue.value,
                   onInputChange: (next) => {
+                    if (blocked) {
+                      return
+                    }
                     inputValue.value = next
                   },
                   onValueChange: (next) => {
+                    if (blocked) {
+                      return
+                    }
                     if (next !== undefined && isCreateOptionValue(next)) {
                       // Служебный пункт: значение в форму не попадает
                       runCreate()
@@ -536,6 +606,8 @@ const FieldComboboxBase = defineComponent({
                     field.handleChange(next ?? '')
                   },
                   onOpenChange: markOpened,
+                  disabled: blocked,
+                  describedBy,
                   // Ошибка прячет данные: на экране «Не удалось загрузить», а не выдача прошлого поиска
                   options: loadError ? [] : optionsWithCreate,
                   loading: !!promiseSearch.isLoading.value || !!selectedLoader.isLoading.value,
@@ -582,9 +654,10 @@ const FieldComboboxBase = defineComponent({
                   loadingText: strings.loading,
                   loadErrorText: strings.loadError,
                   retryText: strings.retry,
-                  placeholder,
+                  placeholder: effectivePlaceholder,
                   'data-field-name': props.name,
                 }),
+                DependentLiveRegion(dependent),
               ],
             }),
             actions.settleFailure.value
@@ -594,6 +667,7 @@ const FieldComboboxBase = defineComponent({
                 interpolate(strings.settleError, { label: actions.settleFailure.value.label }),
               )
               : null,
+            rekaUIKit.FieldError({ hasError, errorMessage, helperText }),
           ] as unknown as UINode,
         })
       })
