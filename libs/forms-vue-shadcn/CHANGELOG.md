@@ -1,5 +1,44 @@
 # Changelog @letar/forms-vue-shadcn
 
+## 0.23.0 (2026-09-29)
+
+`Field.Combobox` — создание/правка записи справочника, Stage 4c (тред `forms-vue-angular-select-parity`,
+паритет с React `field-combobox.tsx`).
+
+- **Feature:** `onCreate`/`onUpdate` — тот же конвейер `useSelectionActionsState`, что у `Field.Select`
+  (Stage 3b): `run()` даёт единый `pending`, закрытие списка перед окном приложения (`controlRef`),
+  оптимистичный режим (`ctx.optimistic`, §16.7) с откатом по отказу/таймауту (`onSettleError` или
+  встроенное сообщение `settleFailure` под полем). Работает поверх опций из ЛЮБОГО источника —
+  статичных `options` или `loadOptions` (Stage 4b), созданные/правленые опции накладываются
+  (`applyOptionOverlay`/`mergeCreatedOptions`) поверх того, что вернул текущий источник.
+- **Feature:** служебный пункт «+ Добавить "<текст>"» в конце списка — подпись берётся из текста
+  поля ввода (`inputValue`), а не из отдельного поля поиска, как у `Field.Select`: у Combobox
+  «значение» и есть набранный текст. `createLabel`/`createItem` — те же пропы, что у Select.
+- **Feature:** `pending`-опции (своя оптимистичная запись или помеченная приложением) приглушены и
+  не выбираются — перенесено в `uikit/primitives/combobox.ts` (`ComboboxItem.disabled = opt.disabled
+  || opt.pending`, тем же приёмом, что `select.ts`), не в поле: примитив уже показывал `Loader2`
+  вместо `renderOptionActions` у `pending`-пункта (Stage 4b), не хватало только блокировки выбора.
+- **Feature:** карандаш «Изменить» — у пункта списка (`renderOptionActions`) и у выбранного значения
+  (`controlActions`, сосед поля ввода). Правка обновляет ОБА — значение поля и текст ввода
+  (`syncedValue`) — согласованно, тем же приёмом, что уже даёт Stage 4a/4b для подписи
+  `loadOptions`/`loadSelected`.
+- **Extended:** `uikit/primitives/combobox.ts` — примитив переведён с плоской функции на
+  Vue-компонент с `setup()` (`ComboboxImpl`, тот же приём, что `SelectImpl` в `select.ts`):
+  персистентное состояние (`open`, `controlRef`) не может жить в теле функции, вызываемой заново на
+  каждый рендер поля. Добавлены `controlRef` (`close`/`focusTrigger`) и `controlActions` (кнопка —
+  сосед `<input>`, не внутри него) — были типизированы в `UIKitSelectionSlotProps`, но не
+  реализованы в Reka-скине Combobox.
+- Слоты `Form.Field.Combobox.EditButton`/`.CreateButton` — для своего `renderOption`/`listFooter`,
+  тем же способом, что у `Field.Select` (`Object.assign`).
+- **Fix:** подпись поля ввода для только что созданной/отредактированной записи иногда показывала
+  сырое `value` вместо ярлыка — `options`, переданный в примитив, отфильтрован по тексту поиска и
+  на момент пересчёта Reka `displayValue` мог не содержать свежую запись. `resolveOption` расширен
+  на `optionByValue` (полную, нефильтрованную карту), а не только на источник `loadSelected`.
+- **Fix:** `listFooter` не был объявлен как проп `Field.Combobox` и не прокидывался в примитив —
+  `Field.Combobox.CreateButton`, переданный вручную при `createItem: false`, никогда не попадал в
+  подвал списка. Добавлен по образцу `field-select.ts`.
+- Не в этой стадии: `dependsOn` (4d), группировка (`option.group`, исключена из всего Этапа 4).
+
 ## 0.22.0 (2026-09-27)
 
 Асинхронные источники опций Combobox, Stage 4b (тред `forms-vue-angular-select-parity`, паритет с
