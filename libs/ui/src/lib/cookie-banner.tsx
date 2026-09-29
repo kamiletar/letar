@@ -73,9 +73,9 @@ export function CookieBanner({
   // единственным крупным элементом, появлявшимся ПОСЛЕ гидратации — Lighthouse брал его
   // текст как LCP-элемент, раздувая LCP до времени полной гидратации (7.2–8.4с вместо
   // времени первой отрисовки). Эффект ниже по-прежнему прячет баннер (`setShown(false)`),
-  // если найдено валидное согласие под текущей версией политики — для вернувшихся
-  // пользователей возможна короткая вспышка баннера на время гидратации, это дешевле
-  // регрессии LCP. Баннер `position: fixed`, поэтому скрытие не даёт CLS.
+  // если найдено валидное согласие под текущей версией политики. Вспышку у вернувшихся
+  // пользователей до гидратации гасит inline-скрипт перед баннером (см. ниже) — LCP не
+  // страдает. Баннер `position: fixed`, поэтому скрытие не даёт CLS.
   const [shown, setShown] = useState(true)
   // Гранулярные чекбоксы скрыты, пока пользователь явно не нажмёт «Настроить» — по умолчанию
   // баннер занимает одну строку текста + строку кнопок, а не три ряда с чекбоксами.
@@ -176,43 +176,129 @@ export function CookieBanner({
   }
 
   return (
-    <Box
-      ref={rootRef}
-      position="fixed"
-      bottom={0}
-      left={0}
-      right={0}
-      bg="bg.panel"
-      borderTopWidth="1px"
-      borderColor="border"
-      zIndex={zIndex}
-      shadow="lg"
-    >
-      <Container maxW="6xl" py={2}>
-        <Stack gap={2}>
-          <Stack direction={{ base: 'column', md: 'row' }} justify="space-between" align={{ md: 'center' }} gap={2}>
-            <Text fontSize="xs" color="fg.muted">
-              {messageText} {
-                /* Постоянный underline, не только по `_hover` — иначе ссылка отличается от
+    <>
+      {
+        /* Прячет баннер ДО первой отрисовки, если согласие уже есть: SSR не знает про localStorage,
+          а ждать эффекта гидратации — секундная вспышка у вернувшегося пользователя. Скрипт
+          исполняется при разборе HTML сразу перед баннером, поэтому браузер его не рисует. Для
+          новых пользователей баннер остаётся в серверной разметке (LCP не страдает). Эффект выше
+          после гидратации всё равно размонтирует баннер — скрипт лишь убирает вспышку.
+          Содержимое — только JSON.stringify констант конфигурации, пользовательского ввода нет. */
+      }
+      {/* nosemgrep: letar-dangerously-set-inner-html-unsanitized -- только константы конфигурации */}
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `try{var r=localStorage.getItem(${JSON.stringify(config.storageKey)});if(r&&JSON.parse(r).version===${
+            JSON.stringify(policyVersion)
+          }){var s=document.currentScript,b=s&&s.nextElementSibling;if(b)b.style.display='none'}}catch(e){}`,
+        }}
+      />
+      <Box
+        ref={rootRef}
+        suppressHydrationWarning
+        position="fixed"
+        bottom={0}
+        left={0}
+        right={0}
+        bg="bg.panel"
+        borderTopWidth="1px"
+        borderColor="border"
+        zIndex={zIndex}
+        shadow="lg"
+      >
+        <Container maxW="6xl" py={2}>
+          <Stack gap={2}>
+            <Stack direction={{ base: 'column', md: 'row' }} justify="space-between" align={{ md: 'center' }} gap={2}>
+              <Text fontSize="xs" color="fg.muted">
+                {messageText} {
+                  /* Постоянный underline, не только по `_hover` — иначе ссылка отличается от
                   окружающего текста только цветом (WCAG 1.4.1), axe (link-in-text-block) ловит
                   это в WebKit при недостаточном контрасте brand.solid/fg.muted. */
-              }
-              <Box asChild color="brand.solid" textDecoration="underline" textUnderlineOffset="2px" display="inline">
-                <Link href={privacyUrl}>{privacyLinkText}</Link>
-              </Box>
-            </Text>
+                }
+                <Box asChild color="brand.solid" textDecoration="underline" textUnderlineOffset="2px" display="inline">
+                  <Link href={privacyUrl}>{privacyLinkText}</Link>
+                </Box>
+              </Text>
 
-            {!expanded && (
-              // На телефоне (колонка) кнопки прижаты вправо — как «Сохранить выбор»/«Принять все»
-              // в развёрнутой панели ниже; на десктопе (строка) выравнивание задаёт родитель
-              <HStack gap={2} flexShrink={0} justify={{ base: 'flex-end', md: 'initial' }}>
-                <Button
+              {!expanded && (
+                // На телефоне (колонка) кнопки прижаты вправо — как «Сохранить выбор»/«Принять все»
+                // в развёрнутой панели ниже; на десктопе (строка) выравнивание задаёт родитель
+                <HStack gap={2} flexShrink={0} justify={{ base: 'flex-end', md: 'initial' }}>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    minH={{ base: '2.75rem', md: 'auto' }}
+                    onClick={() => setExpanded(true)}
+                  >
+                    {customizeButtonText}
+                  </Button>
+                  <Button
+                    size="sm"
+                    colorPalette="brand"
+                    minH={{ base: '2.75rem', md: 'auto' }}
+                    onClick={handleAcceptAll}
+                  >
+                    {acceptAllButtonText}
+                  </Button>
+                </HStack>
+              )}
+            </Stack>
+
+            {expanded && (
+              <HStack gap={3} wrap="wrap">
+                <Checkbox.Root checked disabled colorPalette="brand" size="sm">
+                  <Checkbox.HiddenInput />
+                  <Checkbox.Control />
+                  <Checkbox.Label>
+                    <Text as="span" fontSize="xs">
+                      {necessaryLabel}{' '}
+                      <Text as="span" fontSize="xs" color="fg.subtle">
+                        {necessaryHint}
+                      </Text>
+                    </Text>
+                  </Checkbox.Label>
+                </Checkbox.Root>
+
+                <Checkbox.Root
+                  checked={analytics}
+                  onCheckedChange={(e) => setAnalytics(!!e.checked)}
+                  colorPalette="brand"
                   size="sm"
-                  variant="ghost"
                   minH={{ base: '2.75rem', md: 'auto' }}
-                  onClick={() => setExpanded(true)}
+                  alignItems="center"
                 >
-                  {customizeButtonText}
+                  <Checkbox.HiddenInput ref={analyticsInputRef} />
+                  <Checkbox.Control />
+                  <Checkbox.Label>
+                    <Text as="span" fontSize="xs">
+                      {analyticsLabel}
+                    </Text>
+                  </Checkbox.Label>
+                </Checkbox.Root>
+
+                <Checkbox.Root
+                  checked={marketing}
+                  onCheckedChange={(e) => setMarketing(!!e.checked)}
+                  colorPalette="brand"
+                  size="sm"
+                  minH={{ base: '2.75rem', md: 'auto' }}
+                  alignItems="center"
+                >
+                  <Checkbox.HiddenInput />
+                  <Checkbox.Control />
+                  <Checkbox.Label>
+                    <Text as="span" fontSize="xs">
+                      {marketingLabel}
+                    </Text>
+                  </Checkbox.Label>
+                </Checkbox.Root>
+              </HStack>
+            )}
+
+            {expanded && (
+              <HStack gap={2} justify="flex-end">
+                <Button size="sm" variant="ghost" minH={{ base: '2.75rem', md: 'auto' }} onClick={handleSaveCustom}>
+                  {saveChoiceButtonText}
                 </Button>
                 <Button size="sm" colorPalette="brand" minH={{ base: '2.75rem', md: 'auto' }} onClick={handleAcceptAll}>
                   {acceptAllButtonText}
@@ -220,70 +306,8 @@ export function CookieBanner({
               </HStack>
             )}
           </Stack>
-
-          {expanded && (
-            <HStack gap={3} wrap="wrap">
-              <Checkbox.Root checked disabled colorPalette="brand" size="sm">
-                <Checkbox.HiddenInput />
-                <Checkbox.Control />
-                <Checkbox.Label>
-                  <Text as="span" fontSize="xs">
-                    {necessaryLabel}{' '}
-                    <Text as="span" fontSize="xs" color="fg.subtle">
-                      {necessaryHint}
-                    </Text>
-                  </Text>
-                </Checkbox.Label>
-              </Checkbox.Root>
-
-              <Checkbox.Root
-                checked={analytics}
-                onCheckedChange={(e) => setAnalytics(!!e.checked)}
-                colorPalette="brand"
-                size="sm"
-                minH={{ base: '2.75rem', md: 'auto' }}
-                alignItems="center"
-              >
-                <Checkbox.HiddenInput ref={analyticsInputRef} />
-                <Checkbox.Control />
-                <Checkbox.Label>
-                  <Text as="span" fontSize="xs">
-                    {analyticsLabel}
-                  </Text>
-                </Checkbox.Label>
-              </Checkbox.Root>
-
-              <Checkbox.Root
-                checked={marketing}
-                onCheckedChange={(e) => setMarketing(!!e.checked)}
-                colorPalette="brand"
-                size="sm"
-                minH={{ base: '2.75rem', md: 'auto' }}
-                alignItems="center"
-              >
-                <Checkbox.HiddenInput />
-                <Checkbox.Control />
-                <Checkbox.Label>
-                  <Text as="span" fontSize="xs">
-                    {marketingLabel}
-                  </Text>
-                </Checkbox.Label>
-              </Checkbox.Root>
-            </HStack>
-          )}
-
-          {expanded && (
-            <HStack gap={2} justify="flex-end">
-              <Button size="sm" variant="ghost" minH={{ base: '2.75rem', md: 'auto' }} onClick={handleSaveCustom}>
-                {saveChoiceButtonText}
-              </Button>
-              <Button size="sm" colorPalette="brand" minH={{ base: '2.75rem', md: 'auto' }} onClick={handleAcceptAll}>
-                {acceptAllButtonText}
-              </Button>
-            </HStack>
-          )}
-        </Stack>
-      </Container>
-    </Box>
+        </Container>
+      </Box>
+    </>
   )
 }
