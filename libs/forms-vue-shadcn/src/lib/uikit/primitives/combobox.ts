@@ -45,6 +45,8 @@ export interface RekaComboboxExtraProps<TNode = unknown, TData = unknown> {
   loadingText?: string
   loadErrorText?: string
   retryText?: string
+  /** `id` подсказки под полем (`dependsOn`, Этап 4d, §18) — в `aria-describedby` поля ввода, как у `select.ts` */
+  describedBy?: string
 }
 
 /**
@@ -108,6 +110,7 @@ const ComboboxImpl = defineComponent({
     loading: { type: Boolean, required: false, default: undefined },
     placeholder: { type: String, required: false, default: undefined },
     disabled: { type: Boolean, required: false, default: undefined },
+    describedBy: { type: String, required: false, default: undefined },
     onOpenChange: { type: Function as PropType<(open: boolean) => void>, required: false, default: undefined },
     // См. комментарий у `dataFieldName` в `select.ts` — Vue camel-изирует ключ пропа
     dataFieldName: { type: String, required: false, default: undefined },
@@ -174,6 +177,7 @@ const ComboboxImpl = defineComponent({
         loading,
         placeholder,
         disabled,
+        describedBy,
         onOpenChange,
         dataFieldName,
       } = props
@@ -204,6 +208,7 @@ const ComboboxImpl = defineComponent({
                   ref: inputRef,
                   'data-slot': 'combobox-input',
                   'data-field-name': dataFieldName,
+                  'aria-describedby': describedBy,
                   modelValue: inputValue,
                   'onUpdate:modelValue': (next: string) => onInputChange(next),
                   displayValue,
