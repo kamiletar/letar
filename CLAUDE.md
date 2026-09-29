@@ -205,7 +205,7 @@
 - [chakra-multi-system-ssr-barrel-trap](/.claude/docs/chakra-multi-system-ssr-barrel-trap.md) ⚠️ импорт из барреля с `createSystem()` роняет SSR
 - [chakra-strict-tokens-global-typegen](/.claude/docs/chakra-strict-tokens-global-typegen.md) ⚠️ `strictTokens` пишет типы в `node_modules` — не per-app флаг
 - [chakra-hover-condition-already-media-gated](/.claude/docs/chakra-hover-condition-already-media-gated.md) ⚠️ `_hover` уже в `@media (hover: hover)`, своя обёртка даёт 28 ошибок TS
-- [link-vs-button-navigation-convention](/.claude/docs/link-vs-button-navigation-convention.md) текст-ссылка только для чужих сайтов, свой маршрут — кнопка со стрелкой (`<a>` через `asChild`), состояния в URL
+- [link-vs-button-navigation-convention](/.claude/docs/link-vs-button-navigation-convention.md) чужой сайт — ссылка с ↗ (`OutboundLink`), свой маршрут — кнопка со стрелкой, внутри фразы — ссылка без иконки; состояния в URL
 - [interactive-press-feedback](/.claude/docs/interactive-press-feedback.md) ⚠️ `_active` со сжатием на 1% — состояние есть, глазу его нет
 - [press-scale-audit-task](/.claude/docs/press-scale-audit-task.md) общая формулировка задачи аудита `pressScale` — подключать ссылкой из `PLAN.md`
 - [chakra-layer-style-property-allowlist](/.claude/docs/chakra-layer-style-property-allowlist.md) ⚠️ `LayerStyleProperty` — закрытый список, TS2322 на каждой строке блока
