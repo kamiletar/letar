@@ -150,7 +150,7 @@ export function isAffectedSince(app: string, sinceSha: string): boolean {
     return true
   }
 
-  // Глобальный `nx`, НЕ `npx nx`/`bunx nx` — конвенция монорепо (CLAUDE.md, environment.md).
+  // Глобальный `nx`, НЕ `npx nx`/`bunx nx` — конвенция монорепо (AGENTS.md, environment.md).
   // `npx nx` здесь и было реальным багом (найден живым прогоном BlackCove, aprel8008,
   // 2026-08-09): на машине, где запущен deploy-mcp, `npx` резолвит nx иначе (или не резолвит
   // вовсе) — execFileSync бросает, isAffectedSince уходит в catch evaluateE2eGate,
