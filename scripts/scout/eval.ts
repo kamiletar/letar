@@ -31,6 +31,7 @@ import {
   formatQuery,
   fusedHits,
   hybridHits,
+  type IndexedCard,
   layoutHits,
   scout,
   type ScoutResult,
@@ -91,6 +92,8 @@ export interface Metrics {
   toolCases: number
   toolTop1: number
   toolShown: number
+  /** Среди случаев с советуемым эталоном: доля угаданных среди показанных инструментов */
+  toolPrecision: number
 }
 
 /** Доки справки в порядке очков: доки и ловушки вперемешку, как их ранжировал поиск */
@@ -101,9 +104,23 @@ function rankedPaths(result: ScoutResult): string[] {
 /** Поиск под замером: запрос → разложенная справка */
 export type Searcher = (query: string) => ScoutResult | Promise<ScoutResult>
 
+/** Инструменты, которые скаут вообще может советовать: скилы, команды и агенты без `scope` (не команды приложений и ролей) */
+export function advisableTools(cards: IndexedCard[]): Set<string> {
+  return new Set(
+    cards.filter((c) => (c.kind === 'skill' || c.kind === 'command' || c.kind === 'agent') && !c.scope).map((c) =>
+      c.title
+    ),
+  )
+}
+
+/**
+ * С `advisable` эталон инструментов сужается до советуемых: `end-session` и команды приложений
+ * скаут не советует по замыслу, и без фильтра они занижают top-1.
+ */
 export async function evaluate(
   search: Searcher,
   cases: EvalCase[],
+  advisable?: Set<string>,
 ): Promise<{ metrics: Metrics; perCase: Array<EvalCase & { got: string[]; tool?: string }> }> {
   let recall5 = 0
   let recall8 = 0
@@ -113,6 +130,8 @@ export async function evaluate(
   let toolCases = 0
   let toolTop1 = 0
   let toolShown = 0
+  let precisionShown = 0
+  let precisionHit = 0
   const perCase: Array<EvalCase & { got: string[]; tool?: string }> = []
   for (const c of cases) {
     const result = await search(c.query)
@@ -132,9 +151,15 @@ export async function evaluate(
       const rank = got.findIndex((p) => gold.has(p))
       mrr += rank === -1 ? 0 : 1 / (rank + 1)
     }
-    if (c.goldTools.length) {
+    const goldTools = advisable ? c.goldTools.filter((t) => advisable.has(t)) : c.goldTools
+    if (goldTools.length) {
       toolCases++
-      toolTop1 += tool && c.goldTools.includes(tool) ? 1 : 0
+      const hit = Boolean(tool && goldTools.includes(tool))
+      toolTop1 += hit ? 1 : 0
+      if (tool) {
+        precisionShown++
+        precisionHit += hit ? 1 : 0
+      }
     }
   }
   const avg = (x: number) => (docCases ? x / docCases : 0)
@@ -148,6 +173,7 @@ export async function evaluate(
       toolCases,
       toolTop1: toolCases ? toolTop1 / toolCases : 0,
       toolShown: cases.length ? toolShown / cases.length : 0,
+      toolPrecision: precisionShown ? precisionHit / precisionShown : 0,
     },
     perCase,
   }

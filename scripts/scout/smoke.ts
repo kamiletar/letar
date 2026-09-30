@@ -10,6 +10,8 @@
  *
  * Запуск: bun scripts/scout/smoke.ts
  */
+import { existsSync, readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { Bm25, buildIndex, collectCards, PATTERN_HINTS, scout } from '../../libs/scout/src/index'
 import { findRepoRoot } from './index-store'
 
@@ -45,8 +47,15 @@ const patterns = cards.filter((c) => c.kind === 'pattern')
 if (fields.length < 40) {
   problems.push(`карточек полей форм ${fields.length} — ждали ~60, разошёлся формат таблиц libs/forms/docs/fields.md`)
 }
-if (patterns.length < 10) {
-  problems.push(`паттернов форм ${patterns.length} — ждали ~14, разошёлся формат реестра form-mcp`)
+// Число паттернов сверяем точно: сколько ключей в реестре form-mcp, столько карточек
+const registryPath = join(root, 'libs/form-mcp/src/data/pattern-registry.ts')
+const registryCount = existsSync(registryPath)
+  ? (readFileSync(registryPath, 'utf8').match(/^ {4}name: /gm) ?? []).length
+  : 0
+if (patterns.length < 10 || patterns.length !== registryCount) {
+  problems.push(
+    `паттернов форм ${patterns.length}, в реестре form-mcp ${registryCount} — разошёлся формат реестра form-mcp`,
+  )
 }
 const unhinted = patterns.filter((c) => !PATTERN_HINTS[c.title]).map((c) => c.title)
 if (unhinted.length) {

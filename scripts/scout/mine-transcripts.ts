@@ -30,7 +30,7 @@ export interface SessionRecord {
   startedAt: string
   cwd: string
   entrypoint?: string
-  /** Команда, которой открыта сессия (`/aboi`), если была */
+  /** Команда, которой открыта сессия (`/<app>`), если была */
   command?: string
   task: string
   docsRead: DocRead[]

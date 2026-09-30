@@ -31,15 +31,15 @@ import {
   writeFileSync,
 } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { basename, join } from 'node:path'
 import { Bm25, formatBrief, type ScoutResult } from '../../libs/scout/src/index'
 import { arg, readJsonl } from './cli'
-import { type EvalCase, evaluate, type Metrics } from './eval'
+import { advisableTools, type EvalCase, evaluate, type Metrics } from './eval'
 import { type FormProbe, formsNegatives, scoreProbe } from './forms-eval'
 import { freshIndex, scoutQuery, type ScoutQueryResult } from './hook-core'
-import { findRepoRoot } from './index-store'
+import { findRepoRoot, indexPath } from './index-store'
 import { scoutDataDir, scoutHome } from './paths'
-import { loadDense } from './vectors'
+import { loadVectorStore } from './vectors'
 
 export type Suite = 'docs' | 'forms' | 'latency' | 'robust' | 'hook'
 const ALL_SUITES: Suite[] = ['docs', 'forms', 'latency', 'robust', 'hook']
@@ -131,6 +131,7 @@ const SUMMARY: Array<{ key: string; unit: Unit; journal?: boolean }> = [
   { key: 'p95 мс', unit: 'ms', journal: true },
   { key: 'устойчивость', unit: 'n', journal: true },
   { key: 'симв.', unit: 'n', journal: true },
+  { key: 'инстр. точн.', unit: 'pp', journal: true },
   { key: 'R@5 все', unit: 'pp' },
   { key: 'R@5 коротк.', unit: 'pp' },
   { key: 'R@8 все', unit: 'pp' },
@@ -197,7 +198,7 @@ async function runHook(root: string, home: string, runs: number): Promise<NonNul
   const times: number[] = []
   const problems: string[] = []
   try {
-    for (const f of ['index.json', 'vectors.json', 'vectors.f32']) {
+    for (const f of [basename(indexPath(home, root)), 'vectors.json', 'vectors.f32']) {
       if (existsSync(join(home, f))) {
         copyFileSync(join(home, f), join(tmp, f))
       }
@@ -272,9 +273,17 @@ function journalRow(run: BenchRun): string {
 
 function appendJournal(dir: string, run: BenchRun): void {
   const file = join(dir, 'journal.md')
+  const head = ['дата', 'метка', 'sha', ...SUMMARY.filter((s) => s.journal).map((s) => s.key)]
+  const headLines = [`| ${head.join(' | ')} |`, `| ${head.map(() => '---').join(' | ')} |`]
   if (!existsSync(file)) {
-    const head = ['дата', 'метка', 'sha', ...SUMMARY.filter((s) => s.journal).map((s) => s.key)]
-    writeFileSync(file, `| ${head.join(' | ')} |\n| ${head.map(() => '---').join(' | ')} |\n`)
+    writeFileSync(file, `${headLines.join('\n')}\n`)
+  } else {
+    // Колонки добавляются со временем: заголовок обновляем, старые строки не трогаем
+    const lines = readFileSync(file, 'utf8').split('\n')
+    if (lines[0] !== headLines[0]) {
+      lines.splice(0, 2, ...headLines)
+      writeFileSync(file, lines.join('\n'))
+    }
   }
   appendFileSync(file, journalRow(run))
 }
@@ -315,8 +324,9 @@ async function main() {
   const home = scoutHome()
   const dataDir = scoutDataDir()
   const engine = new Bm25(freshIndex(root, home))
-  const dense = loadDense(home) ?? null
-  const deps = { dense }
+  const store = loadVectorStore(home) ?? null
+  const deps = { store }
+  const advisable = advisableTools(engine.cards)
 
   // Кеш по тексту запроса: сьюты делят общие запросы и не гоняют эмбеддер дважды
   const cache = new Map<string, ScoutQueryResult>()
@@ -325,13 +335,13 @@ async function main() {
     if (hit) {
       return hit
     }
-    const r = await scoutQuery(engine, home, q, deps)
+    const r = await scoutQuery(engine, home, q, deps, root)
     cache.set(q, r)
     return r
   }
 
   // Прогрев: первый запрос платит за JIT и заодно показывает, отвечает ли эмбеддер
-  const warm = await scoutQuery(engine, home, 'сделай форму заявки с телефоном клиента', deps)
+  const warm = await scoutQuery(engine, home, 'сделай форму заявки с телефоном клиента', deps, root)
   const dirty = git(root, ['status', '--porcelain', '--', 'libs/scout', 'scripts/scout']).length > 0
   const now = new Date()
   const result: BenchRun = {
@@ -341,7 +351,7 @@ async function main() {
       gitSha: git(root, ['rev-parse', '--short', 'HEAD']),
       dirty,
       cards: engine.cards.length,
-      vectors: dense !== null,
+      vectors: store !== null,
       embedder: warm.forms === 'dense',
       suites,
     },
@@ -350,7 +360,7 @@ async function main() {
   const s = result.summary
   console.log(
     `== Окружение: ${result.env.gitSha}${dirty ? ' (есть правки)' : ''}, карточек ${result.env.cards}, векторы ${
-      dense ? 'есть' : 'нет'
+      store ? 'есть' : 'нет'
     }, эмбеддер ${result.env.embedder ? 'отвечает' : 'молчит'} ==`,
   )
 
@@ -377,14 +387,14 @@ async function main() {
     const out: DocsGroup[] = []
     console.log('\n== docs ==')
     for (const [group, list] of groups) {
-      const { metrics } = await evaluate(search, list)
+      const { metrics } = await evaluate(search, list, advisable)
       out.push({ group, ...metrics })
       console.log(
         `${group.padEnd(9)} n=${String(metrics.cases).padStart(3)}  R@5 ${pct(metrics.recall5).padStart(6)}  R@8 ${
           pct(metrics.recall8).padStart(6)
-        }  Hit@8 ${pct(metrics.hit8).padStart(6)}  MRR ${metrics.mrr.toFixed(3)}  инстр. top-1 ${
+        }  Hit@8 ${pct(metrics.hit8).padStart(6)}  MRR ${metrics.mrr.toFixed(3)}  инстр. top-1 (советуемые) ${
           pct(metrics.toolTop1)
-        } (${metrics.toolCases})`,
+        } (${metrics.toolCases}), точн. ${pct(metrics.toolPrecision)}`,
       )
     }
     const briefs = cases.map((c) => formatBrief(cache.get(c.query)!.result))
@@ -397,6 +407,7 @@ async function main() {
     s['R@5 test'] = g('test').recall5 * 100
     s['MRR'] = g('все').mrr
     s['инстр. top-1'] = g('все').toolTop1 * 100
+    s['инстр. точн.'] = g('все').toolPrecision * 100
     s['R@5 все'] = g('все').recall5 * 100
     s['R@5 коротк.'] = g('короткие').recall5 * 100
     s['R@8 все'] = g('все').recall8 * 100
@@ -495,7 +506,7 @@ async function main() {
     for (const c of ROBUST_CHECKS) {
       let ok = false
       try {
-        ok = c.check(await scoutQuery(engine, home, c.query, deps))
+        ok = c.check(await scoutQuery(engine, home, c.query, deps, root))
       } catch {
         ok = false
       }

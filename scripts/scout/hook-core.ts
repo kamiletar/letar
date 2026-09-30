@@ -1,11 +1,21 @@
+import { spawn } from 'node:child_process'
 import { createHash } from 'node:crypto'
-import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import {
+  appendFileSync,
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  renameSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from 'node:fs'
 import { join } from 'node:path'
 import {
   Bm25,
   buildIndex,
   collectCards,
-  type DenseIndex,
   embedTexts,
   formatBrief,
   formatOneLine,
@@ -17,7 +27,7 @@ import {
   type ScoutResult,
 } from '../../libs/scout/src/index'
 import { loadIndex, saveIndex, sourcesMtime } from './index-store'
-import { EMBED_URL, loadDense } from './vectors'
+import { EMBED_URL, loadVectorStore, type VectorStore } from './vectors'
 
 /** Режим доставки: `shadow` — только лог, `on` — справка всем, `ab` — половине сессий по хешу id */
 export type ScoutMode = 'shadow' | 'on' | 'ab'
@@ -107,19 +117,50 @@ export function readState(home: string, sessionId: string): SessionState {
   }
 }
 
+const DAY_MS = 24 * 60 * 60 * 1000
+/** Маркеры состояний сессий живут две недели */
+const STATE_TTL_MS = 14 * DAY_MS
+
+/** Не чаще раза в сутки удаляет `state/*.json` старше двух недель; ошибки глотает */
+function cleanupState(dir: string): void {
+  try {
+    const marker = join(dir, '.cleanup')
+    if (existsSync(marker) && Date.now() - statSync(marker).mtimeMs < DAY_MS) {
+      return
+    }
+    writeFileSync(marker, '')
+    for (const name of readdirSync(dir)) {
+      if (!name.endsWith('.json')) {
+        continue
+      }
+      try {
+        if (Date.now() - statSync(join(dir, name)).mtimeMs > STATE_TTL_MS) {
+          rmSync(join(dir, name), { force: true })
+        }
+      } catch {
+        // файл ушёл между readdir и stat
+      }
+    }
+  } catch {
+    // чистка — удобство, не повод падать
+  }
+}
+
 function writeState(home: string, sessionId: string, state: SessionState): void {
-  mkdirSync(join(home, 'state'), { recursive: true })
+  const dir = join(home, 'state')
+  mkdirSync(dir, { recursive: true })
   writeFileSync(statePath(home, sessionId), JSON.stringify(state))
+  cleanupState(dir)
 }
 
 /** Свежий индекс: пересобирается на месте, если доки новее (≈0,3 с), иначе читается с диска */
 export function freshIndex(root: string, home: string): ScoutIndex {
-  const current = loadIndex(home)
+  const current = loadIndex(home, root)
   if (current && Date.parse(current.builtAt) >= sourcesMtime(root)) {
     return current
   }
   const index = buildIndex(collectCards(root))
-  saveIndex(index, home)
+  saveIndex(index, home, root)
   return index
 }
 
@@ -133,12 +174,45 @@ export interface HookDeps {
   embedUrl?: string
   /** Сколько ждать эмбеддинг запроса; дольше — полка форм по BM25 */
   embedTimeoutMs?: number
-  /** Заранее загруженные векторы: `null` — «векторов нет», `undefined` — загрузить `loadDense(home)` */
-  dense?: DenseIndex | null
+  /** Заранее загруженные векторы: `null` — «векторов нет», `undefined` — загрузить `loadVectorStore(home)` */
+  store?: VectorStore | null
+}
+
+/**
+ * Сколько ждать эмбеддинг запроса. Бюджет хука 2,5 с, остальное занимает ≈0,2 с;
+ * после простоя первый ответ эмбеддера дольше 800 мс.
+ */
+export const EMBED_TIMEOUT_MS = 1500
+
+/** Не чаще раза в 10 минут просим фоновый пересчёт: маркер `state/refresh-requested` (по mtime) */
+const REFRESH_INTERVAL_MS = 10 * 60 * 1000
+
+/**
+ * Запустить `warmup.ts` отсоединённым процессом и сразу вернуться (индекс, прогрев эмбеддера, досчёт векторов).
+ * `force` — игнорировать маркер (прогрев на старте сессии).
+ */
+export function requestVectorRefresh(root: string, home: string, options: { force?: boolean } = {}): void {
+  try {
+    const marker = join(home, 'state', 'refresh-requested')
+    if (!options.force && existsSync(marker) && Date.now() - statSync(marker).mtimeMs < REFRESH_INTERVAL_MS) {
+      return
+    }
+    mkdirSync(join(home, 'state'), { recursive: true })
+    writeFileSync(marker, '')
+    spawn(process.execPath, [join(root, 'scripts/scout/warmup.ts')], {
+      cwd: root,
+      detached: true,
+      stdio: 'ignore',
+      windowsHide: true,
+      env: { ...process.env, SCOUT_HOME: home },
+    }).unref()
+  } catch {
+    // фоновое обновление — удобство, хук от него не зависит
+  }
 }
 
 /** Как построена полка форм: по эмбеддингам или откатом на BM25 и почему */
-export type FormsSource = 'dense' | 'no-vectors' | 'embed-down'
+export type FormsSource = 'dense' | 'no-vectors' | 'embed-down' | 'stale-vectors'
 
 /**
  * Косинусный рейтинг полей и паттернов. Доки ищет BM25: на реальных задачах гибрид его не обогнал
@@ -149,15 +223,27 @@ async function denseForms(
   home: string,
   query: string,
   deps: HookDeps,
+  root?: string,
 ): Promise<{ ranking?: FormRanking; source: FormsSource }> {
-  const dense = deps.dense === undefined ? loadDense(home) : deps.dense ?? undefined
-  if (!dense) {
+  const store = deps.store === undefined ? loadVectorStore(home) : deps.store ?? undefined
+  if (!store) {
     return { source: 'no-vectors' }
   }
+  // Векторы должны соответствовать текстам карточек полки; иначе ранжирование по ним врёт
+  const stale = engine.cards.some((c) =>
+    (c.kind === 'field' || c.kind === 'pattern') && store.hashById.get(c.id) !== c.embedHash
+  )
+  if (stale) {
+    if (root) {
+      requestVectorRefresh(root, home)
+    }
+    return { source: 'stale-vectors' }
+  }
+  const dense = store.dense
   try {
     const [vector] = await embedTexts([formatQuery(query)], {
       url: deps.embedUrl ?? EMBED_URL,
-      timeoutMs: deps.embedTimeoutMs ?? 800,
+      timeoutMs: deps.embedTimeoutMs ?? EMBED_TIMEOUT_MS,
     })
     return { ranking: formRanking(engine.cards, dense, vector), source: 'dense' }
   } catch {
@@ -177,9 +263,10 @@ export async function scoutQuery(
   home: string,
   query: string,
   deps: HookDeps = {},
+  root?: string,
 ): Promise<ScoutQueryResult> {
   const started = performance.now()
-  const forms = await denseForms(engine, home, query, deps)
+  const forms = await denseForms(engine, home, query, deps, root)
   // Карточки инструментов короткие и набирают меньше очков, чем доки, поэтому выдачу берём глубоко
   const result = layoutHits(engine.cards, engine.search(query, 500), query, { forms: forms.ranking })
   return { result, forms: forms.source, ms: performance.now() - started }
@@ -203,7 +290,7 @@ export async function runScoutHook(
     return {}
   }
   const engine = new Bm25(freshIndex(root, home))
-  const { result, forms } = await scoutQuery(engine, home, decision.query, deps)
+  const { result, forms } = await scoutQuery(engine, home, decision.query, deps, root)
   const brief = formatBrief(result)
   const line = formatOneLine(result)
   writeState(home, sessionId, { attempts: state.attempts + 1, briefed: Boolean(brief) })
@@ -237,10 +324,36 @@ export async function runScoutHook(
   return { output, log }
 }
 
-export function appendLog(home: string, log: Record<string, unknown>, file = 'briefs.jsonl'): void {
+/** Лог больше этого размера уходит в архив с отметкой времени */
+export const LOG_MAX_BYTES = 5 * 1024 * 1024
+
+function fileStamp(d = new Date()): string {
+  const p = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}${
+    p(d.getSeconds())
+  }`
+}
+
+export function appendLog(
+  home: string,
+  log: Record<string, unknown>,
+  file = 'briefs.jsonl',
+  maxBytes = LOG_MAX_BYTES,
+): void {
   const dir = join(home, 'logs')
   if (!existsSync(dir)) {
     mkdirSync(dir, { recursive: true })
   }
-  appendFileSync(join(dir, file), `${JSON.stringify(log)}\n`)
+  const path = join(dir, file)
+  try {
+    if (existsSync(path) && statSync(path).size > maxBytes) {
+      const dot = file.lastIndexOf('.')
+      const base = dot === -1 ? file : file.slice(0, dot)
+      const ext = dot === -1 ? '' : file.slice(dot)
+      renameSync(path, join(dir, `${base}-${fileStamp()}${ext}`))
+    }
+  } catch {
+    // не удалось ротировать — пишем в тот же файл
+  }
+  appendFileSync(path, `${JSON.stringify(log)}\n`)
 }

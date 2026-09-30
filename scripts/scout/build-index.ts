@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 /**
- * Сборка индекса скаута в `SCOUT_HOME/index.json`.
+ * Сборка индекса скаута в `SCOUT_HOME/index-<хеш корня>.json`.
  *
  * Запуск: bun scripts/scout/build-index.ts [--if-stale]
  * `--if-stale` — выйти сразу, если доки, правила, скилы, команды и агенты не менялись с прошлой сборки

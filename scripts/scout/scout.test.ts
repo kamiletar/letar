@@ -1,12 +1,14 @@
 import { describe, expect, it } from 'bun:test'
-import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { Bm25, buildIndex, collectCards, scout } from '../../libs/scout/src/index'
+import { Bm25, buildIndex, type Card, collectCards, DenseIndex, scout } from '../../libs/scout/src/index'
 import { splitOf } from './bench'
 import { buildCases } from './eval'
-import { abGroup, decide, MAX_ATTEMPTS, runScoutHook, scoutQuery } from './hook-core'
+import { abGroup, appendLog, decide, MAX_ATTEMPTS, runScoutHook, scoutQuery } from './hook-core'
+import { indexPath } from './index-store'
 import { mineSession, normalizeKnowledgePath, parseHumanText, type SessionRecord } from './mine-transcripts'
+import { EMBED_MODEL, loadVectorStore } from './vectors'
 
 describe('decide', () => {
   const fresh = { attempts: 0, briefed: false }
@@ -213,9 +215,69 @@ describe('scoutQuery', () => {
     )
     const engine = new Bm25(buildIndex(collectCards(root)))
     const query = 'форма отдаёт дату строкой'
-    const got = await scoutQuery(engine, mkdtempSync(join(tmpdir(), 'scout-home-')), query, { dense: null })
+    const got = await scoutQuery(engine, mkdtempSync(join(tmpdir(), 'scout-home-')), query, { store: null })
     expect(got.forms).toBe('no-vectors')
     expect(got.result.docs).toEqual(scout(engine, query).docs)
     expect(got.ms).toBeGreaterThanOrEqual(0)
+  })
+})
+
+describe('устойчивость хука', () => {
+  const fieldCard: Card = {
+    id: 'field:Form.Field.Phone',
+    kind: 'field',
+    path: 'libs/forms/docs/fields.md',
+    line: 1,
+    title: 'Form.Field.Phone',
+    summary: 'телефон',
+    fields: [{ text: 'телефон клиента', weight: 3 }],
+  }
+
+  it('векторы с чужим хешем поля → stale-vectors, без spawn при свежем маркере', async () => {
+    const home = mkdtempSync(join(tmpdir(), 'scout-home-'))
+    mkdirSync(join(home, 'state'), { recursive: true })
+    // Свежий маркер: requestVectorRefresh ничего не запускает
+    writeFileSync(join(home, 'state', 'refresh-requested'), '')
+    const engine = new Bm25(buildIndex([fieldCard]))
+    const store = {
+      dense: new DenseIndex([fieldCard.id], new Float32Array([1, 0]), 2),
+      hashById: new Map([[fieldCard.id, 'чужой-хеш']]),
+    }
+    const got = await scoutQuery(engine, home, 'форма с телефоном клиента', { store }, home)
+    expect(got.forms).toBe('stale-vectors')
+  })
+
+  it('loadVectorStore: чужая модель в meta → undefined, своя → хранилище', () => {
+    const home = mkdtempSync(join(tmpdir(), 'scout-home-'))
+    const write = (model: string) => {
+      writeFileSync(
+        join(home, 'vectors.json'),
+        JSON.stringify({ model, dims: 2, ids: ['a'], hashes: ['h'] }),
+      )
+      writeFileSync(join(home, 'vectors.f32'), Buffer.from(new Float32Array([1, 0]).buffer))
+    }
+    write('другая-модель')
+    expect(loadVectorStore(home)).toBeUndefined()
+    write(EMBED_MODEL)
+    expect(loadVectorStore(home)?.hashById.get('a')).toBe('h')
+  })
+
+  it('appendLog ротирует файл больше порога', () => {
+    const home = mkdtempSync(join(tmpdir(), 'scout-home-'))
+    appendLog(home, { n: 1 })
+    appendLog(home, { n: 2 }, 'briefs.jsonl', 5)
+    const files = readdirSync(join(home, 'logs'))
+    expect(files).toHaveLength(2)
+    const rotated = files.find((f) => f !== 'briefs.jsonl')
+    expect(rotated).toMatch(/^briefs-\d{8}-\d{6}\.jsonl$/)
+    expect(readFileSync(join(home, 'logs', 'briefs.jsonl'), 'utf8')).toBe('{"n":2}\n')
+    expect(existsSync(join(home, 'logs', rotated as string))).toBe(true)
+  })
+
+  it('indexPath: разный для разных корней, один для одного корня в разной записи', () => {
+    expect(indexPath('h', 'C:\\web\\a')).not.toBe(indexPath('h', 'C:\\web\\b'))
+    if (process.platform === 'win32') {
+      expect(indexPath('h', 'C:\\x')).toBe(indexPath('h', 'c:/x'))
+    }
   })
 })

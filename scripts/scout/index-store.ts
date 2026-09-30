@@ -1,10 +1,13 @@
+import { createHash } from 'node:crypto'
 import { existsSync, mkdirSync, readdirSync, readFileSync, renameSync, statSync, writeFileSync } from 'node:fs'
-import { dirname, join } from 'node:path'
+import { dirname, join, resolve } from 'node:path'
 import { buildIndex, collectCards, INDEX_VERSION, type ScoutIndex } from '../../libs/scout/src/index'
 import { scoutHome } from './paths'
 
-export function indexPath(home = scoutHome()): string {
-  return join(home, 'index.json')
+/** Индекс на корень: worktree и основной чекаут не затирают друг другу файл (`C:\x` и `c:/x` — один корень) */
+export function indexPath(home: string, root: string): string {
+  const key = resolve(root).replaceAll('\\', '/').toLowerCase()
+  return join(home, `index-${createHash('sha1').update(key).digest('hex').slice(0, 8)}.json`)
 }
 
 /** Корень репозитория: ближайший каталог вверх с `nx.json` и `.claude/` */
@@ -59,8 +62,8 @@ export function sourcesMtime(root: string): number {
   return latest
 }
 
-export function loadIndex(home = scoutHome()): ScoutIndex | undefined {
-  const path = indexPath(home)
+export function loadIndex(home: string, root: string): ScoutIndex | undefined {
+  const path = indexPath(home, root)
   if (!existsSync(path)) {
     return undefined
   }
@@ -73,8 +76,8 @@ export function loadIndex(home = scoutHome()): ScoutIndex | undefined {
 }
 
 /** Запись через временный файл и rename — хук никогда не прочитает половину индекса */
-export function saveIndex(index: ScoutIndex, home = scoutHome()): string {
-  const path = indexPath(home)
+export function saveIndex(index: ScoutIndex, home: string, root: string): string {
+  const path = indexPath(home, root)
   mkdirSync(home, { recursive: true })
   const tmp = `${path}.${process.pid}.tmp`
   writeFileSync(tmp, JSON.stringify(index))
@@ -94,12 +97,17 @@ export function rebuildIndex(root: string, options: { ifStale?: boolean; home?: 
   const home = options.home ?? scoutHome()
   const started = performance.now()
   if (options.ifStale) {
-    const current = loadIndex(home)
+    const current = loadIndex(home, root)
     if (current && Date.parse(current.builtAt) >= sourcesMtime(root)) {
-      return { rebuilt: false, cards: current.cards.length, ms: performance.now() - started, path: indexPath(home) }
+      return {
+        rebuilt: false,
+        cards: current.cards.length,
+        ms: performance.now() - started,
+        path: indexPath(home, root),
+      }
     }
   }
   const index = buildIndex(collectCards(root))
-  const path = saveIndex(index, home)
+  const path = saveIndex(index, home, root)
   return { rebuilt: true, cards: index.cards.length, ms: performance.now() - started, path }
 }
