@@ -16,7 +16,7 @@ try {
   const root = findRepoRoot(payload.cwd ?? process.cwd())
   if (root) {
     const home = scoutHome()
-    const { output, log } = runScoutHook(payload, root, home)
+    const { output, log } = await runScoutHook(payload, root, home)
     if (log) {
       appendLog(home, log)
     }

@@ -1,6 +1,6 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, renameSync, statSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
-import { buildIndex, collectCards, type ScoutIndex } from '../../libs/scout/src/index'
+import { buildIndex, collectCards, INDEX_VERSION, type ScoutIndex } from '../../libs/scout/src/index'
 import { scoutHome } from './paths'
 
 export function indexPath(home = scoutHome()): string {
@@ -31,7 +31,10 @@ export function sourcesMtime(root: string): number {
     }
   }
   touch(join(root, 'CLAUDE.md'))
-  for (const dir of ['.claude/docs', '.claude/rules', '.claude/commands', '.claude/agents']) {
+  // Справка по формам: README и реестр паттернов form-mcp — отдельными файлами, доки — каталогом
+  touch(join(root, 'libs/forms/README.md'))
+  touch(join(root, 'libs/form-mcp/src/data/pattern-registry.ts'))
+  for (const dir of ['.claude/docs', '.claude/rules', '.claude/commands', '.claude/agents', 'libs/forms/docs']) {
     const full = join(root, dir)
     if (existsSync(full)) {
       touch(full)
@@ -57,7 +60,7 @@ export function loadIndex(home = scoutHome()): ScoutIndex | undefined {
   }
   try {
     const index = JSON.parse(readFileSync(path, 'utf8')) as ScoutIndex
-    return index.version === 1 ? index : undefined
+    return index.version === INDEX_VERSION ? index : undefined
   } catch {
     return undefined
   }

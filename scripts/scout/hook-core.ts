@@ -5,12 +5,17 @@ import {
   Bm25,
   buildIndex,
   collectCards,
+  embedTexts,
   formatBrief,
   formatOneLine,
-  scout,
+  formatQuery,
+  type FormRanking,
+  formRanking,
+  layoutHits,
   type ScoutIndex,
 } from '../../libs/scout/src/index'
 import { loadIndex, saveIndex, sourcesMtime } from './index-store'
+import { EMBED_URL, loadDense } from './vectors'
 
 /** Режим доставки: `shadow` — только лог, `on` — справка всем, `ab` — половине сессий по хешу id */
 export type ScoutMode = 'shadow' | 'on' | 'ab'
@@ -122,8 +127,47 @@ export interface HookRun {
   log?: Record<string, unknown>
 }
 
+export interface HookDeps {
+  embedUrl?: string
+  /** Сколько ждать эмбеддинг запроса; дольше — полка форм по BM25 */
+  embedTimeoutMs?: number
+}
+
+/** Как построена полка форм: по эмбеддингам или откатом на BM25 и почему */
+export type FormsSource = 'dense' | 'no-vectors' | 'embed-down'
+
+/**
+ * Косинусный рейтинг полей и паттернов. Доки ищет BM25: на реальных задачах гибрид его не обогнал
+ * (R@5 68,6% против 69,8%), а на полке форм эмбеддинги дают +20 п.п. полноты (замер в local-scout.md).
+ */
+async function denseForms(
+  engine: Bm25,
+  home: string,
+  query: string,
+  deps: HookDeps,
+): Promise<{ ranking?: FormRanking; source: FormsSource }> {
+  const dense = loadDense(home)
+  if (!dense) {
+    return { source: 'no-vectors' }
+  }
+  try {
+    const [vector] = await embedTexts([formatQuery(query)], {
+      url: deps.embedUrl ?? EMBED_URL,
+      timeoutMs: deps.embedTimeoutMs ?? 800,
+    })
+    return { ranking: formRanking(engine.cards, dense, vector), source: 'dense' }
+  } catch {
+    return { source: 'embed-down' }
+  }
+}
+
 /** Один вызов UserPromptSubmit: решение, поиск, лог, вывод по режиму */
-export function runScoutHook(payload: HookPayload, root: string, home: string): HookRun {
+export async function runScoutHook(
+  payload: HookPayload,
+  root: string,
+  home: string,
+  deps: HookDeps = {},
+): Promise<HookRun> {
   const started = performance.now()
   const sessionId = payload.session_id ?? 'unknown'
   const state = readState(home, sessionId)
@@ -134,8 +178,10 @@ export function runScoutHook(payload: HookPayload, root: string, home: string): 
     }
     return {}
   }
-  const index = freshIndex(root, home)
-  const result = scout(new Bm25(index), decision.query)
+  const engine = new Bm25(freshIndex(root, home))
+  const forms = await denseForms(engine, home, decision.query, deps)
+  // Карточки инструментов короткие и набирают меньше очков, чем доки, поэтому выдачу берём глубоко
+  const result = layoutHits(engine.cards, engine.search(decision.query, 500), decision.query, { forms: forms.ranking })
   const brief = formatBrief(result)
   const line = formatOneLine(result)
   writeState(home, sessionId, { attempts: state.attempts + 1, briefed: Boolean(brief) })
@@ -153,6 +199,9 @@ export function runScoutHook(payload: HookPayload, root: string, home: string): 
     docs: result.docs.map((d) => `${d.path}:${d.line}`),
     traps: result.traps.map((d) => `${d.path}:${d.line}`),
     tool: result.tool ? `${result.tool.kind}:${result.tool.name}` : undefined,
+    fields: result.fields.map((f) => f.name),
+    pattern: result.pattern?.name,
+    forms: forms.source,
     scores: [...result.docs, ...result.traps].map((d) => Math.round(d.score * 10) / 10),
     chars: brief.length,
     ms: Math.round(performance.now() - started),

@@ -1,14 +1,16 @@
 #!/usr/bin/env bun
 /**
  * Дымовая проверка скаута: индекс собирается из текущего репо, разбор INDEX.md не сломан
- * сменой формата записей, три известных запроса находят свои доки.
+ * сменой формата записей, три известных запроса находят свои доки. Справка по формам: каталог
+ * полей `libs/forms/docs/fields.md` и реестр паттернов form-mcp разбираются, у каждого паттерна
+ * есть русская подсказка, BM25 находит поле по его русскому описанию.
  *
  * Не заменяет eval.ts (тот меряет качество на транскриптах и работает только на машине владельца):
  * ловит поломку разбора, после которой хук молча отдаёт пустые или мусорные справки.
  *
  * Запуск: bun scripts/scout/smoke.ts
  */
-import { Bm25, buildIndex, collectCards, scout } from '../../libs/scout/src/index'
+import { Bm25, buildIndex, collectCards, PATTERN_HINTS, scout } from '../../libs/scout/src/index'
 import { findRepoRoot } from './index-store'
 
 /** Запрос → док, который обязан попасть в справку. Доки публичные, запросы — реальные формулировки */
@@ -38,7 +40,31 @@ if (annotated / Math.max(docs.length, 1) < 0.8) {
 if (!cards.some((c) => c.kind === 'skill') || !cards.some((c) => c.kind === 'agent')) {
   problems.push('нет карточек скилов или субагентов — сломан разбор frontmatter')
 }
+const fields = cards.filter((c) => c.kind === 'field')
+const patterns = cards.filter((c) => c.kind === 'pattern')
+if (fields.length < 40) {
+  problems.push(`карточек полей форм ${fields.length} — ждали ~60, разошёлся формат таблиц libs/forms/docs/fields.md`)
+}
+if (patterns.length < 10) {
+  problems.push(`паттернов форм ${patterns.length} — ждали ~14, разошёлся формат реестра form-mcp`)
+}
+const unhinted = patterns.filter((c) => !PATTERN_HINTS[c.title]).map((c) => c.title)
+if (unhinted.length) {
+  problems.push(
+    `у паттернов нет русской подсказки в PATTERN_HINTS (libs/scout/src/lib/collect.ts): ${unhinted.join(', ')}`,
+  )
+}
 const engine = new Bm25(buildIndex(cards))
+const FIELD_PROBES: Array<[string, string]> = [
+  ['форма заявки с телефоном клиента', 'Form.Field.Phone'],
+  ['поле ИНН организации в форме', 'Form.Document.INN'],
+]
+for (const [query, expected] of FIELD_PROBES) {
+  const got = scout(engine, query).fields.map((f) => f.name)
+  if (!got.includes(expected)) {
+    problems.push(`«${query}» не дал поле ${expected}; полка: ${got.join(', ') || 'пусто'}`)
+  }
+}
 for (const [query, expected] of PROBES) {
   const result = scout(engine, query)
   const got = [...result.docs, ...result.traps].map((d) => d.path)
@@ -51,5 +77,7 @@ if (problems.length) {
   process.exit(1)
 }
 console.log(
-  `✓ скаут: ${cards.length} карточек, ${annotated}/${docs.length} доков с аннотацией, ${PROBES.length} проб прошли`,
+  `✓ скаут: ${cards.length} карточек, ${annotated}/${docs.length} доков с аннотацией, ${fields.length} полей и ${patterns.length} паттернов форм, ${
+    PROBES.length + FIELD_PROBES.length
+  } проб прошли`,
 )

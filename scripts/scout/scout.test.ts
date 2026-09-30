@@ -164,25 +164,26 @@ describe('runScoutHook', () => {
     return { root, home: mkdtempSync(join(tmpdir(), 'scout-home-')) }
   }
 
-  it('тень: справка считается и пишется в лог, агенту ничего не уходит', () => {
+  it('тень: справка считается и пишется в лог, агенту ничего не уходит', async () => {
     const { root, home } = fakeRepo()
     process.env.SCOUT_MODE = 'shadow'
-    const run = runScoutHook({ session_id: 'a', prompt: 'форма отдаёт дату строкой' }, root, home)
+    const run = await runScoutHook({ session_id: 'a', prompt: 'форма отдаёт дату строкой' }, root, home)
     expect(run.output).toBeUndefined()
-    expect(run.log).toMatchObject({ mode: 'shadow', shown: false })
+    // Векторов в SCOUT_HOME нет — полка форм откатывается на BM25 без сетевого вызова
+    expect(run.log).toMatchObject({ mode: 'shadow', shown: false, forms: 'no-vectors' })
     expect(String((run.log?.traps as string[] | undefined)?.[0])).toStartWith('.claude/docs/date-field.md:')
     expect(JSON.parse(readFileSync(join(home, 'state', 'a.json'), 'utf8'))).toEqual({ attempts: 1, briefed: true })
   })
 
-  it('режим on: additionalContext для агента и одна строка для владельца; повтор молчит', () => {
+  it('режим on: additionalContext для агента и одна строка для владельца; повтор молчит', async () => {
     const { root, home } = fakeRepo()
     process.env.SCOUT_MODE = 'on'
-    const first = runScoutHook({ session_id: 'b', prompt: 'форма отдаёт дату строкой' }, root, home)
+    const first = await runScoutHook({ session_id: 'b', prompt: 'форма отдаёт дату строкой' }, root, home)
     expect(first.output).toMatchObject({
       systemMessage: '🔎 скаут: 1 ловушка',
       hookSpecificOutput: { hookEventName: 'UserPromptSubmit' },
     })
-    expect(runScoutHook({ session_id: 'b', prompt: 'ещё про форму и дату строкой' }, root, home)).toEqual({})
+    expect(await runScoutHook({ session_id: 'b', prompt: 'ещё про форму и дату строкой' }, root, home)).toEqual({})
     delete process.env.SCOUT_MODE
   })
 })

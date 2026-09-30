@@ -12,14 +12,33 @@
  * ⚠️ Эталон смещён: агент читал то, что нашёл по карте в CLAUDE.md, а не всё, что было нужно.
  * Метрика меряет «догоняет ли скаут агента», а не абсолютную полноту.
  *
- * Запуск: bun scripts/scout/eval.ts [--sessions <jsonl>] [--min-task 15] [--show 5] [--out <cases.jsonl>]
+ * Бэкенды (`--backend`, по умолчанию все доступные): `bm25`; `dense` — только эмбеддинги;
+ * `hybrid` — BM25 + эмбеддинги через RRF; `rerank` — гибрид + реранкер. Без llama-server
+ * меряется только BM25. Отдельно печатается корзина коротких задач (< `--short` символов):
+ * на них BM25 слабее всего.
+ *
+ * Запуск: bun scripts/scout/eval.ts [--backend all|bm25|dense|hybrid|rerank] [--short 120]
+ *   [--sessions <jsonl>] [--min-task 15] [--show 5] [--out <cases.jsonl>]
  */
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { Bm25, buildIndex, collectCards, scout, type ScoutResult } from '../../libs/scout/src/index'
+import {
+  Bm25,
+  buildIndex,
+  collectCards,
+  type DenseIndex,
+  embedTexts,
+  formatQuery,
+  fusedHits,
+  hybridHits,
+  layoutHits,
+  scout,
+  type ScoutResult,
+} from '../../libs/scout/src/index'
 import { findRepoRoot } from './index-store'
 import type { SessionRecord } from './mine-transcripts'
 import { scoutDataDir } from './paths'
+import { EMBED_URL, loadDense, RERANK_URL } from './vectors'
 
 export interface EvalCase {
   sessionId: string
@@ -78,10 +97,13 @@ function rankedPaths(result: ScoutResult): string[] {
   return [...result.docs, ...result.traps].sort((a, b) => b.score - a.score).map((d) => d.path)
 }
 
-export function evaluate(
-  engine: Bm25,
+/** Поиск под замером: запрос → разложенная справка */
+export type Searcher = (query: string) => ScoutResult | Promise<ScoutResult>
+
+export async function evaluate(
+  search: Searcher,
   cases: EvalCase[],
-): { metrics: Metrics; perCase: Array<EvalCase & { got: string[]; tool?: string }> } {
+): Promise<{ metrics: Metrics; perCase: Array<EvalCase & { got: string[]; tool?: string }> }> {
   let recall5 = 0
   let recall8 = 0
   let hit8 = 0
@@ -92,7 +114,7 @@ export function evaluate(
   let toolShown = 0
   const perCase: Array<EvalCase & { got: string[]; tool?: string }> = []
   for (const c of cases) {
-    const result = scout(engine, c.query)
+    const result = await search(c.query)
     const got = rankedPaths(result)
     const tool = result.tool?.name
     if (tool) {
@@ -156,19 +178,30 @@ async function main() {
     JSON.parse(l) as SessionRecord
   )
   const cases = buildCases(sessions, knownPaths, knownTools, Number(arg('--min-task') ?? 15))
-  const { metrics, perCase } = evaluate(engine, cases)
+  const shortLimit = Number(arg('--short') ?? 120)
+  const shortCases = cases.filter((c) => c.query.length < shortLimit)
+  console.log(
+    `Сессий: ${sessions.length}, случаев: ${cases.length} (коротких < ${shortLimit} симв.: ${shortCases.length})`,
+  )
+  const backends = backendsFor(engine, arg('--backend') ?? 'all')
   const pct = (x: number) => `${(x * 100).toFixed(1)}%`
-  console.log(
-    `Сессий: ${sessions.length}, случаев: ${cases.length} (с доками ${metrics.cases}, с инструментом ${metrics.toolCases})`,
-  )
-  console.log(
-    `BM25  Recall@5 ${pct(metrics.recall5)}  Recall@8 ${pct(metrics.recall8)}  Hit@8 ${pct(metrics.hit8)}  MRR ${
-      metrics.mrr.toFixed(3)
-    }`,
-  )
-  console.log(
-    `Инструмент: top-1 ${pct(metrics.toolTop1)} из ${metrics.toolCases}; показан в ${pct(metrics.toolShown)} справок`,
-  )
+  const row = (name: string, m: Metrics) =>
+    `${name.padEnd(16)} R@5 ${pct(m.recall5).padStart(6)}  R@8 ${pct(m.recall8).padStart(6)}  Hit@8 ${
+      pct(m.hit8).padStart(6)
+    }  MRR ${m.mrr.toFixed(3)}  инстр. top-1 ${pct(m.toolTop1)} (${m.toolCases})`
+  let perCase: Array<EvalCase & { got: string[]; tool?: string }> = []
+  for (const [name, raw] of backends) {
+    // Короткие случаи — подмножество общих: второй прогон берёт готовый ответ из кеша
+    const cache = new Map<string, ScoutResult>()
+    const search: Searcher = async (q) => cache.get(q) ?? cache.set(q, await raw(q)).get(q)!
+    const started = performance.now()
+    const all = await evaluate(search, cases)
+    const ms = (performance.now() - started) / cases.length
+    const short = await evaluate(search, shortCases)
+    console.log(`${row(name, all.metrics)}  ${ms.toFixed(0)} мс/запрос`)
+    console.log(row(`  короткие`, short.metrics))
+    perCase = all.perCase
+  }
   const out = arg('--out')
   if (out) {
     writeFileSync(out, perCase.map((c) => JSON.stringify(c)).join('\n') + '\n')
@@ -184,6 +217,44 @@ async function main() {
       }`,
     )
   }
+}
+
+/** Доступные бэкенды: без векторов или серверов остаётся только BM25 */
+export function backendsFor(engine: Bm25, wanted: string): Array<[string, Searcher]> {
+  const dense: DenseIndex | undefined = loadDense()
+  const embed = { url: EMBED_URL, timeoutMs: 10_000 }
+  const rerank = { url: RERANK_URL, timeoutMs: 30_000 }
+  const all: Array<[string, Searcher | undefined]> = [
+    ['bm25', (q) => scout(engine, q)],
+    [
+      'dense',
+      dense
+      && (async (q) => {
+        const [vector] = await embedTexts([formatQuery(q)], embed)
+        const ranked = new Map(dense.search(vector, 500).map((d) => [d.id, d.score]))
+        return layoutHits(engine.cards, fusedHits(engine.cards, ranked, ranked.size), q)
+      }),
+    ],
+    [
+      'hybrid',
+      dense && (async (q) => {
+        const { hits, forms } = await hybridHits(engine, q, { dense, embed })
+        return layoutHits(engine.cards, hits, q, { forms })
+      }),
+    ],
+    [
+      'rerank',
+      dense
+      && (async (q) => {
+        const { hits, forms } = await hybridHits(engine, q, { dense, embed, rerank })
+        return layoutHits(engine.cards, hits, q, { forms })
+      }),
+    ],
+  ]
+  if (!dense) {
+    console.log('Векторов нет (bun scripts/scout/vectors.ts) — меряю только BM25')
+  }
+  return all.filter((b): b is [string, Searcher] => Boolean(b[1]) && (wanted === 'all' || wanted === b[0]))
 }
 
 if (import.meta.main) {
