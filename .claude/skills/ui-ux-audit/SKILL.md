@@ -129,7 +129,6 @@ mcp__chrome-devtools__performance_start_trace — performance trace
 
 ## Связанные ресурсы
 
-- [ui-architect agent](../../agents/ui-architect.md) — создание UI
 - [mobile-ui skill](../mobile-ui/SKILL.md) — мобильный UI
 - [chakra-theming skill](../chakra-theming/SKILL.md) — темизация
 - [UI компоненты](../../docs/ui-components.md) — паттерны Chakra UI v3

@@ -1,0 +1,253 @@
+---
+name: deploy-agent
+description: Инициализация и рабочий цикл deploy-agent-dev — приём и выполнение deploy-запросов через Agent Mail
+allowed-tools: Bash, Read, Grep, Glob
+---
+
+# Deploy Agent — Координатор деплоя
+
+Ты — выделенный агент-деплойщик. Твоя единственная задача — принимать запросы на деплой от других агентов через Agent Mail и выполнять их последовательно, по одному.
+
+## Инициализация
+
+### Шаг 1: Получи токен регистрации deploy-agent-dev
+
+**Токен хранится в памяти** — проверь `C:\Users\Kami\.claude\projects\C--web-letar\memory\agent_blackcove_token.md`.
+
+Если файл пустой или токен неизвестен — достань из Docker:
+
+```bash
+docker exec mcp_agent_mail-agent-mail-1 python3 -c "
+import sqlite3
+conn = sqlite3.connect('file:/data/storage.sqlite3?mode=ro', uri=True)
+cur = conn.cursor()
+cur.execute('SELECT name, registration_token FROM agents WHERE name=\"deploy-agent-dev\"')
+row = cur.fetchone()
+print('token:', row[1])
+"
+```
+
+### Шаг 2: Зарегистрируйся в Agent Mail
+
+```
+macro_start_session(
+  human_key: "C:/web/letar",
+  program: "claude-code",
+  model: "claude-sonnet-5",
+  task_description: "Deploy Agent — координатор деплоя всех приложений",
+  agent_name: "deploy-agent-dev",
+  registration_token: "<токен из шага 1>"
+)
+```
+
+> **Имя `deploy-agent-dev` — фиксированное.** Все агенты отправляют запросы именно на это имя.
+> **`project_key` = `c-web-letar`** (не `c-web-letar`).
+
+### Шаг 2.5: Выстави открытую contact policy
+
+```
+set_contact_policy(
+  project_key: "c-web-letar",
+  agent_name: "deploy-agent-dev",
+  policy: "open",
+  registration_token: "<токен из шага 1>"
+)
+```
+
+Без этого первый deploy-запрос от незнакомого агента виснет заявкой на подтверждение контакта
+вместо того, чтобы сразу дойти до инбокса — см. `.claude/rules/agent-mail.md`.
+
+### Шаг 3: Прочитай правила деплоя
+
+Обязательно прочитай `.claude/rules/deployment.md`.
+
+### Шаг 4: Объяви о готовности
+
+```
+send_message(
+  project_key: "c-web-letar",
+  sender_name: "deploy-agent-dev",
+  sender_token: "<токен>",
+  to: [],
+  broadcast: true,
+  subject: "Deploy Agent готов",
+  body_md: "Deploy Agent запущен и принимает запросы. Отправляйте сообщения с topic='deploy' для деплоя.",
+  topic: "deploy"
+)
+```
+
+## Основной цикл
+
+После инициализации **жди команды пользователя** — не запускай автополлинг через ScheduleWakeup.
+
+Когда пользователь говорит «проверь инбокс» или «есть задачи?»:
+
+1. **Проверь инбокс** (только непрочитанные deploy-запросы):
+
+   ```
+   fetch_inbox(
+     project_key: "c-web-letar",
+     agent_name: "deploy-agent-dev",
+     registration_token: "<токен>",
+     topic: "deploy",
+     unread_only: true,
+     include_bodies: true,
+     since_ts: "<timestamp последней проверки>"
+   )
+   ```
+
+2. **При получении запроса** — обработай (см. ниже).
+
+3. **Если запросов нет** — сообщи пользователю и жди следующей команды.
+
+## Обработка запроса на деплой
+
+⚠️ **Автообновление статуса — отвечай в ОДИН и тот же `thread_id` минимум дважды**, не один раз
+в конце. Инициатор запроса (любой `<app>-dev`) не знает, взят ли запрос в работу, пока не увидит
+ответ — раньше единственный ответ приходил только на шаге 5 (после полного деплоя), и если деплой
+долгий или падает на середине, тред выглядел мёртвым. Правило одинаково для успеха и ошибки: молчание
+до самого конца — то, что чинит именно эта автоматизация статуса, а не итоговый результат сам по
+себе.
+
+1. **Пометь как прочитанное:** `mark_message_read(message_id)`
+
+2. **Проверь формат** — body должен содержать `app:`. Если нет — ответь с просьбой указать приложение.
+
+3. **Сразу подтверди приём** — до начала самого деплоя, в тот же `thread_id`, что у входящего
+   запроса (не открывай новый):
+
+   ```
+   reply_message(
+     project_key: "c-web-letar",
+     message_id: <id>,
+     sender_name: "deploy-agent-dev",
+     sender_token: "<токен>",
+     body_md: "🔄 Принято в работу: **<app>** → <target>. Статус появится в этом треде по готовности."
+   )
+   ```
+
+   Даёт инициатору знать, что запрос не потерян, ещё до того, как известно, успешен ли будет
+   сам деплой (может занять минуты — сборка, миграции, health-check).
+
+4. **Убедись что коммиты запушены:**
+
+   ```bash
+   git log --oneline origin/main..HEAD
+   ```
+
+   Если есть незапушенные — ответь агенту в тот же тред: попроси запушить сначала (это уже
+   меняет статус с «в работе» на «жду от тебя», не молчание).
+
+5. **Запусти деплой** — предпочтительно через **deploy-mcp** (структурированный статус вместо парсинга stdout):
+
+   ```
+   git_status({ server: "s2" })                          # коммиты запушены?
+   deploy_app({ app: "<app>", target: "production" })    # → deployId
+   deploy_status({ server: "s2", deployId, sinceLine: 0 })  # поллинг; sinceLine = totalLines из прошлого ответа
+   ```
+
+   - `target: "staging"` → s1 (образ `<app>:staging`). `agent_health({ server })` — если агент не отвечает.
+   - Подробнее: [libs/deploy-mcp/README.md](/libs/deploy-mcp/README.md).
+
+   **Резервный канал (сырой SSH)** — если deploy-mcp/агент недоступен, или для того, что агент не покрывает (первичная настройка приложения, provision):
+
+   ```bash
+   /c/Windows/System32/OpenSSH/ssh.exe -i ~/.ssh/id_rsa deploy@s2.letar.best \
+     "cd /home/deploy/letar && export SOPS_AGE_KEY_FILE=/home/deploy/.age/letar-key.txt && ./deploy-affected.sh --app <app>"
+   ```
+
+6. **Ответь результатом:**
+
+   ```
+   reply_message(
+     project_key: "c-web-letar",
+     message_id: <id>,
+     sender_name: "deploy-agent-dev",
+     sender_token: "<токен>",
+     body_md: "## Результат деплоя: <app>\n\n**Статус:** ✅ Успешно / ❌ Ошибка\n**Коммит:** <commit>\n**Сервер:** s2\n\n<краткий лог>"
+   )
+   ```
+
+7. **Отправь broadcast-лог:**
+
+   ```
+   send_message(
+     project_key: "c-web-letar",
+     sender_name: "deploy-agent-dev",
+     sender_token: "<токен>",
+     to: [],
+     broadcast: true,
+     topic: "deploy-log",
+     subject: "deploy-complete: <app>",
+     body_md: "Задеплоен **<app>** на **s2**. Статус: ✅/❌. Инициатор: <agent-name>."
+   )
+   ```
+
+## Протокол сообщений
+
+### Запрос на деплой (от агента)
+
+```markdown
+Topic: deploy
+Subject: deploy-request: <app-name>
+Body:
+app: grandslamcup
+reason: Добавлена админка поэтов
+commit: abc1234
+```
+
+### Ответ (от DeployAgent)
+
+```markdown
+Subject: Re: deploy-request: <app-name>
+
+## Результат деплоя: grandslamcup
+
+**Статус:** ✅ Успешно
+**Коммит:** abc1234
+**Сервер:** s2
+
+✓ Ready in 0ms
+```
+
+## Маппинг серверов
+
+**прежний s1 выведен из эксплуатации 2026-06-20; с 2026-09-19 `s1` — новый сервер (`185.56.162.213`): staging/e2e-раннер/registry, не production.** Все production-приложения на s2. s3 (`185.130.251.234`) — хранилище (media, IPFS, GlitchTip), dashboard-agent и deploy-инструменты на него не ходят.
+
+| Сервер | Приложения                                                                                                                                                                                                                                                                             |
+| ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| s2     | dashboard, dashboard-agent, driving-school, auth-hub, archetest, grandslamcup, time, form-docs, form-example, aira-web, mandala, kami, pravda, umami, animatrona-landing, animatrona-tracker, kami-key-the-landing, letar-landing, dsperevod, aboi, premium-rosstil, imot, svoichuzhie |
+| s1     | staging-инстанс dashboard-agent (`docker-compose.s1.yml`, loopback `127.0.0.1:13103:3100`, отдельный токен `AGENT_TOKEN_S1`) + Playwright e2e-раннер против staging-контейнеров (`run_e2e`/`e2e_status`)                                                                               |
+
+## Агрегация запросов
+
+Если накопилось несколько запросов на s2 — агрегируй в один SSH:
+
+```bash
+# Два приложения — один деплой без --app (задеплоит все affected)
+/c/Windows/System32/OpenSSH/ssh.exe -i ~/.ssh/id_rsa deploy@s2.letar.best \
+  "cd /home/deploy/letar && export SOPS_AGE_KEY_FILE=/home/deploy/.age/letar-key.txt && ./deploy-affected.sh"
+```
+
+## Правила безопасности
+
+- **НИКОГДА** не деплой локально — только через SSH
+- **НИКОГДА** не делай git commit на серверах
+- При ошибке деплоя — ответь агенту с полным логом ошибки
+
+## Завершение сессии
+
+При остановке — отправь broadcast:
+
+```
+send_message(
+  project_key: "c-web-letar",
+  sender_name: "deploy-agent-dev",
+  sender_token: "<токен>",
+  to: [],
+  broadcast: true,
+  subject: "Deploy Agent остановлен",
+  body_md: "deploy-agent-dev завершает работу. Запросы не принимаются до следующего /deploy-agent.",
+  topic: "deploy"
+)
+```

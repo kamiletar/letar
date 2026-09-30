@@ -1,12 +1,9 @@
 ---
 name: form-pipeline
 description: |
-  Полный цикл создания форм с @letar/forms. Используй при:
-  - Создании CRUD форм (create/edit)
-  - Добавлении полей к формам
-  - Настройке валидации Zod v4
-  - Интеграции с Server Actions
-  - Работе с FormGroup, ChakraFormField
+  Формы на @letar/forms: createForm-инстанс приложения, Field.*, FormGroup, Zod v4, server action,
+  генерация схем из @meta("form.*"). Загружай ДО создания или правки любой формы и когда дропдаун пуст,
+  подсказки английские, ошибка не видна на скрытой вкладке, Field.Date приходит строкой.
 ---
 
 # Form Pipeline
@@ -55,3 +52,10 @@ import { Form } from '@letar/forms'
 ## Связанный Skill
 
 - `zenstack-helper` — @meta("form.\*", value) директивы, генерация схем
+
+## Чеклист
+
+- [ ] `@meta("form.*", value)` в `schema.zmodel` → `nx zenstack:generate <app>`
+- [ ] Компонент на сгенерированной схеме через `createForm`-инстанс приложения
+- [ ] Server action: вход через Zod с `.strip()`, ошибки полей — в `errorMap.onServer`, `revalidatePath` после мутации
+- [ ] Футер — `FormActions`, ошибки видны пользователю (в том числе на скрытой вкладке)

@@ -1,13 +1,11 @@
 ---
 name: zenstack-helper
 description: |
-  Помощник по ZenStack schema.zmodel (v3.3.0+). Используй при:
-  - Редактировании моделей БД (schema.zmodel)
-  - Добавлении @meta("form.*", value) директив для генерации форм
-  - Настройке access control policies (@@allow/@@deny на уровне модели, @allow/@deny на уровне поля)
-  - Работе с отношениями между моделями
-  - Custom Procedures для кастомной логики
-  - Миграциях базы данных
+  Схема БД на ZenStack v3: правка schema.zmodel, relations, политики @@allow/@@deny и полевые @allow/@deny,
+  @meta("form.*") для форм, custom procedures, миграции. Загружай ДО первой правки *.zmodel и когда
+  политика отказывает на записи, поле relation тихо приходит null, падает zenstack:generate или TS2321.
+paths:
+  - "**/*.zmodel"
 ---
 
 # ZenStack Helper
@@ -57,3 +55,13 @@ description: |
 - Используется собственный плагин `@letar/zenstack-form-plugin`, НЕ `@core/zod`
 - Генерируется только `form-schemas/`, папки `zod/` нет
 - При пересборке плагина: `nx build zenstack-form-plugin --skip-nx-cache`
+
+## Чеклист перед коммитом схемы
+
+- [ ] Model-level `@@allow` настроены; сужение прав — только `@deny` (полевой `@allow` права **добавляет**)
+- [ ] Роли в `requireRole` не шире `@@allow` модели; политика по relation учитывает переставленный FK —
+      три ловушки: [security.md](/.claude/rules/security.md)
+- [ ] Relations и индексы на часто фильтруемых полях; нет N+1 (`include`/`select`)
+- [ ] `@meta("form.*", value)` для полей форм
+- [ ] `nx zenstack:generate <app>`, для прода — файл миграции (`nx db:migrate <app>`)
+- [ ] Zod-схемы входа — с `.strip()`
