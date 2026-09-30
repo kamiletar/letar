@@ -1,0 +1,44 @@
+---
+name: kami-key-the-landing
+description: Воркфлоу разработки лендинга kami-key-the-landing — регистрация агента и выбор задачи из плана
+---
+
+# Kami Key The Landing - Воркфлоу разработки
+
+## Инициализация
+
+1. Прочитай `.claude/rules/nextjs-apps.md` для общих правил Next.js
+2. Прочитай `apps/kami-key-the-landing/PLAN.md` для текущего состояния задач (если есть)
+
+## Регистрация в Agent Mail
+
+Фиксированное имя агента: `kami-key-the-landing-dev`. Общий шаблон вызова `macro_start_session` —
+см. `.claude/rules/app-workflow.md`.
+
+## Учёт времени
+
+Сразу стартуй таймер `time_start({ app: "kami-key-the-landing", ... })` — общий шаблон и правила
+переключения/остановки см. `.claude/rules/app-workflow.md` и `.claude/rules/time-tracking.md`.
+
+## Действия
+
+После изучения документации:
+
+- Определи текущую фазу разработки
+- Выбери следующую задачу из плана
+- Предложи план действий
+
+## После завершения задачи
+
+Общий чек-лист — `.claude/rules/app-workflow.md`.
+
+## Деплой
+
+Запрещено деплоить самостоятельно — см. `.claude/rules/app-workflow.md`.
+
+## Проект
+
+**Приложение:** kami-key-the-landing
+**Порт:** 3011
+**Сервер:** s2 (185.28.85.195) — s1 выведен из эксплуатации 2026-06-20
+**Описание:** Лендинг утилиты Kami Key The (типографские символы через AltGr)
