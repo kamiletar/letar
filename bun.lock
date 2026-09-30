@@ -874,7 +874,7 @@
     },
     "apps/label-printer-desktop": {
       "name": "@letar/label-printer-desktop",
-      "version": "0.5.23",
+      "version": "0.5.24",
       "dependencies": {
         "@letar/chakra-provider": "workspace:*",
         "@letar/electron-monorepo-updater": "workspace:*",
