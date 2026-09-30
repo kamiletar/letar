@@ -1,6 +1,7 @@
 import { splitOf } from '../cli'
 import { advisableTools, type EvalCase, evaluateTools, type ToolMetrics, toolRanking } from '../eval'
 import { loadToolGold } from '../tool-gold'
+import { runToolVariants, type ToolVariantsResult } from './tool-variants'
 import type { Suite } from './types'
 import { EMPTY, pct } from './util'
 
@@ -10,6 +11,8 @@ export interface ToolsResult {
   toolMismatch: number
   /** Задач с непустым эталоном судьи */
   goldCases: number
+  /** Эксперимент Э2.3 (`--tool-variants`) */
+  variants?: ToolVariantsResult
 }
 
 /**
@@ -17,7 +20,8 @@ export interface ToolsResult {
  * эталоном, ложный совет — на пустых. Ранкер — порядок карточек инструментов в BM25-выдаче, как
  * `layoutHits` выбирает `tool`. Чужой поиск подставляется другим `rank` в `evaluateTools`.
  */
-export const toolsSuite: Suite = async ({ engine, cases, run, dataDir }) => {
+export const toolsSuite: Suite = async (ctx) => {
+  const { engine, cases, run, dataDir } = ctx
   const goldRows = loadToolGold(dataDir)
   if (!cases.length || !goldRows.length) {
     console.log('\n== tools == нет tool-gold.jsonl или eval-cases.jsonl — пропущен (bun scripts/scout/tool-gold.ts)')
@@ -62,5 +66,12 @@ export const toolsSuite: Suite = async ({ engine, cases, run, dataDir }) => {
     'инстр. ложный': g('все').falseAdvice * 100,
   }
   const result: ToolsResult = { groups: out, toolMismatch, goldCases: g('все').goldCases }
+  if (ctx.flags.toolVariants) {
+    const variants = await runToolVariants(ctx, gold, advisable)
+    if (variants) {
+      Object.assign(s, variants.summary)
+      result.variants = variants.result
+    }
+  }
   return { summary: s, result }
 }

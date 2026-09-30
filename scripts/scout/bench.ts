@@ -84,12 +84,12 @@ function git(root: string, args: string[]): string {
 }
 
 const USAGE = `Запуск: bun scripts/scout/bench.ts [--label <имя>] [--suite ${ALL_SUITES.join(',')}]
-  [--hook-runs 5] [--compare <путь к json | last>] [--no-phrases] [--help]`
+  [--hook-runs 5] [--compare <путь к json | last>] [--no-phrases] [--tool-variants] [--help]`
 
 /** Флаги со значением и без; неизвестный флаг — ошибка (код 2), `--help` — справка */
 function checkArgs(argv: string[]): void {
   const withValue = new Set(['--label', '--suite', '--hook-runs', '--compare'])
-  const bare = new Set(['--no-phrases', '--help'])
+  const bare = new Set(['--no-phrases', '--tool-variants', '--help'])
   if (argv.includes('--help')) {
     console.log(USAGE)
     process.exit(0)
@@ -185,7 +185,7 @@ async function main() {
     run,
     cached: (q: string) => cache.get(q),
     cases,
-    flags: { noPhrases },
+    flags: { noPhrases, toolVariants: process.argv.includes('--tool-variants') },
   }
   // Порядок запуска — как в реестре, а не как в `--suite`
   for (const name of (Object.keys(SUITES) as SuiteName[]).filter((n) => suites.includes(n))) {

@@ -14,7 +14,7 @@ export interface SuiteContext {
   /** Уже посчитанный через `run` результат без запуска (для `latency` и `docs`, которым нужен кеш) */
   cached: (query: string) => ScoutQueryResult | undefined
   cases: EvalCase[]
-  flags: { noPhrases: boolean }
+  flags: { noPhrases: boolean; toolVariants?: boolean }
 }
 
 export interface SuiteOutput {
