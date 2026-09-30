@@ -1,39 +1,35 @@
 # @letar/forms-shadcn
 
 shadcn/ui-скин `@letar/forms` — beta, реализация `UIKit`-контракта из `@letar/forms-core` на
-прямых Radix-примитивах + `cva`/`tailwind-merge` (не `shadcn` CLI — обоснование в
-[libs/forms/PLAN.md](../forms/PLAN.md), Фаза 7.3, Шаг 5).
+прямых Radix-примитивах + `cva`/`tailwind-merge` (не `shadcn` CLI).
 
 Композиционный слой (`createField`, `FieldWrapper`, `FieldErrorBoundary`) не отличается от
 Chakra-скина — оба используют `createFieldPrimitives` из `@letar/forms-react`, каждый со своей
 реализацией `UIKit`. Ни `forms-core`, ни `forms-react` не потребовалось менять при подключении
-второй реализации — это и есть проверка архитектуры Фазы 7.1/7.3.
+второй реализации — это и есть проверка архитектуры.
 
 ## Требования потребителя
 
 Tailwind 4 в приложении (сканирование контента через `@source`) — скин не самодостаточен без
-него. Для приложений монорепо (все на Chakra) это не актуально: пакет предназначен для внешней
-OSS-аудитории.
+него.
 
 ## CSS-переменные для потребителей
 
 `shadcnUIKit` рассчитан на набор CSS-переменных shadcn/ui (`--background`, `--foreground`,
 `--border`, `--input`, `--ring`, `--primary`, `--secondary`, `--muted`, `--accent`,
 `--destructive`, `--popover`, `--card` и их `-foreground`-пары, light/dark через `oklch`) —
-пакет их не определяет сам, только потребляет через `@theme inline`. Референс-реализация —
-[`apps/form-develop-app-shadcn/src/app/globals.css`](../../apps/form-develop-app-shadcn/src/app/globals.css),
-единственный текущий потребитель (Шаг 5 Фазы 7.3, [PLAN.md](../forms/PLAN.md)).
-
-⚠️ **Пока потребитель один — CSS не выносится в библиотеку** (это была бы преждевременная
-абстракция без второго примера использования). Как только появится второй потребитель (Vue-пруф
-Фазы 7.8, showcase-приложение для shadcn-скина и т.п.) — вынести этот набор переменных как
-готовый файл для подключения, например экспортируемый как `@letar/forms-shadcn/styles.css` через
-`exports` в `package.json`. Chakra-версии (`@letar/forms`) этот шаг не нужен — там тема часть
-Chakra-провайдера, а не отдельный статический CSS.
+пакет их не определяет сам, только потребляет через `@theme inline`. Набор стандартный для shadcn/ui: подойдёт `globals.css`,
+сгенерированный `shadcn` CLI для вашего проекта с Tailwind 4.
 
 ## Установка
 
-Библиотека уже включена в монорепозиторий.
+```bash
+npm i @letar/forms-shadcn@beta @letar/forms-core @letar/forms-react @tanstack/react-form react zod class-variance-authority clsx tailwind-merge @radix-ui/react-label
+```
+
+Требуются peer `@letar/forms-core` (>=0.28.0 <1) и `@letar/forms-react` (>=0.26.0 <1). Остальные `@radix-ui/*`-примитивы (по полям),
+`lucide-react`, `@tanstack/react-table` (>=9 <10) и `@tiptap/*` (для `FieldRichText`) — peer-зависимости
+по мере использования соответствующих полей; их список — в `peerDependencies` пакета.
 
 ```tsx
 import {
@@ -90,7 +86,7 @@ import {
 Плюс `FormSteps` и `FieldTableEditor` — compound-компоненты форм-уровня, не `createField()`-поля
 (см. разделы ниже).
 
-**Паритет закрыт (Фаза 8, Этап 6, 2026-08-12).** Девять полей (`FieldMaskedInput`,
+**Паритет с Chakra-скином закрыт.** Девять полей (`FieldMaskedInput`,
 `FieldCreditCard`, `FieldINN`, `FieldKPP`, `FieldOGRN`, `FieldSNILS`, `FieldPassport`, `FieldBIK`,
 `FieldBankAccount`/`FieldCorrAccount`) до этого оставались в backlog — Chakra-версия использовала
 `use-mask-input` (WebKit-баг, мутация DOM в обход React, поймано на `FieldPhone`), тащить ту же
@@ -267,10 +263,6 @@ Zod-тип (string/number/boolean/date/enum) определяет поле, то
 `special`). Полоса прогресса — свой `<div>` с шириной в процентах, не Chakra `Progress.Root`
 (нет такого примитива в UIKit-контракте).
 
-Остальные ходовые поля — по мере миграции, каждое почти бесплатно благодаря готовому
-`UIKit`-контракту. Приоритетный список координатора (Signature → FileUpload → Steps → Table →
-RichText) закрыт полностью.
-
 ## `FormSteps` — мультистеп (beta, не Field)
 
 ```tsx
@@ -403,39 +395,3 @@ Chakra `css`-пропа для стилизации заголовков/спи�
 - `FieldCombobox` — только статичные опции, без async-поиска (`useQuery`) и группировки.
 - `FieldPinInput` — без вставки кода из буфера одним действием на первую ячейку.
 - `FieldTags` — только Enter добавляет тег, без кастомного `delimiter`/`addOnPaste`.
-
-## Команды
-
-```bash
-nx test forms-shadcn
-nx lint forms-shadcn
-nx typecheck:tsgo forms-shadcn
-nx run @letar/forms-shadcn:build:npm   # сборка dist/ для публикации (tsup)
-```
-
-## Публикация (npm) — технически готово, не опубликовано
-
-Пакет собирается в самодостаточный `dist/` через `tsup.config.ts` + `package.publish.json` (тот
-же паттерн, что `@letar/forms`, см. `libs/forms/tsup.config.ts`): один entry point `.` (не
-категорийные подпути, как у Chakra-версии — `src/lib/fields/**` здесь плоская, без категорийных
-подпапок; тяжёлые поля `FieldRichText`/`FieldDataGrid` уже изолированы через `lazy()` внутри
-самого поля, что даёт рантайм-код-сплиттинг у любого бандлера потребителя независимо от числа
-tsup-entry). Все `peerDependencies` — `external`, `@letar/forms-core`/`@letar/forms-react`
-(внутренние слои, `devDependencies`) — вбандлены внутрь через `noExternal` + `dts.resolve`.
-`peerDependenciesMeta` помечает per-field Radix-примитивы, `@tiptap/*` и `@tanstack/react-table`
-как `optional: true` — обязательны только `@tanstack/react-form`, `react`, `zod`,
-`class-variance-authority`/`clsx`/`tailwind-merge` (используются `cn()`-утилитой во всех полях) и
-`@radix-ui/react-label` (базовый `FieldLabel`-примитив).
-
-`npm publish` не запускался — цель этой докрутки была только техническая готовность
-(`nx run @letar/forms-shadcn:build:npm` даёт рабочий `dist/`), решение о реальной публикации не
-принято.
-
-## Подключение к приложению
-
-Обязательное — одно: добавь `@letar/forms-shadcn` в `nx.implicitDependencies` в `package.json`
-приложения (если библиотеки нет в его `dependencies`). Это ребро графа Nx; сам импорт
-`@letar/forms-shadcn` резолвится и без настроек приложения.
-
-Когда дополнительно нужны `paths` в его `tsconfig.json` и почему `nx sync` здесь не поможет —
-[libs.md](/.claude/rules/libs.md#подключение-к-приложению).

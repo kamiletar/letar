@@ -2,6 +2,7 @@
   "name": "@letar/forms-vue",
   "version": "0.25.0",
   "description": "Headless Vue-слой @letar/forms поверх @tanstack/vue-form — полный паритет с React-скином, 61/61 поле",
+  "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "exports": {
@@ -29,8 +30,7 @@
     "zod": "^4.0.0"
   },
   "dependencies": {
-    "@floating-ui/dom": "^1.8.0",
-    "@letar/forms-core": "workspace:*"
+    "@floating-ui/dom": "^1.8.0"
   },
   "devDependencies": {
     "@tanstack/vue-form": "^1.0.0",
@@ -39,6 +39,13 @@
     "@tiptap/starter-kit": "^3.31.0",
     "@tiptap/vue-3": "^3.31.0",
     "@vue/test-utils": "^2.4.6",
-    "vue": "^3.5.13"
+    "vue": "^3.5.13",
+    "@letar/forms-core": "workspace:*"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kamiletar/letar.git",
+    "directory": "libs/forms-vue"
   }
 }

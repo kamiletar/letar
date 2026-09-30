@@ -1,21 +1,20 @@
 # @letar/forms-vue
 
 Vue-адаптер `@letar/forms` поверх `@tanstack/vue-form`. Начинался как архитектурный пруф границы
-(Фаза 7.8, DIP держится с 2026-07-08: `forms-core` не потребовал ни одного изменения под Vue).
-С Фазы 9 (`libs/forms/PLAN.md`, 2026-08-13) координатор форм расширил задачу до полного паритета
-с React-скином — не только пруф.
+(`forms-core` не потребовал ни одного изменения под Vue), сейчас — полный паритет с React-скином.
 
-✅ **Полный порт — 61/61 поле React-скина** (закрыто 2026-08-13, Этап 8). История и разбор
-поштапного прогресса — `libs/forms/PLAN.md`, раздел Фазы 9.
+✅ **Полный порт — 61/61 поле React-скина.**
 
 ## Установка
 
-Библиотека уже включена в монорепозиторий. Внешние зависимости — `vue` и `@tanstack/vue-form` —
-peer dependencies, устанавливаются потребителем отдельно (в этом репо их ставит только сам
-`forms-vue` как `devDependencies`, ни одно Next.js/React-приложение их не тянет).
+```bash
+npm i @letar/forms-vue@beta @letar/forms-core vue @tanstack/vue-form @tanstack/vue-table zod
+```
+
+Требуется peer `@letar/forms-core` (>=0.28.0 <1). Для `FieldRichText` (Tiptap) дополнительно:
 
 ```bash
-bun add vue @tanstack/vue-form
+npm i @tiptap/vue-3 @tiptap/starter-kit @tiptap/extension-placeholder
 ```
 
 ## Быстрый старт
@@ -56,7 +55,9 @@ function handleSubmit(value: Record<string, unknown>) {
 Корневой компонент. Заводит `@tanstack/vue-form` через `useForm`, отдаёт `form`+`schema` полям
 через `provide`/`inject`. Сабмит — обычный `<form @submit>` с `preventDefault`.
 
-### Поля (39 штук)
+### Поля
+
+Основные поля; полный список — в экспортах пакета.
 
 | Компонент             | Пропсы                                                                                                                                                   | Значение схемы                |
 | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- |
@@ -113,7 +114,7 @@ compound-компонент с area/hue/alpha слайдерами): натив�
 вынесена в `useAddressSuggestions` (`@letar/forms-vue/core`), общую для обоих полей.
 
 Документные поля (`FieldPassport`…`FieldCorrAccount`) собраны через общую фабрику
-`createDocumentField` (`src/lib/fields/document-field-base.ts`) поверх `useMaskField`
+`createDocumentField` поверх `useMaskField`
 (`@letar/forms-vue/core`, движок `@letar/forms-core/mask`, контрольные суммы —
 `@letar/forms-core/validators/ru`). `FieldPhone` — единственное исключение среди «масочных»
 полей: форматирует через чистый JS-форматтер `@letar/forms-core/phone`, не через
@@ -130,14 +131,14 @@ compound-компонент с area/hue/alpha слайдерами): натив�
 
 Фабрика для собственных простых полей (тот же контракт, что у 5 встроенных) — Vue-эквивалент
 `createField` из `@letar/forms-react`. `FieldSelect` под неё не подошёл (нужен доп. проп
-`options`) и собран напрямую по тому же контексту, см. `src/lib/fields/field-select.ts`.
+`options`) и собран напрямую по тому же контексту.
 
 ### `useAppFormContext()` / `provideAppForm()`
 
 Низкоуровневый доступ к `{ form, schema }` — для полей, которым `createField` не подходит
 (как `FieldSelect`).
 
-### `useMaskField(options)` (Этап 3)
+### `useMaskField(options)`
 
 Composable движка масок `@letar/forms-core/mask` — Vue-аналог `useMaskField` из
 `@letar/forms-react`. `'live'`-режим отдаёт неконтролируемый `<input>` (`inputRef` без
@@ -149,14 +150,11 @@ Composable движка масок `@letar/forms-core/mask` — Vue-аналог
 
 ## Что НЕ входит в скоуп
 
-- **Не все 61 поле React-скина** — 39 (Фаза 9, Этапы 1–4 целиком + 7 из 8 тяжёлых peer-dep полей
-  Этапа 5). Остался только `FieldRichText` (Tiptap — новый peer-dep, требует `lazy()`-паттерна,
-  как у Form.Captcha) и survey/table (Этап 6) — следующие этапы плана Фазы 9 (`libs/forms/PLAN.md`).
 - **Нет UIKit-абстракции** (в отличие от `forms-react`+`forms`/`forms-shadcn`) — одна референсная
-  реализация на голом HTML, без свопаемого дизайн-скина. Для пруфа границы этого достаточно.
+  реализация на голом HTML, без свопаемого дизайн-скина. Для headless-слоя этого достаточно.
 - **Нет `Form.Group`/`Form.Steps`/массивов** — только плоские top-level поля.
 
-## Подпуть `@letar/forms-vue/core` (Фаза 9)
+## Подпуть `@letar/forms-vue/core`
 
 Композиционный слой без единого конкретного поля — `AppForm`, `createField`, `provideAppForm`,
 `useAppFormContext`, `resolveFieldMeta`, `withFieldValidation`. Vue-аналог роли, которую для React
@@ -167,32 +165,9 @@ Composable движка масок `@letar/forms-core/mask` — Vue-аналог
 import { AppForm, createField, useAppFormContext } from '@letar/forms-vue/core'
 ```
 
-Граница проверяется ESLint-правилом (`eslint.config.mjs`): файлам `src/core.ts`/`src/lib/core/**`
-запрещено импортировать что-либо из `src/lib/fields/**` — тот же принцип, что уже защищает
-границу `forms-core`/`forms-react` (`no-restricted-imports` + негативная проба линта, не
-соглашение на честном слове).
+Подпуть не импортирует референсные поля пакета — та же граница, что у `forms-core`/`forms-react`.
 
-## Команды
+## Связанные пакеты
 
-```bash
-nx test forms-vue
-nx lint forms-vue
-nx typecheck:tsgo forms-vue
-```
-
-## Подключение к приложению
-
-Обязательное — одно: добавь `@letar/forms-vue` в `nx.implicitDependencies` в `package.json`
-приложения (если библиотеки нет в его `dependencies`). Это ребро графа Nx; сам импорт
-`@letar/forms-vue` резолвится и без настроек приложения.
-
-Когда дополнительно нужны `paths` в его `tsconfig.json` и почему `nx sync` здесь не поможет —
-[libs.md](/.claude/rules/libs.md#подключение-к-приложению).
-
-## Связанные документы
-
-- [libs/forms/PLAN.md](../forms/PLAN.md) — §7.8, стратегический контекст задачи
-- [libs/forms-core/README.md](../forms-core/README.md) — framework-agnostic ядро, которое этот
-  пакет проверяет на границу
-- [libs/forms-react/README.md](../forms-react/README.md) — React-эквивалент того же контракта
-  (`createField`, композиционный слой)
+- `@letar/forms-core` — framework-agnostic ядро, которое этот пакет проверяет на границу
+- `@letar/forms-react` — React-эквивалент того же контракта (`createField`, композиционный слой)

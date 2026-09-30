@@ -1,13 +1,21 @@
 # @letar/forms-core
 
-Framework-free ядро [`@letar/forms`](../forms/README.md) — Zod-мета-движок, валидаторы, i18n,
+Framework-free ядро `@letar/forms` — Zod-мета-движок, валидаторы, i18n,
 серверные ошибки, security-утилиты и другая логика форм, которая не зависит ни от React, ни от
 Chakra, ни от какого-либо другого UI-фреймворка.
 
+## Установка
+
+```bash
+npm i @letar/forms-core@beta
+```
+
+Пакет не требует peer-зависимостей.
+
 ## Архитектурный принцип
 
-Clean Architecture / DIP: зависимость идёт внутрь, к ядру, а не наружу. С Фазы 7.3 слоёв три —
-между ядром и Chakra-скином появился [`@letar/forms-react`](../forms-react/README.md)
+Clean Architecture / DIP: зависимость идёт внутрь, к ядру, а не наружу. Слоёв три —
+между ядром и Chakra-скином находится `@letar/forms-react`
 (React + TanStack Form, но без единой UI-библиотеки): туда переехала **сборка** поля
 (`createField`, обёртка, контекст формы), которая раньше жила в скине и импортировала Chakra
 напрямую, из-за чего второй скин был бы вынужден её дублировать.
@@ -53,19 +61,19 @@ forms-core  →  forms-react  →  forms (Chakra) / forms-shadcn
 | `@letar/forms-core/address`       | DaData address provider (Chakra-free часть)                                                                                                                                                                                                                                                                                  |
 | `@letar/forms-core/i18n`          | `createFormErrorMap` — словари перевода ошибок валидации                                                                                                                                                                                                                                                                     |
 | `@letar/forms-core/uikit`         | Типовой контракт UIKit (~20 примитивов) — см. ниже                                                                                                                                                                                                                                                                           |
-| `@letar/forms-core/mask`          | Mask-движок + DOM-контроллер (замена `use-mask-input`, Фаза 8) — см. ниже                                                                                                                                                                                                                                                    |
-| `@letar/forms-core/field-widgets` | Чистые хелперы дата/число-виджетов (пресеты диапазона дат, парсинг даты-времени, конвертация минут) — вынесены из `forms-vue`/`forms-vue-shadcn` в Фазе 9, Этапе 4                                                                                                                                                           |
+| `@letar/forms-core/mask`          | Mask-движок + DOM-контроллер (замена `use-mask-input`) — см. ниже                                                                                                                                                                                                                                                            |
+| `@letar/forms-core/field-widgets` | Чистые хелперы дата/число-виджетов (пресеты диапазона дат, парсинг даты-времени, конвертация минут) — общие для `forms-vue`/`forms-vue-shadcn`                                                                                                                                                                               |
 
-## Mask-движок (Фаза 8, Этапы 1-4 частично)
+## Mask-движок
 
 `@letar/forms-core/mask` — собственный framework-free движок масок ввода, замена
 `use-mask-input`/Inputmask (весит больше самой библиотеки, 645 открытых issue у апстрима,
-не чинит undo/paste/Android — разбор в [MASK_ENGINE.md](../forms/MASK_ENGINE.md)), которая
-теперь полностью удалена из `@letar/forms` (`package.json`/`package.publish.json`/`tsup.config.ts`).
+не чинит undo/paste/Android), которая
+теперь полностью удалена из `@letar/forms`.
 Ядро (чистые функции), DOM-контроллер и React-биндинг (`@letar/forms-react` → `useMaskField`)
 готовы; `Form.Field.MaskedInput` и все 8 документных полей (`createDocumentField` — паспорт,
 СНИЛС, ОГРН, КПП, БИК, расчётный/корр. счёт, ИНН) переведены на движок. `FieldPhone`/
-`FieldCreditCard` остаются на собственных JS-форматтерах — открытый хвост Этапа 4.
+`FieldCreditCard` остаются на собственных JS-форматтерах.
 
 ```typescript
 import { applyChange, caretBoundary, format, formatToParts, unformat } from '@letar/forms-core/mask'
@@ -101,9 +109,9 @@ DSL маски: `9` цифра, `a` буква, `*` буква/цифра, `\X` 
 
 ⚠️ `applyChange` пока не отличает цифры вставленного текста от цифр, дублирующих литералы маски
 (пасченный целиком номер с кодом страны в поле с этим же кодом в маске) — препроцессор
-вставки/автозаполнения открыт в Этапе 4, см. `PLAN.md`.
+вставки/автозаполнения пока не реализован.
 
-### DOM-контроллер (Этап 2)
+### DOM-контроллер
 
 `MaskController` — события, каретка, undo/redo, автозаполнение, IME. Без React, работает
 напрямую с `<input>`:
@@ -133,17 +141,17 @@ controller.detach()
 сдвигая всё вправо. Починено — `previousValue` классифицируется позиционно (`classifyValue`), не
 как raw-поток. Регресс-тест — `apply-change.spec.ts`.
 
-`MaskControllerOptions` (Этап 3) дополнительно принимает:
+`MaskControllerOptions` дополнительно принимает:
 
 - `onRejectedInput?: (rejected: string) => void` — вставка целиком не прошла ни одного токена
   маски (обычно — одно нажатие не по алфавиту). Основа для `aria-live="polite"`-объявления в
-  React-биндинге (MASK_ENGINE.md §6.6). ⚠️ Ловит только полный отказ вставки — частичный отказ
+  React-биндинге. ⚠️ Ловит только полный отказ вставки — частичный отказ
   смешанного текста посимвольно не различается, тот же класс ограничения, что и препроцессор
-  вставки/автозаполнения (открытая часть Этапа 4).
+  вставки/автозаполнения (пока не реализован).
 - `onPasteMode?: 'normalize' | 'reject'` — `'reject'` полностью блокирует `insertFromPaste` на
   уровне `beforeinput`, вместо нормализации по маске. По умолчанию `'normalize'`.
 
-### React-биндинг (Этап 3, `@letar/forms-react`)
+### React-биндинг (`@letar/forms-react`)
 
 `useMaskField` — хук, отдающий наружу только сырое значение (`onValueChange`); ядро само в DOM
 не пишет. Три режима форматирования — не варианты одной реализации, а разная степень нагрузки:
@@ -163,7 +171,7 @@ const { inputProps, onFocus, onBlur, displayValue, resolvedMask } = useMaskField
 return <input {...inputProps} onFocus={onFocus} onBlur={onBlur} />
 ```
 
-- **`'live'`** — держит `MaskController` (undo/IME/autofill из Этапа 2). Пока он активен,
+- **`'live'`** — держит `MaskController` (undo/IME/autofill). Пока он активен,
   `<input>` **неконтролируемый** React'ом (`defaultValue`, без `value`/`onChange`): DOM —
   источник истины, `setRangeText`-запись контроллера конфликтует с управляемым `value` (тот
   самый WebKit-баг, из-за которого `FieldPhone` в своё время отказался от `use-mask-input`).
@@ -171,19 +179,19 @@ return <input {...inputProps} onFocus={onFocus} onBlur={onBlur} />
   форматирование применяется только при потере фокуса (во время редактирования показывается
   сырое значение), в `'off'` — только фильтрация по алфавиту токенов, без группировки литералами.
   Это осознанное упрощение: каретка не «прыгает» на каждое нажатие вне `'live'`, поэтому там не
-  нужна вся подсистема Этапа 2.
+  нужна вся подсистема DOM-контроллера.
 - `mask: string[]` — движок выбирает вариант, под который сырое значение раскладывается лучше
   остальных (`unformat(value, candidate).length` максимален). `mask: (raw) => string | null` —
-  `null` означает «маски нет, свободный ввод» (телефонный кейс, MASK_ENGINE.md §6.6).
+  `null` означает «маски нет, свободный ввод» (телефонный кейс).
 
 ⚠️ Смена идентичности `onValueChange`/`onRejectedInput` между рендерами пересоздаёт
 `MaskController` (теряя undo-стек) — колбэки должны быть стабильны по ссылке
 (`useCallback`/стабильный `field.handleChange` от TanStack Form).
 
-## UIKit-контракт (Фаза 7.1, Этап 4)
+## UIKit-контракт
 
 `@letar/forms-core/uikit` — типы, описывающие, что полю нужно от UI-библиотеки (Chakra, shadcn,
-...), без единой строки реализации. Адаптер (сегодня — `chakraUIKit` внутри `libs/forms`) даёт
+...), без единой строки реализации. Адаптер (например, `chakraUIKit` в `@letar/forms`) даёт
 конкретную реализацию; поле обращается к контракту, а не к Chakra напрямую.
 
 ```typescript
@@ -203,7 +211,7 @@ const chakraUIKit: UIKit<ReactNode> = {
 - `FieldRoot`, `FieldLabel`, `FieldError`
 - `Input`, `Checkbox`, `Select`
 
-Добавлены в Фазе 7.3 и реализованы Chakra-адаптером — их потребляет композиционный слой
+Реализованы Chakra-адаптером — их потребляет композиционный слой
 (обёртка поля, error boundary, кнопки массивов), а не сами поля:
 
 - `Tooltip`, `RequiredIndicator`, `ErrorFallback`
@@ -215,12 +223,12 @@ const chakraUIKit: UIKit<ReactNode> = {
 - `NumberInput`, `NativeSelect`, `Combobox`, `RadioGroup`, `SegmentGroup`, `PinInput`
 - Layout: `Box`, `HStack`, `VStack`, `Text`
 
-Это осознанно неполное покрытие — цель Этапа 4 была доказать, что граница работает на
+Это осознанно неполное покрытие — цель — доказать, что граница работает на
 представительной выборке (текстовое/бинарное/выборное поле), а не переписать все 56 полей за раз.
 
 ### Контракт описывает намерение, а не оформление
 
-Правило, выведенное из двух реальных протечек, найденных в Фазе 7.3:
+Правило, выведенное из двух реальных протечек:
 
 - `FieldWrapper` подсвечивал поле во время async-валидации `css`-пропом с Chakra-токенами
   (`borderColor: 'blue.200'`) → стало состояние `validating?: boolean` у `FieldRoot`.
@@ -235,34 +243,18 @@ const chakraUIKit: UIKit<ReactNode> = {
 
 `groupOptions` / `hasGroups` / `getOptionLabel` (тот же subpath `./uikit`) — чистая логика
 группировки опций для `Select`/`Combobox`/`Listbox`. Вынесена из хука `useGroupedOptions`
-(`libs/forms`), который смешивал её с построением `createListCollection` — рантайм-структуры
+(`@letar/forms`), который смешивал её с построением `createListCollection` — рантайм-структуры
 Ark UI.
 
 Это другой класс протечки, чем импорт компонента: у shadcn нет `createListCollection` вовсе,
 поэтому подменить её реализацией примитива нельзя — коллекцию строит адаптер, а ядро отдаёт
 только сгруппированные данные.
 
-## Команды
+## Подключение
 
-```bash
-nx test forms-core
-nx lint forms-core
-nx typecheck:tsgo forms-core
-```
+`forms-core` — зависимость остальных пакетов семейства `@letar/forms*`; напрямую обычно
+импортируют только отдельные subpath, например `@letar/forms-core/validators/ru`.
 
-## Подключение к приложению
+## Связанные пакеты
 
-`forms-core` — внутренняя зависимость `@letar/forms`, обычные приложения-потребители не
-импортируют его напрямую (кроме отдельных subpath, если явно понадобится, например
-`@letar/forms-core/validators/ru`). Механика резолва (workspace-зависимость + `paths` в
-tsconfig потребителей) — [libs.md](/.claude/rules/libs.md#подключение-к-приложению).
-
-⚠️ Новый subpath-экспорт требует зеркальной записи в `libs/forms/vitest.config.ts` —
-generated из `forms-core/package.json` → `exports` автоматически, но проверь порядок ключей:
-`rollup-plugin-alias` матчит объектные алиасы по префиксу, и бare `@letar/forms-core` (без
-подпути) обязан сортироваться после всех подпутей.
-
-## Связанные документы
-
-- [/libs/forms/README.md](../forms/README.md) — React/Chakra-адаптер поверх этого ядра
-- [/libs/forms/PLAN.md](../forms/PLAN.md) — Фаза 7 (стратегия дистрибуции, расслоение core)
+- `@letar/forms` — React/Chakra-адаптер поверх этого ядра

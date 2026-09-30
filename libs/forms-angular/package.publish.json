@@ -1,0 +1,74 @@
+{
+  "name": "@letar/forms-angular",
+  "description": "Headless Angular layer of @letar/forms on top of @angular/forms (Reactive Forms). Proof of concept — not for production.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./index.js",
+  "types": "./index.d.ts",
+  "files": [
+    "**/*.js",
+    "**/*.js.map",
+    "**/*.d.ts",
+    "**/*.d.ts.map",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "angular",
+    "forms",
+    "reactive-forms",
+    "zod",
+    "headless",
+    "typescript"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kamiletar/letar.git",
+    "directory": "libs/forms-angular"
+  },
+  "bugs": {
+    "url": "https://github.com/kamiletar/letar/issues"
+  },
+  "publishConfig": {
+    "access": "public",
+    "tag": "beta"
+  },
+  "peerDependencies": {
+    "@angular/cdk": "^22.0.0",
+    "@angular/common": "^22.0.0",
+    "@angular/core": "^22.0.0",
+    "@angular/forms": "^22.0.0",
+    "@tanstack/table-core": "^9.1.2",
+    "@tiptap/core": ">=3.0.0",
+    "@tiptap/extension-placeholder": ">=3.0.0",
+    "@tiptap/starter-kit": ">=3.0.0",
+    "zod": "^4.0.0",
+    "@letar/forms-core": ">=0.28.0 <1"
+  },
+  "peerDependenciesMeta": {
+    "@angular/cdk": {
+      "optional": true
+    },
+    "@tanstack/table-core": {
+      "optional": true
+    },
+    "@tiptap/core": {
+      "optional": true
+    },
+    "@tiptap/extension-placeholder": {
+      "optional": true
+    },
+    "@tiptap/starter-kit": {
+      "optional": true
+    }
+  }
+}

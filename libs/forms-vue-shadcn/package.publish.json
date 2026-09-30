@@ -1,0 +1,75 @@
+{
+  "name": "@letar/forms-vue-shadcn",
+  "description": "shadcn-vue skin for @letar/forms-vue — UIKit contract implemented on Reka UI, Tailwind and cva.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./index.js",
+  "types": "./index.d.ts",
+  "files": [
+    "**/*.js",
+    "**/*.js.map",
+    "**/*.d.ts",
+    "**/*.d.ts.map",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "vue",
+    "forms",
+    "shadcn-vue",
+    "reka-ui",
+    "tailwind",
+    "zod",
+    "typescript"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kamiletar/letar.git",
+    "directory": "libs/forms-vue-shadcn"
+  },
+  "bugs": {
+    "url": "https://github.com/kamiletar/letar/issues"
+  },
+  "publishConfig": {
+    "access": "public",
+    "tag": "beta"
+  },
+  "peerDependencies": {
+    "@tanstack/vue-table": "^8.21.3",
+    "@tiptap/extension-placeholder": ">=3.0.0",
+    "@tiptap/starter-kit": ">=3.0.0",
+    "@tiptap/vue-3": ">=3.0.0",
+    "class-variance-authority": ">=0.7.0",
+    "clsx": ">=2.0.0",
+    "lucide-vue-next": ">=0.400.0",
+    "reka-ui": ">=2.0.0",
+    "tailwind-merge": ">=3.0.0",
+    "vue": ">=3.4.0",
+    "zod": ">=4.0.0",
+    "@letar/forms-core": ">=0.28.0 <1",
+    "@letar/forms-vue": ">=0.25.0 <1"
+  },
+  "peerDependenciesMeta": {
+    "@tanstack/vue-table": {
+      "optional": true
+    },
+    "@tiptap/extension-placeholder": {
+      "optional": true
+    },
+    "@tiptap/starter-kit": {
+      "optional": true
+    },
+    "@tiptap/vue-3": {
+      "optional": true
+    }
+  }
+}

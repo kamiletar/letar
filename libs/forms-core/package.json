@@ -123,5 +123,12 @@
       "default": "./src/lib/testing/index.ts"
     },
     "./package.json": "./package.json"
+  },
+  "description": "Ядро @letar/forms без привязки к UI и фреймворку",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kamiletar/letar.git",
+    "directory": "libs/forms-core"
   }
 }

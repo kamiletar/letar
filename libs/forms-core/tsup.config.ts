@@ -1,0 +1,36 @@
+import { defineConfig } from 'tsup'
+
+export default defineConfig({
+  entry: {
+    index: 'src/index.ts',
+    'validators/ru': 'src/lib/validators/ru/index.ts',
+    schema: 'src/lib/schema/index.ts',
+    'server-errors': 'src/lib/server-errors/index.ts',
+    utils: 'src/lib/utils/index.ts',
+    security: 'src/lib/security/index.ts',
+    offline: 'src/lib/offline/index.ts',
+    captcha: 'src/lib/captcha/index.ts',
+    analytics: 'src/lib/analytics/index.ts',
+    'credit-card': 'src/lib/credit-card/index.ts',
+    'edit-intent': 'src/lib/edit-intent/index.ts',
+    phone: 'src/lib/phone/index.ts',
+    mask: 'src/lib/mask/index.ts',
+    'field-widgets': 'src/lib/field-widgets/index.ts',
+    table: 'src/lib/table/index.ts',
+    address: 'src/lib/address/index.ts',
+    i18n: 'src/lib/i18n/index.ts',
+    uikit: 'src/lib/uikit/index.ts',
+    testing: 'src/lib/testing/index.ts',
+  },
+  format: ['esm'],
+  dts: true,
+  tsconfig: 'tsconfig.publish.json',
+  splitting: true,
+  treeshake: true,
+  clean: true,
+  outDir: 'dist',
+  // Внутренние @letar/* не вбандливаем: forms-core — опубликованный peer, остальное — devDependencies-только-типы
+  external: [/^@letar\//],
+  target: 'es2022',
+  sourcemap: true,
+})

@@ -48,11 +48,16 @@
   "peerDependencies": {
     "@tanstack/react-query": ">=5.0.0",
     "@zenstackhq/tanstack-query": ">=3.0.0",
-    "react": ">=18.0.0"
+    "react": ">=18.0.0",
+    "@letar/forms-core": ">=0.28.0 <1"
   },
   "peerDependenciesMeta": {
     "@zenstackhq/tanstack-query": {
       "optional": true
     }
+  },
+  "publishConfig": {
+    "access": "public",
+    "tag": "beta"
   }
 }

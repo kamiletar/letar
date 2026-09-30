@@ -1,0 +1,130 @@
+{
+  "name": "@letar/forms-core",
+  "description": "Framework- and UI-agnostic core of @letar/forms: schema introspection, validators, masks, i18n, offline queue, UIKit contract.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./index.js"
+    },
+    "./validators/ru": {
+      "types": "./validators/ru.d.ts",
+      "import": "./validators/ru.js"
+    },
+    "./schema": {
+      "types": "./schema.d.ts",
+      "import": "./schema.js"
+    },
+    "./server-errors": {
+      "types": "./server-errors.d.ts",
+      "import": "./server-errors.js"
+    },
+    "./utils": {
+      "types": "./utils.d.ts",
+      "import": "./utils.js"
+    },
+    "./security": {
+      "types": "./security.d.ts",
+      "import": "./security.js"
+    },
+    "./offline": {
+      "types": "./offline.d.ts",
+      "import": "./offline.js"
+    },
+    "./captcha": {
+      "types": "./captcha.d.ts",
+      "import": "./captcha.js"
+    },
+    "./analytics": {
+      "types": "./analytics.d.ts",
+      "import": "./analytics.js"
+    },
+    "./credit-card": {
+      "types": "./credit-card.d.ts",
+      "import": "./credit-card.js"
+    },
+    "./edit-intent": {
+      "types": "./edit-intent.d.ts",
+      "import": "./edit-intent.js"
+    },
+    "./phone": {
+      "types": "./phone.d.ts",
+      "import": "./phone.js"
+    },
+    "./mask": {
+      "types": "./mask.d.ts",
+      "import": "./mask.js"
+    },
+    "./field-widgets": {
+      "types": "./field-widgets.d.ts",
+      "import": "./field-widgets.js"
+    },
+    "./table": {
+      "types": "./table.d.ts",
+      "import": "./table.js"
+    },
+    "./address": {
+      "types": "./address.d.ts",
+      "import": "./address.js"
+    },
+    "./i18n": {
+      "types": "./i18n.d.ts",
+      "import": "./i18n.js"
+    },
+    "./uikit": {
+      "types": "./uikit.d.ts",
+      "import": "./uikit.js"
+    },
+    "./testing": {
+      "types": "./testing.d.ts",
+      "import": "./testing.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./index.js",
+  "types": "./index.d.ts",
+  "files": [
+    "**/*.js",
+    "**/*.js.map",
+    "**/*.d.ts",
+    "**/*.d.ts.map",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "forms",
+    "form-core",
+    "zod",
+    "validation",
+    "schema",
+    "headless",
+    "typescript"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kamiletar/letar.git",
+    "directory": "libs/forms-core"
+  },
+  "bugs": {
+    "url": "https://github.com/kamiletar/letar/issues"
+  },
+  "publishConfig": {
+    "access": "public",
+    "tag": "beta"
+  },
+  "dependencies": {
+    "@tanstack/table-core": "^9.1.2"
+  },
+  "peerDependencies": {
+    "zod": ">=4.0.0",
+    "idb-keyval": ">=6.0.0"
+  },
+  "peerDependenciesMeta": {
+    "idb-keyval": {
+      "optional": true
+    }
+  }
+}

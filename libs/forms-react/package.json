@@ -30,10 +30,14 @@
     "react": "^19.0.0",
     "zod": "^4.0.0"
   },
-  "dependencies": {
+  "devDependencies": {
+    "@letar/eager-jsx-check": "workspace:*",
     "@letar/forms-core": "workspace:*"
   },
-  "devDependencies": {
-    "@letar/eager-jsx-check": "workspace:*"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kamiletar/letar.git",
+    "directory": "libs/forms-react"
   }
 }

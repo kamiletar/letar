@@ -2,8 +2,8 @@
 
 ## 0.24.0 (2026-09-29)
 
-`Field.Combobox` — `dependsOn` (§18), Этап 4d (тред `forms-vue-angular-select-parity`, паритет с
-React `field-combobox.tsx`) — последний под-этап Combobox для этого пакета, весь набор фич
+`Field.Combobox` — `dependsOn` (паритет с
+React `field-combobox.tsx`) — завершает Combobox для этого пакета, весь набор фич
 (renderOption/renderValue/description/loadOptions/loadSelected/onCreate/onUpdate/pending/dependsOn)
 теперь на паритете с React-референсом.
 
@@ -13,7 +13,7 @@ React `field-combobox.tsx`) — последний под-этап Combobox дл
   вместо placeholder, правка родителя чистит значение и объявляет об этом в live-области.
 - **Feature:** `dependent.deps`/`depsKey` доходят до `usePromiseSearch`/`useSelectedLoader`/
   `useSelectionActionsState` — смена родителя переинициализирует промис-путь (данные и
-  созданные/отредактированные опции чужого родителя не остаются на экране, §18.6), `loadSelected`
+  созданные/отредактированные опции чужого родителя не остаются на экране), `loadSelected`
   продолжает искать запись по `value` независимо от того, какой родитель выбран сейчас.
 - **Fix (примитив):** `combobox.ts` — добавлен `describedBy` (проброс в `aria-describedby` поля
   ввода), тем же приёмом, что у `select.ts`; примитив уже поддерживал `disabled`.
@@ -23,14 +23,13 @@ React `field-combobox.tsx`) — последний под-этап Combobox дл
 
 ## 0.23.0 (2026-09-29)
 
-`Field.Combobox` — создание/правка записи справочника, Stage 4c (тред `forms-vue-angular-select-parity`,
-паритет с React `field-combobox.tsx`).
+`Field.Combobox` — создание/правка записи справочника, (паритет с React `field-combobox.tsx`).
 
-- **Feature:** `onCreate`/`onUpdate` — тот же конвейер `useSelectionActionsState`, что у `Field.Select`
-  (Stage 3b): `run()` даёт единый `pending`, закрытие списка перед окном приложения (`controlRef`),
-  оптимистичный режим (`ctx.optimistic`, §16.7) с откатом по отказу/таймауту (`onSettleError` или
+- **Feature:** `onCreate`/`onUpdate` — тот же конвейер `useSelectionActionsState`, что у `Field.Select`:
+  `run()` даёт единый `pending`, закрытие списка перед окном приложения (`controlRef`),
+  оптимистичный режим (`ctx.optimistic`) с откатом по отказу/таймауту (`onSettleError` или
   встроенное сообщение `settleFailure` под полем). Работает поверх опций из ЛЮБОГО источника —
-  статичных `options` или `loadOptions` (Stage 4b), созданные/правленые опции накладываются
+  статичных `options` или `loadOptions`, созданные/правленые опции накладываются
   (`applyOptionOverlay`/`mergeCreatedOptions`) поверх того, что вернул текущий источник.
 - **Feature:** служебный пункт «+ Добавить "<текст>"» в конце списка — подпись берётся из текста
   поля ввода (`inputValue`), а не из отдельного поля поиска, как у `Field.Select`: у Combobox
@@ -38,10 +37,10 @@ React `field-combobox.tsx`) — последний под-этап Combobox дл
 - **Feature:** `pending`-опции (своя оптимистичная запись или помеченная приложением) приглушены и
   не выбираются — перенесено в `uikit/primitives/combobox.ts` (`ComboboxItem.disabled = opt.disabled
   || opt.pending`, тем же приёмом, что `select.ts`), не в поле: примитив уже показывал `Loader2`
-  вместо `renderOptionActions` у `pending`-пункта (Stage 4b), не хватало только блокировки выбора.
+  вместо `renderOptionActions` у `pending`-пункта, не хватало только блокировки выбора.
 - **Feature:** карандаш «Изменить» — у пункта списка (`renderOptionActions`) и у выбранного значения
   (`controlActions`, сосед поля ввода). Правка обновляет ОБА — значение поля и текст ввода
-  (`syncedValue`) — согласованно, тем же приёмом, что уже даёт Stage 4a/4b для подписи
+  (`syncedValue`) — согласованно, тем же приёмом, что уже применён для подписи
   `loadOptions`/`loadSelected`.
 - **Extended:** `uikit/primitives/combobox.ts` — примитив переведён с плоской функции на
   Vue-компонент с `setup()` (`ComboboxImpl`, тот же приём, что `SelectImpl` в `select.ts`):
@@ -58,11 +57,11 @@ React `field-combobox.tsx`) — последний под-этап Combobox дл
 - **Fix:** `listFooter` не был объявлен как проп `Field.Combobox` и не прокидывался в примитив —
   `Field.Combobox.CreateButton`, переданный вручную при `createItem: false`, никогда не попадал в
   подвал списка. Добавлен по образцу `field-select.ts`.
-- Не в этой стадии: `dependsOn` (4d), группировка (`option.group`, исключена из всего Этапа 4).
+- Не в этом релизе: `dependsOn`, группировка (`option.group`).
 
 ## 0.22.0 (2026-09-27)
 
-Асинхронные источники опций Combobox, Stage 4b (тред `forms-vue-angular-select-parity`, паритет с
+Асинхронные источники опций Combobox (паритет с
 React `field-combobox.tsx`).
 
 - **Feature:** `Field.Combobox` — `loadOptions` (промис-путь: server action, `fetch`, SDK) вместо
@@ -96,19 +95,18 @@ React `field-combobox.tsx`).
   (тестируемость, тем же приёмом, что `combobox-item-description`).
 - Новые framework-слой композаблы `useDebounce`/`usePromiseSearch`/`useSelectedLoader` — в
   `@letar/forms-vue` (`core.ts`), не здесь: они не завязаны на Reka и рассчитаны на переиспользование
-  headless-скином `forms-vue` в Этапах 4e-4h.
-- Не в этой стадии: `onCreate`/`onUpdate`/pending-действия (4c), `dependsOn` (4d), группировка
-  (`option.group`, исключена из всего Этапа 4).
+  headless-скином `forms-vue`.
+- Не в этом релизе: `onCreate`/`onUpdate`/pending-действия, `dependsOn`, группировка
+  (`option.group`).
 
 ## 0.21.0 (2026-09-27)
 
-Combobox паритет с React-скином, Stage 4a (начало Этапа 4 — `renderOption`/`renderValue`/
-`description`, тред `forms-vue-angular-select-parity`).
+Combobox паритет с React-скином: `renderOption`/`renderValue`/`description`.
 
 - **Feature:** `Field.Combobox` — `renderOption` (своё содержимое пункта списка, получает опцию и
   `UIKitOptionRenderState`) и вторая строка пункта (`FieldSelectOption.description`, тот же общий
   тип, что и у `Field.Select`) — рисуется примитивом сама, только без своего `renderOption`.
-  Реализовано в `uikit/primitives/combobox.ts` тем же приёмом, что `select.ts` (Stage 3a): опция
+  Реализовано в `uikit/primitives/combobox.ts` тем же приёмом, что `select.ts`: опция
   формы приложения ищется по значению и передаётся в колбэк приложения, чтобы контравариантная
   разница `FieldSelectOption.label: string` vs `UIKitSelectOption<UINode>.label: UINode` не ломала
   типы (`field-combobox.ts`, как `optionByKey` в `field-select.ts`).
@@ -127,20 +125,19 @@ Combobox паритет с React-скином, Stage 4a (начало Этапа
   какой-то одной опции (Reka выставляет подпись в поле ввода сама, поле принимало её за активный
   поисковый запрос). Guard — «подпись выбранного значения в поле ввода, не запрос → список
   целиком», как `matchedOptions` в React `field-combobox.tsx`.
-- ⚠️ **Не входит в 4a** (следующие срезы Этапа 4): `loadOptions`/`loadSelected` (4b),
-  `onCreate`/`onUpdate`/`pending` (4c), `dependsOn` (4d).
+- ⚠️ **Не входит в этот релиз:** `loadOptions`/`loadSelected`,
+  `onCreate`/`onUpdate`/`pending`, `dependsOn`.
 - ⚠️ **Найдено разведкой, не расширено в этой сессии:** `UIKitSelectOption.group` (группировка
   по optgroup) не реализован ни в одном скине Select/Combobox, кроме отдельного, более старого
   Chakra-паттерна (`use-grouped-options.ts` в `forms`) — вне контекста паритета с `forms-shadcn`.
 
 ## 0.20.0 (2026-09-27)
 
-Select паритет с React-скином, Stage 3c (завершение Этапа 3 — searchable + `dependsOn`, последняя
-фича-срез перед публикацией в npm, тред `forms-vue-angular-select-parity`).
+Select паритет с React-скином: searchable + `dependsOn`.
 
 - **Feature:** `Field.Select` — `searchable` (`true`/`false`/`'auto'`/`{ threshold, filter,
   emptyMessage }`) и `searchInDescription`. Тонкая обвязка над готовым `useSelectionSearch`
-  (`@letar/forms-vue/core`, Этап 2) — сама фильтрация, порог (10 опций по умолчанию) и допуск
+  (`@letar/forms-vue/core`) — сама фильтрация, порог (10 опций по умолчанию) и допуск
   раскладки клавиатуры не менялись, только подключение к `field-select.ts`: список опций вынесен в
   `computed()` уровня `setup()` (нужен стабильный геттер для композабла), `search.visibleValues`
   композабла построен по сырым значениям опций и переотображён через тот же `toKey()`
@@ -148,8 +145,8 @@ Select паритет с React-скином, Stage 3c (завершение Эт
   видимых при активном поиске. Поле поиска и список — Popover-примитив
   (`uikit/primitives/select-searchable.ts`, уже существовал), не нативный Reka `SelectRoot`.
 - **Feature:** `Field.Select` — `dependsOn`/`depsReady`/`clearOnParentChange`/
-  `disableWhenParentEmpty`/`placeholderWhenDisabled` (§18). Обвязка над `useDependentField`
-  (`@letar/forms-vue/core`, Этап 2) через новый `use-dependent-field-ui.ts` (подсказка «Сначала
+  `disableWhenParentEmpty`/`placeholderWhenDisabled`. Обвязка над `useDependentField`
+  (`@letar/forms-vue/core`) через новый `use-dependent-field-ui.ts` (подсказка «Сначала
   выберите «Страна»», `aria-describedby`, live-область объявления автоочистки) — портирован с
   React `useDependentFieldUi` (`forms-shadcn`) без изменения поведения. Подпись родителя для
   подсказки — реактивная карта `AppFormContext.labels` (`fullPath → label`, заполняется каждым
@@ -157,7 +154,7 @@ Select паритет с React-скином, Stage 3c (завершение Эт
   отрендерился или не регистрирует подпись.
 - **Fix (обнаружено этой сессией, не специфично для Select):** `AppForm`
   (`@letar/forms-vue`, `core/app-form.ts`) не вызывал `DependentsRegistry.handleFieldChange` нигде
-  в продакшен-коде — реестр очистки (Этап 2) был протестирован только собственным изолированным
+  в продакшен-коде — реестр очистки был протестирован только собственным изолированным
   unit-тестом, который зовёт `handleFieldChange` вручную. Без этой правки `dependsOn` в любой
   реальной Vue-форме тихо не работал бы: `useDependentField` регистрирует `clear()`-колбэк, но
   ничто не сообщало реестру, что родитель изменился. См. запись в CHANGELOG `@letar/forms-vue`
@@ -168,9 +165,8 @@ Select паритет с React-скином, Stage 3c (завершение Эт
 
 ## 0.19.0 (2026-09-27)
 
-Select паритет с React-скином, Stage 3b (продолжение Stage 3a — `onCreate`/`onUpdate`, `pending`,
-провайдеры карандашей, оптимистичный отказ §16.7). Searchable + `dependsOn` — Stage 3c, отдельной
-сессией.
+Select паритет с React-скином: `onCreate`/`onUpdate`, `pending`,
+провайдеры карандашей, оптимистичный отказ. Searchable + `dependsOn` — в следующем релизе.
 
 - **Feature:** `Field.Select` — `onCreate(search, ctx)` (создание записи справочника без ухода из
   формы, служебный пункт «+ Добавить…»/`Field.Select.CreateButton` в своём `listFooter`) и
@@ -197,9 +193,8 @@ Select паритет с React-скином, Stage 3b (продолжение St
 
 ## 0.18.0 (2026-09-27)
 
-Select/Combobox паритет с React-скином (`@letar/forms-shadcn`) и Chakra-скином, Stage 3a
-(из общего плана Этапа 3, разбитого по фичам вместо пакетов целиком — create/update/pending/
-optimistic/`searchable`/`dependsOn` остаются в Stage 3b/3c, отдельными сессиями):
+Select/Combobox паритет с React-скином (`@letar/forms-shadcn`) и Chakra-скином
+(create/update/pending/optimistic/`searchable`/`dependsOn` — в следующих релизах):
 
 - **Feature:** `Field.Select` — новые пропы `renderOption(option, state)` (своё содержимое пункта
   списка; сигнатура и семантика зеркалят `UIKitSelectProps.renderOption` из `@letar/forms-core`,
@@ -211,7 +206,7 @@ optimistic/`searchable`/`dependsOn` остаются в Stage 3b/3c, отдел�
   комментарий в `field-select.ts`) больше не течёт в колбэки приложения — `renderOption`/
   `renderValue` всегда получают исходную опцию с настоящим `value`, как `optionByValue` в
   shadcn-React-скине.
-- `libs/forms-vue-shadcn/src/lib/uikit/primitives/select.ts` реализует уже существовавший в
+- Примитив `select` реализует уже существовавший в
   `UIKitSelectProps<TNode>` (`@letar/forms-core/uikit`) контракт — тип не менялся, только его
   реализация на Reka UI.
 
@@ -230,28 +225,11 @@ optimistic/`searchable`/`dependsOn` остаются в Stage 3b/3c, отдел�
 
 ## Unreleased
 
-Фаза 9, Этап 7/0 (form-docs P7, «единый источник кода примеров») — `demo/` разбит с одного
-файла `App.ts` (все 6 полей сразу) на отдельные примеры, читаемые с диска по одному (будущий
-Этап 1 P7 будет парсить их напрямую, минуя дублирование кода в MDX). Версия пакета не поднята —
-`demo/` не публикуется в npm (нет в `exports`/`.npmignore` не нужен).
-
-- `demo/examples/{string,number,select,combobox,textarea,checkbox,table-editor}-demo.ts` — по
-  одному файлу на поле (`FieldString`/`FieldNumber`/`FieldSelect`/`FieldCombobox`/`FieldTextarea`/
-  `FieldCheckbox`/`FieldTableEditor`), каждый самодостаточен: своя Zod-схема, свой `AppForm`,
-  рендерится в изоляции. `demo/examples/index.ts` — реестр `demoExamples` (id/title/component).
-  `table-editor-demo.ts` добавлен 2026-08-13 (form-docs P7 Этап 2) — те же данные/колонки, что
-  React-пример `table-editor-demo/page.tsx`, читается напрямую `SkinCodeFile` в
-  `apps/form-docs/content/docs/guides/table-editor.mdx`.
-- `demo/App.ts` — теперь только навигационная оболочка: `<select>` + `ref` переключают активный
-  пример из реестра, без роутер-либы (харнесс маленький, роутер избыточен).
-- Проверено: `bunx vite build demo --config demo/vite.config.ts` зелёный (2548 модулей, тот же
-  набор чанков, что и до разбиения). `nx run-many -t lint typecheck:tsgo test
-  --projects=@letar/forms-vue-shadcn` зелёный — `demo/` вне scope этих таргетов
-  (`tsconfig.lib.json`/`oxlint` покрывают только `src/`), поведение то же, что и до правки.
+`demo/` разбит с одного файла на отдельные примеры по полям (не публикуется в npm).
 
 ## 0.16.0 (2026-08-13)
 
-Фаза 9, Этап 8 (часть 2, финал) — оставшиеся 14 полей: полный паритет с React-скином, **61/61**.
+Оставшиеся 14 полей: полный паритет с React-скином, **61/61**.
 
 - **Select-семейство (9):** `FieldAutocomplete`, `FieldCombobox` (уже существовал
   незаэкспортированным, добавлен экспорт), `FieldListbox`, `FieldCascadingSelect`,
@@ -270,10 +248,8 @@ optimistic/`searchable`/`dependsOn` остаются в Stage 3b/3c, отдел�
 
 ## 0.15.0 (2026-08-13)
 
-Фаза 9, Этап 8 (часть 1) — три документных поля, пропущенных при исходной декомпозиции на 7
-этапов (47 полей, было 44). Найдены сверкой полного списка `docs/fields.md` с фактической
-реализацией — предыдущий отчёт «Фаза 9 завершена всеми 7 этапами» был неверным, см. поправку в
-`libs/forms/PLAN.md`.
+Три документных поля, пропущенных ранее (47 полей, было 44). Найдены сверкой полного списка полей
+React-скина с фактической реализацией.
 
 - **`FieldForeignPassport`/`FieldDepartmentCode`** — 1:1 порт через `createDocumentField`.
 - **`FieldBirthCertificate`** — БЕЗ маски, свободный ввод с нормализацией на `blur`,
@@ -284,7 +260,7 @@ optimistic/`searchable`/`dependsOn` остаются в Stage 3b/3c, отдел�
 
 ## 0.14.0 (2026-08-13)
 
-Фаза 9, Этап 6 (часть 4, финал) — `Form.Group`/`Form.Steps`. Закрывает Этап 6 целиком (44 поля,
+`Form.Group`/`Form.Steps` (44 поля,
 счётчик не меняется — это form-level compound-компоненты, не поля).
 
 - **`Form.Group`/`useFormGroup`** — без своего файла, реэкспорт из `@letar/forms-vue/core` одной
@@ -298,7 +274,7 @@ optimistic/`searchable`/`dependsOn` остаются в Stage 3b/3c, отдел�
   `useStepPersistence`/`provideFormSteps`/`extractFieldNames`) не своя — целиком из
   `@letar/forms-vue/core`, тот же экспорт использует headless-версия `@letar/forms-vue`. Разбор
   Vue-специфичных упрощений относительно React-хуков (`setup()` вместо `useRef`, без гонки
-  debounce-таймеров персистенции) — `libs/forms-vue/CHANGELOG.md` 0.13.0, идентичен обоим пакетам.
+  debounce-таймеров персистенции) — см. CHANGELOG `@letar/forms-vue` 0.13.0, идентичен обоим пакетам.
 - Своя — только Tailwind-классы: индикатор (`lucide-vue-next` `Check` по умолчанию для
   завершённого шага, тот же паттерн иконок, что у `FieldRating`/`FieldTableEditor`), кнопки
   навигации (`cn(buttonBase, ...)`).
@@ -306,25 +282,24 @@ optimistic/`searchable`/`dependsOn` остаются в Stage 3b/3c, отдел�
 - Тест `app-form.stage6d.spec.ts` — тот же набор сценариев, что в headless-пакете
   (`FieldString` вместо `FieldInput`, индикатор ищется по `ol.flex button`, а не по BEM-классу
   headless-версии). `vitest.setup.ts`/`localStorage`-полифилл — свой (тот же код, что у
-  `libs/forms-vue`), нужен для теста персистенции шага в этом пакете отдельно.
+  `@letar/forms-vue`), нужен для теста персистенции шага в этом пакете отдельно.
 
 ## 0.13.0 (2026-08-13)
 
-Фаза 9, Этап 6 (часть 3) — тот же `FieldDataGrid`, что в headless `forms-vue` 0.12.0,
-Reka/Tailwind-скин. Итог: 45 полей (было 44). Этап 6 (поля) завершён — остаются только
-`Form.Group`/`Form.Steps` (form-level компоненты, не поля).
+Тот же `FieldDataGrid`, что в headless `forms-vue` 0.12.0,
+Reka/Tailwind-скин. Итог: 45 полей (было 44).
 
 - Табличный wiring (`useVueTable`, обвязка `useField(mode:'array')`, сортировка/фильтр/
   пагинация/row-selection, CSV-экспорт) переиспользован из `@letar/forms-vue/core`
   (`use-data-grid.ts`) — не дублирован, тот же экспорт использует и headless-версия. Находки
   про API `@tanstack/vue-table` (нет функции `flexRender`, реактивность через геттеры, ручная
   распаковка `updater`) и про `useField(mode:'array')` (нечувствительность `_arrayVersion` к
-  точечным правкам скаляра) — см. `libs/forms-vue/CHANGELOG.md` 0.12.0, идентичны обоим пакетам
+  точечным правкам скаляра) — см. CHANGELOG `@letar/forms-vue` 0.12.0, идентичны обоим пакетам
   (общая композабл-логика).
 - Своя — только Tailwind-разметка: заголовки/ячейки/чекбоксы (`rekaUIKit.Checkbox`), инлайн-
   input (кастомные компактные классы, не `rekaUIKit.Input` — тот же выбор, что в React
   shadcn-версии), `rekaUIKit.FieldRoot`/`FieldLabel`/`FieldError`, `onErrorCaptured` →
-  `rekaUIKit.ErrorFallback` (тот же паттерн защиты рендера, что у остальных полей Этапа 6).
+  `rekaUIKit.ErrorFallback` (тот же паттерн защиты рендера, что у остальных полей).
 - Те же сохранённые beta-упрощения, что у headless-версии: без виртуализации, без
   resize/drag-reorder колонок, `columns` обязателен явно, фильтр только текстовый contains.
 - Тест `app-form.stage6c.spec.ts` (тот же набор сценариев, что в headless-пакете, через
@@ -333,7 +308,7 @@ Reka/Tailwind-скин. Итог: 45 полей (было 44). Этап 6 (по�
 
 ## 0.12.0 (2026-08-13)
 
-Фаза 9, Этап 6 (часть 2) — тот же `FieldTableEditor`, что в headless `forms-vue` 0.11.0,
+Тот же `FieldTableEditor`, что в headless `forms-vue` 0.11.0,
 Reka/Tailwind-скин. Итог: 44 поля (было 43).
 
 - Логика (резолв колонок, навигация клавиатурой, тип контроллера) переиспользована из
@@ -341,20 +316,20 @@ Reka/Tailwind-скин. Итог: 44 поля (было 43).
   `TableEditorController` не дублированы, тот же экспорт использует и headless-версия. Своя —
   только Tailwind-разметка подкомпонентов (`lib/fields/table/table-{header,row,footer,toolbar,cell}.ts`)
   и главный `field-table-editor.ts` (Reka `FieldRoot`/`FieldLabel`/`FieldError`, `onErrorCaptured`
-  - `rekaUIKit.ErrorFallback` — тот же паттерн защиты рендера, что у остальных полей Этапа 6).
+  - `rekaUIKit.ErrorFallback` — тот же паттерн защиты рендера, что у остальных полей).
 - Иконки — `lucide-vue-next` (`GripVertical` для drag handle, `X` для кнопки удаления строки),
   тот же набор, что у React shadcn-версии.
-- Те же упрощения объёма, что у headless-версии (см. `libs/forms-vue/CHANGELOG.md` 0.11.0): без
+- Те же упрощения объёма, что у headless-версии (см. CHANGELOG `@letar/forms-vue` 0.11.0): без
   отдельного мобильного вида, native HTML5 DnD вместо `@dnd-kit`.
 - Тест `app-form.stage6b.spec.ts` (тот же набор сценариев, что в headless-пакете, через
   `setupRekaPolyfills()`).
 
 ## 0.11.0 (2026-08-13)
 
-Фаза 9, Этап 6 (часть 1) — тот же `FieldLikert`/`FieldMatrixChoice`, что в headless `forms-vue`
+Тот же `FieldLikert`/`FieldMatrixChoice`, что в headless `forms-vue`
 0.10.0, Reka/Tailwind-скин. Итог: 43 поля (было 41).
 
-- Портированы 1:1 из `libs/forms-shadcn/src/lib/fields/{field-likert,field-matrix-choice}.tsx` —
+- Портированы 1:1 из `forms-shadcn` —
   те же Tailwind-классы, что в React-версии.
 - **`FieldLikert`** — `FieldWrapper` из `../uikit/primitives`, ряд кнопок-точек с
   `hover:scale-110`, `flex-wrap`, `showNumbers`.
@@ -370,7 +345,7 @@ Reka/Tailwind-скин. Итог: 44 поля (было 43).
 
 ## 0.10.0 (2026-08-13)
 
-Фаза 9, Этап 5 закрыт целиком — тот же `FieldRichText`, что в headless `forms-vue` 0.9.0,
+Тот же `FieldRichText`, что в headless `forms-vue` 0.9.0,
 Reka/Tailwind-скин. Итог: 41 поле (было 40).
 
 - Переиспользует `useRichTextField`/`RICH_TEXT_ACTIONS`/`DEFAULT_RICH_TEXT_BUTTONS`/
@@ -392,22 +367,22 @@ Reka/Tailwind-скин. Итог: 41 поле (было 40).
 
 ## 0.9.0 (2026-08-13)
 
-Фаза 9, Этап 5 (часть 2) — те же 3 поля, что в headless `forms-vue` 0.8.0, Reka/Tailwind-скин:
+Те же 3 поля, что в headless `forms-vue` 0.8.0, Reka/Tailwind-скин:
 `FieldSignature`, `FieldAddress`, `FieldCity`. Итог: 40 полей (было 37). Остался только
-`FieldRichText` из восьми полей Этапа 5.
+`FieldRichText` из «тяжёлых» полей.
 
 - Переиспользуют `useSignatureField`/`useAddressSuggestions` из `@letar/forms-vue/core` — здесь
   только Tailwind-разметка (тулбар draw/typed, дропдаун подсказок вместо `letar-field__address-*`
   классов headless-пакета).
 - `onErrorCaptured` + `rekaUIKit.ErrorFallback` — тот же паттерн защиты рендера, что у остальных
   полей пакета.
-- Тесты — `app-form.spec.ts`, блок «Этап 5 (часть 2)».
+- Тесты: `app-form.spec.ts`.
 - Проверено: `nx run-many -t lint typecheck:tsgo test --projects=@letar/forms-vue,@letar/forms-vue-shadcn`
   зелёный на обоих пакетах.
 
 ## 0.8.0 (2026-08-13)
 
-Фаза 9, Этап 5 (часть 1) — те же 4 поля, что в headless `forms-vue` 0.7.0, Reka/Tailwind-скин:
+Те же 4 поля, что в headless `forms-vue` 0.7.0, Reka/Tailwind-скин:
 `FieldPinInput`, `FieldOTPInput`, `FieldColorPicker`, `FieldFileUpload`. Итог: 37 полей (было 33).
 
 - PIN/OTP переиспользуют `usePinInputField`/`splitPinChars` из `@letar/forms-vue/core` — здесь
@@ -417,21 +392,20 @@ Reka/Tailwind-скин. Итог: 41 поле (было 40).
   `FieldSwitch`/`FieldSlider`/`FieldRating`.
 - `onErrorCaptured` + `rekaUIKit.ErrorFallback` — тот же паттерн защиты рендера, что у остальных
   полей пакета.
-- Тесты — `app-form.spec.ts`, блок «Этап 5 (часть 1)».
+- Тесты: `app-form.spec.ts`.
 - Проверено: `nx run-many -t lint typecheck:tsgo test --projects=@letar/forms-vue,@letar/forms-vue-shadcn`
   зелёный на обоих пакетах.
 
 ## 0.7.0 (2026-08-13)
 
-Фаза 9, Этап 3 (продолжение) — `FieldCreditCard` (compound-поле, отложено с основного захода
-Этапа 3), Reka/Tailwind-скин. Итог: 33 поля (было 32).
+`FieldCreditCard` (compound-поле, отложено с основного захода масок), Reka/Tailwind-скин. Итог: 33 поля (было 32).
 
 - Логика полностью переиспользована из `useCreditCardField`/`cardBrandIcon`
   (`@letar/forms-vue/core`) — здесь только Tailwind-разметка на голых `<input>` (мульти-part
-  виджет не укладывается в `UIKitInputProps`, тот же приём, что у документных полей Этапа 3).
+  виджет не укладывается в `UIKitInputProps`, тот же приём, что у документных полей).
 - `onErrorCaptured` + `rekaUIKit.ErrorFallback` — тот же паттерн защиты рендера, что у остальных
   полей пакета.
-- Тесты — `app-form.spec.ts`, блок «Этап 3 (продолжение)»: те же сценарии, что в headless-версии.
+- Тесты: те же сценарии, что в headless-версии.
 - Проверено: `nx run-many -t lint typecheck:tsgo test --projects=@letar/forms-vue,@letar/forms-vue-shadcn`
   зелёный.
 
@@ -442,27 +416,27 @@ Reka/Tailwind-скин. Итог: 41 поле (было 40).
 
 ## 0.6.0 (2026-08-13)
 
-Фаза 9, Этап 4 — дата/число-виджеты (5 новых полей), Reka-скин: `FieldDateRange`,
+Дата/число-виджеты (5 новых полей), Reka-скин: `FieldDateRange`,
 `FieldDateTimePicker`, `FieldDuration`, `FieldSlider`, `FieldRating`. См. CHANGELOG `forms-vue`
 0.5.0 — находка про отсутствие внешней библиотеки дат в этой группе полей общая для обоих
 пакетов.
 
 - `FieldDateRange`/`FieldDateTimePicker`/`FieldDuration` — те же пропсы и логика, что в headless,
   рисуют сырой `<input>` в обход `rekaUIKit.Input` (тот же приём, что у документных полей из
-  Этапа 3) либо переиспользуют существующий `NumberInput`-примитив (`FieldDuration`).
+  масок) либо переиспользуют существующий `NumberInput`-примитив (`FieldDuration`).
 - `FieldSlider` — `reka-ui` `SliderRoot`/`SliderTrack`/`SliderRange`/`SliderThumb`, не входит в
   UIKit-контракт (нет `Slider` в `UIKitExtendedPrimitives`) — тот же принцип, что у `FieldSwitch`.
 - `FieldRating` — ряд кнопок-звёзд на иконке `Star` из `lucide-vue-next` (уже peer dependency
   пакета), тоже вне UIKit-контракта.
 - Итог: 32 поля (было 27).
-- Тесты — `app-form.spec.ts`, блок «Этап 4»: те же сценарии, что в headless-версии, плюс
+- Тесты: те же сценарии, что в headless-версии, плюс
   клавиатурное управление `Slider` (`ArrowRight` на сфокусированном `SliderThumb`).
 - Проверено: `nx run-many -t lint typecheck:tsgo test --projects=@letar/forms-vue,@letar/forms-vue-shadcn`
   зелёный.
 
 ## 0.5.0 (2026-08-13)
 
-Фаза 9, Этап 3 — маски/документы (10 новых полей), Reka-скин поверх нового
+Маски/документы (10 новых полей), Reka-скин поверх нового
 `useMaskField` из `@letar/forms-vue/core` (см. CHANGELOG `forms-vue` 0.4.0 — composable общий,
 здесь только стилизация).
 
@@ -476,14 +450,14 @@ Reka/Tailwind-скин. Итог: 41 поле (было 40).
 - Каждое поле — `onErrorCaptured` + `rekaUIKit.ErrorFallback`, тот же паттерн, что у остальных
   полей пакета, собранных напрямую (не через `createField`).
 - Итог: 27 полей (было 17). `FieldCreditCard` отложен — см. CHANGELOG `forms-vue` 0.4.0.
-- Тесты — `src/lib/app-form.spec.ts`, блок «Этап 3»: те же сценарии, что в headless-версии,
+- Тесты: те же сценарии, что в headless-версии,
   через `rekaUIKit`/`FieldWrapper`.
 
 ## 0.4.0 (2026-08-13)
 
-Фаза 9, Этап 2 — select-family на `rekaUIKit`: `FieldRadioGroup`, `FieldNativeSelect`,
-`FieldSwitch` (три поля, отложенные с Этапа 1). Закрывает недостающие 3 из 14→17 полей —
-теперь весь набор Этапа 1 полностью портирован и на Reka-скин, не только на headless.
+Select-family на `rekaUIKit`: `FieldRadioGroup`, `FieldNativeSelect`,
+`FieldSwitch` (три поля, отложенные ранее). Теперь весь базовый набор полностью портирован и на
+Reka-скин, не только на headless.
 
 - Новые Reka-примитивы UIKit-контракта: `RadioGroup` (`RadioGroupRoot`/`RadioGroupItem`/
   `RadioGroupIndicator` из `reka-ui`, паритет разметки с React `radio-group.tsx`) и
@@ -494,15 +468,15 @@ Reka/Tailwind-скин. Итог: 41 поле (было 40).
   `SwitchRoot`/`SwitchThumb` из `reka-ui`, стилизация 1:1 с React-версией.
 - `FieldRadioGroup`/`FieldNativeSelect` собраны как `FieldSelect` — `options` вне контракта
   `createField`, `useAppFormContext`/`resolveFieldMeta`/`withFieldValidation` напрямую.
-- Тесты — `src/lib/app-form.spec.ts`, блок «Этап 2»: рендер контролов, клик по
+- Тесты: рендер контролов, клик по
   radio-опции, выбор в native `<select>`, переключение `Switch`.
 
 ## 0.3.0 (2026-08-13)
 
-Фаза 9, Этап 1 (продолжение) — 8 новых полей на `rekaUIKit`, подмножество нового набора
+8 новых полей на `rekaUIKit`, подмножество нового набора
 `@letar/forms-vue` (полностью: `FieldNumberInput`, `FieldPassword`, `FieldDate`, `FieldTime`,
 `FieldCurrency`, `FieldPercentage`, `FieldHidden`, `FieldYesNo`). `FieldSwitch`/`FieldRadioGroup`/
-`FieldNativeSelect` отложены на Этап 2 — нужны новые Reka UI-примитивы
+`FieldNativeSelect` отложены на следующий релиз — нужны новые Reka UI-примитивы
 (`Switch`/`RadioGroup`/`NativeSelect`), которых пока нет в `rekaUIKit`.
 
 - Поля без своего Reka-примитива переиспользуют уже существующие (`Input` → Password/Date/Time,
@@ -512,14 +486,14 @@ Reka/Tailwind-скин. Итог: 41 поле (было 40).
   `withFieldValidation` + собственный `onErrorCaptured`, как `FieldSelect`.
 - `FieldHidden`/`FieldYesNo` не используют `rekaUIKit` вовсе (нет визуального контрола/своя
   вёрстка на Tailwind-классах) — тот же выбор, что в headless-версии.
-- Тесты — `src/lib/app-form.spec.ts`, блок «Этап 1»: рендер контролов всех 8 полей,
+- Тесты: рендер контролов всех 8 полей,
   переключение видимости пароля.
 
 ## 0.2.0 (2026-08-13)
 
-Фаза 9 (`libs/forms/PLAN.md`, тред `forms-vue-parity-phase9`), Этап 1.
+Начало паритета Vue-полей.
 
-- ⚠️ **Ломающее изменение (пакет в beta, внешних потребителей нет — согласовано координатором):**
+- ⚠️ **Ломающее изменение (пакет в beta, внешних потребителей нет):**
   `useAppFormContext`, `AppForm` и вся композиционная логика теперь берутся из
   `@letar/forms-vue/core`, не из корневого `@letar/forms-vue`. `createFieldPrimitives` (в
   `field/create-field-primitives.ts`) и поля `FieldSelect`/`FieldCombobox` (собранные напрямую,
@@ -529,15 +503,14 @@ Reka/Tailwind-скин. Итог: 41 поле (было 40).
 - Публичный API самого `@letar/forms-vue-shadcn` (`createField`, `FieldWrapper`, 6 полей,
   `rekaUIKit`) не изменился — поменялся только внутренний источник композиционной логики.
 
-Первый релиз — Поток 1 письма координатора форм `QuietRidge` (тред `forms-phase7-3-shadcn`,
-письмо #61): полноценный Reka UI-скин `UIKit`-контракта из `forms-core` для Vue, аналог
+Первый релиз: полноценный Reka UI-скин `UIKit`-контракта из `forms-core` для Vue, аналог
 `@letar/forms-shadcn` для React.
 
 - `rekaUIKit` — реализация `UIKit`-контракта на [Reka UI](https://reka-ui.com) + Tailwind + cva:
   core-примитивы (`FieldRoot`/`FieldLabel`/`FieldError`/`Input`/`Checkbox`/`Select`) + минимум
   extended (`NumberInput`/`Combobox`/`ErrorFallback`), нужный 6 полям.
 - `createFieldPrimitives(uikit)` — Vue-версия композиционного слоя из `@letar/forms-react`
-  (Фаза 7.3), не копия 1:1: ошибку рендера поля ловит `onErrorCaptured` в `setup()`, а не
+  не копия 1:1: ошибку рендера поля ловит `onErrorCaptured` в `setup()`, а не
   классовый `ErrorBoundary` (паттерна которого в Vue нет).
 - 6 полей: `FieldString`, `FieldNumber`, `FieldCheckbox`, `FieldTextarea`, `FieldSelect`,
   `FieldCombobox`.
@@ -548,8 +521,7 @@ Reka/Tailwind-скин. Итог: 41 поле (было 40).
   валидации, блокировка сабмита, чекбокс по клику, успешный сабмит, guard «поле вне `<AppForm>`»).
   Полифиллы `ResizeObserver`/`hasPointerCapture`/`scrollIntoView` — стандартный минимум для
   тестирования Radix/Reka-компонентов в jsdom.
-- Минимальный dev-харнесс на голом Vite (`nx run @letar/forms-vue-shadcn:demo`, порт 5173,
-  `.claude/launch.json`) — не Nx-приложение, в монорепо нет Vue+Vite приложений.
+- Минимальный dev-харнесс на голом Vite (порт 5173) — не отдельное приложение.
 - **Находка задачи:** UIKit-контракт (`forms-core/uikit/types.ts`) уже полностью
   framework-agnostic (`TNode` — обобщённый параметр) — Vue-версия контракта заводить не
   потребовалось, только реализация под конкретный TNode (`VNode | string | null`).

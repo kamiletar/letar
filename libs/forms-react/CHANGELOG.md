@@ -21,11 +21,11 @@
   `cancel`, `apply`) и `resolveImagePopoverString`/`useImagePopoverString` (`formImagePopover.*`:
   `dropHint`, `dropHintSub`, `sizeHint`, `cancel`, `loading`, `tryAgain`, `errorNotImage`,
   `errorSizeExceeded`, `errorGeneric`, `errorUrlMissing`) — контент `LinkPopover`/`ImagePopover`
-  Chakra-скина (`libs/forms`), до этого захардкоженный по-английски внутри самих компонентов.
+  Chakra-скина (`@letar/forms`), до этого захардкоженный по-английски внутри самих компонентов.
   Отдельно от `formToolbar.*` — тот словарь описывает только `aria-label` кнопок-триггеров, не тело
   попапов (другая семантическая категория). Только Chakra-скин: shadcn эти диалоги не рисует вовсе
   (`ImagePopover` отсутствует как beta-упрощение, `link` — `window.prompt`, не Popover) — но словарь
-  лежит в `forms-react`, а не в `libs/forms`, по тому же принципу размещения, что у
+  лежит в `forms-react`, а не в `@letar/forms`, по тому же принципу размещения, что у
   `formFieldPlaceholder.*`/`formPasswordStrength.*`/`formSelection.*`.
   `sizeHint`/`errorSizeExceeded` — с `{size}`, интерполяция `.replace('{size}', ...)` на стороне
   вызывающего (тот же приём, что у `formSelection.settleError`).
@@ -35,7 +35,7 @@
 ### Added
 
 - Два новых ключа словаря `formToolbar.*`: `formToolbar.linkAdd`/`formToolbar.linkRemove` — для
-  `LinkPopover` Chakra-скина (`libs/forms`), у которого подпись кнопки переключается по `isActive`
+  `LinkPopover` Chakra-скина (`@letar/forms`), у которого подпись кнопки переключается по `isActive`
   между «добавить»/«убрать», в отличие от остального тулбара с одной статичной подписью на кнопку.
   shadcn-скин ссылку не спецкейсит (общий `formToolbar.link`), новые ключи не использует.
 
@@ -190,8 +190,7 @@
 
 ### Fixed
 
-- **`useStepNavigation().goToNext()` теперь пускает `currentStep` в состояние "завершено"**
-  (#1922, тред `form-steps-completed-content-unreachable`): раньше `nextStep < stepCountRef.current`
+- **`useStepNavigation().goToNext()` теперь пускает `currentStep` в состояние "завершено"**: раньше `nextStep < stepCountRef.current`
   жёстко запрещал уйти дальше последнего реального шага — `Form.Steps.CompletedContent` в
   `@letar/forms` был физически недостижим обычным кликом (только через `skipToEnd()`), потому что
   Navigation на последнем шаге сразу подменяла "Continue" на Submit, а `goToNext()` даже если бы
@@ -204,12 +203,11 @@
 
 ### Fixed
 
-- **`useFormServerAction.run` сужает тип результата до `Exclude<TData, ActionFailure>`** (#1819,
-  тред `form-action-result-extract`): для action, обёрнутой в `catchActionFailure`
+- **`useFormServerAction.run` сужает тип результата до `Exclude<TData, ActionFailure>`**: для action, обёрнутой в `catchActionFailure`
   (`TData = T | ActionFailure`), `onSuccess` и резолв `run` теперь типизированы как `T` — рантайм
   уже отсекал отказ (бросал `ActionFailureError`, до `onSuccess` не доходило), тип раньше этого не
   отражал и требовал ручного `as`/type guard на стороне вызывающего кода. `TData` без пересечения
-  с `ActionFailure` (например 4 формы входа `aboi` на Better Auth) не меняется — `Exclude` для них
+  с `ActionFailure` (например формы входа на Better Auth) не меняется — `Exclude` для них
   тождество. `TData`, структурно совпадающий с `ActionFailure` целиком (без опционального `field`),
   тоже исключается — он неотличим от настоящего отказа.
 
@@ -229,8 +227,8 @@
 ### Changed
 
 - ⚠️ Action, которая через `run` возвращала `{ success: false, error: '…' }` (ActionResult), теперь
-  трактуется как отказ: `run` бросает вместо резолва этим значением. Внутри монорепо таких
-  вызовов нет (единственные потребители — четыре формы входа aboi на Better Auth).
+  трактуется как отказ: `run` бросает вместо резолва этим значением. В монорепо таких
+  вызовов не было (единственные потребители — формы входа на Better Auth).
 
 ## [0.9.1] - 2026-09-15
 
@@ -246,8 +244,7 @@
 ### Added
 
 - **`useFormServerAction`** — облегчённая по ceremony обёртка над связкой `formRef` +
-  `middleware.onError` + `mapServerErrors`/`applyServerErrors` (см.
-  `libs/forms/docs/server-errors.md` §«С декларативным `<Form>`»). Одна точка входа с
+  `middleware.onError` + `mapServerErrors`/`applyServerErrors`. Одна точка входа с
   pending-состоянием и опциональным toaster: `const { run, pending } = useFormServerAction(formRef,
   { fieldMap, toaster, successMessage })`, дальше
   `onSubmit={async (data) => { await run(() => action(data)) }}`. `run` **перебрасывает** исходную
@@ -258,7 +255,7 @@
   `onSubmit` в том же месте, где уже ловит `throw` из `middleware.onError`. Не новая возможность —
   существующий путь работает и остаётся рабочим для тех, кому нужен полный контроль (разное
   поведение `onError` по типу ошибки); хук просто снимает ceremony для типового случая. Найдено
-  при аудите форм domwellbes: самопальный `useServerActionForm` (63 потребителя) не использовал
+  при аудите форм продуктового приложения: самопальный `useServerActionForm` (63 потребителя) не использовал
   `mapServerErrors`/`applyServerErrors` вовсе — все серверные ошибки схлопывались в одну строку
   без field-level мэппинга, при том что документированный путь уже существовал
   (`material-form.tsx`), просто ceremony оказалась выше порога, при котором тянутся к
@@ -274,8 +271,7 @@
   (server action, `@fuzzy`/`@fullText` full-text search и т.п.) под контракт `AsyncQueryFn`,
   который ждёт `useQuery`-проп `Form.Field.Combobox`. Раньше это переиспользуемое поведение
   (debounce уже даёт `useAsyncSearch`, но приведение «плоский async → синхронная форма
-  `{data, isLoading, error}`» каждый раз писалось руками — 3 независимых копии в domwellbes:
-  `ComboboxStudent`, `useClientSearchOptions`, `ComboboxMaterial`) закрыто одним хуком.
+  `{data, isLoading, error}`» каждый раз писалось руками — 3 независимых копии в одном приложении) закрыто одним хуком.
   `createAsyncActionQuery(action)` — эргономичная фабрика, отдаёт готовый `useQuery`:
   ```tsx
   <Combobox useQuery={createAsyncActionQuery(searchMaterialsAction)} />
@@ -290,16 +286,14 @@
 - **`useResolvedFieldProps` резолвит `meta.fieldProps` из `schema.zmodel`** —
   `@meta("form.props.<key>", value)` теперь работает одинаково и через `Form.Field.Auto`
   (уже умел это раньше через `renderFieldByType`), и через явные типизированные теги
-  (`<AppForm.Field.Currency name="x" />`), рекомендованный в `.claude/rules/forms.md` паттерн.
+  (`<AppForm.Field.Currency name="x" />`).
   Раньше произвольный `fieldProps` резолвился только в первом пути — значения вроде
   `minorUnitScale`/`currency` (факт о хранении данных, не о месте рендера) приходилось
   дублировать JSX-пропом в каждом использовании вручную. Хук отдаёт сырой `meta.fieldProps`
   новым полем `fieldProps` в возвращаемом объекте; мерж с приоритетом `props > meta` сделан в
   `createField` (`create-field-primitives.tsx`) — единой точке для обоих UI-скинов
   (`@letar/forms` Chakra и `@letar/forms-shadcn`), так что фикс автоматически действует в
-  обоих без отдельной правки скина. Архитектурная коррекция от владельца (Ками) к запросу
-  `Field.Percentage.minorUnitScale`, тред agent-mail `money-field-kopecks` — разбор в
-  `libs/forms/PLAN.md` Backlog.
+  обоих без отдельной правки скина.
 
 ## [0.6.1] - 2026-09-08
 
@@ -325,9 +319,8 @@
   откатом на встроенный ru/en словарь `@letar/forms-core/i18n`
   (`createBuiltinTranslateFunction`) — `setupZodErrorMap` переводит стандартные коды Zod v4
   (`too_small`/`too_big`/`invalid_format`/... с учётом `origin`) сразу по `locale`, без
-  next-intl. Найдено на `domwellbes` (Form.Steps пилот на форме дома, 2026-09-07) — подробности
-  и разбор двух независимых механизмов в
-  [letar-forms-missing-i18nprovider-english-hints.md](/.claude/docs/letar-forms-missing-i18nprovider-english-hints.md).
+  next-intl. Найдено при пилоте Form.Steps в продуктовом приложении (2026-09-07): два независимых механизма
+  оставляли подсказки английскими.
 
 ## [0.5.1] - 2026-09-04
 
@@ -343,7 +336,7 @@
 
 - **`SensitiveFieldsProvider`/`useRegisterSensitiveField`/`useSensitiveFieldPaths`** —
   реестр «чувствительных» dot-путей текущей формы
-  (`libs/forms/PLAN.md` backlog `EditIntentValue<T>`, security-инфраструктура). Поле вроде
+  (security-инфраструктура для `EditIntentValue<T>`). Поле вроде
   `Form.Field.EditIntent` регистрирует `${fullPath}.value` при монтировании (пока `sensitive`
   истинен), а потребители снимка формы (persistence/`Form.DebugValues`/`Form.UrlSync`) читают
   текущий список реактивно через `useSyncExternalStore` и прогоняют его через
@@ -387,8 +380,7 @@
   (`prisma/seed.ts`) с `tsconfig` Next.js-приложения (`"jsx": "preserve"`) esbuild транспилирует
   такой JSX в classic `React.createElement(...)`, и модуль без `import React` падает
   `ReferenceError: React is not defined` прямо при импорте `@letar/forms`. Фабрика откладывает
-  создание элемента до рендера `LazyWrapper` — там React-рантайм есть гарантированно. Разбор —
-  [letar-forms-lazy-component-eager-jsx-seed-crash.md](/.claude/docs/letar-forms-lazy-component-eager-jsx-seed-crash.md).
+  создание элемента до рендера `LazyWrapper` — там React-рантайм есть гарантированно.
 
 ## [0.3.1] - 2026-08-20
 
@@ -399,4 +391,4 @@
   v2.7.1), где та же логика была продублирована руками в `@letar/forms-shadcn`
   (`FieldDataGrid`/`FieldRichText`, v0.33.3) — теперь оба скина используют одну реализацию.
   `fallback` передаётся снаружи как `ReactNode` (не хардкодится), т.к. этот слой не знает ни одной
-  UI-библиотеки. Разбор бага — `.claude/docs/letar-forms-lazy-component-ssr-stuck-suspense.md`.
+  UI-библиотеки.

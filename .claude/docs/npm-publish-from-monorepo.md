@@ -22,6 +22,31 @@ grep -l '"build:npm"' libs/*/project.json apps/*/project.json
 `dist/package.json`, собранный из `package.publish.json`). Владелец решил публиковать: флаг убран. На npm
 при этом лежат только `1.0.0`/`1.0.1` (2026-03-31), версии `2.x` не выходили; тегов `form-mcp-v*` в репо нет.
 
+## Волна 1 (2026-09-30): 16 библиотек к beta-публикации
+
+Конвейер `build:npm` заведён у 16 библиотек: `forms-core`, `forms-react`, `forms-vue`, `forms-angular`,
+`forms-shadcn`, `forms-vue-shadcn`, `forms-query`, `number-words`, `semver-compare`, `pg-url`, `sse`,
+`url-query-state`, `fuzzy-search`, `slug-resolver`, `idempotency-key`, `upload-validation`. Теги релизов
+в [publish-npm.yml](/.github/workflows/publish-npm.yml) пока не заведены (решение владельца — позже).
+
+- `publishConfig: { access: 'public', tag: 'beta' }` лежит в `package.publish.json`; `publish:npm` идёт с `--tag beta`.
+- Слои forms — **опубликованные peer-зависимости**, не инлайн: `@letar/forms-core` (`>=0.28.0 <1`) у всех,
+  `@letar/forms-react` у `forms-shadcn`, `@letar/forms-vue` у `forms-vue-shadcn`. В рабочем `package.json`
+  они лежат в `devDependencies` (`workspace:*`). Порядок публикации: `forms-core` → `forms-react`/`forms-vue` →
+  скины. Причина отказа от инлайна: два экземпляра React-контекста форм у потребителя.
+  `@letar/tailwind-utils` не публикуется и по-прежнему инлайнится (`noExternal`).
+- Рабочий `package.json` получил `"type": "module"`: без него tsup называет выход `.mjs`/`.d.mts`, а
+  `exports` в `package.publish.json` ждёт `.js`/`.d.ts`.
+- ⚠️ Перенос `@letar/*` из `dependencies` в `devDependencies` меняет `bun.lock`: сразу
+  `bun install --lockfile-only` и коммит lock, иначе `--frozen-lockfile` роняет деплой всех приложений.
+- ⚠️ Сборка нашла необъявленную зависимость: `upload-validation` импортирует `next/server` без `next` в
+  peer, и tsup молча **вбандлил куски Next.js** в пакет. Проверка: `grep -c "__commonJS" dist/index.js` и
+  сверка импортов `src/` с `peerDependencies`.
+- ⚠️ `'use client'` при сборке tsup отбрасывается (предупреждение «Module level directives»), у `forms-shadcn`
+  это было и раньше. Потребитель с App Router импортирует поля из клиентских компонентов.
+- ⚠️ `forms-angular` собирается tsup как JIT (`experimentalDecorators`, inline-шаблоны): потребителю нужен
+  `@angular/compiler` в рантайме; AOT-пакет (ng-packagr) не делался. Пакет помечен proof-of-concept.
+
 ## Конвейер целиком
 
 ```

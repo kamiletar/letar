@@ -1,12 +1,12 @@
 # @letar/forms-query
 
-Интеграция [`@letar/forms`](../forms/) с TanStack Query: источники опций для `Field.Select` и `Field.Combobox`.
+Интеграция `@letar/forms` с TanStack Query: источники опций для `Field.Select` и `Field.Combobox`.
 Пакет **не импортирует скины** — одинаково работает с Chakra-скином (`@letar/forms`) и shadcn-скином
 (`@letar/forms-shadcn`). Ядро форм от TanStack Query не зависит: кому он не нужен, этот пакет не ставит.
 
 ```bash
-bun add @letar/forms-query @tanstack/react-query
-# ZenStack-часть (подпуть /zenstack): @zenstackhq/tanstack-query >=3 — необязательный peer
+npm i @letar/forms-query@beta @letar/forms-core @tanstack/react-query react
+# peer @letar/forms-core >=0.28.0 <1; ZenStack-часть (подпуть /zenstack): @zenstackhq/tanstack-query >=3 — необязательный peer
 ```
 
 ## Что внутри

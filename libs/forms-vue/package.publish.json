@@ -1,0 +1,76 @@
+{
+  "name": "@letar/forms-vue",
+  "description": "Headless Vue layer of @letar/forms on top of @tanstack/vue-form — full field parity with the React skin.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./index.js"
+    },
+    "./core": {
+      "types": "./core.d.ts",
+      "import": "./core.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./index.js",
+  "types": "./index.d.ts",
+  "files": [
+    "**/*.js",
+    "**/*.js.map",
+    "**/*.d.ts",
+    "**/*.d.ts.map",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "vue",
+    "forms",
+    "tanstack-form",
+    "zod",
+    "headless",
+    "typescript"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kamiletar/letar.git",
+    "directory": "libs/forms-vue"
+  },
+  "bugs": {
+    "url": "https://github.com/kamiletar/letar/issues"
+  },
+  "publishConfig": {
+    "access": "public",
+    "tag": "beta"
+  },
+  "dependencies": {
+    "@floating-ui/dom": "^1.8.0"
+  },
+  "peerDependencies": {
+    "@tanstack/vue-form": "^1.0.0",
+    "@tanstack/vue-table": "^8.21.3",
+    "@tiptap/extension-placeholder": ">=3.0.0",
+    "@tiptap/starter-kit": ">=3.0.0",
+    "@tiptap/vue-3": ">=3.0.0",
+    "vue": "^3.4.0",
+    "zod": "^4.0.0",
+    "@letar/forms-core": ">=0.28.0 <1"
+  },
+  "peerDependenciesMeta": {
+    "@tanstack/vue-table": {
+      "optional": true
+    },
+    "@tiptap/extension-placeholder": {
+      "optional": true
+    },
+    "@tiptap/starter-kit": {
+      "optional": true
+    },
+    "@tiptap/vue-3": {
+      "optional": true
+    }
+  }
+}

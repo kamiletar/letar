@@ -8,15 +8,21 @@ export default defineConfig({
     zenstack: 'src/zenstack.ts',
   },
   format: ['esm'],
-  // Типы `@letar/forms-core` (контракт опций) — внутренний слой, не npm-пакет: вбандливаем в декларации
-  dts: { resolve: [/^@letar\//] },
+  // `@letar/forms-core` — опубликованный peer (в devDependencies для workspace): не вбандливается
+  dts: true,
   tsconfig: 'tsconfig.publish.json',
   splitting: true,
   treeshake: true,
   clean: true,
   outDir: 'dist',
-  noExternal: ['@letar/forms-core'],
-  external: ['react', 'react/jsx-runtime', '@tanstack/react-query', '@zenstackhq/tanstack-query', /^@zenstackhq\//],
+  external: [
+    /^@letar\//,
+    'react',
+    'react/jsx-runtime',
+    '@tanstack/react-query',
+    '@zenstackhq/tanstack-query',
+    /^@zenstackhq\//,
+  ],
   target: 'es2022',
   sourcemap: true,
 })

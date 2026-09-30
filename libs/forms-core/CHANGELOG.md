@@ -25,8 +25,7 @@
 - `moveListboxActiveIndex(options, activeIndex, direction)`/`createListboxTypeAhead(getText)` —
   framework-free клавиатурная навигация кастомного listbox-попапа (стрелки/Home/End с пропуском
   `disabled`-опций, type-ahead по первой букве с накоплением и циклом по повторным совпадениям).
-  Экспорт из `@letar/forms-core/uikit`. Первый потребитель — Этап 1 паритета Select/Combobox в
-  `forms-vue`/`forms-angular` (headless-скины были без вообще какого-либо поп-ап движка).
+  Экспорт из `@letar/forms-core/uikit`. Первый потребитель — `forms-vue`/`forms-angular` (headless-скины были без вообще какого-либо поп-ап движка).
 
 ## [0.26.1] - 2026-09-27
 
@@ -56,7 +55,7 @@
 
 ### Added
 
-- Основа зависимых полей (`libs/forms/PLAN.md` §18): реестр `createDependentsRegistry` (очистка дочернего по правке
+- Основа зависимых полей: реестр `createDependentsRegistry` (очистка дочернего по правке
   родителя, `suppress`, обнаружение циклов), `FieldDeps`, `resolveDependsOn`, `serializeDeps`, `isEmptyDepValue`,
   `buildDeps`, `areDepsReady`, `getValueAtPath`.
 - `LoadContext.deps` во всех загрузчиках, `SelectionActionContext.deps`, `SettleErrorInfo.deps`.
@@ -151,13 +150,11 @@
 - **`catchActionFailure` (`./server-errors`): распознаёт нарушение внешнего ключа (`23503`),**
   не только unique (`23505`). Раньше FK-нарушение (типичный случай — удаление записи, ещё
   используемой другими) пробрасывалось дальше вместе с реальными неполадками, и в production
-  Next.js стирал текст ошибки (`.claude/docs/nextjs-server-action-thrown-error-message-stripped.md`)
-  — клиент видел generic-сообщение вместо причины отказа. Новая ветка: `isFkViolation(error)` →
+  Next.js стирал текст ошибки — клиент видел generic-сообщение вместо причины отказа. Новая ветка: `isFkViolation(error)` →
   `ActionFailure` с текстом «Нельзя удалить — есть связанные записи» (или своим текстом из новой
   опции `fkMessages`, ключ — часть имени ограничения `…_<ключ>_fkey`, по аналогии с
   `uniqueMessages`). Экспортирована и `isFkViolation` отдельно. Найдено при аудите
-  delete-экшенов `domwellbes` — продолжение находки в `PLAN_CROSSCUTTING.md` § «Тот же класс
-  бага шире: сырой startTransition без try/catch».
+  delete-экшенов продуктового приложения.
 
 ## [0.13.2] - 2026-09-23
 
@@ -168,8 +165,7 @@
   на месте (`push`/индексное присваивание) вместо пересборки новой ссылки. `useSyncExternalStore`,
   на котором построены `useSyncQueue`/`FormSyncStatus`, сравнивает снапшоты через `Object.is` —
   та же ссылка после мутации означает «ничего не изменилось» для React, даже когда
-  `notifyListeners()` вызван. Найдено живьём в domwellbes (`/admin/receiving`, офлайн-приёмка,
-  O1): бейдж показывал «Отправлено» сразу после постановки действия в очередь вместо «Не
+  `notifyListeners()` вызван. Найдено живьём в продуктовом приложении (офлайн-приёмка): бейдж показывал «Отправлено» сразу после постановки действия в очередь вместо «Не
   отправлено: N». Данные в IndexedDB были корректны всегда — баг чисто в реактивности индикатора.
 
 ## [0.13.1] - 2026-09-22
@@ -183,14 +179,13 @@
   нет вовсе. `resolveBuiltin(locale)` сам решает, что значит «встроенный дефолт» — словарь ru/en
   с плюрализацией или фиксированный fallback-текст из пропов без своего словаря. Заменила три
   независимо написанные копии в `@letar/forms` (`Form.Errors`, `minChars`-подсказка,
-  `form-persistence`) — см. `libs/forms/CHANGELOG.md` 2.16.5.
+  `form-persistence`).
 
 ## [0.13.0] - 2026-09-21
 
 ### Added
 
-- **`@letar/forms-core/server-errors`: отказ Server Action значением** (задача `form-action-result-extract`,
-  вынесено из пилота domwellbes). В production Next.js стирает текст ошибки, брошенной из Server
+- **`@letar/forms-core/server-errors`: отказ Server Action значением** (вынесено из пилота в продуктовом приложении). В production Next.js стирает текст ошибки, брошенной из Server
   Action (код 441), поэтому ожидаемый отказ возвращается значением, а клиент бросает его обратно:
   - `ActionFailure` = `{ success: false; error: string; field?: string }` и фабрика
     `actionFailure(error, field?)`; `isActionFailure` требует явный маркер `success: false`,
@@ -259,6 +254,6 @@
   (`getErrorMapKey('server') === 'onServer'` в `@tanstack/form-core`), не занятый обычными
   циклами `onMount`/`onChange`/`onBlur`/`onSubmit`.
 - Затрагивает ВСЕХ потребителей `applyServerErrors`, не только новый `useFormServerAction`
-  (`@letar/forms-react` 0.9.0) — в том числе `apps/domwellbes` (`material-form.tsx`,
-  `sign-in`/`sign-up`/`forgot-password`/`reset-password`) и `apps/dsperevod` (те же 4 auth-страницы),
+  (`@letar/forms-react` 0.9.0) — в том числе формы авторизации
+  (`sign-in`/`sign-up`/`forgot-password`/`reset-password`) в приложениях монорепо,
   которые вызывали `applyServerErrors` напрямую и несли тот же латентный баг.

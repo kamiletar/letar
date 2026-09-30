@@ -15,18 +15,19 @@ export default defineConfig({
     index: 'src/index.ts',
   },
   format: ['esm'],
-  // См. комментарий в libs/forms/tsup.config.ts — тот же принцип: `@letar/forms-core` и
-  // `@letar/forms-react` внутренние слои (devDependencies, не npm-пакеты), поэтому вбандливаются
-  // внутрь, а `dts.resolve` нужен отдельно для прохода деклараций (rollup-plugin-dts строит
-  // `external` из `dependencies`+`peerDependencies`, `noExternal` для JS-бандла его не касается).
-  dts: { resolve: [/^@letar\//] },
+  // `@letar/forms-core` и `@letar/forms-react` — опубликованные peer-пакеты (в devDependencies для
+  // workspace): не вбандливаются, иначе у потребителя два экземпляра React-контекста форм.
+  // `@letar/tailwind-utils` не публикуется — инлайнится (`noExternal`), типы его не торчат наружу.
+  dts: true,
   tsconfig: 'tsconfig.publish.json',
   splitting: true,
   treeshake: true,
   clean: true,
   outDir: 'dist',
-  noExternal: ['@letar/forms-core', '@letar/forms-react', '@letar/tailwind-utils'],
+  noExternal: ['@letar/tailwind-utils'],
   external: [
+    // Опубликованные внутренние слои — peer-зависимости
+    /^@letar\/(?!tailwind-utils)/,
     // React
     'react',
     'react-dom',

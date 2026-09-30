@@ -141,6 +141,53 @@
         "command": "bunx dprint check \"**/*.{ts,tsx,js,jsx,json,md}\"",
         "cwd": "libs/forms-vue-shadcn"
       }
+    },
+    "build:npm": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "default",
+        "{projectRoot}/tsup.config.ts",
+        "{projectRoot}/package.publish.json",
+        "{projectRoot}/scripts/write-publish-package-json.mjs"
+      ],
+      "outputs": [
+        "{projectRoot}/dist"
+      ],
+      "metadata": {
+        "description": "Сборка @letar/forms-vue-shadcn для публикации на npm",
+        "technologies": [
+          "tsup"
+        ]
+      },
+      "options": {
+        "commands": [
+          "tsup",
+          "node scripts/write-publish-package-json.mjs",
+          "cp README.md dist/",
+          "cp CHANGELOG.md dist/",
+          "cp LICENSE dist/"
+        ],
+        "cwd": "libs/forms-vue-shadcn",
+        "parallel": false
+      }
+    },
+    "publish:npm": {
+      "executor": "nx:run-commands",
+      "dependsOn": [
+        "build:npm"
+      ],
+      "cache": false,
+      "metadata": {
+        "description": "Публикация @letar/forms-vue-shadcn на npmjs.com",
+        "technologies": [
+          "npm"
+        ]
+      },
+      "options": {
+        "command": "npm publish --access public --tag beta",
+        "cwd": "libs/forms-vue-shadcn/dist"
+      }
     }
   }
 }

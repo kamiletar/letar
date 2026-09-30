@@ -2,6 +2,7 @@
   "name": "@letar/forms-vue-shadcn",
   "version": "0.24.0",
   "description": "shadcn-vue-скин @letar/forms-vue — реализация UIKit-контракта из @letar/forms-core на Reka UI + Tailwind + cva",
+  "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "exports": {
@@ -26,11 +27,6 @@
     "vue": ">=3.4.0",
     "zod": ">=4.0.0"
   },
-  "dependencies": {
-    "@letar/forms-core": "workspace:*",
-    "@letar/forms-vue": "workspace:*",
-    "@letar/tailwind-utils": "workspace:*"
-  },
   "devDependencies": {
     "@tanstack/vue-form": "^1.0.0",
     "@tanstack/vue-table": "^8.21.3",
@@ -44,6 +40,15 @@
     "reka-ui": "^2.6.0",
     "tailwind-merge": "^3.3.1",
     "vite": "^8.2.1",
-    "vue": "^3.5.13"
+    "vue": "^3.5.13",
+    "@letar/forms-core": "workspace:*",
+    "@letar/forms-vue": "workspace:*",
+    "@letar/tailwind-utils": "workspace:*"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kamiletar/letar.git",
+    "directory": "libs/forms-vue-shadcn"
   }
 }

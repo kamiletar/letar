@@ -2,18 +2,25 @@
 
 Reka UI-скин `@letar/forms-vue` — реализация `UIKit`-контракта из `@letar/forms-core` на
 [Reka UI](https://reka-ui.com) (бывший Radix Vue) + Tailwind + cva. Vue-эквивалент
-`@letar/forms-shadcn` (Фаза 7.3, React): та же архитектура (`createFieldPrimitives(uikit)`),
+`@letar/forms-shadcn` (React): та же архитектура (`createFieldPrimitives(uikit)`),
 тот же стек примитивов (Radix-семейство), перенесённый на Vue.
 
-✅ **Полный порт `@letar/forms-shadcn` — 61/61 поле** (закрыто 2026-08-13, Этап 8). До Фазы 9
-(2026-08-13) пакет был архитектурным пруфом на 6 полей (письмо координатора форм #61); решение
-координатора расширило скоуп до полного паритета. История — `libs/forms/PLAN.md`, раздел Фазы 9.
+✅ **Полный порт `@letar/forms-shadcn` — 61/61 поле.**
 
 ## Установка
 
-Библиотека уже включена в монорепозиторий. Внешние зависимости (`reka-ui`, `vue`,
-`@tanstack/vue-form`, `class-variance-authority`, `clsx`, `tailwind-merge`, `lucide-vue-next`) —
-peer dependencies, устанавливаются потребителем отдельно.
+```bash
+npm i @letar/forms-vue-shadcn@beta @letar/forms-vue @letar/forms-core vue reka-ui class-variance-authority clsx tailwind-merge lucide-vue-next @tanstack/vue-table zod
+```
+
+Требуются peer `@letar/forms-core` (>=0.28.0 <1) и `@letar/forms-vue` (>=0.25.0 <1). Для `FieldRichText` (Tiptap) дополнительно:
+
+```bash
+npm i @tiptap/vue-3 @tiptap/starter-kit @tiptap/extension-placeholder
+```
+
+Headless-слой `@letar/forms-vue` (`AppForm`, `useAppFormContext`) ставится отдельно — этот пакет
+несёт только скин.
 
 ## Быстрый старт
 
@@ -49,8 +56,7 @@ export default defineComponent({
 })
 ```
 
-`AppForm`/`useAppFormContext` — из `@letar/forms-vue/core` (композиционный слой, Фаза 9; до неё —
-корневой `@letar/forms-vue`, см. CHANGELOG 0.2.0), не отсюда: этот пакет несёт только UIKit-скин и
+`AppForm`/`useAppFormContext` — из `@letar/forms-vue/core` (композиционный слой), не отсюда: этот пакет несёт только UIKit-скин и
 поля поверх него, не форму целиком. Импорт именно подпути `/core`, не корневого `.` —
 `forms-vue-shadcn` не должен тянуть референсные HTML-поля headless-пакета.
 
@@ -60,7 +66,7 @@ export default defineComponent({
 
 Реализация `UIKit`-контракта (`@letar/forms-core/uikit`) на Reka UI: `FieldRoot`/`FieldLabel`/
 `FieldError` (core) + `Input`/`Checkbox`/`Select` (core) + `NumberInput`/`Combobox`/`RadioGroup`/
-`NativeSelect`/`ErrorFallback` (extended, 32 поля на 2026-08-13). `Switch`/`Slider`/`Rating` в контракт
+`NativeSelect`/`ErrorFallback` (extended). `Switch`/`Slider`/`Rating` в контракт
 не входят (см. таблицу полей ниже) — рисуются в обход UIKit напрямую на `reka-ui`/`lucide-vue-next`,
 тот же принцип для всех трёх. Каждый примитив — обычная функция
 `(props) => VNode`, не Vue-компонент (см. `createFieldPrimitives` ниже — почему это осознанный
@@ -68,13 +74,13 @@ export default defineComponent({
 
 ### `createFieldPrimitives(uikit)` → `{ createField, FieldWrapper }`
 
-Vue-версия `createFieldPrimitives` из `@letar/forms-react` (Фаза 7.3) — фабрика композиционного
-слоя, привязанная к конкретному UIKit. `libs/forms-vue-shadcn/src/lib/uikit/primitives.ts` вызывает
+Vue-версия `createFieldPrimitives` из `@letar/forms-react` — фабрика композиционного
+слоя, привязанная к конкретному UIKit. Пакет вызывает
 её один раз со своим `rekaUIKit`; экспортируемые `createField`/`FieldWrapper` из этого пакета —
 готовый результат, для написания нового Reka-поля обычно не нужно вызывать фабрику самому.
 
 Разбор Zod-меты и обёртку `form.Field` (`resolveFieldMeta`/`withFieldValidation`) фабрика берёт из
-`@letar/forms-vue/core` (Фаза 9) — не дублирует: та же логика нужна простым полям headless-пакета.
+`@letar/forms-vue/core` — не дублирует: та же логика нужна простым полям headless-пакета.
 Сверх неё здесь только специфика скина — `onErrorCaptured`-обвязка и вызов `uikit.ErrorFallback`.
 
 Отличия от React-версии не косметические:
@@ -149,7 +155,7 @@ UIKit-контракта (тот же приём, что `FieldSwitch`/`FieldSli
 UIKit-контракта (см. выше «Поля») — тот же выбор, что у React `forms-shadcn`.
 
 Документные поля (`FieldMaskedInput`…`FieldCorrAccount`, кроме `FieldPhone`) — Reka-версия
-`createDocumentField` (`src/lib/fields/document-field-base.ts`) поверх `useMaskField`
+`createDocumentField` поверх `useMaskField`
 (`@letar/forms-vue/core`), рисуют сырой `<input>` в обход `rekaUIKit.Input` (`'live'`-режим
 неконтролируемый, `UIKitInputProps` требует `value`/`onChange`) — тот же приём, что у
 `FieldPassword`. `FieldPhone` — контролируемое поле через `rekaUIKit.Input`, форматтер
@@ -161,39 +167,11 @@ UIKit-контракта (см. выше «Поля») — тот же выбо�
 
 ## Что не входит в скоуп
 
-Все 61 поле React-скина портированы (Фаза 9 закрыта, 2026-08-13). Вне скоупа этой библиотеки
+Все 61 поле React-скина портированы . Вне скоупа этой библиотеки
 осталось только то, что не входит и в React-скин `@letar/forms-shadcn` — см. его README.
 
-## Demo
+## Связанные пакеты
 
-Минимальный dev-харнесс (не Nx-приложение — в монорепо нет Vue+Vite приложений, заводить одно ради
-6 полей непропорционально задаче):
-
-```bash
-nx run @letar/forms-vue-shadcn:demo
-```
-
-## Команды
-
-```bash
-nx test forms-vue-shadcn
-nx lint forms-vue-shadcn
-nx typecheck:tsgo forms-vue-shadcn
-```
-
-## Подключение к приложению
-
-Обязательное — одно: добавь `@letar/forms-vue-shadcn` в `nx.implicitDependencies` в `package.json`
-приложения (если библиотеки нет в его `dependencies`). Это ребро графа Nx; сам импорт
-`@letar/forms-vue-shadcn` резолвится и без настроек приложения.
-
-Когда дополнительно нужны `paths` в его `tsconfig.json` и почему `nx sync` здесь не поможет —
-[libs.md](/.claude/rules/libs.md#подключение-к-приложению).
-
-## Связанные документы
-
-- [libs/forms/PLAN.md](../forms/PLAN.md) — Поток 1 письма координатора #61, стратегический контекст
-- [libs/forms-vue/README.md](../forms-vue/README.md) — headless-слой (`AppForm`, `useAppFormContext`),
-  на котором построен этот скин
-- [libs/forms-shadcn/README.md](../forms-shadcn/README.md) — React-эквивалент того же контракта
-- [libs/forms-core/README.md](../forms-core/README.md) — framework-agnostic ядро (`UIKit`-контракт)
+- `@letar/forms-vue` — headless-слой (`AppForm`, `useAppFormContext`), на котором построен этот скин
+- `@letar/forms-shadcn` — React-эквивалент того же контракта
+- `@letar/forms-core` — framework-agnostic ядро (`UIKit`-контракт)

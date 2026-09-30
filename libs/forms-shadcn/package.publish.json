@@ -68,21 +68,53 @@
     "lucide-react": ">=1.0.0",
     "react": ">=18.0.0",
     "tailwind-merge": ">=3.0.0",
-    "zod": ">=4.0.0"
+    "zod": ">=4.0.0",
+    "@letar/forms-core": ">=0.28.0 <1",
+    "@letar/forms-react": ">=0.26.0 <1"
   },
   "peerDependenciesMeta": {
-    "@radix-ui/react-checkbox": { "optional": true },
-    "@radix-ui/react-popover": { "optional": true },
-    "@radix-ui/react-radio-group": { "optional": true },
-    "@radix-ui/react-select": { "optional": true },
-    "@radix-ui/react-slider": { "optional": true },
-    "@radix-ui/react-switch": { "optional": true },
-    "@radix-ui/react-toggle-group": { "optional": true },
-    "@tanstack/react-table": { "optional": true },
-    "@tiptap/extension-link": { "optional": true },
-    "@tiptap/extension-placeholder": { "optional": true },
-    "@tiptap/extension-underline": { "optional": true },
-    "@tiptap/react": { "optional": true },
-    "@tiptap/starter-kit": { "optional": true }
+    "@radix-ui/react-checkbox": {
+      "optional": true
+    },
+    "@radix-ui/react-popover": {
+      "optional": true
+    },
+    "@radix-ui/react-radio-group": {
+      "optional": true
+    },
+    "@radix-ui/react-select": {
+      "optional": true
+    },
+    "@radix-ui/react-slider": {
+      "optional": true
+    },
+    "@radix-ui/react-switch": {
+      "optional": true
+    },
+    "@radix-ui/react-toggle-group": {
+      "optional": true
+    },
+    "@tanstack/react-table": {
+      "optional": true
+    },
+    "@tiptap/extension-link": {
+      "optional": true
+    },
+    "@tiptap/extension-placeholder": {
+      "optional": true
+    },
+    "@tiptap/extension-underline": {
+      "optional": true
+    },
+    "@tiptap/react": {
+      "optional": true
+    },
+    "@tiptap/starter-kit": {
+      "optional": true
+    }
+  },
+  "publishConfig": {
+    "access": "public",
+    "tag": "beta"
   }
 }

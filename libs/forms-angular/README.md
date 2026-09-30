@@ -1,34 +1,46 @@
 # @letar/forms-angular
 
-✅ **Полный порт — 61/61 поле** (Фаза 11 закрыта 2026-08-14, Stage J). Начинался как разведочный
+> ⚠️ Proof-of-concept: API может меняться между beta-версиями.
+
+✅ **Полный порт — 61/61 поле.** Начинался как разведочный
 headless-адаптер `@letar/forms-core` для Angular — третий фреймворк-пруф после React
-(`@letar/forms-react`/`forms-shadcn`) и Vue (`@letar/forms-vue`/`forms-vue-shadcn`, Фаза 9). Пруф
+(`@letar/forms-react`/`forms-shadcn`) и Vue (`@letar/forms-vue`/`forms-vue-shadcn`). Пруф
 подтверждён: framework-free ядро (`@letar/forms-core/schema`, Zod-мета-движок `.meta({ ui: {...} })`)
 читается в Angular без единой правки в самом ядре, а валидация подключается через нативные
-примитивы `@angular/forms` (Reactive Forms), не через имитацию `@tanstack/angular-form`. С
-Фазы 11 (`libs/forms/PLAN.md`) координатор форм расширил задачу до полного паритета с
-React/Vue-скинами — не только пруф.
+примитивы `@angular/forms` (Reactive Forms), не через имитацию `@tanstack/angular-form`.
+
+## Установка
+
+```bash
+npm i @letar/forms-angular@beta @letar/forms-core @angular/core @angular/common @angular/forms @angular/cdk @tanstack/table-core zod
+```
+
+Требуется peer `@letar/forms-core` (>=0.28.0 <1). Для `FieldRichTextComponent` (Tiptap) дополнительно:
+
+```bash
+npm i @tiptap/core @tiptap/starter-kit @tiptap/extension-placeholder
+```
 
 Все 61 поле закрыты десятью этапами (Stage A–J):
 
-- **Этап 1–2** (зеркало Vue-порта): String, Textarea, Number, Password, Checkbox, Switch,
+- **Базовые поля** (зеркало Vue-порта): String, Textarea, Number, Password, Checkbox, Switch,
   RadioGroup, NativeSelect, Date, YesNo.
-- **Stage A** (Фаза 11, +7 самых простых полей): NumberInput, Currency, Percentage, Slider,
+- **Stage A** (+7 самых простых полей): NumberInput, Currency, Percentage, Slider,
   Rating, Hidden, Time.
-- **Stage B** (Фаза 11, +11 документных полей РФ — движок масок): INN, BIK, OGRN, SNILS, KPP,
+- **Stage B** (+11 документных полей РФ — движок масок): INN, BIK, OGRN, SNILS, KPP,
   Passport, BankAccount, CorrAccount, ForeignPassport, DepartmentCode, BirthCertificate.
-- **Stage C** (Фаза 11, +1 поле — чистый JS-форматтер вместо движка масок): Phone.
-- **Stage D** (Фаза 11, +4 поля с составным значением): DateRange, DateTimePicker, Duration,
+- **Stage C** (+1 поле — чистый JS-форматтер вместо движка масок): Phone.
+- **Stage D** (+4 поля с составным значением): DateRange, DateTimePicker, Duration,
   Schedule.
-- **Stage E** (Фаза 11, +8 полей семейства «выбор»): Select, CascadingSelect, Combobox,
+- **Stage E** (+8 полей семейства «выбор»): Select, CascadingSelect, Combobox,
   Autocomplete, Listbox, RadioCard, SegmentedGroup, ImageChoice.
-- **Stage F** (Фаза 11, +2 поля): CheckboxCard, Tags.
-- **Stage G** (Фаза 11, +8 полей категории "special"): PinInput, OTPInput, ColorPicker,
+- **Stage F** (+2 поля): CheckboxCard, Tags.
+- **Stage G** (+8 полей категории "special"): PinInput, OTPInput, ColorPicker,
   FileUpload, Address, City, Signature, CreditCard.
-- **Stage H** (Фаза 11, +3 поля): PasswordStrength, Editable, RichText (ленивая загрузка Tiptap).
-- **Stage I** (Фаза 11, +4 поля survey/table категорий): Likert, MatrixChoice, TableEditor,
+- **Stage H** (+3 поля): PasswordStrength, Editable, RichText (ленивая загрузка Tiptap).
+- **Stage I** (+4 поля survey/table категорий): Likert, MatrixChoice, TableEditor,
   DataGrid (`@tanstack/table-core`, без ленивой загрузки — см. ниже).
-- **Stage J** (Фаза 11, +3 поля, финальный этап — 61/61): Auto (диспетчер типа поля по Zod-схеме),
+- **Stage J** (+3 поля, финальный этап — 61/61): Auto (диспетчер типа поля по Zod-схеме),
   Calculated (readonly-поле, автопересчёт из значений формы), MaskedInput (универсальная маска
   поверх того же движка `@letar/forms-core/mask`, что и 10 документных полей Stage B).
 
@@ -99,8 +111,7 @@ React/Vue-скинами — не только пруф.
 | `FieldMaskedInputComponent`      | `letar-field-masked-input`      | `mask` (DSL `@letar/forms-core/mask`), `formatMode` (`live`/`off`, по умолчанию `live`), `maxLength`, `formatDescription` (обязателен, WCAG 3.3.2)                                        |
 
 Разметка у всех — голый HTML, без CSS: классы `letar-field`, `letar-field__label`,
-`letar-field__control`, `letar-field__error` (тот же принцип, что у `libs/forms-vue`, раздел
-«Что НЕ входит в скоуп» его README).
+`letar-field__control`, `letar-field__error` (тот же принцип, что у `@letar/forms-vue`).
 
 ## Архитектурные решения
 
@@ -157,12 +168,11 @@ React/Vue-скинами — не только пруф.
   `WeeklySchedule`/`ScheduleDaySchedule`/`DayOfWeek` и константы (дни недели, дефолтный график)
   портированы локально (как и в Vue-версии — они не вынесены в `forms-core`, живут в каждом скине
   отдельно), логика toggle/copy-to-weekdays/`close>open`-предупреждение — 1-в-1 с
-  `libs/forms-vue/src/lib/fields/field-schedule.ts`.
+  Vue-версией (`FieldSchedule`).
 - **Stage E — семейство «выбор», 8 полей.** `FieldSelectComponent` изначально был на чистом
   `[formControl]="ctrl"` (обычный `<select>`, тот же примитив, что `FieldNativeSelectComponent`).
-  Этап 3g паритета Select/Combobox (`forms-vue-angular-select-parity`, msg 2242/2246) заменил его
-  на кастомный listbox поверх headless-примитива `createListboxPopup` (`core/listbox-popup.ts`,
-  Этап 1 — `@angular/cdk` Overlay) — `<button role="combobox">` + `<ul role="listbox">`, свой
+  Позже он заменён
+  на кастомный listbox поверх headless-примитива `createListboxPopup` (на базе `@angular/cdk` Overlay) — `<button role="combobox">` + `<ul role="listbox">`, свой
   `signal selectedValue` вместо `[formControl]`, `#optionTemplate`/`#valueTemplate` через
   `@ContentChild(TemplateRef)` для кастомного рендера (Angular-идиома вместо колбэка,
   возвращающего VNode/JSX, как в Vue/React-скинах). `FieldNativeSelectComponent` остаётся
@@ -198,7 +208,7 @@ React/Vue-скинами — не только пруф.
   (сам `<input>` не поле формы, источник текста для следующего тега); список тегов — тот же
   синхронизируемый `signal<string[]>`, что у остальных полей с составным/множественным значением.
   Enter добавляет тег из черновика (с проверкой `minTagLength`/`maxTags`/дубликатов), Backspace на
-  пустом черновике удаляет последний тег — 1-в-1 с `libs/forms-vue/src/lib/fields/field-tags.ts`.
+  пустом черновике удаляет последний тег — 1-в-1 с Vue-версией (`FieldTags`).
 - **Stage G — 8 полей категории "special", самый архитектурно тяжёлый этап.**
   `FieldPinInputComponent`/`FieldOtpInputComponent` — N ячеек `<input maxlength="1">`
   (Backspace/стрелки/paste — `../core/pin-input-utils.ts`, общий для обоих полей); OTP добавляет
@@ -318,44 +328,10 @@ React/Vue-скинами — не только пруф.
   целиком из Zod-подсхемы формы). Наследование не потребовало ни одной правки в
   `document-field-base.ts` — 10 уже работающих документных полей не затронуты.
 
-## Тестирование без Karma
-
-Разведка (главный технический риск задачи): в репозитории тесты идут через Vitest
-(`@nx/vitest`), а Angular-компоненты обычно тестируются через `TestBed` + Karma/Jest + zone.js.
-Связка **`provideZonelessChangeDetection()` + `TestBed` + Vitest + jsdom** реально работает —
-подтверждено 84 зелёными тестами (`nx test forms-angular`), без Karma-раннера и без `zone.js` в
-зависимостях. Реальный Tiptap-редактор (`@tiptap/core`) тоже рендерится и тестируется в jsdom —
-`FieldRichTextComponent`'s тест кликает по кнопке тулбара и проверяет `aria-pressed`, без моков
-редактора (тот же прецедент, что уже подтверждён для `@tiptap/vue-3` в `forms-vue`).
-
-Две находки по пути:
-
-1. **Angular-декораторы нельзя объявлять инлайн в `*.spec.ts`.** Vitest 4/Vite 8 транформируют
-   файлы теста через отдельный от обычного модульного графа путь (непохоже на `esbuild`/`oxc`,
-   не понимает decorator-синтаксис вовсе) — `@Component`/`@Injectable` прямо в `*.spec.ts` валят
-   сборку с `SyntaxError: Invalid or unexpected token` ещё на этапе коллекции тестов (0 найденных
-   тестов, без стека). Воркэраунд: любой Angular-декорированный класс — только в обычном `.ts`
-   файле (см. `src/lib/testing/stage1-host.component.ts`, `stage2-host.component.ts`), импортированном в
-   спек.
-2. **Vite 8 использует `oxc` по умолчанию, не `esbuild`.** `esbuild.tsconfigRaw` тихо
-   игнорируется («Both esbuild and oxc options were set»). Публичного эквивалента
-   `experimentalDecorators` в `OxcOptions` этой версии не нашли — `vitest.config.ts` явно
-   отключает `oxc: false`, откатываясь на `esbuild` с ручным `tsconfigRaw`
-   (`experimentalDecorators: true`, `useDefineForClassFields: true` — именно `true`, не `false`:
-   сигнальные API требуют настоящих ES class fields).
-
-## Команды
-
-```bash
-nx test forms-angular
-nx lint forms-angular
-nx typecheck:tsgo forms-angular
-```
-
 ## Известные ограничения
 
 - Нет skin/дизайн-системы — только семантическая разметка (как у `forms-vue`, не `forms-vue-shadcn`).
-  Angular Material/скин-слой — будущая Фаза 12, не начата.
+  Angular Material/скин-слой не реализован.
 - Нет вложенности `FormGroup` (аналог `FormGroup` из `forms-vue` с `fullPath`) — только плоские поля.
 - `FieldBase.name`/`label`/`placeholder` не реактивны к изменению после первого рендера
   (не сигналы, `@Input()`) — приемлемо, так как в реальном использовании `name` не меняется после
@@ -363,12 +339,3 @@ nx typecheck:tsgo forms-angular
 - Тяжёлые peer-deps сами по себе больше не блокер — `FieldRichTextComponent` (Stage H) доказал,
   что ленивая загрузка (`import()` + `ViewContainerRef.createComponent()`) работает для Angular
   так же, как `createLazyField`/`React.lazy` в Vue/React-скинах.
-
-## Подключение к приложению
-
-Обязательное — одно: добавь `@letar/forms-angular` в `nx.implicitDependencies` в `package.json`
-приложения (если библиотеки нет в его `dependencies`). Это ребро графа Nx; сам импорт
-`@letar/forms-angular` резолвится и без настроек приложения.
-
-Когда дополнительно нужны `paths` в его `tsconfig.json` и почему `nx sync` здесь не поможет —
-[libs.md](/.claude/rules/libs.md#подключение-к-приложению).

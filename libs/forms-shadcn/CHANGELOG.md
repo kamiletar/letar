@@ -273,7 +273,7 @@
   таймаут. Найдено превентивным аудитом сестринских библиотек (флаки не воспроизведён в 3
   прогонах, но механизм идентичен — подтверждено, что jsdom реально резолвит `getContext('2d')`
   в настоящий контекст, не `null`). Детерминированный no-op мок скопирован из
-  `libs/forms/vitest.setup.ts`.
+  тестового окружения `@letar/forms`.
 
 ## [0.37.0] - 2026-09-09
 
@@ -293,16 +293,14 @@
 ### Fixed
 
 - **Helper/error-слот (`uikit/primitives/field-error.tsx`) не резервировал высоту без ошибки/
-  `helperText`** — тот же фикс, что в Chakra-скине (`forms-coordinator-dev`, тред
-  `forms-fieldwrapper-helper-slot-height`): вместо `null` слот рендерит пустой `<p>` того же
+  `helperText`** — тот же фикс, что в Chakra-скине: вместо `null` слот рендерит пустой `<p>` того же
   класса, скрытый через `invisible`/`aria-hidden` — место в layout сохраняется.
 
 ## [0.36.0] - 2026-09-09
 
 ### Fixed
 
-- **`shadcnUIKit.NumberInput` — русская запятая как десятичный разделитель.** Задача от
-  `forms-coordinator-dev` (тред `forms-shadcn-locale-parity`): под `FormI18nProvider locale="ru"`
+- **`shadcnUIKit.NumberInput` — русская запятая как десятичный разделитель.** Под `FormI18nProvider locale="ru"`
   ввод `234,65` в числовых полях (`Form.Field.Number`, `NumberInput`, `Currency`, `Percentage`)
   раньше не парсился вовсе. Причина архитектурно глубже, чем «тот же паттерн, что у Chakra-скина» —
   примитив рендерил нативный `<input type="number">`, а HTML5 value sanitization algorithm сбрасывает
@@ -345,8 +343,7 @@
 
 ### Added
 
-- **`FieldEditIntent`** — shadcn-скин `Form.Field.EditIntent` (`libs/forms/PLAN.md` backlog
-  `EditIntentValue<T>`). Явная замена значения без передачи старого клиенту (API key/Client
+- **`FieldEditIntent`** — shadcn-скин `Form.Field.EditIntent` (`EditIntentValue<T>`). Явная замена значения без передачи старого клиенту (API key/Client
   Secret и т.п.) — view mode с безопасным `displayValue` и кнопкой «Заменить», edit mode с
   дочерним полем и кнопкой «Оставить текущее». Value-контракт и view/edit/focus-логика идентичны
   Chakra-скину — общий headless `useEditIntentField` из `@letar/forms-react` (0.3.3 → 0.4.0),
@@ -370,8 +367,7 @@
 
 - **Таргет `eager-jsx-check`, подключён к `lint`.** Regex-гейт против регресса бага из раздела
   выше — `@letar/eager-jsx-check` (новая plain-JS библиотека монорепо, по образцу
-  `@letar/theme-check`). Разбор бага —
-  `.claude/docs/letar-forms-lazy-component-eager-jsx-seed-crash.md`.
+  `@letar/theme-check`).
 
 ## [0.33.5] - 2026-08-25
 
@@ -381,8 +377,7 @@
   уровне модуля** (`const fallback = <div .../>`), что исполняется сразу при импорте, до всякого
   рендера. Под `tsx` (Node-скрипты вне Next.js) это падало `ReferenceError: React is not defined`
   — тот же баг, что и в `@letar/forms-react` `createLazyComponent` (v0.3.2). Теперь `fallback` —
-  фабрика (`() => <div .../>`), соответствует новой сигнатуре `createLazyComponent`. Разбор —
-  [letar-forms-lazy-component-eager-jsx-seed-crash.md](/.claude/docs/letar-forms-lazy-component-eager-jsx-seed-crash.md).
+  фабрика (`() => <div .../>`), соответствует новой сигнатуре `createLazyComponent`.
 
 ## [0.33.4] - 2026-08-20
 
@@ -399,8 +394,7 @@
 
 - **`FieldDataGrid`/`FieldRichText` — зависший серверный Suspense-boundary.** Оба компонента
   монтировали `<Suspense>` вокруг ленивого `lazy()`-импорта сразу, в том числе на сервере — тот
-  же баг, что был исправлен в `createLazyComponent` (`@letar/forms`, v2.7.1, см.
-  `.claude/docs/letar-forms-lazy-component-ssr-stuck-suspense.md`). Раскрытие серверного
+  же баг, что был исправлен в `createLazyComponent` (`@letar/forms`, v2.7.1). Раскрытие серверного
   Suspense-boundary React делает через reveal-script, батчащий DOM-swap через
   `requestAnimationFrame` — в скрытой/фоновой вкладке (типично для headless e2e) rAF не тикает,
   и boundary виснет навсегда без ошибок в консоли. Фикс — тот же mounted-гейт: `<Suspense>`
@@ -438,7 +432,7 @@
 
 ### Added
 
-- **Паритет с `@letar/forms` закрыт: 56/56 полей (Фаза 8, Этап 6).** Девять полей, отложенных
+- **Паритет с `@letar/forms` закрыт: 56/56 полей.** Девять полей, отложенных
   из-за `use-mask-input` (WebKit-баг, см. CHANGELOG `@letar/forms`), портированы поверх
   собственного движка масок `@letar/forms-core/mask`: `FieldMaskedInput`, `FieldCreditCard`,
   `FieldINN`, `FieldKPP`, `FieldOGRN`, `FieldSNILS`, `FieldPassport`, `FieldBIK`,
@@ -478,7 +472,7 @@
   (один entry `.`, все peer'ы `external`, `@letar/forms-core`/`@letar/forms-react` вбандлены через
   `noExternal` + `dts.resolve`), `package.publish.json` (`peerDependenciesMeta` с `optional: true`
   для per-field Radix/`@tiptap/*`/`@tanstack/react-table`), `scripts/write-publish-package-json.mjs`,
-  `tsconfig.publish.json`, `LICENSE`. Nx-таргеты `build:npm`/`publish:npm` по образцу `libs/forms`.
+  `tsconfig.publish.json`, `LICENSE`. Nx-таргеты `build:npm`/`publish:npm` по образцу `@letar/forms`.
   Проверено: `nx run @letar/forms-shadcn:build:npm` даёт рабочий `dist/` (index.js 167 KB + 2
   lazy-чанка для RichText/DataGrid, декларации 81 KB).
 
@@ -490,8 +484,7 @@
   знаменатель (реальный подсчёт по файлам `@letar/forms`, включая `City` и 7 document-полей), но
   числитель ошибочно включал 9 полей, которые фактически не портированы (backlog:
   `FieldMaskedInput`, `FieldCreditCard`, 7 document-полей — ждут исследовательскую сессию по
-  замене `use-mask-input`). Найдено при release-ready ревизии (тред agent-mail
-  `forms-phase7-3-shadcn`), решение зафиксировано координатором `QuietRidge`: знаменатель не
+  замене `use-mask-input`). Найдено при release-ready ревизии: знаменатель не
   занижаем, поправляем числитель и формулировку.
 
 ## [0.30.0] - 2026-08-11
@@ -610,9 +603,8 @@
 
 ### Added
 
-- **`FieldRichText`** — пятое, последнее из приоритетного списка координатора (Signature ✅ →
-  FileUpload ✅ → Steps ✅ → Table ✅ → **RichText** ✅, тред `forms-phase7-3-shadcn`) — паритет
-  по этому списку закрыт. WYSIWYG-редактор на Tiptap (`StarterKit` + `Underline` + `Link` +
+- **`FieldRichText`** — пятое, последнее из приоритетных полей (Signature, FileUpload, Steps,
+  Table, RichText) — паритет по этому списку закрыт. WYSIWYG-редактор на Tiptap (`StarterKit` + `Underline` + `Link` +
   `Placeholder`), портирован из `@letar/forms` (Chakra-скин): тот же домен (extensions, `onUpdate`,
   синхронизация `value` при внешнем изменении, `outputFormat: 'html' | 'json'`), другая обвязка —
   native `<button>`-тулбар вместо `IconButton`/`HStack`, Tailwind arbitrary-selector'ы вместо
@@ -629,14 +621,13 @@
     disabled/readOnly, негативный контроль типов `toolbarButtons`. Клик по кнопке форматирования
     проверяется только на отсутствие краша — jsdom не реализует DOM Selection API до состояния,
     нужного ProseMirror, чтобы `toggleBold()` реально применился (аналог находки про
-    blur-события в `FieldTableEditor`, см. `libs/forms/PLAN.md` §7.3).
+    blur-события в `FieldTableEditor`).
 
 ## [0.17.0] - 2026-08-10
 
 ### Added
 
-- **`FieldTableEditor`** — четвёртое из приоритетного списка координатора (Signature ✅ →
-  FileUpload ✅ → Steps ✅ → **Table** ✅ → RichText, тред `forms-phase7-3-shadcn`). Инлайн-
+- **`FieldTableEditor`** — четвёртое из приоритетных полей. Инлайн-
   редактируемая таблица для array-полей, портирована из `@letar/forms` (Chakra-скин): та же
   логика (`use-table-columns`, `use-table-navigation`, `@letar/forms-core/table` и
   `@letar/forms-core/schema` утилиты, все без изменений), другая разметка (native `<table>` +
@@ -666,8 +657,7 @@
 
 ### Added
 
-- `FormSteps` — мультистеп compound-компонент форм-уровня (beta), третий из приоритетного списка
-  координатора (Signature → FileUpload → **Steps** → Table → RichText). Не `createField()`-поле —
+- `FormSteps` — мультистеп compound-компонент форм-уровня (beta), третий из приоритетных компонентов. Не `createField()`-поле —
   та же категория, что `Form.Steps` у Chakra-версии: `FormSteps`, `FormSteps.Step`,
   `FormSteps.Indicator`, `FormSteps.Navigation`, `FormSteps.CompletedContent`. Работает поверх
   `useDeclarativeForm()` из `@letar/forms-react` напрямую — не требует `createForm()`/`Form`
@@ -837,15 +827,15 @@
 - **`uikit-shadcn.tsx` разбит на отдельные примитивы.** Реализация `UIKit`-контракта
   (`FieldRoot`/`FieldLabel`/`FieldError`/`Input`/`Checkbox`/`Select` + extended-набор) вынесена
   из одного файла в отдельные модули по примитиву — тот же принцип организации, что у
-  Chakra-скина (`libs/forms/src/lib/declarative/form-fields/base/`). Публичный API не изменился.
+  Chakra-скина (`@letar/forms`). Публичный API не изменился.
 
 ## [0.4.2] - 2026-08-09
 
 ### Docs
 
 - Зафиксирован триггер выноса shadcn CSS-переменных в отдельный файл: как только появится второй
-  потребитель пакета (Vue-пруф Фазы 7.8, showcase-приложение), набор переменных из
-  `apps/form-develop-app-shadcn/src/app/globals.css` переедет в библиотеку как
+  потребитель пакета (например, Vue-пруф или демо-приложение), набор переменных из
+  демо-приложения переедет в библиотеку как
   `@letar/forms-shadcn/styles.css`.
 
 ## [0.4.1] - 2026-08-09
@@ -884,9 +874,9 @@
 
 ### Added
 
-- Каркас `@letar/forms-shadcn` (Фаза 7.3, Шаг 5): `shadcnUIKit` на прямых Radix-примитивах +
+- Каркас `@letar/forms-shadcn` (первый выпуск): `shadcnUIKit` на прямых Radix-примитивах +
   `cva`/`tailwind-merge` (не `shadcn` CLI), первые три поля — `FieldString`, `FieldCheckbox`,
   `FieldSelect`.
 - Композиционный слой (`createField`, `FieldWrapper`, `FieldErrorBoundary`) переиспользован из
   `@letar/forms-react` без изменений — вторая реализация `UIKit`-контракта не потребовала правок
-  ни в `forms-core`, ни в `forms-react`. Это и есть верификация архитектуры Фазы 7.1.
+  ни в `forms-core`, ни в `forms-react`. Это и есть верификация архитектуры.
