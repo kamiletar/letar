@@ -34,7 +34,7 @@
 // ⚠️ В CI это не запускается и запускаться не может: приватные submodule там
 // намеренно не выкачиваются (см. шапку .github/workflows/ci.yml), а на пустом
 // каталоге проверять нечего. Точки вызова — периодический прогон
-// (агент monorepo-health-check) и момент заведения/правки .gitignore submodule
+// (bun scripts/check-all.mjs) и момент заведения/правки .gitignore submodule
 // (.claude/rules/git.md).
 
 import { execFileSync } from 'node:child_process'

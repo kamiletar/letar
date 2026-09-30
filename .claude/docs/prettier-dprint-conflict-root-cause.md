@@ -41,7 +41,8 @@ Prettier как пакет в репозитории не подключён —
    команда): `.claude/commands/letar.md`, `.claude/commands/workflow/code-review.md`,
    `.claude/commands/workflow/refactor.md`, `.claude/agents/code-quality-gate.md`,
    `.claude/agents/refactor-expert.md`, `.claude/skills/nx-monorepo/SKILL.md`,
-   `.claude/skills/nx-monorepo/reference/commands.md` — последний прямо утверждал, что
+   `.claude/skills/nx-monorepo/reference/commands.md` (`workflow/code-review.md`,
+   `workflow/refactor.md` и `code-quality-gate.md` удалены аудитом скилов 2026-09-30) — последний прямо утверждал, что
    `nx format <project>` резолвится в таргет `project.json` («~30x быстрее Prettier»), что
    неверно: это разные команды, совпавшие именем.
 6. **`scripts/hooks/pre-commit-dprint-check.sh`** (добавлен 13.08.2026, `db7a819e`) —

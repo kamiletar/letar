@@ -826,7 +826,7 @@ services:
 
 **Полная документация:** [backup-architecture.md](/.claude/docs/backup-architecture.md)
 
-**При добавлении нового приложения с БД** — обязательно выполнить чеклист из `deployment-assistant` → «Чеклист: бекапы при деплое». Вкратце:
+**При добавлении нового приложения с БД** — обязательно выполнить чеклист:
 
 1. Добавить в `APP_CONFIG` (`apps/dashboard-agent/src/lib/database.ts`)
 2. Добавить в `SERVER_APPS` (`apps/dashboard-agent/src/lib/server-config.ts`)

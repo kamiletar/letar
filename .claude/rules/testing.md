@@ -78,5 +78,5 @@ dev-сервер и прогон окажется ложным).
 
 ## Документация
 
-→ **Skill: `test-generator`** — паттерны Vitest и Playwright
+→ Паттерны unit-тестов — `.claude/docs/unit-testing.md`; E2E-сценарии пишет агент `e2e-test-writer`
 → См. `.claude/docs/e2e-testing.md` для особенностей WebKit и Portal компонентов
