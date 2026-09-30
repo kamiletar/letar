@@ -373,6 +373,21 @@ const CHECKS = [
     doc: '.claude/docs/tsgo-stray-declarations.md',
   },
   {
+    id: 'public-domains',
+    group: 'hygiene',
+    title: 'публичные *.md без доменов коммерческих приложений и реквизитов продавцов',
+    run: ['node', ['scripts/check-public-domains.mjs']],
+    // gate: правило public-repo-hygiene держалось на дисциплине и не удержалось — на
+    // 2026-09-30 в 26 публичных md нашлись реальные домены и два ИНН, часть из них в
+    // истории с июля. Проверка по хешам (scripts/data/private-domains.sha256), поэтому
+    // приватный submodule не нужен и в CI покрытие полное. Область — только *.md: домены в
+    // nginx/traefik/коде функциональны. Та же проверка на коммит-пути (--staged) —
+    // scripts/hooks/pre-commit-public-domains.sh.
+    severity: 'gate',
+    ci: 'full',
+    doc: '.claude/rules/public-repo-hygiene.md',
+  },
+  {
     id: 'zmodel-regex-backslashes',
     group: 'hygiene',
     title: 'обратные слэши в @regex/form.props.pattern всех .zmodel (одиночный слэш съедается Langium)',

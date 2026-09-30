@@ -12,6 +12,7 @@
 #                                   после случайного Prettier-форматирования `nx format`)
 #   - pre-commit-deps-integrity.sh — целостность зависимостей (патчи + peer), запускается
 #                                   ТОЛЬКО если в коммите есть bun.lock/package.json
+#   - pre-commit-public-domains.sh — домены и ИНН коммерческих приложений в публичных *.md
 #   - pre-commit-docs-index.sh   — индекс документации (каждый .claude/docs/*.md упомянут и в
 #                                   CLAUDE.md, и в INDEX.md; ссылки живы), запускается ТОЛЬКО
 #                                   если в коммите есть .claude/docs/*.md или CLAUDE.md;
@@ -65,6 +66,8 @@ install_into() {
   cp "$SRC_DIR/pre-commit-section-number-check.sh" "$hooks_dir/_pre-commit-section-number-check.sh"
   cp "$SRC_DIR/../check-section-numbers.mjs" "$hooks_dir/_check-section-numbers.mjs"
   cp "$SRC_DIR/pre-commit-stray-dts-check.sh" "$hooks_dir/_pre-commit-stray-dts-check.sh"
+  cp "$SRC_DIR/pre-commit-public-domains.sh" "$hooks_dir/_pre-commit-public-domains.sh"
+  cp "$SRC_DIR/../check-public-domains.mjs" "$hooks_dir/_check-public-domains.mjs"
   cp "$SRC_DIR/../check-stray-dts.mjs" "$hooks_dir/_check-stray-dts.mjs"
   # check-section-numbers.mjs, check-stray-dts.mjs и check-staged-syntax.mjs импортируют './lib/repo-root.mjs'
   # относительно своего расположения — рядом с копией в hooks_dir нужна и копия lib/.
@@ -74,7 +77,8 @@ install_into() {
     "$hooks_dir/_pre-commit-semgrep.sh" "$hooks_dir/_pre-commit-dprint-check.sh" \
     "$hooks_dir/_pre-commit-deps-integrity.sh" "$hooks_dir/_pre-commit-docs-index.sh" \
     "$hooks_dir/_pre-commit-schema-migration-check.sh" "$hooks_dir/_pre-commit-section-number-check.sh" \
-    "$hooks_dir/_pre-commit-stray-dts-check.sh" "$hooks_dir/_pre-commit-syntax-check.sh"
+    "$hooks_dir/_pre-commit-stray-dts-check.sh" "$hooks_dir/_pre-commit-syntax-check.sh" \
+    "$hooks_dir/_pre-commit-public-domains.sh"
 
   cat > "$hooks_dir/pre-commit" <<'DISPATCH'
 #!/usr/bin/env bash
@@ -108,6 +112,9 @@ if [[ $status -eq 0 ]]; then
   bash "$DIR/_pre-commit-stray-dts-check.sh" || status=$?
 fi
 if [[ $status -eq 0 ]]; then
+  bash "$DIR/_pre-commit-public-domains.sh" || status=$?
+fi
+if [[ $status -eq 0 ]]; then
   bash "$DIR/_pre-commit-sops.sh" || status=$?
 fi
 exit $status
@@ -130,7 +137,7 @@ exec bash "$DIR/_pre-push-submodule-check.sh" "$@"
 PUSH_DISPATCH
   chmod +x "$hooks_dir/pre-push"
 
-  echo "✅ $label → $hooks_dir/pre-commit (scope-guard + syntax-check + semgrep + dprint-check + deps-integrity + docs-index + schema-migration-check + section-number-check + stray-dts-check + sops)"
+  echo "✅ $label → $hooks_dir/pre-commit (scope-guard + syntax-check + semgrep + dprint-check + deps-integrity + docs-index + schema-migration-check + section-number-check + stray-dts-check + public-domains + sops)"
   echo "   $label → $hooks_dir/pre-push (submodule-check)"
 }
 
