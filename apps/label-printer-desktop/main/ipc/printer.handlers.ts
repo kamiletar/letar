@@ -14,7 +14,7 @@ import {
 } from '@letar/label-printer-core'
 import { exec as execCb } from 'child_process'
 import { ipcMain } from 'electron'
-import { readdirSync, readFileSync } from 'fs'
+import { readdirSync } from 'fs'
 import { promisify } from 'util'
 import type { PrinterStatus, PrintResult, TemplateInfo } from '../../shared/types'
 import { settingsService } from '../services/settings.service'
@@ -194,7 +194,7 @@ export function registerPrinterHandlers(): void {
 
         // Читаем шаблон этикетки
         logger.info('Reading template...')
-        const templateBuffer = readFileSync(labelConfig.templatePath)
+        const templateBuffer = await ImageGeneratorService.loadTemplateBuffer(labelConfig.templatePath)
         logger.info('Template read', { size: templateBuffer.length })
 
         // Генерируем изображение этикетки

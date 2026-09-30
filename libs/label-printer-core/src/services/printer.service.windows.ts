@@ -258,7 +258,7 @@ export class WindowsPrinterService {
       let templateBuffer: Buffer | null = null
       if (this.labelConfig.templatePath && fs.existsSync(this.labelConfig.templatePath)) {
         this.logger.info('Loading template image', { path: this.labelConfig.templatePath })
-        templateBuffer = fs.readFileSync(this.labelConfig.templatePath)
+        templateBuffer = await ImageGeneratorService.loadTemplateBuffer(this.labelConfig.templatePath)
       } else {
         this.logger.info('No template configured, using white background')
       }

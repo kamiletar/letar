@@ -4,6 +4,7 @@ import * as path from 'path'
 import type { LabelConfig } from '../config/config.schema'
 import type { MarkingCode } from '../models/marking-code.model'
 import { BarcodeService } from './barcode.service'
+import { ImageGeneratorService } from './image-generator.service'
 
 // Тип изображения Jimp
 type JimpImage = Awaited<ReturnType<typeof Jimp.read>>
@@ -31,7 +32,7 @@ export class ImageService {
     }
 
     // Load template
-    const template: JimpImage = await Jimp.read(config.templatePath)
+    const template: JimpImage = await Jimp.read(await ImageGeneratorService.loadTemplateBuffer(config.templatePath))
 
     // Generate and add DataMatrix
     if (config.elements.datamatrix.enabled) {

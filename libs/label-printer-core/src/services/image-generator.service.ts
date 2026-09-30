@@ -1,5 +1,7 @@
 import bwipjs from 'bwip-js/node'
 import { Jimp } from 'jimp'
+import { existsSync, readFileSync } from 'node:fs'
+import { dirname, join } from 'node:path'
 import type { LabelConfig } from '../config/config.schema'
 import { Logger } from '../utils/logger'
 
@@ -96,6 +98,26 @@ export class ImageGeneratorService {
       logger.error('Failed to generate GTIN barcode', { error, gtin })
       throw error
     }
+  }
+
+  /**
+   * Прочитать шаблон этикетки и наложить на его низ файл реквизитов продавца.
+   *
+   * Реквизиты (ИП, ИНН, декларация, сайт) не хранятся в публичном репозитории: лежат рядом с
+   * шаблоном как `label-footer.png` (в .gitignore). Если файла нет — шаблон возвращается как есть
+   * (этикетка без реквизитов; для боевой печати файл обязателен).
+   */
+  static async loadTemplateBuffer(templatePath: string): Promise<Buffer> {
+    const templateBuffer = readFileSync(templatePath)
+    const footerPath = join(dirname(templatePath), 'label-footer.png')
+    if (!existsSync(footerPath)) {
+      Logger.getInstance().warn('Файл реквизитов label-footer.png не найден — этикетка без реквизитов', { footerPath })
+      return templateBuffer
+    }
+    const template = await Jimp.read(templateBuffer)
+    const footer = await Jimp.read(readFileSync(footerPath))
+    template.composite(footer, 0, template.bitmap.height - footer.bitmap.height)
+    return await template.getBuffer('image/png')
   }
 
   /**

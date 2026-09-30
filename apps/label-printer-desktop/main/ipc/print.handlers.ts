@@ -18,7 +18,6 @@ import {
 } from '@letar/label-printer-core'
 import type { IpcMainInvokeEvent } from 'electron'
 import { ipcMain } from 'electron'
-import { readFileSync } from 'fs'
 import type { ValidationResult } from '../../shared/types'
 import { settingsService } from '../services/settings.service'
 import { getLogger } from '../utils/logger-helper'
@@ -127,7 +126,7 @@ export function registerPrintHandlers(): void {
       const labelConfig = await settingsService.getLabelConfig()
 
       // BITMAP режим — генерация PNG, печать через Windows GDI
-      const templateBuffer = readFileSync(labelConfig.templatePath)
+      const templateBuffer = await ImageGeneratorService.loadTemplateBuffer(labelConfig.templatePath)
 
       // Генерируем изображение этикетки (без retry — CPU-bound операция)
       const imageBuffer = await ImageGeneratorService.generateLabelImage(

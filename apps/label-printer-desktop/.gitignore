@@ -9,3 +9,6 @@ tsconfig.tsbuildinfo
 /.next/
 /renderer/.next/
 /output/
+
+# Реквизиты продавца на этикетке — не в публичном репо (см. .claude/rules/public-repo-hygiene.md)
+/templates/label-footer.png
