@@ -175,6 +175,38 @@ export async function createSupplier(input: unknown) {
 
 Для правки (`update`) — `SupplierUpdateFormSchema` (все поля `.partial()`).
 
+## 5. `.pick()` от `UpdateFormSchema` теряет подпись, плейсхолдер и тултипы (найдено 2026-09-30)
+
+Узкополевая форма (одно поле общей модели) берёт схему через `.pick()`. Если пикать из
+`<Model>UpdateFormSchema`, поле рендерится **без `<label>`, без плейсхолдера и без тултипа** —
+значение при этом сохраняется верно, typecheck и lint зелёные.
+
+**Механизм.** `UpdateFormSchema = CreateFormSchema.partial()`. `.partial()` заворачивает каждое
+поле в новый `ZodOptional`, а `.meta()` в Zod v4 хранится в реестре по **идентичности объекта**
+схемы и через обёртки не разворачивается: у новой обёртки меты нет. `@letar/forms-core`
+(`getFieldMeta`) сначала смотрит мету на самой схеме, потом на развёрнутой — но развёртка идёт к
+внутренней схеме, а мета у сгенерированного поля висит на внешней (`.nullable().optional().meta(…)`),
+которую `.partial()` прячет под собой.
+
+```ts
+// ❌ label/placeholder/tooltip пропали
+export const MySchema = ModelUpdateFormSchema.pick({ field: true })
+// ✅ мета цела; для nullable-полей валидация у Create и Update одинакова
+export const MySchema = ModelCreateFormSchema.pick({ field: true })
+```
+
+Для **обязательных** полей Create ещё и сохраняет обязательность (Update сделал бы поле optional).
+Поэтому правило одно: `.pick()` — всегда из `Create`.
+
+**Проверка.** В сгенерированном файле у поля есть `.meta({ ui: { title: … } })`, а у пикнутой
+схемы `Schema.shape.<поле>.meta()` не `undefined`; в браузере — у формы есть `<label>`
+(`form.querySelector('label')`). Прямой `UpdateFormSchema` (без `.pick()`) для форм, которым нужна
+подпись, страдает тем же.
+
+**Как поймали.** При переводе очередной одно-полевой формы DOM показал поле без подписи;
+сравнение со старой ручной схемой подтвердило регрессию. Дефект уже сидел в двух ранее
+закоммиченных конверсиях той же серии — их исправили отдельным коммитом.
+
 ## Чеклист после правки директив
 
 1. `nx zenstack:generate <app>` и внимательно прочитать вывод: warning плагина — единственный
@@ -182,3 +214,5 @@ export async function createSupplier(input: unknown) {
 2. Открыть `src/generated/form-schemas/<Model>.form.ts`: паттерны `.regex(/…/)` без потерянных
    слэшей, `tooltip` у нужных полей, `fieldProps` с `minorUnitScale`.
 3. Живой прогон: очистить необязательное поле с email/URL и сохранить — форма должна уходить.
+4. Узкополевая форма через `.pick()` — схема из `...CreateFormSchema`, не из `...UpdateFormSchema`;
+   в DOM у поля есть `<label>` и плейсхолдер (п. 5).
