@@ -9,7 +9,7 @@ description: Чеклист подготовки приложения и отп�
 
 ⛔ **Деплой самостоятельно ЗАПРЕЩЁН** — ни `deploy-affected.sh`, ни `docker compose`, ни SSH.
 Полная модель координации, шаблон запроса и что делать, если deploy-agent-dev молчит 10 минут —
-`.claude/rules/deploy-coordination.md`. Этот файл — только контекст для команды `/infra:deploy`.
+`.claude/rules/deploy-coordination.md`. Этот файл — только инструкции навыка `/infra-deploy`.
 
 ## Когда использовать
 

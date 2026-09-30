@@ -12,7 +12,7 @@ allowed-tools: Bash, Read, Grep, Glob
 
 **Имя приложения:** $ARGUMENTS
 
-Для веб-приложений эта инструкция не подходит — там `/create:new-app`. Общие грабли платформы —
+Для веб-приложений эта инструкция не подходит — там `/create-new-app`. Общие грабли платформы —
 [.claude/rules/electron.md](/.claude/rules/electron.md), они обязательны к прочтению до первого
 коммита.
 
@@ -198,9 +198,9 @@ nx g @letar/generators:e2e-suite <name>
 
 - [ ] Иконка: заменить `resources/icon.svg` → `node scripts/generate-icons.mjs`
 - [ ] `PLAN.md` приложения: занести реальные фазы вместо шаблонных
-- [ ] `.claude/commands/<name>.md` — команда воркфлоу (шаблон в `/create:new-app`)
+- [ ] `.agents/skills/<name>/SKILL.md` — общий навык воркфлоу (шаблон в `/create-new-app`)
 - [ ] Приватное приложение → git submodule `kamiletar/letar-private-<name>` (пошагово — в
-      `/create:new-app` § «Приватные приложения»; `.gitignore` положить **до** первого `git add`)
+      `/create-new-app` § «Приватные приложения»; `.gitignore` положить **до** первого `git add`)
 - [ ] Обновить `paths:` в [.claude/rules/electron.md](/.claude/rules/electron.md) — добавить
       `apps/<name>/**`, иначе правила платформы не подхватятся в этой папке
 - [ ] Сборка: `nx build:win <name>` (в генераторе только Windows-таргет — mac/linux дописывать
