@@ -41,7 +41,7 @@ CI, координация агентов, документация — всё, 
 | [PLAN-INFRA-4.md](/PLAN-INFRA-4.md) | §62–§75      | канарейка (второй заход), GlitchTip, ревизия конфигурации агентов     |
 | [PLAN-INFRA-5.md](/PLAN-INFRA-5.md) | §76–§114     | CI-гейт test/eslint, Agent Mail root cause, `zenstack:generate`       |
 | [PLAN-INFRA-6.md](/PLAN-INFRA-6.md) | §115–§156    | Nx-граф/worktree-инциденты, гейты graph/pin-drift, аудит `.claude`    |
-| [PLAN-INFRA-7.md](/PLAN-INFRA-7.md) | §157–§205    | сборка на s1/релиз на s2, MCP SDK v2, деплой-барьеры, chakra-provider |
+| [PLAN-INFRA-7.md](/PLAN-INFRA-7.md) | §157–§207    | сборка на s1/релиз на s2, MCP SDK v2, деплой-барьеры, chakra-provider |
 
 Нужен конкретный `§NN` — ищи диапазон в таблице выше и открывай соответствующий файл. Это
 **единственная** карта диапазонов: в самих частях её копий нет.
