@@ -96,7 +96,7 @@ nx format archetest             # Форматирование
 
 - [Паттерны archetest](./docs/app-patterns.md) ⭐ — производный индекс в `_lib`, двуязычие
   психологического контента парами полей, именование шкал через `getScaleName`
-- [Монорепо CLAUDE.md](../../CLAUDE.md) — инструкции для разработки
+- [Монорепо AGENTS.md](../../AGENTS.md) — инструкции для разработки
 - [Environment](../../.claude/docs/environment.md) — окружение и порты
 - [Database](../../.claude/docs/database.md) — работа с БД
 
