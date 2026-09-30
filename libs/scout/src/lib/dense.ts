@@ -231,7 +231,7 @@ export async function hybridHits(engine: Bm25, query: string, options: HybridOpt
   }
   if (options.rerank) {
     try {
-      const candidates = hits.filter((h) => !['skill', 'command', 'agent'].includes(h.card.kind)).slice(0, rerankDepth)
+      const candidates = hits.filter((h) => !['skill', 'agent'].includes(h.card.kind)).slice(0, rerankDepth)
       const scores = await rerankTexts(query, candidates.map((h) => cardRerankText(h.card)), options.rerank)
       const reranked = new Map(candidates.map((h, i) => [h.card.id, 1 + scores[i]]))
       hits = hits

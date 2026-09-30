@@ -21,6 +21,7 @@ import { advisableTools, type EvalCase } from './eval'
 import { freshIndex } from './hook-core'
 import { findRepoRoot } from './index-store'
 import { scoutDataDir, scoutHome } from './paths'
+import { canonicalTools } from './tool-names'
 
 /** Запись эталона: инструменты, которые сэкономят агенту работу в этой задаче */
 export interface ToolGoldRow {
@@ -50,7 +51,7 @@ export function toolCandidates(cards: IndexedCard[]): ToolCandidate[] {
     if (!names.has(c.title) || c.scope || seen.has(c.title)) {
       continue
     }
-    if (c.kind !== 'skill' && c.kind !== 'command' && c.kind !== 'agent') {
+    if (c.kind !== 'skill' && c.kind !== 'agent') {
       continue
     }
     seen.add(c.title)
@@ -138,10 +139,12 @@ function main() {
   }
 }
 
-/** Читает эталон судьи; нет файла — пусто */
+/** Читает эталон судьи, имена — через `TOOL_RENAMES` (удалённые пункты → пустой ответ); нет файла — пусто */
 export function loadToolGold(dataDir: string = scoutDataDir()): ToolGoldRow[] {
   const file = join(dataDir, 'tool-gold.jsonl')
-  return existsSync(file) ? readJsonl<ToolGoldRow>(file) : []
+  return existsSync(file)
+    ? readJsonl<ToolGoldRow>(file).map((r) => ({ ...r, tools: canonicalTools(r.tools) }))
+    : []
 }
 
 if (import.meta.main) {

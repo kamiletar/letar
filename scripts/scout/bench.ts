@@ -57,6 +57,7 @@ import { latencySuite } from './suites/latency'
 import { robustSuite } from './suites/robust'
 import { toolsSuite } from './suites/tools'
 import type { Suite } from './suites/types'
+import { canonicalTools } from './tool-names'
 import { loadVectorStore } from './vectors'
 
 export type SuiteName = 'docs' | 'forms' | 'latency' | 'robust' | 'hook' | 'judge' | 'app' | 'edit' | 'tools' | 'clm'
@@ -163,7 +164,9 @@ async function main() {
   )
 
   const casesFile = join(dataDir, 'eval-cases.jsonl')
-  const cases = existsSync(casesFile) ? readJsonl<EvalCase>(casesFile) : []
+  const cases = existsSync(casesFile)
+    ? readJsonl<EvalCase>(casesFile).map((c) => ({ ...c, goldTools: canonicalTools(c.goldTools ?? []) }))
+    : []
   if (!cases.length && suites.some((x) => ['docs', 'latency', 'forms'].includes(x))) {
     console.error(`Нет случаев в ${casesFile} — docs и latency пропущены (bun scripts/scout/eval.ts --out ...)`)
   }

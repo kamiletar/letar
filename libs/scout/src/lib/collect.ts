@@ -45,13 +45,12 @@ export const PATTERN_HINTS: Record<string, string> = {
 }
 
 /**
- * Служебные команды: роли агентов и завершение сессии запускает человек, а не агент по задаче,
+ * Служебные скилы: роли агентов и завершение сессии запускает человек, а не агент по задаче,
  * поэтому в индексе они есть (поиск их видит), но справка их не советует.
  */
 const SERVICE_COMMANDS = new Set([
   'end-session',
   'deploy-agent',
-  'sync-env',
   'forms-dev',
   'forms-coordinator',
   'ui-coordinator',
@@ -60,6 +59,23 @@ const SERVICE_COMMANDS = new Set([
   'letar',
   'repo',
 ])
+
+/**
+ * Почему скил не советуем: у приложения (`apps/<имя>`) своя статическая справка, служебные скилы
+ * запускает человек, а `disable-model-invocation: true` модель вызвать не может вообще.
+ */
+function skillScope(root: string, name: string, data: Record<string, string>): Card['scope'] {
+  if (existsSync(join(root, 'apps', name))) {
+    return 'app'
+  }
+  if (SERVICE_COMMANDS.has(name) || /устарел/i.test(data.description ?? '')) {
+    return 'service'
+  }
+  if (data['disable-model-invocation']?.toLowerCase() === 'true') {
+    return 'user-only'
+  }
+  return undefined
+}
 
 /** Служебные файлы каталога доков: сами по себе не док */
 const SKIP_DOC_FILES = new Set(['INDEX.md', 'README.md'])
@@ -79,8 +95,9 @@ function listMarkdown(root: string, dir: string): string[] {
     .map((e) => `${dir}/${e.name}`)
 }
 
-function listToolFiles(root: string, kind: ToolKind): Array<{ path: string; name: string; nested?: boolean }> {
+function listToolFiles(root: string, kind: ToolKind): Array<{ path: string; name: string }> {
   if (kind === 'skill') {
+    // Источник скилов — `.agents/skills`; `.claude/skills` — производная копия (sync-agent-skills.ts), её не читаем
     const dir = '.agents/skills'
     const full = join(root, dir)
     if (!existsSync(full)) {
@@ -88,31 +105,17 @@ function listToolFiles(root: string, kind: ToolKind): Array<{ path: string; name
     }
     return readdirSync(full, { withFileTypes: true })
       .filter((e) => e.isDirectory() && existsSync(join(full, e.name, 'SKILL.md')))
-      .map((e) => ({ path: `${dir}/${e.name}/SKILL.md`, name: e.name, nested: false }))
+      .map((e) => ({ path: `${dir}/${e.name}/SKILL.md`, name: e.name }))
   }
-  const dir = kind === 'command' ? '.claude/commands' : '.claude/agents'
-  const files = listMarkdown(root, dir).map((path) => ({
+  return listMarkdown(root, '.claude/agents').map((path) => ({
     path,
     name: path.replace(/^.*\//, '').replace(/\.md$/, ''),
-    nested: false,
   }))
-  if (kind === 'command') {
-    // Команды из подкаталогов первого уровня харнесс зовёт `/<каталог>:<файл>`
-    const full = join(root, dir)
-    if (existsSync(full)) {
-      for (const sub of readdirSync(full, { withFileTypes: true }).filter((e) => e.isDirectory())) {
-        for (const path of listMarkdown(root, `${dir}/${sub.name}`)) {
-          files.push({ path, name: `${sub.name}:${path.replace(/^.*\//, '').replace(/\.md$/, '')}`, nested: true })
-        }
-      }
-    }
-  }
-  return files
 }
 
 /**
  * Все карточки монорепо: доки `.claude/docs` (без `external/`) и доки из INDEX.md вне его,
- * правила, скилы, команды, субагенты. Корпус — только `.claude/` и то, на что ссылается индекс.
+ * правила, скилы (`.agents/skills`), субагенты. Корпус — только `.claude/` и то, на что ссылается индекс.
  */
 export function collectCards(root: string): Card[] {
   const entries = new Map<string, IndexEntry>()
@@ -161,18 +164,17 @@ export function collectCards(root: string): Card[] {
       ),
     )
   }
-  for (const kind of ['skill', 'command', 'agent'] as const) {
-    for (const { path, name, nested } of listToolFiles(root, kind)) {
+  for (const kind of ['skill', 'agent'] as const) {
+    for (const { path, name } of listToolFiles(root, kind)) {
       const markdown = read(root, path)
       if (markdown === undefined) {
         continue
       }
       const card = toolCard(kind, path, markdown, name)
-      if (kind === 'command') {
-        if (!nested && existsSync(join(root, 'apps', name))) {
-          card.scope = 'app'
-        } else if (SERVICE_COMMANDS.has(name) || /устарел/i.test(parseFrontmatter(markdown).data.description ?? '')) {
-          card.scope = 'service'
+      if (kind === 'skill') {
+        const scope = skillScope(root, name, parseFrontmatter(markdown).data)
+        if (scope) {
+          card.scope = scope
         }
       }
       cards.push(card)

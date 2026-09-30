@@ -119,8 +119,8 @@ function fixtureEngine() {
       'x',
     ),
     toolCard(
-      'command',
-      '.claude/commands/deploy-check.md',
+      'skill',
+      '.agents/skills/deploy-check/SKILL.md',
       '---\ndescription: проверка деплоя\n---\n# Деплой',
       'deploy-check',
     ),
@@ -319,7 +319,7 @@ describe('hybridHits', () => {
 
 describe('исправления по ревью', () => {
   it('BM25 не даёт NaN на словах, совпадающих с членами Object.prototype', () => {
-    const card = toolCard('command', '.claude/commands/x.md', '---\ndescription: constructor toString\n---', 'x')
+    const card = toolCard('skill', '.agents/skills/x/SKILL.md', '---\ndescription: constructor toString\n---', 'x')
     const index = buildIndex([card], 'test')
     for (const engine of [new Bm25(index), new Bm25(JSON.parse(JSON.stringify(index)))]) {
       const hits = engine.search('constructor')
@@ -336,7 +336,7 @@ describe('исправления по ревью', () => {
 
   it('embedHash стабилен, зависит от текста карточки и заполняется в индексе', () => {
     const make = (description: string) =>
-      toolCard('command', '.claude/commands/x.md', `---\ndescription: ${description}\n---`, 'x')
+      toolCard('skill', '.agents/skills/x/SKILL.md', `---\ndescription: ${description}\n---`, 'x')
     const a = make('первый текст')
     expect(embedHash(a)).toMatch(/^[0-9a-f]{16}$/)
     expect(embedHash(a)).toBe(embedHash(make('первый текст')))
@@ -396,12 +396,12 @@ describe('исправления по ревью', () => {
     }
   })
 
-  it('служебная команда — scope service, и раскладка не делает её инструментом', () => {
+  it('служебный скил — scope service, и раскладка не делает его инструментом', () => {
     const command = (name: string, description: string) => ({
-      ...toolCard('command', `.claude/commands/${name}.md`, `---\ndescription: ${description}\n---`, name),
+      ...toolCard('skill', `.agents/skills/${name}/SKILL.md`, `---\ndescription: ${description}\n---`, name),
       scope: 'service' as const,
     })
-    const cards = [command('end-session', 'завершение сессии деплой'), command('sync-env', 'Устарела: деплой env')]
+    const cards = [command('end-session', 'завершение сессии деплой'), command('old-deploy', 'Устарел: деплой env')]
     const engine = new Bm25(JSON.parse(JSON.stringify(buildIndex(cards, 'test'))))
     expect(engine.cards.map((c) => c.scope)).toEqual(['service', 'service'])
     const hits = engine.search('деплой', 500)

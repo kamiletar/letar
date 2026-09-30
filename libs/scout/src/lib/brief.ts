@@ -28,9 +28,6 @@ function toolHow(tool: ToolHit): string {
   if (tool.kind === 'skill') {
     return `скил \`${tool.name}\` (Skill)`
   }
-  if (tool.kind === 'command') {
-    return `команда \`/${tool.name}\``
-  }
   return `субагент \`${tool.name}\` (Agent)`
 }
 
@@ -106,7 +103,7 @@ export function formatOneLine(result: ScoutResult): string {
   }
   if (result.tool) {
     const { kind, name } = result.tool
-    parts.push(kind === 'skill' ? `скил ${name}` : kind === 'command' ? `команда /${name}` : `агент ${name}`)
+    parts.push(kind === 'skill' ? `скил ${name}` : `агент ${name}`)
   }
   return parts.length ? `🔎 скаут: ${parts.join(', ')}` : ''
 }

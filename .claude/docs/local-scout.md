@@ -33,14 +33,32 @@
 | `scripts/scout/warmup.ts`        | прогрев эмбеддера и досчёт векторов; запускает хук `.claude/hooks/scout-warmup.ts` (SessionStart)                                                                                                                                                                                                                                           |
 | `scripts/scout/smoke.ts`         | дымовая проверка `scout-smoke` в `bun scripts/check-all.mjs`                                                                                                                                                                                                                                                                                |
 
-**Карточки:** док (slug, заголовок, аннотации из `INDEX.md` и `CLAUDE.md`, заголовки секций),
-секция дока (заголовок + тело, ссылка на её строку), правило `.claude/rules/*`, скил, команда,
-субагент (frontmatter), поле формы (строка каталога `libs/forms/docs/fields.md`, ссылка на
-подробный раздел о компоненте), паттерн формы (реестр `libs/form-mcp/src/data/pattern-registry.ts`,
-читается текстом). Доки `libs/forms/docs/*` и `libs/forms/README.md` индексируются как обычные.
-`.claude/docs/external/` не индексируется. Команды приложений
-(`/<app>`, у которых есть `apps/<app>`) в советы не попадают: у приложений будет своя статическая
-справка.
+**Карточки:** док (slug, заголовок, аннотации из `INDEX.md` и `AGENTS.md`, заголовки секций),
+секция дока (заголовок + тело, ссылка на её строку), правило `.claude/rules/*`, скил, субагент
+(frontmatter), поле формы (строка каталога `libs/forms/docs/fields.md`, ссылка на подробный раздел
+о компоненте), паттерн формы (реестр `libs/form-mcp/src/data/pattern-registry.ts`, читается
+текстом). Доки `libs/forms/docs/*` и `libs/forms/README.md` индексируются как обычные.
+`.claude/docs/external/` не индексируется.
+
+**Скилы** берутся из `.agents/skills/*/SKILL.md` (источник). `.claude/skills` — производная копия
+(`bun scripts/sync-agent-skills.ts`), её не читаем, иначе каждый скил был бы в индексе дважды.
+Вида «команда» больше нет: `.claude/commands` удалён при миграции инструкций 2026-09-30.
+В советы **не попадают** (карточка есть, `scope` задан — `collect.ts`, `skillScope`):
+
+- `app` — скил приложения (есть каталог `apps/<имя>`): у приложений своя статическая справка по
+  голой `/<app>`;
+- `service` — имя в `SERVICE_COMMANDS` (роли агентов, `end-session`, `letar`, `repo`…) или слово
+  «устарел» в описании: эти скилы запускает человек;
+- `user-only` — `disable-model-invocation: true` во frontmatter: модель такой скил вызвать не может.
+
+Старые имена (`infra:deploy`, `deployment-assistant`…) остались в эталоне `tool-gold.jsonl`,
+`eval-cases.jsonl` и истории `sessions-live.jsonl`. Файлы данных не переписываются: имена
+переводятся при чтении таблицей `scripts/scout/tool-names.ts` (`TOOL_RENAMES`: новое имя или `null`
+для удалённых пунктов — такой ответ эталона считается пустым).
+
+Каждая строка `logs/briefs.jsonl` несёт `scoutVersion` (`INDEX_VERSION` + 8 символов хеша
+`libs/scout/src` без тестов и `hook-core.ts`). `report.ts` печатает число справок по версиям и, если
+версий несколько, сводку по каждой; `--since <дата>` отрезает период.
 
 **Где лежит состояние** — вне репозитория, в `SCOUT_HOME` (по умолчанию `C:\ai\scout` на Windows):
 `index-<hash>.json` (на корень репо, ~3,6k карточек), `vectors.json` + `vectors.f32` (1024 измерения,

@@ -17,6 +17,7 @@ import { mentionedIn } from '../../libs/scout/src/index'
 import { arg } from './cli'
 import { mineSession } from './mine-transcripts'
 import { scoutHome } from './paths'
+import { canonicalTools } from './tool-names'
 
 /** Транскрипт, изменённый позже этого срока назад, считается сессией «в работе» */
 export const ACTIVE_WINDOW_MS = 30 * 60 * 1000
@@ -34,6 +35,8 @@ export interface BriefRow {
   tool?: string
   /** `app` — справка приложения по голой `/<app>`; нет поля — справка поиска */
   kind?: 'app'
+  /** Версия скаута (`INDEX_VERSION` + хеш кода) на момент справки; нет поля — запись до версионирования */
+  scoutVersion?: string
 }
 
 export type SessionStatus = 'ok' | 'no-transcript' | 'in-progress'
@@ -44,6 +47,7 @@ export interface SessionReport {
   mode: string
   shown: boolean
   kind?: 'app'
+  scoutVersion?: string
   queryLength: number
   suggested: string[]
   opened: string[]
@@ -159,6 +163,7 @@ export async function reportSession(row: BriefRow, file: string | undefined, now
     mode: row.mode ?? 'unknown',
     shown: Boolean(row.shown),
     kind: row.kind,
+    scoutVersion: row.scoutVersion,
     queryLength: query.length,
     suggested,
     opened: [],
@@ -182,7 +187,8 @@ export async function reportSession(row: BriefRow, file: string | undefined, now
   // У справки приложения запроса нет: новым считается всё прочитанное
   const openedNovel = row.kind === 'app' ? opened : opened.filter((p) => !mentionedIn(query, p))
   const suggestedSet = new Set(suggested)
-  const used = new Set([...rec.skills, ...rec.agents, ...rec.commands])
+  // История вызовов хранит старые имена (`infra:deploy`) — переводим в текущие
+  const used = new Set(canonicalTools([...rec.skills, ...rec.agents, ...rec.commands]))
   const toolName = row.tool?.slice(row.tool.indexOf(':') + 1)
   return {
     ...base,
@@ -224,6 +230,16 @@ export function summarize(reports: SessionReport[]): GroupSummary[] {
   })
 }
 
+/** Сколько справок (строк после `pickRows`) на каждую версию скаута; без поля — `без версии` */
+export function versionBreakdown(rows: BriefRow[]): Array<{ version: string; count: number }> {
+  const counts = new Map<string, number>()
+  for (const r of rows) {
+    const v = r.scoutVersion ?? 'без версии'
+    counts.set(v, (counts.get(v) ?? 0) + 1)
+  }
+  return [...counts.entries()].map(([version, count]) => ({ version, count })).sort((a, b) => b.count - a.count)
+}
+
 const pct = (v?: number) => (v === undefined ? '—' : `${Math.round(v * 100)}%`)
 
 async function main() {
@@ -249,6 +265,7 @@ async function main() {
     }; в работе: ${count('in-progress')}; `
       + `транскрипт не найден: ${count('no-transcript')}`,
   )
+  console.log(`Версии скаута: ${versionBreakdown(rows).map((v) => `${v.version} ×${v.count}`).join(', ') || '—'}`)
   console.log('группа | вид | сессий | со справкой | точность | полнота | до правки | инструмент | медиана запроса')
   for (const g of summary) {
     console.log(
@@ -256,6 +273,20 @@ async function main() {
         pct(g.beforeEdit)
       } | ${pct(g.toolRate)} | ${g.medianQueryLength}`,
     )
+  }
+  const versions = [...new Set(reports.map((r) => r.scoutVersion ?? 'без версии'))]
+  if (versions.length > 1) {
+    for (const v of versions) {
+      console.log(`
+[версия ${v}]`)
+      for (const g of summarize(reports.filter((r) => (r.scoutVersion ?? 'без версии') === v))) {
+        console.log(
+          `${g.group} | ${g.kind} | ${g.sessions} | ${g.withBrief} | ${pct(g.precision)} | ${pct(g.recall)} | ${
+            pct(g.beforeEdit)
+          } | ${pct(g.toolRate)} | ${g.medianQueryLength}`,
+        )
+      }
+    }
   }
   if (show > 0) {
     for (const r of reports.filter((x) => x.status === 'ok' && x.missed.length).slice(0, show)) {

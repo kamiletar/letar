@@ -26,6 +26,7 @@ import {
   type FormRanking,
   formRanking,
   fuseWithDense,
+  INDEX_VERSION,
   layoutHits,
   phraseRanking,
   type ScoutIndex,
@@ -492,6 +493,43 @@ function purgeOldLogs(dir: string, base: string, ext: string, now: number): void
   }
 }
 
+let cachedScoutVersion: string | undefined
+
+/** Файлы `.ts` каталога, рекурсивно, по имени — порядок не зависит от файловой системы */
+function listSourceFiles(dir: string): string[] {
+  return readdirSync(dir, { withFileTypes: true })
+    .sort((a, b) => (a.name < b.name ? -1 : 1))
+    .flatMap((e) =>
+      e.isDirectory()
+        ? listSourceFiles(join(dir, e.name))
+        : e.name.endsWith('.ts') && !e.name.endsWith('.spec.ts')
+        ? [join(dir, e.name)]
+        : []
+    )
+}
+
+/**
+ * Версия скаута для строки лога: `INDEX_VERSION` и короткий хеш содержимого `libs/scout/src` и
+ * `hook-core.ts`. По ней отчёт делит справки до и после правки кода (нельзя смешивать периоды A/B).
+ * Считается один раз на процесс; не смогли прочитать — `INDEX_VERSION-?`, лог от этого не падает.
+ */
+export function scoutVersion(): string {
+  if (cachedScoutVersion) {
+    return cachedScoutVersion
+  }
+  try {
+    const root = join(import.meta.dir, '..', '..')
+    const hash = createHash('sha1')
+    for (const file of [...listSourceFiles(join(root, 'libs/scout/src')), join(root, 'scripts/scout/hook-core.ts')]) {
+      hash.update(readFileSync(file))
+    }
+    cachedScoutVersion = `${INDEX_VERSION}-${hash.digest('hex').slice(0, 8)}`
+  } catch {
+    cachedScoutVersion = `${INDEX_VERSION}-?`
+  }
+  return cachedScoutVersion
+}
+
 export function appendLog(
   home: string,
   log: Record<string, unknown>,
@@ -517,6 +555,6 @@ export function appendLog(
   } catch {
     // не удалось ротировать — пишем в тот же файл
   }
-  appendFileSync(path, `${JSON.stringify(log)}\n`)
+  appendFileSync(path, `${JSON.stringify({ scoutVersion: scoutVersion(), ...log })}\n`)
   purgeOldLogs(dir, base, ext, now)
 }

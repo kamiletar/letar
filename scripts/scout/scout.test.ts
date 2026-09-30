@@ -27,7 +27,16 @@ import {
 } from './clm'
 import { catalogBrief, editGold, pathQueryText } from './edit-briefs'
 import { buildCases, evaluate, evaluateTools, toolRanking } from './eval'
-import { abGroup, appendLog, decide, LOG_MAX_BYTES, MAX_ATTEMPTS, runScoutHook, scoutQuery } from './hook-core'
+import {
+  abGroup,
+  appendLog,
+  decide,
+  LOG_MAX_BYTES,
+  MAX_ATTEMPTS,
+  runScoutHook,
+  scoutQuery,
+  scoutVersion,
+} from './hook-core'
 import { hubMetrics, spearman, topFrequency } from './hubs'
 import { indexPath } from './index-store'
 import { judgeGroups, judgeItems, loadLabels } from './judge'
@@ -384,7 +393,10 @@ describe('устойчивость хука', () => {
     expect(files).toHaveLength(2)
     const rotated = files.find((f) => f !== 'briefs.jsonl')
     expect(rotated).toMatch(/^briefs-\d{8}-\d{6}\.jsonl$/)
-    expect(readFileSync(join(home, 'logs', 'briefs.jsonl'), 'utf8')).toBe('{"n":2}\n')
+    expect(JSON.parse(readFileSync(join(home, 'logs', 'briefs.jsonl'), 'utf8'))).toEqual({
+      scoutVersion: scoutVersion(),
+      n: 2,
+    })
     expect(existsSync(join(home, 'logs', rotated as string))).toBe(true)
   })
 

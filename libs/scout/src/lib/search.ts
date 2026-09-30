@@ -16,7 +16,7 @@ export interface DocHit {
 }
 
 export interface ToolHit {
-  kind: 'skill' | 'command' | 'agent'
+  kind: 'skill' | 'agent'
   name: string
   path: string
   summary: string
@@ -96,7 +96,7 @@ export interface ScoutOptions {
 export const FORM_WORDS =
   /(?<![а-яё])(?:форм(?!ат|ул|ир|альн)|анкет|пол(?:е|я|ю|ей|ем|ях|ями?)(?![а-яё])|инпут|ввод(?![а-яё]))|\b(?:forms?|inputs?|fields?)\b/i
 
-const TOOL_KINDS = new Set(['skill', 'command', 'agent'])
+const TOOL_KINDS = new Set(['skill', 'agent'])
 const FORM_KINDS = new Set(['field', 'pattern'])
 
 /**

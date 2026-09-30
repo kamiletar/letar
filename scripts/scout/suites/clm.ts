@@ -88,7 +88,7 @@ export const clmSuite: Suite = async ({ engine, cases, run, deps, home, dataDir 
   const seenTool = new Set<string>()
   for (const c of engine.cards) {
     if (
-      advisable.has(c.title) && !c.scope && ['skill', 'command', 'agent'].includes(c.kind) && !seenTool.has(c.title)
+      advisable.has(c.title) && !c.scope && ['skill', 'agent'].includes(c.kind) && !seenTool.has(c.title)
     ) {
       seenTool.add(c.title)
       toolCards.push(c)

@@ -252,9 +252,9 @@ export function patternCard(input: PatternInput): Card {
   }
 }
 
-export type ToolKind = 'skill' | 'command' | 'agent'
+export type ToolKind = 'skill' | 'agent'
 
-/** Карточка скила, команды или субагента из frontmatter */
+/** Карточка скила или субагента из frontmatter */
 export function toolCard(kind: ToolKind, path: string, markdown: string, fallbackName: string): Card {
   const { data, body } = parseFrontmatter(markdown)
   const name = data.name || fallbackName

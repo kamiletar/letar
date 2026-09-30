@@ -1,5 +1,5 @@
 /** Вид карточки индекса: откуда она собрана */
-export type CardKind = 'doc' | 'section' | 'rule' | 'skill' | 'command' | 'agent' | 'field' | 'pattern'
+export type CardKind = 'doc' | 'section' | 'rule' | 'skill' | 'agent' | 'field' | 'pattern'
 
 /** Карточка — единица поиска. Справка строится только из карточек, поэтому ссылки в ней всегда реальные */
 export interface Card {
@@ -21,10 +21,11 @@ export interface Card {
   /** Раздел INDEX.md, в котором стоит док */
   topic?: string
   /**
-   * `app` — команда приложения (`/<app>`): её не советуем, у приложений своя статическая справка.
-   * `service` — служебная команда роли или сессии, агенту по задаче её не советуем.
+   * `app` — скил приложения (`/<app>`): его не советуем, у приложений своя статическая справка.
+   * `service` — служебный скил роли или сессии, агенту по задаче его не советуем.
+   * `user-only` — `disable-model-invocation: true`: модель такой скил вызвать не может, советовать нечего.
    */
-  scope?: 'app' | 'service'
+  scope?: 'app' | 'service' | 'user-only'
   /** Правило без `paths:` во frontmatter: харнесс грузит его в каждую сессию, советовать незачем */
   loaded?: boolean
   /** Взвешенный текст для индексации: поле → вес */
@@ -51,8 +52,10 @@ export interface IndexedCard extends Omit<Card, 'fields'> {
  * (так карточки полей форм не попали в индекс, собранный до их появления).
  * 3 — частоты без прототипа, команды из подкаталогов, `embedHash`.
  * 4 — `loaded` у правил без `paths:`.
+ * 5 — после миграции инструкций: источник команд (`.claude/commands`) удалён, скилы только из
+ *     `.agents/skills`, `scope` у скилов приложений, служебных и `disable-model-invocation`.
  */
-export const INDEX_VERSION = 4
+export const INDEX_VERSION = 5
 
 export interface ScoutIndex {
   version: typeof INDEX_VERSION

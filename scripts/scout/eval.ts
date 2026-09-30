@@ -42,6 +42,7 @@ import { arg } from './cli'
 import { findRepoRoot } from './index-store'
 import type { SessionRecord } from './mine-transcripts'
 import { scoutDataDir } from './paths'
+import { canonicalTools } from './tool-names'
 import { EMBED_URL, loadDense, RERANK_URL } from './vectors'
 
 export interface EvalCase {
@@ -74,7 +75,7 @@ export function buildCases(
       continue
     }
     const goldDocs = [...new Set(s.docsRead.filter((d) => d.beforeEdit && knownPaths.has(d.path)).map((d) => d.path))]
-    const goldTools = [...new Set([...s.skills, ...s.agents])].filter((t) =>
+    const goldTools = canonicalTools([...s.skills, ...s.agents]).filter((t) =>
       !BUILTIN_AGENTS.has(t) && knownTools.has(t)
     )
     if (!goldDocs.length && !goldTools.length) {
@@ -121,9 +122,7 @@ export type Searcher = (query: string) => ScoutResult | Promise<ScoutResult>
 /** Инструменты, которые скаут вообще может советовать: скилы, команды и агенты без `scope` (не команды приложений и ролей) */
 export function advisableTools(cards: IndexedCard[]): Set<string> {
   return new Set(
-    cards.filter((c) => (c.kind === 'skill' || c.kind === 'command' || c.kind === 'agent') && !c.scope).map((c) =>
-      c.title
-    ),
+    cards.filter((c) => (c.kind === 'skill' || c.kind === 'agent') && !c.scope).map((c) => c.title),
   )
 }
 
@@ -131,7 +130,7 @@ export function advisableTools(cards: IndexedCard[]): Set<string> {
 export function toolRanking(hits: Array<{ card: IndexedCard }>): string[] {
   const seen = new Set<string>()
   for (const { card } of hits) {
-    if ((card.kind === 'skill' || card.kind === 'command' || card.kind === 'agent') && !card.scope) {
+    if ((card.kind === 'skill' || card.kind === 'agent') && !card.scope) {
       seen.add(card.title)
     }
   }
@@ -321,7 +320,7 @@ async function main() {
   const engine = new Bm25(index)
   const knownPaths = new Set(index.cards.filter((c) => c.kind === 'doc' || c.kind === 'rule').map((c) => c.path))
   const knownTools = new Set(
-    index.cards.filter((c) => ['skill', 'command', 'agent'].includes(c.kind)).map((c) => c.title),
+    index.cards.filter((c) => ['skill', 'agent'].includes(c.kind)).map((c) => c.title),
   )
   const sessions = readFileSync(sessionsFile, 'utf8').split('\n').filter(Boolean).map((l) =>
     JSON.parse(l) as SessionRecord

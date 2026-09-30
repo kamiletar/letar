@@ -18,7 +18,6 @@ export interface RobustResult {
 const SERVICE_COMMANDS = [
   'end-session',
   'deploy-agent',
-  'sync-env',
   'forms-dev',
   'forms-coordinator',
   'ui-coordinator',
