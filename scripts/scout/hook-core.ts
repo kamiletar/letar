@@ -26,7 +26,6 @@ import {
   type FormRanking,
   formRanking,
   fuseWithDense,
-  type HubOptions,
   layoutHits,
   phraseRanking,
   type ScoutIndex,
@@ -36,7 +35,7 @@ import {
 import { readAppBriefs } from './app-briefs'
 import { loadIndex, saveIndex, sourcesMtime } from './index-store'
 import { loadPhraseStore, type PhraseStore } from './phrases'
-import { EMBED_URL, loadOrBuildHubs, loadVectorStore, type VectorStore } from './vectors'
+import { EMBED_URL, loadVectorStore, type VectorStore } from './vectors'
 
 /** Режим доставки: `shadow` — только лог, `on` — справка всем, `ab` — половине сессий по хешу id */
 export type ScoutMode = 'shadow' | 'on' | 'ab'
@@ -189,39 +188,6 @@ export interface HookDeps {
   store?: VectorStore | null
   /** Векторы формулировок к докам: та же семантика `null`/`undefined`, что у `store` */
   phrases?: PhraseStore | null
-  /** Поправки на хабы в выдаче доков; по умолчанию выключены */
-  hub?: HubSpec
-  /** Готовая хабность карточек для `hub.beta` (бенч считает один раз); `undefined` — `loadOrBuildHubs` */
-  hubs?: Map<string, number>
-}
-
-/** Поправки на хабы: A — `oneCard`, B — `gamma`, C — `beta` (см. `HubOptions`) */
-export interface HubSpec {
-  oneCard?: boolean
-  gamma?: number
-  beta?: number
-}
-
-/**
- * Разбор флага `--hub`: части через `+`, каждая `A`, `B:<γ>` или `C:<β>`, например `A+C:0.5`.
- * Пустая строка и `none` — без поправок. Неизвестная часть — ошибка.
- */
-export function parseHubSpec(text: string): HubSpec {
-  const spec: HubSpec = {}
-  for (const part of text.split('+').map((p) => p.trim()).filter((p) => p && p !== 'none')) {
-    const [name, value] = part.split(':')
-    const num = Number(value)
-    if (name === 'A' && value === undefined) {
-      spec.oneCard = true
-    } else if (name === 'B' && value !== undefined && num >= 0) {
-      spec.gamma = num
-    } else if (name === 'C' && value !== undefined && num >= 0) {
-      spec.beta = num
-    } else {
-      throw new Error(`Неизвестная поправка «${part}»: ждём A, B:<γ>, C:<β>`)
-    }
-  }
-  return spec
 }
 
 /**
@@ -329,18 +295,7 @@ export async function scoutQuery(
   const extra = phrases
     ? [phraseRanking(engine.cards, phrases.index, forms.store.dense, forms.vector)]
     : undefined
-  const spec = deps.hub
-  const hubs = spec?.beta && phrases
-    ? deps.hubs ?? loadOrBuildHubs(home, forms.store, phrases, engine.cards)
-    : undefined
-  const hub: HubOptions | undefined = spec
-    ? {
-      oneCardPerDoc: spec.oneCard,
-      lengthPenalty: spec.gamma,
-      csls: hubs && spec.beta ? { beta: spec.beta, hubs } : undefined,
-    }
-    : undefined
-  const fused = fuseWithDense(engine.cards, bm25, forms.store.dense, forms.vector, { extra, hub })
+  const fused = fuseWithDense(engine.cards, bm25, forms.store.dense, forms.vector, { extra })
   const docs = layoutHits(engine.cards, fused, query, { forms: forms.ranking })
   return {
     result: { ...base, docs: docs.docs, traps: docs.traps },

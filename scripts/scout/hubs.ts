@@ -5,8 +5,7 @@
  * пути `scoutQuery` (доки и ловушки вместе, по очкам), на запросах набора `eval-cases.jsonl` —
  * только dev по `splitOf`.
  *
- * Запуск: bun scripts/scout/hubs.ts [--hub A|B:0.2|C:0.5|A+C:0.5] [--top 10] [--json]
- * `--hub` включает поправку на хабы в выдаче (по умолчанию выключены, как в хуке).
+ * Запуск: bun scripts/scout/hubs.ts [--top 10] [--json]
  * В печать попадают только пути доков, тексты запросов — нет.
  */
 import { join } from 'node:path'
@@ -18,9 +17,9 @@ import {
   phraseRanking,
   type ScoutResult,
 } from '../../libs/scout/src/index'
-import { arg, readJsonl } from './cli'
+import { arg, readJsonl, splitOf } from './cli'
 import type { EvalCase } from './eval'
-import { freshIndex, type HubSpec, parseHubSpec, scoutQuery } from './hook-core'
+import { freshIndex, scoutQuery } from './hook-core'
 import { findRepoRoot } from './index-store'
 import { scoutDataDir, scoutHome } from './paths'
 import { loadPhraseStore } from './phrases'
@@ -151,8 +150,6 @@ async function main() {
     console.error('Нет векторов или формулировок — сначала vectors.ts и phrases.ts')
     process.exit(1)
   }
-  const spec: HubSpec | undefined = arg('--hub') ? parseHubSpec(arg('--hub')!) : undefined
-  const { splitOf } = await import('./bench')
   const cases = readJsonl<EvalCase>(join(scoutDataDir(), 'eval-cases.jsonl')).filter((c) =>
     splitOf(c.sessionId) === 'dev'
   )
@@ -170,7 +167,7 @@ async function main() {
     { bm25: number[]; bm25n: number[]; dense: number[]; densen: number[]; phrases: number[] }
   >()
   for (const c of cases) {
-    const { result } = await scoutQuery(engine, home, c.query, { store, phrases, hub: spec }, root)
+    const { result } = await scoutQuery(engine, home, c.query, { store, phrases }, root)
     const top = topPaths(result)
     rankings.push(top)
     goldSets.push(new Set(c.goldDocs))
@@ -222,10 +219,10 @@ async function main() {
   const metrics = hubMetrics(rankings)
 
   if (process.argv.includes('--json')) {
-    console.log(JSON.stringify({ hub: spec ?? null, cases: cases.length, spearman: rho, ...metrics, rows }, null, 2))
+    console.log(JSON.stringify({ cases: cases.length, spearman: rho, ...metrics, rows }, null, 2))
     return
   }
-  console.log(`Хабы: dev ${cases.length} запросов, поправка ${arg('--hub') ?? 'нет'}`)
+  console.log(`Хабы: dev ${cases.length} запросов`)
   console.log(
     `10 самых частых занимают ${(metrics.top10Share * 100).toFixed(1)}% мест пятёрки, максимум ${
       (metrics.maxFreq * 100).toFixed(1)

@@ -23,7 +23,6 @@
  * Запуск: bun scripts/scout/bench.ts [--label <имя>] [--suite docs,forms,latency,robust,hook]
  *   [--hook-runs 5] [--compare <путь к json | last>]
  */
-import { createHash } from 'node:crypto'
 import {
   appendFileSync,
   copyFileSync,
@@ -39,10 +38,10 @@ import { tmpdir } from 'node:os'
 import { basename, join } from 'node:path'
 import { Bm25, formatBrief, mentionedIn, type ScoutResult } from '../../libs/scout/src/index'
 import { scoreAppBriefs } from './app-briefs'
-import { arg, readJsonl } from './cli'
+import { arg, readJsonl, splitOf } from './cli'
 import { advisableTools, type EvalCase, evaluate, type Metrics } from './eval'
 import { type FormProbe, formsNegatives, scoreProbe } from './forms-eval'
-import { freshIndex, type HubSpec, parseHubSpec, scoutQuery, type ScoutQueryResult } from './hook-core'
+import { freshIndex, scoutQuery, type ScoutQueryResult } from './hook-core'
 import { hubMetrics } from './hubs'
 import { findRepoRoot, indexPath } from './index-store'
 import {
@@ -58,16 +57,11 @@ import {
 import type { SessionRecord } from './mine-transcripts'
 import { scoutDataDir, scoutHome } from './paths'
 import { loadPhraseStore } from './phrases'
-import { loadOrBuildHubs, loadVectorStore } from './vectors'
+import { loadVectorStore } from './vectors'
 
 export type Suite = 'docs' | 'forms' | 'latency' | 'robust' | 'hook' | 'judge' | 'app'
 const ALL_SUITES: Suite[] = ['docs', 'forms', 'latency', 'robust', 'hook', 'judge', 'app']
 const DEFAULT_SUITES: Suite[] = ['docs', 'forms', 'latency', 'robust']
-
-/** Детерминированное разбиение случаев: около 20% уходит в `test`, остальное — `dev` */
-export function splitOf(id: string): 'dev' | 'test' {
-  return createHash('sha1').update(id).digest()[0] % 5 === 0 ? 'test' : 'dev'
-}
 
 /** Проверка устойчивости: исключение внутри считается провалом */
 export interface RobustCheck {
@@ -216,7 +210,6 @@ interface BenchRun {
     vectors: boolean
     embedder: boolean
     suites: Suite[]
-    hub?: string
   }
   docs?: { groups: DocsGroup[]; avgChars: number; emptyShare: number }
   forms?: { sets: FormsSet[]; negatives: { cases: number; fieldsShare: number; patternShare: number } }
@@ -248,11 +241,11 @@ function stamp(d = new Date()): string {
 }
 
 const USAGE = `Запуск: bun scripts/scout/bench.ts [--label <имя>] [--suite ${ALL_SUITES.join(',')}]
-  [--hook-runs 5] [--compare <путь к json | last>] [--no-phrases] [--hub A|B:<γ>|C:<β>|A+C:<β>] [--help]`
+  [--hook-runs 5] [--compare <путь к json | last>] [--no-phrases] [--help]`
 
 /** Флаги со значением и без; неизвестный флаг — ошибка (код 2), `--help` — справка */
 function checkArgs(argv: string[]): void {
-  const withValue = new Set(['--label', '--suite', '--hook-runs', '--compare', '--hub'])
+  const withValue = new Set(['--label', '--suite', '--hook-runs', '--compare'])
   const bare = new Set(['--no-phrases', '--help'])
   if (argv.includes('--help')) {
     console.log(USAGE)
@@ -415,12 +408,7 @@ async function main() {
   // `--no-phrases` — прогон без третьего списка слияния, для сравнения
   const noPhrases = process.argv.includes('--no-phrases')
   const phrases = noPhrases ? null : loadPhraseStore(home) ?? null
-  // `--hub` — поправка на хабы в выдаче доков (A, B:<γ>, C:<β>, комбинации через `+`); без флага выключены
-  const hubSpec: HubSpec | undefined = arg('--hub') ? parseHubSpec(arg('--hub')!) : undefined
-  const hubs = hubSpec?.beta && store && phrases
-    ? loadOrBuildHubs(home, store, phrases, freshIndex(root, home).cards)
-    : undefined
-  const deps = { store, phrases, hub: hubSpec, hubs }
+  const deps = { store, phrases }
   const advisable = advisableTools(engine.cards)
 
   // Кеш по тексту запроса: сьюты делят общие запросы и не гоняют эмбеддер дважды
@@ -449,7 +437,6 @@ async function main() {
       vectors: store !== null,
       embedder: warm.forms === 'dense',
       suites,
-      hub: arg('--hub'),
     },
     summary: {},
   }
@@ -544,6 +531,18 @@ async function main() {
     let newLabels = 0
     let serverAnswered: boolean | null = null
     let unparsed = 0
+    const record = (c: EvalCase, it: JudgeItem, label: 0 | 1 | 2) => {
+      const l: JudgeLabel = { sessionId: c.sessionId, path: it.path, label, judge: JUDGE_MODEL }
+      labels.set(labelKey(c.sessionId, it.path), l)
+      appendFileSync(
+        labelsFile,
+        `${JSON.stringify(l)}
+`,
+      )
+      newLabels++
+    }
+    // Случаи, где 9B ответила, но пачку не разобрали: переспрашиваем в конце по одному пункту
+    const retry: Array<{ c: EvalCase; items: JudgeItem[] }> = []
     for (const c of judged) {
       const items = judgedItems((await run(c.query)).result)
       const missing = items.filter((it) => !labels.has(labelKey(c.sessionId, it.path)))
@@ -552,22 +551,29 @@ async function main() {
       }
       const got = await judgeItems(c.query, missing)
       if ('error' in got) {
-        // Сервер лёг — больше не зовём; ответ не разобран — только этот случай пропускаем
+        // Сервер лёг — больше не зовём; ответ не разобран — переспросим во втором проходе
         if (got.error === 'unreachable') {
           serverAnswered = false
         } else {
-          unparsed++
+          retry.push({ c, items: missing })
         }
         continue
       }
       serverAnswered = true
-      missing.forEach((it, i) => {
-        const l: JudgeLabel = { sessionId: c.sessionId, path: it.path, label: got.labels[i], judge: JUDGE_MODEL }
-        labels.set(labelKey(c.sessionId, it.path), l)
-        appendFileSync(labelsFile, `${JSON.stringify(l)}\n`)
-        newLabels++
-      })
+      missing.forEach((it, i) => record(c, it, got.labels[i]))
     }
+    let stillUnparsed = 0
+    for (const { c, items } of serverAnswered === false ? [] : retry) {
+      for (const it of items) {
+        const one = await judgeItems(c.query, [it])
+        if ('error' in one) {
+          stillUnparsed++
+        } else {
+          record(c, it, one.labels[0])
+        }
+      }
+    }
+    unparsed = stillUnparsed
     const shown = (list: EvalCase[]) =>
       list.map((c) => ({ sessionId: c.sessionId, paths: judgedItems(cache.get(c.query)!.result).map((it) => it.path) }))
     const out = judgeGroups(
@@ -591,7 +597,7 @@ async function main() {
     console.log(
       `новых меток от 9B: ${newLabels}${
         serverAnswered === false ? '; судья не ответил — считаю по кешу' : ''
-      }; не разобрано: ${unparsed}`,
+      }; пар не разобрано после переспроса: ${unparsed}`,
     )
     result.judge = { groups: out, newLabels, serverAnswered, unparsed }
     const jg = (name: string) => out.find((x) => x.group === name)!
@@ -761,7 +767,7 @@ async function main() {
   const prevPath = compare === 'last'
     ? readdirSync(runsDir).filter((f) => f.endsWith('.json')).sort().map((f) => join(runsDir, f)).at(-1)
     : compare
-  // Метка бывает с `:` (`--hub C:0.5`): в имени файла на Windows это поток данных, а не часть имени
+  // Метка бывает с `:` (например `a:b`): в имени файла на Windows это поток данных, а не часть имени
   const file = join(runsDir, `${stamp(now)}-${label.replace(/[^\w.=+-]+/g, '_')}.json`)
   writeFileSync(file, JSON.stringify(result, null, 2))
   appendJournal(benchDir, result)
