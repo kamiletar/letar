@@ -33,7 +33,11 @@
     "typecheck:tsgo": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "tsgo --build tsconfig.lib.json --emitDeclarationOnly",
+        "commands": [
+          "tsgo --build tsconfig.lib.json --emitDeclarationOnly",
+          "tsgo -p ../../scripts/scout/tsconfig.json"
+        ],
+        "parallel": false,
         "cwd": "libs/scout"
       },
       "dependsOn": ["^typecheck:tsgo"],
@@ -43,7 +47,10 @@
         "^production",
         "{projectRoot}/tsconfig.json",
         "{projectRoot}/tsconfig.lib.json",
-        "{workspaceRoot}/tsconfig.base.json"
+        "{workspaceRoot}/tsconfig.base.json",
+        "{workspaceRoot}/scripts/scout/*.ts",
+        "{workspaceRoot}/scripts/scout/tsconfig.json",
+        "{workspaceRoot}/.claude/hooks/scout-*.ts"
       ],
       "outputs": [
         "{projectRoot}/dist/**/*.d.ts",
@@ -51,7 +58,7 @@
         "{projectRoot}/dist/tsconfig.lib.tsbuildinfo"
       ],
       "metadata": {
-        "description": "Type-check library with tsgo (faster)",
+        "description": "Type-check library and scripts/scout (bun-types) with tsgo",
         "technologies": ["typescript", "tsgo"]
       }
     },

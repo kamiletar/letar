@@ -154,7 +154,7 @@ llama-server -m C:/ai/models/Qwen3.5-9B-Q8_0.gguf -ngl 99 -c 8192 -np 1 --cache-
 ```
 
 Эмбеддер стартует сам при входе в Windows: задача Планировщика `scout-embedder` запускает
-`C:i\scout\start-embedder.vbs` (та же команда без окна консоли, вывод — `logs/embedder.log`).
+`C:\ai\scout\start-embedder.vbs` (та же команда без окна консоли, вывод — `logs/embedder.log`).
 Порт занят — второй экземпляр завершается сам. 9B автозапуска нет.
 
 Адрес эмбеддера переопределяется `SCOUT_EMBED_URL`; ~0,7 ГБ видеопамяти. Реранкер боевым путём не

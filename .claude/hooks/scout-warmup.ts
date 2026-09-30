@@ -14,3 +14,6 @@ try {
   // fail-open
 }
 process.exit(0)
+
+// Модуль, а не скрипт: иначе top-level await не проходит typecheck
+export {}
