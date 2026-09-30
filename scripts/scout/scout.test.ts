@@ -13,8 +13,18 @@ import {
   type ScoutResult,
 } from '../../libs/scout/src/index'
 import { buildAppBriefs, readAppBriefs, scoreAppBriefs } from './app-briefs'
-import { SUMMARY, unknownMetricKeys } from './bench-report'
+import { resolveRunRef, SUMMARY, unknownMetricKeys } from './bench-report'
 import { splitOf } from './cli'
+import {
+  applyHead,
+  CLM_QUESTION_DOCS,
+  type ClmHeadTensors,
+  fuseWithClm,
+  gelu,
+  l2,
+  rankToolCandidates,
+  situationText,
+} from './clm'
 import { catalogBrief, editGold, pathQueryText } from './edit-briefs'
 import { buildCases, evaluate, evaluateTools, toolRanking } from './eval'
 import { abGroup, appendLog, decide, LOG_MAX_BYTES, MAX_ATTEMPTS, runScoutHook, scoutQuery } from './hook-core'
@@ -1003,5 +1013,108 @@ describe('toolRanking: базовый ранкер выбора инструме
     const list = toolRanking(engine.search('совсем постороннее слово zzzq', 500))
     expect(list).toEqual([])
     expect(scout(engine, 'совсем постороннее слово zzzq').tool).toBeUndefined()
+  })
+})
+
+describe('CLM: голова, текст ситуации, слияние', () => {
+  const t = (data: number[], shape: number[]) => ({ data: Float32Array.from(data), shape })
+  // 3 → 2 → 2 → 2: inp берёт первые две координаты, остальные слои — тождественные
+  const head: ClmHeadTensors = {
+    'inp.weight': t([1, 0, 0, 0, 1, 0], [2, 3]),
+    'inp.bias': t([0, 0], [2]),
+    'hidden.0.weight': t([1, 0, 0, 1], [2, 2]),
+    'hidden.0.bias': t([0, 0], [2]),
+    'norms.0.weight': t([1, 1], [2]),
+    'norms.0.bias': t([0, 0], [2]),
+    'out.weight': t([1, 0, 0, 1], [2, 2]),
+    'out.bias': t([0, 0], [2]),
+  }
+
+  it('GELU точный: gelu(1) ≈ 0,8413, gelu(-1) ≈ -0,1587, gelu(0) = 0', () => {
+    expect(gelu(1)).toBeCloseTo(0.841345, 5)
+    expect(gelu(-1)).toBeCloseTo(-0.158655, 5)
+    expect(gelu(0)).toBe(0)
+  })
+
+  it('голова: inp → gelu → layernorm → gelu → out → L2 на известном входе', () => {
+    // x=[1,0,0]: inp → [1,0], gelu → [0,8413; 0]; LayerNorm по двум числам → [+1; -1] (eps 1e-5);
+    // gelu → [0,8413; -0,1587]; L2 → [0,98267; -0,18537]
+    const out = applyHead(head, Float32Array.from([1, 0, 0]))
+    expect(out[0]).toBeCloseTo(0.98267, 3)
+    expect(out[1]).toBeCloseTo(-0.18537, 3)
+    expect(Math.hypot(out[0], out[1])).toBeCloseTo(1, 5)
+  })
+
+  it('L2: нулевой вектор не даёт NaN', () => {
+    expect([...l2(Float32Array.from([0, 0]))]).toEqual([0, 0])
+    expect(l2(Float32Array.from([3, 4]))[0]).toBeCloseTo(0.6)
+  })
+
+  it('текст ситуации: задача, пустая строка, вопрос; задача обрезана до 600', () => {
+    expect(situationText('починить форму', CLM_QUESTION_DOCS)).toBe(`починить форму
+
+${CLM_QUESTION_DOCS}`)
+    const long = situationText('я'.repeat(900), 'Q?')
+    expect(long).toBe(`${'я'.repeat(600)}
+
+Q?`)
+  })
+
+  it('кандидат «ничего» не ниже лучшего → инструмент не советуется', () => {
+    expect(rankToolCandidates(['a', 'b'], [0.4, 0.7], 0.8)).toEqual({ list: ['b', 'a'], shown: false })
+    expect(rankToolCandidates(['a', 'b'], [0.4, 0.7], 0.5)).toEqual({ list: ['b', 'a'], shown: true })
+    expect(rankToolCandidates([], [], 0.1).shown).toBe(false)
+  })
+
+  it('CLM четвёртым списком меняет порядок: ничья A/B решается в пользу B', () => {
+    const card = (id: string, repeat: number): Card => ({
+      id,
+      kind: 'doc',
+      path: `.claude/docs/${id}.md`,
+      line: 1,
+      title: id,
+      summary: '',
+      fields: [{ text: Array(repeat).fill('alpha').join(' '), weight: 3 }],
+    })
+    const engine = new Bm25(buildIndex([card('a', 3), card('b', 2), card('c', 1)]))
+    const bm25 = engine.search('alpha', 10)
+    expect(bm25.map((h) => h.card.title)).toEqual(['a', 'b', 'c'])
+    const ids = engine.cards.map((c) => c.id)
+    const byTitle = (title: string) => ids[engine.cards.findIndex((c) => c.title === title)]
+    // Плотный поиск по вектору [1,0]: b ближе всех, потом a, c последний
+    const rows: Record<string, number[]> = { a: [0.9, 0.1], b: [1, 0], c: [0, 1] }
+    const dense = new DenseIndex(
+      engine.cards.map((c) => c.id),
+      Float32Array.from(engine.cards.flatMap((c) => rows[c.title])),
+      2,
+    )
+    const vector = Float32Array.from([1, 0])
+    const base = fuseWithClm(engine.cards, bm25, dense, vector, [], [])
+    expect(base.slice(0, 2).map((h) => h.card.title)).toEqual(['a', 'b'])
+    const withClm = fuseWithClm(engine.cards, bm25, dense, vector, [], [byTitle('b')])
+    expect(withClm.slice(0, 2).map((h) => h.card.title)).toEqual(['b', 'a'])
+  })
+})
+
+describe('resolveRunRef: --compare принимает метку', () => {
+  it('last, путь, метка (целиком: final ≠ split-final), нет такой — undefined', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'scout-runs-'))
+    for (
+      const f of [
+        '20260930-100000-final.json',
+        '20260930-120000-split-final.json',
+        '20260930-130000-final.json',
+        'note.txt',
+      ]
+    ) {
+      writeFileSync(join(dir, f), '{}')
+    }
+    expect(resolveRunRef(dir, 'final')).toBe(join(dir, '20260930-130000-final.json'))
+    expect(resolveRunRef(dir, 'split-final')).toBe(join(dir, '20260930-120000-split-final.json'))
+    expect(resolveRunRef(dir, 'last')).toBe(join(dir, '20260930-130000-final.json'))
+    const path = join(dir, '20260930-100000-final.json')
+    expect(resolveRunRef(dir, path)).toBe(path)
+    expect(resolveRunRef(dir, 'нет-такой')).toBeUndefined()
+    expect(resolveRunRef(join(dir, 'нет-каталога'), 'last')).toBeUndefined()
   })
 })

@@ -22,13 +22,24 @@
  *
  * - `tools` — выбор инструмента по эталону судьи (`tool-gold.jsonl`): hit@1/hit@3/MRR, ложный совет; только явно.
  *
+ * - `clm` — CLM-8B офлайн (нужен llama-server Qwen3-8B на 8093 и `tool-gold.jsonl`): инструменты и доки; только явно.
+ *
  * Запуск: bun scripts/scout/bench.ts [--label <имя>] [--suite docs,forms,latency,robust,hook]
  *   [--hook-runs 5] [--compare <путь к json | last>]
  */
-import { existsSync, mkdirSync, readdirSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { Bm25 } from '../../libs/scout/src/index'
-import { appendJournal, type BenchRun, printCompare, stamp, SUMMARY, unknownMetricKeys } from './bench-report'
+import {
+  appendJournal,
+  type BenchRun,
+  labelSlug,
+  printCompare,
+  resolveRunRef,
+  stamp,
+  SUMMARY,
+  unknownMetricKeys,
+} from './bench-report'
 import { arg, readJsonl } from './cli'
 import type { EvalCase } from './eval'
 import { freshIndex, scoutQuery, type ScoutQueryResult } from './hook-core'
@@ -36,6 +47,7 @@ import { findRepoRoot } from './index-store'
 import { scoutDataDir, scoutHome } from './paths'
 import { loadPhraseStore } from './phrases'
 import { appSuite } from './suites/app'
+import { clmSuite } from './suites/clm'
 import { docsSuite } from './suites/docs'
 import { editSuite } from './suites/edit'
 import { formsSuite } from './suites/forms'
@@ -47,7 +59,7 @@ import { toolsSuite } from './suites/tools'
 import type { Suite } from './suites/types'
 import { loadVectorStore } from './vectors'
 
-export type SuiteName = 'docs' | 'forms' | 'latency' | 'robust' | 'hook' | 'judge' | 'app' | 'edit' | 'tools'
+export type SuiteName = 'docs' | 'forms' | 'latency' | 'robust' | 'hook' | 'judge' | 'app' | 'edit' | 'tools' | 'clm'
 
 /** Реестр сьютов в порядке запуска: новый сьют — новый файл в `suites/` и строка здесь */
 const SUITES: Record<SuiteName, Suite> = {
@@ -60,9 +72,10 @@ const SUITES: Record<SuiteName, Suite> = {
   app: appSuite,
   edit: editSuite,
   tools: toolsSuite,
+  clm: clmSuite,
 }
 // Порядок в справке и сообщении об ошибке; порядок запуска — по реестру `SUITES`
-const ALL_SUITES: SuiteName[] = ['docs', 'forms', 'latency', 'robust', 'hook', 'judge', 'app', 'edit', 'tools']
+const ALL_SUITES: SuiteName[] = ['docs', 'forms', 'latency', 'robust', 'hook', 'judge', 'app', 'edit', 'tools', 'clm']
 const DEFAULT_SUITES: SuiteName[] = ['docs', 'forms', 'latency', 'robust']
 
 function git(root: string, args: string[]): string {
@@ -191,11 +204,9 @@ async function main() {
   mkdirSync(runsDir, { recursive: true })
   const compare = arg('--compare')
   // Самый свежий прогон берём до записи текущего
-  const prevPath = compare === 'last'
-    ? readdirSync(runsDir).filter((f) => f.endsWith('.json')).sort().map((f) => join(runsDir, f)).at(-1)
-    : compare
+  const prevPath = compare ? resolveRunRef(runsDir, compare) : undefined
   // Метка бывает с `:` (например `a:b`): в имени файла на Windows это поток данных, а не часть имени
-  const file = join(runsDir, `${stamp(now)}-${label.replace(/[^\w.=+-]+/g, '_')}.json`)
+  const file = join(runsDir, `${stamp(now)}-${labelSlug(label)}.json`)
   writeFileSync(file, JSON.stringify(result, null, 2))
   appendJournal(benchDir, result)
   console.log(`\nПрогон → ${file}\nЖурнал → ${join(benchDir, 'journal.md')}`)
@@ -204,7 +215,9 @@ async function main() {
       printCompare(result, prevPath)
     } else {
       console.log(
-        `\nСравнивать не с чем: ${compare === 'last' ? 'в runs/ нет прежних прогонов' : `нет файла ${compare}`}`,
+        `\nСравнивать не с чем: ${
+          compare === 'last' ? 'в runs/ нет прежних прогонов' : `нет файла или прогона с меткой ${compare}`
+        }`,
       )
     }
   }

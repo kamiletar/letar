@@ -1,6 +1,7 @@
-import { appendFileSync, existsSync, readFileSync, writeFileSync } from 'node:fs'
+import { appendFileSync, existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import type { AppResult } from './suites/app'
+import type { ClmResult } from './suites/clm'
 import type { DocsResult } from './suites/docs'
 import type { EditResult } from './suites/edit'
 import type { FormsResult } from './suites/forms'
@@ -57,6 +58,14 @@ export const SUMMARY: Array<{ key: string; unit: Unit; journal?: boolean }> = [
   { key: 'инстр. hit@3', unit: 'pp' },
   { key: 'инстр. MRR', unit: 'ratio' },
   { key: 'инстр. ложный', unit: 'pp' },
+  { key: 'clm инстр. hit@1', unit: 'pp' },
+  { key: 'clm инстр. hit@3', unit: 'pp' },
+  { key: 'clm инстр. ложный', unit: 'pp' },
+  { key: 'clm-raw инстр. hit@1', unit: 'pp' },
+  { key: 'clm-only нов. R@5', unit: 'pp' },
+  { key: 'clm-rrf нов. R@5', unit: 'pp' },
+  { key: 'clm-rerank нов. R@5', unit: 'pp' },
+  { key: 'clm p95 мс', unit: 'ms' },
 ]
 
 export type Summary = Record<string, number | null>
@@ -80,8 +89,36 @@ export interface BenchRun {
   app?: AppResult
   edit?: EditResult
   tools?: ToolsResult
+  clm?: ClmResult
   hook?: HookResult
   summary: Summary
+}
+
+/** Метка прогона в имени файла: на Windows `:` в имени — поток данных, поэтому лишние символы меняются на `_` */
+export function labelSlug(label: string): string {
+  return label.replace(/[^\w.=+-]+/g, '_')
+}
+
+/**
+ * Прогон для `--compare`: `last` — самый свежий, путь к файлу — как есть, иначе метка — самый свежий
+ * прогон с этой меткой в `runs/`. Нет такого — `undefined`.
+ */
+export function resolveRunRef(runsDir: string, ref: string): string | undefined {
+  if (!existsSync(runsDir)) {
+    return undefined
+  }
+  const files = readdirSync(runsDir).filter((f) => f.endsWith('.json')).sort()
+  if (ref === 'last') {
+    const last = files.at(-1)
+    return last && join(runsDir, last)
+  }
+  if (existsSync(ref)) {
+    return ref
+  }
+  const slug = labelSlug(ref)
+  // Имя файла: `YYYYMMDD-HHMMSS-<метка>.json`; метка сравнивается целиком, `final` не цепляет `split-final`
+  const hit = files.filter((f) => /^\d{8}-\d{6}-/.test(f) && f.slice(16) === `${slug}.json`).at(-1)
+  return hit && join(runsDir, hit)
 }
 
 export function stamp(d = new Date()): string {
