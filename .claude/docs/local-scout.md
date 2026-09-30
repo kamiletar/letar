@@ -251,7 +251,8 @@ bun scripts/scout/tool-gold.ts --prepare    # пачки задач для сл�
 bun scripts/scout/clm.ts --check            # перенос головы CLM совпадает с эталоном torch (нужен 8093)
 bun scripts/scout/warmup.ts                 # прогреть эмбеддер и досчитать векторы
 bun scripts/scout/phrases.ts [--generate]   # векторы формулировок; --generate пишет их докам без них (9B)
-bun scripts/scout/report.ts --since <дата> [--show 5]   # онлайн: открыл ли агент подсказанное
+bun scripts/scout/report.ts --since <дата> [--show 5]   # онлайн: открыл ли агент подсказанное; в режиме ab — строки «A−B» с бутстрэп-интервалом
+bun scripts/scout/report.ts --judge [--sample 60]       # онлайн-судья 9B по живым справкам: «по делу@3» с интервалом Уилсона (9B на 8092 поднять и остановить)
 bun scripts/scout/app-briefs.ts --build [--sessions <файл>]   # справки приложений; с --app <имя> вместо --build — показать список
 bun test scripts/scout                      # тесты скриптов и хука
 nx typecheck:tsgo @letar/scout              # типы либы И scripts/scout + хуков (bun-types)
@@ -270,6 +271,22 @@ tail -5 C:/ai/scout/logs/briefs.jsonl       # что скаут насчитал
 ⚠️ **Хук `security-guidance` блокирует `Write` файла, где есть `RegExp.prototype.exec`** — он
 принимает `re.exec(text)` за `child_process.exec`. В новых файлах скаута использован
 `text.match(re)`: для регулярки без флага `g` результат тот же.
+
+## Чек-лист перед включением A/B
+
+⚠️ Режим `ab` этим чек-листом не включается: `{"mode":"ab"}` в `SCOUT_HOME/config.json` — решение
+владельца. До него проверь:
+
+1. Индекс свежий: `bun scripts/scout/build-index.ts` (или хук пересобрал сам), `bun scripts/scout/smoke.ts` зелёный.
+2. `scoutVersion` одинаков у всех записей периода: `bun scripts/scout/report.ts --since <дата начала>` →
+   строка «Версии скаута» показывает ровно одну версию. Правка `libs/scout/src` посреди периода
+   меняет её — период надо начинать заново.
+3. Эмбеддер на 8090 жив (без него справка собирается по BM25 и группы A и B несопоставимы с базой).
+4. `report.ts` на пустом `ab`-логе не падает (проверено тестом `report-stats.test.ts` и прогоном на
+   пустом `SCOUT_HOME`).
+5. Строка «разница A−B» появляется, когда в логе есть и A, и B. Интервал — бутстрэп по сессиям, при
+   десятках сессий он широкий: решение принимать по интервалу, а не по точке.
+6. Базовые цифры тени и онлайн-судьи зафиксированы заранее (`report.ts --judge`), чтобы сравнивать с чем-то.
 
 ## Связка сеньор → мидл
 

@@ -7,16 +7,20 @@
  * Разбор транскрипта — только `mineSession` из `mine-transcripts.ts`.
  *
  * Запуск: bun scripts/scout/report.ts [--since 2026-09-30] [--projects <каталог>] [--show 10]
+ *   [--judge [--sample 60]]   — онлайн-судья 9B по живым справкам (нужен llama-server на 8092)
  *
  * ⚠️ Текст запросов печатается только с `--show` (локальный отчёт владельцу); в JSON его нет.
  */
-import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
+import { appendFileSync, existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
 import { mentionedIn } from '../../libs/scout/src/index'
 import { arg } from './cli'
+import { loadIndex } from './index-store'
+import { JUDGE_MODEL, type JudgeItem, judgeItems, type JudgeLabel, labelKey, loadLabels } from './judge'
 import { mineSession } from './mine-transcripts'
 import { scoutHome } from './paths'
+import { abDifference, pickSample, wilson } from './report-stats'
 import { canonicalTools } from './tool-names'
 
 /** Транскрипт, изменённый позже этого срока назад, считается сессией «в работе» */
@@ -240,7 +244,53 @@ export function versionBreakdown(rows: BriefRow[]): Array<{ version: string; cou
   return [...counts.entries()].map(([version, count]) => ({ version, count })).sort((a, b) => b.count - a.count)
 }
 
+/**
+ * Онлайн-судья: случайные N справок поиска, 9B размечает «по делу» первые 3 пункта (тот же промпт,
+ * что в `judge.ts`). Метки кешируются в `SCOUT_HOME/judge-live-labels.jsonl`; в отчёт идут только
+ * цифры. Доля считается по парам «справка — пункт» (Уилсон 95%): пары одной справки не независимы,
+ * интервал оптимистичен.
+ */
+export async function judgeLive(rows: BriefRow[], home: string, sample: number) {
+  const index = loadIndex(home, process.cwd())
+  const byRef = new Map<string, JudgeItem>()
+  for (const c of index?.cards ?? []) {
+    byRef.set(`${c.path}:${c.line}`, { path: c.path, title: c.title, summary: c.summary })
+  }
+  const pool = rows.filter((r) => r.kind !== 'app' && r.query && r.docs?.length)
+  const picked = pickSample(pool, sample, (r) => r.sessionId)
+  const file = join(home, 'judge-live-labels.jsonl')
+  const labels = loadLabels(file)
+  let items = 0
+  let relevant = 0
+  let unjudged = 0
+  for (const row of picked) {
+    const top = (row.docs ?? []).slice(0, 3).map((ref) => byRef.get(ref)).filter((x): x is JudgeItem => Boolean(x))
+    const missing = top.filter((it) => !labels.has(labelKey(row.sessionId, it.path)))
+    if (missing.length) {
+      const got = await judgeItems(row.query!, missing)
+      if ('labels' in got) {
+        missing.forEach((it, i) => {
+          const l: JudgeLabel = { sessionId: row.sessionId, path: it.path, label: got.labels[i], judge: JUDGE_MODEL }
+          labels.set(labelKey(l.sessionId, l.path), l)
+          appendFileSync(file, JSON.stringify(l) + String.fromCharCode(10))
+        })
+      }
+    }
+    for (const it of top) {
+      const l = labels.get(labelKey(row.sessionId, it.path))
+      if (!l) {
+        unjudged++
+        continue
+      }
+      items++
+      relevant += l.label >= 1 ? 1 : 0
+    }
+  }
+  return { sessions: picked.length, items, relevant, ...wilson(relevant, items), unjudged }
+}
+
 const pct = (v?: number) => (v === undefined ? '—' : `${Math.round(v * 100)}%`)
+const signed = (v: number) => `${v >= 0 ? '+' : ''}${(v * 100).toFixed(1)} п.п.`
 
 async function main() {
   const since = arg('--since')
@@ -274,6 +324,17 @@ async function main() {
       } | ${pct(g.toolRate)} | ${g.medianQueryLength}`,
     )
   }
+  const diff = abDifference(reports)
+  if (reports.some((r) => r.mode === 'ab' && r.status === 'ok')) {
+    console.log('\nразница A−B (режим ab, бутстрэп по сессиям, 95%):')
+    for (const d of diff) {
+      console.log(
+        d.diff === undefined
+          ? `${d.metric} | A ${pct(d.a)} | B ${pct(d.b)} | разница —`
+          : `${d.metric} | A ${pct(d.a)} | B ${pct(d.b)} | A−B ${signed(d.diff)} [${signed(d.lo!)}; ${signed(d.hi!)}]`,
+      )
+    }
+  }
   const versions = [...new Set(reports.map((r) => r.scoutVersion ?? 'без версии'))]
   if (versions.length > 1) {
     for (const v of versions) {
@@ -288,6 +349,15 @@ async function main() {
       }
     }
   }
+  if (process.argv.includes('--judge')) {
+    const j = await judgeLive(rows, home, Number(arg('--sample') ?? 60))
+    console.log(
+      `\nсудья 9B, по делу@3: ${pct(j.p)} (95% Уилсон ${pct(j.lo)}–${
+        pct(j.hi)
+      }), пунктов ${j.items} из ${j.sessions} справок`
+        + (j.unjudged ? `, не разобрано ${j.unjudged}` : ''),
+    )
+  }
   if (show > 0) {
     for (const r of reports.filter((x) => x.status === 'ok' && x.missed.length).slice(0, show)) {
       console.log(`\n# ${r.sessionId}\nзапрос: ${(queries.get(r.sessionId) ?? '').slice(0, 200)}`)
@@ -297,7 +367,7 @@ async function main() {
   const outDir = join(home, 'reports')
   mkdirSync(outDir, { recursive: true })
   const out = join(outDir, `${new Date().toISOString().slice(0, 10)}.json`)
-  writeFileSync(out, JSON.stringify({ since, summary, sessions: reports }, null, 2))
+  writeFileSync(out, JSON.stringify({ since, summary, abDiff: diff, sessions: reports }, null, 2))
   console.log(`\nJSON → ${out}`)
 }
 
