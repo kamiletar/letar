@@ -20,16 +20,6 @@ import type { CronJob } from './cron-types'
  */
 export const DEFAULT_CRON_JOBS: CronJob[] = [
   {
-    id: 'nginx-backup-s2',
-    name: 'Nginx Backup S2',
-    app: 'dashboard-agent',
-    endpoint: '/api/nginx/backup',
-    schedule: '0 3 * * *',
-    description: 'Автоматический бэкап Nginx Proxy Manager на s2 (data + SSL сертификаты)',
-    enabled: true,
-    server: 's2',
-  },
-  {
     id: 's2-database-backup',
     name: 'Database Backup (s2)',
     app: 'dashboard-agent',
@@ -39,7 +29,7 @@ export const DEFAULT_CRON_JOBS: CronJob[] = [
     // (`0 4 * * *` не встречается ни в одном коммите). Код разъезжался с фактом минимум с
     // 2026-07-10 и вводил в заблуждение всех, кто его читал. Приведено к реальному значению.
     // Разъезд возможен потому, что merge при старте не синхронизирует `schedule` — PLAN-INFRA.md §56.
-    // В 3:00 идут бэкап nginx и чистка логов, в 3:30 — acme-dns, так что 4:00 разводит их по времени.
+    // В 3:00 идёт чистка логов, в 3:30 — acme-dns, так что 4:00 разводит их по времени.
     schedule: '0 4 * * *',
     description: 'Автоматический бэкап всех БД на s2 из APP_CONFIG (см. database.ts)',
     enabled: true,
@@ -538,4 +528,7 @@ export const RETIRED_JOB_IDS: string[] = [
   'next-cache-cleanup-s3',
   'nx-cache-cleanup-s3',
   'registry-gc-s3',
+  // Бэкап Nginx Proxy Manager на s2: прокси снят с s2 и s3 (боевой — Traefik, 2026-08-31),
+  // архивировать нечего. Маршрут /api/nginx/* и nginx-backup.ts удалены вместе с задачей.
+  'nginx-backup-s2',
 ]

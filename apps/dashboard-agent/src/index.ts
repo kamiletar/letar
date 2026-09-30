@@ -48,7 +48,6 @@ import { loginCanaryRoutes } from './routes/login-canary'
 import { loginCanarySetupRoutes } from './routes/login-canary-setup'
 import { metricsRoutes } from './routes/metrics'
 import { nextCacheCleanupRoutes } from './routes/next-cache-cleanup'
-import { nginxRoutes } from './routes/nginx'
 import { nxCacheCleanupRoutes } from './routes/nx-cache-cleanup'
 import { registryGcRoutes } from './routes/registry-gc'
 import { stagingIdleShutdownRoutes } from './routes/staging-idle-shutdown'
@@ -130,7 +129,6 @@ async function main(): Promise<void> {
   await fastify.register(deployRoutes)
   await fastify.register(e2eRoutes)
   await fastify.register(databaseRoutes)
-  await fastify.register(nginxRoutes)
   await fastify.register(acmeDnsRoutes)
   await fastify.register(traefikRoutes)
   await fastify.register(cronRoutes)

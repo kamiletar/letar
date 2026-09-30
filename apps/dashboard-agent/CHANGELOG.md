@@ -11,6 +11,15 @@
 - Отправка метрик в Dashboard
 - WebSocket для real-time
 
+## [0.19.1] — 2026-09-30
+
+### Removed
+
+- **Бэкап Nginx Proxy Manager на s2** — задача `nginx-backup-s2`, маршрут `POST /api/nginx/backup`,
+  `GET /api/nginx/backups` и `lib/nginx-backup.ts`. NPM снят с s2 и s3 (боевой прокси — Traefik с
+  2026-08-31), архивировать нечего. Задача добавлена в `RETIRED_JOB_IDS`: с живого
+  `cron-jobs.json` она уйдёт при первой загрузке конфигурации после деплоя.
+
 ## [0.19.0] — 2026-09-26
 
 ### Added
