@@ -16,7 +16,7 @@ import { buildAppBriefs, readAppBriefs, scoreAppBriefs } from './app-briefs'
 import { SUMMARY, unknownMetricKeys } from './bench-report'
 import { splitOf } from './cli'
 import { catalogBrief, editGold, pathQueryText } from './edit-briefs'
-import { buildCases, evaluate } from './eval'
+import { buildCases, evaluate, evaluateTools, toolRanking } from './eval'
 import { abGroup, appendLog, decide, LOG_MAX_BYTES, MAX_ATTEMPTS, runScoutHook, scoutQuery } from './hook-core'
 import { hubMetrics, spearman, topFrequency } from './hubs'
 import { indexPath } from './index-store'
@@ -908,5 +908,100 @@ describe('сверка ключей метрик бенча', () => {
   it('ключи всех сьютов описаны в SUMMARY (опечатка в ключе не теряет метрику молча)', () => {
     const known = new Set(SUMMARY.map((s) => s.key))
     expect(known.size).toBe(SUMMARY.length)
+  })
+})
+
+describe('evaluateTools: выбор инструмента по эталону судьи', () => {
+  // a1, a3 — dev; a2 — test (см. splitOf)
+  const mk = (sessionId: string, goldTools: string[] = []) => ({
+    sessionId,
+    query: `q-${sessionId}`,
+    goldDocs: [],
+    goldTools,
+  })
+  const cases = [mk('a1', ['x']), mk('a2'), mk('a3'), mk('a4')]
+  const gold = new Map<string, string[]>([['a1', ['x']], ['a2', ['y']], ['a3', []], ['a4', ['z']]])
+  const lists: Record<string, string[]> = {
+    'q-a1': ['x', 'y'], // первый — эталон
+    'q-a2': ['p', 'q', 'y'], // эталон третий
+    'q-a3': ['p'], // пустой эталон, инструмент показан
+    'q-a4': ['p', 'q', 'r', 'z'], // эталон четвёртый — мимо hit@3
+  }
+  const rank = async (q: string) => lists[q]
+
+  it('hit@1, hit@3, MRR — по задачам с непустым эталоном; ложный совет — по пустым', async () => {
+    const m = await evaluateTools(rank, cases, gold)
+    expect(m.goldCases).toBe(3)
+    expect(m.hit1).toBeCloseTo(1 / 3)
+    expect(m.hit3).toBeCloseTo(2 / 3)
+    expect(m.mrr).toBeCloseTo((1 + 1 / 3 + 1 / 4) / 3)
+    expect(m.emptyCases).toBe(1)
+    expect(m.falseAdvice).toBe(1)
+  })
+
+  it('shown перекрывает «список непуст»; пустой список — не ложный совет', async () => {
+    const hidden = await evaluateTools(rank, cases, gold, { shown: async () => false })
+    expect(hidden.falseAdvice).toBe(0)
+    const none = await evaluateTools(async () => [], cases, gold)
+    expect(none.falseAdvice).toBe(0)
+    expect(none.hit1).toBe(0)
+  })
+
+  it('dev и test считаются раздельно по splitOf', async () => {
+    const dev = await evaluateTools(rank, cases.filter((c) => splitOf(c.sessionId) === 'dev'), gold)
+    const test = await evaluateTools(rank, cases.filter((c) => splitOf(c.sessionId) === 'test'), gold)
+    expect(dev.cases + test.cases).toBe(4)
+    expect(test.goldCases).toBe(1)
+    expect(test.hit1).toBe(0)
+    expect(test.hit3).toBe(1)
+    expect(dev.goldCases).toBe(2)
+    expect(dev.hit1).toBe(0.5)
+  })
+
+  it('согласие с вызванными агентом — только там, где непусты оба', async () => {
+    const m = await evaluateTools(rank, [mk('a1', ['x']), mk('a4', ['q'])], gold)
+    // a1: вызвал x, эталон x — согласие; a4: вызвал q, эталон z — нет
+    expect(m.agreeCases).toBe(2)
+    expect(m.agree).toBe(0.5)
+    const onlyAdvisable = await evaluateTools(rank, [mk('a1', ['x']), mk('a4', ['q'])], gold, {
+      advisable: new Set(['x']),
+    })
+    expect(onlyAdvisable.agreeCases).toBe(1)
+    expect(onlyAdvisable.agree).toBe(1)
+  })
+})
+
+describe('toolRanking: базовый ранкер выбора инструмента', () => {
+  const tool = (kind: 'skill' | 'agent', name: string, text: string, scope?: 'app'): Card => ({
+    id: `${kind}:${name}`,
+    kind,
+    path: `.claude/${kind}s/${name}.md`,
+    line: 1,
+    title: name,
+    summary: text,
+    scope,
+    fields: [{ text, weight: 3 }],
+  })
+  const cards: Card[] = [
+    tool('skill', 'sql-helper', 'миграции базы данных схема таблицы'),
+    tool('agent', 'test-writer', 'написание тестов покрытие'),
+    tool('skill', 'app-command', 'миграции базы данных приложения', 'app'),
+  ]
+  const engine = new Bm25(buildIndex(cards))
+
+  it('порядок выдачи без scope; первый совпадает с result.tool', () => {
+    const query = 'миграции базы данных и тесты'
+    const list = toolRanking(engine.search(query, 500))
+    expect(list).toContain('sql-helper')
+    expect(list).toContain('test-writer')
+    expect(list).not.toContain('app-command')
+    // Порог toolRelative без доков — 0: инструмент показан, и он первый в списке
+    expect(scout(engine, query).tool?.name).toBe(list[0])
+  })
+
+  it('пустая выдача — пустой список, инструмента нет', () => {
+    const list = toolRanking(engine.search('совсем постороннее слово zzzq', 500))
+    expect(list).toEqual([])
+    expect(scout(engine, 'совсем постороннее слово zzzq').tool).toBeUndefined()
   })
 })

@@ -20,6 +20,8 @@
  * - `judge` — точность справки по меткам судьи (`judge-labels.jsonl` — кеш 9B, `judge-ref.jsonl` —
  *   эталон Sonnet, только чтение); для новых пар зовёт 9B на `SCOUT_JUDGE_URL`. Только явно.
  *
+ * - `tools` — выбор инструмента по эталону судьи (`tool-gold.jsonl`): hit@1/hit@3/MRR, ложный совет; только явно.
+ *
  * Запуск: bun scripts/scout/bench.ts [--label <имя>] [--suite docs,forms,latency,robust,hook]
  *   [--hook-runs 5] [--compare <путь к json | last>]
  */
@@ -41,10 +43,11 @@ import { hookSuite } from './suites/hook'
 import { judgeSuite } from './suites/judge'
 import { latencySuite } from './suites/latency'
 import { robustSuite } from './suites/robust'
+import { toolsSuite } from './suites/tools'
 import type { Suite } from './suites/types'
 import { loadVectorStore } from './vectors'
 
-export type SuiteName = 'docs' | 'forms' | 'latency' | 'robust' | 'hook' | 'judge' | 'app' | 'edit'
+export type SuiteName = 'docs' | 'forms' | 'latency' | 'robust' | 'hook' | 'judge' | 'app' | 'edit' | 'tools'
 
 /** Реестр сьютов в порядке запуска: новый сьют — новый файл в `suites/` и строка здесь */
 const SUITES: Record<SuiteName, Suite> = {
@@ -56,9 +59,10 @@ const SUITES: Record<SuiteName, Suite> = {
   hook: hookSuite,
   app: appSuite,
   edit: editSuite,
+  tools: toolsSuite,
 }
 // Порядок в справке и сообщении об ошибке; порядок запуска — по реестру `SUITES`
-const ALL_SUITES: SuiteName[] = ['docs', 'forms', 'latency', 'robust', 'hook', 'judge', 'app', 'edit']
+const ALL_SUITES: SuiteName[] = ['docs', 'forms', 'latency', 'robust', 'hook', 'judge', 'app', 'edit', 'tools']
 const DEFAULT_SUITES: SuiteName[] = ['docs', 'forms', 'latency', 'robust']
 
 function git(root: string, args: string[]): string {

@@ -127,6 +127,89 @@ export function advisableTools(cards: IndexedCard[]): Set<string> {
   )
 }
 
+/** Инструменты в порядке выдачи: карточки скилов, команд и агентов без `scope`, каждое имя один раз */
+export function toolRanking(hits: Array<{ card: IndexedCard }>): string[] {
+  const seen = new Set<string>()
+  for (const { card } of hits) {
+    if ((card.kind === 'skill' || card.kind === 'command' || card.kind === 'agent') && !card.scope) {
+      seen.add(card.title)
+    }
+  }
+  return [...seen]
+}
+
+/** Метрики выбора инструмента по эталону судьи */
+export interface ToolMetrics {
+  /** Всего задач в срезе */
+  cases: number
+  /** Задач с непустым эталоном */
+  goldCases: number
+  hit1: number
+  hit3: number
+  mrr: number
+  /** Среди задач с пустым эталоном: доля, где скаут показал бы инструмент */
+  falseAdvice: number
+  /** Сколько задач с пустым эталоном */
+  emptyCases: number
+  /** Задач, где непусты и эталон судьи, и `goldTools` (что агент вызвал) */
+  agreeCases: number
+  /** Среди них: доля, где эталон судьи и вызванное агентом пересекаются */
+  agree: number
+}
+
+/**
+ * Замер выбора инструмента по эталону судьи. `rank` — упорядоченные имена кандидатов (для текущего
+ * поиска — порядок карточек в выдаче, для другого поиска подставляется его порядок). `shown` — показал
+ * бы скаут инструмент вообще; по умолчанию — список непуст. `advisable` сужает `goldTools` для согласия.
+ */
+export async function evaluateTools(
+  rank: (query: string) => Promise<string[]>,
+  cases: EvalCase[],
+  gold: Map<string, string[]>,
+  options: { shown?: (query: string) => Promise<boolean>; advisable?: Set<string> } = {},
+): Promise<ToolMetrics> {
+  let goldCases = 0
+  let hit1 = 0
+  let hit3 = 0
+  let mrr = 0
+  let emptyCases = 0
+  let falseShown = 0
+  let agreeCases = 0
+  let agreed = 0
+  for (const c of cases) {
+    const want = gold.get(c.sessionId) ?? []
+    const list = await rank(c.query)
+    if (!want.length) {
+      emptyCases++
+      const shown = options.shown ? await options.shown(c.query) : list.length > 0
+      falseShown += shown ? 1 : 0
+      continue
+    }
+    goldCases++
+    const set = new Set(want)
+    const at = list.findIndex((t) => set.has(t))
+    hit1 += at === 0 ? 1 : 0
+    hit3 += at !== -1 && at < 3 ? 1 : 0
+    mrr += at === -1 ? 0 : 1 / (at + 1)
+    const called = options.advisable ? c.goldTools.filter((t) => options.advisable!.has(t)) : c.goldTools
+    if (called.length) {
+      agreeCases++
+      agreed += called.some((t) => set.has(t)) ? 1 : 0
+    }
+  }
+  return {
+    cases: cases.length,
+    goldCases,
+    hit1: goldCases ? hit1 / goldCases : 0,
+    hit3: goldCases ? hit3 / goldCases : 0,
+    mrr: goldCases ? mrr / goldCases : 0,
+    falseAdvice: emptyCases ? falseShown / emptyCases : 0,
+    emptyCases,
+    agreeCases,
+    agree: agreeCases ? agreed / agreeCases : 0,
+  }
+}
+
 /**
  * С `advisable` эталон инструментов сужается до советуемых: `end-session` и команды приложений
  * скаут не советует по замыслу, и без фильтра они занижают top-1.

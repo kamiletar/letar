@@ -8,6 +8,7 @@ import type { HookResult } from './suites/hook'
 import type { JudgeResult } from './suites/judge'
 import type { LatencyResult } from './suites/latency'
 import type { RobustResult } from './suites/robust'
+import type { ToolsResult } from './suites/tools'
 
 /** Ключевые метрики прогона: порядок колонок журнала и единицы для сравнения */
 export type Unit = 'pp' | 'ms' | 'ratio' | 'n'
@@ -52,6 +53,10 @@ export const SUMMARY: Array<{ key: string; unit: Unit; journal?: boolean }> = [
   { key: 'app попадание', unit: 'pp' },
   { key: 'global полнота', unit: 'pp' },
   { key: 'global попадание', unit: 'pp' },
+  { key: 'инстр. hit@1', unit: 'pp' },
+  { key: 'инстр. hit@3', unit: 'pp' },
+  { key: 'инстр. MRR', unit: 'ratio' },
+  { key: 'инстр. ложный', unit: 'pp' },
 ]
 
 export type Summary = Record<string, number | null>
@@ -74,6 +79,7 @@ export interface BenchRun {
   judge?: JudgeResult
   app?: AppResult
   edit?: EditResult
+  tools?: ToolsResult
   hook?: HookResult
   summary: Summary
 }
