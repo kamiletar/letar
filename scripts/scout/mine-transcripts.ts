@@ -42,6 +42,8 @@ export interface SessionRecord {
   interrupts: number
   toolCalls: number
   firstEditStep?: number
+  /** Первые 3 разных пути, которые агент правил (`Edit`/`Write`/…), от корня репо, со слэшами `/` */
+  editPaths?: string[]
 }
 
 /** Служебные вставки харнесса, которые приходят как сообщение пользователя */
@@ -60,6 +62,11 @@ const FOLLOWUP_LIMIT = 12
 const FOLLOWUP_CHARS = 400
 const TASK_CHARS = 3000
 
+const EDIT_PATHS_LIMIT = 3
+/** Корень репо в абсолютном пути: `…/letar/`, `…/letar-wt-x/` (worktree рядом) */
+const REPO_ROOT_RE = /^[a-z]:\/(?:[^/]+\/)*?letar(?:-[^/]+)?\/(.+)$/i
+const INNER_WORKTREE_RE = /^\.claude\/worktrees\/[^/]+\/(.+)$/
+
 const KNOWLEDGE_PATH_RE = /(?:^|\/)(\.claude\/(?:docs|rules)\/[^?#]+\.md)$/
 const COMMAND_NAME_RE = /<command-name>\/?([^<]+)<\/command-name>/
 const COMMAND_ARGS_RE = /<command-args>([\s\S]*?)<\/command-args>/
@@ -71,6 +78,23 @@ export function normalizeKnowledgePath(raw: string): string | undefined {
     return undefined
   }
   return match[1]
+}
+
+/**
+ * Путь правимого файла от корня репо; вне репо — `undefined`. Корень — по имени каталога
+ * (worktree тоже), запасной вариант — `cwd` сессии.
+ */
+export function repoRelativePath(raw: string, cwd = ''): string | undefined {
+  const path = raw.replace(/\\/g, '/')
+  let rel = path.match(REPO_ROOT_RE)?.[1]
+  if (!rel) {
+    const base = cwd.replace(/\\/g, '/').replace(/\/+$/, '')
+    if (base && path.toLowerCase().startsWith(`${base.toLowerCase()}/`)) {
+      rel = path.slice(base.length + 1)
+    }
+  }
+  rel = rel?.replace(INNER_WORKTREE_RE, '$1')
+  return rel && !rel.startsWith('../') ? rel : undefined
 }
 
 /** Текст сообщения человека: строка или текстовые блоки */
@@ -196,6 +220,11 @@ export async function mineSession(file: string): Promise<SessionRecord | undefin
       const input = block.input ?? {}
       if (EDIT_TOOLS.has(block.name)) {
         rec.firstEditStep ??= rec.toolCalls
+        const raw = input.file_path ?? input.notebook_path
+        const rel = typeof raw === 'string' ? repoRelativePath(raw, rec.cwd) : undefined
+        if (rel && (rec.editPaths?.length ?? 0) < EDIT_PATHS_LIMIT && !rec.editPaths?.includes(rel)) {
+          rec.editPaths = [...(rec.editPaths ?? []), rel]
+        }
       } else if (block.name === 'Read' && typeof input.file_path === 'string') {
         const path = normalizeKnowledgePath(input.file_path)
         if (path && !rec.docsRead.some((d) => d.path === path)) {
@@ -249,8 +278,9 @@ async function main() {
   mkdirSync(dirname(out), { recursive: true })
   writeFileSync(out, records.map((r) => JSON.stringify(r)).join('\n') + '\n')
   const withDocs = records.filter((r) => r.docsRead.some((d) => d.beforeEdit)).length
+  const withEdits = records.filter((r) => r.editPaths?.length).length
   console.log(
-    `Сессий: ${records.length} из ${files.length} файлов; с доками до первой правки: ${withDocs}; `
+    `Сессий: ${records.length} из ${files.length} файлов; с доками до первой правки: ${withDocs}; с путями правок: ${withEdits}; `
       + `${Math.round((performance.now() - started) / 1000)} с → ${out}`,
   )
 }

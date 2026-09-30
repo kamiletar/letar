@@ -14,13 +14,20 @@ import {
 } from '../../libs/scout/src/index'
 import { buildAppBriefs, readAppBriefs, scoreAppBriefs } from './app-briefs'
 import { splitOf } from './cli'
+import { catalogBrief, editGold, pathQueryText } from './edit-briefs'
 import { buildCases, evaluate } from './eval'
 import { abGroup, appendLog, decide, LOG_MAX_BYTES, MAX_ATTEMPTS, runScoutHook, scoutQuery } from './hook-core'
 import { hubMetrics, spearman, topFrequency } from './hubs'
 import { indexPath } from './index-store'
 import { judgeGroups, judgeItems, loadLabels } from './judge'
 import { readMatrixStore, writeMatrixStore } from './matrix-store'
-import { mineSession, normalizeKnowledgePath, parseHumanText, type SessionRecord } from './mine-transcripts'
+import {
+  mineSession,
+  normalizeKnowledgePath,
+  parseHumanText,
+  repoRelativePath,
+  type SessionRecord,
+} from './mine-transcripts'
 import { generatePhrases, loadPhraseStore, readPhraseRows } from './phrases'
 import { isProbe, pickRows, reportSession, summarize } from './report'
 import { EMBED_MODEL, loadVectorStore } from './vectors'
@@ -133,6 +140,87 @@ describe('разбор транскрипта', () => {
       { path: '.claude/docs/forms.md', step: 1, beforeEdit: true },
       { path: '.claude/rules/git.md', step: 4, beforeEdit: false },
     ])
+  })
+})
+
+describe('пути правок и эталон второй справки', () => {
+  it('mineSession: editPaths в порядке правок, эталон содержит док, прочитанный после правки', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'scout-edit-'))
+    const file = join(dir, 's.jsonl')
+    const row = (message: object, extra = {}) => ({ type: 'assistant', message, ...extra })
+    const tool = (name: string, input: object) => row({ content: [{ type: 'tool_use', name, input }] })
+    const rows = [
+      {
+        type: 'user',
+        origin: { kind: 'human' },
+        sessionId: 's2',
+        timestamp: '2026-09-30T00:00:00Z',
+        cwd: 'C:\\repo',
+        message: { content: 'Поправь страницу заказов' },
+      },
+      tool('Edit', { file_path: 'C:\\repo\\apps\\app-a\\src\\b.ts' }),
+      tool('Edit', { file_path: 'C:\\repo\\apps\\app-a\\src\\b.ts' }),
+      tool('Write', { file_path: 'C:\\elsewhere\\x.ts' }),
+      tool('NotebookEdit', { notebook_path: 'C:\\repo\\n.ipynb' }),
+      tool('Read', { file_path: 'C:\\repo\\.claude\\docs\\orders.md' }),
+    ]
+    writeFileSync(file, rows.map((r) => JSON.stringify(r)).join('\n'))
+    const rec = await mineSession(file)
+    expect(rec?.editPaths).toEqual(['apps/app-a/src/b.ts', 'n.ipynb'])
+    const known = new Set(['.claude/docs/orders.md'])
+    expect(editGold(rec!, known, () => false)).toEqual(['.claude/docs/orders.md'])
+    // Упомянутый в задаче и loaded-доки в эталон не идут
+    expect(editGold({ ...rec!, task: 'см. orders.md' }, known, () => false)).toEqual([])
+    expect(editGold(rec!, known, () => true)).toEqual([])
+  })
+
+  it('repoRelativePath: корень по имени каталога, worktree и cwd, чужое — мимо', () => {
+    expect(repoRelativePath('C:\\web\\letar\\apps\\app-a\\x.ts')).toBe('apps/app-a/x.ts')
+    expect(repoRelativePath('C:/web/letar-wt-1/libs/l/y.ts')).toBe('libs/l/y.ts')
+    expect(repoRelativePath('C:/web/letar/.claude/worktrees/w1/libs/l/y.ts')).toBe('libs/l/y.ts')
+    expect(repoRelativePath('C:\\repo\\z.ts', 'C:\\repo')).toBe('z.ts')
+    expect(repoRelativePath('C:\\Users\\me\\notes.md', 'C:\\repo')).toBeUndefined()
+  })
+
+  it('pathQueryText: сегменты пути словами, служебные и скобки убраны', () => {
+    const text = pathQueryText('apps/app-a/src/app/(admin)/orders/page.tsx').split(' ')
+    for (const word of ['app-a', 'admin', 'orders', 'page']) {
+      expect(text).toContain(word)
+    }
+    for (const word of ['src', '(admin)', 'page.tsx']) {
+      expect(text).not.toContain(word)
+    }
+  })
+
+  describe('catalogBrief', () => {
+    const at = (path: string, docs: string[]): SessionRecord => ({
+      ...sessionOf('x', []),
+      editPaths: [path],
+      docsRead: docs.map((d, step) => ({ path: d, step, beforeEdit: false })),
+    })
+    const history = [
+      at('apps/app-a/src/one.ts', ['a.md', 'b.md']),
+      at('apps/app-a/src/two.ts', ['a.md']),
+      at('apps/app-a/prisma/schema.zmodel', ['db.md']),
+      at('apps/app-b/x/y.ts', ['other.md']),
+    ]
+    const none = () => false
+
+    it('префикс из 3 сегментов', () => {
+      expect(catalogBrief('apps/app-a/src/new.ts', history, { loaded: none })).toEqual(['a.md', 'b.md'])
+    })
+
+    it('нет истории у 3 сегментов — откат к 2', () => {
+      expect(catalogBrief('apps/app-a/docs/new.ts', history, { loaded: none })).toEqual(['a.md', 'b.md', 'db.md'])
+    })
+
+    it('нет истории вовсе — пусто; loaded и exclude отсекаются', () => {
+      expect(catalogBrief('apps/app-c/src/new.ts', history, { loaded: none })).toEqual([])
+      expect(
+        catalogBrief('apps/app-a/src/new.ts', history, { loaded: (p) => p === 'a.md', exclude: new Set(['b.md']) }),
+      )
+        .toEqual([])
+    })
   })
 })
 

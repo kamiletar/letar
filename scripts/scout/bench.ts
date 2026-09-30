@@ -39,6 +39,7 @@ import { basename, join } from 'node:path'
 import { Bm25, formatBrief, mentionedIn, type ScoutResult } from '../../libs/scout/src/index'
 import { scoreAppBriefs } from './app-briefs'
 import { arg, readJsonl, splitOf } from './cli'
+import { buildEditCases, cutDate, editGroups, editSessions, scoreEditCases, VARIANTS } from './edit-briefs'
 import { advisableTools, type EvalCase, evaluate, type Metrics } from './eval'
 import { type FormProbe, formsNegatives, scoreProbe } from './forms-eval'
 import { freshIndex, scoutQuery, type ScoutQueryResult } from './hook-core'
@@ -59,8 +60,8 @@ import { scoutDataDir, scoutHome } from './paths'
 import { loadPhraseStore } from './phrases'
 import { loadVectorStore } from './vectors'
 
-export type Suite = 'docs' | 'forms' | 'latency' | 'robust' | 'hook' | 'judge' | 'app'
-const ALL_SUITES: Suite[] = ['docs', 'forms', 'latency', 'robust', 'hook', 'judge', 'app']
+export type Suite = 'docs' | 'forms' | 'latency' | 'robust' | 'hook' | 'judge' | 'app' | 'edit'
+const ALL_SUITES: Suite[] = ['docs', 'forms', 'latency', 'robust', 'hook', 'judge', 'app', 'edit']
 const DEFAULT_SUITES: Suite[] = ['docs', 'forms', 'latency', 'robust']
 
 /** Проверка устойчивости: исключение внутри считается провалом */
@@ -217,6 +218,21 @@ interface BenchRun {
   robust?: { passed: number; total: number; failed: string[] }
   judge?: { groups: JudgeGroup[]; newLabels: number; serverAnswered: boolean | null; unparsed: number }
   app?: { train: number; app: AppScore; global: AppScore }
+  edit?: {
+    sessions: number
+    cases: number
+    rows: Array<
+      {
+        group: string
+        variant: string
+        found: number
+        gold: number
+        hitSessions: number
+        sessions: number
+        coveredByFirst: number
+      }
+    >
+  }
   hook?: { runs: number; p50: number; max: number; ok: boolean; problems: string[] }
   summary: Summary
 }
@@ -753,6 +769,49 @@ async function main() {
           } (${x.hitSessions}/${x.sessions})`,
         )
       }
+    }
+  }
+  if (suites.includes('edit')) {
+    console.log('\n== edit ==')
+    const liveFile = join(dataDir, 'sessions-live.jsonl')
+    const frozenFile = join(dataDir, 'sessions.jsonl')
+    if (!existsSync(liveFile) || !existsSync(frozenFile)) {
+      console.log(`нет ${existsSync(liveFile) ? frozenFile : liveFile}`)
+    } else {
+      const sessions = editSessions(readJsonl<SessionRecord>(liveFile), readJsonl<SessionRecord>(frozenFile))
+      const known = new Set(engine.cards.filter((c) => c.kind === 'doc' || c.kind === 'rule').map((c) => c.path))
+      const loadedPaths = new Set(engine.cards.filter((c) => c.loaded).map((c) => c.path))
+      const editCases = await buildEditCases(sessions, {
+        search: async (q) => (await run(q)).result,
+        known,
+        loaded: (p) => loadedPaths.has(p),
+      })
+      const cut = cutDate(sessions)
+      console.log(
+        `сессий с правкой ${sessions.length}, с эталоном ${editCases.length}; история — до ${cut.slice(0, 10)}, `
+          + `проверка — после. Каталог и смесь меряются только на проверке.`,
+      )
+      const rows: NonNullable<BenchRun['edit']>['rows'] = []
+      for (const group of editGroups(editCases, cut)) {
+        const isCheck = group.name.startsWith('проверка')
+        for (const variant of VARIANTS) {
+          if (!isCheck && (variant === 'P-каталог' || variant === 'P-смесь')) {
+            continue
+          }
+          const x = scoreEditCases(group.cases, variant)
+          rows.push({ group: group.name, variant, ...x })
+          console.log(
+            `${group.name.padEnd(14)} ${variant.padEnd(14)} n=${String(x.sessions).padStart(3)}  полнота ${
+              pct(x.gold ? x.found / x.gold : 0).padStart(6)
+            } (${x.found}/${x.gold})  сессий с попаданием ${
+              pct(x.sessions ? x.hitSessions / x.sessions : 0).padStart(6)
+            } (${x.hitSessions}/${x.sessions})  первая справка уже покрыла ${
+              pct(x.gold ? x.coveredByFirst / x.gold : 0)
+            } (${x.coveredByFirst}/${x.gold})`,
+          )
+        }
+      }
+      result.edit = { sessions: sessions.length, cases: editCases.length, rows }
     }
   }
   for (const { key } of SUMMARY) {
