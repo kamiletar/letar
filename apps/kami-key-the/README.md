@@ -56,7 +56,7 @@ nx typecheck:tsgo kami-key-the
 
 ## Полезные ссылки
 
-- [Монорепо CLAUDE.md](../../CLAUDE.md) — общие правила разработки
+- [Монорепо AGENTS.md](../../AGENTS.md) — общие правила разработки
 - [keysender](https://github.com/Krombik/keysender) — нативный модуль для перехвата клавиш
 - [systray2](https://github.com/Edgar-P-yan/node-systray-v2) — системный трей
 
