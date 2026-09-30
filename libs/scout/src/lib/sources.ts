@@ -173,6 +173,85 @@ export function docCards(input: DocInput): Card[] {
   return cards
 }
 
+const FIELD_ROW_RE = /^\|\s*`(Form\.(?:Field|Document)\.\w+)`\s*\|\s*([^|]+?)\s*\|/
+
+/** Разворачивает имя компонента в слова для поиска: `Form.Field.DateRange` → `Date Range DateRange` */
+function componentWords(component: string): string {
+  const short = component.replace(/^Form\.(Field|Document)\./, '')
+  return `${short} ${short.replace(/([a-z])([A-Z])/g, '$1 $2')}`
+}
+
+/**
+ * Каталог полей форм: строки таблиц `| \`Form.Field.X\` | описание |` → карточка поля с категорией
+ * (заголовок `##` над таблицей). Если ниже есть подробный раздел про компонент — ссылка ведёт
+ * на него, а его текст идёт в поиск. Таблицы пропсов (первая ячейка не `Form.*`) пропускаются.
+ */
+export function fieldCatalogCards(path: string, markdown: string): Card[] {
+  const lines = markdown.split(/\r?\n/)
+  const sections = parseSections(markdown)
+  const cards: Card[] = []
+  const seen = new Set<string>()
+  let category = ''
+  lines.forEach((line, i) => {
+    const heading = line.match(/^##\s+(.+)$/)
+    if (heading) {
+      category = stripMarkdown(heading[1])
+      return
+    }
+    const row = line.match(FIELD_ROW_RE)
+    if (!row || seen.has(row[1])) {
+      return
+    }
+    const [, component, description] = row
+    seen.add(component)
+    const short = component.split('.').pop() ?? component
+    const detail = sections.find((s) =>
+      s.level >= 2 && (s.title.startsWith(`${component} `) || s.title.startsWith(`${short} `))
+    )
+    cards.push({
+      id: `field:${component}`,
+      kind: 'field',
+      path,
+      line: detail?.line ?? i + 1,
+      title: component,
+      summary: `${stripMarkdown(description)} (${category})`,
+      topic: category,
+      fields: [
+        { text: `${componentWords(component)} ${description}`, weight: 3 },
+        { text: `${category} ${detail?.title ?? ''}`, weight: 2 },
+        { text: detail?.body ?? '', weight: 1 },
+      ],
+    })
+  })
+  return cards
+}
+
+export interface PatternInput {
+  name: string
+  title: string
+  description: string
+  path: string
+  line: number
+  /** Русское описание: описания в реестре английские, а задачи пишут по-русски */
+  hint?: string
+}
+
+/** Карточка паттерна формы (реестр form-mcp): код отдаёт MCP-инструмент `get_form_pattern` */
+export function patternCard(input: PatternInput): Card {
+  return {
+    id: `pattern:${input.name}`,
+    kind: 'pattern',
+    path: input.path,
+    line: input.line,
+    title: input.name,
+    summary: input.hint ? `${input.hint} (${input.title})` : `${input.title}: ${input.description}`,
+    fields: [
+      { text: `${input.name.replace(/-/g, ' ')} ${input.title} ${input.hint ?? ''}`, weight: 3 },
+      { text: `${input.description} форма form`, weight: 2 },
+    ],
+  }
+}
+
 export type ToolKind = 'skill' | 'command' | 'agent'
 
 /** Карточка скила, команды или субагента из frontmatter */

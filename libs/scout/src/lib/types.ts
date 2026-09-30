@@ -1,5 +1,5 @@
 /** Вид карточки индекса: откуда она собрана */
-export type CardKind = 'doc' | 'section' | 'rule' | 'skill' | 'command' | 'agent'
+export type CardKind = 'doc' | 'section' | 'rule' | 'skill' | 'command' | 'agent' | 'field' | 'pattern'
 
 /** Карточка — единица поиска. Справка строится только из карточек, поэтому ссылки в ней всегда реальные */
 export interface Card {
@@ -38,8 +38,15 @@ export interface IndexedCard extends Omit<Card, 'fields'> {
 }
 
 /** Сериализуемый индекс, лежит в `SCOUT_HOME/index.json` */
+/**
+ * Версия формата индекса. Поднимать при любом изменении набора или вида карточек: сохранённый
+ * индекс пересобирается по свежести исходников, а сами исходники при этом могли не меняться
+ * (так карточки полей форм не попали в индекс, собранный до их появления).
+ */
+export const INDEX_VERSION = 2
+
 export interface ScoutIndex {
-  version: 1
+  version: typeof INDEX_VERSION
   builtAt: string
   cards: IndexedCard[]
 }

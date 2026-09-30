@@ -1,10 +1,47 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { docCards, type IndexEntry, parseIndexEntries, toolCard, type ToolKind } from './sources'
+import {
+  docCards,
+  fieldCatalogCards,
+  type IndexEntry,
+  parseIndexEntries,
+  patternCard,
+  type PatternInput,
+  toolCard,
+  type ToolKind,
+} from './sources'
 import type { Card } from './types'
 
 const DOCS_DIR = '.claude/docs'
 const RULES_DIR = '.claude/rules'
+
+/** Документация библиотеки форм: поля и паттерны — отдельные карточки, доки — как обычные */
+const FORMS_DOCS_DIR = 'libs/forms/docs'
+const FORMS_README = 'libs/forms/README.md'
+const FIELD_CATALOG = `${FORMS_DOCS_DIR}/fields.md`
+const PATTERN_REGISTRY = 'libs/form-mcp/src/data/pattern-registry.ts'
+
+/**
+ * Русские описания паттернов реестра form-mcp: в реестре они английские, а BM25 по-русски их не
+ * найдёт. Новый паттерн без подсказки всё равно попадёт в индекс — с английским описанием;
+ * дымовая проверка `scripts/scout/smoke.ts` напоминает дописать строку.
+ */
+export const PATTERN_HINTS: Record<string, string> = {
+  'crud-create': 'форма создания новой записи, добавление',
+  'crud-edit': 'форма редактирования существующей записи, начальные значения, сохранение изменений',
+  'multi-step': 'многошаговая форма, пошаговый мастер, визард, шаги оформления',
+  offline: 'офлайн-форма без интернета, отправка позже, синхронизация очереди',
+  i18n: 'перевод и локализация формы, несколько языков',
+  'from-schema': 'форма из Zod-схемы, поля генерируются автоматически по схеме',
+  declarative: 'декларативная форма, поля из конфигурации',
+  'server-action': 'отправка формы в server action, сохранение на сервере',
+  analytics: 'аналитика формы, цели Метрики, отслеживание заполнения и отказов',
+  'server-errors': 'ошибки с сервера под полями формы, серверная валидация',
+  'undo-redo': 'отмена и повтор правок в форме, история изменений',
+  'reference-select': 'выбор связанной записи из справочника, поиск по длинному списку, подгрузка вариантов',
+  'reference-zenstack': 'выбор связанной модели ZenStack из базы, relation',
+  'dependent-select': 'зависимые списки: страна, затем город, каскадный выбор',
+}
 
 /** Служебные файлы каталога доков: сами по себе не док */
 const SKIP_DOC_FILES = new Set(['INDEX.md', 'README.md'])
@@ -52,7 +89,12 @@ export function collectCards(root: string): Card[] {
   for (const entry of parseIndexEntries(read(root, 'CLAUDE.md') ?? '')) {
     short.set(entry.path, entry.annotation)
   }
-  const docPaths = new Set([...listMarkdown(root, DOCS_DIR), ...listMarkdown(root, RULES_DIR)])
+  const docPaths = new Set([
+    ...listMarkdown(root, DOCS_DIR),
+    ...listMarkdown(root, RULES_DIR),
+    ...listMarkdown(root, FORMS_DOCS_DIR),
+    FORMS_README,
+  ])
   for (const path of entries.keys()) {
     if (path.endsWith('.md') && !path.startsWith(`${DOCS_DIR}/external/`)) {
       docPaths.add(path)
@@ -65,6 +107,18 @@ export function collectCards(root: string): Card[] {
       continue
     }
     cards.push(...docCards({ path, markdown, entry: entries.get(path), shortAnnotation: short.get(path) }))
+  }
+  const catalog = read(root, FIELD_CATALOG)
+  if (catalog !== undefined) {
+    cards.push(...fieldCatalogCards(FIELD_CATALOG, catalog))
+  }
+  const registry = read(root, PATTERN_REGISTRY)
+  if (registry !== undefined) {
+    cards.push(
+      ...parsePatternRegistry(PATTERN_REGISTRY, registry).map((p) =>
+        patternCard({ ...p, hint: PATTERN_HINTS[p.name] })
+      ),
+    )
   }
   for (const kind of ['skill', 'command', 'agent'] as const) {
     for (const { path, name } of listToolFiles(root, kind)) {
@@ -80,4 +134,27 @@ export function collectCards(root: string): Card[] {
     }
   }
   return cards
+}
+
+/**
+ * Паттерны из реестра form-mcp читаются как текст, без импорта библиотеки: объект начинается строкой
+ * `    name: 'x'`, за ней `title` и `description` в одинарных кавычках.
+ */
+export function parsePatternRegistry(path: string, source: string): PatternInput[] {
+  const lines = source.split(/\r?\n/)
+  const patterns: PatternInput[] = []
+  lines.forEach((line, i) => {
+    const name = line.match(/^ {4}name: '([\w-]+)'/)?.[1]
+    if (!name) {
+      return
+    }
+    const next = lines.slice(i + 1, i + 6).join('\n')
+    const title = next.match(/^ {4}title: '([^']*)'/m)?.[1]
+    // Длинное описание переносится на следующую строку: `description:\n      '…'`
+    const description = next.match(/^ {4}description:\s*'([^']*)'/m)?.[1]
+    if (title && description) {
+      patterns.push({ name, title, description, path, line: i + 1 })
+    }
+  })
+  return patterns
 }

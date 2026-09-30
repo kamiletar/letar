@@ -1,4 +1,4 @@
-import type { DocHit, ScoutResult, ToolHit } from './search'
+import type { DocHit, FormHit, ScoutResult, ToolHit } from './search'
 import { truncate } from './sources'
 
 export const BRIEF_HEADER = 'подсказка скаута; не по теме — игнорируй'
@@ -24,13 +24,29 @@ function toolHow(tool: ToolHit): string {
   return `субагент \`${tool.name}\` (Agent)`
 }
 
+function fieldLine(field: FormHit): string {
+  return `- \`${field.name}\` — ${truncate(field.summary, 120)} (${field.path}:${field.line})`
+}
+
+/** Короткое имя поля для строки владельца: `Form.Field.Date` → `Date` */
+function shortField(name: string): string {
+  return name.replace(/^Form\.(Field|Document)\./, '')
+}
+
 /** Полная справка для агента. Пустая строка — сказать нечего, хук молчит */
 export function formatBrief(result: ScoutResult, options: BriefOptions = {}): string {
   const { summaryChars = 250 } = options
-  if (!result.docs.length && !result.traps.length && !result.tool) {
+  if (!result.docs.length && !result.traps.length && !result.tool && !result.fields.length) {
     return ''
   }
   const lines = [BRIEF_HEADER]
+  if (result.fields.length) {
+    lines.push('Поля формы (@letar/forms):', ...result.fields.map(fieldLine))
+  }
+  if (result.pattern) {
+    const { name, summary } = result.pattern
+    lines.push(`Паттерн формы: \`${name}\` — ${truncate(summary, 160)}; код — MCP \`get_form_pattern("${name}")\``)
+  }
   if (result.docs.length) {
     lines.push('Доки:', ...result.docs.map((d) => docLine(d, summaryChars)))
   }
@@ -65,6 +81,9 @@ export function formatOneLine(result: ScoutResult): string {
   }
   if (traps) {
     parts.push(`${traps} ${plural(traps, 'ловушка', 'ловушки', 'ловушек')}`)
+  }
+  if (result.fields.length) {
+    parts.push(`поля ${result.fields.map((f) => shortField(f.name)).join(', ')}`)
   }
   if (result.tool) {
     const { kind, name } = result.tool

@@ -1,5 +1,5 @@
 import { tokenize } from './text'
-import type { Card, IndexedCard, ScoutIndex } from './types'
+import { type Card, INDEX_VERSION, type IndexedCard, type ScoutIndex } from './types'
 
 /** Карточки → сериализуемый индекс с частотами термов (поля взвешены повтором) */
 export function buildIndex(cards: Card[], builtAt = new Date().toISOString()): ScoutIndex {
@@ -14,7 +14,7 @@ export function buildIndex(cards: Card[], builtAt = new Date().toISOString()): S
     }
     return { ...card, tf, len }
   })
-  return { version: 1, builtAt, cards: indexed }
+  return { version: INDEX_VERSION, builtAt, cards: indexed }
 }
 
 export interface Hit {
