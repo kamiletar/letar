@@ -38,8 +38,14 @@ export function sourcesMtime(root: string): number {
     const full = join(root, dir)
     if (existsSync(full)) {
       touch(full)
-      for (const name of readdirSync(full)) {
-        touch(join(full, name))
+      for (const entry of readdirSync(full, { withFileTypes: true })) {
+        touch(join(full, entry.name))
+        // Команды лежат ещё и в подкаталогах первого уровня (`/audit:security-check`)
+        if (dir === '.claude/commands' && entry.isDirectory()) {
+          for (const nested of readdirSync(join(full, entry.name))) {
+            touch(join(full, entry.name, nested))
+          }
+        }
       }
     }
   }

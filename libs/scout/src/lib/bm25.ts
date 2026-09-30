@@ -1,10 +1,13 @@
+import { embedHash } from './dense'
 import { tokenize } from './text'
 import { type Card, INDEX_VERSION, type IndexedCard, type ScoutIndex } from './types'
 
 /** Карточки → сериализуемый индекс с частотами термов (поля взвешены повтором) */
 export function buildIndex(cards: Card[], builtAt = new Date().toISOString()): ScoutIndex {
-  const indexed = cards.map(({ fields, ...card }): IndexedCard => {
-    const tf: Record<string, number> = {}
+  const indexed = cards.map((full): IndexedCard => {
+    const { fields, ...card } = full
+    // Без прототипа: иначе `tf['constructor']` — функция, и очки превращаются в NaN
+    const tf: Record<string, number> = Object.create(null)
     let len = 0
     for (const field of fields) {
       for (const term of tokenize(field.text)) {
@@ -12,7 +15,7 @@ export function buildIndex(cards: Card[], builtAt = new Date().toISOString()): S
         len += field.weight
       }
     }
-    return { ...card, tf, len }
+    return { ...card, tf, len, embedHash: embedHash(full) }
   })
   return { version: INDEX_VERSION, builtAt, cards: indexed }
 }
@@ -73,7 +76,11 @@ export class Bm25 {
       const idf = this.idf(term)
       for (const i of list) {
         const card = this.cards[i]
-        const tf = card.tf[term]
+        // Индекс из JSON — обычный объект: берём только собственную частоту
+        const tf = Object.hasOwn(card.tf, term) ? card.tf[term] : 0
+        if (!tf) {
+          continue
+        }
         const norm = (tf * (this.k1 + 1)) / (tf + this.k1 * (1 - this.b + (this.b * card.len) / this.avgLen))
         scores.set(i, (scores.get(i) ?? 0) + idf * norm)
       }

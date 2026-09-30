@@ -6,6 +6,7 @@ export {
   cardRerankText,
   DenseIndex,
   EMBED_TEXT_CHARS,
+  embedHash,
   embedTexts,
   formatQuery,
   type FormRanking,
@@ -15,6 +16,7 @@ export {
   type HybridOptions,
   type HybridResult,
   normalize,
+  QUERY_CHARS,
   QUERY_INSTRUCTION,
   reciprocalRankFusion,
   rerankTexts,
@@ -23,6 +25,7 @@ export {
 export { type Frontmatter, parseFrontmatter } from './lib/frontmatter'
 export {
   type DocHit,
+  FORM_WORDS,
   type FormHit,
   isFormCard,
   layoutHits,

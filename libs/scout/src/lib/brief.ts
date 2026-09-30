@@ -36,7 +36,7 @@ function shortField(name: string): string {
 /** Полная справка для агента. Пустая строка — сказать нечего, хук молчит */
 export function formatBrief(result: ScoutResult, options: BriefOptions = {}): string {
   const { summaryChars = 250 } = options
-  if (!result.docs.length && !result.traps.length && !result.tool && !result.fields.length) {
+  if (!result.docs.length && !result.traps.length && !result.tool && !result.fields.length && !result.pattern) {
     return ''
   }
   const lines = [BRIEF_HEADER]
@@ -84,6 +84,9 @@ export function formatOneLine(result: ScoutResult): string {
   }
   if (result.fields.length) {
     parts.push(`поля ${result.fields.map((f) => shortField(f.name)).join(', ')}`)
+  }
+  if (result.pattern) {
+    parts.push(`паттерн ${result.pattern.name}`)
   }
   if (result.tool) {
     const { kind, name } = result.tool

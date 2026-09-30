@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto'
 import type { Bm25, Hit } from './bm25'
 import type { Card, IndexedCard } from './types'
 
@@ -21,8 +22,18 @@ export function cardEmbedText(card: Card): string {
   return [head, card.summary, ...ordered].join('\n').slice(0, EMBED_TEXT_CHARS)
 }
 
+/** Хеш текста для эмбеддинга: первые 16 hex sha1 от `cardEmbedText` */
+export function embedHash(card: Card): string {
+  return createHash('sha1').update(cardEmbedText(card)).digest('hex').slice(0, 16)
+}
+
+/** Длиннее — эмбеддер отвечает HTTP 400 (лимит токенов на слот), поэтому запрос сжимаем */
+export const QUERY_CHARS = 1500
+
+/** Длинный запрос: начало (там обычно задача) и конец (после вставленного лога) */
 export function formatQuery(query: string): string {
-  return `Instruct: ${QUERY_INSTRUCTION}\nQuery: ${query}`
+  const body = query.length > QUERY_CHARS ? `${query.slice(0, 1200)}\n…\n${query.slice(-300)}` : query
+  return `Instruct: ${QUERY_INSTRUCTION}\nQuery: ${body}`
 }
 
 export interface ServerOptions {

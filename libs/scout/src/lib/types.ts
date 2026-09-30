@@ -20,8 +20,11 @@ export interface Card {
   warn?: boolean
   /** Раздел INDEX.md, в котором стоит док */
   topic?: string
-  /** `app` — команда приложения (`/<app>`): её не советуем, у приложений своя статическая справка */
-  scope?: 'app'
+  /**
+   * `app` — команда приложения (`/<app>`): её не советуем, у приложений своя статическая справка.
+   * `service` — служебная команда роли или сессии, агенту по задаче её не советуем.
+   */
+  scope?: 'app' | 'service'
   /** Взвешенный текст для индексации: поле → вес */
   fields: WeightedField[]
 }
@@ -35,6 +38,8 @@ export interface WeightedField {
 export interface IndexedCard extends Omit<Card, 'fields'> {
   tf: Record<string, number>
   len: number
+  /** Хеш текста для эмбеддинга (`embedHash`): по нему сверяют векторы с индексом */
+  embedHash: string
 }
 
 /** Сериализуемый индекс, лежит в `SCOUT_HOME/index.json` */
@@ -42,8 +47,9 @@ export interface IndexedCard extends Omit<Card, 'fields'> {
  * Версия формата индекса. Поднимать при любом изменении набора или вида карточек: сохранённый
  * индекс пересобирается по свежести исходников, а сами исходники при этом могли не меняться
  * (так карточки полей форм не попали в индекс, собранный до их появления).
+ * 3 — частоты без прототипа, команды из подкаталогов, `embedHash`.
  */
-export const INDEX_VERSION = 2
+export const INDEX_VERSION = 3
 
 export interface ScoutIndex {
   version: typeof INDEX_VERSION

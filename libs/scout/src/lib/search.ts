@@ -85,10 +85,12 @@ export interface ScoutOptions {
 
 /**
  * Явные слова про формы и поля ввода в запросе. `\b` в JS не видит кириллицу — границы слова через
- * lookaround; «формат» и «информация» — не формы.
+ * lookaround. Не формы: «формат», «формула/формулировка» (`ул`), «формировать/сформировать» (`ир`),
+ * «формально» (`альн`); «информация» и «платформа» отсекает `(?<![а-яё])` перед корнем. «Поле» берём
+ * во всех падежах («полем», «в полях»), «form/forms/input/field» — английские слова целиком.
  */
-const FORM_WORDS =
-  /(?<![а-яё])(?:форм(?!ат)|анкет|пол(?:е|я|ю|ей|ями?)(?![а-яё])|инпут|ввод(?![а-яё]))|\b(?:inputs?|fields?)\b/i
+export const FORM_WORDS =
+  /(?<![а-яё])(?:форм(?!ат|ул|ир|альн)|анкет|пол(?:е|я|ю|ей|ем|ях|ями?)(?![а-яё])|инпут|ввод(?![а-яё]))|\b(?:forms?|inputs?|fields?)\b/i
 
 const TOOL_KINDS = new Set(['skill', 'command', 'agent'])
 const FORM_KINDS = new Set(['field', 'pattern'])
@@ -147,7 +149,7 @@ export function layoutHits(cards: IndexedCard[], hits: Hit[], query: string, opt
       firstFormRank = rank
     }
     if (TOOL_KINDS.has(card.kind)) {
-      if (card.scope !== 'app') {
+      if (!card.scope) {
         tool ??= toToolHit(hit)
       }
       return

@@ -1,9 +1,9 @@
 import { Bm25, buildIndex } from './bm25'
 import { BRIEF_HEADER, formatBrief, formatOneLine } from './brief'
 import { parsePatternRegistry } from './collect'
-import { hybridHits } from './dense'
+import { embedHash, formatQuery, hybridHits, QUERY_CHARS, QUERY_INSTRUCTION } from './dense'
 import { parseFrontmatter } from './frontmatter'
-import { layoutHits, scout } from './search'
+import { FORM_WORDS, layoutHits, scout } from './search'
 import {
   docCards,
   fieldCatalogCards,
@@ -261,5 +261,98 @@ describe('hybridHits', () => {
     const { hits, stages } = await hybridHits(engine, 'форма с полем даты', { embed: dead, rerank: dead })
     expect(stages).toEqual(['bm25'])
     expect(hits.map((h) => h.card.id)).toEqual(engine.search('форма с полем даты', 500).map((h) => h.card.id))
+  })
+})
+
+describe('исправления по ревью', () => {
+  it('BM25 не даёт NaN на словах, совпадающих с членами Object.prototype', () => {
+    const card = toolCard('command', '.claude/commands/x.md', '---\ndescription: constructor toString\n---', 'x')
+    const index = buildIndex([card], 'test')
+    for (const engine of [new Bm25(index), new Bm25(JSON.parse(JSON.stringify(index)))]) {
+      const hits = engine.search('constructor')
+      expect(hits.length).toBe(1)
+      expect(Number.isFinite(hits[0].score)).toBe(true)
+    }
+    // Старый индекс: у tf есть прототип, чужой `constructor` не считается частотой
+    const legacy = JSON.parse(JSON.stringify(index))
+    Object.setPrototypeOf(legacy.cards[0].tf, { constructor: 5 })
+    delete legacy.cards[0].tf.constructor
+    const hits = new Bm25(legacy).search('constructor')
+    expect(hits.every((h) => Number.isFinite(h.score))).toBe(true)
+  })
+
+  it('embedHash стабилен, зависит от текста карточки и заполняется в индексе', () => {
+    const make = (description: string) =>
+      toolCard('command', '.claude/commands/x.md', `---\ndescription: ${description}\n---`, 'x')
+    const a = make('первый текст')
+    expect(embedHash(a)).toMatch(/^[0-9a-f]{16}$/)
+    expect(embedHash(a)).toBe(embedHash(make('первый текст')))
+    expect(embedHash(a)).not.toBe(embedHash(make('второй текст')))
+    expect(buildIndex([a], 'test').cards[0].embedHash).toBe(embedHash(a))
+  })
+
+  it('formatQuery сжимает длинный запрос: начало и конец, короткий не трогает', () => {
+    const prefix = `Instruct: ${QUERY_INSTRUCTION}\nQuery: `
+    const formatted = formatQuery('а'.repeat(2000) + 'б'.repeat(3000))
+    const body = formatted.slice(prefix.length)
+    expect(formatted.startsWith(prefix)).toBe(true)
+    expect(body.length).toBe(1200 + 3 + 300)
+    expect(body).toBe(`${'а'.repeat(1200)}\n…\n${'б'.repeat(300)}`)
+    const short = 'x'.repeat(QUERY_CHARS)
+    expect(formatQuery(short)).toBe(prefix + short)
+  })
+
+  it('справка из одного паттерна не пустая, в строке для владельца он назван', () => {
+    const result = {
+      query: 'q',
+      docs: [],
+      traps: [],
+      fields: [],
+      matched: 1,
+      pattern: { name: 'contact-form', summary: 'Контактная форма', path: 'reg.ts', line: 3, score: 1 },
+    }
+    expect(formatBrief(result)).toContain('get_form_pattern("contact-form")')
+    expect(formatOneLine(result)).toBe('🔎 скаут: паттерн contact-form')
+  })
+
+  it('реестр паттернов: экранированная кавычка и двойные кавычки', () => {
+    const source = String.raw`  {
+    name: 'one',
+    title: 'Doesn\'t break',
+    description: 'Don\'t stop here',
+  },
+  {
+    name: "two",
+    title: "Say \"hi\"",
+    description:
+      "Double \"quoted\" text",
+  },`
+    const [one, two] = parsePatternRegistry('reg.ts', source)
+    expect(one).toMatchObject({ name: 'one', title: "Doesn't break", description: "Don't stop here" })
+    expect(two).toMatchObject({ name: 'two', title: 'Say "hi"', description: 'Double "quoted" text' })
+  })
+
+  it('FORM_WORDS: формы и поля — да, формула, формат и прочее — нет', () => {
+    for (const yes of ['форма заявки', 'полем ввода', 'в полях анкеты', 'login form']) {
+      expect(FORM_WORDS.test(yes), yes).toBe(true)
+    }
+    for (
+      const no of ['формула сметы', 'сформировать отчёт', 'формально верно', 'формат даты', 'информация', 'платформа']
+    ) {
+      expect(FORM_WORDS.test(no), no).toBe(false)
+    }
+  })
+
+  it('служебная команда — scope service, и раскладка не делает её инструментом', () => {
+    const command = (name: string, description: string) => ({
+      ...toolCard('command', `.claude/commands/${name}.md`, `---\ndescription: ${description}\n---`, name),
+      scope: 'service' as const,
+    })
+    const cards = [command('end-session', 'завершение сессии деплой'), command('sync-env', 'Устарела: деплой env')]
+    const engine = new Bm25(JSON.parse(JSON.stringify(buildIndex(cards, 'test'))))
+    expect(engine.cards.map((c) => c.scope)).toEqual(['service', 'service'])
+    const hits = engine.search('деплой', 500)
+    expect(hits.length).toBe(2)
+    expect(layoutHits(engine.cards, hits, 'деплой').tool).toBeUndefined()
   })
 })

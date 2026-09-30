@@ -1,5 +1,6 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { parseFrontmatter } from './frontmatter'
 import {
   docCards,
   fieldCatalogCards,
@@ -43,6 +44,23 @@ export const PATTERN_HINTS: Record<string, string> = {
   'dependent-select': 'зависимые списки: страна, затем город, каскадный выбор',
 }
 
+/**
+ * Служебные команды: роли агентов и завершение сессии запускает человек, а не агент по задаче,
+ * поэтому в индексе они есть (поиск их видит), но справка их не советует.
+ */
+const SERVICE_COMMANDS = new Set([
+  'end-session',
+  'deploy-agent',
+  'sync-env',
+  'forms-dev',
+  'forms-coordinator',
+  'ui-coordinator',
+  'animatrona-coordinator',
+  'webstudio',
+  'letar',
+  'repo',
+])
+
 /** Служебные файлы каталога доков: сами по себе не док */
 const SKIP_DOC_FILES = new Set(['INDEX.md', 'README.md'])
 
@@ -61,7 +79,7 @@ function listMarkdown(root: string, dir: string): string[] {
     .map((e) => `${dir}/${e.name}`)
 }
 
-function listToolFiles(root: string, kind: ToolKind): Array<{ path: string; name: string }> {
+function listToolFiles(root: string, kind: ToolKind): Array<{ path: string; name: string; nested?: boolean }> {
   if (kind === 'skill') {
     const dir = '.claude/skills'
     const full = join(root, dir)
@@ -70,10 +88,26 @@ function listToolFiles(root: string, kind: ToolKind): Array<{ path: string; name
     }
     return readdirSync(full, { withFileTypes: true })
       .filter((e) => e.isDirectory() && existsSync(join(full, e.name, 'SKILL.md')))
-      .map((e) => ({ path: `${dir}/${e.name}/SKILL.md`, name: e.name }))
+      .map((e) => ({ path: `${dir}/${e.name}/SKILL.md`, name: e.name, nested: false }))
   }
   const dir = kind === 'command' ? '.claude/commands' : '.claude/agents'
-  return listMarkdown(root, dir).map((path) => ({ path, name: path.replace(/^.*\//, '').replace(/\.md$/, '') }))
+  const files = listMarkdown(root, dir).map((path) => ({
+    path,
+    name: path.replace(/^.*\//, '').replace(/\.md$/, ''),
+    nested: false,
+  }))
+  if (kind === 'command') {
+    // Команды из подкаталогов первого уровня харнесс зовёт `/<каталог>:<файл>`
+    const full = join(root, dir)
+    if (existsSync(full)) {
+      for (const sub of readdirSync(full, { withFileTypes: true }).filter((e) => e.isDirectory())) {
+        for (const path of listMarkdown(root, `${dir}/${sub.name}`)) {
+          files.push({ path, name: `${sub.name}:${path.replace(/^.*\//, '').replace(/\.md$/, '')}`, nested: true })
+        }
+      }
+    }
+  }
+  return files
 }
 
 /**
@@ -121,19 +155,31 @@ export function collectCards(root: string): Card[] {
     )
   }
   for (const kind of ['skill', 'command', 'agent'] as const) {
-    for (const { path, name } of listToolFiles(root, kind)) {
+    for (const { path, name, nested } of listToolFiles(root, kind)) {
       const markdown = read(root, path)
       if (markdown === undefined) {
         continue
       }
       const card = toolCard(kind, path, markdown, name)
-      if (kind === 'command' && existsSync(join(root, 'apps', name))) {
-        card.scope = 'app'
+      if (kind === 'command') {
+        if (!nested && existsSync(join(root, 'apps', name))) {
+          card.scope = 'app'
+        } else if (SERVICE_COMMANDS.has(name) || /устарел/i.test(parseFrontmatter(markdown).data.description ?? '')) {
+          card.scope = 'service'
+        }
       }
       cards.push(card)
     }
   }
   return cards
+}
+
+/** Значение поля в одинарных или двойных кавычках, с экранированием внутри; кавычки снимаются */
+function quoted(source: string, key: string): string | undefined {
+  const pattern = new RegExp(String.raw`^ {4}${key}:\s*(?:'((?:[^'\\]|\\.)*)'|"((?:[^"\\]|\\.)*)")`, 'm')
+  const match = source.match(pattern)
+  const raw = match?.[1] ?? match?.[2]
+  return raw?.replace(/\\(['"\\])/g, '$1')
 }
 
 /**
@@ -144,14 +190,14 @@ export function parsePatternRegistry(path: string, source: string): PatternInput
   const lines = source.split(/\r?\n/)
   const patterns: PatternInput[] = []
   lines.forEach((line, i) => {
-    const name = line.match(/^ {4}name: '([\w-]+)'/)?.[1]
+    const name = line.match(/^ {4}name: (?:'([\w-]+)'|"([\w-]+)")/)?.slice(1).find(Boolean)
     if (!name) {
       return
     }
     const next = lines.slice(i + 1, i + 6).join('\n')
-    const title = next.match(/^ {4}title: '([^']*)'/m)?.[1]
+    const title = quoted(next, 'title')
     // Длинное описание переносится на следующую строку: `description:\n      '…'`
-    const description = next.match(/^ {4}description:\s*'([^']*)'/m)?.[1]
+    const description = quoted(next, 'description')
     if (title && description) {
       patterns.push({ name, title, description, path, line: i + 1 })
     }
