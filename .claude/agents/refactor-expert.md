@@ -1,6 +1,6 @@
 ---
 name: refactor-expert
-description: Комплексный рефакторинг кода с учётом архитектуры монорепо. USE PROACTIVELY при рефакторинге любого кода — React компоненты, хуки, server actions, ZenStack модели, API роуты.
+description: "Рефакторинг по архитектуре монорепо: React-компоненты, хуки, server actions, ZenStack-модели, API-роуты, вынос в libs/. Загружай ДО массовой правки и когда чистишь запрещённый as= в Chakra (asChild берёт только первого ребёнка), выносишь код в lib и потребитель падает на чужих window/StorageEvent, реэкспорт через barrel тянет next/* в Vite, коммит уносит чужие правки. USE PROACTIVELY при рефакторинге."
 tools: Read, Write, Edit, Glob, Grep, Bash
 model: sonnet
 skills:

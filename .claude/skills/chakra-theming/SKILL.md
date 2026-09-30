@@ -1,15 +1,19 @@
 ---
 name: chakra-theming
 description: |
-  Полное руководство по темизации Chakra UI v3. Используй при:
-  - Настройке dark/light mode
-  - Создании кастомных токенов и семантических токенов
-  - Написании recipes и slot recipes
-  - Работе с цветами, контрастом и доступностью
-  - Добавлении визуальной и тактильной обратной связи
+  Темизация Chakra UI v3: createSystem, токены и semantic tokens, recipes и slot recipes, dark/light mode. Загружай ДО правки theme.ts, defineRecipe/defineSlotRecipe и когда textStyle перебивает соседний fontSize, слоты slotRecipes пропали после partial-override, typecheck сыплет TS2322 на layerStyles, SSR падает на «extendWith is not a function», hydration mismatch из-за разных классов emotion.
 ---
 
 # Chakra UI Theming Skill
+
+## ⚠️ Ловушки (разборы в доках)
+
+- [chakra-recipe-variant-property-override](/.claude/docs/chakra-recipe-variant-property-override.md) — `textStyle` перебивает соседний `fontSize`, `_hover` варианта мимо `base._hover`
+- [chakra-slot-recipe-array-merge-truncation](/.claude/docs/chakra-slot-recipe-array-merge-truncation.md) — `slots` мержатся по индексу: короткий массив вычёркивает `root`
+- [chakra-layer-style-property-allowlist](/.claude/docs/chakra-layer-style-property-allowlist.md) — TS2322 на `touchAction`/`transitionDuration` в layerStyle
+- [chakra-multi-system-ssr-barrel-trap](/.claude/docs/chakra-multi-system-ssr-barrel-trap.md) — импорт из барреля с `createSystem()` в Server Component роняет SSR
+- [chakra-css-memo-prop-order-hydration](/.claude/docs/chakra-css-memo-prop-order-hydration.md) — разные классы emotion на сервере и клиенте
+- [chakra-strict-tokens-global-typegen](/.claude/docs/chakra-strict-tokens-global-typegen.md) — `strictTokens` ломает typecheck всех приложений
 
 ## Quick Reference
 

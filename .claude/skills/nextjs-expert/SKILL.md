@@ -1,18 +1,20 @@
 ---
 name: nextjs-expert
 description: |
-  Разработка Next.js 16 приложений. Используй при:
-  - Создании страниц и layouts
-  - Работе с Server/Client Components
-  - Data fetching и Server Actions
-  - Оптимизации производительности
-  - SEO и metadata
-  - Troubleshooting Next.js
+  Next.js 16 в монорепо: страницы и layouts, Server/Client Components, Server Actions, metadata, next-intl-роуты. Загружай ДО правки app/**/layout.tsx, not-found.tsx, next.config.mjs и когда typecheck:tsgo даёт TS6305 не по вашим правкам, hydration mismatch на невалидной локали, nx build ходит в сеть на OIDC discovery, в standalone ECONNREFUSED/ERR_DLOPEN_FAILED при зелёной сборке.
 ---
 
 # Next.js Expert
 
 Руководство по разработке Next.js приложений в монорепо Letar.
+
+## ⚠️ Ловушки (разборы в доках)
+
+- [nextjs-stale-dotnext-types-tsgo-ts6305](/.claude/docs/nextjs-stale-dotnext-types-tsgo-ts6305.md) — устаревший `.next/types` даёт `TS6305` в `typecheck:tsgo`
+- [nextjs-root-notfound-no-root-layout](/.claude/docs/nextjs-root-notfound-no-root-layout.md) — корневой `not-found.tsx` без `app/layout.tsx`: дубль `<html>`, hydration mismatch
+- [nextjs-build-time-oidc-discovery-network-dependency](/.claude/docs/nextjs-build-time-oidc-discovery-network-dependency.md) — `nx build` бьёт в сеть на OIDC discovery
+- [nextjs-standalone-tracing](/.claude/docs/nextjs-standalone-tracing.md) — ECONNREFUSED/ERR_DLOPEN_FAILED при зелёном билде
+- [nextjs16-turbopack-default-emotion-hydration](/.claude/docs/nextjs16-turbopack-default-emotion-hydration.md) — Turbopack + Chakra `<Global>`: hydration mismatch
 
 ## Когда использовать
 

@@ -1,17 +1,19 @@
 ---
 name: mobile-ui
 description: |
-  Мобильный UI с Chakra UI v3. Используй при:
-  - Создании адаптивных компонентов
-  - Работе с breakpoints (sm, md, lg, xl)
-  - Реализации мобильной навигации (Drawer, Bottom Nav)
-  - Оптимизации touch-friendly UI (44px targets)
-  - Тестировании на мобильных устройствах
+  Мобильный UI на Chakra UI v3: адаптивные компоненты, breakpoints, Drawer и нижняя навигация, touch-цели 44px. Загружай ДО вёрстки шапки с Drawer и адаптивных flex-блоков и когда на mobile элементы уезжают вбок вместо переноса вниз, Drawer раздувает шапку и не занимает высоту экрана, подпись Field.Select обрезается, TS2322 на touchAction в layerStyle.
 ---
 
 # Mobile UI Skill
 
 Руководство по мобильному UI с Chakra UI v3.
+
+## ⚠️ Ловушки (разборы в доках)
+
+- [chakra-flexwrap-column-direction-overflow](/.claude/docs/chakra-flexwrap-column-direction-overflow.md) — `flexWrap="wrap"` рядом с `direction` column: элементы уезжают вбок
+- [chakra-drawer-missing-positioner-inline-render](/.claude/docs/chakra-drawer-missing-positioner-inline-render.md) — `Drawer.Content` без `Drawer.Positioner`: блок в потоке, шапка раздувается
+- [chakra-select-flex-item-maxw-collapse](/.claude/docs/chakra-select-flex-item-maxw-collapse.md) — `maxW` вокруг `Field.Select` сжимает подпись до стрелки
+- [chakra-layer-style-property-allowlist](/.claude/docs/chakra-layer-style-property-allowlist.md) — `touchAction` вне списка свойств layerStyle: TS2322
 
 ## Quick Reference
 

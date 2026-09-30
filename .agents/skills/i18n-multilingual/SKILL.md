@@ -1,17 +1,19 @@
 ---
 name: i18n-multilingual
 description: |
-  Мультиязычность: next-intl для веб-приложений, i18next для Electron-стека. Используй при:
-  - Настройке i18n в Next.js приложении
-  - Локализации Electron-приложений, shared-либ и main-процессов
-  - Создании переводов для компонентов
-  - SEO оптимизации для разных языков
-  - Форматировании дат и чисел по локали
+  Мультиязычность: next-intl для веб-приложений, i18next для Electron. Загружай ДО правки i18n/navigation.ts, proxy.ts с matcher локалей, messages/*.json и когда ссылка /en/... открывается на дефолтной локали, icon и opengraph-image отдаются без префикса локали, подсказки валидации формы остаются на английском, корневой not-found ломает hydration.
 ---
 
 # i18n Multilingual
 
 Мультиязычность приложений: переводы, SEO, форматирование.
+
+## ⚠️ Ловушки (разборы в доках)
+
+- [nextjs-intl-plain-link-drops-locale-prefix](/.claude/docs/nextjs-intl-plain-link-drops-locale-prefix.md) — голый `next/link` на `/en/...` уводит на дефолтную локаль
+- [nextjs-intl-matcher-metadata-routes](/.claude/docs/nextjs-intl-matcher-metadata-routes.md) — matcher не ловит `icon`/`opengraph-image`
+- [letar-forms-missing-i18nprovider-english-hints](/.claude/docs/letar-forms-missing-i18nprovider-english-hints.md) — без `FormI18nProvider` подсказки валидации на английском
+- [nextjs-root-notfound-no-root-layout](/.claude/docs/nextjs-root-notfound-no-root-layout.md) — корневой `not-found.tsx` без корневого layout
 
 ## ⚠️ Стеков ДВА, и это осознанное решение — не техдолг
 

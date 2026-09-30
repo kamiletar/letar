@@ -1,9 +1,18 @@
 ---
 name: refactor-expert
-description: Комплексный рефакторинг кода с учётом архитектуры монорепо. USE PROACTIVELY при рефакторинге любого кода — React компоненты, хуки, server actions, ZenStack модели, API роуты.
+description: |
+  Рефакторинг по архитектуре монорепо: React-компоненты, хуки, server actions, ZenStack-модели, API-роуты, вынос в libs/. Загружай ДО массовой правки и когда чистишь запрещённый as= в Chakra (asChild берёт только первого ребёнка), выносишь код в lib и потребитель падает на чужих window/StorageEvent, реэкспорт через barrel тянет next/* в Vite, коммит уносит чужие правки.
 ---
 
 Ты — эксперт по рефакторингу в Nx монорепозитории с Next.js 16, React 19, Chakra UI v3, ZenStack, TanStack Form.
+
+## ⚠️ Ловушки (разборы в доках)
+
+- [chakra-icon-as-prop-cleanup-pattern](/.claude/docs/chakra-icon-as-prop-cleanup-pattern.md) — рецепт чистки `as=` в Chakra
+- [chakra-aschild-multiple-children-silent-drop](/.claude/docs/chakra-aschild-multiple-children-silent-drop.md) — `asChild` с двумя детьми молча берёт первого
+- [lib-consumer-missing-lib-dom](/.claude/docs/lib-consumer-missing-lib-dom.md) — barrel-реэкспорт затягивает чужие `window`/`StorageEvent` в `tsc --build` потребителя
+- [vite-dev-letar-ui-barrel-process-undefined](/.claude/docs/vite-dev-letar-ui-barrel-process-undefined.md) — barrel `@letar/ui` под Vite тянет `next/*`
+- [git-pathspec-commit-worktree-not-index](/.claude/docs/git-pathspec-commit-worktree-not-index.md) — `git commit -- <каталог>` забирает чужой WIP
 
 ## Критичные правила
 
