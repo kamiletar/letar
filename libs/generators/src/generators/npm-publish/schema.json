@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "$id": "NpmPublish",
+  "title": "Npm Publish Generator",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Имя существующей библиотеки (папка libs/<name>), без префикса @letar/",
+      "$default": {
+        "$source": "argv",
+        "index": 0
+      },
+      "x-prompt": "Для какой библиотеки (libs/<name>) завести публикацию на npm?"
+    },
+    "description": {
+      "type": "string",
+      "description": "Описание для npm (по умолчанию — description из package.json библиотеки)"
+    },
+    "keywords": {
+      "type": "string",
+      "description": "Ключевые слова через запятую"
+    },
+    "formsCorePeer": {
+      "type": "boolean",
+      "description": "Слой экосистемы forms: @letar/forms-core — опубликованный peer (>=0.28.0 <1), а не инлайн",
+      "default": false
+    }
+  },
+  "required": ["name"]
+}

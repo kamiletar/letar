@@ -147,7 +147,7 @@
         "default",
         "{projectRoot}/tsup.config.ts",
         "{projectRoot}/package.publish.json",
-        "{projectRoot}/scripts/write-publish-package-json.mjs"
+        "{workspaceRoot}/scripts/write-publish-package-json.mjs"
       ],
       "outputs": [
         "{projectRoot}/dist"
@@ -161,7 +161,7 @@
       "options": {
         "commands": [
           "tsup",
-          "node scripts/write-publish-package-json.mjs",
+          "node ../../scripts/write-publish-package-json.mjs",
           "cp README.md dist/",
           "cp CHANGELOG.md dist/",
           "cp LICENSE dist/"

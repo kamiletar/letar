@@ -17,6 +17,11 @@
       "schema": "./src/generators/new-lib/schema.json",
       "description": "Скаффолдит новую shared-библиотеку libs/<name> (@letar/<name>) по конвенции монорепо (см. .claude/rules/libs.md)"
     },
+    "npm-publish": {
+      "factory": "./src/generators/npm-publish/generator",
+      "schema": "./src/generators/npm-publish/schema.json",
+      "description": "Заводит конвейер публикации на npm для существующей libs/<name>: tsup.config.ts, tsconfig.publish.json, package.publish.json, LICENSE, таргеты build:npm/publish:npm (см. .claude/docs/npm-publish-from-monorepo.md)"
+    },
     "new-app": {
       "factory": "./src/generators/new-app/generator",
       "schema": "./src/generators/new-app/schema.json",

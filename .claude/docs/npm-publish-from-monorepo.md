@@ -59,7 +59,7 @@ tsup.config.ts (сборка JS-бандла + .d.ts)
 package.publish.json (шаблон метаданных для npm, БЕЗ версии)
         │
         ▼
-scripts/write-publish-package-json.mjs (мёржит версию из package.json в шаблон)
+scripts/write-publish-package-json.mjs — общий, в корне (мёржит версию из package.json в шаблон)
         │
         ▼
 dist/package.json + dist/*.js + dist/*.d.ts → npm publish
@@ -70,7 +70,7 @@ dist/package.json + dist/*.js + dist/*.d.ts → npm publish
 
 ```
 tsup
-node scripts/write-publish-package-json.mjs
+node ../../scripts/write-publish-package-json.mjs
 cp README.en.md dist/README.md
 cp README.md dist/README.ru.md
 cp CHANGELOG.md dist/
@@ -95,23 +95,34 @@ cp LICENSE dist/
 
 ## Чек-лист: заводишь новый публикуемый пакет или добавляешь ему внутреннюю зависимость
 
-**Новый пакет:**
+**Новый пакет** — одной командой (библиотека уже существует, см. `new-lib`):
 
-1. `package.json` библиотеки — рабочий, с `main`/`types`/`exports` через `@letar/source`
-   (как у любой другой библиотеки монорепо, см. [libs.md](/.claude/rules/libs.md)).
-2. `package.publish.json` рядом — шаблон для npm: `exports` на плоские `./index.js` +
-   `./index.d.ts` (и по одной паре на каждый subpath-entry из `tsup.config.ts`), `files`,
-   `keywords`, `repository`, `peerDependencies`. **Без поля `version`.**
-3. `scripts/write-publish-package-json.mjs` — либо скопировать из `libs/forms/scripts/`,
-   либо переиспользовать логику: читает `version` из `package.json`, мёржит в шаблон,
-   пишет `dist/package.json`.
-4. `tsup.config.ts` — `entry` под все subpath-экспорты, `dts: true` (или `dts: { resolve:
-   [...] }`, см. ниже), `format: ['esm']`, `external` на всё, что потребитель ставит сам
-   (React, UI-библиотеки, опциональные peer-зависимости).
-5. Таргет `build:npm` в `project.json` — `nx:run-commands`, шаги строго
-   `tsup → write-publish-package-json.mjs → cp README/CHANGELOG/LICENSE`, `parallel: false`
-   (порядок важен: `write-publish-package-json.mjs` требует, чтобы `dist/` от `tsup` уже
-   существовал).
+```bash
+nx g @letar/generators:npm-publish <lib> [--formsCorePeer] [--keywords=a,b] [--description="..."]
+```
+
+Генератор кладёт `tsup.config.ts` (один entry `index`), `tsconfig.publish.json`, `package.publish.json`
+(без `version`, `publishConfig` beta, внешние `dependencies`/`peerDependencies` из рабочего
+`package.json`), `LICENSE`, таргеты `build:npm`/`publish:npm`, ставит `"type": "module"` и переносит
+`@letar/*` из `dependencies` в `devDependencies` (после этого — `bun install --lockfile-only` и
+коммит lock). `--formsCorePeer` добавляет `@letar/forms-core` peer `>=0.28.0 <1`. Существующую
+публикацию (`tsup.config.ts` уже есть) генератор не перезаписывает. **Руками остаётся:** subpath-entry
+в `tsup.config.ts` и `exports` (образец — `libs/forms-core`), `external` для peer-зависимостей,
+сверка импортов `src/` с `peerDependencies` (см. ловушку про `upload-validation` выше).
+
+Что генератор делает за тебя, если собирать вручную:
+
+1. `package.json` — рабочий, `main`/`types`/`exports` через `@letar/source` (как у любой библиотеки,
+   см. [libs.md](/.claude/rules/libs.md)).
+2. `package.publish.json` — шаблон для npm: `exports` на плоские `./index.js` + `./index.d.ts`
+   (пара на каждый subpath-entry), `files`, `keywords`, `repository`, `peerDependencies`. **Без `version`.**
+3. Скрипт `write-publish-package-json.mjs` **общий**: `scripts/write-publish-package-json.mjs` в корне,
+   копий в библиотеках нет. Запускается из `cwd` библиотеки: `node ../../scripts/write-publish-package-json.mjs`;
+   корень берёт из `process.cwd()`, без `dist/` падает.
+4. `tsup.config.ts` — `entry` под все subpath-экспорты, `dts: true` (или `dts: { resolve: [...] }`),
+   `format: ['esm']`, `external` на всё, что потребитель ставит сам.
+5. `build:npm` — `tsup → write-publish-package-json.mjs → cp README/CHANGELOG/LICENSE`,
+   `parallel: false`; в `inputs` скрипт указан как `{workspaceRoot}/scripts/write-publish-package-json.mjs`.
 
 **Новая внутренняя `@letar/*`-зависимость у уже публикуемого пакета** (например
 композиционный слой вроде `forms-core`/`forms-react`, который существует только как
@@ -208,7 +219,8 @@ tsc --noEmit check.tsx
 
 - [libs/forms/tsup.config.ts](/libs/forms/tsup.config.ts) — комментарии прямо в конфиге
   объясняют `noExternal`/`dts.resolve` тем же текстом, что и здесь.
-- [libs/forms/scripts/write-publish-package-json.mjs](/libs/forms/scripts/write-publish-package-json.mjs)
+- [scripts/write-publish-package-json.mjs](/scripts/write-publish-package-json.mjs) — общий скрипт сборки `dist/package.json`
+- [libs/generators/README.md § npm-publish](/libs/generators/README.md) — генератор конвейера
 - [verification-pitfalls.md](/.claude/docs/verification-pitfalls.md) — общий принцип
   «проверять тем путём, которым ходит настоящий потребитель», из которого следует рецепт
   проверки выше.

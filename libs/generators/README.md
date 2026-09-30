@@ -142,6 +142,21 @@ nx g @letar/generators:new-lib <name> --react
 [libs.md](/.claude/rules/libs.md#подключение-к-приложению) (коротко: обязательное там одно —
 `nx.implicitDependencies` в `package.json` приложения).
 
+### `npm-publish`
+
+Заводит конвейер публикации на npm для **существующей** `libs/<name>` (по образцу `libs/number-words`
+и `libs/forms-core`): `tsup.config.ts`, `tsconfig.publish.json`, `package.publish.json`, `LICENSE`,
+таргеты `build:npm`/`publish:npm` (beta), `"type": "module"`, `@letar/*` → `devDependencies`. Версию в
+`dist/package.json` подставляет общий `scripts/write-publish-package-json.mjs`.
+
+```bash
+nx g @letar/generators:npm-publish <lib>
+nx g @letar/generators:npm-publish <lib> --formsCorePeer --keywords=forms,zod
+```
+
+Ничего не публикует. Subpath-entry и `exports` добавляются вручную. Правила и ловушки —
+[npm-publish-from-monorepo](/.claude/docs/npm-publish-from-monorepo.md).
+
 ### `new-app`
 
 Скаффолдит новое минимальное Next.js приложение `apps/<name>` — чистый каркас Chakra UI v3 + MDX без

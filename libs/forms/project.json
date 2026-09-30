@@ -183,7 +183,7 @@
         "default",
         "{projectRoot}/tsup.config.ts",
         "{projectRoot}/package.publish.json",
-        "{projectRoot}/scripts/write-publish-package-json.mjs"
+        "{workspaceRoot}/scripts/write-publish-package-json.mjs"
       ],
       "outputs": [
         "{projectRoot}/dist"
@@ -197,7 +197,7 @@
       "options": {
         "commands": [
           "tsup",
-          "node scripts/write-publish-package-json.mjs",
+          "node ../../scripts/write-publish-package-json.mjs",
           "cp README.en.md dist/README.md",
           "cp README.md dist/README.ru.md",
           "cp CHANGELOG.md dist/",
