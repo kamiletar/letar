@@ -18,6 +18,7 @@ import { abGroup, appendLog, decide, MAX_ATTEMPTS, runScoutHook, scoutQuery } fr
 import { indexPath } from './index-store'
 import { judgeGroups, judgeItems, loadLabels } from './judge'
 import { mineSession, normalizeKnowledgePath, parseHumanText, type SessionRecord } from './mine-transcripts'
+import { loadPhraseStore } from './phrases'
 import { EMBED_MODEL, loadVectorStore } from './vectors'
 
 describe('decide', () => {
@@ -445,5 +446,63 @@ describe('judgeGroups', () => {
   it('пустая группа не даёт NaN', () => {
     const [g] = judgeGroups([{ group: 'test', cases: [] }], new Map(), new Map())
     expect(g).toMatchObject({ cases: 0, coverage: 0, relevant3: 0, agreement: null })
+  })
+})
+
+describe('формулировки к докам', () => {
+  it('loadPhraseStore: чужая модель и неверная длина матрицы → undefined, своя → хранилище', () => {
+    const home = mkdtempSync(join(tmpdir(), 'scout-home-'))
+    const write = (model: string, floats: number[]) => {
+      writeFileSync(
+        join(home, 'phrase-vectors.json'),
+        JSON.stringify({ model, dims: 2, ids: ['doc:a.md', 'doc:a.md'], hashes: ['h', 'h'] }),
+      )
+      writeFileSync(join(home, 'phrase-vectors.f32'), Buffer.from(new Float32Array(floats).buffer))
+    }
+    write('другая-модель', [1, 0, 0, 1])
+    expect(loadPhraseStore(home)).toBeUndefined()
+    write(EMBED_MODEL, [1, 0, 0])
+    expect(loadPhraseStore(home)).toBeUndefined()
+    write(EMBED_MODEL, [1, 0, 0, 1])
+    expect(loadPhraseStore(home)?.hashByPath.get('a.md')).toBe('h')
+  })
+
+  it('scoutQuery с формулировками → hybrid+phrases, без них → hybrid', async () => {
+    const root = mkdtempSync(join(tmpdir(), 'scout-repo-'))
+    mkdirSync(join(root, '.claude', 'docs'), { recursive: true })
+    writeFileSync(
+      join(root, '.claude', 'docs', 'INDEX.md'),
+      '## Формы\n- [date-field](/.claude/docs/date-field.md) поле даты в форме отдаёт строку\n',
+    )
+    writeFileSync(join(root, '.claude', 'docs', 'date-field.md'), '# Дата строкой\nформа отдаёт дату строкой\n')
+    const engine = new Bm25(buildIndex(collectCards(root)))
+    const id = 'doc:.claude/docs/date-field.md'
+    const dense = new DenseIndex([id], new Float32Array([1, 0]), 2)
+    const store = { dense, hashById: new Map<string, string>() }
+    for (const c of engine.cards) {
+      if (c.kind === 'field' || c.kind === 'pattern') {
+        store.hashById.set(c.id, c.embedHash)
+      }
+    }
+    // Фейковый эмбеддер: вектор запроса всегда [1, 0]
+    const server = Bun.serve({
+      port: 0,
+      fetch: () => Response.json({ data: [{ index: 0, embedding: [1, 0] }] }),
+    })
+    try {
+      const home = mkdtempSync(join(tmpdir(), 'scout-home-'))
+      const embedUrl = `http://127.0.0.1:${server.port}`
+      const phrases = {
+        index: new DenseIndex([id], new Float32Array([1, 0]), 2),
+        hashByPath: new Map([['.claude/docs/date-field.md', 'h']]),
+      }
+      const query = 'форма отдаёт дату строкой'
+      const withPhrases = await scoutQuery(engine, home, query, { store, phrases, embedUrl }, root)
+      expect(withPhrases.docsSource).toBe('hybrid+phrases')
+      const without = await scoutQuery(engine, home, query, { store, phrases: null, embedUrl }, root)
+      expect(without.docsSource).toBe('hybrid')
+    } finally {
+      server.stop(true)
+    }
   })
 })

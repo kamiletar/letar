@@ -27,6 +27,11 @@ export function embedHash(card: Card): string {
   return createHash('sha1').update(cardEmbedText(card)).digest('hex').slice(0, 16)
 }
 
+/** Хеш текста дока для формулировок: sha1(path + первые 3000 символов markdown), 16 hex */
+export function phraseHash(path: string, markdown: string): string {
+  return createHash('sha1').update(path + markdown.slice(0, 3000)).digest('hex').slice(0, 16)
+}
+
 /** Длиннее — эмбеддер отвечает HTTP 400 (лимит токенов на слот), поэтому запрос сжимаем */
 export const QUERY_CHARS = 1500
 
@@ -160,11 +165,12 @@ export function fuseWithDense(
   bm25: Hit[],
   dense: DenseIndex,
   vector: Float32Array,
-  options: { depth?: number; k?: number } = {},
+  options: { depth?: number; k?: number; extra?: string[][] } = {},
 ): Hit[] {
-  const { depth = 100, k = 60 } = options
+  const { depth = 100, k = 60, extra = [] } = options
   const denseIds = dense.search(vector, depth).map((d) => d.id)
-  const fused = reciprocalRankFusion([bm25.slice(0, depth).map((h) => h.card.id), denseIds], k)
+  const lists = [bm25.slice(0, depth).map((h) => h.card.id), denseIds, ...extra.map((r) => r.slice(0, depth))]
+  const fused = reciprocalRankFusion(lists, k)
   const head = fusedHits(cards, fused, fused.size)
   const inHead = new Set(head.map((h) => h.card.id))
   // Хвост BM25 нужен для инструментов: их короткие карточки редко попадают в верхушку
@@ -248,4 +254,31 @@ export function formRanking(cards: IndexedCard[], dense: DenseIndex, vector: Flo
       return card ? [{ card, score }] : []
     })
   return { fields: ranked('field'), patterns: ranked('pattern') }
+}
+
+/**
+ * Рейтинг карточек `doc`/`rule` по формулировкам: максимум косинуса запроса по строкам карточки.
+ * Карточка без формулировок получает косинус к своему вектору из `dense` (если он есть) —
+ * новый док не проигрывает старым, просто не получает бонуса.
+ * `phrases` — DenseIndex, где `ids` — id карточки на каждую строку (id повторяются).
+ */
+export function phraseRanking(
+  cards: IndexedCard[],
+  phrases: DenseIndex,
+  dense: DenseIndex,
+  vector: Float32Array,
+  depth = 100,
+): string[] {
+  const docIds = new Set(cards.filter((c) => c.kind === 'doc' || c.kind === 'rule').map((c) => c.id))
+  const best = new Map<string, number>()
+  // Список уже отсортирован по убыванию: первое вхождение id и есть максимум
+  for (const { id, score } of phrases.search(vector, phrases.ids.length)) {
+    if (docIds.has(id) && !best.has(id)) {
+      best.set(id, score)
+    }
+  }
+  for (const { id, score } of dense.rank(vector, [...docIds].filter((id) => !best.has(id)))) {
+    best.set(id, score)
+  }
+  return [...best.entries()].sort((a, b) => b[1] - a[1]).slice(0, depth).map(([id]) => id)
 }

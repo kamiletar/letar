@@ -4,7 +4,8 @@
  * Запускается отсоединённым процессом (`requestVectorRefresh`) при старте сессии и при устаревших векторах:
  * 1. пересобирает индекс, если источники новее;
  * 2. будит эмбеддер запросом «прогрев» (GPU и модель после простоя отвечают долго);
- * 3. досчитывает векторы карточек, у которых их нет или хеш текста другой.
+ * 3. досчитывает векторы карточек, у которых их нет или хеш текста другой;
+ * 4. досчитывает векторы формулировок к докам (сами формулировки пишет `phrases.ts --generate`).
  *
  * Запуск: bun scripts/scout/warmup.ts
  */
@@ -14,6 +15,7 @@ import { collectCards, embedTexts } from '../../libs/scout/src/index'
 import { freshIndex } from './hook-core'
 import { findRepoRoot } from './index-store'
 import { scoutHome } from './paths'
+import { buildPhraseVectors } from './phrases'
 import { buildVectors, EMBED_URL, loadVectorStore, staleCards, vectorsLockPath } from './vectors'
 
 /** Блокировка моложе этого срока — пересчёт уже идёт */
@@ -48,15 +50,17 @@ try {
     freshIndex(root, home)
     await embedTexts(['прогрев'], { url: EMBED_URL, timeoutMs: 5000 })
     const cards = collectCards(root)
-    if (staleCards(cards, loadVectorStore(home), VECTOR_KINDS).length) {
-      const lock = vectorsLockPath(home)
-      if (takeLock(lock)) {
-        try {
+    const lock = vectorsLockPath(home)
+    if (takeLock(lock)) {
+      try {
+        if (staleCards(cards, loadVectorStore(home), VECTOR_KINDS).length) {
           await buildVectors(cards, EMBED_URL, home, () => {})
-        } finally {
-          if (existsSync(lock)) {
-            rmSync(lock, { force: true })
-          }
+        }
+        // Эмбеддер уже разбужен; дешёвый выход, если формулировки не менялись
+        await buildPhraseVectors(cards, home)
+      } finally {
+        if (existsSync(lock)) {
+          rmSync(lock, { force: true })
         }
       }
     }

@@ -17,6 +17,8 @@ export {
   type HybridOptions,
   type HybridResult,
   normalize,
+  phraseHash,
+  phraseRanking,
   QUERY_CHARS,
   QUERY_INSTRUCTION,
   reciprocalRankFusion,

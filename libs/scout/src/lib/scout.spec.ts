@@ -1,7 +1,17 @@
 import { Bm25, buildIndex } from './bm25'
 import { BRIEF_HEADER, formatBrief, formatOneLine } from './brief'
 import { parsePatternRegistry } from './collect'
-import { DenseIndex, embedHash, formatQuery, fuseWithDense, hybridHits, QUERY_CHARS, QUERY_INSTRUCTION } from './dense'
+import {
+  DenseIndex,
+  embedHash,
+  formatQuery,
+  fuseWithDense,
+  hybridHits,
+  phraseHash,
+  phraseRanking,
+  QUERY_CHARS,
+  QUERY_INSTRUCTION,
+} from './dense'
 import { parseFrontmatter } from './frontmatter'
 import { type DocHit, FORM_WORDS, layoutHits, mentionedIn, scout } from './search'
 import {
@@ -493,5 +503,47 @@ describe('fuseWithDense', () => {
     const skill = fused.find((h) => h.card.kind === 'skill')
     expect(skill?.score).toBe(0)
     expect(ids.indexOf('skill:deployer')).toBeGreaterThanOrEqual(2)
+  })
+})
+
+describe('phraseHash', () => {
+  it('стабилен и зависит только от path и первых 3000 символов', () => {
+    const body = 'а'.repeat(3000)
+    expect(phraseHash('p.md', body)).toBe(phraseHash('p.md', body + 'хвост'))
+    expect(phraseHash('p.md', body)).toMatch(/^[0-9a-f]{16}$/)
+    expect(phraseHash('p.md', body)).not.toBe(phraseHash('q.md', body))
+    expect(phraseHash('p.md', 'один')).not.toBe(phraseHash('p.md', 'другой'))
+  })
+})
+
+describe('phraseRanking и fuseWithDense с extra', () => {
+  const cards = ['a', 'b', 'c'].flatMap((n) =>
+    docCards({
+      path: `.claude/docs/${n}.md`,
+      markdown: `# ${n}
+`,
+    })
+  )
+  const engine = new Bm25(JSON.parse(JSON.stringify(buildIndex(cards, 'test'))))
+  const ids = ['doc:.claude/docs/a.md', 'doc:.claude/docs/b.md', 'doc:.claude/docs/c.md']
+  // Собственные векторы доков: все далеки от запроса [0, 1], кроме c (слабо)
+  const dense = new DenseIndex(ids, Float32Array.from([1, 0, 1, 0, 0.6, 0.8]), 2)
+  const query = Float32Array.from([0, 1])
+
+  it('док с близкой формулировкой выше дока без неё; док без формулировок идёт по своему вектору', () => {
+    // У a две формулировки: далёкая и близкая (берётся максимум); у b формулировок нет; у c — далёкая
+    const phrases = new DenseIndex([ids[0], ids[0], ids[2]], Float32Array.from([1, 0, 0, 1, 1, 0]), 2)
+    const ranking = phraseRanking(engine.cards, phrases, dense, query)
+    expect(ranking[0]).toBe(ids[0])
+    expect(ranking).toContain(ids[1])
+    expect(ranking).toHaveLength(3)
+  })
+
+  it('extra: док только из extra попадает в голову; без extra результат прежний', () => {
+    const bm25 = engine.search('нет такого слова', 500)
+    const without = fuseWithDense(engine.cards, bm25, dense, query, { depth: 1 })
+    expect(without.map((h) => h.card.id)).toEqual([ids[2]])
+    const withExtra = fuseWithDense(engine.cards, bm25, dense, query, { depth: 1, extra: [[ids[0]]] })
+    expect(withExtra.map((h) => h.card.id).sort()).toEqual([ids[0], ids[2]].sort())
   })
 })

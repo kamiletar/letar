@@ -24,10 +24,12 @@ import {
   formRanking,
   fuseWithDense,
   layoutHits,
+  phraseRanking,
   type ScoutIndex,
   type ScoutResult,
 } from '../../libs/scout/src/index'
 import { loadIndex, saveIndex, sourcesMtime } from './index-store'
+import { loadPhraseStore, type PhraseStore } from './phrases'
 import { EMBED_URL, loadVectorStore, type VectorStore } from './vectors'
 
 /** Режим доставки: `shadow` — только лог, `on` — справка всем, `ab` — половине сессий по хешу id */
@@ -177,6 +179,8 @@ export interface HookDeps {
   embedTimeoutMs?: number
   /** Заранее загруженные векторы: `null` — «векторов нет», `undefined` — загрузить `loadVectorStore(home)` */
   store?: VectorStore | null
+  /** Векторы формулировок к докам: та же семантика `null`/`undefined`, что у `store` */
+  phrases?: PhraseStore | null
 }
 
 /**
@@ -255,8 +259,8 @@ async function denseForms(
 export interface ScoutQueryResult {
   result: ScoutResult
   forms: FormsSource
-  /** Чем построены доки и ловушки: гибридом BM25 + эмбеддинги или одним BM25 */
-  docsSource: 'hybrid' | 'bm25'
+  /** Чем построены доки и ловушки: гибридом BM25 + эмбеддинги (+ формулировки к докам) или одним BM25 */
+  docsSource: 'hybrid+phrases' | 'hybrid' | 'bm25'
   ms: number
 }
 
@@ -277,13 +281,17 @@ export async function scoutQuery(
   if (!forms.vector || !forms.store) {
     return { result: base, forms: forms.source, docsSource: 'bm25', ms: performance.now() - started }
   }
-  // Доки и ловушки — по слиянию с плотным поиском (RRF)
-  const fused = fuseWithDense(engine.cards, bm25, forms.store.dense, forms.vector)
+  // Доки и ловушки — по слиянию с плотным поиском (RRF); формулировки к докам — третий список
+  const phrases = deps.phrases === undefined ? loadPhraseStore(home) : deps.phrases ?? undefined
+  const extra = phrases
+    ? [phraseRanking(engine.cards, phrases.index, forms.store.dense, forms.vector)]
+    : undefined
+  const fused = fuseWithDense(engine.cards, bm25, forms.store.dense, forms.vector, { extra })
   const docs = layoutHits(engine.cards, fused, query, { forms: forms.ranking })
   return {
     result: { ...base, docs: docs.docs, traps: docs.traps },
     forms: forms.source,
-    docsSource: 'hybrid',
+    docsSource: phrases ? 'hybrid+phrases' : 'hybrid',
     ms: performance.now() - started,
   }
 }

@@ -51,6 +51,7 @@ import {
   loadLabels,
 } from './judge'
 import { scoutDataDir, scoutHome } from './paths'
+import { loadPhraseStore } from './phrases'
 import { loadVectorStore } from './vectors'
 
 export type Suite = 'docs' | 'forms' | 'latency' | 'robust' | 'hook' | 'judge'
@@ -356,7 +357,9 @@ async function main() {
   const dataDir = scoutDataDir()
   const engine = new Bm25(freshIndex(root, home))
   const store = loadVectorStore(home) ?? null
-  const deps = { store }
+  // `--no-phrases` — прогон без третьего списка слияния, для сравнения
+  const phrases = process.argv.includes('--no-phrases') ? null : loadPhraseStore(home) ?? null
+  const deps = { store, phrases }
   const advisable = advisableTools(engine.cards)
 
   // Кеш по тексту запроса: сьюты делят общие запросы и не гоняют эмбеддер дважды
