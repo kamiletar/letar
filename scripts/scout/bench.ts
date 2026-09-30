@@ -23,113 +23,42 @@
  * Запуск: bun scripts/scout/bench.ts [--label <имя>] [--suite docs,forms,latency,robust,hook]
  *   [--hook-runs 5] [--compare <путь к json | last>]
  */
-import {
-  appendFileSync,
-  copyFileSync,
-  existsSync,
-  mkdirSync,
-  mkdtempSync,
-  readdirSync,
-  readFileSync,
-  rmSync,
-  writeFileSync,
-} from 'node:fs'
-import { tmpdir } from 'node:os'
-import { basename, join } from 'node:path'
-import { Bm25, formatBrief, mentionedIn, type ScoutResult } from '../../libs/scout/src/index'
-import { scoreAppBriefs } from './app-briefs'
-import { arg, readJsonl, splitOf } from './cli'
-import { buildEditCases, cutDate, editGroups, editSessions, scoreEditCases, VARIANTS } from './edit-briefs'
-import { advisableTools, type EvalCase, evaluate, type Metrics } from './eval'
-import { type FormProbe, formsNegatives, scoreProbe } from './forms-eval'
+import { appendFileSync, existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { join } from 'node:path'
+import { Bm25 } from '../../libs/scout/src/index'
+import { arg, readJsonl } from './cli'
+import type { EvalCase } from './eval'
 import { freshIndex, scoutQuery, type ScoutQueryResult } from './hook-core'
-import { hubMetrics } from './hubs'
-import { findRepoRoot, indexPath } from './index-store'
-import {
-  JUDGE_MODEL,
-  type JudgeGroup,
-  judgeGroups,
-  type JudgeItem,
-  judgeItems,
-  type JudgeLabel,
-  labelKey,
-  loadLabels,
-} from './judge'
-import type { SessionRecord } from './mine-transcripts'
+import { findRepoRoot } from './index-store'
 import { scoutDataDir, scoutHome } from './paths'
 import { loadPhraseStore } from './phrases'
+import { type AppResult, appSuite } from './suites/app'
+import { type DocsResult, docsSuite } from './suites/docs'
+import { type EditResult, editSuite } from './suites/edit'
+import { type FormsResult, formsSuite } from './suites/forms'
+import { type HookResult, hookSuite } from './suites/hook'
+import { type JudgeResult, judgeSuite } from './suites/judge'
+import { type LatencyResult, latencySuite } from './suites/latency'
+import { type RobustResult, robustSuite } from './suites/robust'
+import type { Suite } from './suites/types'
 import { loadVectorStore } from './vectors'
 
-export type Suite = 'docs' | 'forms' | 'latency' | 'robust' | 'hook' | 'judge' | 'app' | 'edit'
-const ALL_SUITES: Suite[] = ['docs', 'forms', 'latency', 'robust', 'hook', 'judge', 'app', 'edit']
-const DEFAULT_SUITES: Suite[] = ['docs', 'forms', 'latency', 'robust']
+export type SuiteName = 'docs' | 'forms' | 'latency' | 'robust' | 'hook' | 'judge' | 'app' | 'edit'
 
-/** Проверка устойчивости: исключение внутри считается провалом */
-export interface RobustCheck {
-  name: string
-  query: string
-  check: (r: ScoutQueryResult) => boolean
+/** Реестр сьютов в порядке запуска: новый сьют — новый файл в `suites/` и строка здесь */
+const SUITES: Record<SuiteName, Suite> = {
+  docs: docsSuite,
+  judge: judgeSuite,
+  forms: formsSuite,
+  latency: latencySuite,
+  robust: robustSuite,
+  hook: hookSuite,
+  app: appSuite,
+  edit: editSuite,
 }
-
-const SERVICE_COMMANDS = [
-  'end-session',
-  'deploy-agent',
-  'sync-env',
-  'forms-dev',
-  'forms-coordinator',
-  'ui-coordinator',
-  'animatrona-coordinator',
-  'webstudio',
-  'letar',
-  'repo',
-]
-
-function noNaN(r: ScoutResult): boolean {
-  return [...r.docs, ...r.traps].every((d) => !Number.isNaN(d.score))
-}
-
-const STACK_LINE = 'at Object.<anonymous> (C:\\web\\letar\\apps\\x\\src\\y.ts:10:5)\n'
-const LONG_PASTE = `форма заявки с телефоном клиента\n${
-  STACK_LINE.repeat(Math.ceil(22_000 / STACK_LINE.length)).slice(0, 22_000)
-}`
-
-export const ROBUST_CHECKS: RobustCheck[] = [
-  {
-    name: 'constructor',
-    query: 'constructor в классе стал undefined',
-    check: (r) => Boolean(formatBrief(r.result)) && noNaN(r.result),
-  },
-  {
-    name: 'proto-words',
-    query: 'toString valueOf hasOwnProperty __proto__ в объекте конфига',
-    check: (r) => noNaN(r.result),
-  },
-  {
-    name: 'long-paste',
-    query: LONG_PASTE,
-    check: (r) => r.forms === 'dense' && r.result.fields.some((f) => f.name === 'Form.Field.Phone'),
-  },
-  {
-    name: 'no-service-command',
-    query: 'задеплой приложение на прод после правки',
-    check: (r) => !r.result.tool || !SERVICE_COMMANDS.includes(r.result.tool.name),
-  },
-  {
-    name: 'subdir-command',
-    query: 'проведи аудит безопасности приложения по OWASP',
-    check: (r) => r.result.tool?.name === 'audit:security-check' || r.result.tool?.name === 'security-auditor',
-  },
-  {
-    name: 'pattern-only',
-    query: 'нужна многошаговая форма-мастер оформления заказа',
-    check: (r) => r.result.pattern?.name === 'multi-step',
-  },
-  {
-    name: 'formula-not-form',
-    query: 'пересчитай формулу сметы и сформируй итог',
-    check: (r) => r.result.fields.length === 0,
-  },
-]
+// Порядок в справке и сообщении об ошибке; порядок запуска — по реестру `SUITES`
+const ALL_SUITES: SuiteName[] = ['docs', 'forms', 'latency', 'robust', 'hook', 'judge', 'app', 'edit']
+const DEFAULT_SUITES: SuiteName[] = ['docs', 'forms', 'latency', 'robust']
 
 /** Ключевые метрики прогона: порядок колонок журнала и единицы для сравнения */
 type Unit = 'pp' | 'ms' | 'ratio' | 'n'
@@ -178,29 +107,6 @@ const SUMMARY: Array<{ key: string; unit: Unit; journal?: boolean }> = [
 
 type Summary = Record<string, number | null>
 
-interface DocsGroup extends Metrics {
-  group: string
-}
-
-interface FormsSet {
-  name: string
-  probes: number
-  fieldRecall: number
-  complete: number
-  patternOk: number
-  patternTotal: number
-}
-
-/** Пункты справки для судьи: доки и ловушки вперемешку по убыванию очков (стабильно, доки первыми) */
-export function judgedItems(result: ScoutResult, limit = 5): JudgeItem[] {
-  return [...result.docs, ...result.traps]
-    .sort((a, b) => b.score - a.score)
-    .slice(0, limit)
-    .map((d) => ({ path: d.path, title: d.section ? `${d.title} § ${d.section}` : d.title, summary: d.summary }))
-}
-
-type AppScore = ReturnType<typeof scoreAppBriefs>['app']
-
 interface BenchRun {
   label: string
   ts: string
@@ -210,39 +116,17 @@ interface BenchRun {
     cards: number
     vectors: boolean
     embedder: boolean
-    suites: Suite[]
+    suites: SuiteName[]
   }
-  docs?: { groups: DocsGroup[]; avgChars: number; emptyShare: number }
-  forms?: { sets: FormsSet[]; negatives: { cases: number; fieldsShare: number; patternShare: number } }
-  latency?: { n: number; p50: number; p95: number; max: number }
-  robust?: { passed: number; total: number; failed: string[] }
-  judge?: { groups: JudgeGroup[]; newLabels: number; serverAnswered: boolean | null; unparsed: number }
-  app?: { train: number; app: AppScore; global: AppScore }
-  edit?: {
-    sessions: number
-    cases: number
-    rows: Array<
-      {
-        group: string
-        variant: string
-        found: number
-        gold: number
-        hitSessions: number
-        sessions: number
-        coveredByFirst: number
-      }
-    >
-  }
-  hook?: { runs: number; p50: number; max: number; ok: boolean; problems: string[] }
+  docs?: DocsResult
+  forms?: FormsResult
+  latency?: LatencyResult
+  robust?: RobustResult
+  judge?: JudgeResult
+  app?: AppResult
+  edit?: EditResult
+  hook?: HookResult
   summary: Summary
-}
-
-function percentile(sorted: number[], p: number): number {
-  return sorted.length ? sorted[Math.max(0, Math.ceil(p * sorted.length) - 1)] : 0
-}
-
-function pct(x: number): string {
-  return `${(x * 100).toFixed(1)}%`
 }
 
 function git(root: string, args: string[]): string {
@@ -276,62 +160,6 @@ function checkArgs(argv: string[]): void {
       process.exit(2)
     }
   }
-}
-
-/** Настоящий хук отдельным процессом: время целиком, код выхода, валидность stdout */
-async function runHook(
-  root: string,
-  home: string,
-  runs: number,
-  noPhrases = false,
-): Promise<NonNullable<BenchRun['hook']>> {
-  const tmp = mkdtempSync(join(tmpdir(), 'scout-bench-'))
-  const times: number[] = []
-  const problems: string[] = []
-  try {
-    const files = [basename(indexPath(home, root)), 'vectors.json', 'vectors.f32']
-    if (!noPhrases) {
-      files.push('phrase-vectors.json', 'phrase-vectors.f32')
-    }
-    for (const f of files) {
-      if (existsSync(join(home, f))) {
-        copyFileSync(join(home, f), join(tmp, f))
-      }
-    }
-    for (let i = 0; i < runs; i++) {
-      const payload = JSON.stringify({
-        session_id: `bench-${Date.now()}-${i}`,
-        prompt: 'сделай форму заявки: имя, телефон клиента и email',
-        cwd: root,
-      })
-      const started = performance.now()
-      const proc = Bun.spawn(['bun', join(root, '.claude', 'hooks', 'scout-brief.ts')], {
-        cwd: root,
-        stdin: 'pipe',
-        stdout: 'pipe',
-        stderr: 'pipe',
-        env: { ...process.env, SCOUT_HOME: tmp, SCOUT_MODE: 'on', ...(noPhrases ? { SCOUT_NO_PHRASES: '1' } : {}) },
-      })
-      proc.stdin.write(payload)
-      await proc.stdin.end()
-      const [out, code] = await Promise.all([new Response(proc.stdout).text(), proc.exited])
-      times.push(performance.now() - started)
-      if (code !== 0) {
-        problems.push(`запуск ${i}: код выхода ${code}`)
-      }
-      if (out.trim()) {
-        try {
-          JSON.parse(out)
-        } catch {
-          problems.push(`запуск ${i}: stdout не JSON`)
-        }
-      }
-    }
-  } finally {
-    rmSync(tmp, { recursive: true, force: true })
-  }
-  const sorted = [...times].sort((a, b) => a - b)
-  return { runs, p50: percentile(sorted, 0.5), max: sorted.at(-1) ?? 0, ok: problems.length === 0, problems }
 }
 
 function fmtValue(v: number | null, unit: Unit): string {
@@ -410,7 +238,7 @@ async function main() {
     console.error('Не найден корень репозитория')
     process.exit(1)
   }
-  const suites = (arg('--suite')?.split(',').map((s) => s.trim()).filter(Boolean) ?? DEFAULT_SUITES) as Suite[]
+  const suites = (arg('--suite')?.split(',').map((s) => s.trim()).filter(Boolean) ?? DEFAULT_SUITES) as SuiteName[]
   const unknown = suites.filter((s) => !ALL_SUITES.includes(s))
   if (unknown.length) {
     console.error(`Неизвестные сьюты: ${unknown.join(', ')}. Есть: ${ALL_SUITES.join(', ')}`)
@@ -425,7 +253,6 @@ async function main() {
   const noPhrases = process.argv.includes('--no-phrases')
   const phrases = noPhrases ? null : loadPhraseStore(home) ?? null
   const deps = { store, phrases }
-  const advisable = advisableTools(engine.cards)
 
   // Кеш по тексту запроса: сьюты делят общие запросы и не гоняют эмбеддер дважды
   const cache = new Map<string, ScoutQueryResult>()
@@ -456,7 +283,6 @@ async function main() {
     },
     summary: {},
   }
-  const s = result.summary
   console.log(
     `== Окружение: ${result.env.gitSha}${dirty ? ' (есть правки)' : ''}, карточек ${result.env.cards}, векторы ${
       store ? 'есть' : 'нет'
@@ -468,354 +294,33 @@ async function main() {
   if (!cases.length && suites.some((x) => ['docs', 'latency', 'forms'].includes(x))) {
     console.error(`Нет случаев в ${casesFile} — docs и latency пропущены (bun scripts/scout/eval.ts --out ...)`)
   }
-
   if (suites.some((x) => x === 'docs' || x === 'latency' || x === 'judge')) {
     for (const c of cases) {
       await run(c.query)
     }
   }
 
-  if (suites.includes('docs') && cases.length) {
-    const search = async (q: string) => (await run(q)).result
-    const loadedPaths = new Set(engine.cards.filter((c) => c.loaded).map((c) => c.path))
-    const redundant = (q: string, p: string) => mentionedIn(q, p) || loadedPaths.has(p)
-    const groups: Array<[string, EvalCase[]]> = [
-      ['все', cases],
-      ['dev', cases.filter((c) => splitOf(c.sessionId) === 'dev')],
-      ['test', cases.filter((c) => splitOf(c.sessionId) === 'test')],
-      ['короткие', cases.filter((c) => c.query.length < 120)],
-    ]
-    const out: DocsGroup[] = []
-    console.log('\n== docs ==')
-    for (const [group, list] of groups) {
-      const { metrics, perCase } = await evaluate(search, list, advisable, { redundant })
-      out.push({ group, ...metrics })
-      if (group === 'dev') {
-        // Хабность на итоговой выдаче: первые 5 по очкам, как их видит агент
-        const hub = hubMetrics(perCase.map((c) => c.got.slice(0, 5)))
-        s['хабы топ-10 dev'] = hub.top10Share * 100
-        s['хаб макс dev'] = hub.maxFreq * 100
-        console.log(
-          `${''.padEnd(9)} хабность: 10 частых доков занимают ${pct(hub.top10Share)} мест пятёрки, максимум ${
-            pct(hub.maxFreq)
-          } запросов`,
-        )
-      }
-      console.log(
-        `${group.padEnd(9)} n=${String(metrics.cases).padStart(3)}  R@5 ${pct(metrics.recall5).padStart(6)}  R@8 ${
-          pct(metrics.recall8).padStart(6)
-        }  Hit@8 ${pct(metrics.hit8).padStart(6)}  MRR ${metrics.mrr.toFixed(3)}  инстр. top-1 (советуемые) ${
-          pct(metrics.toolTop1)
-        } (${metrics.toolCases}), точн. ${pct(metrics.toolPrecision)}`,
-      )
-      console.log(
-        `${''.padEnd(9)} нов. R@5 ${
-          pct(metrics.novelRecall5)
-        } (эталонов ${metrics.novelGold}, случаев ${metrics.novelCases}), нов. Hit@5 ${
-          pct(metrics.novelHit5)
-        }, упом. R@5 ${pct(metrics.mentionedRecall5)}, лишнее ${pct(metrics.redundancy)}`,
-      )
-    }
-    const briefs = cases.map((c) => formatBrief(cache.get(c.query)!.result))
-    const avgChars = briefs.reduce((n, b) => n + b.length, 0) / briefs.length
-    const emptyShare = briefs.filter((b) => !b).length / briefs.length
-    console.log(`справка: в среднем ${Math.round(avgChars)} симв., пустых ${pct(emptyShare)}`)
-    result.docs = { groups: out, avgChars, emptyShare }
-    const g = (name: string) => out.find((x) => x.group === name)!
-    s['R@5 dev'] = g('dev').recall5 * 100
-    s['R@5 test'] = g('test').recall5 * 100
-    s['MRR'] = g('все').mrr
-    s['инстр. top-1'] = g('все').toolTop1 * 100
-    s['инстр. точн.'] = g('все').toolPrecision * 100
-    s['нов. R@5 dev'] = g('dev').novelRecall5 * 100
-    s['нов. R@5 test'] = g('test').novelRecall5 * 100
-    s['лишнее'] = g('все').redundancy * 100
-    s['R@5 все'] = g('все').recall5 * 100
-    s['R@5 коротк.'] = g('короткие').recall5 * 100
-    s['R@8 все'] = g('все').recall8 * 100
-    s['Hit@8 все'] = g('все').hit8 * 100
-    s['пустых справок'] = emptyShare * 100
-    s['симв.'] = avgChars
+  const ctx = {
+    root,
+    home,
+    dataDir,
+    engine,
+    deps,
+    run,
+    cached: (q: string) => cache.get(q),
+    cases,
+    flags: { noPhrases },
   }
-
-  if (suites.includes('judge') && cases.length) {
-    console.log('\n== judge ==')
-    const labelsFile = join(dataDir, 'judge-labels.jsonl')
-    const labels = loadLabels(labelsFile)
-    const ref = loadLabels(join(dataDir, 'judge-ref.jsonl'))
-    const judged = cases.filter((c) => c.goldDocs.length)
-    let newLabels = 0
-    let serverAnswered: boolean | null = null
-    let unparsed = 0
-    const record = (c: EvalCase, it: JudgeItem, label: 0 | 1 | 2) => {
-      const l: JudgeLabel = { sessionId: c.sessionId, path: it.path, label, judge: JUDGE_MODEL }
-      labels.set(labelKey(c.sessionId, it.path), l)
-      appendFileSync(
-        labelsFile,
-        `${JSON.stringify(l)}
-`,
-      )
-      newLabels++
-    }
-    // Случаи, где 9B ответила, но пачку не разобрали: переспрашиваем в конце по одному пункту
-    const retry: Array<{ c: EvalCase; items: JudgeItem[] }> = []
-    for (const c of judged) {
-      const items = judgedItems((await run(c.query)).result)
-      const missing = items.filter((it) => !labels.has(labelKey(c.sessionId, it.path)))
-      if (!missing.length || serverAnswered === false) {
-        continue
-      }
-      const got = await judgeItems(c.query, missing)
-      if ('error' in got) {
-        // Сервер лёг — больше не зовём; ответ не разобран — переспросим во втором проходе
-        if (got.error === 'unreachable') {
-          serverAnswered = false
-        } else {
-          retry.push({ c, items: missing })
-        }
-        continue
-      }
-      serverAnswered = true
-      missing.forEach((it, i) => record(c, it, got.labels[i]))
-    }
-    let stillUnparsed = 0
-    for (const { c, items } of serverAnswered === false ? [] : retry) {
-      for (const it of items) {
-        const one = await judgeItems(c.query, [it])
-        if ('error' in one) {
-          stillUnparsed++
-        } else {
-          record(c, it, one.labels[0])
-        }
-      }
-    }
-    unparsed = stillUnparsed
-    const shown = (list: EvalCase[]) =>
-      list.map((c) => ({ sessionId: c.sessionId, paths: judgedItems(cache.get(c.query)!.result).map((it) => it.path) }))
-    const out = judgeGroups(
-      [
-        { group: 'dev', cases: shown(judged.filter((c) => splitOf(c.sessionId) === 'dev')) },
-        { group: 'test', cases: shown(judged.filter((c) => splitOf(c.sessionId) === 'test')) },
-        { group: 'все', cases: shown(judged) },
-      ],
-      labels,
-      ref,
-    )
-    for (const g of out) {
-      console.log(
-        `${g.group.padEnd(5)} n=${String(g.cases).padStart(3)}  по делу@1 ${pct(g.relevant1)}  @3 ${
-          pct(g.relevant3)
-        }  @5 ${pct(g.relevant5)}  нужен@3 ${pct(g.needed3)}  покрытие ${pct(g.coverage)}  согласие с эталоном ${
-          g.agreement === null ? '—' : `${pct(g.agreement)} (${g.agreementPairs} пар)`
-        }`,
-      )
-    }
-    console.log(
-      `новых меток от 9B: ${newLabels}${
-        serverAnswered === false ? '; судья не ответил — считаю по кешу' : ''
-      }; пар не разобрано после переспроса: ${unparsed}`,
-    )
-    result.judge = { groups: out, newLabels, serverAnswered, unparsed }
-    const jg = (name: string) => out.find((x) => x.group === name)!
-    s['суд. по делу@3 dev'] = jg('dev').relevant3 * 100
-    s['суд. по делу@3 test'] = jg('test').relevant3 * 100
-    s['суд. нужен@3'] = jg('все').needed3 * 100
-    s['суд. по делу@1'] = jg('все').relevant1 * 100
-    s['суд. по делу@5'] = jg('все').relevant5 * 100
-    s['суд. покрытие'] = jg('все').coverage * 100
-    const agreement = jg('все').agreement
-    s['суд. согласие'] = agreement === null ? null : agreement * 100
-  }
-
-  if (suites.includes('forms')) {
-    console.log('\n== forms ==')
-    const sets: FormsSet[] = []
-    const files: Array<[string, string]> = [
-      ['dev', join(dataDir, 'forms-probes.jsonl')],
-      ['holdout', join(dataDir, 'forms-probes-holdout.jsonl')],
-    ]
-    for (const [name, file] of files) {
-      if (!existsSync(file)) {
-        console.log(`${name}: нет ${file}`)
-        continue
-      }
-      const probes = readJsonl<FormProbe>(file)
-      let recall = 0
-      let complete = 0
-      let patternOk = 0
-      let patternTotal = 0
-      for (const probe of probes) {
-        const sc = scoreProbe(probe, (await run(probe.query)).result)
-        recall += sc.fieldRecall
-        complete += sc.complete ? 1 : 0
-        if (sc.patternOk !== undefined) {
-          patternTotal++
-          patternOk += sc.patternOk ? 1 : 0
-        }
-      }
-      const set = {
-        name,
-        probes: probes.length,
-        fieldRecall: recall / probes.length,
-        complete,
-        patternOk,
-        patternTotal,
-      }
-      sets.push(set)
-      console.log(
-        `${name.padEnd(8)} проб ${probes.length}  полнота полей ${
-          pct(set.fieldRecall)
-        }  полка целиком ${complete}/${probes.length}  паттерн ${patternOk}/${patternTotal}`,
-      )
-    }
-    const negatives = formsNegatives(cases)
-    let withFields = 0
-    let withPattern = 0
-    for (const c of negatives) {
-      const r = (await run(c.query)).result
-      withFields += r.fields.length ? 1 : 0
-      withPattern += r.pattern ? 1 : 0
-    }
-    const neg = {
-      cases: negatives.length,
-      fieldsShare: negatives.length ? withFields / negatives.length : 0,
-      patternShare: negatives.length ? withPattern / negatives.length : 0,
-    }
-    console.log(
-      `ложная полка на ${neg.cases} отрицательных: поля ${pct(neg.fieldsShare)}, паттерн ${pct(neg.patternShare)}`,
-    )
-    result.forms = { sets, negatives: neg }
-    const dev = sets.find((x) => x.name === 'dev')
-    const hold = sets.find((x) => x.name === 'holdout')
-    s['поля dev'] = dev ? dev.fieldRecall * 100 : null
-    s['поля holdout'] = hold ? hold.fieldRecall * 100 : null
-    s['полка целиком dev'] = dev?.complete ?? null
-    s['полка целиком holdout'] = hold?.complete ?? null
-    const patternTotal = sets.reduce((n, x) => n + x.patternTotal, 0)
-    s['паттерн'] = patternTotal ? (sets.reduce((n, x) => n + x.patternOk, 0) / patternTotal) * 100 : null
-    s['ложная полка'] = neg.fieldsShare * 100
-    s['ложный паттерн'] = neg.patternShare * 100
-  }
-
-  if (suites.includes('latency') && cases.length) {
-    const times = [...new Set(cases.map((c) => c.query))].map((q) => cache.get(q)!.ms).sort((a, b) => a - b)
-    const lat = { n: times.length, p50: percentile(times, 0.5), p95: percentile(times, 0.95), max: times.at(-1) ?? 0 }
-    result.latency = lat
-    s['p50 мс'] = lat.p50
-    s['p95 мс'] = lat.p95
-    s['max мс'] = lat.max
-    console.log(
-      `\n== latency ==\nscoutQuery, ${lat.n} запросов: p50 ${Math.round(lat.p50)} мс, p95 ${
-        Math.round(lat.p95)
-      } мс, max ${Math.round(lat.max)} мс`,
-    )
-  }
-
-  if (suites.includes('robust')) {
-    console.log('\n== robust ==')
-    const failed: string[] = []
-    for (const c of ROBUST_CHECKS) {
-      let ok = false
-      try {
-        ok = c.check(await scoutQuery(engine, home, c.query, deps, root))
-      } catch {
-        ok = false
-      }
-      console.log(`${ok ? '✓' : '✗'} ${c.name}`)
-      if (!ok) {
-        failed.push(c.name)
-      }
-    }
-    result.robust = { passed: ROBUST_CHECKS.length - failed.length, total: ROBUST_CHECKS.length, failed }
-    s['устойчивость'] = result.robust.passed
-    console.log(
-      `прошли ${result.robust.passed}/${result.robust.total}${failed.length ? `; провал: ${failed.join(', ')}` : ''}`,
-    )
-  }
-
-  if (suites.includes('hook')) {
-    const runs = Number(arg('--hook-runs') ?? 5)
-    console.log('\n== hook ==')
-    const hook = await runHook(root, home, runs, process.argv.includes('--no-phrases'))
-    result.hook = hook
-    s['хук p50 мс'] = hook.p50
-    s['хук max мс'] = hook.max
-    console.log(
-      `${hook.runs} запусков процесса: p50 ${Math.round(hook.p50)} мс, max ${Math.round(hook.max)} мс, ${
-        hook.ok ? 'код 0 и stdout валиден' : `проблемы: ${hook.problems.join('; ')}`
-      }`,
-    )
-  }
-  if (suites.includes('app')) {
-    console.log('\n== app ==')
-    const file = join(dataDir, 'sessions.jsonl')
-    if (!existsSync(file)) {
-      console.log(`нет ${file}`)
-    } else {
-      const loadedPaths = new Set(engine.cards.filter((c) => c.loaded).map((c) => c.path))
-      const got = scoreAppBriefs(readJsonl<SessionRecord>(file), (p) => loadedPaths.has(p))
-      result.app = got
-      const ratio = (a: number, b: number) => (b ? (a / b) * 100 : null)
-      s['app полнота'] = ratio(got.app.found, got.app.read)
-      s['app попадание'] = ratio(got.app.hitSessions, got.app.sessions)
-      s['global полнота'] = ratio(got.global.found, got.global.read)
-      s['global попадание'] = ratio(got.global.hitSessions, got.global.sessions)
-      for (const [name, x] of [['app', got.app], ['global', got.global]] as const) {
-        console.log(
-          `${name.padEnd(7)} история ${got.train} сессий, проверка ${x.sessions}: полнота ${
-            pct(x.read ? x.found / x.read : 0)
-          } (${x.found}/${x.read}), сессий с попаданием ${
-            pct(x.sessions ? x.hitSessions / x.sessions : 0)
-          } (${x.hitSessions}/${x.sessions})`,
-        )
-      }
-    }
-  }
-  if (suites.includes('edit')) {
-    console.log('\n== edit ==')
-    const liveFile = join(dataDir, 'sessions-live.jsonl')
-    const frozenFile = join(dataDir, 'sessions.jsonl')
-    if (!existsSync(liveFile) || !existsSync(frozenFile)) {
-      console.log(`нет ${existsSync(liveFile) ? frozenFile : liveFile}`)
-    } else {
-      const sessions = editSessions(readJsonl<SessionRecord>(liveFile), readJsonl<SessionRecord>(frozenFile))
-      const known = new Set(engine.cards.filter((c) => c.kind === 'doc' || c.kind === 'rule').map((c) => c.path))
-      const loadedPaths = new Set(engine.cards.filter((c) => c.loaded).map((c) => c.path))
-      const editCases = await buildEditCases(sessions, {
-        search: async (q) => (await run(q)).result,
-        known,
-        loaded: (p) => loadedPaths.has(p),
-      })
-      const cut = cutDate(sessions)
-      console.log(
-        `сессий с правкой ${sessions.length}, с эталоном ${editCases.length}; история — до ${cut.slice(0, 10)}, `
-          + `проверка — после. Каталог и смесь меряются только на проверке.`,
-      )
-      const rows: NonNullable<BenchRun['edit']>['rows'] = []
-      for (const group of editGroups(editCases, cut)) {
-        const isCheck = group.name.startsWith('проверка')
-        for (const variant of VARIANTS) {
-          if (!isCheck && (variant === 'P-каталог' || variant === 'P-смесь')) {
-            continue
-          }
-          const x = scoreEditCases(group.cases, variant)
-          rows.push({ group: group.name, variant, ...x })
-          console.log(
-            `${group.name.padEnd(14)} ${variant.padEnd(14)} n=${String(x.sessions).padStart(3)}  полнота ${
-              pct(x.gold ? x.found / x.gold : 0).padStart(6)
-            } (${x.found}/${x.gold})  сессий с попаданием ${
-              pct(x.sessions ? x.hitSessions / x.sessions : 0).padStart(6)
-            } (${x.hitSessions}/${x.sessions})  первая справка уже покрыла ${
-              pct(x.gold ? x.coveredByFirst / x.gold : 0)
-            } (${x.coveredByFirst}/${x.gold})`,
-          )
-        }
-      }
-      result.edit = { sessions: sessions.length, cases: editCases.length, rows }
+  // Порядок запуска — как в реестре, а не как в `--suite`
+  for (const name of (Object.keys(SUITES) as SuiteName[]).filter((n) => suites.includes(n))) {
+    const out = await SUITES[name](ctx)
+    Object.assign(result.summary, out.summary)
+    if (out.result !== undefined) {
+      ;(result as unknown as Record<string, unknown>)[name] = out.result
     }
   }
   for (const { key } of SUMMARY) {
-    s[key] ??= null
+    result.summary[key] ??= null
   }
 
   const benchDir = join(home, 'bench')

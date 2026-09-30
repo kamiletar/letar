@@ -9,5 +9,5 @@
     "target": "esnext",
     "types": ["bun-types"]
   },
-  "include": ["*.ts", "../../.claude/hooks/scout-*.ts", "../../libs/scout/src/types/*.d.ts"]
+  "include": ["*.ts", "suites/*.ts", "../../.claude/hooks/scout-*.ts", "../../libs/scout/src/types/*.d.ts"]
 }
