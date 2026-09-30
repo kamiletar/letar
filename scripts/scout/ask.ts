@@ -24,13 +24,13 @@ async function main() {
   }
   const home = scoutHome()
   const engine = new Bm25(freshIndex(root, home))
-  const { result, forms, ms } = await scoutQuery(engine, home, query)
+  const { result, forms, docsSource, ms } = await scoutQuery(engine, home, query, {}, root)
   const brief = formatBrief(result)
   if (process.argv.includes('--json')) {
-    console.log(JSON.stringify({ result, forms, ms }))
+    console.log(JSON.stringify({ result, forms, docsSource, ms }))
   } else {
     console.log(brief || 'скаут: по запросу ничего не нашёл')
-    console.log(`(${Math.round(ms)} мс, полка форм: ${forms})`)
+    console.log(`(${Math.round(ms)} мс, полка форм: ${forms}, доки: ${docsSource})`)
   }
   try {
     appendLog(home, {
@@ -43,6 +43,7 @@ async function main() {
       fields: result.fields.map((f) => f.name),
       pattern: result.pattern?.name,
       forms,
+      docs_by: docsSource,
       chars: brief.length,
       ms: Math.round(ms),
     }, 'asks.jsonl')

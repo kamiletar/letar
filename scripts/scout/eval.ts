@@ -33,6 +33,7 @@ import {
   hybridHits,
   type IndexedCard,
   layoutHits,
+  mentionedIn,
   scout,
   type ScoutResult,
 } from '../../libs/scout/src/index'
@@ -94,6 +95,18 @@ export interface Metrics {
   toolShown: number
   /** Среди случаев с советуемым эталоном: доля угаданных среди показанных инструментов */
   toolPrecision: number
+  /** Доля неупомянутых в запросе эталонов в первых 5 (микро по всем случаям) */
+  novelRecall5: number
+  /** Среди случаев с неупомянутым эталоном: доля, где хоть один из них в первых 5 */
+  novelHit5: number
+  /** Сколько случаев с неупомянутым эталоном */
+  novelCases: number
+  /** Сколько неупомянутых эталонов всего */
+  novelGold: number
+  /** То же, что `novelRecall5`, для эталонов, названных в запросе (микро) */
+  mentionedRecall5: number
+  /** Доля показанных пунктов справки (доки и ловушки), которые `redundant` признаёт лишними */
+  redundancy: number
 }
 
 /** Доки справки в порядке очков: доки и ловушки вперемешку, как их ранжировал поиск */
@@ -121,6 +134,7 @@ export async function evaluate(
   search: Searcher,
   cases: EvalCase[],
   advisable?: Set<string>,
+  options: { redundant?: (query: string, path: string) => boolean } = {},
 ): Promise<{ metrics: Metrics; perCase: Array<EvalCase & { got: string[]; tool?: string }> }> {
   let recall5 = 0
   let recall8 = 0
@@ -132,6 +146,14 @@ export async function evaluate(
   let toolShown = 0
   let precisionShown = 0
   let precisionHit = 0
+  let novelFound = 0
+  let novelTotal = 0
+  let novelCases = 0
+  let novelHits = 0
+  let mentionedFound = 0
+  let mentionedTotal = 0
+  let shownItems = 0
+  let redundantItems = 0
   const perCase: Array<EvalCase & { got: string[]; tool?: string }> = []
   for (const c of cases) {
     const result = await search(c.query)
@@ -150,6 +172,21 @@ export async function evaluate(
       hit8 += inTop(8) > 0 ? 1 : 0
       const rank = got.findIndex((p) => gold.has(p))
       mrr += rank === -1 ? 0 : 1 / (rank + 1)
+      for (const path of new Set(got)) {
+        shownItems++
+        redundantItems += options.redundant?.(c.query, path) ? 1 : 0
+      }
+      const top5 = new Set(got.slice(0, 5))
+      const novel = c.goldDocs.filter((g) => !mentionedIn(c.query, g))
+      const found = novel.filter((g) => top5.has(g)).length
+      novelTotal += novel.length
+      novelFound += found
+      if (novel.length) {
+        novelCases++
+        novelHits += found > 0 ? 1 : 0
+      }
+      mentionedTotal += c.goldDocs.length - novel.length
+      mentionedFound += c.goldDocs.filter((g) => mentionedIn(c.query, g) && top5.has(g)).length
     }
     const goldTools = advisable ? c.goldTools.filter((t) => advisable.has(t)) : c.goldTools
     if (goldTools.length) {
@@ -174,6 +211,12 @@ export async function evaluate(
       toolTop1: toolCases ? toolTop1 / toolCases : 0,
       toolShown: cases.length ? toolShown / cases.length : 0,
       toolPrecision: precisionShown ? precisionHit / precisionShown : 0,
+      novelRecall5: novelTotal ? novelFound / novelTotal : 0,
+      novelHit5: novelCases ? novelHits / novelCases : 0,
+      novelCases,
+      novelGold: novelTotal,
+      mentionedRecall5: mentionedTotal ? mentionedFound / mentionedTotal : 0,
+      redundancy: shownItems ? redundantItems / shownItems : 0,
     },
     perCase,
   }

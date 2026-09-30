@@ -25,6 +25,8 @@ export interface Card {
    * `service` — служебная команда роли или сессии, агенту по задаче её не советуем.
    */
   scope?: 'app' | 'service'
+  /** Правило без `paths:` во frontmatter: харнесс грузит его в каждую сессию, советовать незачем */
+  loaded?: boolean
   /** Взвешенный текст для индексации: поле → вес */
   fields: WeightedField[]
 }
@@ -48,8 +50,9 @@ export interface IndexedCard extends Omit<Card, 'fields'> {
  * индекс пересобирается по свежести исходников, а сами исходники при этом могли не меняться
  * (так карточки полей форм не попали в индекс, собранный до их появления).
  * 3 — частоты без прототипа, команды из подкаталогов, `embedHash`.
+ * 4 — `loaded` у правил без `paths:`.
  */
-export const INDEX_VERSION = 3
+export const INDEX_VERSION = 4
 
 export interface ScoutIndex {
   version: typeof INDEX_VERSION

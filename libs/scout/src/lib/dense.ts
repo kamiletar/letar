@@ -154,6 +154,24 @@ export function fusedHits(cards: IndexedCard[], fused: Map<string, number>, limi
     })
 }
 
+/** RRF верхушек BM25 и плотного поиска; хвост BM25 с нулевыми очками (для инструментов) */
+export function fuseWithDense(
+  cards: IndexedCard[],
+  bm25: Hit[],
+  dense: DenseIndex,
+  vector: Float32Array,
+  options: { depth?: number; k?: number } = {},
+): Hit[] {
+  const { depth = 100, k = 60 } = options
+  const denseIds = dense.search(vector, depth).map((d) => d.id)
+  const fused = reciprocalRankFusion([bm25.slice(0, depth).map((h) => h.card.id), denseIds], k)
+  const head = fusedHits(cards, fused, fused.size)
+  const inHead = new Set(head.map((h) => h.card.id))
+  // Хвост BM25 нужен для инструментов: их короткие карточки редко попадают в верхушку
+  const tail = bm25.filter((h) => !inHead.has(h.card.id)).map((h) => ({ card: h.card, score: 0 }))
+  return [...head, ...tail]
+}
+
 export interface HybridOptions {
   dense?: DenseIndex
   embed?: ServerOptions
@@ -199,13 +217,7 @@ export async function hybridHits(engine: Bm25, query: string, options: HybridOpt
     try {
       const [vector] = await embedTexts([formatQuery(query)], options.embed)
       forms = formRanking(engine.cards, options.dense, vector)
-      const dense = options.dense.search(vector, fuseDepth).map((d) => d.id)
-      const fused = reciprocalRankFusion([bm25.slice(0, fuseDepth).map((h) => h.card.id), dense])
-      const head = fusedHits(engine.cards, fused, fused.size)
-      const inHead = new Set(head.map((h) => h.card.id))
-      // Хвост BM25 нужен для инструментов: их короткие карточки редко попадают в верхушку
-      const tail = bm25.filter((h) => !inHead.has(h.card.id)).map((h) => ({ card: h.card, score: 0 }))
-      hits = [...head, ...tail]
+      hits = fuseWithDense(engine.cards, bm25, options.dense, vector, { depth: fuseDepth })
       stages.push('dense')
     } catch {
       // сервер эмбеддингов недоступен — остаёмся на BM25

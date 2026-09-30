@@ -32,7 +32,7 @@ import {
 } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { basename, join } from 'node:path'
-import { Bm25, formatBrief, type ScoutResult } from '../../libs/scout/src/index'
+import { Bm25, formatBrief, mentionedIn, type ScoutResult } from '../../libs/scout/src/index'
 import { arg, readJsonl } from './cli'
 import { advisableTools, type EvalCase, evaluate, type Metrics } from './eval'
 import { type FormProbe, formsNegatives, scoreProbe } from './forms-eval'
@@ -132,6 +132,9 @@ const SUMMARY: Array<{ key: string; unit: Unit; journal?: boolean }> = [
   { key: 'устойчивость', unit: 'n', journal: true },
   { key: 'симв.', unit: 'n', journal: true },
   { key: 'инстр. точн.', unit: 'pp', journal: true },
+  { key: 'нов. R@5 dev', unit: 'pp', journal: true },
+  { key: 'нов. R@5 test', unit: 'pp', journal: true },
+  { key: 'лишнее', unit: 'pp', journal: true },
   { key: 'R@5 все', unit: 'pp' },
   { key: 'R@5 коротк.', unit: 'pp' },
   { key: 'R@8 все', unit: 'pp' },
@@ -378,6 +381,8 @@ async function main() {
 
   if (suites.includes('docs') && cases.length) {
     const search = async (q: string) => (await run(q)).result
+    const loadedPaths = new Set(engine.cards.filter((c) => c.loaded).map((c) => c.path))
+    const redundant = (q: string, p: string) => mentionedIn(q, p) || loadedPaths.has(p)
     const groups: Array<[string, EvalCase[]]> = [
       ['все', cases],
       ['dev', cases.filter((c) => splitOf(c.sessionId) === 'dev')],
@@ -387,7 +392,7 @@ async function main() {
     const out: DocsGroup[] = []
     console.log('\n== docs ==')
     for (const [group, list] of groups) {
-      const { metrics } = await evaluate(search, list, advisable)
+      const { metrics } = await evaluate(search, list, advisable, { redundant })
       out.push({ group, ...metrics })
       console.log(
         `${group.padEnd(9)} n=${String(metrics.cases).padStart(3)}  R@5 ${pct(metrics.recall5).padStart(6)}  R@8 ${
@@ -395,6 +400,13 @@ async function main() {
         }  Hit@8 ${pct(metrics.hit8).padStart(6)}  MRR ${metrics.mrr.toFixed(3)}  инстр. top-1 (советуемые) ${
           pct(metrics.toolTop1)
         } (${metrics.toolCases}), точн. ${pct(metrics.toolPrecision)}`,
+      )
+      console.log(
+        `${''.padEnd(9)} нов. R@5 ${
+          pct(metrics.novelRecall5)
+        } (эталонов ${metrics.novelGold}, случаев ${metrics.novelCases}), нов. Hit@5 ${
+          pct(metrics.novelHit5)
+        }, упом. R@5 ${pct(metrics.mentionedRecall5)}, лишнее ${pct(metrics.redundancy)}`,
       )
     }
     const briefs = cases.map((c) => formatBrief(cache.get(c.query)!.result))
@@ -408,6 +420,9 @@ async function main() {
     s['MRR'] = g('все').mrr
     s['инстр. top-1'] = g('все').toolTop1 * 100
     s['инстр. точн.'] = g('все').toolPrecision * 100
+    s['нов. R@5 dev'] = g('dev').novelRecall5 * 100
+    s['нов. R@5 test'] = g('test').novelRecall5 * 100
+    s['лишнее'] = g('все').redundancy * 100
     s['R@5 все'] = g('все').recall5 * 100
     s['R@5 коротк.'] = g('короткие').recall5 * 100
     s['R@8 все'] = g('все').recall8 * 100

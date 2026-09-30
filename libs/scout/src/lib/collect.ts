@@ -140,7 +140,14 @@ export function collectCards(root: string): Card[] {
     if (markdown === undefined) {
       continue
     }
-    cards.push(...docCards({ path, markdown, entry: entries.get(path), shortAnnotation: short.get(path) }))
+    const docs = docCards({ path, markdown, entry: entries.get(path), shortAnnotation: short.get(path) })
+    // Правило без `paths:` харнесс грузит в каждую сессию сам — карточки правила и его секций помечаем
+    if (path.startsWith(`${RULES_DIR}/`) && !('paths' in parseFrontmatter(markdown).data)) {
+      for (const card of docs) {
+        card.loaded = true
+      }
+    }
+    cards.push(...docs)
   }
   const catalog = read(root, FIELD_CATALOG)
   if (catalog !== undefined) {

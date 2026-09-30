@@ -2,9 +2,18 @@ import { describe, expect, it } from 'bun:test'
 import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { Bm25, buildIndex, type Card, collectCards, DenseIndex, scout } from '../../libs/scout/src/index'
+import {
+  Bm25,
+  buildIndex,
+  type Card,
+  collectCards,
+  DenseIndex,
+  mentionedIn,
+  scout,
+  type ScoutResult,
+} from '../../libs/scout/src/index'
 import { splitOf } from './bench'
-import { buildCases } from './eval'
+import { buildCases, evaluate } from './eval'
 import { abGroup, appendLog, decide, MAX_ATTEMPTS, runScoutHook, scoutQuery } from './hook-core'
 import { indexPath } from './index-store'
 import { mineSession, normalizeKnowledgePath, parseHumanText, type SessionRecord } from './mine-transcripts'
@@ -279,5 +288,46 @@ describe('устойчивость хука', () => {
     if (process.platform === 'win32') {
       expect(indexPath('h', 'C:\\x')).toBe(indexPath('h', 'c:/x'))
     }
+  })
+})
+
+describe('evaluate: неупомянутые эталоны и лишнее', () => {
+  const hit = (path: string) => ({ path, line: 1, title: path, summary: '', score: 1 })
+  const result = (query: string, paths: string[]): ScoutResult => ({
+    query,
+    docs: paths.map(hit),
+    traps: [],
+    fields: [],
+    matched: paths.length,
+  })
+  const a = '.claude/docs/first-doc.md'
+  const b = '.claude/docs/second-doc.md'
+  const c = '.claude/docs/third-doc.md'
+  const cases = [
+    { sessionId: '1', query: 'сделай, см. first-doc.md', goldDocs: [a, b], goldTools: [] },
+    { sessionId: '2', query: 'просто задача', goldDocs: [c], goldTools: [] },
+  ]
+  const answers: Record<string, string[]> = { 'сделай, см. first-doc.md': [a, c], 'просто задача': [b] }
+
+  it('novelRecall5 считает только неупомянутые, redundancy — долю лишних показанных', async () => {
+    const { metrics } = await evaluate(
+      (q) => result(q, answers[q]),
+      cases,
+      undefined,
+      { redundant: (q, p) => mentionedIn(q, p) },
+    )
+    // неупомянутые эталоны: b (случай 1, не найден) и c (случай 2, не найден) → 0 из 2
+    expect(metrics.novelGold).toBe(2)
+    expect(metrics.novelRecall5).toBe(0)
+    expect(metrics.novelCases).toBe(2)
+    // упомянутый эталон a найден
+    expect(metrics.mentionedRecall5).toBe(1)
+    // показано 3 пункта, лишний один (a в первом запросе)
+    expect(metrics.redundancy).toBeCloseTo(1 / 3)
+  })
+
+  it('без redundant redundancy равна нулю', async () => {
+    const { metrics } = await evaluate((q) => result(q, answers[q]), cases)
+    expect(metrics.redundancy).toBe(0)
   })
 })

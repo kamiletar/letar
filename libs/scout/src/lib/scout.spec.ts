@@ -1,9 +1,9 @@
 import { Bm25, buildIndex } from './bm25'
 import { BRIEF_HEADER, formatBrief, formatOneLine } from './brief'
 import { parsePatternRegistry } from './collect'
-import { embedHash, formatQuery, hybridHits, QUERY_CHARS, QUERY_INSTRUCTION } from './dense'
+import { DenseIndex, embedHash, formatQuery, fuseWithDense, hybridHits, QUERY_CHARS, QUERY_INSTRUCTION } from './dense'
 import { parseFrontmatter } from './frontmatter'
-import { FORM_WORDS, layoutHits, scout } from './search'
+import { FORM_WORDS, layoutHits, mentionedIn, scout } from './search'
 import {
   docCards,
   fieldCatalogCards,
@@ -354,5 +354,101 @@ describe('исправления по ревью', () => {
     const hits = engine.search('деплой', 500)
     expect(hits.length).toBe(2)
     expect(layoutHits(engine.cards, hits, 'деплой').tool).toBeUndefined()
+  })
+})
+
+describe('mentionedIn', () => {
+  const zod = '.claude/docs/zod-per-package-pin-drift.md'
+
+  it('имя файла с .md в запросе — упомянут, регистр не важен', () => {
+    expect(mentionedIn('см. ZOD-per-package-pin-drift.md и дальше', zod)).toBe(true)
+  })
+
+  it('слаг с дефисом без .md — упомянут, если стоит отдельным словом', () => {
+    expect(mentionedIn('прочти zod-per-package-pin-drift перед правкой', zod)).toBe(true)
+    expect(mentionedIn('(zod-per-package-pin-drift)', zod)).toBe(true)
+  })
+
+  it('короткое имя без дефиса без .md — обычное слово, не упоминание', () => {
+    expect(mentionedIn('поправь auth в приложении', '.claude/docs/auth.md')).toBe(false)
+    expect(mentionedIn('открой auth.md', '.claude/docs/auth.md')).toBe(true)
+  })
+
+  it('слаг как часть более длинного слага — не упоминание', () => {
+    expect(mentionedIn('см. zod-per-package-pin', '.claude/docs/zod-per.md')).toBe(false)
+    expect(mentionedIn('см. zod-per-package', '.claude/docs/zod-per.md')).toBe(false)
+    expect(mentionedIn('см. my-zod-per', '.claude/docs/zod-per.md')).toBe(false)
+  })
+})
+
+describe('layoutHits: лишнее не советуем', () => {
+  const engine = () => {
+    const doc = (path: string, extra: Partial<{ loaded: boolean }> = {}) =>
+      docCards({ path, markdown: '# Деплой\n## Симптом\nдеплой падает' }).map((c) => ({ ...c, ...extra }))
+    const cards = [
+      ...doc('.claude/docs/deploy-mentioned.md'),
+      ...doc('.claude/docs/deploy-other.md'),
+      ...doc('.claude/rules/deploy-loaded.md', { loaded: true }),
+    ]
+    return new Bm25(JSON.parse(JSON.stringify(buildIndex(cards, 'test'))))
+  }
+  const paths = (r: { docs: Array<{ path: string }>; traps: Array<{ path: string }> }) =>
+    [...r.docs, ...r.traps].map((d) => d.path).sort()
+
+  it('не показывает док, названный в запросе, и правило с loaded', () => {
+    const e = engine()
+    const result = layoutHits(
+      e.cards,
+      e.search('деплой падает, см. deploy-mentioned.md', 500),
+      'деплой падает, см. deploy-mentioned.md',
+    )
+    expect(paths(result)).toEqual(['.claude/docs/deploy-other.md'])
+  })
+
+  it('с dropMentioned и dropLoaded = false показывает всё', () => {
+    const e = engine()
+    const q = 'деплой падает, см. deploy-mentioned.md'
+    const result = layoutHits(e.cards, e.search(q, 500), q, { dropMentioned: false, dropLoaded: false, minRelative: 0 })
+    expect(paths(result)).toEqual([
+      '.claude/docs/deploy-mentioned.md',
+      '.claude/docs/deploy-other.md',
+      '.claude/rules/deploy-loaded.md',
+    ])
+  })
+})
+
+describe('fuseWithDense', () => {
+  it('док только из плотного списка попадает в голову, инструмент только из BM25 — в хвост с нулём', () => {
+    const doc = (path: string, text: string) =>
+      docCards({
+        path,
+        markdown: `# ${text}
+`,
+      })
+    const cards = [
+      ...doc('.claude/docs/alpha.md', 'альфа деплой деплой деплой'),
+      ...doc('.claude/docs/beta.md', 'бета совсем другое'),
+      toolCard(
+        'skill',
+        '.claude/skills/deployer/SKILL.md',
+        '---\nname: deployer\ndescription: набор инструментов для сборки и деплой\n---',
+        'x',
+      ),
+    ]
+    const engine = new Bm25(JSON.parse(JSON.stringify(buildIndex(cards, 'test'))))
+    const bm25 = engine.search('деплой', 500)
+    expect(bm25.some((h) => h.card.path === '.claude/docs/beta.md')).toBe(false)
+    // Плотный индекс знает только два дока; запрос ближе к beta
+    const dense = new DenseIndex(
+      ['doc:.claude/docs/alpha.md', 'doc:.claude/docs/beta.md'],
+      Float32Array.from([1, 0, 0, 1]),
+      2,
+    )
+    const fused = fuseWithDense(engine.cards, bm25, dense, Float32Array.from([0, 1]), { depth: 1 })
+    const ids = fused.map((h) => h.card.id)
+    expect(ids.slice(0, 2).sort()).toEqual(['doc:.claude/docs/alpha.md', 'doc:.claude/docs/beta.md'])
+    const skill = fused.find((h) => h.card.kind === 'skill')
+    expect(skill?.score).toBe(0)
+    expect(ids.indexOf('skill:deployer')).toBeGreaterThanOrEqual(2)
   })
 })

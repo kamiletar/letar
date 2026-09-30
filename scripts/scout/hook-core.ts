@@ -22,6 +22,7 @@ import {
   formatQuery,
   type FormRanking,
   formRanking,
+  fuseWithDense,
   layoutHits,
   type ScoutIndex,
   type ScoutResult,
@@ -215,8 +216,8 @@ export function requestVectorRefresh(root: string, home: string, options: { forc
 export type FormsSource = 'dense' | 'no-vectors' | 'embed-down' | 'stale-vectors'
 
 /**
- * Косинусный рейтинг полей и паттернов. Доки ищет BM25: на реальных задачах гибрид его не обогнал
- * (R@5 68,6% против 69,8%), а на полке форм эмбеддинги дают +20 п.п. полноты (замер в local-scout.md).
+ * Вектор запроса и косинусный рейтинг полей и паттернов. На полке форм эмбеддинги дают +20 п.п.
+ * полноты (замер в local-scout.md); на доках гибрид с BM25 помогает только по неупомянутым в запросе.
  */
 async function denseForms(
   engine: Bm25,
@@ -224,7 +225,7 @@ async function denseForms(
   query: string,
   deps: HookDeps,
   root?: string,
-): Promise<{ ranking?: FormRanking; source: FormsSource }> {
+): Promise<{ ranking?: FormRanking; source: FormsSource; vector?: Float32Array; store?: VectorStore }> {
   const store = deps.store === undefined ? loadVectorStore(home) : deps.store ?? undefined
   if (!store) {
     return { source: 'no-vectors' }
@@ -245,7 +246,7 @@ async function denseForms(
       url: deps.embedUrl ?? EMBED_URL,
       timeoutMs: deps.embedTimeoutMs ?? EMBED_TIMEOUT_MS,
     })
-    return { ranking: formRanking(engine.cards, dense, vector), source: 'dense' }
+    return { ranking: formRanking(engine.cards, dense, vector), source: 'dense', vector, store }
   } catch {
     return { source: 'embed-down' }
   }
@@ -254,6 +255,8 @@ async function denseForms(
 export interface ScoutQueryResult {
   result: ScoutResult
   forms: FormsSource
+  /** Чем построены доки и ловушки: гибридом BM25 + эмбеддинги или одним BM25 */
+  docsSource: 'hybrid' | 'bm25'
   ms: number
 }
 
@@ -268,8 +271,21 @@ export async function scoutQuery(
   const started = performance.now()
   const forms = await denseForms(engine, home, query, deps, root)
   // Карточки инструментов короткие и набирают меньше очков, чем доки, поэтому выдачу берём глубоко
-  const result = layoutHits(engine.cards, engine.search(query, 500), query, { forms: forms.ranking })
-  return { result, forms: forms.source, ms: performance.now() - started }
+  const bm25 = engine.search(query, 500)
+  // Поля, паттерн и инструмент — по BM25-раскладке: их пороги подобраны под неё
+  const base = layoutHits(engine.cards, bm25, query, { forms: forms.ranking })
+  if (!forms.vector || !forms.store) {
+    return { result: base, forms: forms.source, docsSource: 'bm25', ms: performance.now() - started }
+  }
+  // Доки и ловушки — по слиянию с плотным поиском (RRF)
+  const fused = fuseWithDense(engine.cards, bm25, forms.store.dense, forms.vector)
+  const docs = layoutHits(engine.cards, fused, query, { forms: forms.ranking })
+  return {
+    result: { ...base, docs: docs.docs, traps: docs.traps },
+    forms: forms.source,
+    docsSource: 'hybrid',
+    ms: performance.now() - started,
+  }
 }
 
 /** Один вызов UserPromptSubmit: решение, поиск, лог, вывод по режиму */
@@ -290,7 +306,7 @@ export async function runScoutHook(
     return {}
   }
   const engine = new Bm25(freshIndex(root, home))
-  const { result, forms } = await scoutQuery(engine, home, decision.query, deps, root)
+  const { result, forms, docsSource } = await scoutQuery(engine, home, decision.query, deps, root)
   const brief = formatBrief(result)
   const line = formatOneLine(result)
   writeState(home, sessionId, { attempts: state.attempts + 1, briefed: Boolean(brief) })
@@ -311,6 +327,7 @@ export async function runScoutHook(
     fields: result.fields.map((f) => f.name),
     pattern: result.pattern?.name,
     forms,
+    docs_by: docsSource,
     scores: [...result.docs, ...result.traps].map((d) => Math.round(d.score * 10) / 10),
     chars: brief.length,
     ms: Math.round(performance.now() - started),

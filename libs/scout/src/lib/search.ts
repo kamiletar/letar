@@ -81,6 +81,10 @@ export interface ScoutOptions {
   patternMinCosine?: number
   /** Паттерн без слов про формы — только при таком косинусе */
   patternMinCosineAlone?: number
+  /** Не советовать доки, названные в запросе по имени файла: агент их уже видит */
+  dropMentioned?: boolean
+  /** Не советовать правила без `paths:`: харнесс грузит их в каждую сессию сам */
+  dropLoaded?: boolean
 }
 
 /**
@@ -94,6 +98,32 @@ export const FORM_WORDS =
 
 const TOOL_KINDS = new Set(['skill', 'command', 'agent'])
 const FORM_KINDS = new Set(['field', 'pattern'])
+
+/**
+ * Док назван в запросе по имени файла: агент его уже видит, советовать незачем. Имя без `.md`
+ * считается только со слагом (есть дефис): короткие `auth`, `forms` — обычные слова текста.
+ */
+export function mentionedIn(query: string, path: string): boolean {
+  const file = (path.replace(/^.*\//, '')).toLowerCase()
+  const text = query.toLowerCase()
+  if (text.includes(file)) {
+    return true
+  }
+  const slug = file.replace(/\.md$/, '')
+  if (!slug.includes('-')) {
+    return false
+  }
+  let from = text.indexOf(slug)
+  while (from !== -1) {
+    const before = text[from - 1]
+    const after = text[from + slug.length]
+    if (!(before && /[\w-]/.test(before)) && !(after && /[\w-]/.test(after))) {
+      return true
+    }
+    from = text.indexOf(slug, from + 1)
+  }
+  return false
+}
 
 /** Карточка из корпуса форм: поле, паттерн, доки и правила про формы */
 export function isFormCard(card: IndexedCard): boolean {
@@ -130,6 +160,8 @@ export function layoutHits(cards: IndexedCard[], hits: Hit[], query: string, opt
     fieldMargin = 0.12,
     patternMinCosine = 0.53,
     patternMinCosineAlone = 0.65,
+    dropMentioned = true,
+    dropLoaded = true,
   } = options
   const docCards = new Map<string, IndexedCard>()
   for (const card of cards) {
@@ -164,6 +196,9 @@ export function layoutHits(cards: IndexedCard[], hits: Hit[], query: string, opt
       if (rank < patternRank) {
         pattern ??= toFormHit(hit)
       }
+      return
+    }
+    if ((dropMentioned && mentionedIn(query, card.path)) || (dropLoaded && card.loaded)) {
       return
     }
     const existing = byPath.get(card.path)
