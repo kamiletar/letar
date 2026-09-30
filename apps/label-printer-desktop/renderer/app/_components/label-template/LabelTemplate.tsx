@@ -5,6 +5,7 @@ import { cousine, sourceSans3 } from '../../_fonts'
 import { eacSignBase64 } from './assets'
 import logo from './images/rosstil-logo.png'
 import uhod from './images/uhod.png'
+import { getLabelSeller } from './seller'
 
 /**
  * Информация о товаре
@@ -47,6 +48,8 @@ export const LabelTemplate = forwardRef<HTMLDivElement, LabelTemplateProps>(func
   ref,
 ) {
   const { product, dataMatrixBase64, gtinBarcodeBase64 } = data
+  // Реквизиты продавца — из renderer/.env.local, не из репозитория (см. seller.ts)
+  const seller = getLabelSeller()
   // TODO: заменить статичный uhod.src на динамические иконки
   // const careIcons = product.composition ? getCareIconsByComposition(product.composition) : careSetDefault
 
@@ -128,20 +131,20 @@ export const LabelTemplate = forwardRef<HTMLDivElement, LabelTemplateProps>(func
             <img src={uhod.src} />
           </HStack>
           <Text lineHeight={1} fontSize="64px" flex={1}>
-            rosstil.ru
+            {seller.site}
           </Text>
           <Text fontSize="26px" color="#000" fontWeight="medium">
-            ИП Аксянова Е.Ю.
+            {seller.entrepreneur}
           </Text>
 
           <Text fontSize="24px" color="#000" fontWeight="medium">
-            ИНН 682701271521
+            ИНН {seller.inn}
           </Text>
           <Text fontSize="18px" color="#000" fontWeight="medium">
             ТР ТС 017/2011. ЕАЭС RU
           </Text>
           <Text fontSize="21px" color="#000" fontWeight="medium">
-            Д-RU.РА04.В.84763/24
+            {seller.declaration}
           </Text>
         </VStack>
       </HStack>

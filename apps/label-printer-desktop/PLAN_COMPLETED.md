@@ -721,7 +721,7 @@ export function LabelTemplate({ product, dataMatrixBase64, gtinBarcodeBase64 }: 
 
       {/* === ТЕХНИЧЕСКАЯ ИНФОРМАЦИЯ === */}
       <div style={{ position: 'absolute', bottom: 10, left: 15, fontSize: 10 }}>
-        <div>ТР ТС 017/2011. ЕАЭС RU Д-RU.РА04.В.84763/24</div>
+        <div>ТР ТС 017/2011. ЕАЭС RU <номер декларации></div>
         <div><реквизиты продавца></div>
       </div>
 
