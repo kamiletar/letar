@@ -1,6 +1,7 @@
 ---
 name: pravda
 description: Воркфлоу разработки приложения pravda — регистрация агента и выбор задачи из плана
+disable-model-invocation: true
 ---
 
 # Pravda - Воркфлоу разработки

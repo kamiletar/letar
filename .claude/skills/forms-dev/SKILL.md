@@ -1,6 +1,7 @@
 ---
 name: forms-dev
 description: Воркфлоу разработки @letar/forms — приоритизация задач и обязательный цикл синхронизации из 6 групп
+disable-model-invocation: true
 ---
 
 # Forms Dev - Воркфлоу разработки

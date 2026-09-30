@@ -1,6 +1,7 @@
 ---
 name: label-printer-desktop
 description: Воркфлоу разработки Electron-приложения label-printer-desktop для печати этикеток «Честный знак»
+disable-model-invocation: true
 ---
 
 # Label Printer Desktop - Воркфлоу разработки

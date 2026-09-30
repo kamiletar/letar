@@ -1,6 +1,7 @@
 ---
 name: animatrona-mobile
 description: Воркфлоу разработки мобильного плеера Animatrona (React Native, Android)
+disable-model-invocation: true
 ---
 
 # Animatrona Mobile - Воркфлоу разработки

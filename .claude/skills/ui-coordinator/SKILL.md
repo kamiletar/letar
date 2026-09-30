@@ -1,6 +1,7 @@
 ---
 name: ui-coordinator
 description: Координатор экосистемы libs/ui — ui-coordinator-dev — приём запросов, триаж и реализация shared UI компонентов
+disable-model-invocation: true
 ---
 
 # UI Coordinator — Гейткипер экосистемы `libs/ui`

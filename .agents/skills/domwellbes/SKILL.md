@@ -1,6 +1,7 @@
 ---
 name: domwellbes
 description: Воркфлоу разработки domwellbes — приватный submodule, учёт времени, требования 152-ФЗ
+disable-model-invocation: true
 ---
 
 # DomWellbes - Воркфлоу разработки

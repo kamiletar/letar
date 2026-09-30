@@ -1,6 +1,7 @@
 ---
 name: forms-coordinator
 description: Координатор экосистемы форм forms-coordinator-dev — приём запросов, триаж и делегация forms-dev
+disable-model-invocation: true
 ---
 
 # Forms Coordinator — Гейткипер экосистемы форм

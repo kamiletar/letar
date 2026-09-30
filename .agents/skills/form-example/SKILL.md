@@ -1,6 +1,7 @@
 ---
 name: form-example
 description: Воркфлоу разработки form-example — витрина @letar/forms для внешних пользователей
+disable-model-invocation: true
 ---
 
 # Form Example - Воркфлоу разработки

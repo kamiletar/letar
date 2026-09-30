@@ -1,6 +1,7 @@
 ---
 name: aira-web
 description: Воркфлоу разработки Aira Web — сайт с релизами пост-квантового мессенджера Aira
+disable-model-invocation: true
 ---
 
 # Aira Web - Воркфлоу разработки

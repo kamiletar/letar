@@ -1,6 +1,7 @@
 ---
 name: umami
 description: Воркфлоу разработки self-hosted аналитики umami для всех проектов Letar
+disable-model-invocation: true
 ---
 
 # Umami - Воркфлоу разработки

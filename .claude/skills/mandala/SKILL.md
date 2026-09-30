@@ -1,6 +1,7 @@
 ---
 name: mandala
 description: Воркфлоу разработки галереи мандал mandala — регистрация агента и выбор задачи из плана
+disable-model-invocation: true
 ---
 
 # Mandala - Воркфлоу разработки

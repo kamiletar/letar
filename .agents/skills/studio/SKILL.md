@@ -1,6 +1,7 @@
 ---
 name: studio
 description: Воркфлоу разработки сайта студии Letar с личным кабинетом, биллингом и требованиями 152-ФЗ
+disable-model-invocation: true
 ---
 
 # Studio Letar - Воркфлоу разработки

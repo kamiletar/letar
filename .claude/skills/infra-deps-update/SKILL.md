@@ -2,6 +2,7 @@
 name: infra-deps-update
 description: Систематическое обновление зависимостей монорепо через bun с проверкой безопасности и сборки
 allowed-tools: Bash(bun outdated:*), Bash(bun update:*), Bash(bun add:*), Bash(bun audit:*), Bash(bun install:*), Bash(bun scripts/check-all.mjs:*), Bash(bun scripts/check-peer-deps.mjs:*), Bash(bun scripts/check-patched-deps.mjs:*), Bash(bun patch:*), Bash(nx run-many:*)
+disable-model-invocation: true
 ---
 
 # Deps Update - Обновление зависимостей

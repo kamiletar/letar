@@ -1,6 +1,7 @@
 ---
 name: animatrona-tv
 description: Воркфлоу разработки TV-плеера Animatrona (React Native, Android TV)
+disable-model-invocation: true
 ---
 
 # Animatrona TV - Воркфлоу разработки

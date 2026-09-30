@@ -1,6 +1,7 @@
 ---
 name: aboi
 description: Воркфлоу разработки НейроАбоИ (aboi) — интернет-магазин обоев с аффирмациями
+disable-model-invocation: true
 ---
 
 # НейроАбоИ (aboi) - Воркфлоу разработки

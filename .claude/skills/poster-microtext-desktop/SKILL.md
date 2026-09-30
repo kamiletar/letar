@@ -1,6 +1,7 @@
 ---
 name: poster-microtext-desktop
 description: Воркфлоу разработки Electron-приложения poster-microtext-desktop — микротекст на постерах
+disable-model-invocation: true
 ---
 
 # Poster Microtext Desktop - Воркфлоу разработки

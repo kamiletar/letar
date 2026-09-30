@@ -2,6 +2,7 @@
 name: create-new-electron-app
 description: Генерация каркаса Electron-приложения — протокол, ассоциации файлов, грабли платформы
 allowed-tools: Bash, Read, Grep, Glob
+disable-model-invocation: true
 ---
 
 > Параметры берутся из запроса пользователя. В Claude Code маркеры `$ARGUMENTS` и `$1`…`$9` подставляются при вызове навыка.

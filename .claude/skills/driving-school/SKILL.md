@@ -1,6 +1,7 @@
 ---
 name: driving-school
 description: Воркфлоу разработки driving-school — автошкола, эталон документации приложений
+disable-model-invocation: true
 ---
 
 # Driving School - Воркфлоу разработки

@@ -2,6 +2,7 @@
 name: deploy-agent
 description: Инициализация и рабочий цикл deploy-agent-dev — приём и выполнение deploy-запросов через Agent Mail
 allowed-tools: Bash, Read, Grep, Glob
+disable-model-invocation: true
 ---
 
 # Deploy Agent — Координатор деплоя

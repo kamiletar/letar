@@ -1,6 +1,7 @@
 ---
 name: grandslamcup
 description: Воркфлоу разработки grandslamcup — турнир поэтов, регистрация в Agent Mail
+disable-model-invocation: true
 ---
 
 # Grand Slam Cup - Воркфлоу разработки

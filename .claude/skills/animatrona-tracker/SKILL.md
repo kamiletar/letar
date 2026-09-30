@@ -1,6 +1,7 @@
 ---
 name: animatrona-tracker
 description: Воркфлоу разработки Animatrona Tracker — каталог, модерация и пиннинг IPFS-раздач аниме
+disable-model-invocation: true
 ---
 
 # Animatrona Tracker - Воркфлоу разработки

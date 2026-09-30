@@ -1,6 +1,7 @@
 ---
 name: audit-seo-audit
 description: Аудит SEO и метаданных приложения — canonical, hreflang, OG, structured data
+disable-model-invocation: true
 ---
 
 > Параметры берутся из запроса пользователя. В Claude Code маркеры `$ARGUMENTS` и `$1`…`$9` подставляются при вызове навыка.

@@ -1,6 +1,7 @@
 ---
 name: audit-perf-audit
 description: Аудит производительности приложения — bundle, рендеринг, Lighthouse, БД, сеть
+disable-model-invocation: true
 ---
 
 # Perf Audit - Аудит производительности

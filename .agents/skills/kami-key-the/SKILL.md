@@ -1,6 +1,7 @@
 ---
 name: kami-key-the
 description: Воркфлоу разработки утилиты kami-key-the — регистрация агента и выбор задачи из плана
+disable-model-invocation: true
 ---
 
 # KamiKeyThe - Воркфлоу разработки

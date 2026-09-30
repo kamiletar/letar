@@ -7,6 +7,7 @@ description: |
   - Проверке responsive дизайна
   - Оценке консистентности дизайн-системы
   - Поиске UX улучшений
+disable-model-invocation: true
 ---
 
 # UI/UX Audit Skill

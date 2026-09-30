@@ -1,6 +1,7 @@
 ---
 name: animatrona-ipfs-player
 description: Воркфлоу разработки Animatrona IPFS Player — облегчённый десктоп-клиент для просмотра IPFS-раздач аниме по CID, без импорта и кодирования
+disable-model-invocation: true
 ---
 
 # Animatrona IPFS Player - Воркфлоу разработки

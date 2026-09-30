@@ -1,6 +1,7 @@
 ---
 name: dashboard
 description: Воркфлоу разработки dashboard — мониторинг сервера, регистрация в Agent Mail
+disable-model-invocation: true
 ---
 
 # Dashboard - Воркфлоу разработки

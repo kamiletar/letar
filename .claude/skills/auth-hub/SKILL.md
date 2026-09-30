@@ -1,6 +1,7 @@
 ---
 name: auth-hub
 description: Воркфлоу разработки Auth Hub (Ключница) — централизованный сервис авторизации и SSO
+disable-model-invocation: true
 ---
 
 # Auth Hub - Воркфлоу разработки

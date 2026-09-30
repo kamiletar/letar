@@ -1,6 +1,7 @@
 ---
 name: archetest
 description: Воркфлоу разработки Archetest — квиз-платформа архетипов с авторизацией и лидербордом
+disable-model-invocation: true
 ---
 
 # Archetest - Воркфлоу разработки

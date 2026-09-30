@@ -2,6 +2,7 @@
 name: workflow-archive-completed
 description: Архивация выполненных задач и старых записей CHANGELOG в архивные файлы
 allowed-tools: Read, Write, Edit, Glob
+disable-model-invocation: true
 ---
 
 # Архивация выполненных задач и CHANGELOG

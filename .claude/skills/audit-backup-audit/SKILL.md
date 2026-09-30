@@ -2,6 +2,7 @@
 name: audit-backup-audit
 description: Аудит системы бэкапов — свежесть дампов, cron, репликация, регистрация приложений
 allowed-tools: Bash
+disable-model-invocation: true
 ---
 
 # Backup Audit - Аудит бэкапов

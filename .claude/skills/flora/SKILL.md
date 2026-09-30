@@ -1,6 +1,7 @@
 ---
 name: flora
 description: Воркфлоу разработки flora — приватный submodule, учёт времени, требования 152-ФЗ
+disable-model-invocation: true
 ---
 
 # Flora - Воркфлоу разработки

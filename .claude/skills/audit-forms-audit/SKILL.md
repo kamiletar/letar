@@ -1,6 +1,7 @@
 ---
 name: audit-forms-audit
 description: Аудит соответствия форм проекта паттернам @letar/forms
+disable-model-invocation: true
 ---
 
 # Forms Audit - Аудит интеграции форм

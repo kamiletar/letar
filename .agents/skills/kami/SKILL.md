@@ -1,6 +1,7 @@
 ---
 name: kami
 description: Воркфлоу разработки приложения kami — регистрация агента и выбор задачи из плана
+disable-model-invocation: true
 ---
 
 # Kami - Воркфлоу разработки

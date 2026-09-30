@@ -1,6 +1,7 @@
 ---
 name: animatrona-landing
 description: Воркфлоу разработки лендинга десктоп-приложения Animatrona
+disable-model-invocation: true
 ---
 
 # Animatrona Landing - Воркфлоу разработки

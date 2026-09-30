@@ -1,6 +1,7 @@
 ---
 name: dsperevod
 description: Воркфлоу разработки dsperevod — бюро переводов, требования 152-ФЗ к формам согласия
+disable-model-invocation: true
 ---
 
 # DS Perevod - Воркфлоу разработки

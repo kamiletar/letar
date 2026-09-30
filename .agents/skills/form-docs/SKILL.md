@@ -1,6 +1,7 @@
 ---
 name: form-docs
 description: Воркфлоу разработки form-docs — документация библиотеки @letar/forms на Fumadocs
+disable-model-invocation: true
 ---
 
 # Form Docs - Воркфлоу разработки

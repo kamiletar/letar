@@ -1,6 +1,7 @@
 ---
 name: letar-landing
 description: Воркфлоу разработки лендинга letar-landing — регистрация агента и выбор задачи из плана
+disable-model-invocation: true
 ---
 
 # Letar Landing - Воркфлоу разработки

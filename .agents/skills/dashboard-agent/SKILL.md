@@ -1,6 +1,7 @@
 ---
 name: dashboard-agent
 description: Воркфлоу разработки dashboard-agent — регистрация в Agent Mail, задачи, деплой через deploy-agent-dev
+disable-model-invocation: true
 ---
 
 # Dashboard Agent - Воркфлоу разработки

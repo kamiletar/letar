@@ -1,6 +1,7 @@
 ---
 name: animatrona-coordinator
 description: Координатор экосистемы Animatrona — раздаёт каскадные задачи приложениям через Agent Mail
+disable-model-invocation: true
 ---
 
 # Animatrona Coordinator — Архитектор скоупа

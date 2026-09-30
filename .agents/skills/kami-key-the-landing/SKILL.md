@@ -1,6 +1,7 @@
 ---
 name: kami-key-the-landing
 description: Воркфлоу разработки лендинга kami-key-the-landing — регистрация агента и выбор задачи из плана
+disable-model-invocation: true
 ---
 
 # Kami Key The Landing - Воркфлоу разработки

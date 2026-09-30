@@ -2,6 +2,7 @@
 name: create-new-app
 description: Генерация каркаса нового Next.js приложения генератором и чеклист шагов до продакшена
 allowed-tools: Bash, Read, Grep, Glob
+disable-model-invocation: true
 ---
 
 > Параметры берутся из запроса пользователя. В Claude Code маркеры `$ARGUMENTS` и `$1`…`$9` подставляются при вызове навыка.

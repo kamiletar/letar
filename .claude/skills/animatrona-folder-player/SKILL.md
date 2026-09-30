@@ -1,6 +1,7 @@
 ---
 name: animatrona-folder-player
 description: Воркфлоу разработки Animatrona Folder Player — standalone-плеер аниме из локальной папки (Electron + Next.js), без ffmpeg/IPFS
+disable-model-invocation: true
 ---
 
 # Animatrona Folder Player - Воркфлоу разработки

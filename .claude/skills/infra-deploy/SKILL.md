@@ -1,6 +1,7 @@
 ---
 name: infra-deploy
 description: Чеклист подготовки приложения и отправки запроса на деплой координатору deploy-agent-dev
+disable-model-invocation: true
 ---
 
 # Deploy - Запрос деплоя приложения

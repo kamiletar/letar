@@ -1,6 +1,7 @@
 ---
 name: aprel8008
 description: Воркфлоу разработки приложения aprel8008
+disable-model-invocation: true
 ---
 
 # aprel8008 - Воркфлоу разработки

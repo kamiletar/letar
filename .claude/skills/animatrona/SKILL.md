@@ -1,6 +1,7 @@
 ---
 name: animatrona
 description: Воркфлоу разработки Animatrona — десктоп-приложение (Electron + Next.js) для видео-контента
+disable-model-invocation: true
 ---
 
 # Animatrona - Воркфлоу разработки

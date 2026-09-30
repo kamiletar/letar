@@ -2,6 +2,7 @@
 name: commandments-check
 description: Аудит текущего приложения по «Заповедям студии» — статус-таблица в PLAN.md
 allowed-tools: Read, Grep, Glob, Bash, Edit, Write
+disable-model-invocation: true
 ---
 
 > Параметры берутся из запроса пользователя. В Claude Code маркеры `$ARGUMENTS` и `$1`…`$9` подставляются при вызове навыка.
