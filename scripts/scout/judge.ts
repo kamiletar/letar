@@ -126,3 +126,80 @@ export async function judgeItems(
   }
   return undefined
 }
+
+/** Группа случаев для подсчёта: у каждого — сессия и пути показанных пунктов (первые 5) по порядку */
+export interface JudgeGroupInput {
+  group: string
+  cases: Array<{ sessionId: string; paths: string[] }>
+}
+
+export interface JudgeGroup {
+  group: string
+  cases: number
+  covered: number
+  relevant1: number
+  relevant3: number
+  relevant5: number
+  needed3: number
+  coverage: number
+  agreement: number | null
+  agreementPairs: number
+}
+
+function mean(xs: number[]): number {
+  return xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : 0
+}
+
+/**
+ * Метрики справки по меткам судьи. «По делу@k» — средняя доля пунктов с меткой ≥1 среди первых k
+ * показанных, «нужен@k» — то же для метки 2; считаются по случаям, где размечены все показанные пункты.
+ * Согласие — доля совпадений «≥1» на парах, где есть и метка 9B, и эталонная.
+ */
+export function judgeGroups(
+  groups: JudgeGroupInput[],
+  labels: Map<string, JudgeLabel>,
+  ref: Map<string, JudgeLabel>,
+): JudgeGroup[] {
+  return groups.map(({ group, cases }) => {
+    const rel: Record<1 | 3 | 5, number[]> = { 1: [], 3: [], 5: [] }
+    const need3: number[] = []
+    let covered = 0
+    let agree = 0
+    let pairs = 0
+    for (const c of cases) {
+      const ls = c.paths.map((p) => labels.get(labelKey(c.sessionId, p))?.label)
+      for (const [i, p] of c.paths.entries()) {
+        const r = ref.get(labelKey(c.sessionId, p))
+        const l = ls[i]
+        if (l !== undefined && r) {
+          pairs++
+          agree += (l >= 1) === (r.label >= 1) ? 1 : 0
+        }
+      }
+      if (!c.paths.length || ls.some((l) => l === undefined)) {
+        continue
+      }
+      covered++
+      const top = (k: number, min: number) => {
+        const part = ls.slice(0, k) as number[]
+        return part.filter((l) => l >= min).length / part.length
+      }
+      rel[1].push(top(1, 1))
+      rel[3].push(top(3, 1))
+      rel[5].push(top(5, 1))
+      need3.push(top(3, 2))
+    }
+    return {
+      group,
+      cases: cases.length,
+      covered,
+      relevant1: mean(rel[1]),
+      relevant3: mean(rel[3]),
+      relevant5: mean(rel[5]),
+      needed3: mean(need3),
+      coverage: cases.length ? covered / cases.length : 0,
+      agreement: pairs ? agree / pairs : null,
+      agreementPairs: pairs,
+    }
+  })
+}

@@ -16,7 +16,7 @@ import { splitOf } from './bench'
 import { buildCases, evaluate } from './eval'
 import { abGroup, appendLog, decide, MAX_ATTEMPTS, runScoutHook, scoutQuery } from './hook-core'
 import { indexPath } from './index-store'
-import { judgeItems, loadLabels } from './judge'
+import { judgeGroups, judgeItems, loadLabels } from './judge'
 import { mineSession, normalizeKnowledgePath, parseHumanText, type SessionRecord } from './mine-transcripts'
 import { EMBED_MODEL, loadVectorStore } from './vectors'
 
@@ -400,5 +400,50 @@ describe('judge', () => {
     const started = performance.now()
     expect(await judgeItems('запрос', items, { url, timeoutMs: 500 })).toBeUndefined()
     expect(performance.now() - started).toBeLessThan(2000)
+  })
+})
+
+describe('judgeGroups', () => {
+  const lab = (sessionId: string, path: string, label: 0 | 1 | 2) =>
+    [`${sessionId}\t${path}`, { sessionId, path, label, judge: 'qwen3.5-9b' }] as const
+
+  it('считает по делу, нужен, покрытие и согласие; неразмеченный случай не входит в метрики', () => {
+    const labels = new Map([
+      lab('s1', 'a', 2),
+      lab('s1', 'b', 0),
+      lab('s1', 'c', 1),
+      lab('s2', 'a', 0),
+      // s3: 'b' не размечен
+      lab('s3', 'a', 2),
+    ])
+    const ref = new Map([lab('s1', 'a', 1), lab('s1', 'b', 1), lab('s2', 'a', 0)])
+    const [g] = judgeGroups(
+      [{
+        group: 'все',
+        cases: [
+          { sessionId: 's1', paths: ['a', 'b', 'c'] },
+          { sessionId: 's2', paths: ['a'] },
+          { sessionId: 's3', paths: ['a', 'b'] },
+        ],
+      }],
+      labels,
+      ref,
+    )
+    expect(g.cases).toBe(3)
+    expect(g.covered).toBe(2)
+    expect(g.coverage).toBeCloseTo(2 / 3)
+    // @1: s1 → 1, s2 → 0
+    expect(g.relevant1).toBeCloseTo(0.5)
+    // @3: s1 → 2/3, s2 → 0/1 (справка короче k — делим на показанное)
+    expect(g.relevant3).toBeCloseTo(1 / 3)
+    expect(g.needed3).toBeCloseTo(1 / 6)
+    // пары: s1a (≥1 и ≥1 — да), s1b (0 против 1 — нет), s2a (0 и 0 — да)
+    expect(g.agreementPairs).toBe(3)
+    expect(g.agreement).toBeCloseTo(2 / 3)
+  })
+
+  it('пустая группа не даёт NaN', () => {
+    const [g] = judgeGroups([{ group: 'test', cases: [] }], new Map(), new Map())
+    expect(g).toMatchObject({ cases: 0, coverage: 0, relevant3: 0, agreement: null })
   })
 })

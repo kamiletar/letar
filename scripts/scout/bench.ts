@@ -40,7 +40,16 @@ import { advisableTools, type EvalCase, evaluate, type Metrics } from './eval'
 import { type FormProbe, formsNegatives, scoreProbe } from './forms-eval'
 import { freshIndex, scoutQuery, type ScoutQueryResult } from './hook-core'
 import { findRepoRoot, indexPath } from './index-store'
-import { JUDGE_MODEL, type JudgeItem, judgeItems, type JudgeLabel, labelKey, loadLabels } from './judge'
+import {
+  JUDGE_MODEL,
+  type JudgeGroup,
+  judgeGroups,
+  type JudgeItem,
+  judgeItems,
+  type JudgeLabel,
+  labelKey,
+  loadLabels,
+} from './judge'
 import { scoutDataDir, scoutHome } from './paths'
 import { loadVectorStore } from './vectors'
 
@@ -172,19 +181,6 @@ interface FormsSet {
   complete: number
   patternOk: number
   patternTotal: number
-}
-
-interface JudgeGroup {
-  group: string
-  cases: number
-  covered: number
-  relevant1: number
-  relevant3: number
-  relevant5: number
-  needed3: number
-  coverage: number
-  agreement: number | null
-  agreementPairs: number
 }
 
 /** Пункты справки для судьи: доки и ловушки вперемешку по убыванию очков (стабильно, доки первыми) */
@@ -489,58 +485,20 @@ async function main() {
         newLabels++
       })
     }
-    const mean = (xs: number[]) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : 0)
-    const groupsOf: Array<[string, EvalCase[]]> = [
-      ['dev', judged.filter((c) => splitOf(c.sessionId) === 'dev')],
-      ['test', judged.filter((c) => splitOf(c.sessionId) === 'test')],
-      ['все', judged],
-    ]
-    const out: JudgeGroup[] = []
-    for (const [group, list] of groupsOf) {
-      const rel: Record<1 | 3 | 5, number[]> = { 1: [], 3: [], 5: [] }
-      const need3: number[] = []
-      let covered = 0
-      let agree = 0
-      let pairs = 0
-      for (const c of list) {
-        const items = judgedItems((await run(c.query)).result)
-        const ls = items.map((it) => labels.get(labelKey(c.sessionId, it.path))?.label)
-        for (const [i, it] of items.entries()) {
-          const r = ref.get(labelKey(c.sessionId, it.path))
-          const l = ls[i]
-          if (l !== undefined && r) {
-            pairs++
-            agree += (l >= 1) === (r.label >= 1) ? 1 : 0
-          }
-        }
-        if (!items.length || ls.some((l) => l === undefined)) {
-          continue
-        }
-        covered++
-        const top = (k: number, min: number) => {
-          const part = ls.slice(0, k) as number[]
-          return part.filter((l) => l >= min).length / part.length
-        }
-        rel[1].push(top(1, 1))
-        rel[3].push(top(3, 1))
-        rel[5].push(top(5, 1))
-        need3.push(top(3, 2))
-      }
-      const g: JudgeGroup = {
-        group,
-        cases: list.length,
-        covered,
-        relevant1: mean(rel[1]),
-        relevant3: mean(rel[3]),
-        relevant5: mean(rel[5]),
-        needed3: mean(need3),
-        coverage: list.length ? covered / list.length : 0,
-        agreement: pairs ? agree / pairs : null,
-        agreementPairs: pairs,
-      }
-      out.push(g)
+    const shown = (list: EvalCase[]) =>
+      list.map((c) => ({ sessionId: c.sessionId, paths: judgedItems(cache.get(c.query)!.result).map((it) => it.path) }))
+    const out = judgeGroups(
+      [
+        { group: 'dev', cases: shown(judged.filter((c) => splitOf(c.sessionId) === 'dev')) },
+        { group: 'test', cases: shown(judged.filter((c) => splitOf(c.sessionId) === 'test')) },
+        { group: 'все', cases: shown(judged) },
+      ],
+      labels,
+      ref,
+    )
+    for (const g of out) {
       console.log(
-        `${group.padEnd(5)} n=${String(g.cases).padStart(3)}  по делу@1 ${pct(g.relevant1)}  @3 ${
+        `${g.group.padEnd(5)} n=${String(g.cases).padStart(3)}  по делу@1 ${pct(g.relevant1)}  @3 ${
           pct(g.relevant3)
         }  @5 ${pct(g.relevant5)}  нужен@3 ${pct(g.needed3)}  покрытие ${pct(g.coverage)}  согласие с эталоном ${
           g.agreement === null ? '—' : `${pct(g.agreement)} (${g.agreementPairs} пар)`
