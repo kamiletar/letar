@@ -11,7 +11,7 @@ describe('chakraColorVar', () => {
     ['yellow.500', 'var(--chakra-colors-yellow-500)'],
     ['green.500', 'var(--chakra-colors-green-500)'],
     ['red.500', 'var(--chakra-colors-red-500)'],
-    // многосоставные семантические токены (border.control, bg.panel из CLAUDE.md)
+    // многосоставные семантические токены (border.control, bg.panel из AGENTS.md)
     ['border.control', 'var(--chakra-colors-border-control)'],
     ['bg.panel', 'var(--chakra-colors-bg-panel)'],
     // camelCase-сегмент — из .claude/docs/chakra-icon-as-prop-cleanup-pattern.md
