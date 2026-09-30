@@ -2984,3 +2984,21 @@ WebKit сбрасывает ранее заполненный controlled-инп�
       (Whisper, игры, NVENC, QLoRA); CLM через WSL2, дообучение — только на согласованной синтетике.
 - [ ] Вне окна эксперимента (иначе эффект смешается со скаутом): аудит скилов — 32 из 100
       скилов/команд/агентов не вызывались ни разу за 2 250 сессий; разрезка PLAN на файлы задач.
+
+## §208 (2026-09-30) Плановые файлы из корня перенесены в docs/plans
+
+Посторонний читатель репозитория первым видел ~23 тыс. строк планов в корне. Перенесено (`git mv`):
+`PLAN-INFRA*`, `PLAN-JOURNAL-*`, `PLAN_COMPLETED`, `PLAN_STICKY_CTA`, `PACKAGE_PLAN` → `docs/plans/`,
+`WINDOW_DEBUG` → `docs/notes/`. В корне остались `PLAN.md`, `README*`, `CLAUDE.md`, `DEPLOY.md`.
+
+- Ссылки (абсолютные `/X.md`, относительные, внутри перенесённых файлов) пересчитаны мигратором с
+  dry-run; новых битых md-ссылок 0. Голые упоминания имён (`PLAN-INFRA-4.md §118`) оставлены как есть —
+  имена уникальны и ищутся поиском. Голое `PLAN_COMPLETED.md` не трогали: такой файл есть у каждого приложения.
+- Семейства §NN (`next-section-number.mjs`, `check-section-numbers.mjs`) ищут файлы в корне и в
+  `docs/plans/`, состав «до» берётся из HEAD; scope-guard держит `docs/plans` и `docs/notes` в `docs-root`.
+- ⚠️ Хуки — копии на момент `install.sh`: у агентов со старой установкой scope-guard даст ложный
+  multi-scope на `docs/plans/*` до переустановки (`bash scripts/hooks/install.sh --all-submodules`).
+- [ ] ⚠️ Открытый вопрос: push. Порядок — сначала `apps/studio` (3 коммита впереди origin, один мой:
+      ссылки на `/docs/plans/…`), потом letar. Ждёт одобрения владельца.
+- [ ] Примеры путей в `git-multi-agent-incidents.md` и `git-pathspec-commit-worktree-not-index.md`
+      (`PLAN-INFRA-4.md` как пример) оставлены — это разбор инцидента, не инструкция.
