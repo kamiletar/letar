@@ -15,7 +15,7 @@
 
 > **Технологический стек:** Electron, Next.js 16, Chakra UI v3, FFmpeg + SVT-AV1, SQLite + Prisma, Shaka Player
 >
-> **Документация для разработчиков:** см. [CLAUDE.md](./CLAUDE.md)
+> **Документация для разработчиков:** см. [AGENTS.md](./AGENTS.md)
 
 ---
 
@@ -24,7 +24,7 @@
 | Файл                                   | Описание                             |
 | -------------------------------------- | ------------------------------------ |
 | [README.md](README.md)                 | Обзор проекта, установка, команды    |
-| [CLAUDE.md](CLAUDE.md)                 | Инструкции для Claude (БД, миграции) |
+| [AGENTS.md](AGENTS.md)                 | Инструкции для Claude (БД, миграции) |
 | [PLAN.md](PLAN.md)                     | Текущие задачи, TODO, roadmap        |
 | [PLAN_COMPLETED.md](PLAN_COMPLETED.md) | Завершённые фичи по версиям          |
 | [PLAN_TESTING.md](PLAN_TESTING.md)     | План и статистика тестирования       |
