@@ -60,6 +60,11 @@ for f in "${FILES[@]}"; do
       # разными scope и по-прежнему блокируются: спецкейс docs-root ниже до них не доходит.
       scope="$(echo "$f" | cut -d/ -f1-2)"
       ;;
+    docs/plans/*|docs/notes/*)
+      # Плановые файлы корневого репо (PLAN-INFRA-*, PLAN-JOURNAL-*, PLAN_COMPLETED…) до 2026-09-30
+      # лежали в корне и давали scope docs-root; после переноса в docs/ сохраняем то же поведение.
+      scope="docs-root"
+      ;;
     */*)
       # Прочий вложенный путь (scripts/**, .claude/**, src/** внутри submodule) — scope
       # по первому сегменту.

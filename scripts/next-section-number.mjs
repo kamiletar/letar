@@ -38,11 +38,15 @@ function familyFor(fileBaseName) {
   return FAMILIES.find((f) => f.member.test(fileBaseName)) ?? null
 }
 
+// Семейство живёт в корне (PLAN.md) и в docs/plans/ (PLAN-INFRA-*, PLAN-JOURNAL-*).
+const PLAN_DIRS = ['', 'docs/plans']
+
 function listFamilyFiles(root, family) {
-  return fs
-    .readdirSync(root)
-    .filter((name) => family.member.test(name))
-    .sort()
+  return PLAN_DIRS.flatMap((dir) => {
+    const abs = path.join(root, dir)
+    if (!fs.existsSync(abs)) { return [] }
+    return fs.readdirSync(abs).filter((name) => family.member.test(name)).map((name) => (dir ? `${dir}/${name}` : name))
+  }).sort()
 }
 
 function extractHeaders(text, file) {

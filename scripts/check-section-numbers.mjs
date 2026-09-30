@@ -22,8 +22,7 @@
 // Обход для сознательных случаев (ложное срабатывание, осознанный дубль вида §66):
 //   GIT_ALLOW_SECTION_DUP=1 git commit ...
 
-import fs from 'node:fs'
-import { repoRoot } from './lib/repo-root.mjs'
+import path from 'node:path'
 
 const FAMILIES = [
   { name: 'INFRA', member: /^PLAN-INFRA(-\d+)?\.md$/ },
@@ -33,6 +32,16 @@ const FAMILIES = [
 function gitRun(args) {
   const result = Bun.spawnSync(['git', ...args], { stdout: 'pipe', stderr: 'pipe' })
   return { ok: result.exitCode === 0, text: result.stdout.toString('utf8') }
+}
+
+const PLAN_DIRS = ['.', 'docs/plans']
+
+// Пути членов семейства: в дереве коммита (`HEAD`) или в индексе (ref = null).
+function familyPaths(family, ref) {
+  const { text } = ref ? gitRun(['ls-tree', '-r', '--name-only', ref]) : gitRun(['ls-files'])
+  return text
+    .split('\n')
+    .filter((f) => f && PLAN_DIRS.includes(path.posix.dirname(f)) && family.member.test(path.posix.basename(f)))
 }
 
 function stagedFiles() {
@@ -76,25 +85,22 @@ function main() {
     process.exit(0)
   }
 
-  const root = repoRoot()
   const staged = stagedFiles()
 
-  const stagedRootNames = [...staged].filter((f) => !f.includes('/'))
-  const touchesFamily = stagedRootNames.some((f) => FAMILIES.some((fam) => fam.member.test(f)))
+  // Семейство живёт в корне (PLAN.md) и в docs/plans/ (PLAN-INFRA-*, PLAN-JOURNAL-*).
+  const inFamilyDir = (f) => PLAN_DIRS.includes(path.posix.dirname(f))
+  const touchesFamily = [...staged].some((f) => inFamilyDir(f) && FAMILIES.some((fam) => fam.member.test(path.posix.basename(f))))
   if (!touchesFamily) { process.exit(0) }
 
   let anyBad = false
 
   for (const family of FAMILIES) {
-    const files = fs.readdirSync(root).filter((name) => family.member.test(name))
-
+    // Состав «до» берём из HEAD, «после» — из индекса: коммит с переносом файла (git mv) иначе
+    // выглядел бы как рождение новых дублей.
     const beforeHeaders = []
     const afterHeaders = []
-    for (const file of files) {
-      beforeHeaders.push(...extractHeaders(headBlob(file), file))
-      const afterText = staged.has(file) ? indexBlob(file) : headBlob(file)
-      afterHeaders.push(...extractHeaders(afterText, file))
-    }
+    for (const file of familyPaths(family, 'HEAD')) { beforeHeaders.push(...extractHeaders(headBlob(file), file)) }
+    for (const file of familyPaths(family, null)) { afterHeaders.push(...extractHeaders(indexBlob(file), file)) }
 
     const before = countByNumber(beforeHeaders)
     const after = countByNumber(afterHeaders)
