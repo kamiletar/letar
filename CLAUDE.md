@@ -21,7 +21,7 @@
 - [plan-decomposition-pattern](/.claude/docs/plan-decomposition-pattern.md) когда резать разросшийся `PLAN.md`
 - [tsconfig-presets](/.claude/docs/tsconfig-presets.md) общий пресет Next.js-приложений, `${configDir}`
 - [agent-skills-mirror](/.claude/docs/agent-skills-mirror.md) зеркало `.claude/skills/` для Codex
-- [local-scout](/.claude/docs/local-scout.md) справка агенту по первому сообщению (доки, ловушки, поля форм), хук в тени, гибрид BM25+эмбеддинги; ⚠️ 67% эталона названо в запросе — мерить `нов. R@5`, не R@5
+- [local-scout](/.claude/docs/local-scout.md) справка агенту по первому сообщению (доки, ловушки, поля форм), хук в тени; ⚠️ 67% эталона названо в запросе — мерить `нов. R@5`
 - [nextjs16-agent-guide-files](/.claude/docs/nextjs16-agent-guide-files.md) `next dev` сам пишет `AGENTS.md`
 - [llms-txt-pattern](/.claude/docs/llms-txt-pattern.md) `llms.txt`: статика vs роут, юридические запреты
 - [git-multi-agent-incidents](/.claude/docs/git-multi-agent-incidents.md) ⭐ почему правила git такие строгие; ⚠️ две сессии под одной identity → коммит непарсящегося файла
