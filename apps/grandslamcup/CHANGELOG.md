@@ -232,7 +232,7 @@
 render-prop) сведены к общему `RoleHeader` (`app/_components/header/role-header.tsx`).
 Различия между ролями — `colorPalette` (`brand`/`teal`), заголовки, `navItems`, `rootHref`
 и `rightContent` — вынесены в пропы. Исходные три файла стали тонкими обёртками.
-Живая проверка (dev-сессия admin@grandslamcup.ru): гамбургер открывает Drawer с верным
+Живая проверка (dev-сессия admin@<домен grandslamcup>): гамбургер открывает Drawer с верным
 заголовком и списком пунктов, активный пункт подсвечен `brand.subtle`/`brand.fg`, клик по
 пункту закрывает Drawer и переходит по ссылке.
 

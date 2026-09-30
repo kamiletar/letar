@@ -14,16 +14,16 @@ Self-hosted аналитика для проектов Letar.
 
 ## Подключённые сайты
 
-| Приложение         | Домен                 | Сервер |
-| ------------------ | --------------------- | ------ |
-| premium-rosstil    | premium.rosstil.ru    | s1     |
-| imot               | integrelle.com        | s1     |
-| mandala            | mandala.letar.best    | s1     |
-| kami               | kami.letar.best       | s1     |
-| pravda             | pravda.letar.best     | s1     |
-| animatrona-landing | animatrona.letar.best | s1     |
-| dashboard          | dash.letar.best       | s2     |
-| driving-school     | направа.рф            | s2     |
+| Приложение         | Домен                   | Сервер |
+| ------------------ | ----------------------- | ------ |
+| premium-rosstil    | <домен premium-rosstil> | s1     |
+| imot               | integrelle.com          | s1     |
+| mandala            | mandala.letar.best      | s1     |
+| kami               | kami.letar.best         | s1     |
+| pravda             | pravda.letar.best       | s1     |
+| animatrona-landing | animatrona.letar.best   | s1     |
+| dashboard          | dash.letar.best         | s2     |
+| driving-school     | <домен napravo>         | s2     |
 
 ## Деплой
 

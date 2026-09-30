@@ -65,14 +65,14 @@ EMAIL_UNSUBSCRIBE_URL=https://app.com/unsubscribe
 
 ### Примеры конфигурации по приложениям
 
-| Приложение      | SMTP_FROM_EMAIL              | SMTP_FROM_NAME    |
-| --------------- | ---------------------------- | ----------------- |
-| premium-rosstil | noreply@premium.rosstil.ru   | Premium Rosstil   |
-| driving-school  | noreply@направа.рф           | Направа Автошкола |
-| imot            | noreply@imot.letar.best      | IMOT              |
-| kami            | noreply@kami.letar.best      | Ками              |
-| mandala         | noreply@mandala.letar.best   | Мандала           |
-| dashboard       | noreply@dashboard.letar.best | Dashboard         |
+| Приложение      | SMTP_FROM_EMAIL                 | SMTP_FROM_NAME    |
+| --------------- | ------------------------------- | ----------------- |
+| premium-rosstil | noreply@<домен premium-rosstil> | Premium Rosstil   |
+| driving-school  | noreply@<домен napravo>         | Направа Автошкола |
+| imot            | noreply@imot.letar.best         | IMOT              |
+| kami            | noreply@kami.letar.best         | Ками              |
+| mandala         | noreply@mandala.letar.best      | Мандала           |
+| dashboard       | noreply@dashboard.letar.best    | Dashboard         |
 
 ## API
 

@@ -380,7 +380,7 @@ export async function sendOrderStatusNotification(order: Order) {
   if (!config) { return }
 
   await resend.emails.send({
-    from: 'Premium Rosstil <orders@premium-rosstil.ru>',
+    from: 'Premium Rosstil <orders@<домен premium-rosstil>>',
     to: order.email,
     subject: config.subject,
     react: OrderEmailTemplate({ order, template: config.template }),

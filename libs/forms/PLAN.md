@@ -351,7 +351,7 @@
   не тронуты).
 - **Тесты:** 2 новых в `form-steps.spec.tsx` (блокировка на пустых required-полях, штатный
   переход на валидных) + полный прогон `nx test forms` 853/853, `nx test forms-react` 125/125.
-- **Живая проверка:** domwellbes `/admin/houses/new`, dev-session `admin@domwellbes.ru` — пустой
+- **Живая проверка:** domwellbes `/admin/houses/new`, dev-session `admin@<домен domwellbes>` — пустой
   шаг 1 теперь блокируется сводкой ошибок, валидный переходит на «Классификация» как раньше.
 - **Статус:** ✅ закрыто.
 

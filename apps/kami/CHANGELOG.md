@@ -421,7 +421,7 @@
 
 ### Fixed
 
-- **Портфолио отдавало мёртвые demo-ссылки.** `prisma/seed.ts` — карточки проектов «Premium Rosstil» и «IMOT» указывали `demoUrl` на decommissioned `https://premium.rosstil.ru/` и `https://imot.letar.best` (оба приложения выведены из эксплуатации 2026-07-05). `demoUrl` убран у обеих карточек, описание/технологии оставлены как история портфолио. Найдено при повторном аудите хвостов decommission (`apps/dashboard-agent/PLAN.md`).
+- **Портфолио отдавало мёртвые demo-ссылки.** `prisma/seed.ts` — карточки проектов «Premium Rosstil» и «IMOT» указывали `demoUrl` на decommissioned `https://<домен premium-rosstil>/` и `https://imot.letar.best` (оба приложения выведены из эксплуатации 2026-07-05). `demoUrl` убран у обеих карточек, описание/технологии оставлены как история портфолио. Найдено при повторном аудите хвостов decommission (`apps/dashboard-agent/PLAN.md`).
 
 ## [0.31.1] - 2026-07-12
 

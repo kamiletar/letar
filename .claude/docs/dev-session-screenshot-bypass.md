@@ -41,7 +41,7 @@ nx dev aboi
 # (run_in_background: true)
 
 # 2. Скриншот конкретной страницы
-node .claude/scripts/dev-session-screenshot.mjs aboi 3018 /catalog/gornyj-duh .claude/artifacts/check.png admin@neyroaboi.ru
+node .claude/scripts/dev-session-screenshot.mjs aboi 3018 /catalog/gornyj-duh .claude/artifacts/check.png admin@<домен aboi>
 ```
 
 ## ⚠️ Git Bash на Windows подменяет ведущий `/` в аргументе пути

@@ -787,7 +787,7 @@
 ### Добавлено
 
 - **Миграция данных с Tilda** — итерация 1 (СПб Сезон 1 + Сезон 2)
-  - Краулер `scripts/migrate/crawl.ts`: скачивание HTML страниц с grandslamcup.ru
+  - Краулер `scripts/migrate/crawl.ts`: скачивание HTML страниц с <домен grandslamcup>
   - Экстрактор `scripts/migrate/extract.ts`: парсинг расписания, перекрёстных таблиц, составов команд, результатов С1, индивидуальных зачётов поэтов
   - Seed `scripts/migrate/seed.ts`: загрузка в PostgreSQL через pg pool (raw SQL, идемпотентный)
   - Nx target `migrate:seed` для запуска миграции

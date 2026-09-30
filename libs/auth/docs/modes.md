@@ -25,7 +25,7 @@ export const auth = createAuth({
   mode: 'standalone',
   database: prismaAdapter(prisma as never, { provider: 'postgresql' }),
   baseURL: process.env.BETTER_AUTH_URL ?? 'http://localhost:3019',
-  trustedOrigins: ['https://dsperevod.ru', 'http://localhost:3019'],
+  trustedOrigins: ['https://<домен dsperevod>', 'http://localhost:3019'],
   email: {
     sendVerificationEmail,
     sendPasswordResetEmail,
@@ -210,8 +210,8 @@ import { genericOAuth, magicLink, organization } from 'better-auth/plugins'
 export const auth = createAuth({
   mode: 'standalone',
   database: prismaAdapter(prismaAuth, { provider: 'postgresql' }),
-  baseURL: process.env.NODE_ENV === 'development' ? 'http://localhost:3003' : 'https://xn--80aaah6cnh.xn--p1ai',
-  trustedOrigins: ['https://xn--80aaah6cnh.xn--p1ai', 'https://направа.рф'],
+  baseURL: process.env.NODE_ENV === 'development' ? 'http://localhost:3003' : 'https://<домен napravo>',
+  trustedOrigins: ['https://<домен napravo>', 'https://<домен napravo>'],
 
   email: {
     sendVerificationEmail,

@@ -78,7 +78,7 @@ time_start({ app: "svoichuzhie", description: "<что делаешь, язык�
 
 **Приложение:** svoichuzhie
 **Порт:** 3021
-**Домен prod:** svoichuzhie.ru
+**Домен prod:** <домен svoichuzhie>
 **Домен dev:** svoichuzhie.letar.best
 **Сервер:** s2 (185.28.85.195)
 **Submodule:** kamiletar/letar-private-svoichuzhie

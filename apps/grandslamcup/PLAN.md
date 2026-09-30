@@ -2501,7 +2501,7 @@ chats/
 
 **Кубок Большого Слэма (КБС)** — первый в России командный поэтический турнир в формате poetry-clash, организованный по принципу футбольного чемпионата.
 
-**Текущее состояние:** Лендинг на Tilda (grandslamcup.ru) — статичные HTML-таблицы, текстовое расписание, правила, несколько страниц команд. Результаты матчей ведутся в Google Таблицах.
+**Текущее состояние:** Лендинг на Tilda (<домен grandslamcup>) — статичные HTML-таблицы, текстовое расписание, правила, несколько страниц команд. Результаты матчей ведутся в Google Таблицах.
 
 **Масштаб:**
 
@@ -3112,13 +3112,14 @@ Dev-only endpoint `/api/auth/dev-session` создаёт сессию без OID
 Cookie ставится с `__Secure-` префиксом и атрибутом `Secure`, если `BETTER_AUTH_URL` начинается с
 `https://` (staging/prod) — иначе Better Auth не находит сессию под ожидаемым именем cookie.
 
-**Админ в БД:** `admin@grandslamcup.ru`, roles: {ADMIN, USER}
+**Админ в БД:** `admin@<домен grandslamcup>`, roles: {ADMIN, USER}
 
 **Использование в preview:**
 
 ```javascript
 // После preview_start — навигируем на dev-session endpoint (token — из DEV_SESSION_TOKEN окружения):
-window.location.href = '/api/auth/dev-session?email=admin@grandslamcup.ru&redirect=/admin&token=<DEV_SESSION_TOKEN>'
+window.location.href =
+  '/api/auth/dev-session?email=admin@<домен grandslamcup>&redirect=/admin&token=<DEV_SESSION_TOKEN>'
 // → Создаёт Session в БД, подписывает cookie (HMAC-SHA256, формат better-call), редиректит
 ```
 
@@ -3135,7 +3136,7 @@ factories/create-dev-session-route.ts` (общая логика).
 
 ### Источники данных
 
-1. **Tilda (grandslamcup.ru)** — старый сайт, HTML-парсинг через cheerio
+1. **Tilda (<домен grandslamcup>)** — старый сайт, HTML-парсинг через cheerio
    - Cached HTML: `scripts/migrate/cache/` (gitignored)
    - Парсер: `scripts/migrate/extract.ts`
    - Данные: СПб С1 (45 матчей) + С2 (41 матч), 3 команды с составами, 30 стадионов
@@ -3401,7 +3402,7 @@ model SwissPair {
 | 1  | ~~Карточки: влияют на баллы? Что при красной? 2 жёлтые = красная?~~ ✅ Ответ в правилах Москвы 2.0                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Решён                       |
 | 2  | Есть ли данные поэт-по-поэту за прошлые сезоны (или только итоговые счета)?                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | Организатор                 |
 | 3  | ~~Москва — те же правила? Есть ли отличия?~~ ✅ Получены правила КБС-Москва 2.0, реализована поддержка                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Решён                       |
-| 4  | Домен — оставляем grandslamcup.ru?                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Организатор                 |
+| 4  | Домен — оставляем <домен grandslamcup>?                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | Организатор                 |
 | 5  | Нужна ли регистрация зрителей (для будущих фич — донаты, подписки)?                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Организатор                 |
 | 6  | Генератор round-robin расписания — нужен, или организатор составляет вручную?                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Организатор                 |
 | 7  | Может ли поэт играть в обоих таймах? На Tilda есть такие данные (Стрельникова — оба тайма одного матча)                                                                                                                                                                                                                                                                                                                                                                                                                                                  | Организатор                 |

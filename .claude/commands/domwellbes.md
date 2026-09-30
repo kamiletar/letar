@@ -102,7 +102,7 @@ time_start({ app: "domwellbes", description: "<что делаешь, языко
 
 **Приложение:** domwellbes
 **Порт:** 3025
-**Домен prod:** domwellbes.ru
+**Домен prod:** <домен domwellbes>
 **Домен dev:** domwellbes.letar.best
 **Сервер:** s2 (185.28.85.195)
 **Submodule:** kamiletar/letar-private-domwellbes

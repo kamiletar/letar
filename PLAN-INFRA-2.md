@@ -317,7 +317,7 @@ premium-rosstil», то есть привязан к приложению, **у�
       маленький магазин заранее). Ни одно приложение не названо по имени.
 - [x] `skill ecommerce-patterns` — убрана привязка к удалённому `premium-rosstil` из frontmatter
       `description` и из тела; добавлена ссылка на новый док. `reference/order-workflow.md`
-      внутри skill'а всё ещё содержит один старый email-пример на домене `premium-rosstil.ru` —
+      внутри skill'а всё ещё содержит один старый email-пример на домене `<домен premium-rosstil>` —
       не тронут, вне скоупа этого захода (тот же класс техдолга, что и остальные ~30 файлов из
       `project_premium_rosstil_imot_removed`).
 - [x] Ссылка в `CLAUDE.md` добавлена.
@@ -1030,9 +1030,9 @@ staging-деплоем. `aboi`/`archetest` уже были в порядке н�
    `form-example` с полностью пустым окружением (см. ниже).
 
 Отдельно у `dsperevod` вскрылась независимая ошибка: гейт использовал `BASE_URL =
-'https://dsperevod.letar.best'`, а реальный боевой домен по Traefik-лейблу — `dsperevod.ru`
+'https://dsperevod.letar.best'`, а реальный боевой домен по Traefik-лейблу — `<домен dsperevod>`
 (letar.best-домен не существует в проде этого приложения). С неверной константой гейт
-сравнивал бы staging/прод неправильно даже при правильном wiring — исправлено на `dsperevod.ru`.
+сравнивал бы staging/прод неправильно даже при правильном wiring — исправлено на `<домен dsperevod>`.
 
 **Починено:** все 10 переведены на `@letar/seo` (`isProductionDomain()`), `NEXT_PUBLIC_BASE_URL`
 проброшена в `docker-compose.staging.yml`/`docker-compose.production.yml` (кроме `mandala`/
@@ -3072,8 +3072,8 @@ M2), проверить фактическую историю инциденто
    независим от wildcard и от общего переезда, поэтому это самый дешёвый и обратимый первый шаг.
    Список доменов снят с **сервера** (`docker ps -a` + текущие proxy host'ы NPM), не из
    документации — тот же урок, что уже трижды сработал на s3 (§48 M2). 6 доменов вне зоны:
-   `xn--80aaah6cnh.xn--p1ai` (направа.рф/driving-school), `neyroaboi.ru`+`www` (aboi),
-   `dsperevod.ru`+`www`, `svoichuzhie.ru`, `aprel8008.ru`, `domwellbes.ru`+`www`.
+   `<домен napravo>` (<домен napravo>/driving-school), `<домен aboi>`+`www` (aboi),
+   `<домен dsperevod>`+`www`, `<домен svoichuzhie>`, `<домен aprel8008>`, `<домен domwellbes>`+`www`.
 
    Роутеры заведены (`infra/traefik/dynamic/s2/own-domains.yml`, коммит `a48c700b`) —
    file-провайдер, статический адрес по network alias (`<app>-app`, НЕ пронумерованный
@@ -3117,31 +3117,31 @@ M2), проверить фактическую историю инциденто
    отдельно). CNAME-записи, которые владельцу нужно добавить у регистраторов (шаг не
    автоматизируется — 6 разных регистраторов):
 
-   | Домен                                | `_acme-challenge.<домен>` CNAME →                      |
-   | ------------------------------------ | ------------------------------------------------------ |
-   | xn--80aaah6cnh.xn--p1ai (направа.рф) | `3bce44ee-bdc9-40a3-a2c9-a47baf74b3a3.acme.letar.best` |
-   | aprel8008.ru                         | `8534355f-76b0-4c55-ae0a-d094429a95a1.acme.letar.best` |
-   | svoichuzhie.ru                       | `44a1568c-13b0-4b66-b586-b9168a8caefa.acme.letar.best` |
-   | domwellbes.ru                        | `b190f3a9-4eb2-44d3-b25f-d92936f6b20c.acme.letar.best` |
-   | www.domwellbes.ru                    | `8ab12461-96b1-4482-b871-98c58141b450.acme.letar.best` |
-   | dsperevod.ru                         | `3e2a9424-d75c-4c57-a2cc-8540166ce9c0.acme.letar.best` |
-   | www.dsperevod.ru                     | `9316e299-5f5a-44ca-bbc9-145e13b3df7f.acme.letar.best` |
-   | neyroaboi.ru                         | `782f4d89-bcc1-402e-968d-5c46af5d20ab.acme.letar.best` |
-   | www.neyroaboi.ru                     | `e5fb479c-5221-4087-87be-10230bd2e0f9.acme.letar.best` |
+   | Домен                             | `_acme-challenge.<домен>` CNAME →                      |
+   | --------------------------------- | ------------------------------------------------------ |
+   | <домен napravo> (<домен napravo>) | `3bce44ee-bdc9-40a3-a2c9-a47baf74b3a3.acme.letar.best` |
+   | <домен aprel8008>                 | `8534355f-76b0-4c55-ae0a-d094429a95a1.acme.letar.best` |
+   | <домен svoichuzhie>               | `44a1568c-13b0-4b66-b586-b9168a8caefa.acme.letar.best` |
+   | <домен domwellbes>                | `b190f3a9-4eb2-44d3-b25f-d92936f6b20c.acme.letar.best` |
+   | <домен domwellbes>                | `8ab12461-96b1-4482-b871-98c58141b450.acme.letar.best` |
+   | <домен dsperevod>                 | `3e2a9424-d75c-4c57-a2cc-8540166ce9c0.acme.letar.best` |
+   | <домен dsperevod>                 | `9316e299-5f5a-44ca-bbc9-145e13b3df7f.acme.letar.best` |
+   | <домен aboi>                      | `782f4d89-bcc1-402e-968d-5c46af5d20ab.acme.letar.best` |
+   | <домен aboi>                      | `e5fb479c-5221-4087-87be-10230bd2e0f9.acme.letar.best` |
 
    После добавления CNAME Traefik сам подхватит выпуск сертификатов на следующей проверке —
    отдельного деплоя не требуется, если не нужно форсировать раньше renewal-цикла.
 
-   ✅ **5 из 6 доменов готовы (2026-08-25):** владелец добавил CNAME для направа.рф,
-   `aprel8008.ru`, `svoichuzhie.ru`, `domwellbes.ru`+`www`, `neyroaboi.ru`+`www` — deploy-agent-dev
+   ✅ **5 из 6 доменов готовы (2026-08-25):** владелец добавил CNAME для <домен napravo>,
+   `<домен aprel8008>`, `<домен svoichuzhie>`, `<домен domwellbes>`+`www`, `<домен aboi>`+`www` — deploy-agent-dev
    подтвердил пропагацию (`dig`) и получение сертификата в логе Traefik (`Server responded with a
    certificate`) на каждом из 7 CNAME. NPM и боевой трафик всё это время не тронуты — роутеры
    существуют, DNS всё ещё указывает на NPM, сертификат просто готов к моменту реального
    переключения (шаг 5/6).
 
-   ✅ **6 из 6 доменов готовы (2026-08-27):** доступ к регистратору `dsperevod.ru` появился раньше,
+   ✅ **6 из 6 доменов готовы (2026-08-27):** доступ к регистратору `<домен dsperevod>` появился раньше,
    чем ожидалось (решение владельца 2026-08-25 было «не форсировать», но не «никогда») — владелец
-   добавил оставшиеся 2 CNAME (`_acme-challenge.dsperevod.ru`, `_acme-challenge.www.dsperevod.ru`).
+   добавил оставшиеся 2 CNAME (`_<домен dsperevod>`, `_<домен dsperevod>`).
    deploy-agent-dev подтвердил публикацию на авторитетном `dns1.yandex.net` и получение
    сертификата (`Server responded with a certificate`, лог Traefik). Cutover NPM→Traefik выполнен
    в тот же день, см. итог в §48 M3 ниже.
@@ -3382,8 +3382,8 @@ NPM → `docker compose -f docker-compose.s2.yml up -d` Traefik → сквозн
 - **21/21 приложение** с `letar.rollout: 'true'` несёт Traefik docker-provider роутер.
 - **Cutover NPM→Traefik выполнен для всех доменов**: 10 `*.letar.best` (включая
   `archetest.letar.best`, разблокирован после фикса `StickyActionBar` zIndex, см. ниже) + 6
-  коммерческих доменов вне зоны letar.best через DNS-01/acme-dns (`xn--80aaah6cnh.xn--p1ai`,
-  `neyroaboi.ru`+www, `svoichuzhie.ru`, `aprel8008.ru`, `domwellbes.ru`+www, `dsperevod.ru`+www —
+  коммерческих доменов вне зоны letar.best через DNS-01/acme-dns (`<домен napravo>`,
+  `<домен aboi>`+www, `<домен svoichuzhie>`, `<домен aprel8008>`, `<домен domwellbes>`+www, `<домен dsperevod>`+www —
   последний, был отложен по недоступности регистратора, снят 2026-08-27 после появления доступа).
 - **archetest** был заблокирован собственным hard e2e-gate (3/21 тестов, firefox/webkit,
   `express.spec.ts`) — root cause: `StickyActionBar` (`libs/ui`) поднимается над `CookieBanner`

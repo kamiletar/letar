@@ -410,8 +410,8 @@ export default function RootLayout({ children }) {
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: 'Premium Rosstil',
-    url: 'https://premium-rosstil.ru',
-    logo: 'https://premium-rosstil.ru/logo.png',
+    url: 'https://<домен premium-rosstil>',
+    logo: 'https://<домен premium-rosstil>/logo.png',
     contactPoint: {
       '@type': 'ContactPoint',
       telephone: '+7-999-123-4567',

@@ -38,7 +38,7 @@ kami.letar.best.              TXT   "v=spf1 a:mail.letar.best ~all"
 default._domainkey.kami.letar.best.  TXT   "v=DKIM1; k=rsa; p=MIIBIjAN..."
 ```
 
-## направа.рф
+## <домен napravo>
 
 | Тип | Имя                 | Значение                                              |
 | --- | ------------------- | ----------------------------------------------------- |
@@ -46,12 +46,12 @@ default._domainkey.kami.letar.best.  TXT   "v=DKIM1; k=rsa; p=MIIBIjAN..."
 | TXT | default.\_domainkey | `v=DKIM1; k=rsa; p=<КЛЮЧ_naprava.rf>`                 |
 | TXT | \_dmarc             | `v=DMARC1; p=quarantine; rua=mailto:admin@letar.best` |
 
-## premium.rosstil.ru
+## <домен premium-rosstil>
 
 | Тип | Имя                 | Значение                                              |
 | --- | ------------------- | ----------------------------------------------------- |
 | TXT | @                   | `v=spf1 a:mail.letar.best ~all`                       |
-| TXT | default.\_domainkey | `v=DKIM1; k=rsa; p=<КЛЮЧ_premium.rosstil.ru>`         |
+| TXT | default.\_domainkey | `v=DKIM1; k=rsa; p=<КЛЮЧ_<домен premium-rosstil>>`    |
 | TXT | \_dmarc             | `v=DMARC1; p=quarantine; rua=mailto:admin@letar.best` |
 
 ## Получение DKIM ключей
@@ -60,11 +60,11 @@ default._domainkey.kami.letar.best.  TXT   "v=DKIM1; k=rsa; p=MIIBIjAN..."
 # letar.best и все поддомены
 ssh root@mail.letar.best "cat /opt/maddy/data/dkim_keys/letar.best_default.dns"
 
-# направа.рф (punycode: xn--80aaah6cnh.xn--p1ai)
-ssh root@mail.letar.best "cat /opt/maddy/data/dkim_keys/xn--80aaah6cnh.xn--p1ai_default.dns"
+# <домен napravo> (punycode: <домен napravo>)
+ssh root@mail.letar.best "cat /opt/maddy/data/dkim_keys/<домен napravo>_default.dns"
 
-# premium.rosstil.ru
-ssh root@mail.letar.best "cat /opt/maddy/data/dkim_keys/premium.rosstil.ru_default.dns"
+# <домен premium-rosstil>
+ssh root@mail.letar.best "cat /opt/maddy/data/dkim_keys/<домен premium-rosstil>_default.dns"
 ```
 
 ## Проверка DNS
@@ -124,7 +124,7 @@ rua=mailto:admin@...      # Куда слать отчёты
 - `quarantine` — помечать как спам
 - `reject` — отклонять
 
-## svoichuzhie.ru
+## <домен svoichuzhie>
 
 | Тип | Имя                 | Значение                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | --- | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

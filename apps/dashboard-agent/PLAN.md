@@ -72,7 +72,7 @@ Maddy `creds create` и `imap-acct create` — два независимых ш�
 общей `email-canary-check` (технический ящик `canary@letar.best`), эта шлёт через РЕАЛЬНЫЙ
 SMTP-аккаунт приложения (`getAppSmtpConfig('domwellbes')` — новая функция в `app-secrets.ts`,
 читает уже смонтированный `/secrets/domwellbes.env`) — так проверяется именно то, что может
-сломаться у самого приложения (SMTP-реквизиты, DKIM домена `domwellbes.ru`), а не общая
+сломаться у самого приложения (SMTP-реквизиты, DKIM домена `<домен domwellbes>`), а не общая
 инфраструктура Maddy. IMAP-проверка переиспользует `waitForCanaryMessage` (экспортирован из
 `email-canary.ts`). Секрет — `DOMWELLBES_EMAIL_CANARY_IMAP_PASSWORD` в
 `apps/dashboard-agent/.env.docker.enc` (пароль служебного ящика, не SMTP domwellbes — тот уже

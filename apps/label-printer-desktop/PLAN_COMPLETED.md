@@ -722,7 +722,7 @@ export function LabelTemplate({ product, dataMatrixBase64, gtinBarcodeBase64 }: 
       {/* === ТЕХНИЧЕСКАЯ ИНФОРМАЦИЯ === */}
       <div style={{ position: 'absolute', bottom: 10, left: 15, fontSize: 10 }}>
         <div>ТР ТС 017/2011. ЕАЭС RU Д-RU.РА04.В.84763/24</div>
-        <div>ИП Аксянова Е.Ю. ИНН 682701271521 rosstil.ru</div>
+        <div><реквизиты продавца></div>
       </div>
 
       {/* === DATAMATRIX === */}

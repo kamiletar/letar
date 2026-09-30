@@ -37,13 +37,13 @@ relay.
 ## Актуальный конфиг (`data/maddy.conf`)
 
 Проверяй `$(local_domains)` на сервере — список расширяется по мере добавления приложений/доменов
-(например `svoichuzhie.ru` добавлен позже остальных).
+(например `<домен svoichuzhie>` добавлен позже остальных).
 
 ```
 $(hostname) = mail.letar.best
 $(primary_domain) = letar.best
-$(local_domains) = $(primary_domain) svoichuzhie.ru kami.letar.best imot.letar.best animatrona.letar.best mandala.letar.best dashboard.letar.best xn--80aaah6cnh.xn--p1ai premium.rosstil.ru
-# xn--80aaah6cnh.xn--p1ai = направа.рф (punycode)
+$(local_domains) = $(primary_domain) <домен svoichuzhie> kami.letar.best imot.letar.best animatrona.letar.best mandala.letar.best dashboard.letar.best <домен napravo> <домен premium-rosstil>
+# <домен napravo> = <домен napravo> (punycode)
 
 # TLS — статичный сертификат (не acme loader)
 tls file /data/certs/fullchain.pem /data/certs/privkey.pem
@@ -200,13 +200,13 @@ target.queue remote_queue {
 
 ```
 admin@letar.best: admin@letar.best
-noreply@svoichuzhie.ru: noreply@svoichuzhie.ru
-author@svoichuzhie.ru: author@svoichuzhie.ru, booking@svoichuzhie.ru, denis@svoichuzhie.ru, agent@svoichuzhie.ru, director@svoichuzhie.ru, master@svoichuzhie.ru, manager@svoichuzhie.ru, assistant@svoichuzhie.ru, curator@svoichuzhie.ru, consultant@svoichuzhie.ru, coordinator@svoichuzhie.ru
+noreply@<домен svoichuzhie>: noreply@<домен svoichuzhie>
+author@<домен svoichuzhie>: author@<домен svoichuzhie>, booking@<домен svoichuzhie>, denis@<домен svoichuzhie>, agent@<домен svoichuzhie>, director@<домен svoichuzhie>, master@<домен svoichuzhie>, manager@<домен svoichuzhie>, assistant@<домен svoichuzhie>, curator@<домен svoichuzhie>, consultant@<домен svoichuzhie>, coordinator@<домен svoichuzhie>
 ```
 
-Пример `author@svoichuzhie.ru` — паттерн «один логин, несколько ролевых имён в своём домене»:
+Пример `author@<домен svoichuzhie>` — паттерн «один логин, несколько ролевых имён в своём домене»:
 приложение шлёт письма от лица разных ролей (`booking@`, `denis@`, `director@`, ...), но
-авторизуется одним SMTP-аккаунтом `author@svoichuzhie.ru`. Тот же паттерн используется в паре
+авторизуется одним SMTP-аккаунтом `author@<домен svoichuzhie>`. Тот же паттерн используется в паре
 с `aliases` (см. ниже) для симметричного приёма на эти же адреса.
 
 ## `/data/aliases` — форвард входящих (replace_rcpt + reroute)
@@ -221,8 +221,8 @@ author@svoichuzhie.ru: author@svoichuzhie.ru, booking@svoichuzhie.ru, denis@svoi
 kami@letar.best: kami@letar.best, letarkami@gmail.com
 kami@kami.letar.best: kami@letar.best, letarkami@gmail.com
 admin@letar.best: admin@letar.best, letarkami@gmail.com
-booking@svoichuzhie.ru: author@svoichuzhie.ru
-denis@svoichuzhie.ru: author@svoichuzhie.ru
+booking@<домен svoichuzhie>: author@<домен svoichuzhie>
+denis@<домен svoichuzhie>: author@<домен svoichuzhie>
 ```
 
 Два реальных паттерна использования:
@@ -231,7 +231,7 @@ denis@svoichuzhie.ru: author@svoichuzhie.ru
    почта на рабочий адрес дублируется в личный gmail — обычный способ читать корпоративную почту
    без отдельного почтового клиента для IMAP.
 2. **Схлопывание ролевых адресов в один mailbox** (`booking@`/`denis@`/`director@`/... →
-   `author@svoichuzhie.ru`): зеркало записи в `sender_map.txt` — приложение и отправляет, и
+   `author@<домен svoichuzhie>`): зеркало записи в `sender_map.txt` — приложение и отправляет, и
    получает от лица нескольких ролевых имён, но реально всё падает в один ящик `author@`.
 
 При добавлении нового домена с таким паттерном — заводить пару записей сразу в обоих файлах

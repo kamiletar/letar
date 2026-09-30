@@ -258,7 +258,7 @@ render-prop для закрытия по клику на пункт, одина�
 `navItems`, `rootHref`, `rightContent`. Три исходных файла стали тонкими обёртками.
 
 `nx run-many -t format/lint/typecheck:tsgo --projects=grandslamcup` — зелёные (лint-warnings
-дочерние, не связаны с изменением). Живая проверка через dev-сессию `admin@grandslamcup.ru`:
+дочерние, не связаны с изменением). Живая проверка через dev-сессию `admin@<домен grandslamcup>`:
 гамбургер открывает Drawer с верным заголовком и списком пунктов, активный пункт подсвечен
 `brand.subtle`/`brand.fg`, клик по пункту закрывает Drawer и переходит по ссылке (Browser pane
 была скрыта — проверка через DOM/`javascript_tool`, не скриншот). Coach/poet живым кликом не
@@ -489,12 +489,12 @@ staging-e2e приложения (§18.6 roadmap) не наступали на �
 ## Разбор e2e-провалов и повторный прогон (§18 Сессия D продолжение, 2026-07-11)
 
 Настоящая причина 3/28: `anonymize-staging-db.ts` анонимизировал служебный e2e-fixture
-`admin@grandslamcup.ru` (на нём держится `global-setup.ts` через `/api/auth/dev-session`) —
+`admin@<домен grandslamcup>` (на нём держится `global-setup.ts` через `/api/auth/dev-session`) —
 роут не находил юзера с этим email и создавал нового несвязанного admin'а без
 `CityOrganizer`/`Player`-связей, откуда каскад провалов по всем admin-зависимым тестам.
 Не отсутствие данных о сезоне.
 
-- ✅ `admin@grandslamcup.ru` исключён из анонимизации (`WHERE email != ...`).
+- ✅ `admin@<домен grandslamcup>` исключён из анонимизации (`WHERE email != ...`).
 - ✅ Alt-баг подтверждён по логу реального прогона (ровно 2 элемента: header+hero на `/`, оба
   легитимны для доступности) — тест `01-public.spec.ts` теперь скоупит через `page.locator('header')`.
 - ✅ `01-public.spec.ts` обновлён под мультигород: `/` — city-selector без меню
@@ -893,7 +893,7 @@ src/app/(public)/matches/[id]/page.tsx (обновлён)
 
 ### Реализовано
 
-- Краулер + экстрактор HTML с grandslamcup.ru (cheerio)
+- Краулер + экстрактор HTML с <домен grandslamcup> (cheerio)
 - Seed v1: 1 город, 30 стадионов, 2 сезона, 23 команды, 83 матча
 
 ## v1.5.0 — Миграция из Telegram (2026-04-03)
@@ -1698,7 +1698,7 @@ apps/grandslamcup/
       живой прогон end-to-end (нашёл и починил баг раннера в dashboard-agent, не в grandslamcup)
     - ~~⚠️ Гипотеза «нет активного сезона» (3/28 passed)~~ ❌ **не подтвердилась** — настоящая
       причина: `anonymize-staging-db.ts` анонимизировал служебный e2e-fixture
-      `admin@grandslamcup.ru`, ломая весь admin-пласт тестов. ✅ Исправлено — email исключён из
+      `admin@<домен grandslamcup>`, ломая весь admin-пласт тестов. ✅ Исправлено — email исключён из
       анонимизации.
     - ✅ **Alt-баг подтверждён и исправлен** — `getByAltText('Grand Slam Cup')` резолвился в
       header+hero на `/` (оба легитимны для доступности), тест теперь скоупит через

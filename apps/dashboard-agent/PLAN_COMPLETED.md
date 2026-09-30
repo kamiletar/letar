@@ -1924,7 +1924,7 @@ docker-compose.yml` держал `imot-network` с комментарием «NP
 по всему дереву:
 
 - 🔴 **`apps/kami/prisma/seed.ts`** — реальный битый UX, не косметика: портфолио kami отдавало
-  `demoUrl` на мёртвые `https://premium.rosstil.ru/` и `https://imot.letar.best`. `demoUrl` убран у
+  `demoUrl` на мёртвые `https://<домен premium-rosstil>/` и `https://imot.letar.best`. `demoUrl` убран у
   обеих карточек (описание/технологии оставлены как история портфолио). Seed idempotent
   (`deleteMany`+`createMany`), но re-seed прод-БД kami не выполнялся — отдельное решение владельца.
 - `ecosystem.config.js` (мёртвый PM2-конфиг `start premium-rosstil`, не референсится нигде — вытеснен
