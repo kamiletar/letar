@@ -1663,6 +1663,10 @@
         "ioredis": "^6.0.0",
       },
     },
+    "libs/scout": {
+      "name": "@letar/scout",
+      "version": "0.1.0",
+    },
     "libs/seed-utils": {
       "name": "@letar/seed-utils",
       "version": "0.1.0",
@@ -2936,6 +2940,8 @@
     "@letar/query-provider": ["@letar/query-provider@workspace:libs/query-provider"],
 
     "@letar/redis-client": ["@letar/redis-client@workspace:libs/redis-client"],
+
+    "@letar/scout": ["@letar/scout@workspace:libs/scout"],
 
     "@letar/seed-utils": ["@letar/seed-utils@workspace:libs/seed-utils"],
 
