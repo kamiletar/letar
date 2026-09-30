@@ -33,26 +33,20 @@ export function sourcesMtime(root: string): number {
       latest = Math.max(latest, statSync(path).mtimeMs)
     }
   }
-  touch(join(root, 'CLAUDE.md'))
+  touch(join(root, 'AGENTS.md'))
   // Справка по формам: README и реестр паттернов form-mcp — отдельными файлами, доки — каталогом
   touch(join(root, 'libs/forms/README.md'))
   touch(join(root, 'libs/form-mcp/src/data/pattern-registry.ts'))
-  for (const dir of ['.claude/docs', '.claude/rules', '.claude/commands', '.claude/agents', 'libs/forms/docs']) {
+  for (const dir of ['.claude/docs', '.claude/rules', '.claude/agents', 'libs/forms/docs']) {
     const full = join(root, dir)
     if (existsSync(full)) {
       touch(full)
       for (const entry of readdirSync(full, { withFileTypes: true })) {
         touch(join(full, entry.name))
-        // Команды лежат ещё и в подкаталогах первого уровня (`/audit:security-check`)
-        if (dir === '.claude/commands' && entry.isDirectory()) {
-          for (const nested of readdirSync(join(full, entry.name))) {
-            touch(join(full, entry.name, nested))
-          }
-        }
       }
     }
   }
-  const skills = join(root, '.claude/skills')
+  const skills = join(root, '.agents/skills')
   if (existsSync(skills)) {
     touch(skills)
     for (const name of readdirSync(skills)) {

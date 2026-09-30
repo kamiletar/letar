@@ -14,8 +14,8 @@
 #                                   ТОЛЬКО если в коммите есть bun.lock/package.json
 #   - pre-commit-public-domains.sh — домены и ИНН коммерческих приложений в публичных файлах
 #   - pre-commit-docs-index.sh   — индекс документации (каждый .claude/docs/*.md упомянут и в
-#                                   CLAUDE.md, и в INDEX.md; ссылки живы), запускается ТОЛЬКО
-#                                   если в коммите есть .claude/docs/*.md или CLAUDE.md;
+#                                   AGENTS.md, и в INDEX.md; ссылки живы), запускается ТОЛЬКО
+#                                   если в коммите есть .claude/docs/*.md или AGENTS.md;
 #                                   проверяется ИНДЕКС (только в корне letar)
 #   - pre-commit-schema-migration-check.sh — блокирует commit schema.zmodel со структурным
 #                                   изменением (новое/изменённое поле, @@unique/@@index/...)

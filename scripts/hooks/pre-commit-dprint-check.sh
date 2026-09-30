@@ -135,7 +135,7 @@ if [[ $FAILED -ne 0 ]]; then
   echo ""
   echo "⛔ BLOCKED: staged-файлы не соответствуют dprint.json — похоже, кто-то (или что-то)"
   echo "   отформатировал их не тем форматтером (частый случай: голый \`nx format\`, который"
-  echo "   запускает Prettier вместо dprint — см. CLAUDE.md)."
+  echo "   запускает Prettier вместо dprint — см. AGENTS.md)."
   echo ""
   echo "   Почини командой:"
   echo "     nx run-many -t format --projects=<твой проект>"

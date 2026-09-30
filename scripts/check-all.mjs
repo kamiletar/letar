@@ -420,13 +420,22 @@ const CHECKS = [
     doc: '.claude/docs/theme-hardcode-gate-coverage.md',
   },
   {
+    id: 'agent-skills-mirror',
+    group: 'docs',
+    title: 'навыки Claude синхронны с общим каталогом',
+    run: ['bun', ['scripts/sync-agent-skills.ts', '--check']],
+    severity: 'gate',
+    ci: 'full',
+    doc: '.claude/docs/agent-skills-mirror.md',
+  },
+  {
     id: 'docs-index-integrity',
     group: 'docs',
-    title: 'двухуровневый индекс документации (CLAUDE.md ↔ .claude/docs/INDEX.md) не разошёлся',
+    title: 'единый индекс документации содержит все ссылки и живые файлы',
     run: ['bun', ['scripts/check-docs-index-integrity.mjs']],
     // gate: правило «новый док → две записи» держалось только на дисциплине — и
-    // именно так короткая карта в CLAUDE.md разрослась до 912 строк из 1120 (81%
-    // файла) до разделения на два уровня 2026-09-16. CLAUDE.md и .claude/docs/
+    // именно так короткая карта в AGENTS.md разрослась до 912 строк из 1120 (81%
+    // файла) до разделения на два уровня 2026-09-16. AGENTS.md и .claude/docs/
     // целиком публичные, поэтому в CI видны без изъятий (в отличие от проверок,
     // которым нужны приватные submodule) — покрытие полное всегда.
     // Та же проверка стоит и на коммит-пути — scripts/hooks/pre-commit-docs-index.sh, но в
