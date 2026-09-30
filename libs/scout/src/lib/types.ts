@@ -55,7 +55,7 @@ export interface IndexedCard extends Omit<Card, 'fields'> {
  * 5 — после миграции инструкций: источник команд (`.claude/commands`) удалён, скилы только из
  *     `.agents/skills`, `scope` у скилов приложений, служебных и `disable-model-invocation`.
  */
-export const INDEX_VERSION = 5
+export const INDEX_VERSION = 6
 
 export interface ScoutIndex {
   version: typeof INDEX_VERSION
