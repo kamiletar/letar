@@ -70,48 +70,14 @@ GET  /api/database/backups?db=driving-school   — бэкапы конкретн
 
 ---
 
-## Бэкапы Nginx Proxy Manager
+## Бэкапы Nginx Proxy Manager — сняты (2026-09-30)
 
-### Механизм
-
-```
-dashboard-agent
-  → tar -czf nginx_<type>_<timestamp>.tar.gz \
-      /home/deploy/letar/infra/nginx-proxy-manager/data/ \
-      /home/deploy/letar/infra/nginx-proxy-manager/letsencrypt/
-  → /home/deploy/letar/backups/nginx_<type>_<timestamp>.tar.gz
-```
-
-### Содержимое архива
-
-| Директория     | Содержимое                                          |
-| -------------- | --------------------------------------------------- |
-| `data/`        | SQLite база NPM (proxy hosts, users, SSL настройки) |
-| `data/nginx/`  | Сгенерированные nginx конфиги                       |
-| `letsencrypt/` | SSL сертификаты Let's Encrypt                       |
-
-### Формат имени файла
-
-```
-nginx_<type>_<YYYY-MM-DDTHH-MM-SS>.tar.gz
-
-nginx_auto_2026-03-01T03-00-00.tar.gz
-nginx_manual_2026-03-01T10-45-00.tar.gz
-```
-
-### API (в dashboard-agent)
-
-```
-POST /api/nginx/backup    — создать бэкап NPM
-GET  /api/nginx/backups   — список бэкапов NPM
-```
-
-### Cron (автоматический)
-
-- **S1**: задача `nginx-backup` — 3:00 ежедневно
-- **S2**: задача `nginx-backup-s2` — 3:00 ежедневно
-
-Задача `nginx-backup-s2` имеет поле `server: 's2'` — запускается только на dashboard-agent с `SERVER_NAME=s2.letar.best`.
+NPM убран с s2 и s3 (боевой прокси — Traefik с 2026-08-31), поэтому задача `nginx-backup-s2`,
+маршрут `/api/nginx/backup|backups` и `nginx-backup.ts` удалены из dashboard-agent; задача
+снимается с живого `cron-jobs.json` через `RETIRED_JOB_IDS`. Старые архивы `nginx_*.tar.gz` в
+`/home/deploy/letar/backups/` — история, новых не будет. NPM остался только на mail-сервере
+(`tg-proxy`), у него свой бэкап `/opt/npm-backup.sh` — см.
+[deployment.md](/.claude/docs/deployment.md); переезд оттуда с NPM — в `PLAN.md`.
 
 ---
 
@@ -125,26 +91,11 @@ GET  /api/nginx/backups   — список бэкапов NPM
 gunzip -c backup.sql.gz | docker exec -i <pg-container> psql -U <user> -d <db>
 ```
 
-### Nginx Proxy Manager
-
-```bash
-# 1. Остановить NPM
-cd /home/deploy/letar/infra/nginx-proxy-manager
-docker compose down
-
-# 2. Распаковать бэкап (перезапишет data/ и letsencrypt/)
-tar -xzf /home/deploy/letar/backups/nginx_auto_TIMESTAMP.tar.gz -C /
-
-# 3. Запустить NPM
-docker compose up -d
-```
-
 ---
 
 ## Хранение и ротация
 
 - Все бэкапы: `/home/deploy/letar/backups/`
-- Ротация nginx бэкапов: оставляются последние 7 (`nginx-backup.ts` в агенте)
 - Ротация DB бэкапов: ручная (через Dashboard UI или скрипт)
 - Смонтировано в docker-compose агента через `WORKSPACE_PATH`
 
