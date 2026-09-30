@@ -37,12 +37,12 @@ relay.
 ## Актуальный конфиг (`data/maddy.conf`)
 
 Проверяй `$(local_domains)` на сервере — список расширяется по мере добавления приложений/доменов
-(например `<домен svoichuzhie>` добавлен позже остальных).
+(например `<домен клиента>` добавлен позже остальных).
 
 ```
 $(hostname) = mail.letar.best
 $(primary_domain) = letar.best
-$(local_domains) = $(primary_domain) <домен svoichuzhie> kami.letar.best imot.letar.best animatrona.letar.best mandala.letar.best dashboard.letar.best <домен napravo> <домен premium-rosstil>
+$(local_domains) = $(primary_domain) <домен клиента> kami.letar.best imot.letar.best animatrona.letar.best mandala.letar.best dashboard.letar.best <домен napravo> <домен premium-rosstil>
 # <домен napravo> = <домен napravo> (punycode)
 
 # TLS — статичный сертификат (не acme loader)
@@ -200,13 +200,13 @@ target.queue remote_queue {
 
 ```
 admin@letar.best: admin@letar.best
-noreply@<домен svoichuzhie>: noreply@<домен svoichuzhie>
-author@<домен svoichuzhie>: author@<домен svoichuzhie>, booking@<домен svoichuzhie>, denis@<домен svoichuzhie>, agent@<домен svoichuzhie>, director@<домен svoichuzhie>, master@<домен svoichuzhie>, manager@<домен svoichuzhie>, assistant@<домен svoichuzhie>, curator@<домен svoichuzhie>, consultant@<домен svoichuzhie>, coordinator@<домен svoichuzhie>
+noreply@<домен клиента>: noreply@<домен клиента>
+author@<домен клиента>: author@<домен клиента>, booking@<домен клиента>, <имя>@<домен клиента>, agent@<домен клиента>, director@<домен клиента>, master@<домен клиента>, manager@<домен клиента>, assistant@<домен клиента>, curator@<домен клиента>, consultant@<домен клиента>, coordinator@<домен клиента>
 ```
 
-Пример `author@<домен svoichuzhie>` — паттерн «один логин, несколько ролевых имён в своём домене»:
-приложение шлёт письма от лица разных ролей (`booking@`, `denis@`, `director@`, ...), но
-авторизуется одним SMTP-аккаунтом `author@<домен svoichuzhie>`. Тот же паттерн используется в паре
+Пример `author@<домен клиента>` — паттерн «один логин, несколько ролевых имён в своём домене»:
+приложение шлёт письма от лица разных ролей (`booking@`, `<имя>@`, `director@`, ...), но
+авторизуется одним SMTP-аккаунтом `author@<домен клиента>`. Тот же паттерн используется в паре
 с `aliases` (см. ниже) для симметричного приёма на эти же адреса.
 
 ## `/data/aliases` — форвард входящих (replace_rcpt + reroute)
@@ -218,20 +218,20 @@ author@<домен svoichuzhie>: author@<домен svoichuzhie>, booking@<до�
 Формат — `откуда: куда1, куда2, ...`:
 
 ```
-kami@letar.best: kami@letar.best, letarkami@gmail.com
-kami@kami.letar.best: kami@letar.best, letarkami@gmail.com
-admin@letar.best: admin@letar.best, letarkami@gmail.com
-booking@<домен svoichuzhie>: author@<домен svoichuzhie>
-denis@<домен svoichuzhie>: author@<домен svoichuzhie>
+kami@letar.best: kami@letar.best, <личный-ящик-владельца>
+kami@kami.letar.best: kami@letar.best, <личный-ящик-владельца>
+admin@letar.best: admin@letar.best, <личный-ящик-владельца>
+booking@<домен клиента>: author@<домен клиента>
+<имя>@<домен клиента>: author@<домен клиента>
 ```
 
 Два реальных паттерна использования:
 
-1. **Форвард на внешний ящик** (`kami@letar.best`, `admin@letar.best` → `letarkami@gmail.com`):
+1. **Форвард на внешний ящик** (`kami@letar.best`, `admin@letar.best` → `<личный-ящик-владельца>`):
    почта на рабочий адрес дублируется в личный gmail — обычный способ читать корпоративную почту
    без отдельного почтового клиента для IMAP.
-2. **Схлопывание ролевых адресов в один mailbox** (`booking@`/`denis@`/`director@`/... →
-   `author@<домен svoichuzhie>`): зеркало записи в `sender_map.txt` — приложение и отправляет, и
+2. **Схлопывание ролевых адресов в один mailbox** (`booking@`/`<имя>@`/`director@`/... →
+   `author@<домен клиента>`): зеркало записи в `sender_map.txt` — приложение и отправляет, и
    получает от лица нескольких ролевых имён, но реально всё падает в один ящик `author@`.
 
 При добавлении нового домена с таким паттерном — заводить пару записей сразу в обоих файлах
