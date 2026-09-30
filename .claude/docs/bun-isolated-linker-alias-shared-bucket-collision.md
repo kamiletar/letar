@@ -91,7 +91,7 @@ readlink node_modules/.bun/node_modules/typescript
 В летар это привело к решению **не тиражировать** схему совместимости TS 6/7 до выхода
 TypeScript 7.1 GA (обещан с полноценным программным API — тогда `typescript-eslint` и `@nx/js`
 смогут работать напрямую на 7.x, вся схема с двумя алиасами станет не нужна). Подробности решения
-и контекст пилота — [PLAN-INFRA-1.md §19](/PLAN-INFRA-1.md), коммит `f4ffc9a3`.
+и контекст пилота — [PLAN-INFRA-1.md §19](/docs/plans/PLAN-INFRA-1.md), коммит `f4ffc9a3`.
 
 Эксперимент был полностью и немедленно откачен (`git checkout -- package.json bun.lock` +
 `bun install --force`), `nx lint` подтверждён зелёным после отката — блокировка длилась только во

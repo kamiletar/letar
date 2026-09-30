@@ -1,6 +1,6 @@
 # PLAN-JOURNAL-2 — §52–§81
 
-> Продолжение [PLAN-JOURNAL-1.md](/PLAN-JOURNAL-1.md). Карта всех частей и точка входа —
+> Продолжение [PLAN-JOURNAL-1.md](/docs/plans/PLAN-JOURNAL-1.md). Карта всех частей и точка входа —
 > [PLAN.md](/PLAN.md), раздел «Журнал сессий».
 >
 > Диапазон этой части: §52–§80.

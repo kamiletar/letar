@@ -4,7 +4,7 @@
 > журнала (65 записей сессий №1–74, до 2026-07-13) содержал плотную кросс-приложенческую
 > операционную историю (rollout/deploy-engine кампания, инциденты, ротации секретов) — тот же
 > класс контента, что журнал §18.6/§18.7 в `PLAN.md`, перенесённый туда же ранее в этой сессии.
-> Полный текст — [`.claude/private/PLAN_COMPLETED.md`](.claude/private/PLAN_COMPLETED.md)
+> Полный текст — [`.claude/private/PLAN_COMPLETED.md`](../../.claude/private/PLAN_COMPLETED.md)
 > (репозиторий `letar-private-docs`, submodule). Активный журнал сессий — см. блок СТАТУС
 > в корневом `PLAN.md`.
 

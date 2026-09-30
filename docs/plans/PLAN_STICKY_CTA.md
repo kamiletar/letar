@@ -10,7 +10,7 @@
 `StickyActionBar` + `useScrollGate` в `@letar/ui@0.7.0` (`libs/ui/src/lib/sticky-action-bar.tsx`,
 `libs/ui/src/lib/use-scroll-gate.ts`), эталон — `apps/archetest` (`express-container.tsx`,
 `quiz-intro.tsx`, коммит `4cec46f`). Паттерн задокументирован в
-[`.claude/docs/ui-components.md`](.claude/docs/ui-components.md), раздел
+[`.claude/docs/ui-components.md`](../../.claude/docs/ui-components.md), раздел
 «⭐ Основная CTA не должна уходить под фолд».
 
 Эта задача — тираж паттерна на остальные приложения монорепо.

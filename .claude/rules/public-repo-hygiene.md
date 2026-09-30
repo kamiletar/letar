@@ -23,7 +23,7 @@
 ## Куда девать вместо этого
 
 - **Запись про одно приватное приложение** → в `apps/<app>/PLAN.md` или
-  `apps/<app>/PLAN_COMPLETED.md` этого приложения (внутри submodule).
+  `apps/<app>/docs/plans/PLAN_COMPLETED.md` этого приложения (внутри submodule).
 - **Сквозная запись** (затрагивает несколько приложений сразу, включая публичные) →
   в `.claude/private/PLAN-JOURNAL.md`.
 - **Реквизиты 152-ФЗ, РКН, ИП, домены** → в `.claude/private/COMPLIANCE.md`.

@@ -109,5 +109,5 @@ ssh root@<server> "nsenter -t 1 -m -u -n -i -- sudo -u deploy bash -lc 'which bu
 - [bun-lockfile-private-submodules.md](bun-lockfile-private-submodules.md) — соседний класс
   «дрейфа» lockfile (отсутствующие submodule), сюда же ведёт открытая ссылка на необъяснённое
   ранее падение s3.
-- [PLAN-INFRA-3.md §50](/PLAN-INFRA-3.md) — оригинальная реализация фолбэк-проверки в
+- [PLAN-INFRA-3.md §50](/docs/plans/PLAN-INFRA-3.md) — оригинальная реализация фолбэк-проверки в
   `deploy-affected.sh`.

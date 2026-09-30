@@ -1,6 +1,6 @@
 # gateway-cache — кеширующий прокси перед IPFS-шлюзом
 
-Реализация решения владельца из [PLAN-INFRA-3.md §57](/PLAN-INFRA-3.md):
+Реализация решения владельца из [PLAN-INFRA-3.md §57](/docs/plans/PLAN-INFRA-3.md):
 кешируем только мелочь (`application/json`, `image/*`, `text/vtt`), видео/аудио — мимо кеша.
 Развёртывание — **только через BlackCove**, см. [deploy-coordination.md](/.claude/rules/deploy-coordination.md).
 Этот README — не история решения (та живёт в §57), а чеклист «что сделать по порядку».

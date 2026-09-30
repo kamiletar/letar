@@ -3,7 +3,7 @@
 Скаут по тексту первого сообщения сессии собирает короткую справку: какие доки прочитать, какие
 ⚠️-ловушки рядом, какой скил, команда или субагент подходит. У каждого пункта `файл:строка`.
 Справка — выбор из карточек индекса, а не генерация, поэтому ссылки верны по построению.
-План и этапы — [PLAN-INFRA-7.md § §207](/PLAN-INFRA-7.md).
+План и этапы — [PLAN-INFRA-7.md § §207](/docs/plans/PLAN-INFRA-7.md).
 
 ## Почему хук, а не инструмент
 
@@ -153,6 +153,10 @@ llama-server -m C:/ai/models/Qwen3-Embedding-0.6B-Q8_0.gguf --embedding --poolin
 llama-server -m C:/ai/models/Qwen3.5-9B-Q8_0.gguf -ngl 99 -c 8192 -np 1 --cache-ram 0 --host 127.0.0.1 --port 8092
 ```
 
+Эмбеддер стартует сам при входе в Windows: задача Планировщика `scout-embedder` запускает
+`C:i\scout\start-embedder.vbs` (та же команда без окна консоли, вывод — `logs/embedder.log`).
+Порт занят — второй экземпляр завершается сам. 9B автозапуска нет.
+
 Адрес эмбеддера переопределяется `SCOUT_EMBED_URL`; ~0,7 ГБ видеопамяти. Реранкер боевым путём не
 используется (файл модели оставлен для экспериментов, `SCOUT_RERANK_URL`, порт 8091).
 
@@ -173,10 +177,17 @@ bun scripts/scout/ask.ts "<запрос>"          # спросить скаут
 bun scripts/scout/bench.ts --label <имя> --compare last   # бенч; --suite judge — судья (нужна 9B на 8092)
 bun scripts/scout/warmup.ts                 # прогреть эмбеддер и досчитать векторы
 bun scripts/scout/phrases.ts [--generate]   # векторы формулировок; --generate пишет их докам без них (9B)
+bun scripts/scout/report.ts --since <дата> [--show 5]   # онлайн: открыл ли агент подсказанное
 bun test scripts/scout                      # тесты скриптов и хука
+nx typecheck:tsgo @letar/scout              # типы либы И scripts/scout + хуков (bun-types)
 nx test @letar/scout                        # тесты библиотеки
 tail -5 C:/ai/scout/logs/briefs.jsonl       # что скаут насчитал в тени
 ```
+
+⚠️ **`scripts/scout` типизирован через `bun-types`, не `@types/bun`.** Пакет из `@types/*` TS
+подключает сам во все tsconfig без поля `types` (их в монорепо десятки) — глобальные типы Bun
+разъехались бы по чужим проектам. `bun-types` виден только там, где назван явно
+(`scripts/scout/tsconfig.json`).
 
 ⚠️ **Разбор транскриптов — только `JSON.parse` по строкам.** В путях Windows внутри JSON `\\`, и
 регулярка по сырой строке молча находит ноль совпадений.

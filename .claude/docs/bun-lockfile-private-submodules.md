@@ -54,7 +54,7 @@ submodule не чекаутятся; флаг давал не гарантию, 
 **На сервере** (`deploy-affected.sh`) — есть фолбэк с `--frozen-lockfile` на обычный `bun install`
 плюс диагностика: после фолбэка скрипт печатает `git diff --stat -- bun.lock`. Пустой diff —
 расхождение безобидное (те самые отсутствующие workspace-пути), непустой — настоящий дрейф версий,
-который нужно смотреть глазами. См. [PLAN-INFRA-3.md §50](/PLAN-INFRA-3.md).
+который нужно смотреть глазами. См. [PLAN-INFRA-3.md §50](/docs/plans/PLAN-INFRA-3.md).
 
 **Общее правило:** любая проверка, сравнивающая lockfile с результатом резолва
 (`--frozen-lockfile`, `bun install --dry-run` в пайплайне, будущий lockfile-drift-гейт), обязана
@@ -94,8 +94,8 @@ bun install --lockfile-only && git diff --stat -- bun.lock   # показыва�
 
 ## Смежное
 
-- [PLAN-INFRA-4.md §73](/PLAN-INFRA-4.md) — история CI-гейта, включая рецидив этого дефекта.
-- [PLAN-INFRA-3.md §50](/PLAN-INFRA-3.md) — тот же флаг на прод-деплое.
+- [PLAN-INFRA-4.md §73](/docs/plans/PLAN-INFRA-4.md) — история CI-гейта, включая рецидив этого дефекта.
+- [PLAN-INFRA-3.md §50](/docs/plans/PLAN-INFRA-3.md) — тот же флаг на прод-деплое.
 - [bun-server-version-lockfile-format-incompatibility.md](bun-server-version-lockfile-format-incompatibility.md) —
   причина падения на **s3** (где submodule выкачаны полностью, значит не этот механизм) найдена
   2026-09-05: несовместимость версии bun на сервере с форматом lockfile, никак не связанная с

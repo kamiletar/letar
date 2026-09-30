@@ -90,9 +90,9 @@
 
 ## Прецеденты
 
-- [PLAN-INFRA-5.md §104](/PLAN-INFRA-5.md) — снят точный пин `kysely`
-- [PLAN-INFRA-5.md §105](/PLAN-INFRA-5.md) — снят точный пин `@tanstack/react-query`
-- [PLAN-INFRA-6.md §134](/PLAN-INFRA-6.md) — заведён (не снят) точный пин `zod` на `4.4.3`:
+- [PLAN-INFRA-5.md §104](/docs/plans/PLAN-INFRA-5.md) — снят точный пин `kysely`
+- [PLAN-INFRA-5.md §105](/docs/plans/PLAN-INFRA-5.md) — снят точный пин `@tanstack/react-query`
+- [PLAN-INFRA-6.md §134](/docs/plans/PLAN-INFRA-6.md) — заведён (не снят) точный пин `zod` на `4.4.3`:
   третий, новый механизм — не bump-скрипт забыл соседний файл, а bun 1.3.14 не умеет scoped
   `overrides` на транзитивную зависимость чужого пакета (`@modelcontextprotocol/sdk`), поэтому
   единственный работающий обходной путь — точно запинить сам корневой пакет вместо диапазона
@@ -105,9 +105,9 @@
 ни `nx lint`, ни `typecheck:tsgo`, ни `nx test` точных пинов не проверяют.
 
 Цена этого измерена: пин `@tanstack/react-devtools@0.10.5`, поставленный как фикс падения
-прод-сборки ([§112](/PLAN-INFRA-5.md)), прожил неделю и был снят обычным
+прод-сборки ([§112](/docs/plans/PLAN-INFRA-5.md)), прожил неделю и был снят обычным
 `9a65abe7 deps update` — падение вернулось во все приложения-потребители `@letar/query-provider`
-([§142](/PLAN-INFRA-6.md)). Правило «фиксируй причину и дату в PLAN-INFRA-\*.md» существовало
+([§142](/docs/plans/PLAN-INFRA-6.md)). Правило «фиксируй причину и дату в PLAN-INFRA-\*.md» существовало
 и тогда: причина была записана подробно, но читать её никто не обязан был, потому что ничто не
 связывало строку в `package.json` с разбором.
 

@@ -65,7 +65,7 @@ storage/bitswap. Разворачивать заново по этому README 
   фактически не разворачивался (образ `animatrona-pinner3-pin-queue:latest` собран только сегодня,
   контейнер из него никогда не поднимался). Реальный работающий на s3 pin-queue — отдельный
   standalone-деплой `/opt/pin-queue` из `infra/animatrona-pin-queue/`, см.
-  [§63](/PLAN-INFRA-4.md)
+  [§63](/docs/plans/PLAN-INFRA-4.md)
 
 ## Установка на новый сервер
 
@@ -83,7 +83,7 @@ bash setup.sh
 3. Останавливает Kubo, патчит datastore на PebbleDS (см. выше), перезапускает
 4. Собирает и запускает `pin-queue` (`docker compose up -d --build pin-queue`) — ⚠️ этот шаг
    документирован, но на реальном s3 не выполнялся: там pin-queue развёрнут отдельно, standalone
-   (см. предупреждение выше и [§63](/PLAN-INFRA-4.md))
+   (см. предупреждение выше и [§63](/docs/plans/PLAN-INFRA-4.md))
 5. Регистрируется на relay (`POST /register`)
 
 **После `setup.sh` — HTTPS и полный bootstrap:**
@@ -117,12 +117,12 @@ curl http://localhost:42080/health   # pin-queue healthcheck
 `/opt/pin-queue/` — ручной копии исходников от 18 июня, без `.git` вообще. Правки в этом
 `docker-compose.yml` не доезжают до прода сами по себе — нужен отдельный шаг деплоя на сервер
 вручную (через BlackCove). Перепись и план перевода на git —
-[PLAN-INFRA-3.md §60](/PLAN-INFRA-3.md).
+[PLAN-INFRA-3.md §60](/docs/plans/PLAN-INFRA-3.md).
 
 ## Связанные узлы
 
 `infra/animatrona-relay/README.md` (relay), `infra/animatrona-gateway/` (gateway),
 `infra/animatrona-pinner/` (pinner1 — на 2026-08-08 не существует физически, см.
-[§57](/PLAN-INFRA-3.md), удаление каталога отслеживается там же), `infra/animatrona-pin-queue/`
+[§57](/docs/plans/PLAN-INFRA-3.md), удаление каталога отслеживается там же), `infra/animatrona-pin-queue/`
 (сам сервис pin-queue, здесь используется как build-зависимость). Общий дизайн сети — корневой
 `PLAN.md` §15.4.

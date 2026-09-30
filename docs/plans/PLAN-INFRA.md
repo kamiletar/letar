@@ -33,15 +33,15 @@ CI, координация агентов, документация — всё, 
 
 ## Карта частей
 
-| Часть                               | Диапазон §NN | Тема (ориентировочно, границы не строгие)                             |
-| ----------------------------------- | ------------ | --------------------------------------------------------------------- |
-| [PLAN-INFRA-1.md](/PLAN-INFRA-1.md) | §15–§25      | сервер s3, deploy MCP, e2e-гейт, форматтер worktree, СДЭК             |
-| [PLAN-INFRA-2.md](/PLAN-INFRA-2.md) | §26–§48      | `libs/ui`, SEO, npm-публикация, деплой, redis, Traefik                |
-| [PLAN-INFRA-3.md](/PLAN-INFRA-3.md) | §49–§61      | firewall, hard e2e-gate, cron-задачи, security-инциденты              |
-| [PLAN-INFRA-4.md](/PLAN-INFRA-4.md) | §62–§75      | канарейка (второй заход), GlitchTip, ревизия конфигурации агентов     |
-| [PLAN-INFRA-5.md](/PLAN-INFRA-5.md) | §76–§114     | CI-гейт test/eslint, Agent Mail root cause, `zenstack:generate`       |
-| [PLAN-INFRA-6.md](/PLAN-INFRA-6.md) | §115–§156    | Nx-граф/worktree-инциденты, гейты graph/pin-drift, аудит `.claude`    |
-| [PLAN-INFRA-7.md](/PLAN-INFRA-7.md) | §157–§207    | сборка на s1/релиз на s2, MCP SDK v2, деплой-барьеры, chakra-provider |
+| Часть                                          | Диапазон §NN | Тема (ориентировочно, границы не строгие)                             |
+| ---------------------------------------------- | ------------ | --------------------------------------------------------------------- |
+| [PLAN-INFRA-1.md](/docs/plans/PLAN-INFRA-1.md) | §15–§25      | сервер s3, deploy MCP, e2e-гейт, форматтер worktree, СДЭК             |
+| [PLAN-INFRA-2.md](/docs/plans/PLAN-INFRA-2.md) | §26–§48      | `libs/ui`, SEO, npm-публикация, деплой, redis, Traefik                |
+| [PLAN-INFRA-3.md](/docs/plans/PLAN-INFRA-3.md) | §49–§61      | firewall, hard e2e-gate, cron-задачи, security-инциденты              |
+| [PLAN-INFRA-4.md](/docs/plans/PLAN-INFRA-4.md) | §62–§75      | канарейка (второй заход), GlitchTip, ревизия конфигурации агентов     |
+| [PLAN-INFRA-5.md](/docs/plans/PLAN-INFRA-5.md) | §76–§114     | CI-гейт test/eslint, Agent Mail root cause, `zenstack:generate`       |
+| [PLAN-INFRA-6.md](/docs/plans/PLAN-INFRA-6.md) | §115–§156    | Nx-граф/worktree-инциденты, гейты graph/pin-drift, аудит `.claude`    |
+| [PLAN-INFRA-7.md](/docs/plans/PLAN-INFRA-7.md) | §157–§207    | сборка на s1/релиз на s2, MCP SDK v2, деплой-барьеры, chakra-provider |
 
 Нужен конкретный `§NN` — ищи диапазон в таблице выше и открывай соответствующий файл. Это
 **единственная** карта диапазонов: в самих частях её копий нет.
@@ -80,14 +80,14 @@ grep -o '^## §[0-9]*' PLAN-INFRA-6.md | sed 's/^## §//' | sort -n | sed -n '1p
 Секции, которые берутся вперёд остальных открытых. Список короткий намеренно: если в нём больше
 двух-трёх пунктов, он перестаёт быть приоритетом и становится вторым оглавлением.
 
-Пусто — большая ревизия 2026-09-02: закрыты [§60](/PLAN-INFRA-3.md) (инфра-сервисы вне git на
+Пусто — большая ревизия 2026-09-02: закрыты [§60](/docs/plans/PLAN-INFRA-3.md) (инфра-сервисы вне git на
 s2/s3/mail — kubo, relay, nginx-proxy-manager, maddy, все теперь git-трекаемые),
-[§50](/PLAN-INFRA-3.md) (фолбэк `--frozen-lockfile → bun install` — root cause сам исчез),
-[§90](/PLAN-INFRA-5.md) (s3 — второй offsite-получатель бэкапов s2, плюс попутно закрыт
+[§50](/docs/plans/PLAN-INFRA-3.md) (фолбэк `--frozen-lockfile → bun install` — root cause сам исчез),
+[§90](/docs/plans/PLAN-INFRA-5.md) (s3 — второй offsite-получатель бэкапов s2, плюс попутно закрыт
 смежный пробел: собственный traefik-бэкап s3 не реплицировался никуда). Дополнительно доведены
-до предела возможного без решения владельца [§52](/PLAN-INFRA-3.md) (root cause 401 давно
+до предела возможного без решения владельца [§52](/docs/plans/PLAN-INFRA-3.md) (root cause 401 давно
 починен, последний диагностический пункт — `ApiLog` на проде `driving-school` — проверен
-напрямую в БД, хвоста нет) и [§56](/PLAN-INFRA-3.md) (зомби-проверка cron-задач чистая, механизм
+напрямую в БД, хвоста нет) и [§56](/docs/plans/PLAN-INFRA-3.md) (зомби-проверка cron-задач чистая, механизм
 ретира подтверждён на первом реальном случае §75). Следующий приоритет пока не выбран.
 
 - [x] `bun.lock` разошёлся с `package.json` — закрыто 2026-09-22. Открывший сессию снимок (7

@@ -25,7 +25,7 @@ Next.js metadata route convention (`icon`/`apple-icon`/`opengraph-image`/`twitte
 файла-источника (`.svg`, `.png`, `.tsx`) не переносится в URL. На 2026-08-21 эта ошибка дважды
 привела к ложноотрицательному аудиту («баг не подтвердился») для приложений, у которых
 `icon.svg`/`icon.png`/`apple-icon.png` физически лежали в `src/app/` месяцами незамеченными —
-разбор по каждому приложению в `apps/<app>/PLAN_COMPLETED.md` (kami, time, aboi).
+разбор по каждому приложению в `apps/<app>/docs/plans/PLAN_COMPLETED.md` (kami, time, aboi).
 
 `favicon` — не подвержена: остаётся `favicon.ico` в URL, единственная из пяти конвенций.
 

@@ -1,10 +1,10 @@
 # PLAN-INFRA-6 — §115–§156
 
-> Продолжение [PLAN-INFRA-5.md](/PLAN-INFRA-5.md) — часть журнала `PLAN-INFRA.md`, отрезанная от
+> Продолжение [PLAN-INFRA-5.md](/docs/plans/PLAN-INFRA-5.md) — часть журнала `PLAN-INFRA.md`, отрезанная от
 > неё 2026-09-03 (см. [plan-decomposition-pattern.md](/.claude/docs/plan-decomposition-pattern.md)).
 >
-> **Точка входа, легенда статусов и карта частей с диапазонами `§NN`** — [PLAN-INFRA.md](/PLAN-INFRA.md).
-> Карта здесь намеренно не продублирована — см. пояснение в [PLAN-INFRA-4.md](/PLAN-INFRA-4.md).
+> **Точка входа, легенда статусов и карта частей с диапазонами `§NN`** — [PLAN-INFRA.md](/docs/plans/PLAN-INFRA.md).
+> Карта здесь намеренно не продублирована — см. пояснение в [PLAN-INFRA-4.md](/docs/plans/PLAN-INFRA-4.md).
 >
 > ⚠️ На этом диапазоне сразу две коллизии номеров, обе — гонка параллельных сессий за общий
 > счётчик `§NN`. Старая: §66 (PLAN-INFRA-4.md, две разные записи 2026-08-08) не перенумерована —
