@@ -12,6 +12,7 @@ import {
   scout,
   type ScoutResult,
 } from '../../libs/scout/src/index'
+import { buildAppBriefs, readAppBriefs, scoreAppBriefs } from './app-briefs'
 import { splitOf } from './bench'
 import { buildCases, evaluate } from './eval'
 import { abGroup, appendLog, decide, LOG_MAX_BYTES, MAX_ATTEMPTS, runScoutHook, scoutQuery } from './hook-core'
@@ -20,7 +21,7 @@ import { judgeGroups, judgeItems, loadLabels } from './judge'
 import { readMatrixStore, writeMatrixStore } from './matrix-store'
 import { mineSession, normalizeKnowledgePath, parseHumanText, type SessionRecord } from './mine-transcripts'
 import { generatePhrases, loadPhraseStore, readPhraseRows } from './phrases'
-import { isProbe, reportSession, summarize } from './report'
+import { isProbe, pickRows, reportSession, summarize } from './report'
 import { EMBED_MODEL, loadVectorStore } from './vectors'
 
 describe('decide', () => {
@@ -642,5 +643,152 @@ describe('онлайн-отчёт', () => {
     expect(rep.status).toBe('in-progress')
     expect(summarize([rep])).toEqual([])
     expect((await reportSession(row, undefined)).status).toBe('no-transcript')
+  })
+})
+
+function sessionOf(command: string | undefined, paths: string[], startedAt = '2026-09-01T00:00:00Z'): SessionRecord {
+  return {
+    sessionId: `s-${Math.random()}`,
+    startedAt,
+    cwd: '',
+    command,
+    task: 'задача',
+    docsRead: paths.map((path, step) => ({ path, step, beforeEdit: true })),
+    skills: [],
+    agents: [],
+    commands: [],
+    followups: [],
+    interrupts: 0,
+    toolCalls: 1,
+  }
+}
+
+describe('buildAppBriefs', () => {
+  const none = () => false
+
+  it('частота — по сессиям, два чтения в одной сессии дают одно очко', () => {
+    const sessions = [
+      sessionOf('app-a', ['a.md', 'a.md', 'b.md']),
+      sessionOf('app-a', ['b.md']),
+      sessionOf('app-a', ['b.md', 'c.md']),
+    ]
+    expect(buildAppBriefs(sessions, { loaded: none }).apps['app-a']).toEqual(['b.md', 'a.md', 'c.md'])
+  })
+
+  it('отбрасывает loaded и сессии без команды', () => {
+    const sessions = [
+      sessionOf('app-a', ['rule.md', 'a.md']),
+      sessionOf('app-a', ['rule.md']),
+      sessionOf('app-a', ['a.md']),
+      sessionOf(undefined, ['x.md', 'x.md']),
+    ]
+    const got = buildAppBriefs(sessions, { loaded: (p) => p === 'rule.md' })
+    expect(got.apps['app-a']).toEqual(['a.md'])
+    expect(got.global).toEqual(['a.md'])
+  })
+
+  it('приложение с двумя сессиями не попадает в apps, общий список остаётся', () => {
+    const sessions = [
+      sessionOf('app-a', ['a.md']),
+      sessionOf('app-a', ['a.md']),
+      sessionOf('app-b', ['b.md']),
+      sessionOf('app-b', ['b.md']),
+      sessionOf('app-b', ['b.md']),
+    ]
+    const got = buildAppBriefs(sessions, { loaded: none })
+    expect(Object.keys(got.apps)).toEqual(['app-b'])
+    expect(got.global).toEqual(['b.md', 'a.md'])
+  })
+
+  it('при равной частоте порядок — по пути, K обрезает список', () => {
+    const sessions = Array.from({ length: 3 }, () => sessionOf('app-a', ['z.md', 'm.md', 'a.md']))
+    expect(buildAppBriefs(sessions, { loaded: none, k: 2 }).apps['app-a']).toEqual(['a.md', 'm.md'])
+  })
+})
+
+describe('scoreAppBriefs', () => {
+  it('строит справку на ранней части и меряет на поздней', () => {
+    const early = ['01', '02', '03', '04', '05', '06', '07'].map((d) =>
+      sessionOf('app-a', ['a.md'], `2026-08-${d}T00:00:00Z`)
+    )
+    const late = ['a.md', 'other.md', 'a.md'].map((p, i) => sessionOf('app-a', [p], `2026-09-0${i + 1}T00:00:00Z`))
+    const got = scoreAppBriefs([...late, ...early], () => false)
+    expect(got.train).toBe(7)
+    expect(got.app).toEqual({ sessions: 3, read: 3, found: 2, hitSessions: 2 })
+  })
+})
+
+describe('readAppBriefs', () => {
+  it('нет файла или битый JSON — undefined', () => {
+    const home = mkdtempSync(join(tmpdir(), 'scout-home-'))
+    expect(readAppBriefs(home)).toBeUndefined()
+    writeFileSync(join(home, 'app-briefs.json'), '{oops')
+    expect(readAppBriefs(home)).toBeUndefined()
+  })
+})
+
+describe('справка приложения в хуке', () => {
+  function fakeAppRepo(withBriefs = true, withApp = true) {
+    const root = mkdtempSync(join(tmpdir(), 'scout-repo-'))
+    mkdirSync(join(root, '.claude', 'docs'), { recursive: true })
+    writeFileSync(join(root, 'nx.json'), '{}')
+    writeFileSync(
+      join(root, '.claude', 'docs', 'INDEX.md'),
+      '## Формы\n- [date-field](/.claude/docs/date-field.md) ⚠️ поле даты в форме отдаёт строку\n',
+    )
+    writeFileSync(join(root, '.claude', 'docs', 'date-field.md'), '# Дата строкой\n## Симптом\nформа отдаёт дату\n')
+    if (withApp) {
+      mkdirSync(join(root, 'apps', 'app-a'), { recursive: true })
+    }
+    const home = mkdtempSync(join(tmpdir(), 'scout-home-'))
+    if (withBriefs) {
+      const briefs = { builtAt: '', k: 8, global: ['.claude/docs/date-field.md', '.claude/docs/gone.md'], apps: {} }
+      writeFileSync(join(home, 'app-briefs.json'), JSON.stringify(briefs))
+    }
+    return { root, home }
+  }
+
+  it('голая /app: лог kind app, appBriefed без briefed; повтор молчит', async () => {
+    const { root, home } = fakeAppRepo()
+    process.env.SCOUT_MODE = 'on'
+    const run = await runScoutHook({ session_id: 'app1', prompt: '/app-a' }, root, home)
+    expect(run.log).toMatchObject({
+      kind: 'app',
+      command: 'app-a',
+      shown: true,
+      docs: ['.claude/docs/date-field.md:1'],
+    })
+    expect(run.log).not.toHaveProperty('query')
+    const context = (run.output?.hookSpecificOutput as { additionalContext: string }).additionalContext
+    expect(context).toContain('Справка скаута по приложению')
+    expect(context).not.toContain('gone.md')
+    expect(JSON.parse(readFileSync(join(home, 'state', 'app1.json'), 'utf8'))).toMatchObject({
+      briefed: false,
+      appBriefed: true,
+    })
+    expect(await runScoutHook({ session_id: 'app1', prompt: '/app-a' }, root, home)).toEqual({})
+    delete process.env.SCOUT_MODE
+  })
+
+  it('без каталога apps/<имя> или без app-briefs.json — молчим', async () => {
+    const noApp = fakeAppRepo(true, false)
+    expect(await runScoutHook({ session_id: 'app2', prompt: '/app-a' }, noApp.root, noApp.home)).toEqual({})
+    const noFile = fakeAppRepo(false, true)
+    expect(await runScoutHook({ session_id: 'app3', prompt: '/app-a' }, noFile.root, noFile.home)).toEqual({})
+  })
+})
+
+describe('report: справка приложения и поиска в одной сессии', () => {
+  it('две строки одной сессии дают две записи, в разных группах', async () => {
+    const rows = [
+      { sessionId: 's1', mode: 'shadow', shown: false, kind: 'app' as const, docs: ['a.md:1'] },
+      { sessionId: 's1', mode: 'shadow', shown: false, docs: ['b.md:1'], query: 'q' },
+    ]
+    const picked = pickRows(rows)
+    expect(picked).toHaveLength(2)
+    const reports = await Promise.all(picked.map((r) => reportSession(r, undefined)))
+    expect(reports.map((r) => r.kind)).toEqual(['app', undefined])
+    const groups = summarize(reports.map((r) => ({ ...r, status: 'ok' as const }))).map((g) => g.group)
+    expect(groups.sort()).toEqual(['shadow/тень', 'shadow/тень/app'])
   })
 })

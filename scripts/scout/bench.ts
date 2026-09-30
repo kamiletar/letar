@@ -14,6 +14,9 @@
  * - `latency` — время `scoutQuery` на тёплом процессе (p50/p95/max);
  * - `robust` — проверки устойчивости; проваленные не роняют бенч, а считаются и печатаются;
  * - `hook` — настоящий процесс хука `.claude/hooks/scout-brief.ts`, `--hook-runs N` запусков;
+ * - `app` — справка приложения по голой `/<app>`: `sessions.jsonl` (снимок, не `-live`), сессии с командой
+ *   делятся по дате 70/30; справки строятся на первой части, полнота и «сессий с попаданием» — на второй,
+ *   и то же для общего списка. Только явно.
  * - `judge` — точность справки по меткам судьи (`judge-labels.jsonl` — кеш 9B, `judge-ref.jsonl` —
  *   эталон Sonnet, только чтение); для новых пар зовёт 9B на `SCOUT_JUDGE_URL`. Только явно.
  *
@@ -35,6 +38,7 @@ import {
 import { tmpdir } from 'node:os'
 import { basename, join } from 'node:path'
 import { Bm25, formatBrief, mentionedIn, type ScoutResult } from '../../libs/scout/src/index'
+import { scoreAppBriefs } from './app-briefs'
 import { arg, readJsonl } from './cli'
 import { advisableTools, type EvalCase, evaluate, type Metrics } from './eval'
 import { type FormProbe, formsNegatives, scoreProbe } from './forms-eval'
@@ -50,12 +54,13 @@ import {
   labelKey,
   loadLabels,
 } from './judge'
+import type { SessionRecord } from './mine-transcripts'
 import { scoutDataDir, scoutHome } from './paths'
 import { loadPhraseStore } from './phrases'
 import { loadVectorStore } from './vectors'
 
-export type Suite = 'docs' | 'forms' | 'latency' | 'robust' | 'hook' | 'judge'
-const ALL_SUITES: Suite[] = ['docs', 'forms', 'latency', 'robust', 'hook', 'judge']
+export type Suite = 'docs' | 'forms' | 'latency' | 'robust' | 'hook' | 'judge' | 'app'
+const ALL_SUITES: Suite[] = ['docs', 'forms', 'latency', 'robust', 'hook', 'judge', 'app']
 const DEFAULT_SUITES: Suite[] = ['docs', 'forms', 'latency', 'robust']
 
 /** Детерминированное разбиение случаев: около 20% уходит в `test`, остальное — `dev` */
@@ -167,6 +172,10 @@ const SUMMARY: Array<{ key: string; unit: Unit; journal?: boolean }> = [
   { key: 'max мс', unit: 'ms' },
   { key: 'хук p50 мс', unit: 'ms' },
   { key: 'хук max мс', unit: 'ms' },
+  { key: 'app полнота', unit: 'pp' },
+  { key: 'app попадание', unit: 'pp' },
+  { key: 'global полнота', unit: 'pp' },
+  { key: 'global попадание', unit: 'pp' },
 ]
 
 type Summary = Record<string, number | null>
@@ -192,6 +201,8 @@ export function judgedItems(result: ScoutResult, limit = 5): JudgeItem[] {
     .map((d) => ({ path: d.path, title: d.section ? `${d.title} § ${d.section}` : d.title, summary: d.summary }))
 }
 
+type AppScore = ReturnType<typeof scoreAppBriefs>['app']
+
 interface BenchRun {
   label: string
   ts: string
@@ -201,6 +212,7 @@ interface BenchRun {
   latency?: { n: number; p50: number; p95: number; max: number }
   robust?: { passed: number; total: number; failed: string[] }
   judge?: { groups: JudgeGroup[]; newLabels: number; serverAnswered: boolean | null; unparsed: number }
+  app?: { train: number; app: AppScore; global: AppScore }
   hook?: { runs: number; p50: number; max: number; ok: boolean; problems: string[] }
   summary: Summary
 }
@@ -683,6 +695,31 @@ async function main() {
         hook.ok ? 'код 0 и stdout валиден' : `проблемы: ${hook.problems.join('; ')}`
       }`,
     )
+  }
+  if (suites.includes('app')) {
+    console.log('\n== app ==')
+    const file = join(dataDir, 'sessions.jsonl')
+    if (!existsSync(file)) {
+      console.log(`нет ${file}`)
+    } else {
+      const loadedPaths = new Set(engine.cards.filter((c) => c.loaded).map((c) => c.path))
+      const got = scoreAppBriefs(readJsonl<SessionRecord>(file), (p) => loadedPaths.has(p))
+      result.app = got
+      const ratio = (a: number, b: number) => (b ? (a / b) * 100 : null)
+      s['app полнота'] = ratio(got.app.found, got.app.read)
+      s['app попадание'] = ratio(got.app.hitSessions, got.app.sessions)
+      s['global полнота'] = ratio(got.global.found, got.global.read)
+      s['global попадание'] = ratio(got.global.hitSessions, got.global.sessions)
+      for (const [name, x] of [['app', got.app], ['global', got.global]] as const) {
+        console.log(
+          `${name.padEnd(7)} история ${got.train} сессий, проверка ${x.sessions}: полнота ${
+            pct(x.read ? x.found / x.read : 0)
+          } (${x.found}/${x.read}), сессий с попаданием ${
+            pct(x.sessions ? x.hitSessions / x.sessions : 0)
+          } (${x.hitSessions}/${x.sessions})`,
+        )
+      }
+    }
   }
   for (const { key } of SUMMARY) {
     s[key] ??= null

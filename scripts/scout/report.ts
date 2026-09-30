@@ -32,6 +32,8 @@ export interface BriefRow {
   docs?: string[]
   traps?: string[]
   tool?: string
+  /** `app` — справка приложения по голой `/<app>`; нет поля — справка поиска */
+  kind?: 'app'
 }
 
 export type SessionStatus = 'ok' | 'no-transcript' | 'in-progress'
@@ -41,6 +43,7 @@ export interface SessionReport {
   status: SessionStatus
   mode: string
   shown: boolean
+  kind?: 'app'
   queryLength: number
   suggested: string[]
   opened: string[]
@@ -105,16 +108,17 @@ export function readBriefRows(logsDir: string): BriefRow[] {
 
 const hasBrief = (r: BriefRow) => Boolean(r.docs?.length || r.traps?.length || r.tool)
 
-/** Одна строка на сессию: первая со справкой, иначе первая («скаут промолчал») */
+/** Одна строка на сессию и вид справки (`app` / поиск): первая со справкой, иначе первая («скаут промолчал») */
 export function pickRows(rows: BriefRow[], sinceMs = 0): BriefRow[] {
   const bySession = new Map<string, BriefRow>()
   for (const row of rows) {
     if (sinceMs && Date.parse(row.ts ?? '') < sinceMs) {
       continue
     }
-    const prev = bySession.get(row.sessionId)
+    const key = `${row.sessionId}|${row.kind ?? ''}`
+    const prev = bySession.get(key)
     if (!prev || (!hasBrief(prev) && hasBrief(row))) {
-      bySession.set(row.sessionId, row)
+      bySession.set(key, row)
     }
   }
   return [...bySession.values()]
@@ -152,6 +156,7 @@ export async function reportSession(row: BriefRow, file: string | undefined, now
     status: 'ok',
     mode: row.mode ?? 'unknown',
     shown: Boolean(row.shown),
+    kind: row.kind,
     queryLength: query.length,
     suggested,
     opened: [],
@@ -172,7 +177,8 @@ export async function reportSession(row: BriefRow, file: string | undefined, now
     return { ...base, status: 'no-transcript' }
   }
   const opened = rec.docsRead.map((d) => d.path)
-  const openedNovel = opened.filter((p) => !mentionedIn(query, p))
+  // У справки приложения запроса нет: новым считается всё прочитанное
+  const openedNovel = row.kind === 'app' ? opened : opened.filter((p) => !mentionedIn(query, p))
   const suggestedSet = new Set(suggested)
   const used = new Set([...rec.skills, ...rec.agents, ...rec.commands])
   const toolName = row.tool?.slice(row.tool.indexOf(':') + 1)
@@ -187,14 +193,14 @@ export async function reportSession(row: BriefRow, file: string | undefined, now
   }
 }
 
-/** Сводка по группам `(mode, shown)`; в метрики входят только сессии со статусом `ok` */
+/** Сводка по группам `(mode, shown[, app])`; в метрики входят только сессии со статусом `ok` */
 export function summarize(reports: SessionReport[]): GroupSummary[] {
   const groups = new Map<string, SessionReport[]>()
   for (const r of reports) {
     if (r.status !== 'ok') {
       continue
     }
-    const key = `${r.mode}/${r.shown ? 'показана' : 'тень'}`
+    const key = `${r.mode}/${r.shown ? 'показана' : 'тень'}${r.kind === 'app' ? '/app' : ''}`
     groups.set(key, [...(groups.get(key) ?? []), r])
   }
   return [...groups.entries()].map(([group, list]) => {

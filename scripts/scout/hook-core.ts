@@ -30,7 +30,9 @@ import {
   phraseRanking,
   type ScoutIndex,
   type ScoutResult,
+  truncate,
 } from '../../libs/scout/src/index'
+import { readAppBriefs } from './app-briefs'
 import { loadIndex, saveIndex, sourcesMtime } from './index-store'
 import { loadPhraseStore, type PhraseStore } from './phrases'
 import { EMBED_URL, loadVectorStore, type VectorStore } from './vectors'
@@ -48,6 +50,8 @@ export interface HookPayload {
 export interface SessionState {
   attempts: number
   briefed: boolean
+  /** Справка приложения по голой `/<app>` уже показана (не трогает `briefed`) */
+  appBriefed?: boolean
 }
 
 /** Сколько содержательных сообщений ждём, прежде чем сдаться на сессию */
@@ -301,6 +305,79 @@ export async function scoutQuery(
   }
 }
 
+/** Длина строки справки приложения: как у хвоста основной справки */
+const APP_LINE_CHARS = 140
+const APP_BRIEF_HEADER = 'Справка скаута по приложению: что обычно читают в его сессиях; не по теме — игнорируй'
+
+/**
+ * Голая `/<app>`: искать не по чему, поэтому справка берётся из `app-briefs.json` — доки, которые
+ * чаще всего читали в сессиях этого приложения. Не трогает `briefed`: первое содержательное
+ * сообщение получит обычную справку поиска. Нет каталога приложения, файла или списка — молчим.
+ */
+function appBriefRun(
+  prompt: string,
+  sessionId: string,
+  state: SessionState,
+  root: string,
+  home: string,
+  started: number,
+): HookRun {
+  const name = prompt.trim().match(/^\/([\w:-]+)$/)?.[1]
+  if (!name || state.appBriefed || !existsSync(join(root, 'apps', name))) {
+    return {}
+  }
+  const briefs = readAppBriefs(home)
+  const paths = briefs ? (briefs.apps[name] ?? briefs.global) : []
+  if (!paths.length) {
+    return {}
+  }
+  // Индекс нужен только здесь: голая команда редка, лишние миллисекунды допустимы
+  const cards = freshIndex(root, home).cards
+  const known = new Set(cards.map((c) => c.path))
+  const annotation = new Map<string, string>()
+  for (const c of cards) {
+    if ((c.kind === 'doc' || c.kind === 'rule') && c.summary && !annotation.has(c.path)) {
+      annotation.set(c.path, c.summary)
+    }
+  }
+  const items = paths.filter((p) => known.has(p)).slice(0, 8)
+  if (!items.length) {
+    return {}
+  }
+  const brief = [
+    APP_BRIEF_HEADER,
+    ...items.map((p) => {
+      const note = annotation.get(p)
+      return truncate(note ? `- ${p} — ${note}` : `- ${p}`, APP_LINE_CHARS)
+    }),
+  ].join('\n')
+  writeState(home, sessionId, { ...state, appBriefed: true })
+  const mode = readMode(home)
+  const group = abGroup(sessionId)
+  const shown = mode === 'on' || (mode === 'ab' && group === 'A')
+  const log = {
+    ts: new Date().toISOString(),
+    sessionId,
+    mode,
+    group,
+    shown,
+    attempt: state.attempts,
+    kind: 'app',
+    command: name,
+    docs: items.map((p) => `${p}:1`),
+    traps: [],
+    chars: brief.length,
+    ms: Math.round(performance.now() - started),
+  }
+  const output = shown
+    ? {
+      systemMessage: `🔎 скаут: справка приложения, пунктов ${items.length}`,
+      hookSpecificOutput: { hookEventName: 'UserPromptSubmit', additionalContext: brief },
+    }
+    : undefined
+  return { output, log }
+}
+
 /** Один вызов UserPromptSubmit: решение, поиск, лог, вывод по режиму */
 export async function runScoutHook(
   payload: HookPayload,
@@ -315,6 +392,9 @@ export async function runScoutHook(
   if (decision.action === 'skip') {
     if (decision.countsAttempt) {
       writeState(home, sessionId, { ...state, attempts: state.attempts + 1 })
+    }
+    if (decision.reason === 'no-args') {
+      return appBriefRun(payload.prompt ?? '', sessionId, state, root, home, started)
     }
     return {}
   }
