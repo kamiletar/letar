@@ -224,6 +224,28 @@ function stamp(d = new Date()): string {
   }`
 }
 
+const USAGE = `Запуск: bun scripts/scout/bench.ts [--label <имя>] [--suite ${ALL_SUITES.join(',')}]
+  [--hook-runs 5] [--compare <путь к json | last>] [--no-phrases] [--help]`
+
+/** Флаги со значением и без; неизвестный флаг — ошибка (код 2), `--help` — справка */
+function checkArgs(argv: string[]): void {
+  const withValue = new Set(['--label', '--suite', '--hook-runs', '--compare'])
+  const bare = new Set(['--no-phrases', '--help'])
+  if (argv.includes('--help')) {
+    console.log(USAGE)
+    process.exit(0)
+  }
+  for (let i = 0; i < argv.length; i++) {
+    const a = argv[i]
+    if (withValue.has(a)) {
+      i++
+    } else if (!bare.has(a)) {
+      console.error(`Неизвестный аргумент: ${a}\n${USAGE}`)
+      process.exit(2)
+    }
+  }
+}
+
 /** Настоящий хук отдельным процессом: время целиком, код выхода, валидность stdout */
 async function runHook(
   root: string,
@@ -235,7 +257,11 @@ async function runHook(
   const times: number[] = []
   const problems: string[] = []
   try {
-    for (const f of [basename(indexPath(home, root)), 'vectors.json', 'vectors.f32']) {
+    const files = [basename(indexPath(home, root)), 'vectors.json', 'vectors.f32']
+    if (!noPhrases) {
+      files.push('phrase-vectors.json', 'phrase-vectors.f32')
+    }
+    for (const f of files) {
       if (existsSync(join(home, f))) {
         copyFileSync(join(home, f), join(tmp, f))
       }
@@ -346,6 +372,7 @@ function printCompare(cur: BenchRun, prevPath: string): void {
 }
 
 async function main() {
+  checkArgs(process.argv.slice(2))
   const root = findRepoRoot()
   if (!root) {
     console.error('Не найден корень репозитория')
