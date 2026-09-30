@@ -4,7 +4,7 @@ import { scoreAppBriefs } from '../app-briefs'
 import { readJsonl } from '../cli'
 import type { SessionRecord } from '../mine-transcripts'
 import type { Suite } from './types'
-import { EMPTY, pct } from './util'
+import { EMPTY, loadedPathsOf, pct } from './util'
 
 type AppScore = ReturnType<typeof scoreAppBriefs>['app']
 export interface AppResult {
@@ -21,7 +21,7 @@ export const appSuite: Suite = async ({ engine, dataDir }) => {
     console.log(`нет ${file}`)
     return EMPTY
   }
-  const loadedPaths = new Set(engine.cards.filter((c) => c.loaded).map((c) => c.path))
+  const loadedPaths = loadedPathsOf(engine)
   const got: AppResult = scoreAppBriefs(readJsonl<SessionRecord>(file), (p) => loadedPaths.has(p))
   const ratio = (a: number, b: number) => (b ? (a / b) * 100 : null)
   for (const [name, x] of [['app', got.app], ['global', got.global]] as const) {

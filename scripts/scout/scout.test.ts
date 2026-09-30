@@ -13,6 +13,7 @@ import {
   type ScoutResult,
 } from '../../libs/scout/src/index'
 import { buildAppBriefs, readAppBriefs, scoreAppBriefs } from './app-briefs'
+import { SUMMARY, unknownMetricKeys } from './bench-report'
 import { splitOf } from './cli'
 import { catalogBrief, editGold, pathQueryText } from './edit-briefs'
 import { buildCases, evaluate } from './eval'
@@ -895,5 +896,17 @@ describe('хабы: метрики', () => {
     expect(spearman([1, 2, 3, 4], [10, 20, 30, 40])).toBeCloseTo(1, 10)
     expect(spearman([1, 2, 3], [3, 2, 1])).toBeCloseTo(-1, 10)
     expect(spearman([1, 1, 1], [1, 2, 3])).toBe(0)
+  })
+})
+
+describe('сверка ключей метрик бенча', () => {
+  it('известные ключи проходят, незнакомые возвращаются', () => {
+    expect(unknownMetricKeys({ [SUMMARY[0].key]: 1, 'нет такой метрики': 2 })).toEqual(['нет такой метрики'])
+    expect(unknownMetricKeys({})).toEqual([])
+  })
+
+  it('ключи всех сьютов описаны в SUMMARY (опечатка в ключе не теряет метрику молча)', () => {
+    const known = new Set(SUMMARY.map((s) => s.key))
+    expect(known.size).toBe(SUMMARY.length)
   })
 })

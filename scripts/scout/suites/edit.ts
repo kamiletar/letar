@@ -4,7 +4,7 @@ import { readJsonl } from '../cli'
 import { buildEditCases, cutDate, editGroups, editSessions, scoreEditCases, VARIANTS } from '../edit-briefs'
 import type { SessionRecord } from '../mine-transcripts'
 import type { Suite } from './types'
-import { EMPTY, pct } from './util'
+import { EMPTY, loadedPathsOf, pct } from './util'
 
 export interface EditResult {
   sessions: number
@@ -33,7 +33,7 @@ export const editSuite: Suite = async ({ engine, dataDir, run }) => {
   }
   const sessions = editSessions(readJsonl<SessionRecord>(liveFile), readJsonl<SessionRecord>(frozenFile))
   const known = new Set(engine.cards.filter((c) => c.kind === 'doc' || c.kind === 'rule').map((c) => c.path))
-  const loadedPaths = new Set(engine.cards.filter((c) => c.loaded).map((c) => c.path))
+  const loadedPaths = loadedPathsOf(engine)
   const editCases = await buildEditCases(sessions, {
     search: async (q) => (await run(q)).result,
     known,

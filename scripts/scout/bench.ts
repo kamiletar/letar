@@ -23,23 +23,24 @@
  * Запуск: bun scripts/scout/bench.ts [--label <имя>] [--suite docs,forms,latency,robust,hook]
  *   [--hook-runs 5] [--compare <путь к json | last>]
  */
-import { appendFileSync, existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { Bm25 } from '../../libs/scout/src/index'
+import { appendJournal, type BenchRun, printCompare, stamp, SUMMARY, unknownMetricKeys } from './bench-report'
 import { arg, readJsonl } from './cli'
 import type { EvalCase } from './eval'
 import { freshIndex, scoutQuery, type ScoutQueryResult } from './hook-core'
 import { findRepoRoot } from './index-store'
 import { scoutDataDir, scoutHome } from './paths'
 import { loadPhraseStore } from './phrases'
-import { type AppResult, appSuite } from './suites/app'
-import { type DocsResult, docsSuite } from './suites/docs'
-import { type EditResult, editSuite } from './suites/edit'
-import { type FormsResult, formsSuite } from './suites/forms'
-import { type HookResult, hookSuite } from './suites/hook'
-import { type JudgeResult, judgeSuite } from './suites/judge'
-import { type LatencyResult, latencySuite } from './suites/latency'
-import { type RobustResult, robustSuite } from './suites/robust'
+import { appSuite } from './suites/app'
+import { docsSuite } from './suites/docs'
+import { editSuite } from './suites/edit'
+import { formsSuite } from './suites/forms'
+import { hookSuite } from './suites/hook'
+import { judgeSuite } from './suites/judge'
+import { latencySuite } from './suites/latency'
+import { robustSuite } from './suites/robust'
 import type { Suite } from './suites/types'
 import { loadVectorStore } from './vectors'
 
@@ -60,84 +61,8 @@ const SUITES: Record<SuiteName, Suite> = {
 const ALL_SUITES: SuiteName[] = ['docs', 'forms', 'latency', 'robust', 'hook', 'judge', 'app', 'edit']
 const DEFAULT_SUITES: SuiteName[] = ['docs', 'forms', 'latency', 'robust']
 
-/** Ключевые метрики прогона: порядок колонок журнала и единицы для сравнения */
-type Unit = 'pp' | 'ms' | 'ratio' | 'n'
-const SUMMARY: Array<{ key: string; unit: Unit; journal?: boolean }> = [
-  { key: 'R@5 dev', unit: 'pp', journal: true },
-  { key: 'R@5 test', unit: 'pp', journal: true },
-  { key: 'MRR', unit: 'ratio', journal: true },
-  { key: 'инстр. top-1', unit: 'pp', journal: true },
-  { key: 'поля dev', unit: 'pp', journal: true },
-  { key: 'поля holdout', unit: 'pp', journal: true },
-  { key: 'паттерн', unit: 'pp', journal: true },
-  { key: 'ложная полка', unit: 'pp', journal: true },
-  { key: 'p95 мс', unit: 'ms', journal: true },
-  { key: 'устойчивость', unit: 'n', journal: true },
-  { key: 'симв.', unit: 'n', journal: true },
-  { key: 'инстр. точн.', unit: 'pp', journal: true },
-  { key: 'нов. R@5 dev', unit: 'pp', journal: true },
-  { key: 'нов. R@5 test', unit: 'pp', journal: true },
-  { key: 'хабы топ-10 dev', unit: 'pp' },
-  { key: 'хаб макс dev', unit: 'pp' },
-  { key: 'лишнее', unit: 'pp', journal: true },
-  { key: 'суд. по делу@3 dev', unit: 'pp', journal: true },
-  { key: 'суд. по делу@3 test', unit: 'pp', journal: true },
-  { key: 'суд. нужен@3', unit: 'pp', journal: true },
-  { key: 'суд. по делу@1', unit: 'pp' },
-  { key: 'суд. по делу@5', unit: 'pp' },
-  { key: 'суд. покрытие', unit: 'pp' },
-  { key: 'суд. согласие', unit: 'pp' },
-  { key: 'R@5 все', unit: 'pp' },
-  { key: 'R@5 коротк.', unit: 'pp' },
-  { key: 'R@8 все', unit: 'pp' },
-  { key: 'Hit@8 все', unit: 'pp' },
-  { key: 'пустых справок', unit: 'pp' },
-  { key: 'полка целиком dev', unit: 'n' },
-  { key: 'полка целиком holdout', unit: 'n' },
-  { key: 'ложный паттерн', unit: 'pp' },
-  { key: 'p50 мс', unit: 'ms' },
-  { key: 'max мс', unit: 'ms' },
-  { key: 'хук p50 мс', unit: 'ms' },
-  { key: 'хук max мс', unit: 'ms' },
-  { key: 'app полнота', unit: 'pp' },
-  { key: 'app попадание', unit: 'pp' },
-  { key: 'global полнота', unit: 'pp' },
-  { key: 'global попадание', unit: 'pp' },
-]
-
-type Summary = Record<string, number | null>
-
-interface BenchRun {
-  label: string
-  ts: string
-  env: {
-    gitSha: string
-    dirty: boolean
-    cards: number
-    vectors: boolean
-    embedder: boolean
-    suites: SuiteName[]
-  }
-  docs?: DocsResult
-  forms?: FormsResult
-  latency?: LatencyResult
-  robust?: RobustResult
-  judge?: JudgeResult
-  app?: AppResult
-  edit?: EditResult
-  hook?: HookResult
-  summary: Summary
-}
-
 function git(root: string, args: string[]): string {
   return Bun.spawnSync(['git', ...args], { cwd: root }).stdout.toString().trim()
-}
-
-function stamp(d = new Date()): string {
-  const p = (n: number) => String(n).padStart(2, '0')
-  return `${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}${
-    p(d.getSeconds())
-  }`
 }
 
 const USAGE = `Запуск: bun scripts/scout/bench.ts [--label <имя>] [--suite ${ALL_SUITES.join(',')}]
@@ -159,75 +84,6 @@ function checkArgs(argv: string[]): void {
       console.error(`Неизвестный аргумент: ${a}\n${USAGE}`)
       process.exit(2)
     }
-  }
-}
-
-function fmtValue(v: number | null, unit: Unit): string {
-  if (v === null) {
-    return '—'
-  }
-  return unit === 'pp' ? `${v.toFixed(1)}%` : unit === 'ratio' ? v.toFixed(3) : String(Math.round(v))
-}
-
-function fmtDelta(d: number, unit: Unit): string {
-  const sign = d > 0 ? '+' : ''
-  if (unit === 'pp') {
-    return `${sign}${d.toFixed(1)} п.п.`
-  }
-  if (unit === 'ms') {
-    return `${sign}${Math.round(d)} мс`
-  }
-  return unit === 'ratio' ? `${sign}${d.toFixed(3)}` : `${sign}${Math.round(d)}`
-}
-
-function journalRow(run: BenchRun): string {
-  const cells = SUMMARY.filter((s) => s.journal).map((s) => {
-    if (s.key === 'устойчивость') {
-      return run.robust ? `${run.robust.passed}/${run.robust.total}` : '—'
-    }
-    return fmtValue(run.summary[s.key] ?? null, s.unit)
-  })
-  // Локальное время машины, как и в имени файла прогона
-  const t = stamp(new Date(run.ts))
-  const date = `${t.slice(0, 4)}-${t.slice(4, 6)}-${t.slice(6, 8)} ${t.slice(9, 11)}:${t.slice(11, 13)}`
-  const sha = `${run.env.gitSha}${run.env.dirty ? '*' : ''}`
-  return `| ${[date, run.label, sha, ...cells].join(' | ')} |\n`
-}
-
-function appendJournal(dir: string, run: BenchRun): void {
-  const file = join(dir, 'journal.md')
-  const head = ['дата', 'метка', 'sha', ...SUMMARY.filter((s) => s.journal).map((s) => s.key)]
-  const headLines = [`| ${head.join(' | ')} |`, `| ${head.map(() => '---').join(' | ')} |`]
-  if (!existsSync(file)) {
-    writeFileSync(file, `${headLines.join('\n')}\n`)
-  } else {
-    // Колонки добавляются со временем: заголовок обновляем, старые строки не трогаем
-    const lines = readFileSync(file, 'utf8').split('\n')
-    if (lines[0] !== headLines[0]) {
-      lines.splice(0, 2, ...headLines)
-      writeFileSync(file, lines.join('\n'))
-    }
-  }
-  appendFileSync(file, journalRow(run))
-}
-
-function printCompare(cur: BenchRun, prevPath: string): void {
-  const prev = JSON.parse(readFileSync(prevPath, 'utf8')) as BenchRun
-  console.log(`\n== Сравнение с ${prev.label} (${prevPath}) ==`)
-  let shown = 0
-  for (const { key, unit } of SUMMARY) {
-    const a = prev.summary[key]
-    const b = cur.summary[key]
-    if (a === null || a === undefined || b === null || b === undefined) {
-      continue
-    }
-    shown++
-    console.log(
-      `${key.padEnd(24)} ${fmtValue(a, unit).padStart(8)} → ${fmtValue(b, unit).padStart(8)}  ${fmtDelta(b - a, unit)}`,
-    )
-  }
-  if (!shown) {
-    console.log('общих метрик нет (сьюты прогонов не пересекаются)')
   }
 }
 
@@ -314,6 +170,9 @@ async function main() {
   // Порядок запуска — как в реестре, а не как в `--suite`
   for (const name of (Object.keys(SUITES) as SuiteName[]).filter((n) => suites.includes(n))) {
     const out = await SUITES[name](ctx)
+    for (const key of unknownMetricKeys(out.summary)) {
+      console.log(`⚠️ метрика ${key} не описана в SUMMARY — в журнал не попадёт`)
+    }
     Object.assign(result.summary, out.summary)
     if (out.result !== undefined) {
       ;(result as unknown as Record<string, unknown>)[name] = out.result

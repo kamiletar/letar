@@ -3,7 +3,7 @@ import { splitOf } from '../cli'
 import { advisableTools, type EvalCase, evaluate, type Metrics } from '../eval'
 import { hubMetrics } from '../hubs'
 import type { Suite } from './types'
-import { EMPTY, pct } from './util'
+import { EMPTY, loadedPathsOf, pct } from './util'
 
 export interface DocsGroup extends Metrics {
   group: string
@@ -23,7 +23,7 @@ export const docsSuite: Suite = async ({ engine, cases, run, cached }) => {
   const s: Record<string, number | null> = {}
   const advisable = advisableTools(engine.cards)
   const search = async (q: string) => (await run(q)).result
-  const loadedPaths = new Set(engine.cards.filter((c) => c.loaded).map((c) => c.path))
+  const loadedPaths = loadedPathsOf(engine)
   const redundant = (q: string, p: string) => mentionedIn(q, p) || loadedPaths.has(p)
   const groups: Array<[string, EvalCase[]]> = [
     ['все', cases],

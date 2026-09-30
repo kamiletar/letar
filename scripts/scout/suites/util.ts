@@ -1,3 +1,4 @@
+import type { Bm25 } from '../../../libs/scout/src/index'
 import type { SuiteOutput } from './types'
 
 export function percentile(sorted: number[], p: number): number {
@@ -10,3 +11,8 @@ export function pct(x: number): string {
 
 /** Результат пропущенного сьюта (нет данных): метрик нет, поле прогона не заполняется */
 export const EMPTY: SuiteOutput = { summary: {} }
+
+/** Пути карточек, уже загруженных в контекст агента (`loaded`): их справка не повторяет */
+export function loadedPathsOf(engine: Bm25): Set<string> {
+  return new Set(engine.cards.filter((c) => c.loaded).map((c) => c.path))
+}
