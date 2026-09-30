@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test'
-import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, utimesSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import {
@@ -20,6 +20,7 @@ import { judgeGroups, judgeItems, loadLabels } from './judge'
 import { readMatrixStore, writeMatrixStore } from './matrix-store'
 import { mineSession, normalizeKnowledgePath, parseHumanText, type SessionRecord } from './mine-transcripts'
 import { generatePhrases, loadPhraseStore, readPhraseRows } from './phrases'
+import { isProbe, reportSession, summarize } from './report'
 import { EMBED_MODEL, loadVectorStore } from './vectors'
 
 describe('decide', () => {
@@ -559,5 +560,57 @@ describe('формулировки к докам', () => {
     } finally {
       server.stop(true)
     }
+  })
+})
+
+describe('онлайн-отчёт', () => {
+  it('пробы хука отличаются от живых сессий', () => {
+    expect(isProbe('probe-1')).toBe(true)
+    expect(isProbe('0a1b2c3d-probe')).toBe(false)
+  })
+
+  const OLD = new Date(Date.now() - 3 * 3600 * 1000)
+  const transcript = (docs: string[], age = OLD) => {
+    const dir = mkdtempSync(join(tmpdir(), 'scout-report-'))
+    const file = join(dir, 's.jsonl')
+    const rows = [
+      { type: 'user', origin: { kind: 'human' }, sessionId: 's1', message: { content: 'поправь поле формы' } },
+      ...docs.map((d) => ({
+        type: 'assistant',
+        message: {
+          content: [{ type: 'tool_use', name: 'Read', input: { file_path: 'C:\\web\\letar\\.claude\\docs\\' + d } }],
+        },
+      })),
+    ]
+    writeFileSync(file, rows.map((r) => JSON.stringify(r)).join('\n'))
+    utimesSync(file, age, age)
+    return file
+  }
+  const row = {
+    sessionId: 's1',
+    mode: 'shadow',
+    shown: false,
+    query: 'поправь поле формы',
+    docs: ['.claude/docs/x-y.md:1'],
+  }
+
+  it('подсказанный и открытый док — попадание, точность 1', async () => {
+    const rep = await reportSession(row, transcript(['x-y.md']))
+    expect(rep.hits).toEqual(['.claude/docs/x-y.md'])
+    expect(rep.missed).toEqual([])
+    expect(summarize([rep])[0]).toMatchObject({ sessions: 1, withBrief: 1, precision: 1 })
+  })
+
+  it('неподсказанный док попадает в missed', async () => {
+    const rep = await reportSession(row, transcript(['x-y.md', 'other-doc.md']))
+    expect(rep.missed).toEqual(['.claude/docs/other-doc.md'])
+    expect(summarize([rep])[0].recall).toBe(0.5)
+  })
+
+  it('свежий транскрипт — «в работе», в метрики не входит; нет файла — «не найден»', async () => {
+    const rep = await reportSession(row, transcript(['x-y.md'], new Date()))
+    expect(rep.status).toBe('in-progress')
+    expect(summarize([rep])).toEqual([])
+    expect((await reportSession(row, undefined)).status).toBe('no-transcript')
   })
 })
