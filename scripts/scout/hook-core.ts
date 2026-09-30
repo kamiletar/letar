@@ -305,6 +305,20 @@ export async function scoutQuery(
   }
 }
 
+/** Режим, группа A/B и «показана ли справка агенту» — общие для справки поиска и справки приложения */
+function delivery(home: string, sessionId: string, hasBrief: boolean) {
+  const mode = readMode(home)
+  const group = abGroup(sessionId)
+  return { mode, group, shown: hasBrief && (mode === 'on' || (mode === 'ab' && group === 'A')) }
+}
+
+/** Вывод для харнесса: строка владельцу и контекст агенту; не показана — `undefined` */
+function briefOutput(shown: boolean, systemMessage: string, brief: string): HookRun['output'] {
+  return shown
+    ? { systemMessage, hookSpecificOutput: { hookEventName: 'UserPromptSubmit', additionalContext: brief } }
+    : undefined
+}
+
 /** Длина строки справки приложения: как у хвоста основной справки */
 const APP_LINE_CHARS = 140
 const APP_BRIEF_HEADER = 'Справка скаута по приложению: что обычно читают в его сессиях; не по теме — игнорируй'
@@ -352,9 +366,7 @@ function appBriefRun(
     }),
   ].join('\n')
   writeState(home, sessionId, { ...state, appBriefed: true })
-  const mode = readMode(home)
-  const group = abGroup(sessionId)
-  const shown = mode === 'on' || (mode === 'ab' && group === 'A')
+  const { mode, group, shown } = delivery(home, sessionId, true)
   const log = {
     ts: new Date().toISOString(),
     sessionId,
@@ -369,12 +381,7 @@ function appBriefRun(
     chars: brief.length,
     ms: Math.round(performance.now() - started),
   }
-  const output = shown
-    ? {
-      systemMessage: `🔎 скаут: справка приложения, пунктов ${items.length}`,
-      hookSpecificOutput: { hookEventName: 'UserPromptSubmit', additionalContext: brief },
-    }
-    : undefined
+  const output = briefOutput(shown, `🔎 скаут: справка приложения, пунктов ${items.length}`, brief)
   return { output, log }
 }
 
@@ -403,9 +410,7 @@ export async function runScoutHook(
   const brief = formatBrief(result)
   const line = formatOneLine(result)
   writeState(home, sessionId, { attempts: state.attempts + 1, briefed: Boolean(brief) })
-  const mode = readMode(home)
-  const group = abGroup(sessionId)
-  const shown = Boolean(brief) && (mode === 'on' || (mode === 'ab' && group === 'A'))
+  const { mode, group, shown } = delivery(home, sessionId, Boolean(brief))
   const log = {
     ts: new Date().toISOString(),
     sessionId,
@@ -425,13 +430,7 @@ export async function runScoutHook(
     chars: brief.length,
     ms: Math.round(performance.now() - started),
   }
-  const output = shown
-    ? {
-      systemMessage: line,
-      hookSpecificOutput: { hookEventName: 'UserPromptSubmit', additionalContext: brief },
-    }
-    : undefined
-  return { output, log }
+  return { output: briefOutput(shown, line, brief), log }
 }
 
 /** Лог больше этого размера уходит в архив с отметкой времени (и по возрасту — см. `LOG_ROTATE_AGE_MS`) */

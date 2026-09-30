@@ -57,6 +57,8 @@ export interface SessionReport {
 
 export interface GroupSummary {
   group: string
+  /** Вид справки: поиск по сообщению или справка приложения по голой `/<app>` */
+  kind: 'поиск' | 'app'
   sessions: number
   withBrief: number
   precision?: number
@@ -193,22 +195,24 @@ export async function reportSession(row: BriefRow, file: string | undefined, now
   }
 }
 
-/** Сводка по группам `(mode, shown[, app])`; в метрики входят только сессии со статусом `ok` */
+/** Сводка по группам `(mode, shown, kind)`; в метрики входят только сессии со статусом `ok` */
 export function summarize(reports: SessionReport[]): GroupSummary[] {
   const groups = new Map<string, SessionReport[]>()
   for (const r of reports) {
     if (r.status !== 'ok') {
       continue
     }
-    const key = `${r.mode}/${r.shown ? 'показана' : 'тень'}${r.kind === 'app' ? '/app' : ''}`
+    const key = `${r.mode}/${r.shown ? 'показана' : 'тень'}/${r.kind === 'app' ? 'app' : 'поиск'}`
     groups.set(key, [...(groups.get(key) ?? []), r])
   }
-  return [...groups.entries()].map(([group, list]) => {
+  return [...groups.entries()].map(([key, list]) => {
+    const [mode, shownLabel, kind] = key.split('/')
     const sum = (f: (r: SessionReport) => number) => list.reduce((acc, r) => acc + f(r), 0)
     const withTool = list.filter((r) => r.tool)
     const hitsNovel = sum((r) => r.hits.filter((p) => r.openedNovel.includes(p)).length)
     return {
-      group,
+      group: `${mode}/${shownLabel}`,
+      kind: kind as GroupSummary['kind'],
       sessions: list.length,
       withBrief: list.filter((r) => r.suggested.length || r.tool).length,
       precision: ratio(sum((r) => r.hits.length), sum((r) => r.suggested.length)),
@@ -245,12 +249,12 @@ async function main() {
     }; в работе: ${count('in-progress')}; `
       + `транскрипт не найден: ${count('no-transcript')}`,
   )
-  console.log('группа | сессий | со справкой | точность | полнота | до правки | инструмент | медиана запроса')
+  console.log('группа | вид | сессий | со справкой | точность | полнота | до правки | инструмент | медиана запроса')
   for (const g of summary) {
     console.log(
-      `${g.group} | ${g.sessions} | ${g.withBrief} | ${pct(g.precision)} | ${pct(g.recall)} | ${pct(g.beforeEdit)} | ${
-        pct(g.toolRate)
-      } | ${g.medianQueryLength}`,
+      `${g.group} | ${g.kind} | ${g.sessions} | ${g.withBrief} | ${pct(g.precision)} | ${pct(g.recall)} | ${
+        pct(g.beforeEdit)
+      } | ${pct(g.toolRate)} | ${g.medianQueryLength}`,
     )
   }
   if (show > 0) {
