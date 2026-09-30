@@ -81,7 +81,7 @@ function listMarkdown(root: string, dir: string): string[] {
 
 function listToolFiles(root: string, kind: ToolKind): Array<{ path: string; name: string; nested?: boolean }> {
   if (kind === 'skill') {
-    const dir = '.claude/skills'
+    const dir = '.agents/skills'
     const full = join(root, dir)
     if (!existsSync(full)) {
       return []
@@ -120,7 +120,7 @@ export function collectCards(root: string): Card[] {
     entries.set(entry.path, entry)
   }
   const short = new Map<string, string>()
-  for (const entry of parseIndexEntries(read(root, 'CLAUDE.md') ?? '')) {
+  for (const entry of parseIndexEntries(read(root, 'AGENTS.md') ?? '')) {
     short.set(entry.path, entry.annotation)
   }
   const docPaths = new Set([

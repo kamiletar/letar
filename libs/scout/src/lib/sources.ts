@@ -26,7 +26,7 @@ const LEAD_MARKERS_RE = /^(\s*(⭐|⚠️?|✅|⛔)\s*)+/u
 /** Длина summary у секции: хватает, чтобы понять, про что она */
 const SECTION_SUMMARY_CHARS = 240
 
-/** Разбор INDEX.md или карты в CLAUDE.md: одна запись на строку-ссылку, с разделом `## …` */
+/** Разбор INDEX.md или карты в AGENTS.md: одна запись на строку-ссылку, с разделом `## …` */
 export function parseIndexEntries(markdown: string): IndexEntry[] {
   const entries: IndexEntry[] = []
   let topic: string | undefined
@@ -122,7 +122,7 @@ export interface DocInput {
   markdown: string
   /** Развёрнутая запись INDEX.md */
   entry?: IndexEntry
-  /** Короткая строка карты в CLAUDE.md */
+  /** Короткая строка карты в AGENTS.md */
   shortAnnotation?: string
 }
 
