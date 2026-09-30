@@ -160,7 +160,8 @@ export const RecipeCreateFormSchema = z.object({
   }),
 })
 
-export const RecipeUpdateFormSchema = RecipeCreateFormSchema.partial()
+// Update — та же схема, все поля optional; `.meta()` полей сохраняется (хелпер partialKeepingMeta, с 4.4.3)
+export const RecipeUpdateFormSchema = partialKeepingMeta(RecipeCreateFormSchema)
 export const RecipeExcludedFields = ['id', 'createdAt', 'updatedAt'] as const
 
 export type RecipeCreateForm = z.infer<typeof RecipeCreateFormSchema>
@@ -674,7 +675,7 @@ export const BookingCreateFormSchema = withNative(
 **Ограничения:**
 
 - **Только `{Model}CreateFormSchema`.** `{Model}UpdateFormSchema` строится из внутреннего
-  `{Model}BaseSchema` (до `.refine()`) через `.partial()` — у `ZodEffects`, которую возвращает
+  `{Model}BaseSchema` (до `.refine()`) через `partialKeepingMeta` (`.partial()` с сохранением меты) — у `ZodEffects`, которую возвращает
   `.refine()`, нет метода `.partial()`, а частичный payload часто физически не может
   удовлетворить проверке, рассчитанной на полную модель. Если форме редактирования тоже нужна
   эта проверка — добавляйте её отдельно на уровне формы (`@letar/forms` уровневая валидация), это

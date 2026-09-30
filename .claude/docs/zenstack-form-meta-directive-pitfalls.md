@@ -181,7 +181,9 @@ export async function createSupplier(input: unknown) {
 `<Model>UpdateFormSchema`, поле рендерится **без `<label>`, без плейсхолдера и без тултипа** —
 значение при этом сохраняется верно, typecheck и lint зелёные.
 
-**Механизм.** `UpdateFormSchema = CreateFormSchema.partial()`. `.partial()` заворачивает каждое
+> ✅ **Исправлено в `@letar/zenstack-form-plugin` ≥ 4.4.3:** Update строится через `partialKeepingMeta`, мета полей сохраняется (для моделей, где у полей есть мета). Правило «`.pick()` — из `Create`» остаётся безопасным: оно ещё и сохраняет обязательность. Ниже — механизм для схем, сгенерированных версиями до 4.4.3; после `zenstack generate` на 4.4.3+ проверяй `Update.shape.<поле>.meta()`.
+
+**Механизм (до 4.4.3).** `UpdateFormSchema = CreateFormSchema.partial()`. `.partial()` заворачивает каждое
 поле в новый `ZodOptional`, а `.meta()` в Zod v4 хранится в реестре по **идентичности объекта**
 схемы и через обёртки не разворачивается: у новой обёртки меты нет. `@letar/forms-core`
 (`getFieldMeta`) сначала смотрит мету на самой схеме, потом на развёрнутой — но развёртка идёт к

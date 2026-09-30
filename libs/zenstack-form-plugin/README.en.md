@@ -122,7 +122,8 @@ export const RecipeCreateFormSchema = z.object({
   }),
 })
 
-export const RecipeUpdateFormSchema = RecipeCreateFormSchema.partial()
+// Update: all fields optional, per-field .meta() preserved (partialKeepingMeta helper, since 4.4.3)
+export const RecipeUpdateFormSchema = partialKeepingMeta(RecipeCreateFormSchema)
 ```
 
 ### Use with @letar/forms
