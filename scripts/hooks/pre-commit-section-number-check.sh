@@ -37,7 +37,7 @@ TOPLEVEL="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 
 # Рабочая копия скрипта приоритетнее (правки в scripts/ применяются без переустановки
 # хуков); копия рядом с хуком — фолбэк для чекаутов без каталога scripts/ (submodule, где
-# этот хук всё равно не нужен — семейство PLAN*.md живёт только в корне letar, но копия
+# этот хук всё равно не нужен — семейство PLAN*.md живёт только в корне letar (PLAN.md и docs/plans/), но копия
 # кладётся install.sh'ом единообразно со всеми остальными хелперами).
 CHECKER=""
 for candidate in "$TOPLEVEL/scripts/check-section-numbers.mjs" "$DIR/_check-section-numbers.mjs"; do

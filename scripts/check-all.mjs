@@ -150,7 +150,7 @@ const CHECKS = [
     severity: 'gate',
     ci: 'partial',
     ciNote: 'приватные submodule не выкачаны — их package.json/исходники не проверены',
-    doc: 'PLAN-INFRA.md §169',
+    doc: 'docs/plans/PLAN-INFRA.md §169',
   },
   {
     id: 'electron-drift',
@@ -284,7 +284,7 @@ const CHECKS = [
     // в CI видны целиком, ложной красной, которая приучила бы игнорировать проверку, нет.
     severity: 'gate',
     ci: 'full',
-    doc: 'PLAN-INFRA-6.md §157',
+    doc: 'docs/plans/PLAN-INFRA-6.md §157',
   },
   {
     id: 'compose-mount-parity',
@@ -356,7 +356,7 @@ const CHECKS = [
     severity: 'gate',
     ci: 'no',
     ciNote: 'worktree-каталоги — локальный артефакт машины разработчика, в CI их нет',
-    doc: 'PLAN-INFRA-4.md §120',
+    doc: 'docs/plans/PLAN-INFRA-4.md §120',
   },
   {
     id: 'stray-dts',
@@ -375,13 +375,13 @@ const CHECKS = [
   {
     id: 'public-domains',
     group: 'hygiene',
-    title: 'публичные *.md без доменов коммерческих приложений и реквизитов продавцов',
+    title: 'публичные файлы без доменов коммерческих приложений и реквизитов продавцов',
     run: ['node', ['scripts/check-public-domains.mjs']],
     // gate: правило public-repo-hygiene держалось на дисциплине и не удержалось — на
     // 2026-09-30 в 26 публичных md нашлись реальные домены и два ИНН, часть из них в
     // истории с июля. Проверка по хешам (scripts/data/private-domains.sha256), поэтому
-    // приватный submodule не нужен и в CI покрытие полное. Область — только *.md: домены в
-    // nginx/traefik/коде функциональны. Та же проверка на коммит-пути (--staged) —
+    // приватный submodule не нужен и в CI покрытие полное. Область — все tracked текстовые
+    // файлы; функциональные домены (nginx/traefik, redirect URI) — в public-domains-allowlist.txt. Та же проверка на коммит-пути (--staged) —
     // scripts/hooks/pre-commit-public-domains.sh.
     severity: 'gate',
     ci: 'full',
