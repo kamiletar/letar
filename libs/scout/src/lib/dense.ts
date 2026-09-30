@@ -103,7 +103,8 @@ export class DenseIndex {
     return this.rowById.has(id)
   }
 
-  search(query: Float32Array, limit: number): Array<{ id: string; score: number }> {
+  /** `adjust(id)` вычитается из косинуса до сортировки (CSLS: штраф за хабность вектора) */
+  search(query: Float32Array, limit: number, adjust?: (id: string) => number): Array<{ id: string; score: number }> {
     const scores: Array<{ id: string; score: number }> = []
     for (let row = 0; row < this.ids.length; row++) {
       let dot = 0
@@ -111,7 +112,7 @@ export class DenseIndex {
       for (let d = 0; d < this.dims; d++) {
         dot += this.matrix[offset + d] * query[d]
       }
-      scores.push({ id: this.ids[row], score: dot })
+      scores.push({ id: this.ids[row], score: adjust ? dot - adjust(this.ids[row]) : dot })
     }
     return scores.sort((a, b) => b.score - a.score).slice(0, limit)
   }
@@ -159,18 +160,150 @@ export function fusedHits(cards: IndexedCard[], fused: Map<string, number>, limi
     })
 }
 
+/**
+ * Поправки на «хабы» — доки, которые всплывают в первой пятёрке почти на любой запрос. Все выключены,
+ * пока не заданы; каждая включается отдельно.
+ */
+export interface HubOptions {
+  /** A: до слияния в каждом списке остаётся только лучшая карточка дока (один шанс на список) */
+  oneCardPerDoc?: boolean
+  /** B: очки после слияния делятся на `1 + γ·ln(карточек дока)` */
+  lengthPenalty?: number
+  /** C: `cos' = cos − β·hub(c)` в списке эмбеддингов; `hubs` — см. `computeHubs` */
+  csls?: { beta: number; hubs: Map<string, number> }
+}
+
+const DOC_KINDS = new Set(['doc', 'section', 'rule'])
+
+/** Ключ дока для карточки: путь; карточки других видов (инструменты, поля) в поправках не участвуют */
+function docKey(card: IndexedCard | undefined): string | undefined {
+  return card && DOC_KINDS.has(card.kind) ? card.path : undefined
+}
+
+/**
+ * Оставляет в списке первую (лучшую) карточку каждого дока, порядок остальных не меняется.
+ * Карточки не из доков проходят как есть.
+ */
+export function keepBestPerDoc(ids: string[], byId: Map<string, IndexedCard>): string[] {
+  const seen = new Set<string>()
+  return ids.filter((id) => {
+    const key = docKey(byId.get(id))
+    if (key === undefined) {
+      return true
+    }
+    if (seen.has(key)) {
+      return false
+    }
+    seen.add(key)
+    return true
+  })
+}
+
+/** Сколько карточек (док, секции, правило) у каждого дока */
+export function docCardCounts(cards: IndexedCard[]): Map<string, number> {
+  const counts = new Map<string, number>()
+  for (const card of cards) {
+    const key = docKey(card)
+    if (key !== undefined) {
+      counts.set(key, (counts.get(key) ?? 0) + 1)
+    }
+  }
+  return counts
+}
+
+/** Штраф B: очки карточки дока делятся на `1 + γ·ln(n)`; `γ = 0` и док из одной карточки не меняются */
+export function penalizeByLength(
+  fused: Map<string, number>,
+  byId: Map<string, IndexedCard>,
+  counts: Map<string, number>,
+  gamma: number,
+): Map<string, number> {
+  if (!(gamma > 0)) {
+    return fused
+  }
+  const out = new Map<string, number>()
+  for (const [id, score] of fused) {
+    const key = docKey(byId.get(id))
+    const n = key === undefined ? 1 : counts.get(key) ?? 1
+    out.set(id, score / (1 + gamma * Math.log(n)))
+  }
+  return out
+}
+
+/**
+ * Хабность вектора карточки для CSLS: среднее из `k` наибольших косинусов к строкам пула
+ * формулировок **чужих** доков. Пул — только формулировки: запросы набора в него не входят, иначе
+ * эталон утёк бы в поправку. Формулировки самого дока пропускаются (по пути в id строки).
+ * `phrases.ids` — `<вид>:<путь>` на каждую строку; `pathOf(id)` — путь карточки или `undefined`.
+ */
+export function computeHubs(
+  dense: DenseIndex,
+  phrases: DenseIndex,
+  pathOf: (id: string) => string | undefined,
+  k = 10,
+): Map<string, number> {
+  const phrasePaths = phrases.ids.map((id) => id.slice(id.indexOf(':') + 1))
+  const hubs = new Map<string, number>()
+  const top = new Float32Array(k)
+  for (let row = 0; row < dense.ids.length; row++) {
+    const id = dense.ids[row]
+    const own = pathOf(id)
+    const offset = row * dense.dims
+    top.fill(-Infinity)
+    let worst = 0
+    for (let p = 0; p < phrases.ids.length; p++) {
+      if (phrasePaths[p] === own) {
+        continue
+      }
+      let dot = 0
+      const po = p * phrases.dims
+      for (let d = 0; d < dense.dims; d++) {
+        dot += dense.matrix[offset + d] * phrases.matrix[po + d]
+      }
+      if (dot > top[worst]) {
+        top[worst] = dot
+        worst = 0
+        for (let i = 1; i < k; i++) {
+          if (top[i] < top[worst]) {
+            worst = i
+          }
+        }
+      }
+    }
+    let sum = 0
+    let n = 0
+    for (const x of top) {
+      if (x > -Infinity) {
+        sum += x
+        n++
+      }
+    }
+    hubs.set(id, n ? sum / n : 0)
+  }
+  return hubs
+}
+
 /** RRF верхушек BM25 и плотного поиска; хвост BM25 с нулевыми очками (для инструментов) */
 export function fuseWithDense(
   cards: IndexedCard[],
   bm25: Hit[],
   dense: DenseIndex,
   vector: Float32Array,
-  options: { depth?: number; k?: number; extra?: string[][] } = {},
+  options: { depth?: number; k?: number; extra?: string[][]; hub?: HubOptions } = {},
 ): Hit[] {
-  const { depth = 100, k = 60, extra = [] } = options
-  const denseIds = dense.search(vector, depth).map((d) => d.id)
-  const lists = [bm25.slice(0, depth).map((h) => h.card.id), denseIds, ...extra.map((r) => r.slice(0, depth))]
-  const fused = reciprocalRankFusion(lists, k)
+  const { depth = 100, k = 60, extra = [], hub } = options
+  const byId = new Map(cards.map((c) => [c.id, c]))
+  const one = hub?.oneCardPerDoc === true
+  // Под A глубина считается уже по докам: сначала сводим список к лучшим карточкам, потом режем
+  const cut = (ids: string[]) => (one ? keepBestPerDoc(ids, byId) : ids).slice(0, depth)
+  const csls = hub?.csls && hub.csls.beta > 0 ? hub.csls : undefined
+  const adjust = csls ? (id: string) => csls.beta * (csls.hubs.get(id) ?? 0) : undefined
+  const denseIds = dense.search(vector, one || csls ? dense.ids.length : depth, adjust).map((d) => d.id)
+  const lists = [cut(bm25.map((h) => h.card.id)), cut(denseIds), ...extra.map(cut)]
+  let fused = reciprocalRankFusion(lists, k)
+  if (hub?.lengthPenalty) {
+    fused = penalizeByLength(fused, byId, docCardCounts(cards), hub.lengthPenalty)
+  }
   const head = fusedHits(cards, fused, fused.size)
   const inHead = new Set(head.map((h) => h.card.id))
   // Хвост BM25 нужен для инструментов: их короткие карточки редко попадают в верхушку

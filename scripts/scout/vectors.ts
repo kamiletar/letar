@@ -6,12 +6,22 @@
  * Запуск: bun scripts/scout/vectors.ts [--url http://127.0.0.1:8090] [--if-stale]
  * `--if-stale` — пересчитывать, только если есть карточки без актуального вектора, иначе выйти молча.
  */
+import { createHash } from 'node:crypto'
 import { rmSync } from 'node:fs'
 import { join } from 'node:path'
-import { type Card, cardEmbedText, collectCards, DenseIndex, embedHash, embedTexts } from '../../libs/scout/src/index'
+import {
+  type Card,
+  cardEmbedText,
+  collectCards,
+  computeHubs,
+  DenseIndex,
+  embedHash,
+  embedTexts,
+} from '../../libs/scout/src/index'
 import { findRepoRoot } from './index-store'
 import { EMBED_MODEL, readMatrixStore, writeMatrixStore } from './matrix-store'
 import { scoutHome } from './paths'
+import type { PhraseStore } from './phrases'
 
 export const EMBED_URL = process.env.SCOUT_EMBED_URL ?? 'http://127.0.0.1:8090'
 export const RERANK_URL = process.env.SCOUT_RERANK_URL ?? 'http://127.0.0.1:8091'
@@ -26,6 +36,46 @@ export interface VectorStore {
 }
 
 const BATCH = 16
+
+/** Сколько наибольших косинусов к пулу формулировок усредняет hub карточки (CSLS) */
+export const HUB_K = 10
+
+/**
+ * Хабность карточек для CSLS (`computeHubs`): считается офлайн из готовых векторов и кешируется в
+ * `card-hubs.json/.f32` рядом с ними. Хеш строки — вектор карточки, пул формулировок и `k`: смена
+ * любого из них пересчитывает карточку. Сервер эмбеддингов не нужен.
+ */
+export function loadOrBuildHubs(
+  home: string,
+  store: VectorStore,
+  phrases: PhraseStore,
+  cards: Array<{ id: string; path: string }>,
+  k = HUB_K,
+): Map<string, number> {
+  const pool = createHash('sha1')
+    .update([...phrases.hashByPath].sort(([a], [b]) => (a < b ? -1 : 1)).map(([p, h]) => `${p}=${h}`).join(';'))
+    .digest('hex')
+    .slice(0, 16)
+  const hashOf = (id: string) =>
+    createHash('sha1').update(`${store.hashById.get(id)}|${pool}|${k}`).digest('hex').slice(0, 16)
+  const cached = readMatrixStore(home, 'card-hubs')
+  if (cached && cached.meta.dims === 1) {
+    const { ids, hashes } = cached.meta
+    if (ids.length === store.dense.ids.length && ids.every((id, i) => hashes[i] === hashOf(id))) {
+      return new Map(ids.map((id, i) => [id, cached.matrix[i]]))
+    }
+  }
+  const pathById = new Map(cards.map((c) => [c.id, c.path]))
+  const hubs = computeHubs(store.dense, phrases.index, (id) => pathById.get(id), k)
+  const ids = store.dense.ids
+  writeMatrixStore(
+    home,
+    'card-hubs',
+    { model: EMBED_MODEL, dims: 1, ids, hashes: ids.map(hashOf) },
+    Float32Array.from(ids.map((id) => hubs.get(id) ?? 0)),
+  )
+  return hubs
+}
 
 /** Файл блокировки фонового пересчёта (создаёт `warmup.ts`) */
 export function vectorsLockPath(home = scoutHome()): string {

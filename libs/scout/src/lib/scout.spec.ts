@@ -2,11 +2,15 @@ import { Bm25, buildIndex } from './bm25'
 import { BRIEF_HEADER, formatBrief, formatOneLine } from './brief'
 import { parsePatternRegistry } from './collect'
 import {
+  computeHubs,
   DenseIndex,
+  docCardCounts,
   embedHash,
   formatQuery,
   fuseWithDense,
   hybridHits,
+  keepBestPerDoc,
+  penalizeByLength,
   phraseHash,
   phraseRanking,
   QUERY_CHARS,
@@ -24,6 +28,7 @@ import {
   truncate,
 } from './sources'
 import { tokenize } from './text'
+import type { IndexedCard } from './types'
 
 describe('tokenize', () => {
   it('стеммирует русский и английский, режет camelCase и kebab-case', () => {
@@ -545,5 +550,59 @@ describe('phraseRanking и fuseWithDense с extra', () => {
     expect(without.map((h) => h.card.id)).toEqual([ids[2]])
     const withExtra = fuseWithDense(engine.cards, bm25, dense, query, { depth: 1, extra: [[ids[0]]] })
     expect(withExtra.map((h) => h.card.id).sort()).toEqual([ids[0], ids[2]].sort())
+  })
+})
+
+describe('поправки на хабы', () => {
+  const card = (id: string, kind: IndexedCard['kind'], path: string) =>
+    ({ id, kind, path, line: 1, title: id, summary: '', tf: {}, len: 1, embedHash: '' }) as IndexedCard
+  const cards = [
+    card('sec:a:1', 'section', 'a.md'),
+    card('sec:b:1', 'section', 'b.md'),
+    card('sec:a:2', 'section', 'a.md'),
+    card('sec:a:3', 'section', 'a.md'),
+    card('doc:c', 'doc', 'c.md'),
+    card('skill:s', 'skill', 's.md'),
+  ]
+  const byId = new Map(cards.map((c) => [c.id, c]))
+
+  it('A: из [a1, b1, a2, a3] остаются [a1, b1], носитель дока — a1; не доки проходят', () => {
+    expect(keepBestPerDoc(['sec:a:1', 'sec:b:1', 'sec:a:2', 'sec:a:3'], byId)).toEqual(['sec:a:1', 'sec:b:1'])
+    expect(keepBestPerDoc(['skill:s', 'sec:a:2', 'skill:s'], byId)).toEqual(['skill:s', 'sec:a:2', 'skill:s'])
+  })
+
+  it('B: γ = 0 очки не меняет, док с одной карточкой не штрафуется, длинный — да', () => {
+    const fused = new Map([['sec:a:1', 1], ['doc:c', 1]])
+    const counts = docCardCounts(cards)
+    expect(counts.get('a.md')).toBe(3)
+    expect(penalizeByLength(fused, byId, counts, 0)).toBe(fused)
+    const out = penalizeByLength(fused, byId, counts, 0.2)
+    expect(out.get('doc:c')).toBe(1)
+    expect(out.get('sec:a:1')).toBeCloseTo(1 / (1 + 0.2 * Math.log(3)), 10)
+  })
+
+  it('C: формулировки самого дока в hub не входят; β = 0 выдачу не меняет', () => {
+    const dense = new DenseIndex(['sec:a:1', 'sec:b:1'], Float32Array.from([1, 0, 0, 1]), 2)
+    // Формулировка a.md совпадает с вектором a: при её учёте hub(a) был бы 1, без неё — 0
+    const phrases = new DenseIndex(['doc:a.md', 'doc:b.md', 'doc:c.md'], Float32Array.from([1, 0, 0, 1, 1, 0]), 2)
+    const pathOf = (id: string) => byId.get(id)?.path
+    const hubs = computeHubs(dense, phrases, pathOf, 1)
+    // Чужие для a: b [0,1] → 0 и c [1,0] → 1, берётся наибольший (k = 1)
+    expect(hubs.get('sec:a:1')).toBeCloseTo(1, 6)
+    // Чужие для b: a [1,0] → 0, c [1,0] → 0
+    expect(hubs.get('sec:b:1')).toBeCloseTo(0, 6)
+    const onlyOwn = computeHubs(dense, new DenseIndex(['doc:a.md'], Float32Array.from([1, 0]), 2), pathOf, 1)
+    expect(onlyOwn.get('sec:a:1')).toBe(0)
+
+    const bm25: never[] = []
+    const query = Float32Array.from([1, 0])
+    const plain = fuseWithDense(cards, bm25, dense, query, { depth: 2 })
+    const zero = fuseWithDense(cards, bm25, dense, query, { depth: 2, hub: { csls: { beta: 0, hubs } } })
+    expect(zero.map((h) => h.card.id)).toEqual(plain.map((h) => h.card.id))
+    const strong = fuseWithDense(cards, bm25, dense, query, {
+      depth: 2,
+      hub: { csls: { beta: 1, hubs: new Map([['sec:a:1', 5]]) } },
+    })
+    expect(strong[0].card.id).toBe('sec:b:1')
   })
 })

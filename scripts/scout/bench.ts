@@ -42,7 +42,8 @@ import { scoreAppBriefs } from './app-briefs'
 import { arg, readJsonl } from './cli'
 import { advisableTools, type EvalCase, evaluate, type Metrics } from './eval'
 import { type FormProbe, formsNegatives, scoreProbe } from './forms-eval'
-import { freshIndex, scoutQuery, type ScoutQueryResult } from './hook-core'
+import { freshIndex, type HubSpec, parseHubSpec, scoutQuery, type ScoutQueryResult } from './hook-core'
+import { hubMetrics } from './hubs'
 import { findRepoRoot, indexPath } from './index-store'
 import {
   JUDGE_MODEL,
@@ -57,7 +58,7 @@ import {
 import type { SessionRecord } from './mine-transcripts'
 import { scoutDataDir, scoutHome } from './paths'
 import { loadPhraseStore } from './phrases'
-import { loadVectorStore } from './vectors'
+import { loadOrBuildHubs, loadVectorStore } from './vectors'
 
 export type Suite = 'docs' | 'forms' | 'latency' | 'robust' | 'hook' | 'judge' | 'app'
 const ALL_SUITES: Suite[] = ['docs', 'forms', 'latency', 'robust', 'hook', 'judge', 'app']
@@ -152,6 +153,8 @@ const SUMMARY: Array<{ key: string; unit: Unit; journal?: boolean }> = [
   { key: 'инстр. точн.', unit: 'pp', journal: true },
   { key: 'нов. R@5 dev', unit: 'pp', journal: true },
   { key: 'нов. R@5 test', unit: 'pp', journal: true },
+  { key: 'хабы топ-10 dev', unit: 'pp' },
+  { key: 'хаб макс dev', unit: 'pp' },
   { key: 'лишнее', unit: 'pp', journal: true },
   { key: 'суд. по делу@3 dev', unit: 'pp', journal: true },
   { key: 'суд. по делу@3 test', unit: 'pp', journal: true },
@@ -206,7 +209,15 @@ type AppScore = ReturnType<typeof scoreAppBriefs>['app']
 interface BenchRun {
   label: string
   ts: string
-  env: { gitSha: string; dirty: boolean; cards: number; vectors: boolean; embedder: boolean; suites: Suite[] }
+  env: {
+    gitSha: string
+    dirty: boolean
+    cards: number
+    vectors: boolean
+    embedder: boolean
+    suites: Suite[]
+    hub?: string
+  }
   docs?: { groups: DocsGroup[]; avgChars: number; emptyShare: number }
   forms?: { sets: FormsSet[]; negatives: { cases: number; fieldsShare: number; patternShare: number } }
   latency?: { n: number; p50: number; p95: number; max: number }
@@ -237,11 +248,11 @@ function stamp(d = new Date()): string {
 }
 
 const USAGE = `Запуск: bun scripts/scout/bench.ts [--label <имя>] [--suite ${ALL_SUITES.join(',')}]
-  [--hook-runs 5] [--compare <путь к json | last>] [--no-phrases] [--help]`
+  [--hook-runs 5] [--compare <путь к json | last>] [--no-phrases] [--hub A|B:<γ>|C:<β>|A+C:<β>] [--help]`
 
 /** Флаги со значением и без; неизвестный флаг — ошибка (код 2), `--help` — справка */
 function checkArgs(argv: string[]): void {
-  const withValue = new Set(['--label', '--suite', '--hook-runs', '--compare'])
+  const withValue = new Set(['--label', '--suite', '--hook-runs', '--compare', '--hub'])
   const bare = new Set(['--no-phrases', '--help'])
   if (argv.includes('--help')) {
     console.log(USAGE)
@@ -404,7 +415,12 @@ async function main() {
   // `--no-phrases` — прогон без третьего списка слияния, для сравнения
   const noPhrases = process.argv.includes('--no-phrases')
   const phrases = noPhrases ? null : loadPhraseStore(home) ?? null
-  const deps = { store, phrases }
+  // `--hub` — поправка на хабы в выдаче доков (A, B:<γ>, C:<β>, комбинации через `+`); без флага выключены
+  const hubSpec: HubSpec | undefined = arg('--hub') ? parseHubSpec(arg('--hub')!) : undefined
+  const hubs = hubSpec?.beta && store && phrases
+    ? loadOrBuildHubs(home, store, phrases, freshIndex(root, home).cards)
+    : undefined
+  const deps = { store, phrases, hub: hubSpec, hubs }
   const advisable = advisableTools(engine.cards)
 
   // Кеш по тексту запроса: сьюты делят общие запросы и не гоняют эмбеддер дважды
@@ -433,6 +449,7 @@ async function main() {
       vectors: store !== null,
       embedder: warm.forms === 'dense',
       suites,
+      hub: arg('--hub'),
     },
     summary: {},
   }
@@ -468,8 +485,19 @@ async function main() {
     const out: DocsGroup[] = []
     console.log('\n== docs ==')
     for (const [group, list] of groups) {
-      const { metrics } = await evaluate(search, list, advisable, { redundant })
+      const { metrics, perCase } = await evaluate(search, list, advisable, { redundant })
       out.push({ group, ...metrics })
+      if (group === 'dev') {
+        // Хабность на итоговой выдаче: первые 5 по очкам, как их видит агент
+        const hub = hubMetrics(perCase.map((c) => c.got.slice(0, 5)))
+        s['хабы топ-10 dev'] = hub.top10Share * 100
+        s['хаб макс dev'] = hub.maxFreq * 100
+        console.log(
+          `${''.padEnd(9)} хабность: 10 частых доков занимают ${pct(hub.top10Share)} мест пятёрки, максимум ${
+            pct(hub.maxFreq)
+          } запросов`,
+        )
+      }
       console.log(
         `${group.padEnd(9)} n=${String(metrics.cases).padStart(3)}  R@5 ${pct(metrics.recall5).padStart(6)}  R@8 ${
           pct(metrics.recall8).padStart(6)
@@ -733,7 +761,8 @@ async function main() {
   const prevPath = compare === 'last'
     ? readdirSync(runsDir).filter((f) => f.endsWith('.json')).sort().map((f) => join(runsDir, f)).at(-1)
     : compare
-  const file = join(runsDir, `${stamp(now)}-${label}.json`)
+  // Метка бывает с `:` (`--hub C:0.5`): в имени файла на Windows это поток данных, а не часть имени
+  const file = join(runsDir, `${stamp(now)}-${label.replace(/[^\w.=+-]+/g, '_')}.json`)
   writeFileSync(file, JSON.stringify(result, null, 2))
   appendJournal(benchDir, result)
   console.log(`\nПрогон → ${file}\nЖурнал → ${join(benchDir, 'journal.md')}`)

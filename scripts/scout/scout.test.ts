@@ -15,14 +15,24 @@ import {
 import { buildAppBriefs, readAppBriefs, scoreAppBriefs } from './app-briefs'
 import { splitOf } from './bench'
 import { buildCases, evaluate } from './eval'
-import { abGroup, appendLog, decide, LOG_MAX_BYTES, MAX_ATTEMPTS, runScoutHook, scoutQuery } from './hook-core'
+import {
+  abGroup,
+  appendLog,
+  decide,
+  LOG_MAX_BYTES,
+  MAX_ATTEMPTS,
+  parseHubSpec,
+  runScoutHook,
+  scoutQuery,
+} from './hook-core'
+import { hubMetrics, spearman, topFrequency } from './hubs'
 import { indexPath } from './index-store'
 import { judgeGroups, judgeItems, loadLabels } from './judge'
 import { readMatrixStore, writeMatrixStore } from './matrix-store'
 import { mineSession, normalizeKnowledgePath, parseHumanText, type SessionRecord } from './mine-transcripts'
 import { generatePhrases, loadPhraseStore, readPhraseRows } from './phrases'
 import { isProbe, pickRows, reportSession, summarize } from './report'
-import { EMBED_MODEL, loadVectorStore } from './vectors'
+import { EMBED_MODEL, loadOrBuildHubs, loadVectorStore } from './vectors'
 
 describe('decide', () => {
   const fresh = { attempts: 0, briefed: false }
@@ -790,5 +800,53 @@ describe('report: справка приложения и поиска в одн�
     expect(reports.map((r) => r.kind)).toEqual(['app', undefined])
     const groups = summarize(reports.map((r) => ({ ...r, status: 'ok' as const }))).map((g) => `${g.group}|${g.kind}`)
     expect(groups.sort()).toEqual(['shadow/тень|app', 'shadow/тень|поиск'])
+  })
+})
+
+describe('хабы: разбор флага и метрики', () => {
+  it('parseHubSpec: A, B:γ, C:β и комбинации; пусто и none — без поправок; мусор — ошибка', () => {
+    expect(parseHubSpec('A')).toEqual({ oneCard: true })
+    expect(parseHubSpec('B:0.2')).toEqual({ gamma: 0.2 })
+    expect(parseHubSpec('A+C:0.5')).toEqual({ oneCard: true, beta: 0.5 })
+    expect(parseHubSpec('none')).toEqual({})
+    expect(() => parseHubSpec('D')).toThrow()
+    expect(() => parseHubSpec('B')).toThrow()
+  })
+
+  it('частота считается один раз на запрос; метрики — доля мест и максимум', () => {
+    const rankings = [['a', 'b'], ['a', 'c'], ['a', 'b']]
+    expect(topFrequency(rankings).get('a')).toBe(3)
+    const m = hubMetrics(rankings, 1)
+    expect(m.maxFreq).toBe(1)
+    expect(m.top10Share).toBeCloseTo(3 / 6, 10)
+  })
+
+  it('spearman: монотонная связь даёт 1, обратная -1, константа 0', () => {
+    expect(spearman([1, 2, 3, 4], [10, 20, 30, 40])).toBeCloseTo(1, 10)
+    expect(spearman([1, 2, 3], [3, 2, 1])).toBeCloseTo(-1, 10)
+    expect(spearman([1, 1, 1], [1, 2, 3])).toBe(0)
+  })
+
+  it('loadOrBuildHubs: считает, кеширует рядом с векторами и пересчитывает при смене пула', () => {
+    const home = mkdtempSync(join(tmpdir(), 'scout-hubs-'))
+    const store = {
+      dense: new DenseIndex(['sec:a:1', 'sec:b:1'], Float32Array.from([1, 0, 0, 1]), 2),
+      hashById: new Map([['sec:a:1', 'ha'], ['sec:b:1', 'hb']]),
+    }
+    const cards = [{ id: 'sec:a:1', path: 'a.md' }, { id: 'sec:b:1', path: 'b.md' }]
+    const phrases = (hash: string) => ({
+      index: new DenseIndex(['doc:a.md', 'doc:b.md'], Float32Array.from([1, 0, 1, 0]), 2),
+      hashByPath: new Map([['a.md', hash], ['b.md', hash]]),
+    })
+    const first = loadOrBuildHubs(home, store, phrases('x'), cards, 1)
+    // Для a чужая формулировка b [1,0] → 1; для b чужая a [1,0] → 0
+    expect(first.get('sec:a:1')).toBeCloseTo(1, 6)
+    expect(first.get('sec:b:1')).toBeCloseTo(0, 6)
+    expect(existsSync(join(home, 'card-hubs.f32'))).toBe(true)
+    const cached = loadOrBuildHubs(home, store, phrases('x'), [], 1)
+    expect(cached.get('sec:a:1')).toBeCloseTo(1, 6)
+    // Другой пул формулировок — хеш не сходится, пересчёт (список карточек пуст: пути неизвестны, свои формулировки не исключаются)
+    const recomputed = loadOrBuildHubs(home, store, phrases('y'), [], 1)
+    expect(recomputed.get('sec:b:1')).toBeCloseTo(0, 6)
   })
 })
