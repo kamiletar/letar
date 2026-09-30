@@ -1,5 +1,13 @@
 # Выполненные задачи — @letar/forms
 
+## 2026-09-30 (`OliveDesert`, временная identity) — `UpdateFormSchema` сохраняет `.meta()` полей (zenstack-form-plugin 4.4.3)
+
+**Проблема:** `<Model>UpdateFormSchema = CreateFormSchema.partial()` — `.partial()` оборачивает поля в новые `ZodOptional`, а `.meta()` в Zod v4 привязан к экземпляру схемы; форма рисовала поле без label/плейсхолдера/тултипа, typecheck зелёный.
+
+**Решение:** в `model-generator.ts` эмитится хелпер `partialKeepingMeta` (`partial()` + `extend` с переносом меты; strict и `z.infer` сохраняются), только для моделей, где у полей есть мета. Тест `update-schema-meta.spec.ts` исполняет сгенерированный код. Обновлены README (ru/en), CHANGELOG, `.claude/docs/zenstack-form-meta-directive-pitfalls.md` §5.
+
+**Открыто:** приложениям-потребителям нужен `zenstack generate`; `forms-coordinator-dev` был retired — не уведомлён.
+
 ## 2026-09-27 (`MagentaBeacon`, временная identity — `forms-dev` был занят живой сессией) — общий `interpolate()` для builtin-строк вместо ручного `.replace()` (forms-core 0.28.0, forms 2.36.1, forms-react 0.26.1, forms-shadcn 0.58.1)
 
 **Контекст:** побочная находка предыдущей сессии, добавившей `ImagePopover.sizeHint`/
