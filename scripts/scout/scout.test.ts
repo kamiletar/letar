@@ -17,8 +17,9 @@ import { buildCases, evaluate } from './eval'
 import { abGroup, appendLog, decide, MAX_ATTEMPTS, runScoutHook, scoutQuery } from './hook-core'
 import { indexPath } from './index-store'
 import { judgeGroups, judgeItems, loadLabels } from './judge'
+import { readMatrixStore, writeMatrixStore } from './matrix-store'
 import { mineSession, normalizeKnowledgePath, parseHumanText, type SessionRecord } from './mine-transcripts'
-import { loadPhraseStore } from './phrases'
+import { generatePhrases, loadPhraseStore, readPhraseRows } from './phrases'
 import { EMBED_MODEL, loadVectorStore } from './vectors'
 
 describe('decide', () => {
@@ -370,22 +371,22 @@ describe('judge', () => {
     const server = fakeServer(() => 'Ответ: [2, 0, 1]')
     try {
       const labels = await judgeItems('запрос', items, { url: `http://127.0.0.1:${server.port}`, timeoutMs: 500 })
-      expect(labels).toEqual([2, 0, 1])
+      expect(labels).toEqual({ labels: [2, 0, 1] })
     } finally {
       server.stop(true)
     }
   })
 
-  it('мусор дважды даёт undefined, вторая попытка успевает', async () => {
+  it('мусор дважды даёт unparsed, вторая попытка успевает', async () => {
     let calls = 0
     const server = fakeServer(() => (++calls === 1 ? 'не знаю' : '[1,1,1]'))
     try {
       const url = `http://127.0.0.1:${server.port}`
-      expect(await judgeItems('запрос', items, { url, timeoutMs: 500 })).toEqual([1, 1, 1])
+      expect(await judgeItems('запрос', items, { url, timeoutMs: 500 })).toEqual({ labels: [1, 1, 1] })
       const bad = fakeServer(() => '[2,2]')
       try {
         expect(await judgeItems('запрос', items, { url: `http://127.0.0.1:${bad.port}`, timeoutMs: 500 }))
-          .toBeUndefined()
+          .toEqual({ error: 'unparsed' })
       } finally {
         bad.stop(true)
       }
@@ -394,12 +395,12 @@ describe('judge', () => {
     }
   })
 
-  it('закрытый порт — undefined быстро', async () => {
+  it('закрытый порт — unreachable быстро', async () => {
     const server = fakeServer(() => '[0,0,0]')
     const url = `http://127.0.0.1:${server.port}`
     server.stop(true)
     const started = performance.now()
-    expect(await judgeItems('запрос', items, { url, timeoutMs: 500 })).toBeUndefined()
+    expect(await judgeItems('запрос', items, { url, timeoutMs: 500 })).toEqual({ error: 'unreachable' })
     expect(performance.now() - started).toBeLessThan(2000)
   })
 })
@@ -446,6 +447,60 @@ describe('judgeGroups', () => {
   it('пустая группа не даёт NaN', () => {
     const [g] = judgeGroups([{ group: 'test', cases: [] }], new Map(), new Map())
     expect(g).toMatchObject({ cases: 0, coverage: 0, relevant3: 0, agreement: null })
+  })
+})
+
+describe('общее хранилище матриц', () => {
+  it('readMatrixStore: чужая модель и неверная длина → undefined; запись → чтение возвращает то же', () => {
+    const home = mkdtempSync(join(tmpdir(), 'scout-home-'))
+    const matrix = new Float32Array([1, 0, 0, 1])
+    writeMatrixStore(home, 'm', { model: 'другая-модель', dims: 2, ids: ['a', 'b'], hashes: ['x', 'y'] }, matrix)
+    expect(readMatrixStore(home, 'm')).toBeUndefined()
+    writeMatrixStore(home, 'm', { model: EMBED_MODEL, dims: 2, ids: ['a', 'b', 'c'], hashes: ['x', 'y', 'z'] }, matrix)
+    expect(readMatrixStore(home, 'm')).toBeUndefined()
+    writeMatrixStore(home, 'm', { model: EMBED_MODEL, dims: 2, ids: ['a', 'b'], hashes: ['x', 'y'] }, matrix)
+    const got = readMatrixStore(home, 'm')
+    expect(got?.meta.ids).toEqual(['a', 'b'])
+    expect(Array.from(got?.matrix ?? [])).toEqual([1, 0, 0, 1])
+    expect(readMatrixStore(home, 'нет')).toBeUndefined()
+  })
+})
+
+describe('генерация формулировок', () => {
+  it('ошибка сервера на одном доке не роняет остальные', async () => {
+    const root = mkdtempSync(join(tmpdir(), 'scout-repo-'))
+    mkdirSync(join(root, '.claude', 'docs'), { recursive: true })
+    const names = ['a', 'b', 'c']
+    writeFileSync(
+      join(root, '.claude', 'docs', 'INDEX.md'),
+      `## Разное\n${names.map((n) => `- [${n}](/.claude/docs/${n}.md) док ${n}`).join('\n')}\n`,
+    )
+    for (const n of names) {
+      writeFileSync(join(root, '.claude', 'docs', `${n}.md`), `# Док ${n}\nтекст ${n}\n`)
+    }
+    let calls = 0
+    const server = Bun.serve({
+      port: 0,
+      fetch: (req) => {
+        if (new URL(req.url).pathname === '/health') {
+          return new Response('ok')
+        }
+        return ++calls === 2
+          ? new Response('boom', { status: 500 })
+          : Response.json({
+            choices: [{ message: { content: 'добавь поле даты в форму\nпочему форма падает при отправке' } }],
+          })
+      },
+    })
+    try {
+      const home = mkdtempSync(join(tmpdir(), 'scout-home-'))
+      const cards = collectCards(root).filter((c) => c.kind === 'doc')
+      const res = await generatePhrases(root, cards, home, { url: `http://127.0.0.1:${server.port}` })
+      expect(res).toEqual({ done: 2, skipped: 1 })
+      expect(readPhraseRows(home).size).toBe(2)
+    } finally {
+      server.stop(true)
+    }
   })
 })
 

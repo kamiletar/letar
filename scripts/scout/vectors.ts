@@ -6,24 +6,18 @@
  * Запуск: bun scripts/scout/vectors.ts [--url http://127.0.0.1:8090] [--if-stale]
  * `--if-stale` — пересчитывать, только если есть карточки без актуального вектора, иначе выйти молча.
  */
-import { existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs'
+import { rmSync } from 'node:fs'
 import { join } from 'node:path'
 import { type Card, cardEmbedText, collectCards, DenseIndex, embedHash, embedTexts } from '../../libs/scout/src/index'
 import { findRepoRoot } from './index-store'
+import { EMBED_MODEL, readMatrixStore, writeMatrixStore } from './matrix-store'
 import { scoutHome } from './paths'
 
 export const EMBED_URL = process.env.SCOUT_EMBED_URL ?? 'http://127.0.0.1:8090'
 export const RERANK_URL = process.env.SCOUT_RERANK_URL ?? 'http://127.0.0.1:8091'
 
-/** Модель эмбеддера: векторы другой модели несовместимы, хранилище с чужой моделью не читается */
-export const EMBED_MODEL = 'Qwen3-Embedding-0.6B-Q8_0'
-
-interface VectorMeta {
-  model: string
-  dims: number
-  ids: string[]
-  hashes: string[]
-}
+// Модель эмбеддера живёт в `matrix-store`; реэкспорт — для прежних импортов
+export { EMBED_MODEL }
 
 /** Векторы вместе с хешами текстов карточек: по хешу хук сверяет их с индексом */
 export interface VectorStore {
@@ -40,33 +34,14 @@ export function vectorsLockPath(home = scoutHome()): string {
 
 /** Хранилище с проверками целостности; любое расхождение — `undefined` (считаем, что векторов нет) */
 export function loadVectorStore(home = scoutHome()): VectorStore | undefined {
-  const metaPath = join(home, 'vectors.json')
-  const binPath = join(home, 'vectors.f32')
-  if (!existsSync(metaPath) || !existsSync(binPath)) {
+  const stored = readMatrixStore(home, 'vectors')
+  if (!stored) {
     return undefined
   }
-  try {
-    const meta = JSON.parse(readFileSync(metaPath, 'utf8')) as VectorMeta
-    if (
-      meta.model !== EMBED_MODEL
-      || !(meta.dims > 0)
-      || !Array.isArray(meta.ids)
-      || !Array.isArray(meta.hashes)
-      || meta.hashes.length !== meta.ids.length
-    ) {
-      return undefined
-    }
-    const bytes = readFileSync(binPath)
-    const matrix = new Float32Array(bytes.buffer, bytes.byteOffset, bytes.byteLength / 4)
-    if (matrix.length !== meta.ids.length * meta.dims) {
-      return undefined
-    }
-    return {
-      dense: new DenseIndex(meta.ids, matrix, meta.dims),
-      hashById: new Map(meta.ids.map((id, i) => [id, meta.hashes[i]])),
-    }
-  } catch {
-    return undefined
+  const { meta, matrix } = stored
+  return {
+    dense: new DenseIndex(meta.ids, matrix, meta.dims),
+    hashById: new Map(meta.ids.map((id, i) => [id, meta.hashes[i]])),
   }
 }
 
@@ -86,9 +61,7 @@ export async function buildVectors(
   home = scoutHome(),
   log = console.error,
 ): Promise<{ computed: number; total: number }> {
-  const oldMeta = existsSync(join(home, 'vectors.json'))
-    ? (JSON.parse(readFileSync(join(home, 'vectors.json'), 'utf8')) as VectorMeta)
-    : undefined
+  const oldMeta = readMatrixStore(home, 'vectors')?.meta
   const old = loadDense(home)
   // Переиспользуем по хешу текста, не по id: у секций номер строки входит в id и сдвигается от правок выше
   const rowByHash = new Map<string, number>()
@@ -118,12 +91,7 @@ export async function buildVectors(
   const dims = vectors[0]?.length ?? 0
   const matrix = new Float32Array(cards.length * dims)
   vectors.forEach((v, i) => matrix.set(v as Float32Array, i * dims))
-  mkdirSync(home, { recursive: true })
-  const meta: VectorMeta = { model: EMBED_MODEL, dims, ids: cards.map((c) => c.id), hashes }
-  writeFileSync(join(home, 'vectors.f32.tmp'), Buffer.from(matrix.buffer))
-  writeFileSync(join(home, 'vectors.json.tmp'), JSON.stringify(meta))
-  renameSync(join(home, 'vectors.f32.tmp'), join(home, 'vectors.f32'))
-  renameSync(join(home, 'vectors.json.tmp'), join(home, 'vectors.json'))
+  writeMatrixStore(home, 'vectors', { model: EMBED_MODEL, dims, ids: cards.map((c) => c.id), hashes }, matrix)
   return { computed: todo.length, total: cards.length }
 }
 

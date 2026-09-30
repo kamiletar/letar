@@ -282,7 +282,9 @@ export async function scoutQuery(
     return { result: base, forms: forms.source, docsSource: 'bm25', ms: performance.now() - started }
   }
   // Доки и ловушки — по слиянию с плотным поиском (RRF); формулировки к докам — третий список
-  const phrases = deps.phrases === undefined ? loadPhraseStore(home) : deps.phrases ?? undefined
+  // `SCOUT_NO_PHRASES=1` — хук без формулировок (для сравнения в бенче)
+  const noPhrases = process.env.SCOUT_NO_PHRASES === '1'
+  const phrases = noPhrases ? undefined : deps.phrases === undefined ? loadPhraseStore(home) : deps.phrases ?? undefined
   const extra = phrases
     ? [phraseRanking(engine.cards, phrases.index, forms.store.dense, forms.vector)]
     : undefined

@@ -80,14 +80,17 @@ function parseLabels(text: string, count: number): Array<0 | 1 | 2> | undefined 
   }
 }
 
-/** Оценки судьи 9B для списка пунктов одного запроса; `undefined` — сервер не ответил или ответ не разобран (2 попытки) */
+/** `unreachable` — сеть, таймаут или HTTP не 2xx; `unparsed` — ответ пришёл, но дважды не разобрался */
+export type JudgeResult = { labels: Array<0 | 1 | 2> } | { error: 'unreachable' | 'unparsed' }
+
+/** Оценки судьи 9B для списка пунктов одного запроса (2 попытки) */
 export async function judgeItems(
   query: string,
   items: JudgeItem[],
   options: { url?: string; timeoutMs?: number } = {},
-): Promise<Array<0 | 1 | 2> | undefined> {
+): Promise<JudgeResult> {
   if (!items.length) {
-    return []
+    return { labels: [] }
   }
   const { url = JUDGE_URL, timeoutMs = 30_000 } = options
   const list = items
@@ -107,6 +110,7 @@ export async function judgeItems(
     max_tokens: 60,
     chat_template_kwargs: { enable_thinking: false },
   })
+  let reached = false
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
       const res = await fetch(`${url}/v1/chat/completions`, {
@@ -115,16 +119,20 @@ export async function judgeItems(
         body,
         signal: AbortSignal.timeout(timeoutMs),
       })
+      if (!res.ok) {
+        continue
+      }
+      reached = true
       const json = (await res.json()) as { choices?: Array<{ message: { content: string } }> }
       const labels = parseLabels(json.choices?.[0]?.message.content ?? '', items.length)
       if (labels) {
-        return labels
+        return { labels }
       }
     } catch {
-      // сервер недоступен или таймаут — вторая попытка, затем undefined
+      // сервер недоступен или таймаут — вторая попытка
     }
   }
-  return undefined
+  return { error: reached ? 'unparsed' : 'unreachable' }
 }
 
 /** Группа случаев для подсчёта: у каждого — сессия и пути показанных пунктов (первые 5) по порядку */

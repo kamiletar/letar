@@ -200,7 +200,7 @@ interface BenchRun {
   forms?: { sets: FormsSet[]; negatives: { cases: number; fieldsShare: number; patternShare: number } }
   latency?: { n: number; p50: number; p95: number; max: number }
   robust?: { passed: number; total: number; failed: string[] }
-  judge?: { groups: JudgeGroup[]; newLabels: number; serverAnswered: boolean | null }
+  judge?: { groups: JudgeGroup[]; newLabels: number; serverAnswered: boolean | null; unparsed: number }
   hook?: { runs: number; p50: number; max: number; ok: boolean; problems: string[] }
   summary: Summary
 }
@@ -225,7 +225,12 @@ function stamp(d = new Date()): string {
 }
 
 /** Настоящий хук отдельным процессом: время целиком, код выхода, валидность stdout */
-async function runHook(root: string, home: string, runs: number): Promise<NonNullable<BenchRun['hook']>> {
+async function runHook(
+  root: string,
+  home: string,
+  runs: number,
+  noPhrases = false,
+): Promise<NonNullable<BenchRun['hook']>> {
   const tmp = mkdtempSync(join(tmpdir(), 'scout-bench-'))
   const times: number[] = []
   const problems: string[] = []
@@ -247,7 +252,7 @@ async function runHook(root: string, home: string, runs: number): Promise<NonNul
         stdin: 'pipe',
         stdout: 'pipe',
         stderr: 'pipe',
-        env: { ...process.env, SCOUT_HOME: tmp, SCOUT_MODE: 'on' },
+        env: { ...process.env, SCOUT_HOME: tmp, SCOUT_MODE: 'on', ...(noPhrases ? { SCOUT_NO_PHRASES: '1' } : {}) },
       })
       proc.stdin.write(payload)
       await proc.stdin.end()
@@ -358,7 +363,8 @@ async function main() {
   const engine = new Bm25(freshIndex(root, home))
   const store = loadVectorStore(home) ?? null
   // `--no-phrases` — прогон без третьего списка слияния, для сравнения
-  const phrases = process.argv.includes('--no-phrases') ? null : loadPhraseStore(home) ?? null
+  const noPhrases = process.argv.includes('--no-phrases')
+  const phrases = noPhrases ? null : loadPhraseStore(home) ?? null
   const deps = { store, phrases }
   const advisable = advisableTools(engine.cards)
 
@@ -470,6 +476,7 @@ async function main() {
     const judged = cases.filter((c) => c.goldDocs.length)
     let newLabels = 0
     let serverAnswered: boolean | null = null
+    let unparsed = 0
     for (const c of judged) {
       const items = judgedItems((await run(c.query)).result)
       const missing = items.filter((it) => !labels.has(labelKey(c.sessionId, it.path)))
@@ -477,12 +484,18 @@ async function main() {
         continue
       }
       const got = await judgeItems(c.query, missing)
-      serverAnswered = got !== undefined
-      if (!got) {
+      if ('error' in got) {
+        // Сервер лёг — больше не зовём; ответ не разобран — только этот случай пропускаем
+        if (got.error === 'unreachable') {
+          serverAnswered = false
+        } else {
+          unparsed++
+        }
         continue
       }
+      serverAnswered = true
       missing.forEach((it, i) => {
-        const l: JudgeLabel = { sessionId: c.sessionId, path: it.path, label: got[i], judge: JUDGE_MODEL }
+        const l: JudgeLabel = { sessionId: c.sessionId, path: it.path, label: got.labels[i], judge: JUDGE_MODEL }
         labels.set(labelKey(c.sessionId, it.path), l)
         appendFileSync(labelsFile, `${JSON.stringify(l)}\n`)
         newLabels++
@@ -509,9 +522,11 @@ async function main() {
       )
     }
     console.log(
-      `новых меток от 9B: ${newLabels}${serverAnswered === false ? '; судья не ответил — считаю по кешу' : ''}`,
+      `новых меток от 9B: ${newLabels}${
+        serverAnswered === false ? '; судья не ответил — считаю по кешу' : ''
+      }; не разобрано: ${unparsed}`,
     )
-    result.judge = { groups: out, newLabels, serverAnswered }
+    result.judge = { groups: out, newLabels, serverAnswered, unparsed }
     const jg = (name: string) => out.find((x) => x.group === name)!
     s['суд. по делу@3 dev'] = jg('dev').relevant3 * 100
     s['суд. по делу@3 test'] = jg('test').relevant3 * 100
@@ -632,7 +647,7 @@ async function main() {
   if (suites.includes('hook')) {
     const runs = Number(arg('--hook-runs') ?? 5)
     console.log('\n== hook ==')
-    const hook = await runHook(root, home, runs)
+    const hook = await runHook(root, home, runs, process.argv.includes('--no-phrases'))
     result.hook = hook
     s['хук p50 мс'] = hook.p50
     s['хук max мс'] = hook.max

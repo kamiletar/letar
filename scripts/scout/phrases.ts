@@ -7,27 +7,19 @@
  * Запуск: bun scripts/scout/phrases.ts [--generate] [--limit N]
  * Без `--generate` только досчитывает векторы; с ним сначала пишет формулировки докам без них (нужна 9B на 8092).
  */
-import { appendFileSync, existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs'
+import { appendFileSync, existsSync, mkdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { type Card, collectCards, DenseIndex, embedTexts, phraseHash } from '../../libs/scout/src/index'
 import { arg, readJsonl } from './cli'
 import { findRepoRoot } from './index-store'
+import { EMBED_MODEL, readMatrixStore, writeMatrixStore } from './matrix-store'
 import { scoutHome } from './paths'
-import { EMBED_MODEL, EMBED_URL } from './vectors'
+import { EMBED_URL } from './vectors'
 
 interface PhraseRow {
   path: string
   hash: string
   phrases: string[]
-}
-
-interface PhraseMeta {
-  model: string
-  dims: number
-  /** id карточки на каждую строку матрицы (повторяются) */
-  ids: string[]
-  /** `phraseHash` дока на каждую строку */
-  hashes: string[]
 }
 
 export interface PhraseStore {
@@ -68,33 +60,14 @@ function pathOfId(id: string): string {
 
 /** Хранилище с проверками целостности, как у `loadVectorStore`; любое расхождение — `undefined` */
 export function loadPhraseStore(home = scoutHome()): PhraseStore | undefined {
-  const metaPath = join(home, 'phrase-vectors.json')
-  const binPath = join(home, 'phrase-vectors.f32')
-  if (!existsSync(metaPath) || !existsSync(binPath)) {
+  const stored = readMatrixStore(home, 'phrase-vectors')
+  if (!stored) {
     return undefined
   }
-  try {
-    const meta = JSON.parse(readFileSync(metaPath, 'utf8')) as PhraseMeta
-    if (
-      meta.model !== EMBED_MODEL
-      || !(meta.dims > 0)
-      || !Array.isArray(meta.ids)
-      || !Array.isArray(meta.hashes)
-      || meta.hashes.length !== meta.ids.length
-    ) {
-      return undefined
-    }
-    const bytes = readFileSync(binPath)
-    const matrix = new Float32Array(bytes.buffer, bytes.byteOffset, bytes.byteLength / 4)
-    if (matrix.length !== meta.ids.length * meta.dims) {
-      return undefined
-    }
-    const hashByPath = new Map<string, string>()
-    meta.ids.forEach((id, i) => hashByPath.set(pathOfId(id), meta.hashes[i]))
-    return { index: new DenseIndex(meta.ids, matrix, meta.dims), hashByPath }
-  } catch {
-    return undefined
-  }
+  const { meta, matrix } = stored
+  const hashByPath = new Map<string, string>()
+  meta.ids.forEach((id, i) => hashByPath.set(pathOfId(id), meta.hashes[i]))
+  return { index: new DenseIndex(meta.ids, matrix, meta.dims), hashByPath }
 }
 
 /** Досчитать векторы формулировок для доков, у которых их нет или хеш другой; вернуть число доков */
@@ -139,12 +112,7 @@ export async function buildPhraseVectors(cards: Card[], home = scoutHome(), url 
   const dims = vectors[0]?.length ?? old?.index.dims ?? 0
   const matrix = new Float32Array(vectors.length * dims)
   vectors.forEach((v, i) => matrix.set(v, i * dims))
-  mkdirSync(home, { recursive: true })
-  const meta: PhraseMeta = { model: EMBED_MODEL, dims, ids, hashes }
-  writeFileSync(join(home, 'phrase-vectors.f32.tmp'), Buffer.from(matrix.buffer))
-  writeFileSync(join(home, 'phrase-vectors.json.tmp'), JSON.stringify(meta))
-  renameSync(join(home, 'phrase-vectors.f32.tmp'), join(home, 'phrase-vectors.f32'))
-  renameSync(join(home, 'phrase-vectors.json.tmp'), join(home, 'phrase-vectors.json'))
+  writeMatrixStore(home, 'phrase-vectors', { model: EMBED_MODEL, dims, ids, hashes }, matrix)
   return todo.length
 }
 
@@ -169,13 +137,39 @@ async function alive(url: string): Promise<boolean> {
   }
 }
 
-/** Сгенерировать формулировки 9B для доков без них или с другим хешем; сервер недоступен — 0 */
+/** Три ошибки подряд — считаем, что сервер лёг */
+const MAX_FAILS_IN_ROW = 3
+
+/** Один запрос к генератору; сетевая ошибка, не-2xx или битый JSON — исключение */
+async function generateOne(url: string, card: Card, body: string): Promise<string> {
+  const response = await fetch(`${url}/v1/chat/completions`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      messages: [
+        { role: 'system', content: SYSTEM },
+        { role: 'user', content: prompt(card.title, card.summary, body) },
+      ],
+      temperature: 0.7,
+      max_tokens: 400,
+      chat_template_kwargs: { enable_thinking: false },
+    }),
+    signal: AbortSignal.timeout(120_000),
+  })
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}`)
+  }
+  const json = (await response.json()) as { choices?: Array<{ message: { content: string } }> }
+  return json.choices?.[0]?.message.content ?? ''
+}
+
+/** Сгенерировать формулировки 9B для доков без них или с другим хешем; сервер недоступен — нули; `skipped` — доки, на которых запрос упал */
 export async function generatePhrases(
   root: string,
   cards: Card[],
   home = scoutHome(),
   options: { url?: string; limit?: number } = {},
-): Promise<number> {
+): Promise<{ done: number; skipped: number }> {
   const url = options.url ?? GEN_URL
   const limit = options.limit ?? Infinity
   const rows = readPhraseRows(home)
@@ -192,27 +186,26 @@ export async function generatePhrases(
     }
   }
   if (!todo.length || !(await alive(url))) {
-    return 0
+    return { done: 0, skipped: 0 }
   }
   mkdirSync(home, { recursive: true })
   let done = 0
+  let skipped = 0
+  let streak = 0
   for (const { card, body, hash } of todo.slice(0, limit)) {
-    const response = await fetch(`${url}/v1/chat/completions`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({
-        messages: [
-          { role: 'system', content: SYSTEM },
-          { role: 'user', content: prompt(card.title, card.summary, body) },
-        ],
-        temperature: 0.7,
-        max_tokens: 400,
-        chat_template_kwargs: { enable_thinking: false },
-      }),
-      signal: AbortSignal.timeout(120_000),
-    })
-    const json = (await response.json()) as { choices?: Array<{ message: { content: string } }> }
-    const text = json.choices?.[0]?.message.content ?? ''
+    // Три ошибки подряд — сервер лёг, дальше не идём
+    if (streak >= MAX_FAILS_IN_ROW) {
+      break
+    }
+    let text = ''
+    try {
+      text = await generateOne(url, card, body)
+      streak = 0
+    } catch {
+      skipped++
+      streak++
+      continue
+    }
     const phrases = text.split('\n').map((l) => l.replace(/^[-*\d.)\s]+/, '').trim()).filter((l) => l.length > 8)
       .slice(0, 8)
     if (!phrases.length) {
@@ -221,7 +214,7 @@ export async function generatePhrases(
     appendFileSync(phrasesPath(home), `${JSON.stringify({ path: card.path, hash, phrases })}\n`)
     done++
   }
-  return done
+  return { done, skipped }
 }
 
 if (import.meta.main) {
@@ -233,8 +226,8 @@ if (import.meta.main) {
   const cards = collectCards(root)
   if (process.argv.includes('--generate')) {
     const limit = arg('--limit')
-    const generated = await generatePhrases(root, cards, scoutHome(), limit ? { limit: Number(limit) } : {})
-    console.log(`Формулировки: написано для ${generated} доков`)
+    const { done, skipped } = await generatePhrases(root, cards, scoutHome(), limit ? { limit: Number(limit) } : {})
+    console.log(`Формулировки: написано для ${done} доков${skipped ? `, пропущено из-за ошибок: ${skipped}` : ''}`)
   }
   const started = performance.now()
   const built = await buildPhraseVectors(cards)
