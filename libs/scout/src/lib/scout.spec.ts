@@ -3,7 +3,7 @@ import { BRIEF_HEADER, formatBrief, formatOneLine } from './brief'
 import { parsePatternRegistry } from './collect'
 import { DenseIndex, embedHash, formatQuery, fuseWithDense, hybridHits, QUERY_CHARS, QUERY_INSTRUCTION } from './dense'
 import { parseFrontmatter } from './frontmatter'
-import { FORM_WORDS, layoutHits, mentionedIn, scout } from './search'
+import { type DocHit, FORM_WORDS, layoutHits, mentionedIn, scout } from './search'
 import {
   docCards,
   fieldCatalogCards,
@@ -150,6 +150,49 @@ describe('formatBrief и formatOneLine', () => {
     expect(brief).toContain('.claude/docs/forms-guide.md:')
     expect(brief).toContain('скил `form-pipeline` (Skill)')
     expect(formatOneLine(result)).toBe('🔎 скаут: 1 док, 1 ловушка, скил form-pipeline')
+  })
+})
+
+describe('formatBrief v2: один список по очкам', () => {
+  const hit = (name: string, score: number, extra: Partial<DocHit> = {}): DocHit => ({
+    path: `.claude/docs/${name}.md`,
+    line: 1,
+    title: `Заголовок ${name}`,
+    summary: `Аннотация ${name}`,
+    score,
+    ...extra,
+  })
+  const base = { query: 'q', fields: [], matched: 5 } as const
+
+  it('ловушка с большим счётом идёт выше дока и помечена ⚠️', () => {
+    const brief = formatBrief({ ...base, docs: [hit('doc', 1)], traps: [hit('trap', 2, { warn: true })] })
+    const lines = brief.split('\n')
+    expect(lines).toContain('Что посмотреть:')
+    const first = lines.findIndex((l) => l.startsWith('- '))
+    expect(lines[first]).toContain('⚠️ .claude/docs/trap.md:1')
+    expect(lines[first + 1]).toContain('- .claude/docs/doc.md:1')
+    expect(brief).not.toContain('Доки:')
+  })
+
+  it('5 пунктов при fullItems 3: три с аннотацией, два коротких под «Ещё:»', () => {
+    const docs = [5, 4, 3, 2].map((n) => hit(`d${n}`, n))
+    const traps = [hit('t1', 1, { warn: true, section: 'Раздел' })]
+    const brief = formatBrief({ ...base, docs, traps }, { fullItems: 3 })
+    const lines = brief.split('\n')
+    const more = lines.indexOf('Ещё:')
+    expect(more).toBeGreaterThan(0)
+    const head = lines.slice(lines.indexOf('Что посмотреть:') + 1, more)
+    const tail = lines.slice(more + 1)
+    expect(head).toHaveLength(3)
+    expect(head.every((l) => l.includes(' — Аннотация'))).toBe(true)
+    expect(tail).toEqual([
+      '- .claude/docs/d2.md:1 — Заголовок d2',
+      '- ⚠️ .claude/docs/t1.md:1 — § Раздел',
+    ])
+  })
+
+  it('пустой результат — пустая строка', () => {
+    expect(formatBrief({ ...base, docs: [], traps: [] })).toBe('')
   })
 })
 

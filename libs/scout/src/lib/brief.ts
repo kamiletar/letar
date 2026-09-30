@@ -6,12 +6,22 @@ export const BRIEF_HEADER = 'подсказка скаута; не по теме
 export interface BriefOptions {
   /** Длина аннотации одного пункта */
   summaryChars?: number
+  /** Сколько первых пунктов «Что посмотреть» идут с аннотацией; остальные — коротко */
+  fullItems?: number
 }
 
-function docLine(doc: DocHit, summaryChars: number): string {
+/** Короткая строка хвоста: путь, строка и заголовок без аннотации */
+const SHORT_LINE_CHARS = 140
+
+function shortLine(doc: DocHit, trap: boolean): string {
+  const what = doc.section ? `§ ${doc.section}` : doc.title
+  return truncate(`- ${trap ? '⚠️ ' : ''}${doc.path}:${doc.line} — ${what}`, SHORT_LINE_CHARS)
+}
+
+function docLine(doc: DocHit, summaryChars: number, trap = false): string {
   const star = doc.star ? ' ⭐' : ''
   const section = doc.section ? ` § ${doc.section}` : ''
-  return `- ${doc.path}:${doc.line}${star}${section} — ${truncate(doc.summary, summaryChars)}`
+  return `- ${trap ? '⚠️ ' : ''}${doc.path}:${doc.line}${star}${section} — ${truncate(doc.summary, summaryChars)}`
 }
 
 function toolHow(tool: ToolHit): string {
@@ -35,7 +45,7 @@ function shortField(name: string): string {
 
 /** Полная справка для агента. Пустая строка — сказать нечего, хук молчит */
 export function formatBrief(result: ScoutResult, options: BriefOptions = {}): string {
-  const { summaryChars = 250 } = options
+  const { summaryChars = 250, fullItems = 3 } = options
   if (!result.docs.length && !result.traps.length && !result.tool && !result.fields.length && !result.pattern) {
     return ''
   }
@@ -47,11 +57,17 @@ export function formatBrief(result: ScoutResult, options: BriefOptions = {}): st
     const { name, summary } = result.pattern
     lines.push(`Паттерн формы: \`${name}\` — ${truncate(summary, 160)}; код — MCP \`get_form_pattern("${name}")\``)
   }
-  if (result.docs.length) {
-    lines.push('Доки:', ...result.docs.map((d) => docLine(d, summaryChars)))
-  }
-  if (result.traps.length) {
-    lines.push('Ловушки ⚠️:', ...result.traps.map((d) => docLine(d, summaryChars)))
+  // Доки и ловушки одним списком по очкам; при равных — доки раньше ловушек (sort стабилен)
+  const items = [
+    ...result.docs.map((doc) => ({ doc, trap: false })),
+    ...result.traps.map((doc) => ({ doc, trap: true })),
+  ].sort((a, b) => b.doc.score - a.doc.score)
+  if (items.length) {
+    lines.push('Что посмотреть:', ...items.slice(0, fullItems).map((i) => docLine(i.doc, summaryChars, i.trap)))
+    const rest = items.slice(fullItems)
+    if (rest.length) {
+      lines.push('Ещё:', ...rest.map((i) => shortLine(i.doc, i.trap)))
+    }
   }
   if (result.tool) {
     lines.push(`Инструмент: ${toolHow(result.tool)} — ${truncate(result.tool.summary, 200)} (${result.tool.path})`)

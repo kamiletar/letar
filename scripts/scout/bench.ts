@@ -13,7 +13,9 @@
  * - `forms` — полнота полей, полка целиком, паттерн; ложная полка на отрицательных задачах;
  * - `latency` — время `scoutQuery` на тёплом процессе (p50/p95/max);
  * - `robust` — проверки устойчивости; проваленные не роняют бенч, а считаются и печатаются;
- * - `hook` — настоящий процесс хука `.claude/hooks/scout-brief.ts`, `--hook-runs N` запусков.
+ * - `hook` — настоящий процесс хука `.claude/hooks/scout-brief.ts`, `--hook-runs N` запусков;
+ * - `judge` — точность справки по меткам судьи (`judge-labels.jsonl` — кеш 9B, `judge-ref.jsonl` —
+ *   эталон Sonnet, только чтение); для новых пар зовёт 9B на `SCOUT_JUDGE_URL`. Только явно.
  *
  * Запуск: bun scripts/scout/bench.ts [--label <имя>] [--suite docs,forms,latency,robust,hook]
  *   [--hook-runs 5] [--compare <путь к json | last>]
@@ -38,11 +40,12 @@ import { advisableTools, type EvalCase, evaluate, type Metrics } from './eval'
 import { type FormProbe, formsNegatives, scoreProbe } from './forms-eval'
 import { freshIndex, scoutQuery, type ScoutQueryResult } from './hook-core'
 import { findRepoRoot, indexPath } from './index-store'
+import { JUDGE_MODEL, type JudgeItem, judgeItems, type JudgeLabel, labelKey, loadLabels } from './judge'
 import { scoutDataDir, scoutHome } from './paths'
 import { loadVectorStore } from './vectors'
 
-export type Suite = 'docs' | 'forms' | 'latency' | 'robust' | 'hook'
-const ALL_SUITES: Suite[] = ['docs', 'forms', 'latency', 'robust', 'hook']
+export type Suite = 'docs' | 'forms' | 'latency' | 'robust' | 'hook' | 'judge'
+const ALL_SUITES: Suite[] = ['docs', 'forms', 'latency', 'robust', 'hook', 'judge']
 const DEFAULT_SUITES: Suite[] = ['docs', 'forms', 'latency', 'robust']
 
 /** Детерминированное разбиение случаев: около 20% уходит в `test`, остальное — `dev` */
@@ -135,6 +138,13 @@ const SUMMARY: Array<{ key: string; unit: Unit; journal?: boolean }> = [
   { key: 'нов. R@5 dev', unit: 'pp', journal: true },
   { key: 'нов. R@5 test', unit: 'pp', journal: true },
   { key: 'лишнее', unit: 'pp', journal: true },
+  { key: 'суд. по делу@3 dev', unit: 'pp', journal: true },
+  { key: 'суд. по делу@3 test', unit: 'pp', journal: true },
+  { key: 'суд. нужен@3', unit: 'pp', journal: true },
+  { key: 'суд. по делу@1', unit: 'pp' },
+  { key: 'суд. по делу@5', unit: 'pp' },
+  { key: 'суд. покрытие', unit: 'pp' },
+  { key: 'суд. согласие', unit: 'pp' },
   { key: 'R@5 все', unit: 'pp' },
   { key: 'R@5 коротк.', unit: 'pp' },
   { key: 'R@8 все', unit: 'pp' },
@@ -164,6 +174,27 @@ interface FormsSet {
   patternTotal: number
 }
 
+interface JudgeGroup {
+  group: string
+  cases: number
+  covered: number
+  relevant1: number
+  relevant3: number
+  relevant5: number
+  needed3: number
+  coverage: number
+  agreement: number | null
+  agreementPairs: number
+}
+
+/** Пункты справки для судьи: доки и ловушки вперемешку по убыванию очков (стабильно, доки первыми) */
+export function judgedItems(result: ScoutResult, limit = 5): JudgeItem[] {
+  return [...result.docs, ...result.traps]
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit)
+    .map((d) => ({ path: d.path, title: d.section ? `${d.title} § ${d.section}` : d.title, summary: d.summary }))
+}
+
 interface BenchRun {
   label: string
   ts: string
@@ -172,6 +203,7 @@ interface BenchRun {
   forms?: { sets: FormsSet[]; negatives: { cases: number; fieldsShare: number; patternShare: number } }
   latency?: { n: number; p50: number; p95: number; max: number }
   robust?: { passed: number; total: number; failed: string[] }
+  judge?: { groups: JudgeGroup[]; newLabels: number; serverAnswered: boolean | null }
   hook?: { runs: number; p50: number; max: number; ok: boolean; problems: string[] }
   summary: Summary
 }
@@ -373,7 +405,7 @@ async function main() {
     console.error(`Нет случаев в ${casesFile} — docs и latency пропущены (bun scripts/scout/eval.ts --out ...)`)
   }
 
-  if (suites.includes('docs') || suites.includes('latency')) {
+  if (suites.some((x) => x === 'docs' || x === 'latency' || x === 'judge')) {
     for (const c of cases) {
       await run(c.query)
     }
@@ -429,6 +461,105 @@ async function main() {
     s['Hit@8 все'] = g('все').hit8 * 100
     s['пустых справок'] = emptyShare * 100
     s['симв.'] = avgChars
+  }
+
+  if (suites.includes('judge') && cases.length) {
+    console.log('\n== judge ==')
+    const labelsFile = join(dataDir, 'judge-labels.jsonl')
+    const labels = loadLabels(labelsFile)
+    const ref = loadLabels(join(dataDir, 'judge-ref.jsonl'))
+    const judged = cases.filter((c) => c.goldDocs.length)
+    let newLabels = 0
+    let serverAnswered: boolean | null = null
+    for (const c of judged) {
+      const items = judgedItems((await run(c.query)).result)
+      const missing = items.filter((it) => !labels.has(labelKey(c.sessionId, it.path)))
+      if (!missing.length || serverAnswered === false) {
+        continue
+      }
+      const got = await judgeItems(c.query, missing)
+      serverAnswered = got !== undefined
+      if (!got) {
+        continue
+      }
+      missing.forEach((it, i) => {
+        const l: JudgeLabel = { sessionId: c.sessionId, path: it.path, label: got[i], judge: JUDGE_MODEL }
+        labels.set(labelKey(c.sessionId, it.path), l)
+        appendFileSync(labelsFile, `${JSON.stringify(l)}\n`)
+        newLabels++
+      })
+    }
+    const mean = (xs: number[]) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : 0)
+    const groupsOf: Array<[string, EvalCase[]]> = [
+      ['dev', judged.filter((c) => splitOf(c.sessionId) === 'dev')],
+      ['test', judged.filter((c) => splitOf(c.sessionId) === 'test')],
+      ['все', judged],
+    ]
+    const out: JudgeGroup[] = []
+    for (const [group, list] of groupsOf) {
+      const rel: Record<1 | 3 | 5, number[]> = { 1: [], 3: [], 5: [] }
+      const need3: number[] = []
+      let covered = 0
+      let agree = 0
+      let pairs = 0
+      for (const c of list) {
+        const items = judgedItems((await run(c.query)).result)
+        const ls = items.map((it) => labels.get(labelKey(c.sessionId, it.path))?.label)
+        for (const [i, it] of items.entries()) {
+          const r = ref.get(labelKey(c.sessionId, it.path))
+          const l = ls[i]
+          if (l !== undefined && r) {
+            pairs++
+            agree += (l >= 1) === (r.label >= 1) ? 1 : 0
+          }
+        }
+        if (!items.length || ls.some((l) => l === undefined)) {
+          continue
+        }
+        covered++
+        const top = (k: number, min: number) => {
+          const part = ls.slice(0, k) as number[]
+          return part.filter((l) => l >= min).length / part.length
+        }
+        rel[1].push(top(1, 1))
+        rel[3].push(top(3, 1))
+        rel[5].push(top(5, 1))
+        need3.push(top(3, 2))
+      }
+      const g: JudgeGroup = {
+        group,
+        cases: list.length,
+        covered,
+        relevant1: mean(rel[1]),
+        relevant3: mean(rel[3]),
+        relevant5: mean(rel[5]),
+        needed3: mean(need3),
+        coverage: list.length ? covered / list.length : 0,
+        agreement: pairs ? agree / pairs : null,
+        agreementPairs: pairs,
+      }
+      out.push(g)
+      console.log(
+        `${group.padEnd(5)} n=${String(g.cases).padStart(3)}  по делу@1 ${pct(g.relevant1)}  @3 ${
+          pct(g.relevant3)
+        }  @5 ${pct(g.relevant5)}  нужен@3 ${pct(g.needed3)}  покрытие ${pct(g.coverage)}  согласие с эталоном ${
+          g.agreement === null ? '—' : `${pct(g.agreement)} (${g.agreementPairs} пар)`
+        }`,
+      )
+    }
+    console.log(
+      `новых меток от 9B: ${newLabels}${serverAnswered === false ? '; судья не ответил — считаю по кешу' : ''}`,
+    )
+    result.judge = { groups: out, newLabels, serverAnswered }
+    const jg = (name: string) => out.find((x) => x.group === name)!
+    s['суд. по делу@3 dev'] = jg('dev').relevant3 * 100
+    s['суд. по делу@3 test'] = jg('test').relevant3 * 100
+    s['суд. нужен@3'] = jg('все').needed3 * 100
+    s['суд. по делу@1'] = jg('все').relevant1 * 100
+    s['суд. по делу@5'] = jg('все').relevant5 * 100
+    s['суд. покрытие'] = jg('все').coverage * 100
+    const agreement = jg('все').agreement
+    s['суд. согласие'] = agreement === null ? null : agreement * 100
   }
 
   if (suites.includes('forms')) {

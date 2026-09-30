@@ -16,6 +16,7 @@ import { splitOf } from './bench'
 import { buildCases, evaluate } from './eval'
 import { abGroup, appendLog, decide, MAX_ATTEMPTS, runScoutHook, scoutQuery } from './hook-core'
 import { indexPath } from './index-store'
+import { judgeItems, loadLabels } from './judge'
 import { mineSession, normalizeKnowledgePath, parseHumanText, type SessionRecord } from './mine-transcripts'
 import { EMBED_MODEL, loadVectorStore } from './vectors'
 
@@ -329,5 +330,75 @@ describe('evaluate: неупомянутые эталоны и лишнее', ()
   it('без redundant redundancy равна нулю', async () => {
     const { metrics } = await evaluate((q) => result(q, answers[q]), cases)
     expect(metrics.redundancy).toBe(0)
+  })
+})
+
+describe('judge', () => {
+  const items = [
+    { path: 'a.md', title: 'A', summary: 'аннотация a' },
+    { path: 'b.md', title: 'B', summary: 'аннотация b' },
+    { path: 'c.md', title: 'C', summary: 'аннотация c' },
+  ]
+
+  function fakeServer(reply: () => string) {
+    return Bun.serve({
+      port: 0,
+      fetch: () => Response.json({ choices: [{ message: { content: reply() } }] }),
+    })
+  }
+
+  it('loadLabels читает jsonl, ключ sessionId и path через табуляцию', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'judge-labels-'))
+    const file = join(dir, 'labels.jsonl')
+    writeFileSync(
+      file,
+      [
+        JSON.stringify({ sessionId: 's1', path: 'a.md', label: 2, judge: 'qwen3.5-9b' }),
+        'битая строка',
+        JSON.stringify({ sessionId: 's2', path: 'a.md', label: 0, judge: 'qwen3.5-9b' }),
+      ].join('\n'),
+    )
+    const labels = loadLabels(file)
+    expect(labels.size).toBe(2)
+    expect(labels.get('s1\ta.md')?.label).toBe(2)
+    expect(labels.get('s2\ta.md')?.label).toBe(0)
+    expect(loadLabels(join(dir, 'нет.jsonl')).size).toBe(0)
+  })
+
+  it('judgeItems разбирает массив оценок из ответа', async () => {
+    const server = fakeServer(() => 'Ответ: [2, 0, 1]')
+    try {
+      const labels = await judgeItems('запрос', items, { url: `http://127.0.0.1:${server.port}`, timeoutMs: 500 })
+      expect(labels).toEqual([2, 0, 1])
+    } finally {
+      server.stop(true)
+    }
+  })
+
+  it('мусор дважды даёт undefined, вторая попытка успевает', async () => {
+    let calls = 0
+    const server = fakeServer(() => (++calls === 1 ? 'не знаю' : '[1,1,1]'))
+    try {
+      const url = `http://127.0.0.1:${server.port}`
+      expect(await judgeItems('запрос', items, { url, timeoutMs: 500 })).toEqual([1, 1, 1])
+      const bad = fakeServer(() => '[2,2]')
+      try {
+        expect(await judgeItems('запрос', items, { url: `http://127.0.0.1:${bad.port}`, timeoutMs: 500 }))
+          .toBeUndefined()
+      } finally {
+        bad.stop(true)
+      }
+    } finally {
+      server.stop(true)
+    }
+  })
+
+  it('закрытый порт — undefined быстро', async () => {
+    const server = fakeServer(() => '[0,0,0]')
+    const url = `http://127.0.0.1:${server.port}`
+    server.stop(true)
+    const started = performance.now()
+    expect(await judgeItems('запрос', items, { url, timeoutMs: 500 })).toBeUndefined()
+    expect(performance.now() - started).toBeLessThan(2000)
   })
 })
