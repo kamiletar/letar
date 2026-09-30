@@ -55,8 +55,8 @@ import type { RecipeCreateForm, RecipeUpdateForm } from '@/generated/form-schema
 
 ### form-schemas/ для моделей
 
-Генерируются из `@meta("form.*", value)` директив (legacy `@form.*`-комментарии — deprecated, но
-рабочий синтаксис):
+Генерируются из `@meta("form.*", value)` директив (legacy `@form.*`-комментарии убраны в
+plugin v4.0.0):
 
 ```typescript
 // Recipe.form.ts

@@ -28,7 +28,7 @@ description: |
 | Компонент  | Хост                            | Назначение  |
 | ---------- | ------------------------------- | ----------- |
 | Maddy      | mail.letar.best (31.56.180.161) | SMTP сервер |
-| Production | 194.164.245.97                  | Приложения  |
+| Production | 185.28.85.195 (s2)              | Приложения  |
 
 ### Порты Maddy
 
@@ -190,7 +190,7 @@ git add apps/<app>/.env.docker.enc && git commit -m "chore(<app>): обнови�
    git add apps/*/.env.docker.enc && git commit -m "chore: обновить SMTP-пароль"
    ```
 
-4. **Запросить деплой затронутых приложений** — deploy-request к BlackCove
+4. **Запросить деплой затронутых приложений** — deploy-request к `deploy-agent-dev`
    (см. [deploy-coordination](/.claude/rules/deploy-coordination.md)).
 
    ⛔ Не деплой сам по SSH: `deploy-affected.sh` руками запрещён, а расшифровка `.enc`

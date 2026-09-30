@@ -121,7 +121,7 @@ export const RecipeTypeFormSchema = z.enum(['SWEET', 'SALTY']).meta({
 Плюс отдельный объект `RecipeTypeLabels = { SWEET: 'Сладкое', SALTY: 'Солёное' }` в том же файле.
 Без `///`-комментариев плагин генерирует лейбл транслитом из имени значения (`BRUS` → `"Brus"`).
 
-Живой прецедент — `libs/driving-school-db/schema.zmodel`, enum `AbsenceType`, и
+Живой прецедент — `apps/driving-school/models/enums.zmodel`, enum `AbsenceType`, и
 `apps/domwellbes/schema.zmodel`, enum `WallMaterial`/`HousePurpose`/`Floors`/`HouseStyle`.
 
 ## Constraints: нативные атрибуты — рекомендуемый путь

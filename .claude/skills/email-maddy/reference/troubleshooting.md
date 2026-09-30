@@ -60,7 +60,7 @@ dig -x 31.56.180.161         # PTR
    cat apps/<app>/.env.docker | grep SMTP_PASSWORD
 
    # Сравнить с production
-   ssh root@194.164.245.97 "cat /home/deploy/letar/apps/<app>/.env.docker | grep SMTP_PASSWORD"
+   ssh root@185.28.85.195 "cat /home/deploy/letar/apps/<app>/.env.docker | grep SMTP_PASSWORD"
    ```
 
 3. Логи Maddy:

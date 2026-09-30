@@ -39,7 +39,7 @@ macro_start_session(
 > `forms-coordinator-dev`, без форка.
 >
 > ⚠️ **По завершении сессии `/end-session` эту identity НЕ ретайрит** (фиксированные identity
-> исключены из `retire_agent` — см. `.claude/commands/end-session.md`). Если всё же встретишь
+> исключены из `retire_agent` — см. `.agents/skills/end-session/SKILL.md`). Если всё же встретишь
 > «is retired and no longer accepts new messages» (сервер сам ретирит по 24ч простоя) — вызови
 > `unretire_agent(project_key: "c-web-letar", agent_name: "forms-coordinator-dev",
 > registration_token: "<токен из agent_fixed_names_tokens.md>")`, потом `macro_start_session`.
@@ -83,11 +83,11 @@ send_message(
 
 ### Библиотеки (ты владелец!)
 
-| Библиотека                  | Версия | Описание                                                                                                             |
-| --------------------------- | ------ | -------------------------------------------------------------------------------------------------------------------- |
-| `libs/forms`                | 0.84.3 | 56+ полей, compound API, TanStack Form + Chakra UI                                                                   |
-| `libs/zenstack-form-plugin` | 3.0.0  | Генерация Zod schemas из `@meta("form.*", value)` директив в schema.zmodel (legacy `@form.*`-комментарии deprecated) |
-| `libs/form-mcp`             | 0.1.0  | MCP сервер — list_fields, get_field_props, get_directives, generate_form                                             |
+| Библиотека                  | Версия | Описание                                                                                                                  |
+| --------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------- |
+| `libs/forms`                | 2.36.1 | 56+ полей, compound API, TanStack Form + Chakra UI                                                                        |
+| `libs/zenstack-form-plugin` | 4.4.3  | Генерация Zod schemas из `@meta("form.*", value)` директив в schema.zmodel (legacy `@form.*`-комментарии убраны в v4.0.0) |
+| `libs/form-mcp`             | 2.5.1  | MCP сервер — list_fields, get_field_props, get_directives, generate_form                                                  |
 
 ### Приложения экосистемы
 
@@ -95,11 +95,11 @@ send_message(
 | ------------------------------ | ---- | ------------------------------------------------------------ |
 | `form-develop-app` (forms-dev) | 3006 | Песочница — 25 демо-страниц, 21 E2E тест                     |
 | `form-docs`                    | 3020 | Документация Fumadocs (forms.letar.best)                     |
-| `form-example`                 | 3022 | Витрина для внешних пользователей (forms-example.letar.best) |
+| `form-example`                 | 3027 | Витрина для внешних пользователей (forms-example.letar.best) |
 
 ### Consumer-приложения
 
-driving-school (46 Selects), grandslamcup, mandala, premium-rosstil, imot, kami, animatrona-tracker, archetest, auth-hub, dashboard, label-printer-desktop, animatrona
+driving-school (46 Selects), grandslamcup, mandala, kami, animatrona-tracker, archetest, auth-hub, dashboard, label-printer-desktop, animatrona
 
 ## Основной цикл
 

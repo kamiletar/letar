@@ -10,7 +10,7 @@ paths:
 
 # ZenStack Helper
 
-Помощник по ZenStack schema.zmodel (v3.3.0+). Используй при работе с моделями БД, @meta("form.\*", value) директивами (основной синтаксис с Фазы 3 zenstack-form-plugin v3.0.0; legacy @form.\* — deprecated), access control policies (model-level @@allow/@@deny и field-level @allow/@deny), отношениями между моделями, custom procedures.
+Помощник по ZenStack schema.zmodel (v3.3.0+). Используй при работе с моделями БД, @meta("form.\*", value) директивами (единственный синтаксис с plugin v4.0.0; legacy @form.\* убран), access control policies (model-level @@allow/@@deny и field-level @allow/@deny), отношениями между моделями, custom procedures.
 
 ## Когда использовать
 
@@ -39,7 +39,7 @@ paths:
 
 ## Reference файлы
 
-- `reference/form-directives.md` — @meta("form.\*", value) директивы (@letar/zenstack-form-plugin, v3.0.0+)
+- `reference/form-directives.md` — @meta("form.\*", value) директивы (@letar/zenstack-form-plugin, v4.0.0+)
 - `reference/access-policies.md` — @@allow/@@deny (model) + @allow/@deny (field) паттерны
 - `reference/custom-procedures.md` — Custom Procedures для бизнес-логики (v3.3.0+)
 - `reference/zenstack-better-auth.md` — интеграция с Better Auth Organizations (мультитенантность)

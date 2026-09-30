@@ -35,7 +35,7 @@ nx g @letar/generators:new-app <name> --withDb
 
 Генератор раскладывает весь чистый каркас (Next.js App Router + Chakra UI v3 + MDX): `.env` (PORT),
 `README.md`, `PLAN.md`, `PLAN_COMPLETED.md`, `PLAN_TESTING.md`, `CHANGELOG.md`, `package.json`,
-`project.json` (typecheck/typecheck:tsgo/oxlint/lint/format/test), `vitest.config.ts` + `vitest.setup.tsx`,
+`project.json` (typecheck/typecheck:tsgo/oxlint/lint/format/test), `vitest.config.mts` + `vitest.setup.tsx`,
 `next.config.mjs` (MDX + Nx, без `output: 'standalone'` — это добавляется на этапе первого деплоя, см.
 ниже), `tsconfig.json`, `eslint.config.mjs`, `src/app/layout.tsx` (Providers + UmamiScript, **без**
 импорта `global.css`), `src/app/page.tsx`, `src/app/_components/providers.tsx`,
@@ -136,7 +136,7 @@ rm -rf apps/<name>/* apps/<name>/.[!.]* && rmdir apps/<name>
 
 При добавлении приложения на production, обязательно зарегистрируй его во всех местах (см. [deployment.md](/.claude/docs/deployment.md)):
 
-1. `deploy-affected.sh` → массив `S1_APPS` или `S2_APPS`
+1. `deploy-affected.sh` → массив `S2_APPS` (`S1_APPS` пуст: на s1 staging и dashboard-agent)
 2. `apps/dashboard/prisma/seed.ts` → `s1Apps` или `s2Apps` (name, displayName, containerName, port, type, domain)
 3. `apps/<name>/.env.docker` → создать с `DOMAIN=<domain>`
 4. `apps/<name>/.env.docker.enc` → зашифровать и **закоммитить**:
@@ -155,8 +155,7 @@ rm -rf apps/<name>/* apps/<name>/.[!.]* && rmdir apps/<name>
 
 1. Узнай порт локального контейнера: `docker ps --format "table {{.Names}}\t{{.Ports}}" | grep <app>`
 2. Добавь `MCP_LOCAL_URL` в `apps/<app>/.env.local`
-3. Добавь `postgres-<app>` в `.mcp.json` с указанием на pg-wrapper
-4. Зарегистрируй в `settings.local.json` (allowlist + enabledMcpjsonServers)
+3. Добавь запись в `.claude/mcp/databases.json` (`.mcp.json` не трогай, разрешение `mcp__letar-db__*` общее)
 
 ### Настройка бэкапов (если есть БД или uploads)
 
@@ -282,9 +281,8 @@ s2), а не блокирует ли деплой отсутствие e2e. Не
 <!-- Добавляй этот раздел, только если приложение делается для клиента студии по почасовой оплате.
 Образец с реальным repoSlug — apps/domwellbes/.claude/commands (`.claude/commands/domwellbes.md`). -->
 
-Проект ведётся для клиента студии по **почасовой оплате**. Когда заработает MCP-сервер учёта
-времени (`libs/studio-time-mcp`, Фаза 11 в `apps/studio/PLAN.md`) — стартовать таймер при начале
-работы:
+Проект ведётся для клиента студии по **почасовой оплате**. Инструменты `time_*` сервера `letar`
+(см. `.claude/rules/time-tracking.md`) — стартуй таймер при начале работы:
 ```
 
 time_start({ app: "<name>", description: "<что делаешь, языком клиента>" })
@@ -323,7 +321,7 @@ time_start({ app: "<name>", description: "<что делаешь, языком �
 - [ ] Создать `Dockerfile.production` (образец: `apps/archetest/`)
 - [ ] Создать `docker-compose.production.yml`
 - [ ] Создать начальную миграцию: `nx db:migrate <name> -- --name init`
-- [ ] Добавить в `deploy-affected.sh` → `S1_APPS` или `S2_APPS`
+- [ ] Добавить в `S2_APPS` (`deploy-affected.sh`)
 - [ ] Создать `.env.docker` с `DOMAIN`, `DB_PASSWORD`, `POSTGRES_PASSWORD` (пароли — только
       генератором, см. [security.md](/.claude/rules/security.md))
 - [ ] Зашифровать и закоммитить `.env.docker.enc` (`sops --encrypt --output ...`)

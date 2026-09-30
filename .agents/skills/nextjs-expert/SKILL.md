@@ -241,19 +241,3 @@ nx reset
 | [troubleshooting.md](reference/troubleshooting.md) | Распространённые проблемы   |
 
 ---
-
-## MCP инструменты
-
-Используй `next-devtools` MCP для актуальной документации:
-
-```bash
-# Поиск в документации
-nextjs_docs({ action: "search", query: "Server Actions" })
-
-# Получение документа
-nextjs_docs({ action: "get", path: "/docs/app/getting-started/fetching-data" })
-
-# Подключение к dev серверу
-nextjs_index()  # Найти запущенные серверы
-nextjs_call({ port: "3000", toolName: "get_errors" })
-```

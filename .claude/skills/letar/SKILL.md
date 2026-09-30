@@ -26,7 +26,7 @@ allowed-tools: Bash(nx run-many -t format:*), Bash(nx lint:*), Bash(nx typecheck
    )
    ```
 
-2. Прочитай `CLAUDE.md` в корне — главные инструкции и стек.
+2. Прочитай `AGENTS.md` в корне — главные инструкции и стек.
 3. Вызови MCP `nx_workspace` — получи актуальную карту проектов, портов и графа зависимостей.
 4. При необходимости загляни в `.claude/docs/repo-structure.md` ⭐ (публичный репо + приватные submodules).
 
@@ -48,7 +48,7 @@ nx run-many -t format --projects=<затронутые проекты> → nx li
 
 ⚠️ **Никогда не запускай голую `nx format`/`nx format:write`** — это встроенная команда Nx,
 жёстко зашитая на Prettier, конфликтующий с dprint (единственным форматтером репозитория, см.
-корневой `CLAUDE.md`). Всегда `nx run-many -t format --projects=<...>` — кастомный таргет,
+корневой `AGENTS.md`). Всегда `nx run-many -t format --projects=<...>` — кастомный таргет,
 вызывающий `dprint fmt`.
 
 Для сквозных изменений запускай по затронутым проектам:
@@ -88,6 +88,6 @@ CI по тегу (`forms-v*`, `form-mcp-v*`, `zenstack-form-plugin-v*`) публ
 ## Репозиторий
 
 **Монорепо:** letar (публичный) + 10 приватных приложений/lib через git submodules
-**Стек:** Node 24 · Nx 22 · Next.js 16 · React 19 · Chakra UI v3 · PostgreSQL + Prisma + ZenStack · @letar/forms + Zod v4
+**Стек:** Node 24 · Nx 23 · Next.js 16 · React 19 · Chakra UI v3 · PostgreSQL + Prisma + ZenStack · @letar/forms + Zod v4
 **Команды приложений:** `/kami`, `/driving-school`, `/premium-rosstil`, `/imot`, `/aboi`, … (см. `.claude/commands/`)
 **Сквозные команды:** `/workflow:*`, `/infra:*`, `/audit:*`, `/create:*`
