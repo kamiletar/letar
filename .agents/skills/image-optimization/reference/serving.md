@@ -4,9 +4,9 @@
 
 ```typescript
 // app/api/images/[id]/route.ts
+import { resolveUploadPath } from '@letar/image-upload/server'
 import { readFile, stat } from 'fs/promises'
 import { NextRequest, NextResponse } from 'next/server'
-import { join } from 'path'
 
 const UPLOAD_DIR = process.env.UPLOAD_DIR || 'uploads'
 
@@ -19,7 +19,12 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     return NextResponse.json({ error: 'Изображение не найдено' }, { status: 404 })
   }
 
-  const filePath = join(UPLOAD_DIR, image.folder, image.filename)
+  // Путь только внутри UPLOAD_DIR: folder/filename лежат в БД, но БД тоже может содержать чужой ввод
+  const resolved = resolveUploadPath(UPLOAD_DIR, [image.folder, image.filename])
+  if (!resolved.ok) {
+    return NextResponse.json({ error: 'Файл не найден' }, { status: 404 })
+  }
+  const filePath = resolved.absPath
 
   try {
     const [file, stats] = await Promise.all([readFile(filePath), stat(filePath)])
@@ -52,7 +57,11 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   }
 
   // Пробуем WebP версию если поддерживается
-  let filePath = join(UPLOAD_DIR, image.folder, image.filename)
+  const resolved = resolveUploadPath(UPLOAD_DIR, [image.folder, image.filename])
+  if (!resolved.ok) {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  }
+  let filePath = resolved.absPath
   let mimeType = image.mimeType
 
   if (supportsWebP) {
@@ -93,8 +102,11 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     return NextResponse.json({ error: 'Not found' }, { status: 404 })
   }
 
-  const filePath = join(UPLOAD_DIR, image.folder, image.filename)
-  let buffer = await readFile(filePath)
+  const resolved = resolveUploadPath(UPLOAD_DIR, [image.folder, image.filename])
+  if (!resolved.ok) {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  }
+  let buffer = await readFile(resolved.absPath)
 
   // Resize если указаны размеры
   if (width > 0 || height > 0) {

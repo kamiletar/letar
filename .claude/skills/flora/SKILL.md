@@ -38,7 +38,7 @@ disable-model-invocation: true
 `deploy-agent-dev` через Agent Mail с `subject: "deploy-request: flora"`.
 
 ⚠️ Приложение ещё не готово к деплою: нет `Dockerfile.production`, `docker-compose.production.yml`,
-`.env.docker(.enc)` и регистрации в Dashboard — см. `.claude/commands/create/new-app.md`.
+`.env.docker(.enc)` и регистрации в Dashboard — см. скил `create-new-app`.
 
 ## Работа с submodule
 

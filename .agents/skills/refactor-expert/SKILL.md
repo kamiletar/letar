@@ -251,7 +251,7 @@ model Product {
 }
 
 // ✅ После: с политиками и @meta (основной синтаксис с Фазы 3 zenstack-form-plugin v3.0.0;
-// legacy /// @form.*-комментарии всё ещё работают, но deprecated)
+// legacy /// @form.*-комментарии убраны в plugin v4.0.0)
 model Product {
   id    String @id @default(cuid())
 

@@ -46,32 +46,14 @@ nx show project <name>     # Информация о проекте
 
 ## Версия Nx
 
-- **Nx:** 22.3.3
+- **Nx:** 23.x (точная версия — `package.json`)
 - **Пакетный менеджер:** Bun
 
 ---
 
 ## Проекты в Workspace
 
-| Проект           | Тип | Порт | Описание                 |
-| ---------------- | --- | ---- | ------------------------ |
-| premium-rosstil  | app | 3000 | Fashion интернет-магазин |
-| imot             | app | 3001 | Платформа психотерапии   |
-| dashboard        | app | 3002 | Мониторинг сервера       |
-| driving-school   | app | 3003 | Автошкола                |
-| mandala          | app | 3004 | Галерея мандал           |
-| kami             | app | 3005 | Управление контентом     |
-| form-develop-app | app | 3006 | Песочница форм           |
-
-**Библиотеки:**
-
-- `@letar/forms` — UI библиотека форм
-- `@letar/chakra-provider` — Провайдер Chakra UI
-- `@letar/ui` — Shared UI компоненты
-- `@letar/format-utils` — Утилиты форматирования
-- `@letar/validation-utils` — Zod схемы валидации
-
----
+Список проектов и портов — MCP `nx_workspace` и `apps/<app>/.env`; ручной таблицы портов нет и заводить её не нужно ([environment](/.claude/docs/environment.md)).
 
 ## Ключевые концепции
 

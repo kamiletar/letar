@@ -118,58 +118,62 @@ import { LuMenu, LuPhone } from 'react-icons/lu'
 
 export function Header() {
   return (
-    <Box as="header" position="relative">
-      {/* Мобильные кнопки — fixed позиция */}
-      <IconButton
-        position="fixed"
-        zIndex={20}
-        top={3}
-        left={3}
-        display={{ base: 'flex', md: 'none' }} // Только mobile
-        aria-label="Открыть меню"
-        variant="ghost"
-        size="lg"
-      >
-        <LuMenu />
-      </IconButton>
+    <Box asChild position="relative">
+      <header>
+        {/* Мобильные кнопки — fixed позиция */}
+        <IconButton
+          position="fixed"
+          zIndex={20}
+          top={3}
+          left={3}
+          display={{ base: 'flex', md: 'none' }} // Только mobile
+          aria-label="Открыть меню"
+          variant="ghost"
+          size="lg"
+        >
+          <LuMenu />
+        </IconButton>
 
-      <IconButton
-        position="fixed"
-        zIndex={20}
-        top={3}
-        right={3}
-        display={{ base: 'flex', md: 'none' }} // Только mobile
-        aria-label="Позвонить"
-        variant="ghost"
-        size="lg"
-        asChild
-      >
-        <a href="tel:+79001234567">
-          <LuPhone />
-        </a>
-      </IconButton>
+        <IconButton
+          position="fixed"
+          zIndex={20}
+          top={3}
+          right={3}
+          display={{ base: 'flex', md: 'none' }} // Только mobile
+          aria-label="Позвонить"
+          variant="ghost"
+          size="lg"
+          asChild
+        >
+          <a href="tel:+79001234567">
+            <LuPhone />
+          </a>
+        </IconButton>
 
-      {/* Desktop навигация */}
-      <Flex
-        display={{ base: 'none', md: 'flex' }} // Только desktop
-        justify="space-between"
-        align="center"
-        py={4}
-        px={6}
-      >
-        <Logo />
+        {/* Desktop навигация */}
+        <Flex
+          display={{ base: 'none', md: 'flex' }} // Только desktop
+          justify="space-between"
+          align="center"
+          py={4}
+          px={6}
+        >
+          <Logo />
 
-        <HStack gap={6} as="nav">
-          <Link href="/catalog">Каталог</Link>
-          <Link href="/about">О нас</Link>
-          <Link href="/contacts">Контакты</Link>
-        </HStack>
+          <HStack asChild gap={6}>
+            <nav>
+              <Link href="/catalog">Каталог</Link>
+              <Link href="/about">О нас</Link>
+              <Link href="/contacts">Контакты</Link>
+            </nav>
+          </HStack>
 
-        <HStack gap={4}>
-          <CartButton />
-          <UserMenu />
-        </HStack>
-      </Flex>
+          <HStack gap={4}>
+            <CartButton />
+            <UserMenu />
+          </HStack>
+        </Flex>
+      </header>
     </Box>
   )
 }
@@ -192,7 +196,7 @@ export function BottomNavigation() {
 
   return (
     <Box
-      as="nav"
+      asChild
       position="fixed"
       bottom={0}
       left={0}
@@ -203,21 +207,25 @@ export function BottomNavigation() {
       zIndex="sticky"
       pb="env(safe-area-inset-bottom)" // iPhone notch
     >
-      <HStack justify="space-around" py={2}>
-        <NavItem href="/" icon={LuHome} label="Главная" active={pathname === '/'} />
-        <NavItem href="/search" icon={LuSearch} label="Поиск" active={pathname === '/search'} />
-        <NavItem href="/cart" icon={LuShoppingCart} label="Корзина" active={pathname === '/cart'} />
-        <NavItem href="/profile" icon={LuUser} label="Профиль" active={pathname.startsWith('/profile')} />
-      </HStack>
+      <nav>
+        <HStack justify="space-around" py={2}>
+          <NavItem href="/" icon={LuHome} label="Главная" active={pathname === '/'} />
+          <NavItem href="/search" icon={LuSearch} label="Поиск" active={pathname === '/search'} />
+          <NavItem href="/cart" icon={LuShoppingCart} label="Корзина" active={pathname === '/cart'} />
+          <NavItem href="/profile" icon={LuUser} label="Профиль" active={pathname.startsWith('/profile')} />
+        </HStack>
+      </nav>
     </Box>
   )
 }
 
 function NavItem({ href, icon: Icon, label, active }) {
   return (
-    <VStack as={Link} href={href} gap={0.5} color={active ? 'fg.500' : 'fg.muted'} minW="60px">
-      <Icon size={24} />
-      <Text fontSize="xs">{label}</Text>
+    <VStack asChild gap={0.5} color={active ? 'fg.500' : 'fg.muted'} minW="60px">
+      <Link href={href}>
+        <Icon size={24} />
+        <Text fontSize="xs">{label}</Text>
+      </Link>
     </VStack>
   )
 }

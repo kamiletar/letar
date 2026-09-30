@@ -101,7 +101,7 @@ model Post {
 
 - Сессии хранятся в database
 - Проверка сессии через `auth.api.getSession()`
-- Middleware для защиты роутов
+- `proxy.ts` (Next.js 16, вместо middleware) или `auth()` + проверка роли для защиты роутов
 
 ### Server Actions
 

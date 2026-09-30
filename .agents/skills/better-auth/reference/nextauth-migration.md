@@ -431,6 +431,7 @@ model Account {
   scope             String?
   idToken           String?
   password          String? // Новое (для email auth)
+  issuer            String? // better-auth ≥1.7: обязательно, см. .claude/docs/better-auth-1.7-account-issuer-field.md
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 

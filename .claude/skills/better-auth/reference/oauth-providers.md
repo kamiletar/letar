@@ -306,7 +306,7 @@ export function SocialLogin() {
               callbackURL: '/dashboard',
             })}
         >
-          <Icon as={provider.icon} mr={2} />
+          <provider.icon size={16} style={{ marginRight: 8 }} />
           Войти через {provider.name}
         </Button>
       ))}

@@ -26,7 +26,7 @@ rm -rf .nx/cache
 nx daemon
 
 # Отключить daemon (если проблемы)
-NX_DAEMON=false nx build premium-rosstil
+NX_DAEMON=false nx build mandala
 ```
 
 Постоянное отключение в nx.json:
@@ -45,10 +45,10 @@ NX_DAEMON=false nx build premium-rosstil
 
 ```bash
 # 1. Проверь inputs в target
-nx show project premium-rosstil --json | jq '.targets.build.inputs'
+nx show project mandala --json | jq '.targets.build.inputs'
 
 # 2. Пропусти кэш для теста
-nx build premium-rosstil --skip-nx-cache
+nx build mandala --skip-nx-cache
 
 # 3. Проверь что файл входит в inputs
 # Возможно нужно добавить файл в inputs
@@ -58,10 +58,10 @@ nx build premium-rosstil --skip-nx-cache
 
 ```bash
 # 1. Проверь outputs
-nx show project premium-rosstil --json | jq '.targets.build.outputs'
+nx show project mandala --json | jq '.targets.build.outputs'
 
 # 2. Убедись что папки outputs существуют после сборки
-ls apps/premium-rosstil/.next
+ls apps/mandala/.next
 
 # 3. Возможно outputs указаны неверно
 ```
@@ -135,7 +135,7 @@ nx build @letar/my-lib
 nx run-many -t build --all
 
 # Или для конкретного проекта с зависимостями
-nx build premium-rosstil --skip-nx-cache
+nx build mandala --skip-nx-cache
 ```
 
 ---
@@ -269,7 +269,7 @@ NODE_OPTIONS="--max-old-space-size=8192" nx graph
 ### Подробный вывод
 
 ```bash
-nx build premium-rosstil --verbose
+nx build mandala --verbose
 ```
 
 ### Информация о workspace
@@ -281,8 +281,8 @@ nx report
 ### Детали проекта
 
 ```bash
-nx show project premium-rosstil
-nx show project premium-rosstil --json
+nx show project mandala
+nx show project mandala --json
 ```
 
 ### Граф зависимостей
@@ -320,7 +320,7 @@ cat apps/xxx/project.json | jq '.name'
 
 ```bash
 # Проверь доступные targets
-nx show project premium-rosstil --json | jq '.targets | keys'
+nx show project mandala --json | jq '.targets | keys'
 
 # Возможно target от плагина — проверь plugins в nx.json
 ```
@@ -330,7 +330,7 @@ nx show project premium-rosstil --json | jq '.targets | keys'
 ```bash
 # run-many не нашёл проекты с таким target
 # Проверь что target существует хотя бы в одном проекте
-nx show project premium-rosstil | grep xxx
+nx show project mandala | grep xxx
 ```
 
 ---

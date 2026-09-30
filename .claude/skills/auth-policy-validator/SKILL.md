@@ -35,7 +35,7 @@ description: Валидатор ZenStack access control policies. USE PROACTIVEL
 
 ```bash
 # Найти модели без @@allow
-grep -l "^model" apps/<app>/prisma/schema.zmodel | xargs -I {} sh -c '
+grep -l "^model" apps/<app>/schema.zmodel | xargs -I {} sh -c '
   model=$(grep "^model" {} | head -1)
   if ! grep -q "@@allow" {}; then
     echo "WARNING: $model has no @@allow policies"
@@ -85,8 +85,8 @@ model User {
   // ❌ Пароль виден всем
   @@allow('read', true)
 
-  // ✅ Пароль никогда не читается
-  @@deny('read', true) // на уровне поля
+  // ✅ Пароль никогда не читается — @deny на самом поле, а не @@deny на модели
+  // password String @deny('read', true)
 }
 ```
 
@@ -117,11 +117,12 @@ model User {
 // ❌ Пользователь может обновить любое поле
 @@allow('update', auth() == this)
 
-// ✅ Ограничить поля через @allow на уровне поля
+// ✅ Сузить поле через @deny: field-level @allow право только добавляет, не сужает
+// (.claude/docs/zenstack-field-level-allow-does-not-narrow.md)
 model User {
-  name  String @allow('update', auth() == this)
-  email String @allow('update', auth() == this)
-  role  Role   @allow('update', auth().role == 'ADMIN')
+  name  String
+  email String
+  role  Role   @deny('update', auth().role != 'ADMIN')
 }
 ```
 
@@ -202,13 +203,13 @@ model Post {
 
 ```bash
 # Найти все policies
-grep -rn "@@allow\|@@deny" apps/<app>/prisma/schema.zmodel
+grep -rn "@@allow\|@@deny" apps/<app>/schema.zmodel
 
 # Найти открытый доступ
-grep -n "@@allow.*true" apps/<app>/prisma/schema.zmodel
+grep -n "@@allow.*true" apps/<app>/schema.zmodel
 
 # Найти модели без policies
-grep -B5 "^}" apps/<app>/prisma/schema.zmodel | grep -B5 "^model" | grep -v "@@allow"
+grep -B5 "^}" apps/<app>/schema.zmodel | grep -B5 "^model" | grep -v "@@allow"
 ```
 
 ## Чеклист

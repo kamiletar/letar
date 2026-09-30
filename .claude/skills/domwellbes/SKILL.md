@@ -12,7 +12,7 @@ disable-model-invocation: true
    Не жди, пока прояснится задача — таймер обновляется через `time_switch`, когда направление
    работы становится понятным (см. «Учёт времени» ниже)
 2. Прочитай `.claude/rules/nextjs-apps.md` для общих правил Next.js
-3. ⚠️ **Точка входа — [`apps/domwellbes/PLAN_INDEX.md`](../../apps/domwellbes/PLAN_INDEX.md), не
+3. ⚠️ **Точка входа — [`apps/domwellbes/PLAN_INDEX.md`](/apps/domwellbes/PLAN_INDEX.md), не
    `PLAN.md` напрямую.** Планы приложения разрезаны на части (`PLAN_SHOP*`, `ROADMAP*` и т.д.),
    `PLAN_INDEX.md` — карта, «первый час нового исполнителя» и текущая ⭐ Задача №1, которая
    меняется по ходу работы и может расходиться с тем, что видно из одного `PLAN.md`. Прочитай его
@@ -56,8 +56,9 @@ disable-model-invocation: true
 ```bash
 cd apps/domwellbes && git checkout main && git pull origin main
 # ... правки ...
-git add . && git commit -m "feat(domwellbes): описание" && git push origin main
-cd ../.. && git add apps/domwellbes && git commit -m "chore: bump domwellbes submodule"
+git add <файлы> && git commit -m "feat(domwellbes): описание" -- <файлы>
+git push origin main   # только с одобрения пользователя; сначала submodule, потом letar
+cd ../.. && git commit -m "chore: bump domwellbes submodule" -- apps/domwellbes
 ```
 
 ⚠️ Без `git checkout main` правки уйдут в detached HEAD и потеряются. Подробности:
@@ -78,7 +79,7 @@ cd ../.. && git add apps/domwellbes && git commit -m "chore: bump domwellbes sub
 
 ## Учёт времени
 
-Проект ведётся для клиента студии по **почасовой оплате**. `studio-time-mcp` уже работает —
+Проект ведётся для клиента студии по **почасовой оплате**. Тайм-трекер (инструменты `time_*` сервера `letar`) уже работает —
 таймер стартуется **сразу в шаге 1 «Инициализации»**, не после уточнения задачи.
 
 ```
@@ -98,7 +99,7 @@ time_start({ app: "domwellbes", description: "<что делаешь, языко
 «Этапы» на `/owner/projects/<id>` (её сейчас владелец пополняет вручную кнопкой «+ Добавить этап»)
 заполнится из реальной работы. Когда задача сделана — `time_stage_close({ app: "domwellbes", stage:
 "<то же название>" })`. Название должно совпадать дословно во всех трёх вызовах — детали и
-причина см. `.claude/rules/app-workflow.md` §«Этапы (ProjectStage)».
+причина см. `.claude/rules/app-workflow.md` §«Этапы заводи сам, не жди владельца».
 
 ## Проект
 

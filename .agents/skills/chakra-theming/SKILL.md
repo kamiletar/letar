@@ -125,4 +125,3 @@ npx @chakra-ui/cli typegen ./src/theme/index.ts
 
 - `apps/driving-school/src/theme/` — полная система визуальной обратной связи
 - `apps/mandala/src/app/theme.ts` — семантические токены
-- `apps/premium-rosstil/src/app/_components/theme-provider.tsx` — кастомные цвета

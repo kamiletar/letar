@@ -301,7 +301,7 @@ button: defineRecipe({
 
 // ✅ Цвет + иконка + контекст
 <HStack color="error.fg">
-  <Icon as={LuAlertCircle} />
+  <LuAlertCircle />
   <Text>Неверный формат email</Text>
 </HStack>
 ```

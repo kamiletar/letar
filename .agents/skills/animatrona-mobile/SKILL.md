@@ -41,7 +41,7 @@ send_message(to: ["animatrona-coordinator-dev"], subject: "change: <описан
 Также **проверяй inbox** на задачи от координатора (topic: `animatrona-task`).
 
 **⚠️ НЕ правь код** в `animatrona`, `animatrona-tracker`, `animatrona-tv` — только уведомляй координатора.
-(`animatrona-web` выведен из эксплуатации, папки не существует — см. `animatrona-coordinator.md`.)
+(`animatrona-web` выведен из эксплуатации, папки не существует — см. навык `animatrona-coordinator`.)
 
 ## После завершения задачи
 

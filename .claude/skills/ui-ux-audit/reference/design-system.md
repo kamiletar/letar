@@ -168,20 +168,20 @@
 
 // ❌ Инконсистентное — разные стили для одинаковых действий
 <Button variant="solid">Primary</Button>
-<Box as="button" border="1px solid" p={2}>Secondary</Box>
+<Box asChild border="1px solid" p={2}><button type="button">Secondary</button></Box>
 ```
 
 ### Icon Sizes
 
 ```tsx
 // ✅ Консистентные размеры иконок
-<Icon as={FiPlus} boxSize={5} />   // 20px — стандарт для кнопок
-<Icon as={FiPlus} boxSize={4} />   // 16px — для текста
+<LuPlus size={20} />   // 20px — стандарт для кнопок
+<LuPlus size={16} />   // 16px — для текста
 
 // ❌ Разные размеры в одном контексте
 <HStack>
-  <Icon as={FiPlus} boxSize={5} />
-  <Icon as={FiMinus} boxSize="18px" />
+  <LuPlus size={20} />
+  <LuMinus size={18} />
 </HStack>
 ```
 

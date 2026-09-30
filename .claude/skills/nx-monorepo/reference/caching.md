@@ -157,7 +157,7 @@ rm -rf .nx/cache
 
 ```bash
 # Для одной команды
-nx build premium-rosstil --skip-nx-cache
+nx build mandala --skip-nx-cache
 
 # Для всех команд (env)
 NX_SKIP_NX_CACHE=true nx run-many -t build

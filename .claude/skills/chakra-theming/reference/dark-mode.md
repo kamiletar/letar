@@ -54,9 +54,7 @@ export default function RootLayout({ children }) {
 ```tsx
 'use client'
 
-import { useColorMode } from '@chakra-ui/react'
-// или из проекта Letar:
-// import { useColorMode } from '@letar/chakra-provider'
+import { useColorMode } from '@letar/chakra-provider'
 
 function ThemeToggle() {
   const { colorMode, setColorMode, toggleColorMode } = useColorMode()
@@ -90,7 +88,7 @@ import { ColorModeButton } from '@/components/ui/color-mode' // Готовый �
 'use client'
 
 import { IconButton } from '@chakra-ui/react'
-import { useColorMode } from '@chakra-ui/react'
+import { useColorMode } from '@letar/chakra-provider'
 import { LuMoon, LuSun } from 'react-icons/lu'
 
 export function ColorModeButton() {
@@ -216,18 +214,6 @@ semanticTokens: {
   <body>
     <Providers>{children}</Providers>
   </body>
-</html>
-```
-
-### ColorModeScript (альтернатива)
-
-```tsx
-import { ColorModeScript } from '@chakra-ui/react'
-<html>
-  <head>
-    <ColorModeScript initialColorMode="system" />
-  </head>
-  ...
 </html>
 ```
 

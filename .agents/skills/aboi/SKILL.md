@@ -64,8 +64,8 @@ disable-model-invocation: true
 - Содержать **не предотмеченный** чекбокс согласия со ссылкой на `/privacy`
 - Cookie-баннер с opt-in
 
-Перед публичным запуском — чеклист `.claude/docs/personal-data.md`. Оператор ПДн — ИП Гаев В.В.
-(см. «Проект» ниже).
+Перед публичным запуском — чеклист `.claude/docs/personal-data.md`. Оператор ПДн и реквизиты — в
+`.claude/private/COMPLIANCE.md` (см. «Проект» ниже).
 
 ## Деплой
 
@@ -76,7 +76,6 @@ disable-model-invocation: true
 **Приложение:** aboi
 **Бренд:** НейроАбоИ
 **Порт:** 3018
-**Домен (staging):** aboi.letar.best
 **Домен (production):** <домен aboi> — после регистрации Виталием и подачи в РКН (см. PLAN.md §5, E10.b)
 **Сервер:** s2 (185.28.85.195) — s1 выведен из эксплуатации 2026-06-20
 **Заказчик:** владелец приложения (реквизиты — в приватных доках)
@@ -92,4 +91,4 @@ Next.js 16 + React 19 + Chakra UI v3 + PostgreSQL + Prisma + ZenStack v3 + Bette
 - `/better-auth` — конфиг auth, OIDC, защита роутов
 - `/form-pipeline` — формы через @letar/forms
 - `/chakra-theming` — токены и dark mode
-- `/ecommerce-patterns` — корзина, заказы, платежи (паттерны premium-rosstil)
+- `/ecommerce-patterns` — корзина, заказы, платежи (общие паттерны магазинов, `.claude/docs/ecommerce-cart-orders.md`)

@@ -118,14 +118,14 @@ export const config = {
 }
 ```
 
-**3. Экспортируй как default:**
+**3. Экспортируй `proxy`:**
 
 ```typescript
-// Если файл называется middleware.ts
-export { proxy as middleware } from './proxy'
-
-// Или переименуй proxy.ts в middleware.ts
+// src/proxy.ts — файл остаётся proxy.ts, middleware.ts не создавай
+export async function proxy(request: NextRequest) {/* … */}
 ```
+
+⚠️ Не переименовывай `proxy.ts` в `middleware.ts`: в Next.js 16 это запрещено правилом [proxy-migration](/.claude/rules/proxy-migration.md).
 
 ---
 

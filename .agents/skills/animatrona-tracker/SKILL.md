@@ -37,8 +37,8 @@ disable-model-invocation: true
 - **API Key auth:** Animatrona Desktop публикует аниме через API ключи
 - **Модерация:** модераторы проверяют и одобряют раздачи
 - **Пиннинг:** одобренные раздачи пинятся на relay-серверах (mail.letar.best и др.)
-- **БД:** PostgreSQL + ZenStack 3.2 + Better Auth (Google, Yandex, VK)
-- **Деплой:** `deploy-affected.sh --app animatrona-tracker`
+- **БД:** PostgreSQL + ZenStack 3.x + Better Auth (Google, Yandex, VK)
+- **Деплой:** только запросом к `deploy-agent-dev` (см. раздел «Деплой»)
 
 ## Ключевые файлы
 
@@ -66,7 +66,7 @@ send_message(to: ["animatrona-coordinator-dev"], subject: "change: <описан
 Также **проверяй inbox** на задачи от координатора (topic: `animatrona-task`).
 
 **⚠️ НЕ правь код** в `animatrona`, `animatrona-mobile`, `animatrona-tv` — только уведомляй координатора.
-(`animatrona-web` выведен из эксплуатации, папки не существует — см. `animatrona-coordinator.md`.)
+(`animatrona-web` выведен из эксплуатации, папки не существует — см. навык `animatrona-coordinator`.)
 
 ## Деплой
 

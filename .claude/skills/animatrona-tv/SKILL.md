@@ -41,7 +41,7 @@ send_message(to: ["animatrona-coordinator-dev"], subject: "change: <описан
 Также **проверяй inbox** на задачи от координатора (topic: `animatrona-task`).
 
 **⚠️ НЕ правь код** в `animatrona`, `animatrona-tracker`, `animatrona-mobile` — только уведомляй координатора.
-(`animatrona-web` выведен из эксплуатации, папки не существует — см. `animatrona-coordinator.md`.)
+(`animatrona-web` выведен из эксплуатации, папки не существует — см. навык `animatrona-coordinator`.)
 
 ## После завершения задачи
 
@@ -55,7 +55,7 @@ send_message(to: ["animatrona-coordinator-dev"], subject: "change: <описан
 
 ## Технологии
 
-- React Native 0.80
+- React Native 0.87
 - React Navigation 7
 - ExoPlayer (через @letar/exoplayer-sync)
 - Zustand (state management)

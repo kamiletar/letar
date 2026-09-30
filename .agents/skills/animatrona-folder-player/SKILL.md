@@ -48,7 +48,7 @@ identity `animatrona-dev` — той, что по конвенции `<роль>
 - **Плеер:** Shaka Player (тот же движок, что в `animatrona`/`animatrona-tracker`), субтитры
   ass/ssa — SubtitlesOctopus (libass-wasm), srt/vtt — нативный `<track>`.
 - **Изолировано от экосистемы Animatrona:** не импортирует `@letar/animatrona-types`, не участвует
-  в каскадах координатора (см. `animatrona-coordinator.md`) — уведомлять координатора всё равно
+  в каскадах координатора (см. навык `animatrona-coordinator`) — уведомлять координатора всё равно
   стоит для видимости, но задач от него по каскаду ожидать не нужно.
 
 ## После завершения задачи

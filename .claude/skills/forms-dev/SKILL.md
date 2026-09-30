@@ -23,8 +23,7 @@ disable-model-invocation: true
      task_description: "Разработка @letar/forms",
      file_reservation_paths: [
        "libs/forms/**",
-       "libs/forms-core/**",      // Фаза 7: dependency-free ядро (появится при 7.1)
-       "libs/forms-chakra/**",    // Фаза 7: Chakra-скин
+       "libs/forms-core/**",      // Фаза 7: dependency-free ядро
        "libs/forms-shadcn/**",    // Фаза 7: shadcn-скин
        "libs/forms-vue/**",       // Фаза 7: Vue-пруф-адаптер (7.8)
        "libs/zenstack-form-plugin/**",
@@ -173,14 +172,14 @@ kebab-case имя ловило баг сервера agent-mail в `send_message
 **Порт (dev):** 3027 (production за Traefik — 3022, не связан с dev-портом)
 **Домен:** [forms-example.letar.best](https://forms-example.letar.best)
 **Описание:** Showcase приложение @letar/forms для внешних пользователей
-**Модели:** `schema.zmodel` с `@meta("form.*", value)` директивами (legacy `@form.*`-комментарии deprecated) → `src/generated/form-schemas/`
+**Модели:** `schema.zmodel` с `@meta("form.*", value)` директивами (legacy `@form.*`-комментарии убраны в plugin v4.0.0) → `src/generated/form-schemas/`
 
 Страницы: basic, all-fields, validation, conditional, multi-step, groups, auto-fields, zenstack, theming, i18n, offline.
 
 ### @letar/forms (библиотека)
 
 **Библиотека:** libs/forms
-**Версия:** 1.4.0
+**Версия:** см. `libs/forms/package.json`
 **npm пакет:** @letar/forms
 **Описание:** 56 полей, compound component API, Zod v4, offline, i18n, ZenStack интеграция, MCP-сервер
 **Стратегия:** open-core, широкий OSS-охват — см. `libs/forms/PLAN.md` → Фаза 7 (расслоение core + скины)
@@ -188,5 +187,5 @@ kebab-case имя ловило баг сервера agent-mail в `send_message
 ### @letar/zenstack-form-plugin (плагин)
 
 **Библиотека:** libs/zenstack-form-plugin
-**Версия:** 3.0.0
-**Описание:** Генерация Zod form schemas из `schema.zmodel` с `@meta("form.*", value)` директивами (основной синтаксис с Фазы 3; legacy `/// @form.*`-комментарии deprecated, но рабочие)
+**Версия:** см. `libs/zenstack-form-plugin/package.json`
+**Описание:** Генерация Zod form schemas из `schema.zmodel` с `@meta("form.*", value)` директивами (основной синтаксис с Фазы 3; legacy `/// @form.*`-комментарии убраны в v4.0.0)

@@ -10,16 +10,16 @@
 
 ```bash
 nx <target> <project>
-nx build premium-rosstil
-nx dev imot
+nx build mandala
+nx dev driving-school
 nx lint driving-school
 ```
 
 ### С опциями
 
 ```bash
-nx build premium-rosstil --skip-nx-cache    # Пропустить кэш
-nx dev premium-rosstil -- --hostname 0.0.0.0 # Опции для Next.js
+nx build mandala --skip-nx-cache    # Пропустить кэш
+nx dev mandala -- --hostname 0.0.0.0 # Опции для Next.js
 ```
 
 ### Множественные задачи
@@ -57,7 +57,7 @@ nx run-many -t format --projects=<p1>,<p2>   # несколько проекто
 ```
 
 Прогон по всему публичному репо (не submodule) — `dprint fmt` из корня репозитория (не через
-`nx run-many` без `--projects`, см. корневой `CLAUDE.md`).
+`nx run-many` без `--projects`, см. `AGENTS.md` и `.claude/rules/formatting.md`).
 
 **Конфигурация target в project.json:**
 
@@ -67,7 +67,7 @@ nx run-many -t format --projects=<p1>,<p2>   # несколько проекто
     "executor": "nx:run-commands",
     "options": {
       "command": "bunx dprint fmt \"**/*.{ts,tsx,js,jsx,json,md}\"",
-      "cwd": "apps/premium-rosstil"
+      "cwd": "apps/mandala"
     },
     "cache": false
   },
@@ -75,7 +75,7 @@ nx run-many -t format --projects=<p1>,<p2>   # несколько проекто
     "executor": "nx:run-commands",
     "options": {
       "command": "bunx dprint check \"**/*.{ts,tsx,js,jsx,json,md}\"",
-      "cwd": "apps/premium-rosstil"
+      "cwd": "apps/mandala"
     },
     "cache": true,
     "inputs": ["default", "{workspaceRoot}/dprint.json"]

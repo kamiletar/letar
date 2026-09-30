@@ -397,8 +397,8 @@ const config = defineConfig({
   cssVarsRoot: ':where(html)',
   cssVarsPrefix: 'app',
 
-  // Строгие токены (dev only)
-  strictTokens: process.env.NODE_ENV === 'development',
+  // ⚠️ strictTokens не включай per-app: typegen пишет в общий node_modules и ломает typecheck всех
+  // приложений (.claude/docs/chakra-strict-tokens-global-typegen.md)
 
   // Глобальные стили
   globalCss: {

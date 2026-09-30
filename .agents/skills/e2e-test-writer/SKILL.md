@@ -164,20 +164,21 @@ await expect(page.getByRole('alert')).toContainText('Сохранено')
 ## Команды
 
 ```bash
-# Запуск всех E2E тестов
+# Полный прогон набора — run_e2e({ app, baseUrl }) + e2e_status (сервер letar, s1);
+# локальный nx e2e — только для отладки одного спека (.claude/rules/testing.md)
 nx e2e <app>-e2e
 
 # Конкретный файл
-nx e2e <app>-e2e --spec=src/tests/auth.spec.ts
+nx e2e <app>-e2e -- src/auth.spec.ts
 
 # С UI
-nx e2e <app>-e2e --ui
+nx e2e <app>-e2e -- --ui
 
 # Debug режим
-nx e2e <app>-e2e --debug
+nx e2e <app>-e2e -- --debug
 
 # Только WebKit
-nx e2e <app>-e2e --project=webkit
+nx e2e <app>-e2e -- --project=webkit
 ```
 
 ## Best Practices

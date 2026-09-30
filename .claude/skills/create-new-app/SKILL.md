@@ -210,7 +210,7 @@ nx g @letar/generators:e2e-suite <name>
    (не заводи новый — тот же клиент/секрет, что и у прод).
 3. `playwright.config.ts` приложения-e2e обычно уже совместим (читает `BASE_URL` из env,
    `webServer.reuseExistingServer: true`) — правок, как правило, не требует.
-4. **NPM proxy host + DNS** (`<name>-stage.s1.letar.best`, wildcard `*.s1` уже есть) и
+4. **Маршрут Traefik + DNS** (`<name>-stage.s1.letar.best`, wildcard `*.s1` уже есть) и
    создание `.env.staging` на s1 с реальными секретами — задача deploy-agent-dev, не твоя (см.
    `.claude/rules/deploy-coordination.md`), отправь `deploy-request` через agent-mail.
 5. Добавление в `E2E_GATED_APPS` — только после зелёного `deploy_app(staging)` → `run_e2e` → `e2e_status`,

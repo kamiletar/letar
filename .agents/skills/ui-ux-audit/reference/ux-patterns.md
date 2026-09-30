@@ -417,7 +417,7 @@ export default function Error({ error, reset }) {
   return (
     <Center minH="60vh">
       <VStack gap={4} textAlign="center">
-        <Icon as={WarningIcon} boxSize={12} color="red.500" />
+        <LuTriangleAlert size={48} color="var(--chakra-colors-red-500)" />
         <Heading size="lg">Что-то пошло не так</Heading>
         <Text color="fg.muted">Произошла ошибка при загрузке страницы</Text>
         <HStack>

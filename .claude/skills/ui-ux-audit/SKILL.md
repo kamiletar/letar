@@ -121,9 +121,10 @@ props/пример/миграцию v2→v3.
 ### Browser Automation
 
 ```
-mcp__plugin_playwright_playwright__browser_snapshot — accessibility tree
-mcp__chrome-devtools__take_snapshot — DOM snapshot
-mcp__chrome-devtools__performance_start_trace — performance trace
+mcp__Claude_Browser__read_page — accessibility tree
+mcp__Claude_Browser__javascript_tool — DOM, performance.getEntries()
+mcp__Claude_Browser__computer — скриншот и взаимодействие
+(встроенный Claude Browser; playwright/chrome-devtools MCP сняты ревизией 2026-09-14; трассу производительности — Lighthouse CLI)
 ```
 
 ---
@@ -132,4 +133,4 @@ mcp__chrome-devtools__performance_start_trace — performance trace
 
 - [mobile-ui skill](../mobile-ui/SKILL.md) — мобильный UI
 - [chakra-theming skill](../chakra-theming/SKILL.md) — темизация
-- [UI компоненты](../../docs/ui-components.md) — паттерны Chakra UI v3
+- [UI компоненты](/.claude/docs/ui-components.md) — паттерны Chakra UI v3

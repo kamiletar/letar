@@ -24,7 +24,7 @@ description: |
 | `base`     | 0px     | Мобильные (default) |
 | `sm`       | ~480px  | Большие мобильные   |
 | `md`       | ~768px  | Планшеты            |
-| `lg`       | ~992px  | Ноутбуки            |
+| `lg`       | ~1024px | Ноутбуки            |
 | `xl`       | ~1280px | Десктопы            |
 | `2xl`      | ~1536px | Большие экраны      |
 
@@ -87,5 +87,4 @@ const isMobile = useBreakpointValue({ base: true, md: false })
 
 ## См. также
 
-- [UI компоненты](../../docs/ui-components.md) — Chakra UI v3 паттерны
-- [Chakra UI MCP](../../docs/mcp-servers.md#chakra-ui) — актуальная документация
+- [UI компоненты](/.claude/docs/ui-components.md) — Chakra UI v3 паттерны

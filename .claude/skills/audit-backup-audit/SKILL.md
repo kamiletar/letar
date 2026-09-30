@@ -9,8 +9,9 @@ disable-model-invocation: true
 
 Проведи аудит системы бэкапов: проверь что все бэкапы свежие, cron работает, репликация идёт, все приложения зарегистрированы.
 
-⚠️ **Все production-приложения на s2** (s1 выведен из эксплуатации 2026-06-20 — сервер больше не
-принадлежит letar, бэкапов/cron/dashboard-agent на нём нет). Подробнее —
+⚠️ **Все production-приложения на s2.** Прежний s1 выведен 2026-06-20; с 2026-09-19 `s1` — новый
+staging-сервер со своим staging-инстансом dashboard-agent и бэкапом секретов Traefik
+(`traefik-backup-s1`), production там не запускается ([deployment.md](/.claude/docs/deployment.md)). Подробнее —
 [backup-architecture.md](/.claude/docs/backup-architecture.md).
 
 ## Когда использовать
@@ -49,14 +50,21 @@ $SSH $S2 'cat /home/deploy/letar/cron-jobs.json'
 
 Ожидаемые задачи:
 
-| Job ID             | Расписание | Сервер | Описание        |
-| ------------------ | ---------- | ------ | --------------- |
-| s2-database-backup | 02:00 UTC  | s2     | pg_dump всех БД |
-| nginx-backup-s2    | 03:00 UTC  | s2     | NPM бэкап       |
+Бэкапные задачи из `apps/dashboard-agent/src/lib/cron-default-jobs.ts` (актуальный список — в файле, там же десятки небэкапных задач):
 
-- Обе задачи присутствуют
-- `enabled: true` у каждой
-- Расписание соответствует таблице
+| Job ID                          | Расписание | Сервер | Описание                   |
+| ------------------------------- | ---------- | ------ | -------------------------- |
+| s2-database-backup              | 04:00 UTC  | s2     | pg_dump всех БД            |
+| acme-dns-backup-s2              | 03:30 UTC  | s2     | бэкап acme-dns             |
+| traefik-backup-s1               | 03:45 UTC  | s1     | секреты Traefik на staging |
+| maddy-backup-freshness-check    | каждые 6 ч | s2     | свежесть бэкапа Maddy      |
+| acme-dns-backup-freshness-check | каждые 6 ч | s2     | свежесть бэкапа acme-dns   |
+| traefik-backup-freshness-check  | каждые 6 ч | s1     | свежесть бэкапа Traefik    |
+
+⚠️ `nginx-backup-s2` всё ещё числится в `DEFAULT_CRON_JOBS`, хотя старого прокси на серверах нет (сейчас Traefik): не требуй его свежести.
+
+- Задачи присутствуют и `enabled: true`
+- Расписание соответствует таблице (сверяй с `cron-default-jobs.ts`, реальное значение можно сдвинуть через UI)
 
 ### 3. Свежесть бэкапов PostgreSQL
 
@@ -100,22 +108,7 @@ for d in apps/*/docker-compose.production.yml; do grep -q "image: postgres" "$d"
 - Размер файла **> 1 KB** (пустой дамп = проблема)
 - Тип `auto` в имени файла (подтверждает работу cron)
 
-### 4. Свежесть бэкапов Nginx Proxy Manager
-
-⚠️ Nginx Proxy Manager снят и с s3 (2026-08-08), и с s2 (2026-08-31) — на s2 сейчас Traefik
-([traefik/README.md](/infra/traefik/README.md)). Этот шаг актуален только если на сервере всё ещё
-остался NPM-бэкап от прежней конфигурации — проверь, действительно ли `nginx-backup-s2` в cron ещё
-нужен, прежде чем требовать его свежести.
-
-```bash
-$SSH $S2 'ls -lh /home/deploy/letar/backups/nginx_*.tar.gz 2>/dev/null | tail -5'
-```
-
-- Последний бэкап **не старше 25 часов** (если задача ещё актуальна)
-- Размер **> 10 KB**
-- Ротация работает (не более ~7 файлов)
-
-### 5. Регистрация приложений в dashboard-agent
+### 4. Регистрация приложений в dashboard-agent
 
 Сверь `APP_CONFIG` в коде с реальными docker-compose файлами:
 
@@ -134,7 +127,7 @@ $SSH $S2 'ls -lh /home/deploy/letar/backups/nginx_*.tar.gz 2>/dev/null | tail -5
 $SSH $S2 'docker ps --filter name=-postgres --format "{{.Names}}" && docker ps --filter name=-db --format "{{.Names}}"'
 ```
 
-### 6. Resilio Sync репликация
+### 5. Resilio Sync репликация
 
 ```bash
 $SSH $S2 'systemctl is-active resilio-sync'
@@ -149,7 +142,7 @@ $SSH $S2 'cat /home/deploy/letar/.sync/IgnoreList 2>/dev/null'
 ls -lh /c/BackupSync/lena/s2/backups/*.sql.gz 2>/dev/null | tail -5
 ```
 
-### 7. Credentials (секреты)
+### 6. Credentials (секреты)
 
 ```bash
 $SSH $S2 'docker inspect dashboard-agent --format "{{range .Mounts}}{{.Source}} -> {{.Destination}}{{println}}{{end}}" | grep secrets'
@@ -165,7 +158,7 @@ $SSH $S2 'docker inspect dashboard-agent --format "{{range .Mounts}}{{.Source}} 
 ### Critical
 
 - [ ] Dashboard-agent запущен и отвечает на s2
-- [ ] Cron задачи активны (2 шт: DB + NPM, см. п.4 про актуальность NPM-бэкапа после Traefik)
+- [ ] Бэкапные cron-задачи из п.2 активны (`nginx-backup-s2` не считается)
 - [ ] Бэкапы PostgreSQL свежие (< 25ч) для всех приложений из п.3
 - [ ] Бэкапы PostgreSQL не пустые (> 1 KB)
 - [ ] Credentials доступны agent (все .env.docker примонтированы)
@@ -176,7 +169,7 @@ $SSH $S2 'docker inspect dashboard-agent --format "{{range .Mounts}}{{.Source}} 
 - [ ] Имена контейнеров в APP_CONFIG совпадают с реальными
 - [ ] Resilio Sync активен на s2
 - [ ] Бэкапы не исключены из Resilio Sync (IgnoreList)
-- [ ] Ротация NPM/архивных бэкапов работает (не более ~7 файлов), если задача ещё актуальна
+- [ ] Ротация архивных бэкапов работает (не более ~7 файлов), если задача ещё актуальна
 
 ### Recommended
 
@@ -193,9 +186,8 @@ $SSH $S2 'docker inspect dashboard-agent --format "{{range .Mounts}}{{.Source}} 
 | Область                | Статус | Детали                             |
 | ---------------------- | ------ | ---------------------------------- |
 | Agent s2               |        | Up / Down, время работы            |
-| Cron задачи            |        | N/2 активных                       |
+| Cron задачи            |        | N/M активных бэкапных задач (п.2)  |
 | БД бэкапы              |        | N/17 свежих, мин/макс размер       |
-| NPM/архивный бэкап     |        | Свежесть, актуальность задачи      |
 | Регистрация приложений |        | N/17 зарегистрированы, пропущенные |
 | Resilio Sync           |        | Активен, IgnoreList ok             |
 | Windows репликация     |        | Файлы актуальны / устаревшие       |

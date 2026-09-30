@@ -42,14 +42,10 @@
 <Button onClick={handleClick}>Действие</Button>
 
 // ✅ Правильно — кастомный элемент с keyboard support
-<Box
-  as="button"
-  tabIndex={0}
-  onKeyDown={(e) => e.key === 'Enter' && handleClick()}
-  onClick={handleClick}
->
-  Кастомная кнопка
+<Box asChild>
+  <button type="button" onClick={handleClick}>Кастомная кнопка</button>
 </Box>
+// нативный <button> уже фокусируется и реагирует на Enter/Space — tabIndex и onKeyDown не нужны
 
 // ❌ Неправильно — div с onClick без keyboard support
 <Box onClick={handleClick}>Кликабельный div</Box>
@@ -119,7 +115,9 @@
 
 ```tsx
 // Navigation landmark
-<Box as="nav" role="navigation" aria-label="Главное меню">
+<Box asChild>
+  <nav aria-label="Главное меню">…</nav>
+</Box>
 
 // Alert для уведомлений
 <Alert role="alert" aria-live="polite">

@@ -118,6 +118,7 @@ model Account {
   scope                 String?
   idToken               String?
   password              String?   // Для email auth
+  issuer                String?   // better-auth ≥1.7: без поля вход молча падает, см. better-auth-1.7-account-issuer-field
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
 

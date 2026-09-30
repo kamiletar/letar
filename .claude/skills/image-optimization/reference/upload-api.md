@@ -13,19 +13,26 @@ app/api/images/
 
 ```typescript
 // app/api/images/upload/route.ts
+import { resolveUploadPath } from '@letar/image-upload/server'
 import { randomUUID } from 'crypto'
 import { mkdir, writeFile } from 'fs/promises'
 import { NextRequest, NextResponse } from 'next/server'
-import { join } from 'path'
 
 const UPLOAD_DIR = process.env.UPLOAD_DIR || 'uploads'
 const MAX_SIZE = 5 * 1024 * 1024 // 5MB
-const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+// Расширение берём из проверенного MIME, а не из имени файла клиента
+const ALLOWED_TYPES = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/gif': 'gif' } as const
+// Белый список папок: `folder` приходит от клиента, `../` в нём выводит за пределы uploads/
+const ALLOWED_FOLDERS = ['general', 'products', 'avatars']
 
 export async function POST(request: NextRequest) {
   const formData = await request.formData()
   const file = formData.get('file') as File
-  const folder = (formData.get('folder') as string) || 'general'
+  const folderRaw = (formData.get('folder') as string) || 'general'
+  if (!ALLOWED_FOLDERS.includes(folderRaw)) {
+    return NextResponse.json({ error: 'Недопустимая папка' }, { status: 400 })
+  }
+  const folder = folderRaw
 
   // Валидация
   if (!file) {
@@ -34,20 +41,25 @@ export async function POST(request: NextRequest) {
   if (file.size > MAX_SIZE) {
     return NextResponse.json({ error: 'Файл слишком большой (макс. 5MB)' }, { status: 400 })
   }
-  if (!ALLOWED_TYPES.includes(file.type)) {
+  if (!(file.type in ALLOWED_TYPES)) {
     return NextResponse.json({ error: 'Неподдерживаемый формат' }, { status: 400 })
   }
 
   // Генерация имени
-  const ext = file.name.split('.').pop()
+  const ext = ALLOWED_TYPES[file.type as keyof typeof ALLOWED_TYPES]
   const id = randomUUID()
   const filename = `${id}.${ext}`
-  const path = join(UPLOAD_DIR, folder)
+  // Путь строго внутри UPLOAD_DIR (.claude/docs/upload-path-traversal.md)
+  const dir = resolveUploadPath(UPLOAD_DIR, [folder])
+  const target = resolveUploadPath(UPLOAD_DIR, [folder, filename])
+  if (!dir.ok || !target.ok) {
+    return NextResponse.json({ error: 'Недопустимый путь' }, { status: 400 })
+  }
 
   // Создание папки и сохранение
-  await mkdir(path, { recursive: true })
+  await mkdir(dir.absPath, { recursive: true })
   const bytes = await file.arrayBuffer()
-  await writeFile(join(path, filename), Buffer.from(bytes))
+  await writeFile(target.absPath, Buffer.from(bytes))
 
   // Сохранение в БД
   const image = await db.image.create({

@@ -73,10 +73,6 @@ npx @better-auth/cli migrate
 npx @better-auth/cli generate
 ```
 
-## MCP интеграция
-
-Установлен MCP сервер `better-auth` — используй для актуальной документации.
-
 ## Reference файлы
 
 | Файл                                   | Описание                            |

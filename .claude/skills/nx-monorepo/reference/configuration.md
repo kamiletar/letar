@@ -58,9 +58,9 @@
 
 ```json
 {
-  "name": "premium-rosstil",
+  "name": "mandala",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "apps/premium-rosstil/src",
+  "sourceRoot": "apps/mandala/src",
   "projectType": "application",
   "tags": ["type:app", "scope:premium"],
   "implicitDependencies": ["@letar/chakra-provider"],
@@ -70,19 +70,19 @@
       "executor": "nx:run-commands",
       "options": {
         "command": "next build",
-        "cwd": "apps/premium-rosstil"
+        "cwd": "apps/mandala"
       },
       "dependsOn": ["^build"],
       "cache": true,
       "inputs": ["production", "^production"],
-      "outputs": ["{workspaceRoot}/apps/premium-rosstil/.next"]
+      "outputs": ["{workspaceRoot}/apps/mandala/.next"]
     },
 
     "zenstack:generate": {
       "executor": "nx:run-commands",
       "options": {
         "command": "zenstack generate",
-        "cwd": "apps/premium-rosstil"
+        "cwd": "apps/mandala"
       },
       "cache": true,
       "inputs": ["{projectRoot}/schema.zmodel"],

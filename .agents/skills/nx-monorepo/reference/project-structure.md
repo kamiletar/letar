@@ -9,10 +9,10 @@
 ```
 letar/
 ├── apps/                    # Приложения
-│   ├── premium-rosstil/     # Next.js app
-│   ├── imot/                # Next.js app
+│   ├── mandala/             # Next.js app
+│   ├── driving-school/      # Next.js app
 │   ├── dashboard/           # Next.js app
-│   └── premium-rosstil-e2e/ # E2E тесты
+│   └── mandala-e2e/         # E2E тесты
 ├── libs/                    # Библиотеки
 │   ├── chakra-provider/     # Shared Chakra config
 │   ├── form-components/     # Form UI library
@@ -32,7 +32,7 @@ letar/
 ### Объявление
 
 ```json
-// apps/premium-rosstil/project.json
+// apps/mandala/project.json
 {
   "tags": ["type:app", "scope:premium"]
 }
@@ -125,7 +125,7 @@ projects tagged with "scope:shared" or "scope:premium"
 ### Объявление
 
 ```json
-// apps/premium-rosstil/project.json
+// apps/mandala/project.json
 {
   "implicitDependencies": ["@letar/chakra-provider", "@letar/yandex-metrika"]
 }
@@ -160,7 +160,7 @@ projects tagged with "scope:shared" or "scope:premium"
 ### Использование
 
 ```typescript
-// apps/premium-rosstil/src/components/Form.tsx
+// apps/mandala/src/components/Form.tsx
 import { useAppForm } from '@letar/forms'
 import { Button } from '@letar/ui'
 ```

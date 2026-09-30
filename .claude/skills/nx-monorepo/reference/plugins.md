@@ -84,13 +84,13 @@ Project Crystal — концепция где плагины автоматич�
 
 ```bash
 # Все targets проекта (включая inferred)
-nx show project premium-rosstil
+nx show project mandala
 
 # В JSON формате
-nx show project premium-rosstil --json
+nx show project mandala --json
 
 # Открыть в браузере
-nx show project premium-rosstil --web
+nx show project mandala --web
 ```
 
 ---
