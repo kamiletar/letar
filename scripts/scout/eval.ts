@@ -1,0 +1,191 @@
+#!/usr/bin/env bun
+/**
+ * Замер качества скаута на реальных сессиях.
+ *
+ * Случай = задача сессии → доки, которые агент прочитал до первой правки (эталон),
+ * и проектные скилы/субагенты, которые он позвал. Метрики:
+ * - Recall@5 / Recall@8 — доля эталонных доков в первых 5 / в справке целиком (5 доков + 3 ловушки);
+ * - Hit@8 — в справке есть хоть один эталонный док;
+ * - MRR — обратный ранг первого эталонного дока;
+ * - top-1 инструмента — среди случаев, где агент звал проектный инструмент.
+ *
+ * ⚠️ Эталон смещён: агент читал то, что нашёл по карте в CLAUDE.md, а не всё, что было нужно.
+ * Метрика меряет «догоняет ли скаут агента», а не абсолютную полноту.
+ *
+ * Запуск: bun scripts/scout/eval.ts [--sessions <jsonl>] [--min-task 15] [--show 5] [--out <cases.jsonl>]
+ */
+import { existsSync, readFileSync, writeFileSync } from 'node:fs'
+import { join } from 'node:path'
+import { Bm25, buildIndex, collectCards, scout, type ScoutResult } from '../../libs/scout/src/index'
+import { findRepoRoot } from './index-store'
+import type { SessionRecord } from './mine-transcripts'
+import { scoutDataDir } from './paths'
+
+export interface EvalCase {
+  sessionId: string
+  query: string
+  goldDocs: string[]
+  goldTools: string[]
+}
+
+/** Встроенные агенты харнесса — не проектные инструменты, скаут их не советует */
+const BUILTIN_AGENTS = new Set([
+  'general-purpose',
+  'Explore',
+  'Plan',
+  'claude',
+  'statusline-setup',
+  'claude-code-guide',
+])
+
+export function buildCases(
+  sessions: SessionRecord[],
+  knownPaths: Set<string>,
+  knownTools: Set<string>,
+  minTask = 15,
+): EvalCase[] {
+  const cases: EvalCase[] = []
+  for (const s of sessions) {
+    const query = [s.command ? `/${s.command}` : '', s.task].join(' ').trim()
+    if (s.task.length < minTask) {
+      continue
+    }
+    const goldDocs = [...new Set(s.docsRead.filter((d) => d.beforeEdit && knownPaths.has(d.path)).map((d) => d.path))]
+    const goldTools = [...new Set([...s.skills, ...s.agents])].filter((t) =>
+      !BUILTIN_AGENTS.has(t) && knownTools.has(t)
+    )
+    if (!goldDocs.length && !goldTools.length) {
+      continue
+    }
+    cases.push({ sessionId: s.sessionId, query, goldDocs, goldTools })
+  }
+  return cases
+}
+
+export interface Metrics {
+  cases: number
+  recall5: number
+  recall8: number
+  hit8: number
+  mrr: number
+  toolCases: number
+  toolTop1: number
+  toolShown: number
+}
+
+/** Доки справки в порядке очков: доки и ловушки вперемешку, как их ранжировал поиск */
+function rankedPaths(result: ScoutResult): string[] {
+  return [...result.docs, ...result.traps].sort((a, b) => b.score - a.score).map((d) => d.path)
+}
+
+export function evaluate(
+  engine: Bm25,
+  cases: EvalCase[],
+): { metrics: Metrics; perCase: Array<EvalCase & { got: string[]; tool?: string }> } {
+  let recall5 = 0
+  let recall8 = 0
+  let hit8 = 0
+  let mrr = 0
+  let docCases = 0
+  let toolCases = 0
+  let toolTop1 = 0
+  let toolShown = 0
+  const perCase: Array<EvalCase & { got: string[]; tool?: string }> = []
+  for (const c of cases) {
+    const result = scout(engine, c.query)
+    const got = rankedPaths(result)
+    const tool = result.tool?.name
+    if (tool) {
+      toolShown++
+    }
+    perCase.push({ ...c, got, tool })
+    if (c.goldDocs.length) {
+      docCases++
+      const gold = new Set(c.goldDocs)
+      const inTop = (k: number) => got.slice(0, k).filter((p) => gold.has(p)).length
+      recall5 += inTop(5) / gold.size
+      recall8 += inTop(8) / gold.size
+      hit8 += inTop(8) > 0 ? 1 : 0
+      const rank = got.findIndex((p) => gold.has(p))
+      mrr += rank === -1 ? 0 : 1 / (rank + 1)
+    }
+    if (c.goldTools.length) {
+      toolCases++
+      toolTop1 += tool && c.goldTools.includes(tool) ? 1 : 0
+    }
+  }
+  const avg = (x: number) => (docCases ? x / docCases : 0)
+  return {
+    metrics: {
+      cases: docCases,
+      recall5: avg(recall5),
+      recall8: avg(recall8),
+      hit8: avg(hit8),
+      mrr: avg(mrr),
+      toolCases,
+      toolTop1: toolCases ? toolTop1 / toolCases : 0,
+      toolShown: cases.length ? toolShown / cases.length : 0,
+    },
+    perCase,
+  }
+}
+
+function arg(flag: string): string | undefined {
+  const i = process.argv.indexOf(flag)
+  return i === -1 ? undefined : process.argv[i + 1]
+}
+
+async function main() {
+  const sessionsFile = arg('--sessions') ?? join(scoutDataDir(), 'sessions.jsonl')
+  if (!existsSync(sessionsFile)) {
+    console.error(`Нет ${sessionsFile} — сначала bun scripts/scout/mine-transcripts.ts`)
+    process.exit(1)
+  }
+  const root = findRepoRoot()
+  if (!root) {
+    console.error('Не найден корень репозитория')
+    process.exit(1)
+  }
+  const index = buildIndex(collectCards(root))
+  const engine = new Bm25(index)
+  const knownPaths = new Set(index.cards.filter((c) => c.kind === 'doc' || c.kind === 'rule').map((c) => c.path))
+  const knownTools = new Set(
+    index.cards.filter((c) => ['skill', 'command', 'agent'].includes(c.kind)).map((c) => c.title),
+  )
+  const sessions = readFileSync(sessionsFile, 'utf8').split('\n').filter(Boolean).map((l) =>
+    JSON.parse(l) as SessionRecord
+  )
+  const cases = buildCases(sessions, knownPaths, knownTools, Number(arg('--min-task') ?? 15))
+  const { metrics, perCase } = evaluate(engine, cases)
+  const pct = (x: number) => `${(x * 100).toFixed(1)}%`
+  console.log(
+    `Сессий: ${sessions.length}, случаев: ${cases.length} (с доками ${metrics.cases}, с инструментом ${metrics.toolCases})`,
+  )
+  console.log(
+    `BM25  Recall@5 ${pct(metrics.recall5)}  Recall@8 ${pct(metrics.recall8)}  Hit@8 ${pct(metrics.hit8)}  MRR ${
+      metrics.mrr.toFixed(3)
+    }`,
+  )
+  console.log(
+    `Инструмент: top-1 ${pct(metrics.toolTop1)} из ${metrics.toolCases}; показан в ${pct(metrics.toolShown)} справок`,
+  )
+  const out = arg('--out')
+  if (out) {
+    writeFileSync(out, perCase.map((c) => JSON.stringify(c)).join('\n') + '\n')
+    console.log(`Разбор по случаям → ${out}`)
+  }
+  const show = Number(arg('--show') ?? 0)
+  for (
+    const c of perCase.filter((c) => c.goldDocs.length && !c.got.some((p) => c.goldDocs.includes(p))).slice(0, show)
+  ) {
+    console.log(
+      `\n✗ ${c.query.slice(0, 160).replace(/\s+/g, ' ')}\n  эталон: ${c.goldDocs.join(', ')}\n  скаут:  ${
+        c.got.slice(0, 5).join(', ')
+      }`,
+    )
+  }
+}
+
+if (import.meta.main) {
+  await main()
+}
