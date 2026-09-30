@@ -49,10 +49,23 @@ whois(project_key: "c-web-letar", agent_name: "<app>-dev", registration_token: "
       include_recent_commits: false)
 ```
 
-`last_active_ts` свежее ~30 минут — имя держит живая сессия: заводи
-`create_agent_identity(project_key: "c-web-letar", program: "claude-code", model: "<модель>",
-task_description: "<что делаешь>")` **без** `name_hint`, дальше `set_contact_policy: open` и
-резервации — уже под новым именем. Старше — имя свободно, регистрация штатная. Эвристика неточная:
+`last_active_ts` свежее ~30 минут — имя держит живая сессия: заводи временное имя
+**`<app>-dev-<задача>`** (`repo-dev-scout-e0`, `studio-dev-invoice-pdf`). Владелец по имени видит,
+от кого пришло сообщение и за что сессия отвечает; случайные `HazyCat`/`SunnyTower` не заводить.
+
+```
+whois(project_key: "c-web-letar", agent_name: "<app>-dev-<задача>", include_recent_commits: false)
+# пусто → свободно; занято → добавь -2, -3
+register_agent(project_key: "c-web-letar", program: "claude-code", model: "<модель>",
+               name: "<app>-dev-<задача>", task_description: "<что делаешь>")
+```
+
+`<задача>` — 1–3 слова kebab-case латиницей, **не** оканчивается на `agent`, `bot`, `helper`,
+`manager`, `coordinator`, `worker`, `fixer` и прочие роли из
+[agent-mail-server-quirks](/.claude/docs/agent-mail-server-quirks.md) — такие имена `send_message`
+отвергает в `to`. Задачу выдал сеньор чипом — имя уже стоит в его задании, бери его. Дальше
+`set_contact_policy: open` и резервации — под новым именем, токен сохранять в память не нужно.
+Старше ~30 минут — фиксированное имя свободно, регистрация штатная. Эвристика неточная:
 сессия, которая часами ждёт пользователя, выглядит свободной — поэтому второй сигнал: в `git status`
 есть чужие правки в твоей области, которых ты не делал → считай имя занятым. По завершении —
 `retire_agent` временной identity (`/end-session` это делает).
