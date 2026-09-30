@@ -21,6 +21,7 @@
 - [plan-decomposition-pattern](/.claude/docs/plan-decomposition-pattern.md) когда резать разросшийся `PLAN.md`
 - [tsconfig-presets](/.claude/docs/tsconfig-presets.md) общий пресет Next.js-приложений, `${configDir}`
 - [agent-skills-mirror](/.claude/docs/agent-skills-mirror.md) зеркало `.claude/skills/` для Codex
+- [local-scout](/.claude/docs/local-scout.md) справка агенту по первому сообщению, хук в тени; ⚠️ на коротких фразах BM25 слаб
 - [nextjs16-agent-guide-files](/.claude/docs/nextjs16-agent-guide-files.md) `next dev` сам пишет `AGENTS.md`
 - [llms-txt-pattern](/.claude/docs/llms-txt-pattern.md) `llms.txt`: статика vs роут, юридические запреты
 - [git-multi-agent-incidents](/.claude/docs/git-multi-agent-incidents.md) ⭐ почему правила git такие строгие; ⚠️ две сессии под одной identity → коммит непарсящегося файла
