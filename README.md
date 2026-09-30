@@ -1,110 +1,77 @@
-# Letar Monorepo
+# Letar
 
-Монорепозиторий Nx с веб-приложениями и shared библиотеками.
+Открытый монорепозиторий студии Letar: библиотеки `@letar/*`, инструменты и открытые приложения.
+Приватные проекты подключены как git submodules и в открытой копии недоступны.
 
-## Приложения
+[English](README.en.md) · [Сайт автора](https://kami.letar.best) · Лицензия MIT
 
-| App                                                  | Описание                 | Порт | DB Port | Стек                      |
-| ---------------------------------------------------- | ------------------------ | ---- | ------- | ------------------------- |
-| [premium-rosstil](apps/premium-rosstil/)             | Fashion интернет-магазин | 3000 | 5432    | Next.js, Prisma, ZenStack |
-| [imot](apps/imot/)                                   | Платформа психотерапии   | 3001 | 5433    | Next.js, Prisma, ZenStack |
-| [dashboard](apps/dashboard/)                         | Мониторинг сервера       | 3002 | 5436    | Next.js, Prisma, ZenStack |
-| [driving-school](apps/driving-school/)               | Автошкола                | 3003 | —       | Next.js, Prisma, ZenStack |
-| [mandala](apps/mandala/)                             | Галерея мандал и магазин | 3004 | 5434    | Next.js, Prisma, ZenStack |
-| [kami](apps/kami/)                                   | Управление контентом     | 3005 | 5437    | Next.js, Prisma, ZenStack |
-| [form-develop-app](apps/form-develop-app/)           | Песочница @letar/forms   | 3006 | —       | Next.js                   |
-| [pravda](apps/pravda/)                               | Законодательство РФ      | 3007 | —       | Next.js (static)          |
-| [label-printer-desktop](apps/label-printer-desktop/) | Desktop печать этикеток  | —    | —       | Electron, SQLite          |
-| [animatrona](apps/animatrona/)                       | Конвертер видео          | —    | —       | Electron, FFmpeg          |
-| [animatrona-landing](apps/animatrona-landing/)       | Лендинг для Animatrona   | —    | —       | Next.js (static)          |
+## Главное
 
-> **Порты PostgreSQL:** 5432 (premium-rosstil), 5433 (imot), 5434 (mandala), 5435 (umami), 5436 (dashboard), 5437 (kami)
+**Формы из схемы данных.** Описываешь модель в ZenStack, а формы, валидация Zod v4 и подсказки
+собираются сами.
 
-## Библиотеки
+| Пакет                                                                                      | Что это                                        |
+| ------------------------------------------------------------------------------------------ | ---------------------------------------------- |
+| [`@letar/forms`](https://www.npmjs.com/package/@letar/forms) ([исходники](libs/forms/))    | Формы на TanStack Form + Chakra UI v3          |
+| [`@letar/zenstack-form-plugin`](https://www.npmjs.com/package/@letar/zenstack-form-plugin) | Плагин ZenStack: схемы форм из `schema.zmodel` |
+| [`@letar/form-mcp`](https://www.npmjs.com/package/@letar/form-mcp)                         | MCP-сервер для работы с формами из ИИ-агентов  |
 
-| Lib                                                       | Описание                      |
-| --------------------------------------------------------- | ----------------------------- |
-| [@letar/forms](libs/forms/)                               | UI форм (TanStack Form)       |
-| [@letar/chakra-provider](libs/chakra-provider/)           | Провайдер Chakra UI           |
-| [@letar/ui](libs/ui/)                                     | Shared UI компоненты          |
-| [@letar/admin-ui](libs/admin-ui/)                         | UI для админ-панелей          |
-| [@letar/hooks](libs/hooks/)                               | Shared React хуки             |
-| [@letar/format-utils](libs/format-utils/)                 | Форматирование дат, телефонов |
-| [@letar/api-server](libs/api-server/)                     | Утилиты для API серверов      |
-| [@letar/auth](libs/auth/)                                 | Утилиты аутентификации        |
-| [@letar/query-provider](libs/query-provider/)             | Провайдер TanStack Query      |
-| [@letar/validation-utils](libs/validation-utils/)         | Zod схемы валидации           |
-| [@letar/yandex-metrika](libs/yandex-metrika/)             | Интеграция Яндекс Метрики     |
-| [@letar/zenstack-form-plugin](libs/zenstack-form-plugin/) | Плагин ZenStack для форм      |
-| [@letar/image-upload](libs/image-upload/)                 | Загрузка изображений          |
-| [@letar/label-printer-core](libs/label-printer-core/)     | Ядро печати этикеток          |
-| [@letar/pin-auth](libs/pin-auth/)                         | PIN-аутентификация            |
+> Идёт подготовка к массовой публикации остальных библиотек (сначала как beta). Список пакетов
+> ниже обновится, когда они появятся на npm.
+
+## Что ещё лежит в `libs/`
+
+В репозитории около 80 библиотек. Часть из них станет пакетами, часть останется внутренней:
+UI-компоненты (`ui`, `undo-toast`), фоновые задачи (`jobs`), согласия и cookie (`consent`),
+SSE, идемпотентность, валидация загрузок, SEO-помощники и другое. Смотри каталог [libs/](libs/).
+
+## Открытые приложения
+
+| Приложение                                 | Описание                               |
+| ------------------------------------------ | -------------------------------------- |
+| [form-docs](apps/form-docs/)               | Документация `@letar/forms` (Fumadocs) |
+| [form-example](apps/form-example/)         | Витрина `@letar/forms`                 |
+| [form-develop-app](apps/form-develop-app/) | Песочница для разработки форм          |
+| [pravda](apps/pravda/)                     | Законодательство РФ (статический сайт) |
+| [letar-landing](apps/letar-landing/)       | Лендинг студии                         |
+| [animatrona](apps/animatrona/)             | Десктоп-приложение для видео           |
+| [synth](apps/synth/)                       | Синтезатор                             |
 
 ## Быстрый старт
 
 ```bash
-# Клонирование и настройка
-git clone <repo>
-cd Letar
+git clone --recurse-submodules git@github.com:kamiletar/letar.git
+cd letar
 bun install
-git config core.hooksPath .githooks
+bash scripts/hooks/install.sh   # git hooks, один раз
 
-# Разработка
-nx dev premium-rosstil     # Запуск dev сервера
-nx build premium-rosstil   # Сборка
-
-# База данных
-nx zenstack:generate premium-rosstil  # Генерация схемы
-nx db:push premium-rosstil            # Применить схему
-
-# Проверки
-nx format premium-rosstil      # Форматирование
-nx lint premium-rosstil        # Линтинг
-nx typecheck:tsgo premium-rosstil  # Проверка типов (быстро!)
-nx test premium-rosstil        # Тесты
+nx dev form-example             # dev-сервер
+nx lint form-example
+nx typecheck:tsgo form-example
+nx test form-example
 ```
 
-## Технологический стек
+Приватные submodules у посторонних не выкачаются, это нормально: открытая часть собирается без них.
+Форматирование: `nx run-many -t format --projects=<проекты>` (не голая `nx format`).
 
-- **Node:** 24
-- **Монорепо:** Nx 22.3.3
-- **Фреймворк:** Next.js 16.1 (App Router)
-- **React:** 19
-- **UI:** Chakra UI v3.30
-- **База данных:** PostgreSQL + Prisma 6.19 + ZenStack 3.2.0
-- **Формы:** @letar/forms (TanStack Form) + Zod v4.3
-- **Тестирование:** Vitest 4.0 (unit), Playwright (E2E)
-- **Линтинг:** oxlint (быстрый) + ESLint
-- **Форматирование:** dprint (~30x быстрее Prettier)
-- **Пакетный менеджер:** Bun
+## Стек
 
-## Документация
+Node 24 · Nx · Next.js (App Router) · React 19 · Chakra UI v3 · PostgreSQL + Prisma + ZenStack ·
+TanStack Form · Zod v4 · Vitest · Playwright · oxlint + ESLint · dprint · Bun
 
-- **[CLAUDE.md](./CLAUDE.md)** — Инструкции для Claude Code
-- **[.claude/docs/](/.claude/docs/)** — Подробная документация по темам
-- **[.claude/rules/](/.claude/rules/)** — Path-specific правила
-- **[.claude/commands/](/.claude/commands/)** — Slash-команды проектов
-
-## Структура
+## Как устроен репозиторий
 
 ```
 letar/
-├── apps/                    # Приложения
-│   ├── premium-rosstil/     # Fashion магазин
-│   ├── imot/                # Платформа психотерапии
-│   ├── driving-school/      # Автошкола
-│   └── ...
-├── libs/                    # Shared библиотеки
-│   ├── form-components/     # UI форм
-│   ├── ui/                  # Shared UI
-│   └── ...
-├── .claude/                 # Claude Code конфигурация
-│   ├── docs/                # Документация
-│   ├── rules/               # Path-specific правила
-│   └── commands/            # Slash-команды
-└── CLAUDE.md                # Главный файл для Claude Code
+├── apps/    # приложения (часть — приватные submodules)
+├── libs/    # библиотеки @letar/*
+├── infra/   # конфигурация серверов и прокси
+├── scripts/ # проверки целостности, git hooks
+└── .claude/ # инструкции и документация для ИИ-агентов
 ```
 
----
+## Работа с ИИ-агентами
 
-**Последнее обновление:** 2026-01-10
+Репозиторий ведётся вместе с Claude Code. Правила, ловушки и решения записаны в
+[CLAUDE.md](CLAUDE.md) и [.claude/docs/](.claude/docs/). Их полезно читать и людям: это
+накопленная память проекта.
