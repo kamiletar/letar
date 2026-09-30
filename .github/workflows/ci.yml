@@ -110,7 +110,7 @@ jobs:
       - name: Lint
         run: bunx nx affected -t lint --parallel=3
 
-      # tsgo в 9–38x быстрее обычного typecheck (см. CLAUDE.md § Перед коммитом).
+      # tsgo в 9–38x быстрее обычного typecheck (см. AGENTS.md § Перед коммитом).
       #
       # `always()` здесь — чтобы падение lint не скрывало ошибки типов и тестов: за один
       # прогон видно весь список проблем. Но условие на install обязательно: без него
