@@ -108,13 +108,13 @@ nx format mandala             # Форматирование
 3. **Перенести детали фичи в `PLAN_COMPLETED.md`** — сразу после завершения, чтобы PLAN.md оставался компактным
 4. Обновить `README.md` — если изменился прогресс
 
-> Подробнее о правилах документации: [CLAUDE.md](../../CLAUDE.md) — раздел "Правила документации приложений"
+> Подробнее о правилах документации: [AGENTS.md](../../AGENTS.md) — раздел "Правила документации приложений"
 
 ---
 
 ## 🔗 Полезные ссылки
 
-- **Монорепо:** [CLAUDE.md](../../CLAUDE.md) — инструкции для Claude Code
+- **Монорепо:** [AGENTS.md](../../AGENTS.md) — инструкции для Claude Code
 - **Окружение:** [.claude/docs/environment.md](../../.claude/docs/environment.md)
 - **Формы:** [.claude/docs/forms.md](../../.claude/docs/forms.md)
 - **UI компоненты:** [.claude/docs/ui-components.md](../../.claude/docs/ui-components.md)
