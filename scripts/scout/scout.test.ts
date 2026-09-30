@@ -14,7 +14,7 @@ import {
 } from '../../libs/scout/src/index'
 import { splitOf } from './bench'
 import { buildCases, evaluate } from './eval'
-import { abGroup, appendLog, decide, MAX_ATTEMPTS, runScoutHook, scoutQuery } from './hook-core'
+import { abGroup, appendLog, decide, LOG_MAX_BYTES, MAX_ATTEMPTS, runScoutHook, scoutQuery } from './hook-core'
 import { indexPath } from './index-store'
 import { judgeGroups, judgeItems, loadLabels } from './judge'
 import { readMatrixStore, writeMatrixStore } from './matrix-store'
@@ -279,12 +279,42 @@ describe('устойчивость хука', () => {
     const home = mkdtempSync(join(tmpdir(), 'scout-home-'))
     appendLog(home, { n: 1 })
     appendLog(home, { n: 2 }, 'briefs.jsonl', 5)
-    const files = readdirSync(join(home, 'logs'))
+    const files = readdirSync(join(home, 'logs')).filter((f) => f.endsWith('.jsonl'))
     expect(files).toHaveLength(2)
     const rotated = files.find((f) => f !== 'briefs.jsonl')
     expect(rotated).toMatch(/^briefs-\d{8}-\d{6}\.jsonl$/)
     expect(readFileSync(join(home, 'logs', 'briefs.jsonl'), 'utf8')).toBe('{"n":2}\n')
     expect(existsSync(join(home, 'logs', rotated as string))).toBe(true)
+  })
+
+  it('appendLog уводит в архив лог, первой строке которого больше недели', () => {
+    const home = mkdtempSync(join(tmpdir(), 'scout-home-'))
+    const now = Date.parse('2026-10-20T00:00:00Z')
+    appendLog(home, { ts: '2026-10-01T00:00:00Z', n: 1 }, 'briefs.jsonl', LOG_MAX_BYTES, now)
+    appendLog(home, { ts: '2026-10-20T00:00:00Z', n: 2 }, 'briefs.jsonl', LOG_MAX_BYTES, now)
+    expect(readdirSync(join(home, 'logs')).filter((f) => f.endsWith('.jsonl'))).toHaveLength(2)
+    expect(readFileSync(join(home, 'logs', 'briefs.jsonl'), 'utf8')).toContain('"n":2')
+  })
+
+  it('appendLog удаляет архивы, где запросы доживут до 90 дней, и не трогает свежие и чужие', () => {
+    const home = mkdtempSync(join(tmpdir(), 'scout-home-'))
+    const logs = join(home, 'logs')
+    mkdirSync(logs)
+    const now = Date.now()
+    const day = 24 * 60 * 60 * 1000
+    const old = join(logs, 'briefs-20260101-000000.jsonl')
+    const fresh = join(logs, 'briefs-20260901-000000.jsonl')
+    const other = join(logs, 'asks-20260101-000000.jsonl')
+    for (const f of [old, fresh, other]) {
+      writeFileSync(f, '{}\n')
+    }
+    utimesSync(old, new Date(now - 84 * day), new Date(now - 84 * day))
+    utimesSync(fresh, new Date(now - 10 * day), new Date(now - 10 * day))
+    utimesSync(other, new Date(now - 200 * day), new Date(now - 200 * day))
+    appendLog(home, { ts: new Date(now).toISOString() }, 'briefs.jsonl', LOG_MAX_BYTES, now)
+    expect(existsSync(old)).toBe(false)
+    expect(existsSync(fresh)).toBe(true)
+    expect(existsSync(other)).toBe(true)
   })
 
   it('indexPath: разный для разных корней, один для одного корня в разной записи', () => {

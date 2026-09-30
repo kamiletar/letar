@@ -2,10 +2,13 @@ import { spawn } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import {
   appendFileSync,
+  closeSync,
   existsSync,
   mkdirSync,
+  openSync,
   readdirSync,
   readFileSync,
+  readSync,
   renameSync,
   rmSync,
   statSync,
@@ -351,7 +354,7 @@ export async function runScoutHook(
   return { output, log }
 }
 
-/** Лог больше этого размера уходит в архив с отметкой времени */
+/** Лог больше этого размера уходит в архив с отметкой времени (и по возрасту — см. `LOG_ROTATE_AGE_MS`) */
 export const LOG_MAX_BYTES = 5 * 1024 * 1024
 
 function fileStamp(d = new Date()): string {
@@ -361,26 +364,80 @@ function fileStamp(d = new Date()): string {
   }`
 }
 
+/**
+ * Сырые запросы в логах хранятся не дольше 90 дней (решение владельца, 2026-09-30). Лог уходит в
+ * архив, когда его первой строке неделя, а архив удаляется, когда его последней строке
+ * `LOG_RETENTION_MS − LOG_ROTATE_AGE_MS`: так самая старая строка не старше 90 дней.
+ */
+export const LOG_RETENTION_MS = 90 * DAY_MS
+export const LOG_ROTATE_AGE_MS = 7 * DAY_MS
+
+/** Отметка `ts` первой строки файла (читает первые 4 КБ); нет или не разобрана — `undefined` */
+function firstLineTs(path: string): number | undefined {
+  const fd = openSync(path, 'r')
+  try {
+    const buf = Buffer.alloc(4096)
+    const n = readSync(fd, buf, 0, buf.length, 0)
+    const line = buf.subarray(0, n).toString('utf8').split('\n')[0]
+    const ts = Date.parse((JSON.parse(line) as { ts?: string }).ts ?? '')
+    return Number.isNaN(ts) ? undefined : ts
+  } catch {
+    return undefined
+  } finally {
+    closeSync(fd)
+  }
+}
+
+/** Не чаще раза в сутки удаляет архивы `<base>-*<ext>`, последняя запись в которые старше срока */
+function purgeOldLogs(dir: string, base: string, ext: string, now: number): void {
+  try {
+    const marker = join(dir, `.purge-${base}`)
+    if (existsSync(marker) && now - statSync(marker).mtimeMs < DAY_MS) {
+      return
+    }
+    writeFileSync(marker, '')
+    for (const name of readdirSync(dir)) {
+      if (!name.startsWith(`${base}-`) || !name.endsWith(ext)) {
+        continue
+      }
+      try {
+        if (now - statSync(join(dir, name)).mtimeMs > LOG_RETENTION_MS - LOG_ROTATE_AGE_MS) {
+          rmSync(join(dir, name), { force: true })
+        }
+      } catch {
+        // файл ушёл между readdir и stat
+      }
+    }
+  } catch {
+    // чистка — удобство, не повод падать
+  }
+}
+
 export function appendLog(
   home: string,
   log: Record<string, unknown>,
   file = 'briefs.jsonl',
   maxBytes = LOG_MAX_BYTES,
+  now = Date.now(),
 ): void {
   const dir = join(home, 'logs')
   if (!existsSync(dir)) {
     mkdirSync(dir, { recursive: true })
   }
   const path = join(dir, file)
+  const dot = file.lastIndexOf('.')
+  const base = dot === -1 ? file : file.slice(0, dot)
+  const ext = dot === -1 ? '' : file.slice(dot)
   try {
-    if (existsSync(path) && statSync(path).size > maxBytes) {
-      const dot = file.lastIndexOf('.')
-      const base = dot === -1 ? file : file.slice(0, dot)
-      const ext = dot === -1 ? '' : file.slice(dot)
-      renameSync(path, join(dir, `${base}-${fileStamp()}${ext}`))
+    if (existsSync(path)) {
+      const first = firstLineTs(path)
+      if (statSync(path).size > maxBytes || (first !== undefined && now - first > LOG_ROTATE_AGE_MS)) {
+        renameSync(path, join(dir, `${base}-${fileStamp(new Date(now))}${ext}`))
+      }
     }
   } catch {
     // не удалось ротировать — пишем в тот же файл
   }
   appendFileSync(path, `${JSON.stringify(log)}\n`)
+  purgeOldLogs(dir, base, ext, now)
 }
