@@ -5,6 +5,7 @@ import {
   Bm25,
   buildIndex,
   collectCards,
+  type DenseIndex,
   embedTexts,
   formatBrief,
   formatOneLine,
@@ -13,6 +14,7 @@ import {
   formRanking,
   layoutHits,
   type ScoutIndex,
+  type ScoutResult,
 } from '../../libs/scout/src/index'
 import { loadIndex, saveIndex, sourcesMtime } from './index-store'
 import { EMBED_URL, loadDense } from './vectors'
@@ -131,6 +133,8 @@ export interface HookDeps {
   embedUrl?: string
   /** Сколько ждать эмбеддинг запроса; дольше — полка форм по BM25 */
   embedTimeoutMs?: number
+  /** Заранее загруженные векторы: `null` — «векторов нет», `undefined` — загрузить `loadDense(home)` */
+  dense?: DenseIndex | null
 }
 
 /** Как построена полка форм: по эмбеддингам или откатом на BM25 и почему */
@@ -146,7 +150,7 @@ async function denseForms(
   query: string,
   deps: HookDeps,
 ): Promise<{ ranking?: FormRanking; source: FormsSource }> {
-  const dense = loadDense(home)
+  const dense = deps.dense === undefined ? loadDense(home) : deps.dense ?? undefined
   if (!dense) {
     return { source: 'no-vectors' }
   }
@@ -159,6 +163,26 @@ async function denseForms(
   } catch {
     return { source: 'embed-down' }
   }
+}
+
+export interface ScoutQueryResult {
+  result: ScoutResult
+  forms: FormsSource
+  ms: number
+}
+
+/** Боевой путь поиска: рейтинг полки форм по эмбеддингам и раскладка справки. Его же гоняют бенч и CLI */
+export async function scoutQuery(
+  engine: Bm25,
+  home: string,
+  query: string,
+  deps: HookDeps = {},
+): Promise<ScoutQueryResult> {
+  const started = performance.now()
+  const forms = await denseForms(engine, home, query, deps)
+  // Карточки инструментов короткие и набирают меньше очков, чем доки, поэтому выдачу берём глубоко
+  const result = layoutHits(engine.cards, engine.search(query, 500), query, { forms: forms.ranking })
+  return { result, forms: forms.source, ms: performance.now() - started }
 }
 
 /** Один вызов UserPromptSubmit: решение, поиск, лог, вывод по режиму */
@@ -179,9 +203,7 @@ export async function runScoutHook(
     return {}
   }
   const engine = new Bm25(freshIndex(root, home))
-  const forms = await denseForms(engine, home, decision.query, deps)
-  // Карточки инструментов короткие и набирают меньше очков, чем доки, поэтому выдачу берём глубоко
-  const result = layoutHits(engine.cards, engine.search(decision.query, 500), decision.query, { forms: forms.ranking })
+  const { result, forms } = await scoutQuery(engine, home, decision.query, deps)
   const brief = formatBrief(result)
   const line = formatOneLine(result)
   writeState(home, sessionId, { attempts: state.attempts + 1, briefed: Boolean(brief) })
@@ -201,7 +223,7 @@ export async function runScoutHook(
     tool: result.tool ? `${result.tool.kind}:${result.tool.name}` : undefined,
     fields: result.fields.map((f) => f.name),
     pattern: result.pattern?.name,
-    forms: forms.source,
+    forms,
     scores: [...result.docs, ...result.traps].map((d) => Math.round(d.score * 10) / 10),
     chars: brief.length,
     ms: Math.round(performance.now() - started),
@@ -215,10 +237,10 @@ export async function runScoutHook(
   return { output, log }
 }
 
-export function appendLog(home: string, log: Record<string, unknown>): void {
+export function appendLog(home: string, log: Record<string, unknown>, file = 'briefs.jsonl'): void {
   const dir = join(home, 'logs')
   if (!existsSync(dir)) {
     mkdirSync(dir, { recursive: true })
   }
-  appendFileSync(join(dir, 'briefs.jsonl'), `${JSON.stringify(log)}\n`)
+  appendFileSync(join(dir, file), `${JSON.stringify(log)}\n`)
 }

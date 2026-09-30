@@ -12,9 +12,10 @@
  *
  * Запуск: bun scripts/scout/forms-eval.ts [--backend all|bm25|hybrid|rerank] [--probes <jsonl>] [--show]
  */
-import { existsSync, readFileSync } from 'node:fs'
+import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { Bm25, buildIndex, collectCards, type ScoutResult } from '../../libs/scout/src/index'
+import { arg, readJsonl } from './cli'
 import { backendsFor, type EvalCase, type Searcher } from './eval'
 import { findRepoRoot } from './index-store'
 import { scoutDataDir } from './paths'
@@ -44,13 +45,11 @@ export function scoreProbe(probe: FormProbe, result: ScoutResult): ProbeScore {
   }
 }
 
-function arg(flag: string): string | undefined {
-  const i = process.argv.indexOf(flag)
-  return i === -1 ? undefined : process.argv[i + 1]
-}
-
-function readJsonl<T>(path: string): T[] {
-  return readFileSync(path, 'utf8').split('\n').filter(Boolean).map((l) => JSON.parse(l) as T)
+/** Отрицательные задачи: эталон есть, но это не формы — полки полей и паттерна там быть не должно */
+export function formsNegatives(cases: EvalCase[]): EvalCase[] {
+  return cases.filter((c) =>
+    c.goldDocs.length && !c.goldDocs.some((d) => /forms?[-./]/.test(d)) && !/форм|form/i.test(c.query)
+  )
 }
 
 async function main() {
@@ -63,9 +62,7 @@ async function main() {
   }
   const probes = readJsonl<FormProbe>(probesFile)
   const negatives = existsSync(casesFile)
-    ? readJsonl<EvalCase>(casesFile).filter((c) =>
-      c.goldDocs.length && !c.goldDocs.some((d) => /forms?[-./]/.test(d)) && !/форм|form/i.test(c.query)
-    )
+    ? formsNegatives(readJsonl<EvalCase>(casesFile))
     : []
   const engine = new Bm25(buildIndex(collectCards(root)))
   const pct = (x: number) => `${(x * 100).toFixed(1)}%`

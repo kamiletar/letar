@@ -2,8 +2,10 @@ import { describe, expect, it } from 'bun:test'
 import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
+import { Bm25, buildIndex, collectCards, scout } from '../../libs/scout/src/index'
+import { splitOf } from './bench'
 import { buildCases } from './eval'
-import { abGroup, decide, MAX_ATTEMPTS, runScoutHook } from './hook-core'
+import { abGroup, decide, MAX_ATTEMPTS, runScoutHook, scoutQuery } from './hook-core'
 import { mineSession, normalizeKnowledgePath, parseHumanText, type SessionRecord } from './mine-transcripts'
 
 describe('decide', () => {
@@ -185,5 +187,35 @@ describe('runScoutHook', () => {
     })
     expect(await runScoutHook({ session_id: 'b', prompt: 'ещё про форму и дату строкой' }, root, home)).toEqual({})
     delete process.env.SCOUT_MODE
+  })
+})
+
+describe('splitOf', () => {
+  it('детерминирован и отдаёт около 20% в test', () => {
+    expect(splitOf('session-1')).toBe(splitOf('session-1'))
+    const tests = Array.from({ length: 1000 }, (_, i) => splitOf(`id-${i}`)).filter((x) => x === 'test').length
+    expect(tests).toBeGreaterThanOrEqual(150)
+    expect(tests).toBeLessThanOrEqual(250)
+  })
+})
+
+describe('scoutQuery', () => {
+  it('без векторов отдаёт no-vectors и те же доки, что чистый scout', async () => {
+    const root = mkdtempSync(join(tmpdir(), 'scout-repo-'))
+    mkdirSync(join(root, '.claude', 'docs'), { recursive: true })
+    writeFileSync(
+      join(root, '.claude', 'docs', 'INDEX.md'),
+      '## Формы\n- [date-field](/.claude/docs/date-field.md) ⚠️ поле даты в форме отдаёт строку\n',
+    )
+    writeFileSync(
+      join(root, '.claude', 'docs', 'date-field.md'),
+      '# Дата строкой\n## Симптом\nформа отдаёт дату строкой в onSubmit\n',
+    )
+    const engine = new Bm25(buildIndex(collectCards(root)))
+    const query = 'форма отдаёт дату строкой'
+    const got = await scoutQuery(engine, mkdtempSync(join(tmpdir(), 'scout-home-')), query, { dense: null })
+    expect(got.forms).toBe('no-vectors')
+    expect(got.result.docs).toEqual(scout(engine, query).docs)
+    expect(got.ms).toBeGreaterThanOrEqual(0)
   })
 })

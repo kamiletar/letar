@@ -35,6 +35,7 @@ import {
   scout,
   type ScoutResult,
 } from '../../libs/scout/src/index'
+import { arg } from './cli'
 import { findRepoRoot } from './index-store'
 import type { SessionRecord } from './mine-transcripts'
 import { scoutDataDir } from './paths'
@@ -150,11 +151,6 @@ export async function evaluate(
     },
     perCase,
   }
-}
-
-function arg(flag: string): string | undefined {
-  const i = process.argv.indexOf(flag)
-  return i === -1 ? undefined : process.argv[i + 1]
 }
 
 async function main() {
