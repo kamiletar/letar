@@ -6,13 +6,15 @@
 потока и при `request.signal` 'abort'.
 
 Не годится для событийных (pub/sub) SSE-эндпоинтов, где данные приходят асинхронно от внешнего
-источника (менеджер подписки, callback) — там нечего опрашивать по таймеру. Пример такого
-эндпоинта, оставленного без изменений при выделении этой библиотеки, — `apps/driving-school`
-`src/app/api/realtime/route.ts` (подписка на `realtimeSSEManager`).
+источника (менеджер подписки, callback) — там нечего опрашивать по таймеру.
 
 ## Установка
 
-Библиотека уже включена в монорепозиторий.
+```bash
+npm i @letar/sse@beta
+```
+
+Peer-зависимостей нет: используются только Web API (`Request`, `Response`, `ReadableStream`).
 
 ```typescript
 import { createPollingSseResponse, SSE_HEADERS } from '@letar/sse'
@@ -64,9 +66,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ stre
   один вызов: без `event` — обычный `data: ...` (клиент видит его как `message`), с `event` —
   `event: <имя>\ndata: ...`. Возврат `'done'` закрывает поток сразу после этого вызова.
   Исключение внутри `poll` проглатывается — это временный сбой одного тика, не повод рвать поток;
-  обрабатывай ожидаемые ошибки внутри `poll` сам, если нужно другое поведение (см. пример
-  `sse/dashboard` в `apps/driving-school`, где ошибка агрегации алертов сама превращается в
-  событие `heartbeat` с флагом `error`).
+  обрабатывай ожидаемые ошибки внутри `poll` сам, если нужно другое поведение (например, превратить
+  ошибку в событие с флагом `error`).
 - `intervalMs` — интервал опроса.
 - `heartbeatMs` — интервал heartbeat-комментария `: heartbeat\n\n` (не задан — heartbeat не шлётся).
 - `timeoutMs` — автозакрытие потока (не задан — поток живёт, пока клиент не отключится).
@@ -78,21 +79,3 @@ export async function GET(request: Request, { params }: { params: Promise<{ stre
 Базовые заголовки (`Content-Type: text/event-stream`, `Cache-Control: no-cache`,
 `Connection: keep-alive`) — те же, что `createPollingSseResponse` подставляет по умолчанию.
 Используй их и для «уже готового» раннего ответа без потока (см. пример выше).
-
-## Команды
-
-```bash
-nx test sse
-nx lint sse
-nx typecheck:tsgo sse
-```
-
-## Подключение к приложению
-
-Обязательное — одно: добавь `@letar/sse` в `dependencies` `package.json` приложения
-(`workspace:*`) — не только в `nx.implicitDependencies`. Причина — симлинк в
-`node_modules/@letar/sse`, который под изолированным линковщиком bun создаёт только
-`bun install` по записи в `dependencies`.
-
-Когда дополнительно нужны `paths` в его `tsconfig.json` и почему `nx sync` здесь не поможет —
-[libs.md](/.claude/rules/libs.md#подключение-к-приложению).

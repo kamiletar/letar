@@ -1,6 +1,8 @@
 {
   "name": "@letar/number-words",
   "version": "0.1.0",
+  "description": "Числа прописью на множестве языков, включая RTL",
+  "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "exports": {
@@ -13,5 +15,11 @@
   },
   "dependencies": {
     "to-words": "^5.3.0"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kamiletar/letar.git",
+    "directory": "libs/number-words"
   }
 }

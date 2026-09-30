@@ -1,6 +1,8 @@
 {
   "name": "@letar/upload-validation",
   "version": "0.2.0",
+  "description": "Валидация File/FormData и безопасное сохранение файла на диск",
+  "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "exports": {
@@ -10,5 +12,14 @@
       "default": "./src/index.ts"
     },
     "./package.json": "./package.json"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kamiletar/letar.git",
+    "directory": "libs/upload-validation"
+  },
+  "peerDependencies": {
+    "next": ">=15.0.0"
   }
 }

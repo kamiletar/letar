@@ -4,14 +4,18 @@
 
 ## Установка
 
+```bash
+npm i @letar/number-words@beta
+```
+
 ```typescript
 import { isSupportedLocale, numberToOrdinal, numberToWords } from '@letar/number-words'
 ```
 
 ## API
 
-- `numberToWords(n, locale?)` — число в кардинальный текст (123 → "сто двадцать три")
-- `numberToOrdinal(n, locale?)` — число в порядковый текст
+- `numberToWords(n, locale)` — число в кардинальный текст (`numberToWords(123, 'ru')` → "сто двадцать три")
+- `numberToOrdinal(n, locale)` — число в порядковый текст
 - `isSupportedLocale(locale)` — проверка поддержки локали
 - `isRtlLocale(locale)` — проверка RTL-локали
 - `SUPPORTED_LOCALES` — список поддерживаемых локалей
@@ -20,5 +24,3 @@ import { isSupportedLocale, numberToOrdinal, numberToWords } from '@letar/number
 ## Зависимости
 
 - `to-words` v5.3.0
-
----

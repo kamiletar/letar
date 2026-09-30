@@ -3,7 +3,11 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/upload-validation/src",
   "projectType": "library",
-  "tags": ["scope:shared", "type:util", "owner:letar"],
+  "tags": [
+    "scope:shared",
+    "type:util",
+    "owner:letar"
+  ],
   "targets": {
     "typecheck": {
       "executor": "nx:run-commands",
@@ -11,7 +15,9 @@
         "command": "tsc --build tsconfig.lib.json --emitDeclarationOnly",
         "cwd": "libs/upload-validation"
       },
-      "dependsOn": ["^typecheck"],
+      "dependsOn": [
+        "^typecheck"
+      ],
       "cache": true,
       "inputs": [
         "default",
@@ -27,7 +33,9 @@
       ],
       "metadata": {
         "description": "Type-check library and generate declarations",
-        "technologies": ["typescript"]
+        "technologies": [
+          "typescript"
+        ]
       }
     },
     "typecheck:tsgo": {
@@ -36,7 +44,9 @@
         "command": "tsgo --build tsconfig.lib.json --emitDeclarationOnly",
         "cwd": "libs/upload-validation"
       },
-      "dependsOn": ["^typecheck:tsgo"],
+      "dependsOn": [
+        "^typecheck:tsgo"
+      ],
       "cache": true,
       "inputs": [
         "default",
@@ -52,7 +62,10 @@
       ],
       "metadata": {
         "description": "Type-check library with tsgo (faster)",
-        "technologies": ["typescript", "tsgo"]
+        "technologies": [
+          "typescript",
+          "tsgo"
+        ]
       }
     },
     "test": {
@@ -67,15 +80,22 @@
         "cwd": "libs/upload-validation"
       },
       "cache": true,
-      "inputs": ["default", "{workspaceRoot}/.oxlintrc.json"],
+      "inputs": [
+        "default",
+        "{workspaceRoot}/.oxlintrc.json"
+      ],
       "metadata": {
         "description": "Fast lint with oxlint",
-        "technologies": ["oxlint"]
+        "technologies": [
+          "oxlint"
+        ]
       }
     },
     "lint": {
       "executor": "@nx/eslint:lint",
-      "dependsOn": ["oxlint"]
+      "dependsOn": [
+        "oxlint"
+      ]
     },
     "format": {
       "executor": "nx:run-commands",
@@ -86,7 +106,9 @@
       "cache": false,
       "metadata": {
         "description": "Format files with dprint (~30x faster than Prettier)",
-        "technologies": ["dprint"]
+        "technologies": [
+          "dprint"
+        ]
       }
     },
     "format:check": {
@@ -96,10 +118,62 @@
         "cwd": "libs/upload-validation"
       },
       "cache": true,
-      "inputs": ["default", "{workspaceRoot}/dprint.json"],
+      "inputs": [
+        "default",
+        "{workspaceRoot}/dprint.json"
+      ],
       "metadata": {
         "description": "Check file formatting with dprint",
-        "technologies": ["dprint"]
+        "technologies": [
+          "dprint"
+        ]
+      }
+    },
+    "build:npm": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "default",
+        "{projectRoot}/tsup.config.ts",
+        "{projectRoot}/package.publish.json",
+        "{projectRoot}/scripts/write-publish-package-json.mjs"
+      ],
+      "outputs": [
+        "{projectRoot}/dist"
+      ],
+      "metadata": {
+        "description": "Сборка @letar/upload-validation для публикации на npm",
+        "technologies": [
+          "tsup"
+        ]
+      },
+      "options": {
+        "commands": [
+          "tsup",
+          "node scripts/write-publish-package-json.mjs",
+          "cp README.md dist/",
+          "cp CHANGELOG.md dist/",
+          "cp LICENSE dist/"
+        ],
+        "cwd": "libs/upload-validation",
+        "parallel": false
+      }
+    },
+    "publish:npm": {
+      "executor": "nx:run-commands",
+      "dependsOn": [
+        "build:npm"
+      ],
+      "cache": false,
+      "metadata": {
+        "description": "Публикация @letar/upload-validation на npmjs.com",
+        "technologies": [
+          "npm"
+        ]
+      },
+      "options": {
+        "command": "npm publish --access public --tag beta",
+        "cwd": "libs/upload-validation/dist"
       }
     }
   }

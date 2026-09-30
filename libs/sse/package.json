@@ -1,6 +1,8 @@
 {
   "name": "@letar/sse",
   "version": "0.1.0",
+  "description": "Серверный каркас SSE-эндпоинтов Next.js на периодическом опросе",
+  "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "exports": {
@@ -10,5 +12,11 @@
       "default": "./src/index.ts"
     },
     "./package.json": "./package.json"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kamiletar/letar.git",
+    "directory": "libs/sse"
   }
 }

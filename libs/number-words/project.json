@@ -79,6 +79,53 @@
       "dependsOn": [
         "oxlint"
       ]
+    },
+    "build:npm": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "default",
+        "{projectRoot}/tsup.config.ts",
+        "{projectRoot}/package.publish.json",
+        "{projectRoot}/scripts/write-publish-package-json.mjs"
+      ],
+      "outputs": [
+        "{projectRoot}/dist"
+      ],
+      "metadata": {
+        "description": "Сборка @letar/number-words для публикации на npm",
+        "technologies": [
+          "tsup"
+        ]
+      },
+      "options": {
+        "commands": [
+          "tsup",
+          "node scripts/write-publish-package-json.mjs",
+          "cp README.md dist/",
+          "cp CHANGELOG.md dist/",
+          "cp LICENSE dist/"
+        ],
+        "cwd": "libs/number-words",
+        "parallel": false
+      }
+    },
+    "publish:npm": {
+      "executor": "nx:run-commands",
+      "dependsOn": [
+        "build:npm"
+      ],
+      "cache": false,
+      "metadata": {
+        "description": "Публикация @letar/number-words на npmjs.com",
+        "technologies": [
+          "npm"
+        ]
+      },
+      "options": {
+        "command": "npm publish --access public --tag beta",
+        "cwd": "libs/number-words/dist"
+      }
     }
   }
 }

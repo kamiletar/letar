@@ -1,0 +1,52 @@
+{
+  "name": "@letar/slug-resolver",
+  "description": "Slug resolver: permanent redirect for renamed entities, a proper 'gone' page for deleted ones. Data sources are plain async callbacks; Next.js helpers in a separate entry point.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./index.js"
+    },
+    "./next": {
+      "types": "./next.d.ts",
+      "import": "./next.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./index.js",
+  "types": "./index.d.ts",
+  "files": [
+    "**/*.js",
+    "**/*.js.map",
+    "**/*.d.ts",
+    "**/*.d.ts.map",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "slug",
+    "redirect",
+    "gone",
+    "nextjs",
+    "seo",
+    "typescript"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kamiletar/letar.git",
+    "directory": "libs/slug-resolver"
+  },
+  "bugs": {
+    "url": "https://github.com/kamiletar/letar/issues"
+  },
+  "publishConfig": {
+    "access": "public",
+    "tag": "beta"
+  },
+  "peerDependencies": {
+    "next": ">=15.0.0"
+  }
+}

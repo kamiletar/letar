@@ -1,0 +1,54 @@
+{
+  "name": "@letar/fuzzy-search",
+  "description": "Typo-tolerant search orchestration: decides which of the caller's queries to show (exact, fuzzy, keyboard-layout corrected). Does not query a database itself.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./index.js"
+    },
+    "./client": {
+      "types": "./client.d.ts",
+      "import": "./client.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./index.js",
+  "types": "./index.d.ts",
+  "files": [
+    "**/*.js",
+    "**/*.js.map",
+    "**/*.d.ts",
+    "**/*.d.ts.map",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "fuzzy-search",
+    "search",
+    "typo-tolerance",
+    "keyboard-layout",
+    "react",
+    "typescript"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kamiletar/letar.git",
+    "directory": "libs/fuzzy-search"
+  },
+  "bugs": {
+    "url": "https://github.com/kamiletar/letar/issues"
+  },
+  "publishConfig": {
+    "access": "public",
+    "tag": "beta"
+  },
+  "peerDependencies": {
+    "@chakra-ui/react": ">=3.0.0",
+    "react": ">=19.0.0",
+    "@letar/forms-core": ">=0.28.0 <1"
+  }
+}

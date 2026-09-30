@@ -1,6 +1,8 @@
 {
   "name": "@letar/url-query-state",
   "version": "0.1.0",
+  "description": "Фильтры-тоглы как <a href>-ссылки, синхронизированные с URL",
+  "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "exports": {
@@ -19,5 +21,11 @@
   "peerDependencies": {
     "next": ">=15.0.0",
     "react": ">=19.0.0"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kamiletar/letar.git",
+    "directory": "libs/url-query-state"
   }
 }

@@ -1,12 +1,18 @@
 # @letar/slug-resolver
 
-Адрес живёт вечно — заповедь №25 студии (`.claude/private/WEBSTUDIO.md`). Переименованная
+Адрес живёт вечно. Переименованная
 сущность отвечает постоянным редиректом на новый слаг, удалённая — честной страницей «было,
-больше нет» (заповедь №23), а не безликим 404. Не завязана на ZenStack/Prisma — источники
+больше нет», а не безликим 404. Не завязана на ZenStack/Prisma — источники
 данных передаются как произвольные async-колбэки, что внутри них (запрос к БД, таблица
 редиректов, поле `previousSlugs`) решает приложение.
 
 ## Установка
+
+```bash
+npm i @letar/slug-resolver@beta
+```
+
+Peer-зависимость: `next` (>=15) — только для `@letar/slug-resolver/next`.
 
 ```typescript
 import { resolveSlugOutcome } from '@letar/slug-resolver'
@@ -36,7 +42,7 @@ const outcome = await resolveSlugOutcome({
 
 Next.js App Router обёртка. Сама вызывает `permanentRedirect(toHref(outcome.to))` при редиректе
 и `notFound()` при полном отсутствии; `gone`-ветку не решает сама — возвращает `{ gone: info }`
-странице, чтобы та отрисовала объяснение через `AppEmptyState` (заповедь №23).
+странице, чтобы та отрисовала объяснение (например, компонентом пустого состояния).
 
 ```typescript
 // app/houses/[slug]/page.tsx
@@ -52,27 +58,6 @@ return <HousePage house={result.entity} />
 
 ⚠️ **Настоящий HTTP 410 из page-компонента не выставить** — App Router `notFound()` всегда
 отдаёт 404. Для честного статуса `gone`-ответу нужен route handler/proxy поверх страницы;
-сама страница-объяснение важнее кода статуса (см. текст заповеди №25).
+сама страница-объяснение важнее кода статуса.
 
-## Статус (2026-09-05)
-
-Спроектировано и покрыто тестами в изоляции — **интеграция ни в одно приложение ещё не
-сделана**. Хранение истории слагов (`previousSlugs`/таблица редиректов) и soft-delete —
-ответственность схемы каждого приложения, не этой библиотеки. См. `/commandments-check`.
-
-## Команды
-
-```bash
-nx test slug-resolver
-nx lint slug-resolver
-nx typecheck:tsgo slug-resolver
-```
-
-## Подключение к приложению
-
-Обязательное — одно: добавь `@letar/slug-resolver` в `nx.implicitDependencies` в `package.json`
-приложения (если библиотеки нет в его `dependencies`). Это ребро графа Nx; сам импорт
-`@letar/slug-resolver` резолвится и без настроек приложения.
-
-Когда дополнительно нужны `paths` в его `tsconfig.json` и почему `nx sync` здесь не поможет —
-[libs.md](/.claude/rules/libs.md#подключение-к-приложению).
+Хранение истории слагов (`previousSlugs`/таблица редиректов) и soft-delete — ответственность схемы приложения, не этой библиотеки.

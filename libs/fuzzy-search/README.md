@@ -1,7 +1,6 @@
 # @letar/fuzzy-search
 
-Оркестрация «дружелюбного к опечаткам» поиска — заповедь №17 студии
-(`.claude/private/WEBSTUDIO.md`). Библиотека не выполняет запросы к БД сама и не завязана на
+Оркестрация «дружелюбного к опечаткам» поиска. Библиотека не выполняет запросы к БД сама и не завязана на
 конкретную ZenStack-модель — она решает, какой из выполненных вызывающей стороной запросов
 показать. Устойчивость к опечаткам внутри одной раскладки и морфология словоформ уже закрыты
 ZenStack `@fuzzy`/`@fullText` (pg_trgm + tsvector, Postgres-only, v3.7+) на стороне модели —
@@ -9,7 +8,11 @@ ZenStack `@fuzzy`/`@fullText` (pg_trgm + tsvector, Postgres-only, v3.7+) на с
 
 ## Установка
 
-Библиотека уже включена в монорепозиторий.
+```bash
+npm i @letar/fuzzy-search@beta
+```
+
+Peer-зависимости: `react` (>=19), `@chakra-ui/react` (>=3), `@letar/forms-core` (>=0.28.0 <1) — последний нужен для `correctKeyboardLayout`/`detectLayout`.
 
 ```typescript
 import { correctKeyboardLayout, orchestrateSearch } from '@letar/fuzzy-search'
@@ -46,28 +49,5 @@ const outcome = await orchestrateSearch({
 ### `FuzzySearchBanner` (`@letar/fuzzy-search/client`)
 
 Chakra-компонент прозрачного уведомления о подмене запроса («Показаны результаты по: X. Искать
-вместо этого: Y») — заповедь №11 требует человекочитаемый и локализованный текст, поэтому тексты
-принимаются пропом `labels`, дефолт на русском — только запасной вариант.
-
-## Статус (2026-09-05)
-
-Спроектировано и покрыто тестами в изоляции — **интеграция ни в одно приложение ещё не сделана**.
-Кандидат первого потребителя — `apps/domwellbes` (там уже стоят `@fuzzy`/`@fullText` в трёх
-`.zmodel`, не хватает только серверной оркестрации и баннера). См. `/commandments-check`.
-
-## Команды
-
-```bash
-nx test fuzzy-search
-nx lint fuzzy-search
-nx typecheck:tsgo fuzzy-search
-```
-
-## Подключение к приложению
-
-Обязательное — одно: добавь `@letar/fuzzy-search` в `nx.implicitDependencies` в `package.json`
-приложения (если библиотеки нет в его `dependencies`). Это ребро графа Nx; сам импорт
-`@letar/fuzzy-search` резолвится и без настроек приложения.
-
-Когда дополнительно нужны `paths` в его `tsconfig.json` и почему `nx sync` здесь не поможет —
-[libs.md](/.claude/rules/libs.md#подключение-к-приложению).
+вместо этого: Y») — тексты
+принимаются пропом `labels` (уведомление должно быть человекочитаемым и локализованным), дефолт на русском — только запасной вариант.

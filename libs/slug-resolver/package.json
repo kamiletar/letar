@@ -1,6 +1,8 @@
 {
   "name": "@letar/slug-resolver",
   "version": "0.1.0",
+  "description": "Резолвер слагов: постоянный редирект переименованных, «было, больше нет» для удалённых",
+  "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "exports": {
@@ -18,5 +20,11 @@
   },
   "peerDependencies": {
     "next": ">=15.0.0"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kamiletar/letar.git",
+    "directory": "libs/slug-resolver"
   }
 }

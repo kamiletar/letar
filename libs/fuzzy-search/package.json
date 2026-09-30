@@ -1,6 +1,8 @@
 {
   "name": "@letar/fuzzy-search",
   "version": "0.1.1",
+  "description": "Оркестрация поиска, устойчивого к опечаткам и раскладке",
+  "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "exports": {
@@ -16,11 +18,17 @@
     },
     "./package.json": "./package.json"
   },
-  "dependencies": {
-    "@letar/forms-core": "workspace:*"
-  },
   "peerDependencies": {
     "@chakra-ui/react": ">=3.0.0",
     "react": ">=19.0.0"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kamiletar/letar.git",
+    "directory": "libs/fuzzy-search"
+  },
+  "devDependencies": {
+    "@letar/forms-core": "workspace:*"
   }
 }

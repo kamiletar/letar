@@ -4,7 +4,9 @@
 
 ## Установка
 
-Библиотека уже включена в монорепозиторий.
+```bash
+npm i @letar/semver-compare@beta
+```
 
 ```typescript
 import { compareSemver } from '@letar/semver-compare'
@@ -27,24 +29,3 @@ GitHub Releases API (`GET /repos/{owner}/{repo}/releases`) не гарантир
 версии — в репозитории с частыми релизами свежий тег может какое-то время не быть первым в
 списке. Вызывающий код собирает все releases с нужным префиксом тега и выбирает максимальный по
 `compareSemver`, вместо того чтобы полагаться на `releases[0]`.
-
-Используется в `@letar/github-releases` (`fetchLatestRelease`) и
-`@letar/electron-monorepo-updater` (`findOwnLatestTag`).
-
-## Команды
-
-```bash
-nx test semver-compare
-nx lint semver-compare
-nx typecheck:tsgo semver-compare
-```
-
-## Подключение к приложению
-
-Обязательное — одно: добавь `@letar/semver-compare` в реальные `dependencies` приложения
-(`workspace:*`) и запусти `bun install` — только так bun создаст симлинк в его
-`node_modules/@letar/semver-compare`, без которого не резолвится `typecheck:tsgo`/vitest.
-`nx.implicitDependencies` — необязательный резервный канал, не замена `dependencies`.
-
-Когда дополнительно нужны `paths` в его `tsconfig.json` и почему `nx sync` здесь не поможет —
-[libs.md](/.claude/rules/libs.md#подключение-к-приложению).
