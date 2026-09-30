@@ -84,12 +84,12 @@ function git(root: string, args: string[]): string {
 }
 
 const USAGE = `Запуск: bun scripts/scout/bench.ts [--label <имя>] [--suite ${ALL_SUITES.join(',')}]
-  [--hook-runs 5] [--compare <путь к json | last>] [--no-phrases] [--tool-variants] [--help]`
+  [--hook-runs 5] [--compare <путь к json | last>] [--no-phrases] [--tool-variants] [--assoc] [--prf] [--help]`
 
 /** Флаги со значением и без; неизвестный флаг — ошибка (код 2), `--help` — справка */
 function checkArgs(argv: string[]): void {
   const withValue = new Set(['--label', '--suite', '--hook-runs', '--compare'])
-  const bare = new Set(['--no-phrases', '--tool-variants', '--help'])
+  const bare = new Set(['--no-phrases', '--tool-variants', '--assoc', '--prf', '--help'])
   if (argv.includes('--help')) {
     console.log(USAGE)
     process.exit(0)
@@ -125,6 +125,13 @@ async function main() {
   const store = loadVectorStore(home) ?? null
   // `--no-phrases` — прогон без третьего списка слияния, для сравнения
   const noPhrases = process.argv.includes('--no-phrases')
+  // Э3: расширение запроса читает scoutQuery из env; по умолчанию выключено
+  if (process.argv.includes('--assoc')) {
+    process.env.SCOUT_ASSOC = '1'
+  }
+  if (process.argv.includes('--prf')) {
+    process.env.SCOUT_PRF = '1'
+  }
   const phrases = noPhrases ? null : loadPhraseStore(home) ?? null
   const deps = { store, phrases }
 

@@ -16,6 +16,7 @@ import {
 } from 'node:fs'
 import { join } from 'node:path'
 import {
+  assocExpansion,
   Bm25,
   buildIndex,
   collectCards,
@@ -26,14 +27,17 @@ import {
   type FormRanking,
   formRanking,
   fuseWithDense,
+  type Hit,
   INDEX_VERSION,
   layoutHits,
   phraseRanking,
+  prfExpansion,
   type ScoutIndex,
   type ScoutResult,
   truncate,
 } from '../../libs/scout/src/index'
 import { readAppBriefs } from './app-briefs'
+import { loadAssoc } from './assoc'
 import { loadIndex, saveIndex, sourcesMtime } from './index-store'
 import { loadPhraseStore, type PhraseStore } from './phrases'
 import { EMBED_URL, loadVectorStore, type VectorStore } from './vectors'
@@ -272,6 +276,29 @@ export interface ScoutQueryResult {
   ms: number
 }
 
+/**
+ * Расширение запроса для слияния доков (Э3, по умолчанию выключено): `SCOUT_ASSOC=1` — термы из
+ * словаря ассоциаций, `SCOUT_PRF=1` — термы из топ-карточек первого прохода. Результат замеров —
+ * в `local-scout.md` («Короткие фразы»).
+ */
+function expandedBm25(engine: Bm25, home: string, query: string, first: Hit[]): Hit[] {
+  const useAssoc = process.env.SCOUT_ASSOC === '1'
+  const usePrf = process.env.SCOUT_PRF === '1'
+  if (!useAssoc && !usePrf) {
+    return first
+  }
+  const extra = new Map<string, number>()
+  const dict = useAssoc ? loadAssoc(home) : undefined
+  const add = (m: Map<string, number>) => m.forEach((w, t) => extra.set(t, Math.max(extra.get(t) ?? 0, w)))
+  if (dict) {
+    add(assocExpansion(query, dict, Number(process.env.SCOUT_ASSOC_W ?? 0.3)))
+  }
+  if (usePrf) {
+    add(prfExpansion(engine, query, first, 5, 10, Number(process.env.SCOUT_PRF_W ?? 0.3)))
+  }
+  return extra.size ? engine.search(query, 500, extra) : first
+}
+
 /** Боевой путь поиска: рейтинг полки форм по эмбеддингам и раскладка справки. Его же гоняют бенч и CLI */
 export async function scoutQuery(
   engine: Bm25,
@@ -296,7 +323,9 @@ export async function scoutQuery(
   const extra = phrases
     ? [phraseRanking(engine.cards, phrases.index, forms.store.dense, forms.vector)]
     : undefined
-  const fused = fuseWithDense(engine.cards, bm25, forms.store.dense, forms.vector, { extra })
+  const fused = fuseWithDense(engine.cards, expandedBm25(engine, home, query, bm25), forms.store.dense, forms.vector, {
+    extra,
+  })
   const docs = layoutHits(engine.cards, fused, query, { forms: forms.ranking })
   return {
     result: { ...base, docs: docs.docs, traps: docs.traps },

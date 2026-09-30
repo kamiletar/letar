@@ -65,10 +65,17 @@ export class Bm25 {
     return Math.log(1 + (n - df + 0.5) / (df + 0.5))
   }
 
-  search(query: string, limit = 50): Hit[] {
-    const terms = [...new Set(tokenize(query))]
+  /** `extra` — дополнительные термы с весом (обычно < 1): расширение запроса словарём или PRF */
+  search(query: string, limit = 50, extra?: ReadonlyMap<string, number>): Hit[] {
+    const weights = new Map<string, number>()
+    for (const term of new Set(tokenize(query))) {
+      weights.set(term, 1)
+    }
+    for (const [term, w] of extra ?? []) {
+      weights.set(term, Math.max(weights.get(term) ?? 0, w))
+    }
     const scores = new Map<number, number>()
-    for (const term of terms) {
+    for (const [term, weight] of weights) {
       const list = this.postings.get(term)
       if (!list) {
         continue
@@ -82,7 +89,7 @@ export class Bm25 {
           continue
         }
         const norm = (tf * (this.k1 + 1)) / (tf + this.k1 * (1 - this.b + (this.b * card.len) / this.avgLen))
-        scores.set(i, (scores.get(i) ?? 0) + idf * norm)
+        scores.set(i, (scores.get(i) ?? 0) + weight * idf * norm)
       }
     }
     return [...scores.entries()]

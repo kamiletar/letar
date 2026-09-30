@@ -30,6 +30,8 @@ export const docsSuite: Suite = async ({ engine, cases, run, cached }) => {
     ['dev', cases.filter((c) => splitOf(c.sessionId) === 'dev')],
     ['test', cases.filter((c) => splitOf(c.sessionId) === 'test')],
     ['короткие', cases.filter((c) => c.query.length < 120)],
+    ['test<400', cases.filter((c) => splitOf(c.sessionId) === 'test' && c.query.length < 400)],
+    ['все<400', cases.filter((c) => c.query.length < 400)],
   ]
   const out: DocsGroup[] = []
   console.log('\n== docs ==')
@@ -77,6 +79,8 @@ export const docsSuite: Suite = async ({ engine, cases, run, cached }) => {
   s['лишнее'] = g('все').redundancy * 100
   s['R@5 все'] = g('все').recall5 * 100
   s['R@5 коротк.'] = g('короткие').recall5 * 100
+  s['нов. R@5 test<400'] = g('test<400').novelRecall5 * 100
+  s['нов. R@5 все<400'] = g('все<400').novelRecall5 * 100
   s['R@8 все'] = g('все').recall8 * 100
   s['Hit@8 все'] = g('все').hit8 * 100
   s['пустых справок'] = emptyShare * 100

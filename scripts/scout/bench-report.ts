@@ -28,6 +28,8 @@ export const SUMMARY: Array<{ key: string; unit: Unit; journal?: boolean }> = [
   { key: 'инстр. точн.', unit: 'pp', journal: true },
   { key: 'нов. R@5 dev', unit: 'pp', journal: true },
   { key: 'нов. R@5 test', unit: 'pp', journal: true },
+  { key: 'нов. R@5 test<400', unit: 'pp', journal: true },
+  { key: 'нов. R@5 все<400', unit: 'pp', journal: true },
   { key: 'хабы топ-10 dev', unit: 'pp' },
   { key: 'хаб макс dev', unit: 'pp' },
   { key: 'лишнее', unit: 'pp', journal: true },

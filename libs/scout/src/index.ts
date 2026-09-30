@@ -1,3 +1,11 @@
+export {
+  type AssocDict,
+  assocExpansion,
+  type AssocOptions,
+  type AssocPair,
+  buildAssoc,
+  prfExpansion,
+} from './lib/assoc'
 export { Bm25, type Bm25Options, buildIndex, type Hit } from './lib/bm25'
 export { BRIEF_HEADER, type BriefOptions, formatBrief, formatOneLine } from './lib/brief'
 export { collectCards, parsePatternRegistry, PATTERN_HINTS } from './lib/collect'
