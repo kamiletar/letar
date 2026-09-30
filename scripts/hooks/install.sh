@@ -12,7 +12,7 @@
 #                                   после случайного Prettier-форматирования `nx format`)
 #   - pre-commit-deps-integrity.sh — целостность зависимостей (патчи + peer), запускается
 #                                   ТОЛЬКО если в коммите есть bun.lock/package.json
-#   - pre-commit-public-domains.sh — домены и ИНН коммерческих приложений в публичных *.md
+#   - pre-commit-public-domains.sh — домены и ИНН коммерческих приложений в публичных файлах
 #   - pre-commit-docs-index.sh   — индекс документации (каждый .claude/docs/*.md упомянут и в
 #                                   CLAUDE.md, и в INDEX.md; ссылки живы), запускается ТОЛЬКО
 #                                   если в коммите есть .claude/docs/*.md или CLAUDE.md;

@@ -1,0 +1,15 @@
+# Файлы, где домен коммерческого приложения функционально необходим (гейт public-domains).
+# Формат: путь или glob (`*` внутри сегмента, `**` через сегменты), после `#` — причина.
+# Список действует только для не-md файлов; в *.md домены запрещены безусловно.
+# Сами домены здесь не пишем.
+
+infra/traefik/dynamic/s2/own-domains.yml   # Host()-правила и TLS собственных доменов
+infra/media-server/nginx.conf              # valid_referers: в include не парсится, править только тут
+apps/letar-landing/src/lib/projects-data.ts   # витрина: публичные ссылки на живые сайты
+apps/letar-landing-e2e/src/homepage.spec.ts   # e2e проверяет эти ссылки
+apps/auth-hub/prisma/seed.ts               # redirect URI OIDC-клиентов
+apps/dashboard/prisma/seed.ts              # сид мониторинга: домен приложения
+apps/grandslamcup-e2e/src/global-setup.ts  # служебный админ-фикстура: реальная строка в БД
+apps/grandslamcup/src/app/api/auth/dev-session/route.ts   # тот же служебный админ
+apps/grandslamcup/scripts/anonymize-staging-db.ts         # исключение анонимизации для него же
+apps/grandslamcup/scripts/migrate/manual-data/**          # скрапнутый контент старого сайта

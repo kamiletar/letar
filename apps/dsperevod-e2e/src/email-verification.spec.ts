@@ -79,7 +79,7 @@ test.describe.serial('email-верификация: resend + verify (Этап 2)
     // 1. Регистрация нового пользователя
     await page.goto('/sign-up')
     await page.getByPlaceholder('Иван Иванов').fill('E2E Тестов')
-    await page.getByPlaceholder('ivan@dsperevod.ru').fill(email)
+    await page.getByPlaceholder(/^ivan@/).fill(email)
     await page.getByPlaceholder('Минимум 8 символов').fill(password)
 
     // customRules['/sign-up/email'] = { window: 300, max: 3 } (дефолт createAuth() factory,
@@ -105,7 +105,7 @@ test.describe.serial('email-верификация: resend + verify (Этап 2)
 
     // 2. Попытка входа без верификации → тупик EMAIL_NOT_VERIFIED
     await page.goto('/sign-in')
-    await page.getByPlaceholder('admin@dsperevod.ru').fill(email)
+    await page.getByPlaceholder(/^admin@/).fill(email)
     // У поля пароля на /sign-in после переноса на @letar/forms нет placeholder («••••••••» пропал) —
     // ищем по типу, единственное password-поле формы входа.
     await page.locator('input[type="password"]').fill(password)

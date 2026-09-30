@@ -119,20 +119,20 @@ describe('app-secrets', () => {
     it('собирает конфиг из полного SMTP-блока', () => {
       writeSecrets(
         'domwellbes',
-        'SMTP_HOST=mail.letar.best\nSMTP_PORT=587\nSMTP_SECURE=false\nSMTP_USER=noreply@domwellbes.ru\nSMTP_PASSWORD=пароль\n',
+        'SMTP_HOST=mail.letar.best\nSMTP_PORT=587\nSMTP_SECURE=false\nSMTP_USER=noreply@app.example.com\nSMTP_PASSWORD=пароль\n',
       )
 
       expect(getAppSmtpConfig('domwellbes')).toEqual({
         host: 'mail.letar.best',
         port: 587,
         secure: false,
-        user: 'noreply@domwellbes.ru',
+        user: 'noreply@app.example.com',
         password: 'пароль',
       })
     })
 
     it('дефолтит порт 587 и secure=false при отсутствии явных значений', () => {
-      writeSecrets('domwellbes', 'SMTP_HOST=mail.letar.best\nSMTP_USER=noreply@domwellbes.ru\nSMTP_PASSWORD=пароль\n')
+      writeSecrets('domwellbes', 'SMTP_HOST=mail.letar.best\nSMTP_USER=noreply@app.example.com\nSMTP_PASSWORD=пароль\n')
 
       const config = getAppSmtpConfig('domwellbes')
       expect(config?.port).toBe(587)
@@ -149,7 +149,7 @@ describe('app-secrets', () => {
     })
 
     it('возвращает null, если не хватает хотя бы одного обязательного поля', () => {
-      writeSecrets('domwellbes', 'SMTP_HOST=mail.letar.best\nSMTP_USER=noreply@domwellbes.ru\n')
+      writeSecrets('domwellbes', 'SMTP_HOST=mail.letar.best\nSMTP_USER=noreply@app.example.com\n')
 
       expect(getAppSmtpConfig('domwellbes')).toBeNull()
     })

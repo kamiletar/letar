@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 # pre-commit-public-domains.sh — не пускает в коммит домены коммерческих приложений и ИНН
-# в публичных *.md (.claude/rules/public-repo-hygiene.md).
+# в публичных файлах (.claude/rules/public-repo-hygiene.md).
 #
 # Зачем на коммит-пути: gate `public-domains` в check-all ловит утечку только постфактум (CI),
 # а к тому моменту строка уже в истории публичного репо. Проверяется ИНДЕКС (`--staged`).
-# Узкий запуск: только если среди staged есть *.md; обычный коммит по коду не платит ничего.
+# Область — любые staged текстовые файлы, кроме allowlist (scripts/data/public-domains-allowlist.txt);
+# бинарники чекер пропускает сам.
 # Внутри submodule хук молчит: это правило публичного letar, а submodule приватные.
 #
 # Обход (осознанно, например правка самого правила): GIT_SKIP_PUBLIC_DOMAINS=1 git commit ...
@@ -20,7 +21,7 @@ if [[ -n "$(git rev-parse --show-superproject-working-tree 2>/dev/null)" ]]; the
   exit 0
 fi
 
-if ! git diff --cached --name-only --diff-filter=ACMR | grep -qE '\.md$'; then
+if [[ -z "$(git diff --cached --name-only --diff-filter=ACMR)" ]]; then
   exit 0
 fi
 

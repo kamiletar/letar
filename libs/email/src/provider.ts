@@ -14,7 +14,7 @@ import type { EmailConfig, EmailProvider, SendEmailParams, SendEmailResult } fro
 
 /**
  * Конвертирует email с IDN доменом в ASCII (punycode)
- * Например: noreply@направа.рф → noreply@xn--80aaac0ct.xn--p1ai
+ * Например: noreply@пример.рф → noreply@xn--e1afmkfd.xn--p1acf
  *
  * MailHog не поддерживает IDN домены, поэтому нужна конвертация
  */

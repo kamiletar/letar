@@ -33,13 +33,18 @@
 
 ## Технический барьер
 
-Домены коммерческих приложений и ИНН в публичных `*.md` ловит gate `public-domains`
+Домены коммерческих приложений и ИНН в публичных файлах ловит gate `public-domains`
 (`scripts/check-public-domains.mjs`): на коммите (хук `pre-commit-public-domains.sh`, проверяет
 индекс) и в CI (`bun scripts/check-all.mjs --ci`). Запрещённые домены хранятся там хешами в
 `scripts/data/private-domains.sha256`, чтобы список сам не стал утечкой. Появился новый
 коммерческий домен — `node scripts/check-public-domains.mjs --add <домен>`. Обход для
-осознанного случая — `GIT_SKIP_PUBLIC_DOMAINS=1 git commit`. Гейт смотрит только `*.md`: домены в
-коде, конфигах nginx/traefik и на странице `/privacy` функциональны и остаются на совести ревью.
+осознанного случая — `GIT_SKIP_PUBLIC_DOMAINS=1 git commit`. Гейт смотрит все tracked текстовые файлы, не только `*.md`. Домены, нужные функционально
+(маршрутизация Traefik/nginx, redirect URI, служебные e2e-фикстуры), перечислены с причиной в
+`scripts/data/public-domains-allowlist.txt` — для `*.md` allowlist не действует. Новый домен в
+коде: сперва env или нейтральное значение (`example.com`), в allowlist — только если домен
+действительно нужен файлу. ⚠️ Установленные копии хука (`.git/hooks`) — снимок на момент
+`install.sh`: после этой правки переустанови (`bash scripts/hooks/install.sh`), иначе хук по-прежнему
+пропускает не-md.
 
 ## Почему это отдельное правило
 

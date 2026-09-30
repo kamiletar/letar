@@ -6,7 +6,7 @@
  * (`SMTP_USER`/`SMTP_PASSWORD` из `apps/domwellbes/.env.docker`, читается через
  * `getAppSmtpConfig` — тот же смонтированный `/secrets/domwellbes.env`, что и `CRON_SECRET`).
  * Так проверяется именно то, что реально ломается у приложения: его собственные SMTP-реквизиты,
- * DKIM для его домена (`noreply@domwellbes.ru`), а не общая инфраструктура Maddy — та уже
+ * DKIM для его домена (`noreply@<домен app>`), а не общая инфраструктура Maddy — та уже
  * покрыта `email-canary-check`.
  *
  * Получатель — выделенный служебный ящик `canary-domwellbes@letar.best` на Maddy (заведён

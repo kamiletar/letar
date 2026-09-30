@@ -3,7 +3,7 @@ import { defineTokens } from '@chakra-ui/react'
 /**
  * Color tokens для Grand Slam Cup
  *
- * Палитра основана на grandslamcup.ru:
+ * Палитра основана на прежнем сайте турнира:
  * - brand: Чистый красный (#FF0000) — основной цвет бренда
  * - accent: Синий (#0051FF) — ссылки и интерактивные элементы
  * - gray: Нейтральные (чёрный/белый минимализм)
@@ -12,7 +12,7 @@ import { defineTokens } from '@chakra-ui/react'
 export const colors = defineTokens.colors({
   /* ===========================
      Brand (Primary) — Чистый красный (#FF0000)
-     Палитра с grandslamcup.ru
+     Палитра прежнего сайта
   =========================== */
   brand: {
     50: { value: '#FFF0F0' },

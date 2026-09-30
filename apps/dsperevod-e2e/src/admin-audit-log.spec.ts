@@ -16,7 +16,7 @@ import {
  */
 
 test.describe.serial('admin: audit-log регрессия (AuditLog.metadata JsonNull)', () => {
-  const adminEmail = `e2e-admin-audit-${Date.now()}@dsperevod.ru`
+  const adminEmail = `e2e-admin-audit-${Date.now()}@example.com`
   const adminPassword = 'Password123!'
   let requestId: string
 
@@ -32,7 +32,7 @@ test.describe.serial('admin: audit-log регрессия (AuditLog.metadata Jso
 
   test('редактирование блока контента и просмотр заявки не падают 500', async ({ page }) => {
     await page.goto('/sign-in')
-    const emailInput = page.getByPlaceholder('admin@dsperevod.ru')
+    const emailInput = page.getByPlaceholder(/^admin@/)
     // placeholder у поля пароля на /sign-in больше нет (форма на @letar/forms) — ищем по типу
     const passwordInput = page.locator('input[type="password"]')
     // WebKit сбрасывает email, пока заполняется password, — `fillStable` выходит, только когда оба

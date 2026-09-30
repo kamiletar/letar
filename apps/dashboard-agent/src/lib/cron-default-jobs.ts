@@ -187,7 +187,7 @@ export const DEFAULT_CRON_JOBS: CronJob[] = [
     // ноги проверки, но обе идут через один и тот же mail.letar.best.
     schedule: '15 * * * *',
     description: 'Канареечный round-trip доставки email domwellbes (найдено при разборе жалобы на логин '
-      + '05.09.2026): отправка через РЕАЛЬНЫЙ SMTP-аккаунт приложения (noreply@domwellbes.ru) на служебный '
+      + '05.09.2026): отправка через РЕАЛЬНЫЙ SMTP-аккаунт приложения (noreply@<домен app>) на служебный '
       + 'ящик canary-domwellbes@letar.best + IMAP-проверка получения — lib/domwellbes-email-canary.ts',
     enabled: true,
     server: 's2',
@@ -415,7 +415,7 @@ export const DEFAULT_CRON_JOBS: CronJob[] = [
     endpoint: '/api/cron/poll-rfq-email-replies',
     schedule: '*/5 * * * *',
     description:
-      'IMAP-поллинг технического ящика rfq@domwellbes.ru — приём ответов перевозчиков на запросы цены (PLAN_LOGISTICS_L9_L11.md §12.4)',
+      'IMAP-поллинг технического ящика rfq@<домен app> — приём ответов перевозчиков на запросы цены (PLAN_LOGISTICS_L9_L11.md §12.4)',
     enabled: true,
     server: 's2',
   },

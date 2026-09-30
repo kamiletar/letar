@@ -84,8 +84,13 @@ SITES=(
   "pravda|pravda.letar.best"
   "animatrona-landing|animatrona.letar.best"
   "dashboard|dash.letar.best"
-  "driving-school|направа.рф"
 )
+
+# Сайты коммерческих приложений в репозиторий не пишем (public-repo-hygiene.md):
+# передайте их через UMAMI_EXTRA_SITES="имя|домен имя2|домен2"
+for extra in ${UMAMI_EXTRA_SITES:-}; do
+  SITES+=("$extra")
+done
 
 log "Создание ${#SITES[@]} сайтов..."
 echo ""

@@ -1,12 +1,14 @@
 /**
- * Краулер страниц grandslamcup.ru (Tilda)
+ * Краулер страниц старого сайта (Tilda); адрес — в env LEGACY_SITE_URL
  * Скачивает HTML страницы в cache/ директорию
  */
 import * as cheerio from 'cheerio'
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 
-const BASE_URL = 'https://grandslamcup.ru'
+const BASE_URL = process.env.LEGACY_SITE_URL
+if (!BASE_URL) { throw new Error('Задайте LEGACY_SITE_URL (адрес старого сайта, без завершающего /)') }
+const LEGACY_HOST = new URL(BASE_URL).host
 const CACHE_DIR = join(import.meta.dirname, 'cache')
 const DELAY_MS = 1000
 
@@ -59,9 +61,9 @@ function extractLinks(html: string): Set<string> {
     // Внутренняя ссылка типа /slug
     if (href.startsWith('/') && !href.startsWith('//')) {
       slug = href.slice(1).split('#')[0].split('?')[0]
-    } // Полный URL grandslamcup.ru/slug
-    else if (href.includes('grandslamcup.ru/')) {
-      const match = href.match(/grandslamcup\.ru\/([a-z0-9/_-]+)/i)
+    } // Полный URL <старый сайт>/slug
+    else if (href.includes(`${LEGACY_HOST}/`)) {
+      const match = href.match(new RegExp(`${LEGACY_HOST.replace(/\./g, '\\.')}/([a-z0-9/_-]+)`, 'i'))
       if (match) {
         slug = match[1]
       }
@@ -76,7 +78,7 @@ function extractLinks(html: string): Set<string> {
 }
 
 export async function crawl() {
-  console.log('🕷️  Crawl grandslamcup.ru\n')
+  console.log('🕷️  Crawl старого сайта\n')
 
   if (!existsSync(CACHE_DIR)) {
     mkdirSync(CACHE_DIR, { recursive: true })

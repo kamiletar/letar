@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Гейт гигиены публичного репо: в публичных *.md не должно быть доменов коммерческих
+// Гейт гигиены публичного репо: в публичных файлах не должно быть доменов коммерческих
 // приложений и реквизитов продавцов (.claude/rules/public-repo-hygiene.md).
 //
 // Почему хеши, а не список доменов: сам список запрещённых доменов, лежащий открытым
@@ -13,11 +13,15 @@
 // поддомены закрыты без отдельной записи. Каждый хвост сверяется с хешами.
 // Заодно ловится `ИНН` с настоящими 10–12 цифрами (плейсхолдеры из одинаковых цифр — нет).
 //
-// Область: только tracked `*.md` (кроме `.claude/private/`). Код, конфиги nginx/traefik и
-// страницы `/privacy` содержат домены функционально — их этот гейт не трогает.
+// Область: все tracked текстовые файлы (кроме `.claude/private/`, бинарников и самого гейта).
+// Домены в коде и конфигах бывают функциональными (маршрутизация Traefik/nginx, redirect URI,
+// e2e-фикстуры, страницы `/privacy`) — такие файлы перечислены с причиной в
+// `scripts/data/public-domains-allowlist.txt` и пропускаются. Файл вне allowlist с приватным
+// доменом — ошибка: вынести в env/конфиг или заменить нейтральным значением. Для `*.md`
+// allowlist не действует: в документации домены запрещены безусловно.
 //
 // Использование:
-//   node scripts/check-public-domains.mjs            # все tracked *.md (git-индекс)
+//   node scripts/check-public-domains.mjs            # все tracked файлы (git-индекс)
 //   node scripts/check-public-domains.mjs --staged   # только staged, содержимое из индекса
 //   node scripts/check-public-domains.mjs --add <домен> [<домен>…]   # добавить хеш(и)
 //
@@ -31,6 +35,7 @@ import { repoRoot } from './lib/repo-root.mjs'
 
 const root = repoRoot()
 const HASH_FILE = path.join(root, 'scripts', 'data', 'private-domains.sha256')
+const ALLOW_FILE = path.join(root, 'scripts', 'data', 'public-domains-allowlist.txt')
 
 const normalize = (d) => d.normalize('NFC').toLowerCase().replace(/\.$/, '')
 const sha = (d) => createHash('sha256').update(normalize(d)).digest('hex')
@@ -45,6 +50,32 @@ function loadHashes() {
   )
 }
 
+// Allowlist: строка = путь или glob (`*` — внутри сегмента, `**` — через сегменты), после `#` причина.
+const DOUBLE_STAR = '\u0001'
+const globToRegExp = (g) =>
+  new RegExp(
+    '^'
+      + g
+        .replace(/[.+^${}()|[\]\\]/g, '\\$&')
+        .replaceAll('**', DOUBLE_STAR)
+        .replaceAll('*', '[^/]*')
+        .replaceAll(DOUBLE_STAR, '.*')
+      + '$',
+  )
+
+function loadAllowlist() {
+  if (!existsSync(ALLOW_FILE)) { return [] }
+  return readFileSync(ALLOW_FILE, 'utf8')
+    .split('\n')
+    .map((l) => l.replace(/#.*/, '').trim())
+    .filter(Boolean)
+    .map(globToRegExp)
+}
+
+const BINARY_EXT =
+  /\.(png|jpe?g|gif|webp|avif|ico|icns|svgz|woff2?|ttf|otf|eot|pdf|zip|gz|7z|wasm|db|sqlite|mp[34]|webm|mov|enc|lock)$/i
+const SELF = new Set(['scripts/check-public-domains.mjs'])
+
 const args = process.argv.slice(2)
 
 if (args[0] === '--add') {
@@ -57,13 +88,15 @@ if (args[0] === '--add') {
 
 const staged = args.includes('--staged')
 const hashes = loadHashes()
+const allow = loadAllowlist()
 
 const git = (a) => execFileSync('git', a, { encoding: 'utf8', maxBuffer: 1 << 28, cwd: root })
 
 const files = (staged
   ? git(['diff', '--cached', '--name-only', '--diff-filter=ACMR', '-z']).split('\0')
   : git(['ls-files', '-z']).split('\0'))
-  .filter((f) => f.endsWith('.md') && !f.startsWith('.claude/private/'))
+  .filter((f) => f && !f.startsWith('.claude/private/') && !BINARY_EXT.test(f) && !SELF.has(f))
+  .filter((f) => f.endsWith('.md') || !allow.some((re) => re.test(f)))
 
 const TOKEN = /[\p{L}\p{N}](?:[\p{L}\p{N}-]*[\p{L}\p{N}])?(?:\.[\p{L}\p{N}](?:[\p{L}\p{N}-]*[\p{L}\p{N}])?)+/gu
 const INN = /ИНН[\s:№]*(\d{10}|\d{12})(?!\d)/gu
@@ -76,6 +109,7 @@ for (const f of files) {
   } catch {
     continue
   }
+  if (text.includes('\0')) { continue }
   text.split('\n').forEach((line, i) => {
     for (const m of line.matchAll(TOKEN)) {
       const labels = normalize(m[0]).split('.')
@@ -93,15 +127,19 @@ for (const f of files) {
 }
 
 if (!problems.length) {
-  console.log(`✅ публичные md чисты от доменов и реквизитов (файлов: ${files.length}, хешей: ${hashes.size})`)
+  console.log(
+    `✅ публичные файлы чисты от доменов и реквизитов (проверено: ${files.length}, хешей: ${hashes.size}, allowlist: ${allow.length})`,
+  )
   process.exit(0)
 }
 
-console.error(`⛔ в публичных md найдены приватные детали (${problems.length}):`)
+console.error(`⛔ в публичных файлах найдены приватные детали (${problems.length}):`)
 for (const p of problems) { console.error(`  ${p}`) }
 console.error(
   '\nЧто делать: заменить на метку вида <домен app>, реквизиты — убрать; сквозные записи — в\n'
-    + '.claude/private/. Правило: .claude/rules/public-repo-hygiene.md. Новый запрещённый домен:\n'
+    + '.claude/private/; в коде — env или нейтральное значение, а если домен функционален\n'
+    + '(маршрутизация, redirect URI) — путь в scripts/data/public-domains-allowlist.txt с причиной.\n'
+    + 'Правило: .claude/rules/public-repo-hygiene.md. Новый запрещённый домен:\n'
     + '  node scripts/check-public-domains.mjs --add <домен>',
 )
 process.exit(1)

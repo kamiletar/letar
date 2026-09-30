@@ -1,5 +1,5 @@
 /**
- * Экстрактор данных из cached HTML страниц grandslamcup.ru
+ * Экстрактор данных из cached HTML страниц старого сайта (Tilda)
  */
 import * as cheerio from 'cheerio'
 import { readdirSync, readFileSync } from 'node:fs'

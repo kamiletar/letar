@@ -41,15 +41,15 @@ describe('createUmamiMcpServer', () => {
   describe('umami_list_websites', () => {
     it('успешный вызов возвращает список сайтов', async () => {
       listWebsitesMock.mockResolvedValue([
-        { id: 'w1', name: 'DomWellBes', domain: 'domwellbes.ru' },
-        { id: 'w2', name: 'Aboi', domain: 'neyroaboi.ru' },
+        { id: 'w1', name: 'DomWellBes', domain: 'first.example.com' },
+        { id: 'w2', name: 'Aboi', domain: 'second.example.com' },
       ])
 
       const result = await client.callTool({ name: 'umami_list_websites', arguments: {} })
 
       expect(result.isError).toBeFalsy()
       expect(textOf(result)).toContain('Сайтов в Umami: 2')
-      expect(textOf(result)).toContain('domwellbes.ru')
+      expect(textOf(result)).toContain('first.example.com')
       expect(listWebsitesMock).toHaveBeenCalledTimes(1)
     })
 
@@ -70,17 +70,17 @@ describe('createUmamiMcpServer', () => {
     })
 
     it('успешный вызов находит сайт по домену', async () => {
-      findWebsiteByDomainMock.mockResolvedValue({ id: 'w1', name: 'DomWellBes', domain: 'domwellbes.ru' })
+      findWebsiteByDomainMock.mockResolvedValue({ id: 'w1', name: 'DomWellBes', domain: 'first.example.com' })
 
       const result = await client.callTool({
         name: 'umami_find_website',
-        arguments: { domain: 'domwellbes.ru' },
+        arguments: { domain: 'first.example.com' },
       })
 
       expect(result.isError).toBeFalsy()
       expect(textOf(result)).toContain('Найден')
-      expect(textOf(result)).toContain('domwellbes.ru')
-      expect(findWebsiteByDomainMock).toHaveBeenCalledWith('domwellbes.ru')
+      expect(textOf(result)).toContain('first.example.com')
+      expect(findWebsiteByDomainMock).toHaveBeenCalledWith('first.example.com')
     })
 
     it('домен не найден — читаемое сообщение, не ошибка', async () => {
@@ -100,7 +100,7 @@ describe('createUmamiMcpServer', () => {
 
       const result = await client.callTool({
         name: 'umami_find_website',
-        arguments: { domain: 'domwellbes.ru' },
+        arguments: { domain: 'first.example.com' },
       })
 
       expect(result.isError).toBe(true)
@@ -212,9 +212,9 @@ describe('createUmamiMcpServer', () => {
 // Схемы строгие: лишний ключ — ошибка валидации, обращения к Umami нет.
 describe('строгие входные схемы — неизвестный аргумент отвергается', () => {
   const cases: Array<[tool: string, args: Record<string, unknown>, mock: ReturnType<typeof vi.fn>]> = [
-    ['umami_find_website', { domain: 'domwellbes.ru' }, findWebsiteByDomainMock],
+    ['umami_find_website', { domain: 'first.example.com' }, findWebsiteByDomainMock],
     ['umami_get_website_stats', { websiteId: 'w1', period: '7d' }, getWebsiteStatsMock],
-    ['umami_create_website', { name: 'Domwellbes', domain: 'domwellbes.ru' }, createWebsiteMock],
+    ['umami_create_website', { name: 'Domwellbes', domain: 'first.example.com' }, createWebsiteMock],
   ]
 
   it.each(cases)('%s: валидный вызов проходит', async (tool, args, mock) => {

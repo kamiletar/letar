@@ -169,7 +169,7 @@ async function mountAssist(devClient: Client | undefined, prodClient: Client | u
           type: 'string',
           enum: prodClient ? ['dev', 'prod'] : ['dev'],
           default: 'dev',
-          description: 'dev — локальный dev-сервер владельца, prod — реальный сайт domwellbes.ru',
+          description: 'dev — локальный dev-сервер владельца, prod — реальный сайт (ASSIST_BASE_URL_PROD)',
         },
       },
     }
@@ -316,9 +316,13 @@ async function buildParts(): Promise<void> {
         }
 
         let prodClient: Client | undefined
-        if (prodSecret) {
+        const prodBaseUrl = process.env['ASSIST_BASE_URL_PROD']
+        if (prodSecret && !prodBaseUrl) {
+          console.error('[letar] assist prod: ASSIST_BASE_URL_PROD не задан — прод-подключение пропущено')
+        }
+        if (prodSecret && prodBaseUrl) {
           const prodServer = factory({
-            baseUrl: process.env['ASSIST_BASE_URL_PROD'] ?? 'https://domwellbes.ru',
+            baseUrl: prodBaseUrl,
             token: prodSecret,
             name: '@letar/domwellbes-assist-mcp-prod',
             version: '1.0.0',
