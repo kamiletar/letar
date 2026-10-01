@@ -123,10 +123,12 @@ for (const w of candidateWorktrees) {
 // ─────────────────────────────────────────────────────────────────────────────
 // 2. Ветки worktree-agent-*, которым не соответствует ни один worktree
 
-const branchLines = gitOrNull(['branch', '--list', 'worktree-agent-*']) ?? ''
+// ⚠️ for-each-ref, а не `git branch --list`: вывод `git branch` несёт маркеры `* ` (текущая)
+// и `+ ` (выписана в другом worktree), и имя с маркером ломает `git log origin/main..<имя>`.
+const branchLines = gitOrNull(['for-each-ref', '--format=%(refname:short)', 'refs/heads/worktree-agent-*']) ?? ''
 const allBranchNames = branchLines
   .split('\n')
-  .map((l) => l.replace(/^\*?\s+/, '').trim())
+  .map((l) => l.trim())
   .filter(Boolean)
 
 const worktreeBranches = new Set(allWorktrees.map((w) => w.branch).filter(Boolean))
