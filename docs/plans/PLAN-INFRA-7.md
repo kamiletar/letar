@@ -3039,7 +3039,10 @@ WebKit сбрасывает ранее заполненный controlled-инп�
   `docs/plans/`, состав «до» берётся из HEAD; scope-guard держит `docs/plans` и `docs/notes` в `docs-root`.
 - ⚠️ Хуки — копии на момент `install.sh`: у агентов со старой установкой scope-guard даст ложный
   multi-scope на `docs/plans/*` до переустановки (`bash scripts/hooks/install.sh --all-submodules`).
-- [ ] ⚠️ Открытый вопрос: push. Порядок — сначала `apps/studio` (3 коммита впереди origin, один мой:
-      ссылки на `/docs/plans/…`), потом letar. Ждёт одобрения владельца.
+- [x] ~~Открытый вопрос: push~~ — запушено 2026-10-01 по одобрению владельца: 8 submodule, затем
+      letar (`72c8e2d15`, `86a7af1e1`). Промежуточные gitlink'и миграции studio/domwellbes уронили
+      деплой (`not our ref`) — запушена ветка `codex/agent-instructions-migration`, pre-push теперь
+      проверяет весь диапазон (`3d19f3bad`). Хвост сессии (4 коммита: pre-push, `git.md`, планы
+      dashboard-agent и этот) — ждёт одобрения push.
 - [ ] Примеры путей в `git-multi-agent-incidents.md` и `git-pathspec-commit-worktree-not-index.md`
       (`PLAN-INFRA-4.md` как пример) оставлены — это разбор инцидента, не инструкция.
