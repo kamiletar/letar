@@ -8,8 +8,9 @@ export const MainMatrix = () => {
 
   const isLight = resolvedColorMode === 'light'
 
+  // pointerEvents none: фиксированный слой иначе перехватывает клики по любым непозиционированным блокам под собой
   return (
-    <Box overflow={'hidden'} position={'fixed'} top={0} left={0} width={'100%'} height={'100vh'}>
+    <Box overflow={'hidden'} position={'fixed'} top={0} left={0} width={'100%'} height={'100vh'} pointerEvents={'none'}>
       <MatrixRain
         fontSize={25}
         speed={40}

@@ -5,6 +5,12 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 проект придерживается [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.35.7] - 2026-10-01
+
+### Fixed
+
+- Сайдбар админки пропадал, а клики по нему не срабатывали: фиксированный фон Matrix rain перекрывал непозиционированные блоки. Фон теперь `pointer-events: none`, админка поднята над ним (`position: relative; z-index: 1`).
+
 ## [0.35.6] - 2026-09-24
 
 ### Changed
