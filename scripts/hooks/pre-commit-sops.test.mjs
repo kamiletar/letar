@@ -79,6 +79,20 @@ describe('pre-commit-sops: сверка ключей', () => {
     expect(readEnc(dir)).toBe('A=1\nSECRET_B=very-secret-value\n')
   })
 
+  test('блок одного файла — корректный сосед тоже не перешифрован и не застейджен', () => {
+    // Иначе при блоке сосед уже перезаписан и в индексе — уезжает в следующий, посторонний коммит
+    const dir = setup({ enc: 'A=1\nB=2\n', plain: 'A=1\n' })
+    mkdirSync(join(dir, 'apps/ok'))
+    writeFileSync(join(dir, 'apps/ok/.env.docker.enc'), 'X=1\n')
+    writeFileSync(join(dir, 'apps/ok/.env.docker'), 'X=1\nY=2\n')
+    const old = new Date(Date.now() - 60_000)
+    utimesSync(join(dir, 'apps/ok/.env.docker.enc'), old, old)
+    const r = runHook(dir)
+    expect(r.code).toBe(1)
+    expect(readFileSync(join(dir, 'apps/ok/.env.docker.enc'), 'utf8')).toBe('X=1\n')
+    expect(run(['git', 'diff', '--cached', '--name-only'], dir).out).toBe('')
+  })
+
   test('ключ добавлен — шифрует и делает git add', () => {
     const dir = setup({ enc: 'A=1\n', plain: 'A=1\nB=2\n' })
     const r = runHook(dir)

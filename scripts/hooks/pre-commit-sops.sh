@@ -55,6 +55,7 @@ env_key_names() {
 # с cwd = корень submodule, так что префикса apps/*/ там не существует (§18.8 PLAN-INFRA.md).
 # infra/*/secrets/*.enc — тот же принцип для infra-сервисов (§18.8.1 PLAN-INFRA.md): у них
 # нет apps/*/-префикса и нет submodule-варианта, secrets/ всегда живёт в корне letar.
+TO_ENCRYPT=()
 for enc_file in \
   apps/*/.env.docker.enc apps/*/*/.env.docker.enc \
   apps/*/.env.staging.enc apps/*/*/.env.staging.enc \
@@ -90,17 +91,25 @@ for enc_file in \
       fi
     fi
 
-    echo "[sops] Шифрую $plain_file → $enc_file"
-    sops --encrypt --output "$enc_file" "$plain_file"
-    git add "$enc_file"
-    ENCRYPTED=$((ENCRYPTED + 1))
+    TO_ENCRYPT+=("$enc_file")
   fi
 done
 
+# Сначала сверка всех файлов, шифрование — только если не заблокирован ни один: иначе при блоке
+# корректные .enc уже были бы перезаписаны и застейджены и уехали бы в следующий, посторонний коммит
 if [[ $BLOCKED -gt 0 ]]; then
-  echo "⛔ [sops] Коммит заблокирован: $BLOCKED файл(ов) с потерей ключей (см. выше)." >&2
+  echo "⛔ [sops] Коммит заблокирован: $BLOCKED файл(ов) с потерей ключей (см. выше). Ни один .enc не перешифрован." >&2
   exit 1
 fi
+
+# Форма `${arr[@]+...}` — пустой массив под `set -u` в bash < 4.4 иначе «unbound variable»
+for enc_file in ${TO_ENCRYPT[@]+"${TO_ENCRYPT[@]}"}; do
+  plain_file="${enc_file%.enc}"
+  echo "[sops] Шифрую $plain_file → $enc_file"
+  sops --encrypt --output "$enc_file" "$plain_file"
+  git add "$enc_file"
+  ENCRYPTED=$((ENCRYPTED + 1))
+done
 
 if [[ $ENCRYPTED -gt 0 ]]; then
   echo "[sops] Зашифровано и добавлено в коммит: $ENCRYPTED файл(ов)"
