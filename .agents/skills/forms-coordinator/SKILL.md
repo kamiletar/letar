@@ -83,11 +83,13 @@ send_message(
 
 ### Библиотеки (ты владелец!)
 
-| Библиотека                  | Версия | Описание                                                                                                                  |
-| --------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------- |
-| `libs/forms`                | 2.36.1 | 56+ полей, compound API, TanStack Form + Chakra UI                                                                        |
-| `libs/zenstack-form-plugin` | 4.4.3  | Генерация Zod schemas из `@meta("form.*", value)` директив в schema.zmodel (legacy `@form.*`-комментарии убраны в v4.0.0) |
-| `libs/form-mcp`             | 2.5.1  | MCP сервер — list_fields, get_field_props, get_directives, generate_form                                                  |
+| Библиотека                  | Описание                                                                                                                  |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `libs/forms`                | compound API, TanStack Form + Chakra UI                                                                                   |
+| `libs/zenstack-form-plugin` | Генерация Zod schemas из `@meta("form.*", value)` директив в schema.zmodel (legacy `@form.*`-комментарии убраны в v4.0.0) |
+| `libs/form-mcp`             | MCP сервер — list_fields, get_field_props, get_directives, generate_form                                                  |
+
+Версия — в `package.json` библиотеки.
 
 ### Приложения экосистемы
 
@@ -235,23 +237,13 @@ const { AppForm, AppField } = createForm({
 ✅ libs/forms/NEW_COMPONENTS.md — отметка
 
 ```
-### 2. Синхронизация form-mcp
+### 2. form-mcp
 
-**КРИТИЧНО!** После добавления нового компонента в form-components, form-mcp тоже нужно обновить:
-- Добавить новое поле в `list_fields` ответ
-- Добавить `get_field_props` для нового типа
-- Добавить `get_field_example` для нового типа
-- Если новая `@meta("form.*", value)` директива — добавить в `get_directives`
+form-mcp сам читает `libs/forms/docs/fields.md` — руками его не правят. После добавления компонента:
+- строка в таблице нужной категории `fields.md` (+ пропсы вне таблицы — в `libs/form-mcp/src/data/field-props.ts`);
+- тест `libs/form-mcp/src/data/field-code-parity.integration.spec.ts` проверит, что поля в коде и в доках совпадают;
+- новая `@meta("form.*", value)` директива — добавить в `get_directives` (`libs/form-mcp/src/data/directive-registry.ts`).
 
-Отправь задачу forms-dev агенту:
-```
-
-send_message(to: ["<forms-dev-agent>"], topic: "forms-task",
-subject: "sync: обновить form-mcp после добавления <компонент>",
-body_md: "Обнови libs/form-mcp:\n- list_fields: добавь <тип>\n- get_field_props: добавь описание props\n- get_field_example: добавь примеры",
-importance: "high", ack_required: true)
-
-```
 ### 3. Синхронизация zenstack-form-plugin
 
 Если фича связана с новой `@meta("form.<directive>", value)` директивой:

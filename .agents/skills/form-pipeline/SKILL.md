@@ -45,7 +45,7 @@ import { MyAppForm as Form } from '@/my-app-form'
 
 ## Reference файлы
 
-- `reference/field-types.md` — 40+ типов полей
+- Список полей и пропсы — MCP `list_fields` / `get_field_props`, или `libs/forms/docs/fields.md`
 - `reference/declarative-api.md` — Form, Form.Field.\*, Form.Group, Form.When
 - `reference/zod-meta.md` — .meta({ ui: {...} }) паттерны
 - `reference/server-actions.md` — паттерны Server Actions

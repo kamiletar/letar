@@ -73,7 +73,7 @@ fetch_inbox(project_key: "c-web-letar", agent_name: "<твоё-имя>", topic: 
 kebab-case имя ловило баг сервера agent-mail в `send_message` — см. `.claude/rules/agent-mail.md`,
 новое имя этой проблемы не имеет, но `reply_message` для продолжения треда всё равно предпочтительнее).
 
-**⚠️ После добавления компонента ОБЯЗАТЕЛЬНО обнови `libs/form-mcp`** — list_fields, get_field_props, get_field_example. Координатор проверит!
+**⚠️ После добавления поля** — строка в `libs/forms/docs/fields.md` (пропсы вне таблицы — в `libs/form-mcp/src/data/field-props.ts`). Тест `field-code-parity.integration.spec.ts` проверит, что код и доки совпали. MCP-инструменты (`list_fields` и др.) руками не правятся — они читают `fields.md`.
 
 ## Действия
 
@@ -181,7 +181,7 @@ kebab-case имя ловило баг сервера agent-mail в `send_message
 **Библиотека:** libs/forms
 **Версия:** см. `libs/forms/package.json`
 **npm пакет:** @letar/forms
-**Описание:** 56 полей, compound component API, Zod v4, offline, i18n, ZenStack интеграция, MCP-сервер
+**Описание:** compound component API, Zod v4, offline, i18n, ZenStack интеграция, MCP-сервер
 **Стратегия:** open-core, широкий OSS-охват — см. `libs/forms/PLAN.md` → Фаза 7 (расслоение core + скины)
 
 ### @letar/zenstack-form-plugin (плагин)
