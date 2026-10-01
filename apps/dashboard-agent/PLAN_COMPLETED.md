@@ -2,6 +2,15 @@
 
 Детальное описание всех реализованных фич.
 
+## Снят бэкап Nginx Proxy Manager на s2 (2026-10-01, `0.19.1`)
+
+NPM на s2 и s3 заменён Traefik 2026-08-31 — архивировать нечего. Задача `nginx-backup-s2` убрана
+из `DEFAULT_CRON_JOBS` и добавлена в `RETIRED_JOB_IDS`: `loadAllCronJobs` сам записи не удаляет,
+снятие с живого `cron-jobs.json` идёт только через этот список. Удалены маршрут `/api/nginx/*`
+(`routes/nginx.ts`) и `lib/nginx-backup.ts`. Деплой s2 — `/health` 200; проверено на сервере:
+в `/home/deploy/letar/cron-jobs.json` записи нет, остальные бэкапные задачи на месте. NPM
+mail-сервера (`/opt/npm-backup.sh`) не затронут — переход на Traefik/Caddy в корневом `PLAN.md`.
+
 ## `seedArgs` в `POST /api/deploy/app` (2026-09-26, `0.19.0`)
 
 Сид с аргументами (`db:seed -- --sync-texts [--dry-run]`) раньше шёл руками по SSH: `seed: true`

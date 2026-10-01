@@ -302,5 +302,8 @@ nx typecheck dashboard-agent
 
 ## Открытые вопросы
 
-- [ ] ⚠️ Открытый вопрос: `0.19.0` (`seedArgs`) не задеплоен — до self-deploy `deploy-mcp` отменяет
-      `deploy_app` с `seedArgs` по эхо-проверке. Контекст и детали — `PLAN-INFRA-6.md` §203.
+- [x] ~~Открытый вопрос: `0.19.0` (`seedArgs`) не задеплоен~~ — задеплоен 2026-10-01 в составе
+      `0.19.1` (s2, `/health` 200). Эхо-проверку `deploy-mcp` для `seedArgs` проверить на первом
+      деплое с `seed: true`. Контекст — `PLAN-INFRA-6.md` §203.
+- [x] Снят бэкап Nginx Proxy Manager на s2 (`nginx-backup-s2`) — 2026-10-01, `0.19.1`, см.
+      `PLAN_COMPLETED.md`.
