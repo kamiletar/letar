@@ -12,6 +12,7 @@ const nextConfig = {
   // транспилирует сам. См. .claude/docs/nextjs-nx-composeplugins-migration.md
   transpilePackages: [
     '@letar/analytics',
+    '@letar/chakra-provider',
     '@letar/format-utils',
     '@letar/github-releases',
     '@letar/glitchtip',

@@ -2,6 +2,14 @@
 
 Все изменения в проекте animatrona-landing документируются в этом файле.
 
+## [0.4.15] - 2026-10-01
+
+### Changed
+
+- `next.config`: в `transpilePackages` добавлен `@letar/chakra-provider` — выравнивание списка с
+  импортами и `paths` tsconfig (гейт `transpile-packages`). Дрейф соглашения, сборку не ломал —
+  `.claude/docs/transpile-packages-array-presence-not-content.md`.
+
 ## [0.4.14] - 2026-09-27
 
 ### Fixed

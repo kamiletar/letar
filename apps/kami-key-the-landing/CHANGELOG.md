@@ -2,6 +2,14 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.4.10] - 2026-10-01
+
+### Changed
+
+- `next.config`: в `transpilePackages` добавлен `@letar/chakra-provider` — выравнивание списка с
+  импортами и `paths` tsconfig (гейт `transpile-packages`). Дрейф соглашения, сборку не ломал —
+  `.claude/docs/transpile-packages-array-presence-not-content.md`.
+
 ## [0.4.9] - 2026-09-27
 
 ### Fixed

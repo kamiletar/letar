@@ -10,6 +10,7 @@ const nextConfig = {
   productionBrowserSourceMaps: true,
   transpilePackages: [
     '@letar/analytics',
+    '@letar/chakra-provider',
     '@letar/github-releases',
     '@letar/glitchtip',
     '@letar/seo',

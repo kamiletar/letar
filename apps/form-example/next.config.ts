@@ -20,6 +20,7 @@ const config: NextConfig = {
   // отказывается обрабатывать внешние .ts — «no loaders configured».
   transpilePackages: [
     '@letar/analytics',
+    '@letar/chakra-provider',
     '@letar/demo-protection',
     '@letar/forms',
     '@letar/forms-core',
