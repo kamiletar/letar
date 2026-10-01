@@ -84,7 +84,7 @@ export function createIDBPersister(): Persister {
 import { get, set } from 'idb-keyval'
 import { useCallback, useEffect, useState, useSyncExternalStore } from 'react'
 
-const STORAGE_KEY = 'premium-rosstil-wishlist'
+const STORAGE_KEY = '<app>-wishlist'
 
 interface WishlistState {
   items: number[]

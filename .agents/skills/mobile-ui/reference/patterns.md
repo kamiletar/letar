@@ -5,7 +5,7 @@
 ## Product Card
 
 ```tsx
-// Файл: apps/premium-rosstil/src/app/[locale]/catalog/_components/product-card.tsx
+// Файл: apps/<app>/src/app/[locale]/catalog/_components/product-card.tsx
 import { AspectRatio, Card, IconButton, LinkBox, LinkOverlay, Text } from '@chakra-ui/react'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -77,7 +77,7 @@ export function ProductCard({ product }) {
 ## Cart Item
 
 ```tsx
-// Файл: apps/premium-rosstil/src/app/[locale]/cart/_components/cart-item-card.tsx
+// Файл: apps/<app>/src/app/[locale]/cart/_components/cart-item-card.tsx
 import { Box, Grid, IconButton, NumberInput, Stack, Text } from '@chakra-ui/react'
 import Image from 'next/image'
 import { LuTrash } from 'react-icons/lu'
@@ -182,7 +182,7 @@ function StatCard({ icon, label, value, colorPalette }) {
 ## Image Gallery
 
 ```tsx
-// Файл: apps/premium-rosstil/src/app/[locale]/catalog/[id]/_components/image-gallery.tsx
+// Файл: apps/<app>/src/app/[locale]/catalog/[id]/_components/image-gallery.tsx
 import { AspectRatio, Box, Grid, IconButton } from '@chakra-ui/react'
 import Image from 'next/image'
 import { LuChevronLeft, LuChevronRight } from 'react-icons/lu'

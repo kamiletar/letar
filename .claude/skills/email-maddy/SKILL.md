@@ -176,8 +176,6 @@ git add apps/<app>/.env.docker.enc && git commit -m "chore(<app>): обнови�
    ```
 
 2. **Обновить локальные .env.docker**
-   - `apps/premium-rosstil/.env.docker`
-   - `apps/imot/.env.docker`
    - `apps/mandala/.env.docker`
    - `apps/dashboard/.env.docker`
    - `apps/kami/.env.docker`

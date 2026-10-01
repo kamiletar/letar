@@ -126,7 +126,7 @@ MCP_PROD_RO_URL=postgresql://<app>_ro:<ro-password>@localhost:<tunnel-port>/<pro
 не дублируется здесь во избежание расхождения.
 
 ✅ **`kami` — расхождение `MCP_LOCAL_URL`/`DATABASE_URL` закрыто 2026-08-31.** Раньше
-`DATABASE_URL` в `apps/kami/.env.local` указывал на порт 5432 (`premium-rosstil-postgres`) — не
+`DATABASE_URL` в `apps/kami/.env.local` указывал на порт 5432 (контейнер другого приложения) — не
 просто другую базу, а битую строку подключения (роль `postgres` там не существует). Теперь оба
 значения указывают на один и тот же канонический дев-контейнер `kami-postgres` (порт 5437,
 `lena_kami`). Разбор —

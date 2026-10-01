@@ -7,7 +7,7 @@
 Основной паттерн мобильной навигации — боковая панель:
 
 ```tsx
-// Файл: apps/imot/src/app/_components/navigation/mobile-menu.tsx
+// Файл: apps/<app>/src/app/_components/navigation/mobile-menu.tsx
 import {
   Avatar,
   Button,
@@ -111,7 +111,7 @@ function NavLink({ href, children, onClick }) {
 ## Header с adaptive navigation
 
 ```tsx
-// Файл: apps/premium-rosstil/src/app/_components/header/header.tsx
+// Файл: apps/<app>/src/app/_components/header/header.tsx
 import { Box, Flex, HStack, IconButton } from '@chakra-ui/react'
 import Link from 'next/link'
 import { LuMenu, LuPhone } from 'react-icons/lu'
@@ -246,7 +246,7 @@ function NavItem({ href, icon: Icon, label, active }) {
 ## Breadcrumbs (скрытие на mobile)
 
 ```tsx
-// Файл: apps/imot/src/app/_components/navigation/app-header.tsx
+// Файл: apps/<app>/src/app/_components/navigation/app-header.tsx
 <Breadcrumb.Root display={{ base: 'none', md: 'block' }}>
   <Breadcrumb.List>
     <Breadcrumb.Item>

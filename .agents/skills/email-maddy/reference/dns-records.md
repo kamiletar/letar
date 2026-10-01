@@ -22,7 +22,7 @@
 
 ## Поддомены \*.letar.best
 
-Для каждого поддомена (kami, imot, animatrona, mandala, dashboard):
+Для каждого поддомена (kami, animatrona, mandala, dashboard):
 
 | Тип | Имя                      | Значение                              |
 | --- | ------------------------ | ------------------------------------- |
@@ -38,21 +38,15 @@ kami.letar.best.              TXT   "v=spf1 a:mail.letar.best ~all"
 default._domainkey.kami.letar.best.  TXT   "v=DKIM1; k=rsa; p=MIIBIjAN..."
 ```
 
-## <домен napravo>
+## Домен клиента (внешний, не `*.letar.best`)
 
 | Тип | Имя                 | Значение                                              |
 | --- | ------------------- | ----------------------------------------------------- |
 | TXT | @                   | `v=spf1 a:mail.letar.best ~all`                       |
-| TXT | default.\_domainkey | `v=DKIM1; k=rsa; p=<КЛЮЧ_naprava.rf>`                 |
+| TXT | default.\_domainkey | `v=DKIM1; k=rsa; p=<КЛЮЧ_домена_клиента>`             |
 | TXT | \_dmarc             | `v=DMARC1; p=quarantine; rua=mailto:admin@letar.best` |
 
-## <домен premium-rosstil>
-
-| Тип | Имя                 | Значение                                              |
-| --- | ------------------- | ----------------------------------------------------- |
-| TXT | @                   | `v=spf1 a:mail.letar.best ~all`                       |
-| TXT | default.\_domainkey | `v=DKIM1; k=rsa; p=<КЛЮЧ_<домен premium-rosstil>>`    |
-| TXT | \_dmarc             | `v=DMARC1; p=quarantine; rua=mailto:admin@letar.best` |
+Для каждого внешнего домена — свой DKIM-ключ.
 
 ## Получение DKIM ключей
 
@@ -60,11 +54,8 @@ default._domainkey.kami.letar.best.  TXT   "v=DKIM1; k=rsa; p=MIIBIjAN..."
 # letar.best и все поддомены
 ssh root@mail.letar.best "cat /opt/maddy/data/dkim_keys/letar.best_default.dns"
 
-# <домен napravo> (punycode: <домен napravo>)
-ssh root@mail.letar.best "cat /opt/maddy/data/dkim_keys/<домен napravo>_default.dns"
-
-# <домен premium-rosstil>
-ssh root@mail.letar.best "cat /opt/maddy/data/dkim_keys/<домен premium-rosstil>_default.dns"
+# внешний домен клиента (для кириллических доменов — punycode)
+ssh root@mail.letar.best "cat /opt/maddy/data/dkim_keys/<домен-клиента>_default.dns"
 ```
 
 ## Проверка DNS
@@ -123,15 +114,6 @@ rua=mailto:admin@...      # Куда слать отчёты
 - `none` — только мониторинг
 - `quarantine` — помечать как спам
 - `reject` — отклонять
-
-## <домен svoichuzhie>
-
-| Тип | Имя                 | Значение                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| --- | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| MX  | @                   | mail.letar.best (приоритет 10)                                                                                                                                                                                                                                                                                                                                                                                               |
-| TXT | @                   | `v=spf1 a:mail.letar.best ~all`                                                                                                                                                                                                                                                                                                                                                                                              |
-| TXT | default.\_domainkey | `v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtg6eLQjjhlpt5t/IC+a4aql3AOvmRkp1JdFKDD3KxBhWGJMnB0nqTufbpKii1AAL9pdW09jEHbxOGs8v4MtJr3epK5gd0Gm/toOSTaZYp3a8zXkhnJ0IbotQpqDMeXhhoKazjWzIgmx64kShvTfoxa2zSiHcmD3oXfFjWfmXHFgp0uY57B6EwlFuKoey7TUXXYbDfuUrTufN1PKMjA11BdMO1tgzQHL1KyOeP9gkbuWnyr3+NIE7KNBW+VXgCzOC3YMMUCzWbecs5Y8PcNHkd//JsM/tbE1oCMnDcW+K5n51IhCAcV5hVYSdU4PiE8hUpT9TnfLC5c13+0VmMoXjSQIDAQAB` |
-| TXT | \_dmarc             | `v=DMARC1; p=quarantine; rua=mailto:admin@letar.best`                                                                                                                                                                                                                                                                                                                                                                        |
 
 ## Добавление нового домена
 

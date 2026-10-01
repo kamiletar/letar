@@ -50,7 +50,7 @@
 
 ```bash
 # Запуск dev сервера с доступом из сети
-nx dev premium-rosstil -- --hostname 0.0.0.0
+nx dev <app> -- --hostname 0.0.0.0
 
 # Или напрямую
 npx next dev --hostname 0.0.0.0

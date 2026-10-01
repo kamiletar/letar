@@ -168,7 +168,7 @@ function ChatLayout() {
 ### Sidebar layout
 
 ```tsx
-// Файл: apps/imot/src/app/(dashboard)/layout.tsx
+// Файл: apps/<app>/src/app/(dashboard)/layout.tsx
 <Grid templateColumns={{ base: '1fr', lg: '240px 1fr' }}>
   {/* Sidebar скрыт на mobile — используется Drawer */}
   <Box display={{ base: 'none', lg: 'block' }}>
@@ -188,7 +188,7 @@ function ChatLayout() {
 ### Form layout
 
 ```tsx
-// Файл: apps/premium-rosstil/src/app/[locale]/checkout/_components/checkout-form.tsx
+// Файл: apps/<app>/src/app/[locale]/checkout/_components/checkout-form.tsx
 <Stack gap={4}>
   {/* Полная ширина */}
   <Field.Root>
@@ -213,7 +213,7 @@ function ChatLayout() {
 ### Card Grid (каталог)
 
 ```tsx
-// Файл: apps/premium-rosstil/src/app/[locale]/catalog/page.tsx
+// Файл: apps/<app>/src/app/[locale]/catalog/page.tsx
 <SimpleGrid columns={{ base: 2, md: 3, lg: 4 }} gap={{ base: 2, md: 4 }}>
   {products.map((product) => <ProductCard key={product.id} product={product} />)}
 </SimpleGrid>

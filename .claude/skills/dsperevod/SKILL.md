@@ -1,6 +1,6 @@
 ---
 name: dsperevod
-description: Воркфлоу разработки dsperevod — бюро переводов, требования 152-ФЗ к формам согласия
+description: Воркфлоу разработки dsperevod — регистрация в Agent Mail, требования 152-ФЗ к формам согласия
 disable-model-invocation: true
 ---
 
@@ -56,4 +56,4 @@ disable-model-invocation: true
 **Auth:** Better Auth (email/password)
 **БД:** PostgreSQL + ZenStack
 **Submodule:** kamiletar/letar-private-dsperevod
-**Описание:** Бюро переводов DS Perevod — маркетинговый сайт + панель администратора
+**Описание:** см. `apps/dsperevod/AGENTS.md`

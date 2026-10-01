@@ -42,8 +42,7 @@ relay.
 ```
 $(hostname) = mail.letar.best
 $(primary_domain) = letar.best
-$(local_domains) = $(primary_domain) <домен клиента> kami.letar.best imot.letar.best animatrona.letar.best mandala.letar.best dashboard.letar.best <домен napravo> <домен premium-rosstil>
-# <домен napravo> = <домен napravo> (punycode)
+$(local_domains) = $(primary_domain) <домен клиента> kami.letar.best animatrona.letar.best mandala.letar.best dashboard.letar.best <другие домены клиентов; кириллические — в punycode>
 
 # TLS — статичный сертификат (не acme loader)
 tls file /data/certs/fullchain.pem /data/certs/privkey.pem
