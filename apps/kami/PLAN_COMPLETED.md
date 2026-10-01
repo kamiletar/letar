@@ -1,5 +1,14 @@
 # Выполненные задачи — Kami
 
+## Вход падал с `?error=invalid_code`: устаревший `OIDC_CLIENT_SECRET` (2026-10-01)
+
+Better Auth показывает `invalid_code` на любую ошибку обмена кода на токен. Реальная причина была в
+логе контейнера: Ключница отвечала `invalid_client` / `invalid client_secret`. В `.env.docker.enc`
+лежал секрет, не совпадающий с `OIDC_KAMI_SECRET` из `.env.docker.enc` auth-hub (из него seed кладёт
+клиент `kami-prod` в БД Ключницы). Секрет синхронизирован `scripts/sops-env-set.sh`, коммит
+`922a2d97b`, деплой через `deploy-agent-dev` (`kami-app-18`). Вход вручную пока не подтверждён.
+Диагностика — [oidc-client-secret-drift-invalid-code.md](/.claude/docs/oidc-client-secret-drift-invalid-code.md).
+
 ## `scrollIntoView(smooth)` зависал без OS-фокуса окна (2026-09-22)
 
 Делегировано из сессии `pravda-dev` — после фикса зависающего TOC-скролла в `apps/pravda`
