@@ -942,3 +942,5 @@ warning `react-hooks/exhaustive-deps` в других файлах, не свя�
 Четвёртый класс исключения (Canvas 2D) стоит зафиксировать и в
 `.claude/docs/theme-hardcode-gate-coverage.md` при следующей правке этого документа — на
 2026-09-06 там ещё нет.
+
+- [ ] ⚠️ Открытый вопрос: вход через «Войти» после деплоя `922a2d97b` не подтверждён вручную (секрет в контейнере совпадает с хабом, ошибок в логе нет). Если снова `?error=invalid_code` — см. `.claude/docs/oidc-client-secret-drift-invalid-code.md`. Вход через Google не настроен (`AUTH_GOOGLE_ID`/`AUTH_GOOGLE_SECRET` пусты в каждой сборке).
