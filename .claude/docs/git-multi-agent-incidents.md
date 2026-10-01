@@ -8,6 +8,32 @@
 Действующие правила, которые из этих инцидентов выросли, — в
 [.claude/rules/git.md](/.claude/rules/git.md). Здесь только «почему».
 
+## Дополнение 2026-10-01: pre-push смотрел gitlink-и только конечного коммита — промежуточный SHA ронял `fetch` на сервере
+
+**Что произошло.** Push интеграции (96 коммитов, `32f1b4ad2..72c8e2d15`) прошёл pre-push: конечные
+SHA всех 15 submodule были на origin. Но два промежуточных коммита (`155e6824f`, `601230db4`)
+записали gitlink-и studio `e227a80` и domwellbes `11a85520`, жившие только в локальной ветке
+`codex/agent-instructions-migration`. На s2 `git fetch --recurse-submodules` достаёт **все** SHA,
+упомянутые в новых коммитах, и упал с `upload-pack: not our ref` — встал деплой всех приложений.
+Вылечили push той ветки в оба submodule.
+
+**Механизм.** `check-submodule-push-state.sh` брал `git ls-tree -r <коммит>` одного коммита, а
+`pre-push-submodule-check.sh` передавал ему только `local oid` вершины. Всё, что промежуточный
+коммит записал и следующий перебил, оставалось невидимым (тот же класс, что 2026-09-19 в
+[deployment.md](/.claude/docs/deployment.md)).
+
+**Что ловит хук теперь.** Для каждой строки stdin хук считает диапазон: `<remote oid>..<local oid>`,
+а для новой ветки (remote oid из нулей) — `<local oid> --not --remotes=origin`, и зовёт
+`check-submodule-push-state.sh --range "<диапазон>"`. Чекер объединяет полные gitlink-и вершины и
+изменённые gitlink-и каждого коммита диапазона (один `git diff-tree --stdin -r -m` на весь диапазон,
+без `ls-tree -r` на коммит), проверяет каждую уникальную пару «путь → SHA» один раз прежней
+двухступенчатой логикой (локально, затем `fetch`) и в сообщении называет пару, коммит letar, где она
+появилась, и команду push. Замер на тех же 96 коммитах (по факту 99 в `rev-list`): ≈2,3 с, 20 уникальных пар.
+Ручная проверка перед deploy-request и для CI: `bash scripts/check-submodule-push-state.sh --range <a>..<b>`.
+Тест — `scripts/hooks/pre-push-submodule-check.test.mjs` (на старом хуке 4 из 6 падают).
+
+⚠️ Установленные копии хука — снимок: после правки `bash scripts/hooks/install.sh --all-submodules`.
+
 ## Дополнение 2026-09-22 (третье за день): `git restore --staged` открывает окно ничейного индекса — параллельный `commit -- <файл>` в это окно тихо отменяет чужой только что закоммиченный текст
 
 **Что произошло.** В `apps/domwellbes` одновременно работали две сессии над `PLAN_COMPLETED.md`:

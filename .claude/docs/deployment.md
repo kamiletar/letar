@@ -71,7 +71,7 @@ cd /home/deploy/letar
 bump на SHA, которого нет в origin submodule (закоммитили внутри submodule, не запушили, потом
 перебили — 2026-09-19 `3d989166c` → `d13de0244` у domwellbes), fetch падает, а деплой любого приложения
 на этом сервере останавливается до `git submodule update`. Итоговое состояние при этом синхронно, и
-`check-submodule-push-state.sh` зелёный: он смотрит только на HEAD. Обход — один раз на сервере
+`check-submodule-push-state.sh` без флага был зелёным: он смотрит только на HEAD. С 2026-10-01 pre-push хук сам гоняет `--range` по всем коммитам диапазона ([разбор](/.claude/docs/git-multi-agent-incidents.md)). Обход — один раз на сервере
 `git fetch origin --recurse-submodules=no` (конфиг не трогать), затем обычный деплой: `git pull` уже
 ничего не докачивает и в submodule не лезет. Профилактика: пушить submodule раньше bump, см.
 [git.md](/.claude/rules/git.md) («Порядок push нерушим»).
