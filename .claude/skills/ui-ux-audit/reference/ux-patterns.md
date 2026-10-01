@@ -211,7 +211,9 @@ const Schema = z.object({
 </Form>
 ```
 
-### 40+ типов полей
+### Типы полей
+
+Полный список и пропсы — MCP `list_fields` / `get_field_props` или `libs/forms/docs/fields.md`; ниже — примеры.
 
 ```tsx
 // Текстовые
