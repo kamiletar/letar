@@ -15,6 +15,8 @@
 # снял барьер, всё равно увидел список того, что нужно дослать (тот же приём, что у
 # GIT_ALLOW_MULTI_SCOPE_COMMIT в pre-commit-scope-guard.sh).
 #
+# Проверяются gitlink'и ВСЕХ коммитов отправляемого диапазона (push-check-01), не только конечного.
+#
 # ⚠️ Это НЕ то же самое, что штатный `git push --recurse-submodules=check`. Тот проверяет
 # только submodule, ИЗМЕНЁННЫЕ в отправляемых ревизиях, и сверяется с локальными
 # remote-tracking ветками, которые могут быть устаревшими. Здесь проверяются ВСЕ gitlink'и
@@ -49,23 +51,32 @@ fi
 
 # stdin pre-push: <local ref> <local oid> <remote ref> <remote oid> по строке на каждую
 # отправляемую ветку. Пустой stdin (push без ссылок, `--dry-run` без изменений) — нечего делать.
-revs=()
-while read -r _local_ref local_oid _remote_ref _remote_oid; do
+# Для каждой ветки собираем диапазон коммитов, а не один конечный коммит: промежуточный
+# коммит мог записать gitlink на SHA, которого нет на origin (инцидент 2026-10-01: конечные
+# SHA были на месте, а `git fetch --recurse-submodules` на сервере достал промежуточные).
+ranges=()
+while read -r _local_ref local_oid _remote_ref remote_oid; do
   [[ -z "${local_oid:-}" ]] && continue
   # Удаление ветки (`git push --delete`) — local oid из одних нулей, дерева нет.
   [[ "$local_oid" =~ ^0+$ ]] && continue
-  # Дедуп: несколько refs часто указывают на один коммит.
-  for seen in ${revs[@]+"${revs[@]}"}; do
-    [[ "$seen" == "$local_oid" ]] && continue 2
+  if [[ -z "${remote_oid:-}" || "$remote_oid" =~ ^0+$ ]]; then
+    # Новая ветка на remote: всё, чего ещё нет ни в одной ветке origin.
+    range="$local_oid --not --remotes=origin"
+  else
+    range="$remote_oid..$local_oid"
+  fi
+  # Дедуп: несколько refs часто указывают на один диапазон.
+  for seen in ${ranges[@]+"${ranges[@]}"}; do
+    [[ "$seen" == "$range" ]] && continue 2
   done
-  revs+=("$local_oid")
+  ranges+=("$range")
 done
 
-[[ ${#revs[@]} -eq 0 ]] && exit 0
+[[ ${#ranges[@]} -eq 0 ]] && exit 0
 
 status=0
-for rev in "${revs[@]}"; do
-  bash "$CHECKER" "$rev" || status=1
+for range in "${ranges[@]}"; do
+  bash "$CHECKER" --range "$range" || status=1
 done
 
 [[ $status -eq 0 ]] && exit 0

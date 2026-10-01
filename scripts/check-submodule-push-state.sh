@@ -21,6 +21,16 @@
 # Использование:
 #   bash scripts/check-submodule-push-state.sh             # проверить HEAD
 #   bash scripts/check-submodule-push-state.sh origin/main # проверить произвольный коммит
+#   bash scripts/check-submodule-push-state.sh --range <a>..<b>   # все gitlink'и ВСЕХ коммитов диапазона
+#   bash scripts/check-submodule-push-state.sh --range "<oid> --not --remotes=origin"  # новая ветка
+#
+# ── Режим --range (push-check-01, 2026-10-01) ─────────────────────────────────────────────
+# Конечные SHA могут быть на origin, а промежуточный коммит диапазона — ссылаться на SHA,
+# который жил только в чьей-то локальной ветке. Сервер при `git fetch --recurse-submodules`
+# достаёт ВСЕ SHA, упомянутые в новых коммитах, и падает `not our ref`. Поэтому в режиме
+# --range проверяется объединение: полные gitlink'и вершины диапазона + изменённые gitlink'и
+# каждого коммита (`git diff-tree`, без `ls-tree -r` на каждый). Уникальные пары — один раз.
+# Аргумент --range — это аргументы `git rev-list` (одним словом или в кавычках).
 #
 # Код возврата 1, если хоть один SHA не найден на origin — это gate, а не отчёт
 # (как scripts/check-patched-deps.mjs, в отличие от scripts/check-peer-deps.mjs).
@@ -45,7 +55,14 @@
 
 set -uo pipefail
 
-REV="${1:-HEAD}"
+RANGE=""
+if [[ "${1:-}" == "--range" ]]; then
+  RANGE="${2:-}"
+  [[ -z "$RANGE" ]] && { echo "⛔ --range требует аргумент (<a>..<b>)" >&2; exit 1; }
+  REV=""
+else
+  REV="${1:-HEAD}"
+fi
 
 TOPLEVEL="$(git rev-parse --show-toplevel 2>/dev/null)" || {
   echo "не git-репозиторий — нечего проверять" >&2
@@ -56,6 +73,16 @@ cd "$TOPLEVEL" || exit 1
 if [[ ! -f .gitmodules ]]; then
   echo "submodule в этом репозитории нет — проверять нечего"
   exit 0
+fi
+
+if [[ -n "$RANGE" ]]; then
+  # shellcheck disable=SC2086
+  mapfile -t RANGE_COMMITS < <(git rev-list $RANGE 2>/dev/null)
+  if [[ ${#RANGE_COMMITS[@]} -eq 0 ]]; then
+    echo "✅ диапазон '$RANGE' пуст — проверять нечего"
+    exit 0
+  fi
+  REV="${RANGE_COMMITS[0]}"
 fi
 
 if ! git rev-parse --verify --quiet "$REV^{commit}" >/dev/null; then
@@ -79,6 +106,34 @@ done
 # в этом коммите ещё/уже нет. Один `ls-tree -r` вместо вызова на каждый путь — на Windows
 # запуск процесса стоит ~0.2 c, и 14 лишних вызовов заметны в pre-push хуке.
 mapfile -t GITLINKS < <(git ls-tree -r "$REV" | awk '$1 == "160000" { print $3 "\t" substr($0, index($0, "\t") + 1) }')
+
+# Режим --range: добавляем gitlink'и, изменённые в каждом коммите диапазона. WHERE[sha<TAB>path] —
+# коммит letar, где пара появилась (перебор от новых к старым, побеждает самый старый).
+TAB=$'	'
+declare -A WHERE=()
+if [[ -n "$RANGE" ]]; then
+  cur=""
+  declare -A SEEN_PAIR=()
+  for link in "${GITLINKS[@]}"; do SEEN_PAIR["$link"]=1; done
+  # shellcheck disable=SC2086
+  while IFS= read -r line; do
+    if [[ "$line" =~ ^[0-9a-f]{40}$ ]]; then
+      cur="$line"
+    elif [[ "$line" == :* ]]; then
+      meta="${line%%"$TAB"*}"
+      path="${line#*"$TAB"}"
+      read -r _om nm _osha nsha _st <<< "$meta"
+      [[ "$nm" == "160000" && ! "$nsha" =~ ^0+$ ]] || continue
+      pair="$nsha$TAB$path"
+      WHERE["$pair"]="$cur"
+      if [[ -z "${SEEN_PAIR[$pair]:-}" ]]; then
+        SEEN_PAIR["$pair"]=1
+        GITLINKS+=("$pair")
+      fi
+    fi
+  done < <(printf '%s
+' "${RANGE_COMMITS[@]}" | git diff-tree --stdin -r -m --root --no-abbrev)
+fi
 
 # Записан ли SHA в какой-нибудь ветке origin ЭТОГО submodule.
 # Специально refs/remotes/origin/, а не `git branch -r`: у submodule может быть добавлен
@@ -162,6 +217,10 @@ for i in "${!suspect_paths[@]}"; do
       origin_note=" [этот SHA УЖЕ в $ORIGIN_REF — деплой сломан прямо сейчас, не этим push]"
     fi
   fi
+
+  pair_key="$sha$TAB$sm_path"
+  where="${WHERE[$pair_key]:-}"
+  [[ -n "$where" ]] && origin_note="$origin_note [появился в коммите letar ${where:0:9}]"
 
   problems+=("$sm_path|$sha|$fix_cmd|$origin_note")
 done
