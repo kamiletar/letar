@@ -47,7 +47,7 @@ const Schema = z.object({
 
 | Категория        | Документация                                             | Описание                                                                            |
 | ---------------- | -------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| Field компоненты | [docs/fields.md](./docs/fields.md)                       | 56 типов полей (String, Number, Select, ...)                                        |
+| Field компоненты | [docs/fields.md](./docs/fields.md)                       | Все типы полей по категориям (String, Number, Select, ...)                          |
 | Form-level       | [docs/form-level.md](./docs/form-level.md)               | Steps, When, Watch, Errors, Persistence                                             |
 | Schema генерация | [docs/schema-generation.md](./docs/schema-generation.md) | FromSchema, AutoFields, Builder, Templates                                          |
 | Server Errors    | [docs/server-errors.md](./docs/server-errors.md)         | Маппинг Prisma/ZenStack/Zod ошибок; отказ Server Action значением (`ActionFailure`) |
@@ -69,7 +69,7 @@ const Schema = z.object({
 
 ## Основные возможности
 
-### 56 Field компонентов
+### Field компоненты
 
 ```tsx
 // Текстовые
@@ -492,7 +492,7 @@ const myProvider: AddressProvider = {
 
 ## AI Tooling (MCP)
 
-MCP сервер [`@letar/form-mcp`](../form-mcp/README.md) предоставляет AI-ассистентам (Claude Code, Cursor, VS Code Copilot) полный контекст о библиотеке: 56 полей, паттерны форм, @meta("form.\*", value) директивы.
+MCP сервер [`@letar/form-mcp`](../form-mcp/README.md) предоставляет AI-ассистентам (Claude Code, Cursor, VS Code Copilot) полный контекст о библиотеке: все поля, паттерны форм, @meta("form.\*", value) директивы.
 
 ```json
 { "form-mcp": { "command": "npx", "args": ["-y", "@letar/form-mcp"] } }
