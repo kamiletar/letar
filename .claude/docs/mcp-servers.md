@@ -171,8 +171,13 @@ env-файлам, имена переменных, режим доступа и 
 | `kami`            | ro    | lena_kami      | 5437 (dev), `MCP_LOCAL_URL`       |
 | `grandslamcup`    | ro    | grandslamcup   | 5453 (dev)                        |
 | `kami-prod`       | ro    | lena_kami      | туннель 5455 → 185.28.85.195:5437 |
-| `studio-prod`     | ro    | studio         | туннель 5456 → 185.28.85.185:5455 |
+| `studio-prod`     | ro    | studio         | туннель 5456 → 185.28.85.195:5455 |
 | `domwellbes-prod` | ro    | domwellbes     | туннель 5457 → 185.28.85.195:5456 |
+
+Прод-записи читают `MCP_PROD_RO_URL` из **локального** `apps/<app>/.env.docker` (роль `<app>_ro`, только
+SELECT). Значение хранится и в `.env.docker.enc`; нет локального файла — `sops -d` из `.enc`, затем
+`touch` на `.enc`, чтобы он остался новее plain (иначе хук `pre-commit-sops.sh` перешифрует копию поверх
+`.enc`). Все три записи проверены 2026-10-01: чтение всех таблиц есть, записи нет.
 
 `rw` = раньше `--pro restricted` (Postgres MCP Pro в режиме restricted — писать можно, DDL не
 блокируется кодом; это НЕ было read-only, вопреки внешнему виду прежнего названия). `ro` = раньше
