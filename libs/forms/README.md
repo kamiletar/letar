@@ -502,22 +502,22 @@ MCP сервер [`@letar/form-mcp`](../form-mcp/README.md) предоставл
 
 Библиотека поставляется как ESM с external dependencies. Все тяжёлые зависимости (Chakra, React, Tiptap, dnd-kit) — external и не включаются в bundle.
 
-| Модуль                            | Размер (brotli) | Размер (raw) |
-| --------------------------------- | --------------- | ------------ |
-| `@letar/forms` (все 56 п��лей)    | **20 KB**       | 109 KB       |
-| `@letar/forms/fields/text`        | < 1 KB          | re-export    |
-| `@letar/forms/fields/number`      | < 1 KB          | re-export    |
-| `@letar/forms/fields/datetime`    | < 1 KB          | re-export    |
-| `@letar/forms/fields/selection`   | < 1 KB          | re-export    |
-| `@letar/forms/fields/boolean`     | < 1 KB          | re-export    |
-| `@letar/forms/fields/specialized` | < 1 KB          | re-export    |
-| `@letar/forms/offline`            | < 1 KB          | 5 KB         |
-| `@letar/forms/i18n`               | < 1 KB          | 13 KB        |
+| Модуль                                  | Размер (brotli) | Размер (raw) |
+| --------------------------------------- | --------------- | ------------ |
+| `@letar/forms` (все поля; замер при 56) | **20 KB**       | 109 KB       |
+| `@letar/forms/fields/text`              | < 1 KB          | re-export    |
+| `@letar/forms/fields/number`            | < 1 KB          | re-export    |
+| `@letar/forms/fields/datetime`          | < 1 KB          | re-export    |
+| `@letar/forms/fields/selection`         | < 1 KB          | re-export    |
+| `@letar/forms/fields/boolean`           | < 1 KB          | re-export    |
+| `@letar/forms/fields/specialized`       | < 1 KB          | re-export    |
+| `@letar/forms/offline`                  | < 1 KB          | 5 KB         |
+| `@letar/forms/i18n`                     | < 1 KB          | 13 KB        |
 
 Категорийные entry points (`fields/*`) позволяют импортировать только нужные поля:
 
 ```typescript
-// Полный импорт — все 56 п��лей
+// Полный импорт — все поля
 import { Form } from '@letar/forms'
 
 // Категорийный импорт — только текстовые поля
