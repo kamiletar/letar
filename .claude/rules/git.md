@@ -175,7 +175,14 @@ git push
 
 ```bash
 bash scripts/check-submodule-push-state.sh
+bash scripts/check-submodule-push-state.sh --range origin/main..HEAD   # все коммиты, не только вершина
 ```
+
+⚠️ Сервер достаёт **каждый** SHA submodule, упомянутый в новых коммитах, а не только конечный:
+промежуточный bump на коммит из неотправленной локальной ветки тоже роняет все деплои. С
+2026-10-01 хук проверяет весь диапазон push
+([разбор](/.claude/docs/git-multi-agent-incidents.md)); ручная проверка без `--range` смотрит
+только вершину.
 
 Аварийный обход, когда последствия понятны — `GIT_ALLOW_UNPUSHED_SUBMODULES=1 git push`
 (как и multi-scope флаг, превращает блокировку в предупреждение).
