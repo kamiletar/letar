@@ -296,7 +296,7 @@ Grep "ComponentName" --type tsx
 Glob "**/*product*"
 
 # Проверить тесты
-nx test <app> --testPathPattern=<файл>
+nx test <app> -- <путь к файлу>   # Vitest 4: фильтр — позиционный аргумент
 ```
 
 ### 2. План рефакторинга

@@ -23,16 +23,23 @@ ZenStack создаёт типизированные хуки для каждо�
 ## Импорт
 
 ```typescript
-import {
-  useCountOrder,
-  useCreateOrder,
-  useDeleteOrder,
-  useFindManyOrder,
-  useFindUniqueOrder,
-  useInfiniteFindManyProduct,
-  useUpdateOrder,
-} from '@/generated/hooks'
+import { schema } from '@/generated/schema'
+import { useClientQueries } from '@zenstackhq/tanstack-query/react'
+
+const client = useClientQueries(schema)
+
+client.order.useCount(args, options)
+client.order.useCreate(options)
+client.order.useDelete(options)
+client.order.useFindMany(args, options)
+client.order.useFindUnique(args, options)
+client.product.useInfiniteFindMany(args, options)
+client.order.useUpdate(options)
 ```
+
+В приложениях эти вызовы обычно обёрнуты в `src/lib/hooks.ts` (`useFindManyOrder` и т.д.) —
+образец `apps/driving-school/src/lib/hooks.ts`. Ниже в примерах `useFindManyOrder(...)` читается как
+`client.order.useFindMany(...)`.
 
 ## Примеры использования
 
@@ -313,30 +320,15 @@ const updateOrder = useUpdateOrder({
 
 ## Prefetching
 
-```typescript
-// Server Component (Next.js App Router)
-import { prefetchFindManyOrder } from '@/generated/hooks'
-
-export default async function OrdersPage() {
-  const queryClient = new QueryClient()
-
-  await prefetchFindManyOrder(queryClient, {
-    where: { status: 'PENDING' },
-    take: 20,
-  })
-
-  return (
-    <HydrationBoundary state={dehydrate(queryClient)}>
-      <Orders />
-    </HydrationBoundary>
-  )
-}
-```
+⚠️ В ZenStack v3 готовых `prefetch*`-хелперов (бывший `@/generated/hooks`) нет. Для SSR-гидратации
+используй общий механизм TanStack Query — `reference/hydration.md` (`dehydrate`/`HydrationBoundary`)
+с собственным `queryKey` и `queryFn`, вызывающим серверный enhanced-клиент. Ключи хуков
+`useClientQueries` — внутренняя деталь библиотеки, на совпадение с ними не полагайся.
 
 ## См. также
 
 - **zenstack-helper skill** — полная документация ZenStack:
-  - `reference/tanstack-query.md` — детали генерируемых хуков
+  - `reference/tanstack-query.md` — детали хуков `useClientQueries`
   - `reference/access-policies.md` — @@allow/@@deny влияет на данные
   - `reference/relations.md` — include и вложенные запросы
 

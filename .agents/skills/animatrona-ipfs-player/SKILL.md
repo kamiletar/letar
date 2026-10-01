@@ -19,11 +19,8 @@ disable-model-invocation: true
 Фиксированное имя агента: `animatrona-ipfs-player-dev`. Общий шаблон вызова
 `macro_start_session` — см. `.claude/rules/app-workflow.md`.
 
-⚠️ **Токен ещё не заведён в `agent_fixed_names_tokens.md`** (приложение только что создано,
-2026-09-08) — первая сессия должна зарегистрировать identity без `registration_token`
-(`macro_start_session`/`register_agent` с одним `agent_name: "animatrona-ipfs-player-dev"`),
-затем сохранить выданный `registration_token` в память (`agent_fixed_names_tokens.md`), как у
-всех остальных приложений. Не путать с `animatrona-dev` (десктоп с транскодированием/IPFS) и
+Токен — в памяти `agent_fixed_names_tokens.md` (таблица «Приложение → agent_name → registration_token»),
+регистрация штатная, с `agent_name` + `registration_token`. Не путать с `animatrona-dev` (десктоп с транскодированием/IPFS) и
 `animatrona-folder-player-dev` (плеер локальных папок, без IPFS) — три разные identity.
 
 ## Учёт времени

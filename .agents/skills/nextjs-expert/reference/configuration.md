@@ -109,21 +109,20 @@ export default composePlugins(...plugins)(withAnalyzer(nextConfig))
 
 ```typescript
 // proxy.ts
-import { NextRequest } from 'next/server'
-import type { NextFetchEvent } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
-export function proxy(request: NextRequest, event: NextFetchEvent) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // Добавить pathname в headers
   const requestHeaders = new Headers(request.headers)
   requestHeaders.set('x-pathname', pathname)
 
-  return {
+  return NextResponse.next({
     request: {
       headers: requestHeaders,
     },
-  }
+  })
 }
 
 export const config = {
@@ -377,24 +376,24 @@ const nextConfig = {
 
 ```json
 {
-  "name": "premium-rosstil",
+  "name": "<app>",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "apps/premium-rosstil/src",
+  "sourceRoot": "apps/<app>/src",
   "projectType": "application",
-  "tags": ["type:app", "scope:premium"],
+  "tags": ["type:app", "scope:<app>"],
   "targets": {
     "zenstack:generate": {
       "executor": "nx:run-commands",
       "options": {
         "command": "zenstack generate",
-        "cwd": "apps/premium-rosstil"
+        "cwd": "apps/<app>"
       }
     },
     "db:push": {
       "executor": "nx:run-commands",
       "options": {
         "command": "prisma db push",
-        "cwd": "apps/premium-rosstil"
+        "cwd": "apps/<app>"
       },
       "dependsOn": ["zenstack:generate"]
     }

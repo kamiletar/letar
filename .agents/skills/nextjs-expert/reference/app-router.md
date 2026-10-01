@@ -299,8 +299,9 @@ export default function NotFound() {
 // Программный вызов
 import { notFound } from 'next/navigation'
 
-export default async function Page({ params }) {
-  const product = await getProduct(params.id)
+export default async function Page({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const product = await getProduct(id)
   if (!product) { notFound() }
   return <ProductView product={product} />
 }
@@ -364,9 +365,7 @@ export default async function Page() {
 
 ---
 
-## Проекты Letar
-
-### premium-rosstil
+## Типовая структура приложения Letar
 
 ```
 app/
@@ -377,7 +376,7 @@ app/
 │   ├── admin/
 │   │   ├── layout.tsx            # Admin sidebar
 │   │   ├── _actions/             # Server Actions
-│   │   └── categories/
+│   │   └── items/
 │   │       ├── page.tsx
 │   │       ├── new/page.tsx
 │   │       └── [id]/edit/page.tsx
@@ -386,20 +385,7 @@ app/
 │       ├── loading.tsx
 │       └── [id]/page.tsx
 └── api/
-    └── auth/[...nextauth]/route.ts
-```
-
-### imot
-
-```
-app/
-├── layout.tsx
-├── [locale]/
-│   ├── layout.tsx
-│   ├── (auth)/
-│   ├── therapist/                # Кабинет терапевта
-│   └── client/                   # Кабинет клиента
-└── api/
+    └── auth/[...all]/route.ts
 ```
 
 ---

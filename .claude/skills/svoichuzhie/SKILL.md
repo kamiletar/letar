@@ -1,10 +1,10 @@
 ---
 name: svoichuzhie
-description: Воркфлоу разработки сайта группы «Свои Чужие» — билеты, фан-клуб, мерч, учёт времени по клиенту
+description: Воркфлоу разработки svoichuzhie — регистрация в Agent Mail, 152-ФЗ, учёт времени по клиенту
 disable-model-invocation: true
 ---
 
-# Свои Чужие - Воркфлоу разработки
+# svoichuzhie - Воркфлоу разработки
 
 ## Инициализация
 
@@ -35,8 +35,9 @@ disable-model-invocation: true
 ```bash
 cd apps/svoichuzhie && git checkout main && git pull origin main
 # ... правки ...
-git add . && git commit -m "feat(svoichuzhie): описание" && git push origin main
-cd ../.. && git add apps/svoichuzhie && git commit -m "chore: bump svoichuzhie submodule"
+git add <файлы> && git commit -m "feat(svoichuzhie): описание" -- <файлы>
+git push origin main   # только с одобрения пользователя; сначала submodule, потом letar
+cd ../.. && git commit -m "chore: bump svoichuzhie submodule" -- apps/svoichuzhie
 ```
 
 ⚠️ Без `git checkout main` правки уйдут в detached HEAD и потеряются. Подробности:
@@ -44,8 +45,7 @@ cd ../.. && git add apps/svoichuzhie && git commit -m "chore: bump svoichuzhie s
 
 ## 152-ФЗ
 
-⚠️ Приложение собирает персональные данные (фан-клуб, покупка билетов через QTickets, заказы
-мерча через Альфа-Банк/CDEK). **Любая форма, собирающая персональные данные, ОБЯЗАНА:**
+⚠️ Приложение собирает персональные данные (подробности — `apps/svoichuzhie/AGENTS.md`). **Любая форма, собирающая персональные данные, ОБЯЗАНА:**
 
 - Записывать `ConsentLog` через `recordConsent()` из `@letar/consent`
 - Содержать **не предотмеченный** чекбокс согласия со ссылкой на `/privacy`
@@ -59,7 +59,7 @@ cd ../.. && git add apps/svoichuzhie && git commit -m "chore: bump svoichuzhie s
 
 ## Учёт времени
 
-Проект ведётся для клиента студии по **почасовой оплате**. `studio-time-mcp` работает — таймер
+Проект ведётся для клиента студии по **почасовой оплате**. Инструменты `time_*` (сервер `letar`) — таймер
 стартуется **сразу при начале работы**:
 
 ```
@@ -86,4 +86,4 @@ time_start({ app: "svoichuzhie", description: "<что делаешь, язык�
 **Submodule:** kamiletar/letar-private-svoichuzhie
 **БД:** PostgreSQL + ZenStack
 **Auth:** Better Auth (email/password + email verification)
-**Описание:** Официальный сайт группы «Свои Чужие» — билеты (QTickets), фан-клуб, мерч (Альфа-Банк + CDEK), медиа
+**Описание:** см. `apps/svoichuzhie/AGENTS.md`

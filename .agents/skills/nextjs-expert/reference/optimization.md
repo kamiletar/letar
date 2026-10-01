@@ -332,7 +332,7 @@ import debounce from 'lodash/debounce'
 
 ```bash
 # Анализ bundle
-ANALYZE=true nx build premium-rosstil
+ANALYZE=true nx build <app>
 ```
 
 ```javascript

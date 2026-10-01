@@ -46,7 +46,7 @@ export async function createProductAction(data: unknown) {
 import { createProductAction } from '@/app/_actions/product.action'
 import { toaster } from '@/app/_components/ui/toaster'
 import { ProductCreateFormSchema } from '@/generated/form-schemas'
-import { Form } from '@letar/forms'
+import { MyAppForm as Form } from '@/my-app-form' // createForm-инстанс приложения (образец apps/archetest)
 import { useRouter } from 'next/navigation'
 
 export default function CreateProductPage() {
@@ -105,16 +105,19 @@ export async function updateProductAction(id: string, data: unknown) {
 ### Клиентский компонент
 
 ```tsx
-export default function EditProductPage({ params }: { params: { id: string } }) {
+import { use } from 'react'
+
+export default function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params) // Next 16: params — Promise, в клиентском компоненте читается через use()
   const { data: product, isLoading } = useFindUniqueProduct({
-    where: { id: params.id },
+    where: { id },
   })
 
   if (isLoading) { return <Spinner /> }
   if (!product) { return <NotFound /> }
 
   const handleSubmit = async (data: ProductUpdateForm) => {
-    const result = await updateProductAction(params.id, data)
+    const result = await updateProductAction(id, data)
     // ...
   }
 

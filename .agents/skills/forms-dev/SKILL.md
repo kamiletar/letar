@@ -154,7 +154,7 @@ kebab-case имя ловило баг сервера agent-mail в `send_message
 **Библиотека:** libs/forms
 **Правила:** `.claude/rules/forms.md`
 
-25 демо-страниц, 21 E2E тест, все фазы 1-15 завершены.
+Демо-страницы — `apps/form-develop-app/src/app`, E2E — `apps/form-develop-app-e2e`.
 
 ### form-docs (документация)
 

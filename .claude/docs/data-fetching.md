@@ -85,25 +85,32 @@ export function LikeButton({ postId, initialLikes }: { postId: string; initialLi
 
 ---
 
-## TanStack Query Хуки (ZenStack Generated)
+## TanStack Query Хуки (ZenStack v3)
 
-### Генерируемые хуки
+### Хуки через `useClientQueries(schema)`
 
-ZenStack автоматически генерирует TanStack Query хуки в `@/generated/hooks`:
+В ZenStack v3 `@zenstackhq/tanstack-query` — **runtime-библиотека, а не кодогенерация**: каталога
+`@/generated/hooks` нет. Хуки берутся из клиента по модели:
 
 ```typescript
-import {
-  useCreateManyProduct,
-  // Mutation хуки
-  useCreateProduct,
-  useDeleteProduct,
-  // Query хуки
-  useFindManyProduct,
-  useFindUniqueProduct,
-  useInfiniteFindManyProduct,
-  useUpdateProduct,
-} from '@/generated/hooks'
+import { schema } from '@/generated/schema' // у приложений на общем пакете схемы — его экспорт `/schema`
+import { useClientQueries } from '@zenstackhq/tanstack-query/react'
+
+const client = useClientQueries(schema)
+
+// Query хуки
+client.product.useFindMany(args, options)
+client.product.useInfiniteFindMany(args, options)
+client.product.useCount(args, options)
+// Mutation хуки
+client.product.useCreate(options)
+client.product.useUpdate(options)
+client.product.useDelete(options)
 ```
+
+В приложениях обычно лежат тонкие обёртки `useFindManyProduct = (args, options) => client.product.useFindMany(args, options)`
+в `src/lib/hooks.ts` (образец — `apps/driving-school/src/lib/hooks.ts`; клиент кэшируется через
+`useState`, иначе `useClientQueries` на каждом рендере создаёт новые Zod-объекты).
 
 ### Когда использовать TanStack Query
 
@@ -405,8 +412,8 @@ create/update, где частичный успех недопустим.
 ```typescript
 'use client'
 
-import { useClientQueries } from '@/generated/hooks'
 import { schema } from '@/generated/schema'
+import { useClientQueries } from '@zenstackhq/tanstack-query/react'
 
 export function BookingForm() {
   const client = useClientQueries(schema)

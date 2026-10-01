@@ -29,14 +29,12 @@ description: |
 
 ## Проекты Letar (Next.js 16)
 
-| App             | Порт | Особенности                     |
-| --------------- | ---- | ------------------------------- |
-| premium-rosstil | 3000 | i18n (next-intl), ZenStack, PWA |
-| imot            | 3001 | Better Auth, ZenStack           |
-| dashboard       | 3002 | SSE, React Query                |
-| driving-school  | 3003 | Базовый App Router              |
-| mandala         | 3004 | SSG, OG images                  |
-| kami            | 3005 | Keystatic CMS, i18n             |
+| App            | Порт | Особенности         |
+| -------------- | ---- | ------------------- |
+| dashboard      | 3002 | SSE, React Query    |
+| driving-school | 3003 | Базовый App Router  |
+| mandala        | 3004 | SSG, OG images      |
+| kami           | 3005 | Keystatic CMS, i18n |
 
 ---
 
@@ -109,8 +107,9 @@ export const metadata: Metadata = {
 }
 
 // Dynamic
-export async function generateMetadata({ params }): Promise<Metadata> {
-  const product = await getProduct(params.id)
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params
+  const product = await getProduct(id)
   return { title: product.name }
 }
 ```
@@ -154,7 +153,7 @@ export async function POST(request: NextRequest) {
 
 ```
 app/
-├── [locale]/           # i18n (premium-rosstil, kami)
+├── [locale]/           # i18n (kami)
 │   ├── layout.tsx      # Провайдеры
 │   ├── (auth)/         # Route group
 │   │   └── sign-in/
@@ -214,14 +213,13 @@ export default async function Page() {
 
 ```bash
 # Разработка
-nx dev premium-rosstil          # Порт 3000
-nx dev imot                      # Порт 3001
+nx dev <app>                     # Порт — в apps/<app>/.env (PORT=)
 
 # Сборка
-nx build premium-rosstil
+nx build <app>
 
 # Очистка кэша
-rm -rf apps/premium-rosstil/.next
+rm -rf apps/<app>/.next
 nx reset
 ```
 

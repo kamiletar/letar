@@ -213,9 +213,10 @@ import { revalidateTag } from 'next/cache'
 export async function updateProduct(id: string, data: ProductData) {
   await db.product.update({ where: { id }, data })
 
-  // Инвалидировать по тегу
-  revalidateTag('products')
-  revalidateTag(`product-${id}`)
+  // Инвалидировать по тегу. Next 16: второй аргумент (профиль cacheLife или { expire }) обязателен;
+  // для немедленного сброса в Server Action — updateTag(tag)
+  revalidateTag('products', 'max')
+  revalidateTag(`product-${id}`, 'max')
 }
 ```
 
@@ -234,7 +235,7 @@ export async function POST(request: NextRequest) {
   }
 
   if (tag) {
-    revalidateTag(tag)
+    revalidateTag(tag, 'max')
   }
 
   if (path) {
@@ -446,7 +447,7 @@ export async function getProduct(id) {
 // Инвалидация каскадом
 export async function updateCategory(id, data) {
   await db.category.update({ where: { id }, data })
-  revalidateTag('products') // Инвалидирует все продукты
+  revalidateTag('products', 'max') // Инвалидирует все продукты
 }
 ```
 
@@ -458,7 +459,7 @@ revalidatePath('/', 'layout')
 
 // ✅ Точечная инвалидация
 revalidatePath('/products')
-revalidateTag(`product-${id}`)
+revalidateTag(`product-${id}`, 'max')
 ```
 
 ---

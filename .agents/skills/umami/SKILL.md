@@ -40,6 +40,6 @@ disable-model-invocation: true
 
 **Приложение:** umami
 **Порт (внутри контейнера):** 3000 (Traefik форвардит `umami-app:3000`)
-**Сервер:** s2 (185.28.85.195) — s1 выведен из эксплуатации 2026-06-20
+**Сервер:** s2 (185.28.85.195) — production; s1 сейчас staging/сборочный контур (с 2026-09-19, [deployment.md](/.claude/docs/deployment.md)), старый s1 выведен 2026-06-20
 **Описание:** Self-hosted аналитика для всех проектов Letar
 **Особенности:** Docker-based (вендорский образ, без своего dev-порта), stats.letar.best

@@ -19,6 +19,7 @@ macro_start_session(
   model: "claude-sonnet-5",
   task_description: "Animatrona Coordinator — координация между animatrona приложениями",
   agent_name: "animatrona-coordinator-dev",
+  registration_token: "<токен из agent_fixed_names_tokens.md>",
   file_reservation_paths: ["libs/animatrona-types/**"],
   file_reservation_reason: "animatrona shared types ownership"
 )
@@ -32,7 +33,8 @@ macro_start_session(
 set_contact_policy(
   project_key: "c-web-letar",
   agent_name: "animatrona-coordinator-dev",
-  policy: "open"
+  policy: "open",
+  registration_token: "<токен из agent_fixed_names_tokens.md>"
 )
 ```
 
@@ -253,7 +255,7 @@ Body:
 Ты — владелец `libs/animatrona-types/`. Если изменение требует обновления shared типов:
 
 1. **Ты сам обновляешь** `libs/animatrona-types/src/` (единственное исключение из правила "не пишет код")
-2. Коммитишь: `git add libs/animatrona-types/ && git commit -m "feat(animatrona-types): добавил поле duration в PublishedAnime"`
+2. Коммитишь: `git add <файлы> && git commit -m "feat(animatrona-types): добавил поле duration в PublishedAnime" -- <файлы>` (перечисляй файлы, не каталог; после коммита `git show --stat HEAD`)
 3. Затем раздаёшь задачи приложениям на обновление использования
 
 ## Обработка ситуаций

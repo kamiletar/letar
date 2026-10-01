@@ -18,12 +18,11 @@ description: Генератор Playwright E2E тестов. USE PROACTIVELY п�
 ```
 apps/<app>-e2e/
 ├── src/
-│   ├── fixtures/           # Фикстуры и helpers
-│   ├── pages/              # Page Objects
-│   └── tests/
-│       ├── auth.spec.ts
-│       ├── cart.spec.ts
-│       └── checkout.spec.ts
+│   ├── auth.spec.ts        # *.spec.ts лежат прямо в src/ (плоско)
+│   ├── cart.spec.ts
+│   ├── checkout.spec.ts
+│   ├── fixtures/           # Фикстуры (по необходимости)
+│   └── helpers/            # Helpers / Page Objects (по необходимости)
 ├── playwright.config.ts
 └── project.json
 ```

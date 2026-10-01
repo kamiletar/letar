@@ -28,7 +28,8 @@ description: |
 
 ```tsx
 import { ProductCreateFormSchema } from '@/generated/form-schemas'
-import { Form } from '@letar/forms'
+import { MyAppForm as Form } from '@/my-app-form'
+// `MyAppForm` — createForm-инстанс приложения (`src/<app>-form/`, образец apps/archetest); ниже он записан как `Form`
 <Form schema={ProductCreateFormSchema} initialValue={data} onSubmit={save}>
   <Form.AutoFields />
   <Form.Button.Submit>Сохранить</Form.Button.Submit>

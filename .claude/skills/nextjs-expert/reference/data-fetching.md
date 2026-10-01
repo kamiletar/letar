@@ -106,24 +106,29 @@ import { getEnhancedPrisma } from '@/lib/db'
 import { revalidatePath } from 'next/cache'
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
+import { z } from 'zod/v4'
 
-export async function createCategory(formData: FormData) {
+const CategorySchema = z.object({
+  name: z.string().min(2, 'Название должно быть минимум 2 символа'),
+}).strip() // .strip() — лишние поля отбрасываются (security.md)
+
+export async function createCategory(input: unknown) {
   // 1. Проверка авторизации (Better Auth)
   const session = await auth.api.getSession({ headers: await headers() })
   if (session?.user?.role !== 'ADMIN') {
     throw new Error('Unauthorized')
   }
 
-  // 2. Валидация данных
-  const name = formData.get('name') as string
-  if (!name || name.length < 2) {
-    throw new Error('Название должно быть минимум 2 символа')
+  // 2. Валидация данных (Zod v4)
+  const parsed = CategorySchema.safeParse(input)
+  if (!parsed.success) {
+    return { error: parsed.error.flatten() }
   }
 
   // 3. Мутация БД
   const db = getEnhancedPrisma(session.user)
   await db.category.create({
-    data: { name },
+    data: parsed.data,
   })
 
   // 4. Инвалидация кэша
@@ -136,48 +141,23 @@ export async function createCategory(formData: FormData) {
 
 ### Использование в форме
 
-```typescript
-// app/admin/categories/new/page.tsx
-import { createCategory } from '../_actions/create'
+Формы — через `createForm`-инстанс приложения (`@letar/forms`), а не нативный `<form action>`
+([forms.md](/.claude/docs/forms.md)): валидация и сабмит идут на клиенте, в action уходит объект.
 
-export default function NewCategoryPage() {
-  return (
-    <form action={createCategory}>
-      <Input name="name" placeholder="Название категории" />
-      <Button type="submit">Создать</Button>
-    </form>
-  )
-}
-```
-
-### С @letar/forms
-
-```typescript
+```tsx
 // app/admin/categories/new/page.tsx
 'use client'
 
 import { CategoryFormSchema } from '@/generated/form-schemas/Category.form'
-import { ChakraFormField, FormGroup, FormRoot, useAppForm } from '@letar/forms'
+import { MyAppForm } from '@/my-app-form' // createForm-инстанс приложения (образец apps/archetest)
 import { createCategory } from '../_actions/create'
 
 export function CategoryForm() {
-  const form = useAppForm({
-    schema: CategoryFormSchema,
-    defaultValues: { name: '' },
-  })
-
   return (
-    <FormRoot form={form} action={createCategory}>
-      <FormGroup>
-        <ChakraFormField
-          form={form}
-          name="name"
-          label="Название"
-          placeholder="Введите название"
-        />
-      </FormGroup>
-      <Button type="submit">Создать</Button>
-    </FormRoot>
+    <MyAppForm schema={CategoryFormSchema} initialValue={{ name: '' }} onSubmit={createCategory}>
+      <MyAppForm.Field.String name="name" label="Название" />
+      <MyAppForm.Button.Submit>Создать</MyAppForm.Button.Submit>
+    </MyAppForm>
   )
 }
 ```

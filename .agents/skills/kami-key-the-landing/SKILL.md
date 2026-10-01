@@ -41,5 +41,5 @@ disable-model-invocation: true
 
 **Приложение:** kami-key-the-landing
 **Порт:** 3011
-**Сервер:** s2 (185.28.85.195) — s1 выведен из эксплуатации 2026-06-20
+**Сервер:** s2 (185.28.85.195) — production; s1 сейчас staging/сборочный контур (с 2026-09-19, [deployment.md](/.claude/docs/deployment.md)), старый s1 выведен 2026-06-20
 **Описание:** Лендинг утилиты Kami Key The (типографские символы через AltGr)

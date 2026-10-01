@@ -41,7 +41,7 @@ model Order {
   userId      String
   status      OrderStatus @default(PENDING)
   items       OrderItem[]
-  total       Int         // в копейках
+  total       BigInt      // в копейках (BigInt: Int4 переполняется на ≈21,47 млн ₽)
   payment     Payment?
   createdAt   DateTime    @default(now())
 }
@@ -62,7 +62,7 @@ enum OrderStatus {
 
 ## Критичные правила
 
-- **MUST** хранить цены в копейках (Int, не Float)
+- **MUST** хранить цены в копейках целым числом (не Float); суммы заказов, платежей и итоги — `BigInt`, цену за единицу — `Int`, см. [zenstack-int4-overflow-money-fields](/.claude/docs/zenstack-int4-overflow-money-fields.md)
 - **MUST** валидировать наличие товара перед оформлением
 - **SHOULD** использовать транзакции для критичных операций
 - **NEVER** хранить данные карт в БД

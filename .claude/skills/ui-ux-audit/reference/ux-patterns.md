@@ -38,7 +38,9 @@ function NavLink({ href, isActive, children }) {
 // ✅ Drawer для мобильной навигации
 <Drawer.Root open={isOpen} onOpenChange={setIsOpen}>
   <Drawer.Trigger asChild>
-    <IconButton display={{ base: 'flex', md: 'none' }} aria-label="Открыть меню" icon={<HamburgerIcon />} />
+    <IconButton display={{ base: 'flex', md: 'none' }} aria-label="Открыть меню">
+      <LuMenu />
+    </IconButton>
   </Drawer.Trigger>
   <Drawer.Backdrop />
   <Drawer.Positioner>
@@ -172,13 +174,13 @@ toaster.error({
 ### Декларативный API
 
 ```tsx
-import { Form } from '@letar/forms'
+import { MyAppForm as Form } from '@/my-app-form' // createForm-инстанс приложения (образец apps/archetest)
 import { z } from 'zod/v4'
 
 // ✅ UI метаданные в схеме
 const Schema = z.object({
   title: z.string().min(2).meta({ ui: { title: 'Название', placeholder: 'Введите...' } }),
-  email: z.string().email().meta({ ui: { title: 'Email' } }),
+  email: z.email().meta({ ui: { title: 'Email' } }),
   rating: z.number().min(0).max(10).meta({ ui: { title: 'Рейтинг' } }),
 }).strip()  // ⚠️ Всегда .strip() для Zod v4
 

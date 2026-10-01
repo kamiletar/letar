@@ -1,10 +1,10 @@
 ---
 name: aboi
-description: Воркфлоу разработки НейроАбоИ (aboi) — интернет-магазин обоев с аффирмациями
+description: Воркфлоу разработки aboi — регистрация в Agent Mail, 152-ФЗ, тестирование, деплой
 disable-model-invocation: true
 ---
 
-# НейроАбоИ (aboi) - Воркфлоу разработки
+# aboi - Воркфлоу разработки
 
 ## Инициализация
 
@@ -13,10 +13,9 @@ disable-model-invocation: true
 3. Прочитай `.claude/rules/security.md` — валидация, ZenStack policies, secrets
 4. Прочитай `apps/aboi/PLAN.md` — полный план разработки и текущая фаза
 5. Прочитай `apps/aboi/CHANGELOG.md` — что уже реализовано
-6. Прочитай артефакты концепции (если работаешь по UX/копирайту):
+6. Прочитай артефакты концепции (если работаешь по UX/копирайту; `.claude/artifacts/` вне git — читай, только если файлы есть локально):
    - `.claude/artifacts/aboi-requirements.md`
    - `.claude/artifacts/aboi-landing-concept.md`
-   - `.claude/artifacts/aboi-questions-for-vitaliy.md` (с ответами Виталия)
    - `.claude/artifacts/aboi-plan-research.md` (best practices)
 
 ## Регистрация в Agent Mail
@@ -74,12 +73,11 @@ disable-model-invocation: true
 ## Проект
 
 **Приложение:** aboi
-**Бренд:** НейроАбоИ
 **Порт:** 3018
-**Домен (production):** <домен aboi> — после регистрации Виталием и подачи в РКН (см. PLAN.md §5, E10.b)
-**Сервер:** s2 (185.28.85.195) — s1 выведен из эксплуатации 2026-06-20
+**Домен (production):** <домен aboi> (условия включения — `apps/aboi/AGENTS.md`)
+**Сервер:** s2 (185.28.85.195) — production; s1 сейчас staging/сборочный контур (с 2026-09-19, [deployment.md](/.claude/docs/deployment.md)), старый s1 выведен 2026-06-20
 **Заказчик:** владелец приложения (реквизиты — в приватных доках)
-**Описание:** B2C интернет-магазин обоев с зашитыми аффирмациями. Печать под заказ, флизелин 1.07 м, 1500 ₽/пог.м.
+**Описание:** см. `apps/aboi/AGENTS.md`
 
 ## Стек
 

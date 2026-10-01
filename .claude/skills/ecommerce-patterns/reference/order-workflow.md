@@ -22,10 +22,10 @@ model Order {
   shipping      Shipping?
 
   // Суммы (в копейках)
-  subtotal      Int           // Сумма товаров
+  subtotal      BigInt        // Сумма товаров (копейки)
   discount      Int           @default(0) // Скидка
   shippingCost  Int           @default(0) // Доставка
-  total         Int           // Итого
+  total         BigInt        // Итого (копейки)
 
   // Контактные данные (снэпшот на момент заказа)
   email         String
@@ -380,7 +380,7 @@ export async function sendOrderStatusNotification(order: Order) {
   if (!config) { return }
 
   await resend.emails.send({
-    from: 'Premium Rosstil <orders@<домен premium-rosstil>>',
+    from: 'Shop <orders@example.com>',
     to: order.email,
     subject: config.subject,
     react: OrderEmailTemplate({ order, template: config.template }),

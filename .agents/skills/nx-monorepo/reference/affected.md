@@ -101,7 +101,7 @@ jobs:
         run: bun install
 
       - name: Run affected tests
-        run: npx nx affected -t test --base=origin/main --head=${{ github.sha }}
+        run: bunx nx affected -t test --base=origin/main --head=${{ github.sha }}
 ```
 
 ### GitLab CI
@@ -109,7 +109,7 @@ jobs:
 ```yaml
 test:
   script:
-    - npx nx affected -t test --base=origin/main --head=$CI_COMMIT_SHA
+    - bunx nx affected -t test --base=origin/main --head=$CI_COMMIT_SHA
 ```
 
 ---

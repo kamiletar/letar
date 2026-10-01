@@ -115,7 +115,7 @@ inputs → hash → cache lookup → hit? → restore outputs
 
 ```bash
 # Подключить Nx Cloud
-npx nx connect
+nx connect
 
 # Проверить статус
 nx cloud

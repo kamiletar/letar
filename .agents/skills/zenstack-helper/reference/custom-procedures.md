@@ -158,10 +158,12 @@ curl -X POST /api/$procs/signUp \
 ### Через TanStack Query хуки
 
 ```typescript
-import { useInitiateTransfer, useSignUp } from '@/generated/hooks'
+import { schema } from '@/generated/schema'
+import { useClientQueries } from '@zenstackhq/tanstack-query/react'
 
-// Mutation хук
-const { mutate: signUp, isPending } = useSignUp()
+// Mutation хук процедуры (client.$procs.<имя>)
+const client = useClientQueries(schema)
+const { mutate: signUp, isPending } = client.$procs.signUp.useMutation()
 
 const handleSignUp = () => {
   signUp(

@@ -154,7 +154,7 @@ but found 'import'`. В примере ниже порядок уже верны
 взаимных ссылок, ZenStack 3.9.2 — см.
 [zenstack-multifile-schema-circular-imports](/.claude/docs/zenstack-multifile-schema-circular-imports.md)).
 Раньше был баг [zenstackhq/zenstack#1257](https://github.com/zenstackhq/zenstack/issues/1257)
-(`auth()` не резолвился при взаимном импорте), закрыт в v2.0.0 — наш пин 3.5 уже выше фикса.
+(`auth()` не резолвился при взаимном импорте), закрыт в v2.0.0 — наша версия (3.9.x) уже выше фикса.
 
 ```
 apps/my-app/

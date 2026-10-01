@@ -25,21 +25,23 @@ TanStack Query для управления серверным состояние
 
 ## Важно
 
-**В проекте хуки генерируются через ZenStack!**
+**В ZenStack v3 хуки — не кодогенерация, а runtime:** `useClientQueries(schema)` из
+`@zenstackhq/tanstack-query/react` (каталога `@/generated/hooks` нет).
 
-Для CRUD операций используй сгенерированные хуки:
+Для CRUD операций бери хуки у клиента по модели:
 
-- `useFindMany*`, `useFindUnique*` — запросы
-- `useCreate*`, `useUpdate*`, `useDelete*` — мутации
-- `useInfiniteFindMany*` — бесконечный скролл
+- `client.order.useFindMany(args, options)`, `useFindUnique` — запросы
+- `client.order.useCreate()`, `useUpdate()`, `useDelete()` — мутации
+- `client.order.useInfiniteFindMany(args, options)` — бесконечный скролл
 
-Импорт: `import { useFindManyOrder } from '@/generated/hooks'`
+В приложениях клиент обычно обёрнут в `src/lib/hooks.ts` (образец — `apps/driving-school/src/lib/hooks.ts`):
+`useFindManyOrder(args, options)`.
 
 См. `zenstack-helper/reference/tanstack-query.md` для полной документации ZenStack хуков.
 
 ## Этот скилл для:
 
-1. **Кастомизации** сгенерированных хуков (staleTime, enabled, select)
+1. **Кастомизации** ZenStack-хуков (staleTime, enabled, select)
 2. **Ручных запросов** когда ZenStack не подходит
 3. **Продвинутых паттернов** (prefetch, hydration, persist)
 4. **Управления кэшем** (invalidation, optimistic updates)
@@ -90,7 +92,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
 ### Кастомизация ZenStack хуков
 
 ```typescript
-import { useFindManyOrder } from '@/generated/hooks'
+import { useFindManyOrder } from '@/lib/hooks' // обёртка над client.order.useFindMany
 
 const { data, isLoading } = useFindManyOrder(
   { where: { status: 'PENDING' } },
@@ -106,12 +108,14 @@ const { data, isLoading } = useFindManyOrder(
 ### Инвалидация после мутации
 
 ```typescript
-import { useCreateOrder } from '@/generated/hooks'
+import { schema } from '@/generated/schema'
 import { useQueryClient } from '@tanstack/react-query'
+import { useClientQueries } from '@zenstackhq/tanstack-query/react'
 
 function CreateOrderButton() {
   const queryClient = useQueryClient()
-  const createOrder = useCreateOrder({
+  const client = useClientQueries(schema)
+  const createOrder = client.order.useCreate({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['Order'] })
     },

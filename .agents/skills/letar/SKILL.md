@@ -68,12 +68,13 @@ nx affected -t lint typecheck:tsgo test
 5. Закоммить логически связанные изменения (см. `.claude/rules/git.md`).
 
 ⚠️ В монорепо одновременно работают несколько агентов — добавляй **только свои файлы**
-(`git add apps/<app>/` или `git add libs/<lib>/`), без `git add .` и без `git reset`.
+(перечисляй конкретные файлы: `git add <файлы>` и `git commit -- <файлы>`, не каталоги), без `git add .` и без `git reset`.
 
 ## Приватные submodules
 
-Приватные приложения (aboi, driving-school + db + e2e, premium-rosstil + e2e, imot + e2e, dsperevod) —
-git submodules. Изменения: коммит/пуш **внутри submodule** → `git add <path> && git commit` в `letar`
+Приватные приложения и их e2e/db-пакеты — git submodules (актуальный список:
+`git config -f .gitmodules --get-regexp path`).
+Изменения: коммит/пуш **внутри submodule** → `git add <path> && git commit` в `letar`
 для фиксации SHA. Подробнее: `.claude/rules/git.md`, `.claude/docs/repo-structure.md`.
 
 ## Релиз npm-пакетов
@@ -87,7 +88,7 @@ CI по тегу (`forms-v*`, `form-mcp-v*`, `zenstack-form-plugin-v*`) публ
 
 ## Репозиторий
 
-**Монорепо:** letar (публичный) + 10 приватных приложений/lib через git submodules
+**Монорепо:** letar (публичный) + приватные приложения/lib через git submodules (список — `.gitmodules`)
 **Стек:** Node 24 · Nx 23 · Next.js 16 · React 19 · Chakra UI v3 · PostgreSQL + Prisma + ZenStack · @letar/forms + Zod v4
-**Команды приложений:** `/kami`, `/driving-school`, `/premium-rosstil`, `/imot`, `/aboi`, … (см. `.claude/commands/`)
+**Воркфлоу приложений:** скилы `.agents/skills/<app>/` (`/kami`, `/driving-school`, `/aboi`, …)
 **Сквозные команды:** `/workflow:*`, `/infra:*`, `/audit:*`, `/create:*`

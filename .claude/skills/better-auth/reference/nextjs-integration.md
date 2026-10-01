@@ -197,15 +197,15 @@ export async function proxy(request: NextRequest) {
 
 ---
 
-## Cookie-only проверка (Edge Runtime)
+## Cookie-only проверка (без обращения к БД)
 
-Если нужен Edge Runtime (без доступа к БД), используй только cookie:
+Дешёвая проверка в `proxy.ts` (Next 16: `middleware.ts` заменён на `proxy.ts`, Edge-рантайм не используем) — только по cookie, без запроса в БД:
 
 ```typescript
-// src/middleware.ts (Edge)
+// src/proxy.ts
 import { NextRequest, NextResponse } from 'next/server'
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const sessionCookie = request.cookies.get('better-auth.session_token')
 
   if (!sessionCookie && request.nextUrl.pathname.startsWith('/dashboard')) {

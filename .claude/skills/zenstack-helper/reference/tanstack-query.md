@@ -1,6 +1,14 @@
 # TanStack Query интеграция
 
-ZenStack автоматически генерирует типизированные хуки для TanStack Query.
+ZenStack v3 даёт типизированные хуки для TanStack Query через **runtime**-пакет
+`@zenstackhq/tanstack-query` (не кодогенерацию): `useClientQueries(schema)` из
+`@zenstackhq/tanstack-query/react` возвращает клиент, у которого хуки лежат по моделям —
+`client.order.useFindMany(...)`, `client.order.useCreate()`; кастомные процедуры —
+`client.$procs.<name>.useMutation()` / `.useQuery()`. Каталога `@/generated/hooks` нет.
+
+В приложениях клиент обёрнут в `src/lib/hooks.ts` (образец — `apps/driving-school/src/lib/hooks.ts`,
+клиент кэшируется через `useState`). Примеры ниже используют имена таких обёрток
+(`useFindManyOrder` = `client.order.useFindMany`), импорт — `@/lib/hooks`.
 
 ## Установка
 
@@ -37,12 +45,12 @@ export function Providers({ children }: { children: React.ReactNode }) {
 }
 ```
 
-## Генерируемые хуки
+## Хуки по моделям
 
 ### useFindMany — список записей
 
 ```typescript
-import { useFindManyOrder } from '@/generated/hooks'
+import { useFindManyOrder } from '@/lib/hooks'
 
 function OrderList() {
   const { data, isLoading, error } = useFindManyOrder({
@@ -65,7 +73,7 @@ function OrderList() {
 ### useFindUnique — одна запись
 
 ```typescript
-import { useFindUniqueOrder } from '@/generated/hooks'
+import { useFindUniqueOrder } from '@/lib/hooks'
 
 function OrderDetails({ id }: { id: string }) {
   const { data: order } = useFindUniqueOrder({
@@ -80,7 +88,7 @@ function OrderDetails({ id }: { id: string }) {
 ### useInfiniteQuery — бесконечный скролл
 
 ```typescript
-import { useInfiniteFindManyProduct } from '@/generated/hooks'
+import { useInfiniteFindManyProduct } from '@/lib/hooks'
 
 function ProductList() {
   const {
@@ -116,7 +124,7 @@ function ProductList() {
 ### useCount — количество записей
 
 ```typescript
-import { useCountOrder } from '@/generated/hooks'
+import { useCountOrder } from '@/lib/hooks'
 
 function OrderStats() {
   const { data: pendingCount } = useCountOrder({
@@ -132,7 +140,7 @@ function OrderStats() {
 ### useCreateMutation
 
 ```typescript
-import { useCreateOrder } from '@/generated/hooks'
+import { useCreateOrder } from '@/lib/hooks'
 
 function CreateOrderForm() {
   const createOrder = useCreateOrder()
@@ -158,7 +166,7 @@ function CreateOrderForm() {
 ### useUpdateMutation
 
 ```typescript
-import { useUpdateOrder } from '@/generated/hooks'
+import { useUpdateOrder } from '@/lib/hooks'
 
 function EditOrder({ orderId }: { orderId: string }) {
   const updateOrder = useUpdateOrder()
@@ -181,7 +189,7 @@ function EditOrder({ orderId }: { orderId: string }) {
 ### useDeleteMutation
 
 ```typescript
-import { useDeleteOrder } from '@/generated/hooks'
+import { useDeleteOrder } from '@/lib/hooks'
 
 function DeleteButton({ orderId }: { orderId: string }) {
   const deleteOrder = useDeleteOrder()
@@ -200,7 +208,7 @@ function DeleteButton({ orderId }: { orderId: string }) {
 ## Optimistic Updates
 
 ```typescript
-import { useFindManyOrder, useUpdateOrder } from '@/generated/hooks'
+import { useFindManyOrder, useUpdateOrder } from '@/lib/hooks'
 import { useQueryClient } from '@tanstack/react-query'
 
 function OrderStatus({ order }: { order: Order }) {
@@ -245,7 +253,7 @@ const createOrder = useCreateOrder({
 ## Кастомизация запросов
 
 ```typescript
-import { useFindManyOrder } from '@/generated/hooks'
+import { useFindManyOrder } from '@/lib/hooks'
 
 const { data } = useFindManyOrder(
   { where: { status: 'PENDING' } },
@@ -261,15 +269,9 @@ const { data } = useFindManyOrder(
 
 ## Prefetching
 
-```typescript
-import { prefetchFindManyOrder } from '@/generated/hooks'
-
-// В Server Component или loader
-await prefetchFindManyOrder(queryClient, {
-  where: { status: 'PENDING' },
-  take: 10,
-})
-```
+⚠️ Готовых `prefetch*`-хелперов в ZenStack v3 нет. SSR-гидратация — общим механизмом TanStack Query
+(`dehydrate`/`HydrationBoundary`, скил `tanstack-query/reference/hydration.md`) со своим `queryKey`
+и `queryFn`, вызывающим серверный enhanced-клиент.
 
 ---
 

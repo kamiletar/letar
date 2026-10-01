@@ -11,7 +11,7 @@
 <Image src={src} alt="Описание изображения" />
 
 // ✅ Правильно — aria-label для иконок
-<IconButton aria-label="Удалить" icon={<DeleteIcon />} />
+<IconButton aria-label="Удалить"><LuTrash2 /></IconButton>
 
 // ❌ Неправильно — пустой alt для значимого изображения
 <Image src={src} alt="" />
@@ -229,7 +229,7 @@ import { VisuallyHidden } from '@chakra-ui/react'
 
 // Для screen readers
 <IconButton aria-label="Удалить">
-  <DeleteIcon />
+  <LuTrash2 />
 </IconButton>
 
 // Дополнительный контекст

@@ -21,7 +21,7 @@ open coverage/lcov-report/index.html
 
 ```bash
 # Файлы без тестов
-find apps/<app>/app -name "*.tsx" -o -name "*.ts" | while read f; do
+find apps/<app>/src/app -name "*.tsx" -o -name "*.ts" | while read f; do
   test_file="${f%.tsx}.test.tsx"
   test_file="${test_file%.ts}.test.ts"
   if [ ! -f "$test_file" ]; then
@@ -30,7 +30,7 @@ find apps/<app>/app -name "*.tsx" -o -name "*.ts" | while read f; do
 done
 
 # Server Actions без тестов
-find apps/<app>/app -path "*/_actions/*.ts" | while read f; do
+find apps/<app>/src/app -path "*/_actions/*.ts" | while read f; do
   echo "Action: $f"
 done
 ```
@@ -118,14 +118,14 @@ test('checkout flow', async ({ page }) => {
 
 ✅ Хорошо покрыто (>80%)
   - libs/forms: 92%
-  - apps/premium-rosstil/_actions: 85%
+  - apps/<app-a>/src/app/_actions: 85%
 
 ⚠️ Частично покрыто (50-80%)
-  - apps/premium-rosstil/app: 62%
+  - apps/<app-a>/src/app: 62%
   - libs/ui: 71%
 
 ❌ Слабо покрыто (<50%)
-  - apps/imot/app: 34%
+  - apps/<app-b>/src/app: 34%
   - apps/driving-school: 28%
 ```
 
@@ -134,11 +134,11 @@ test('checkout flow', async ({ page }) => {
 ```
 🎯 Приоритетные тесты
 
-1. [КРИТИЧНО] apps/premium-rosstil/_actions/payment.actions.ts
+1. [КРИТИЧНО] apps/<app>/src/app/_actions/payment.actions.ts
    Причина: Платёжная логика без тестов
    Тип: Integration
 
-2. [ВАЖНО] apps/premium-rosstil/app/(auth)/login/page.tsx
+2. [ВАЖНО] apps/<app>/src/app/(auth)/login/page.tsx
    Причина: Аутентификация
    Тип: E2E
 

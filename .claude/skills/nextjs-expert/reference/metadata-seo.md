@@ -65,15 +65,15 @@ export default async function ProductPage({ params }: Props) {
 // app/layout.tsx
 export const metadata: Metadata = {
   title: {
-    template: '%s | Premium Rosstil',
-    default: 'Premium Rosstil — Интернет-магазин',
+    template: '%s | Example Shop',
+    default: 'Example Shop — Интернет-магазин',
   },
   description: 'Качественные товары по доступным ценам',
 }
 
 // app/products/page.tsx
 export const metadata: Metadata = {
-  title: 'Каталог', // → "Каталог | Premium Rosstil"
+  title: 'Каталог', // → "Каталог | Example Shop"
 }
 ```
 
@@ -91,7 +91,7 @@ export const metadata: Metadata = {
     title: 'OG Title',
     description: 'OG Description',
     url: 'https://example.com/page',
-    siteName: 'Premium Rosstil',
+    siteName: 'Example Shop',
     locale: 'ru_RU',
     type: 'website',
     images: [
@@ -109,8 +109,9 @@ export const metadata: Metadata = {
 ### Для товаров (product)
 
 ```typescript
-export async function generateMetadata({ params }): Promise<Metadata> {
-  const product = await getProduct(params.id)
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params
+  const product = await getProduct(id)
 
   return {
     title: product.name,
@@ -370,8 +371,9 @@ export default function robots(): MetadataRoute.Robots {
 
 ```typescript
 // app/products/[id]/page.tsx
-export default async function ProductPage({ params }) {
-  const product = await getProduct(params.id)
+export default async function ProductPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const product = await getProduct(id)
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -409,9 +411,9 @@ export default function RootLayout({ children }) {
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
-    name: 'Premium Rosstil',
-    url: 'https://<домен premium-rosstil>',
-    logo: 'https://<домен premium-rosstil>/logo.png',
+    name: 'Example Shop',
+    url: 'https://example.com',
+    logo: 'https://example.com/logo.png',
     contactPoint: {
       '@type': 'ContactPoint',
       telephone: '+7-999-123-4567',

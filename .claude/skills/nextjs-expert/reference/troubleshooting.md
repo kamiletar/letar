@@ -434,7 +434,7 @@ nx run-many -t build --all --skip-nx-cache
 
 ```bash
 # Перегенерировать
-nx zenstack:generate premium-rosstil
+nx zenstack:generate <app>
 
 # Проверить schema.zmodel на ошибки
 ```

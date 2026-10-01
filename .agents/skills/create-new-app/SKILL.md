@@ -181,8 +181,8 @@ studio, чтобы почасовая работа могла попасть в 
 1. Создай `Project` в studio (`/owner/projects`, или через клиента в `/owner/clients`) с
    `billingMode: HOURLY`, если оплата почасовая.
 2. Проставь `Project.repoSlug = "<name>"` — по этому полю MCP-тул `time_start`/`time_switch`
-   резолвит проект, без него `libs/studio-time-mcp` не сможет писать время по этому приложению.
-3. Добавь в `.claude/commands/<name>.md` раздел «Учёт времени» (шаблон — выше, в этом же файле).
+   резолвит проект, без него `time_*` (сервер `letar`, `libs/studio-time-mcp`) не сможет писать время по этому приложению.
+3. Добавь в скил приложения `.agents/skills/<name>/SKILL.md` раздел «Учёт времени» (шаблон — выше, в этом же файле).
 
 ### Подключение к staging e2e-гейту (опционально, когда появится e2e-сьют)
 
@@ -240,11 +240,19 @@ s2), а не блокирует ли деплой отсутствие e2e. Не
 `Dockerfile.production`, однохостовый путь в `deploy-affected.sh` удаляется вместе с самим
 списком, см. комментарий у `BUILD_ON_S1_APPS`.
 
-### Создать команду приложения (`.claude/commands/<name>.md`)
+### Создать скил приложения (`.agents/skills/<name>/SKILL.md`)
 
-Создай файл `.claude/commands/<name>.md` по образцу `apps/grandslamcup.md`:
+Создай файл `.agents/skills/<name>/SKILL.md` по образцу `.agents/skills/grandslamcup/SKILL.md`
+(команды `.claude/commands/` больше не ведутся — воркфлоу приложений живут в скилах;
+зеркало для агентов обновляется `bun scripts/sync-agent-skills.ts`):
 
 ```markdown
+---
+name: <name>
+description: Воркфлоу разработки <name> — <одна фраза>, регистрация в Agent Mail
+disable-model-invocation: true
+---
+
 # <DisplayName> - Воркфлоу разработки
 
 ## Инициализация
@@ -279,7 +287,7 @@ s2), а не блокирует ли деплой отсутствие e2e. Не
 ## Учёт времени
 
 <!-- Добавляй этот раздел, только если приложение делается для клиента студии по почасовой оплате.
-Образец с реальным repoSlug — apps/domwellbes/.claude/commands (`.claude/commands/domwellbes.md`). -->
+Образец с реальным repoSlug — `.agents/skills/domwellbes/SKILL.md`. -->
 
 Проект ведётся для клиента студии по **почасовой оплате**. Инструменты `time_*` сервера `letar`
 (см. `.claude/rules/time-tracking.md`) — стартуй таймер при начале работы:

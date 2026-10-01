@@ -12,7 +12,7 @@ model Payment {
   externalId      String?       // ID в платёжной системе
   status          PaymentStatus @default(PENDING)
 
-  amount          Int           // Сумма в копейках
+  amount          BigInt        // Сумма в копейках
   currency        String        @default("RUB")
 
   // Метаданные
