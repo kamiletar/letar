@@ -41,7 +41,7 @@
 ## 3. После завершения задачи
 
 1. `apps/<app>/PLAN.md` — отметить задачу выполненной
-2. `apps/<app>/docs/plans/PLAN_COMPLETED.md` — детали реализации (если ведётся отдельно)
+2. `apps/<app>/PLAN_COMPLETED.md` — детали реализации (если ведётся отдельно)
 3. `apps/<app>/CHANGELOG.md` — запись об изменениях
 4. `apps/<app>/PLAN_TESTING.md` — если добавил тесты
 5. `apps/<app>/package.json` — поднять версию (semver)

@@ -1,7 +1,7 @@
 ---
 name: letar
 description: Воркфлоу верхнего уровня для задач по всему монорепо letar — инфра, общие библиотеки, релизы
-allowed-tools: Bash(nx run-many -t format:*), Bash(nx lint:*), Bash(nx typecheck:*), Bash(nx affected:*), Bash(nx release:*), Bash(git add:*), Bash(git commit:*), Bash(git push:*)
+allowed-tools: Bash(nx run-many -t format:*), Bash(nx lint:*), Bash(nx typecheck:*), Bash(nx affected:*), Bash(nx release:*), Bash(git add:*), Bash(git commit:*)
 ---
 
 # Letar - Воркфлоу монорепо (весь репозиторий)

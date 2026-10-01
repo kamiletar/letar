@@ -337,8 +337,8 @@ export function QueryProvider({ children }: { children: React.ReactNode }) {
 ```tsx
 'use client'
 
-import { useCreateCartItem, useFindManyProduct } from '@/generated/hooks'
 import { useOnlineStatus } from '@/hooks/use-online-status'
+import { useCreateCartItem, useFindManyProduct } from '@/lib/hooks' // обёртки над useClientQueries, образец — apps/driving-school
 
 export function ProductList({ categorySlug }: { categorySlug: string }) {
   const isOnline = useOnlineStatus()

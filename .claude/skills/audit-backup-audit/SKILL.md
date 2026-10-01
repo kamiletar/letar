@@ -61,8 +61,6 @@ $SSH $S2 'cat /home/deploy/letar/cron-jobs.json'
 | acme-dns-backup-freshness-check | каждые 6 ч | s2     | свежесть бэкапа acme-dns   |
 | traefik-backup-freshness-check  | каждые 6 ч | s1     | свежесть бэкапа Traefik    |
 
-⚠️ `nginx-backup-s2` всё ещё числится в `DEFAULT_CRON_JOBS`, хотя старого прокси на серверах нет (сейчас Traefik): не требуй его свежести.
-
 - Задачи присутствуют и `enabled: true`
 - Расписание соответствует таблице (сверяй с `cron-default-jobs.ts`, реальное значение можно сдвинуть через UI)
 
@@ -158,7 +156,7 @@ $SSH $S2 'docker inspect dashboard-agent --format "{{range .Mounts}}{{.Source}} 
 ### Critical
 
 - [ ] Dashboard-agent запущен и отвечает на s2
-- [ ] Бэкапные cron-задачи из п.2 активны (`nginx-backup-s2` не считается)
+- [ ] Бэкапные cron-задачи из п.2 активны
 - [ ] Бэкапы PostgreSQL свежие (< 25ч) для всех приложений из п.3
 - [ ] Бэкапы PostgreSQL не пустые (> 1 KB)
 - [ ] Credentials доступны agent (все .env.docker примонтированы)

@@ -201,7 +201,7 @@ export default function RootLayout({ children }) {
 ```typescript
 'use client'
 
-import { useDeleteWishlistItem, useFindManyWishlistItem } from '@/generated/hooks'
+import { useDeleteWishlistItem, useFindManyWishlistItem } from '@/lib/hooks' // обёртки над useClientQueries, образец — apps/driving-school
 import { Container, SimpleGrid, Spinner } from '@chakra-ui/react'
 
 export default function WishlistPage() {
@@ -253,7 +253,7 @@ export default function WishlistPage() {
 ```typescript
 'use client'
 
-import { useInfiniteFindManyProduct } from '@/generated/hooks'
+import { useInfiniteFindManyProduct } from '@/lib/hooks' // обёртки над useClientQueries, образец — apps/driving-school
 import { Button, SimpleGrid, Spinner } from '@chakra-ui/react'
 import { useEffect } from 'react'
 import { useInView } from 'react-intersection-observer'
@@ -343,7 +343,7 @@ bun add react-intersection-observer
 'use client'
 
 import { toaster } from '@/app/_components/ui/toaster'
-import { useDeleteCartItem, useUpdateCartItem } from '@/generated/hooks'
+import { useDeleteCartItem, useUpdateCartItem } from '@/lib/hooks' // обёртки над useClientQueries, образец — apps/driving-school
 
 export function CartItemCard({ item }) {
   const updateCart = useUpdateCartItem({
@@ -471,7 +471,7 @@ export function BookingForm() {
 ```typescript
 'use client'
 
-import { useFindManyApiLog } from '@/generated/hooks'
+import { useFindManyApiLog } from '@/lib/hooks' // обёртки над useClientQueries, образец — apps/driving-school
 import { Box, Spinner, Text } from '@chakra-ui/react'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { useRef } from 'react'
@@ -550,7 +550,7 @@ export function ApiLogsList() {
 ```typescript
 'use client'
 
-import { useInfiniteFindManyApiLog } from '@/generated/hooks'
+import { useInfiniteFindManyApiLog } from '@/lib/hooks' // обёртки над useClientQueries, образец — apps/driving-school
 import { Box, Spinner, Text } from '@chakra-ui/react'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { useEffect, useMemo, useRef } from 'react'
