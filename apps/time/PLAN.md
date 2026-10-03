@@ -87,7 +87,7 @@
       тоже дёргал `wget` внутри контейнера, тоже падал `executable file not found in $PATH` на
       `node:24-slim`. Контейнер был реально healthy, но rollout всё равно откатывался на шаге
       smoke-test — `time` не мог выкатить ни одной версии, пока не починен и этот шаг. Заменено
-      на `docker exec ... node -e` (см. [PLAN-INFRA-6.md §153](/PLAN-INFRA-6.md#§153) — фикс
+      на `docker exec ... node -e` (см. [PLAN-INFRA-6.md §153](/docs/plans/PLAN-INFRA-6.md#§153) — фикс
       кросс-приложенческий, в `libs/deploy-engine`, не только про `time`). Коммит `51465453`.
 - [ ] ⚠️ Открытый вопрос: новый deploy-request на передеплой `time` (production, коммит
       `51465453`, thread `deploy-time` в Agent Mail) отправлен `deploy-agent-dev` 2026-09-04
