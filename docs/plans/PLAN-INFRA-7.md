@@ -3046,3 +3046,36 @@ WebKit сбрасывает ранее заполненный controlled-инп�
       dashboard-agent и этот) — ждёт одобрения push.
 - [ ] Примеры путей в `git-multi-agent-incidents.md` и `git-pathspec-commit-worktree-not-index.md`
       (`PLAN-INFRA-4.md` как пример) оставлены — это разбор инцидента, не инструкция.
+
+## §209 (2026-10-03) /infra:deps-update — обновление в диапазонах, security-overrides, три ловушки
+
+`bun update` (в пределах диапазонов), electron выровнен до 44.5.1 в 6 приложениях (`electron-drift` был красным),
+`nodemailer` 9→10.0.13 (Node ≥20, ломающих нет), `adm-zip` 0.5→0.6.1 в domwellbes (пакет несёт свои типы,
+`@types/adm-zip` убран). `bun audit`: 38 → 8 находок (6 high, 2 moderate). Коммиты запушены, submodule — раньше корня.
+
+Overrides/resolutions корневого `package.json` для закрытия dev-цепочек: `axios ^1.20.0` (nx), `smol-toml ^1.9.0` (nx),
+`mysql2 ^3.24.5` (prisma, MySQL не используем), `browserslist ^4.29.3`. Проверено: граф Nx, `prisma --version`,
+`zenstack:generate`, `nx build kami`.
+
+⚠️ **Три ловушки этого прогона:**
+
+- **`@swc/core` вложенной копией.** `next-intl` 4.14.9 просит `~1.16.0`, bun положил ему `1.16.13` — тот самый, что не грузит
+  нативный биндинг на машине владельца; Nx перестал строить граф («Failed to load native binding» в `next.config.*`).
+  Лечится `"@swc/core": "1.16.2"` в overrides+resolutions (пояснение — в записи реестра `intentional-pins.json`).
+  Диагностика: `NX_DAEMON=false nx show projects`.
+- **`better-call` — точный пин `1.4.0`.** `better-auth` и `@better-auth/oauth-provider` держат peer ровно `1.4.0`; корневой
+  `^1.4.1` разводит копии, и `libs/auth` падает на `typecheck:tsgo` (TS2322 «not assignable to type undefined» на плагинах
+  jwt/oauthProvider/nextCookies) у всех потребителей. Строка в `peer-deps` («требует 1.4.0, установлен 1.4.1») — не шум,
+  а реальный сигнал. Снимать, когда better-auth поднимет peer.
+- **Правка `package.json` построчным sed.** `"@swc/core": "1.16.2"` встречается и в `devDependencies` — sed по шаблону
+  зацепил его и сломал JSON. Вставки в overrides/resolutions — только по проверенным номерам строк и с
+  `JSON.parse` сразу после.
+
+Остаток audit (ждёт апстрим): `braces`, `http-cache-semantics` (исправления нет), `deepmerge-ts` 7→8 (внутри
+`@prisma/config`, нужна новая prisma), `trim-newlines` (внутри `meow`/mdx), `brace-expansion` 5.0.9 (в дереве ещё 1.x/2.x —
+глобальный override их сломает), `fflate` 0.7.3 (moderate).
+
+- [ ] ⚠️ Открытый вопрос: в domwellbes `vitest` падает 19 наборов (`server-only` не резолвится, DB-специ). К правкам этого
+      прогона отношения не имеют (`read-ifc`/`house-drawings` — 29/29), но на чистом `main` не сверялись — проверить, что
+      падали и раньше.
+- [ ] Повторно проверить остаток audit, когда выйдут новая prisma, nx с `axios ≥1.20`, `braces` 3.0.4+.
