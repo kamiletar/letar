@@ -14,6 +14,21 @@ function withNative<T extends z.ZodTypeAny>(schema: T, apply: (s: T) => unknown)
 }
 
 /**
+ * `.partial()` с сохранением `.meta()` полей: Zod v4 привязывает мету к экземпляру схемы, а
+ * `.partial()` создаёт новые обёртки без неё.
+ */
+function partialKeepingMeta<T extends z.ZodObject>(schema: T): ReturnType<T['partial']> {
+  const partial = schema.partial()
+  const source: Record<string, z.ZodType> = schema.shape
+  const shape: Record<string, z.ZodType> = {}
+  for (const [key, wrapped] of Object.entries<z.ZodType>(partial.shape)) {
+    const meta = source[key]?.meta()
+    shape[key] = meta ? wrapped.meta(meta) : wrapped
+  }
+  return partial.extend(shape) as unknown as ReturnType<T['partial']>
+}
+
+/**
  * Create schema for Product with UI metadata.
  */
 export const ProductCreateFormSchema = z.object({
@@ -54,7 +69,7 @@ export const ProductCreateFormSchema = z.object({
 /**
  * Update schema for Product (all fields optional).
  */
-export const ProductUpdateFormSchema = ProductCreateFormSchema.partial()
+export const ProductUpdateFormSchema = partialKeepingMeta(ProductCreateFormSchema)
 
 /**
  * Fields excluded from forms.

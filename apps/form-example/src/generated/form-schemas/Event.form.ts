@@ -12,6 +12,21 @@ function withNative<T extends z.ZodTypeAny>(schema: T, apply: (s: T) => unknown)
   return apply(schema) as T
 }
 
+/**
+ * `.partial()` с сохранением `.meta()` полей: Zod v4 привязывает мету к экземпляру схемы, а
+ * `.partial()` создаёт новые обёртки без неё.
+ */
+function partialKeepingMeta<T extends z.ZodObject>(schema: T): ReturnType<T['partial']> {
+  const partial = schema.partial()
+  const source: Record<string, z.ZodType> = schema.shape
+  const shape: Record<string, z.ZodType> = {}
+  for (const [key, wrapped] of Object.entries<z.ZodType>(partial.shape)) {
+    const meta = source[key]?.meta()
+    shape[key] = meta ? wrapped.meta(meta) : wrapped
+  }
+  return partial.extend(shape) as unknown as ReturnType<T['partial']>
+}
+
 const EventBaseSchema = z.object({
   name: z.string()
     .meta({
@@ -31,7 +46,7 @@ const EventBaseSchema = z.object({
  * Update schema for Event (all fields optional). Кросс-полевые `@@validate` не применяются —
  * строится из схемы до withNative-обёртки, у которой нет .partial() (Фаза 2, v2.5.0).
  */
-export const EventUpdateFormSchema = EventBaseSchema.partial()
+export const EventUpdateFormSchema = partialKeepingMeta(EventBaseSchema)
 
 /**
  * Create schema for Event with UI metadata + кросс-полевая валидация из `@@validate`.

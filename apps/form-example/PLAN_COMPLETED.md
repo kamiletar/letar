@@ -327,7 +327,7 @@ PLAN-INFRA.md §70) — только production (нет `docker-compose.staging.
 ⚠️ `nx typecheck:tsgo form-example` по-прежнему падает (11 ошибок `TS2339` на `db.product` и
 т.п.) — это не связано с этой правкой: `zenstack:generate` для приложения падает независимо,
 из-за отсутствующего `DATABASE_URL` в локальном `.env.local` (уже задокументировано в
-[PLAN-INFRA.md §45](/PLAN-INFRA.md)). Подтверждено на чистом состоянии: ошибка та же и без
+[PLAN-INFRA.md §45](/docs/plans/PLAN-INFRA.md)). Подтверждено на чистом состоянии: ошибка та же и без
 `package.json`.
 
 ### Lint-ошибки в демо-страницах (pre-existing, не связаны с добавлением package.json)

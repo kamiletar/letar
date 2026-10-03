@@ -5,6 +5,21 @@ import { z } from 'zod/v4'
 import { ContactSubjectFormSchema } from './enums/ContactSubject.form'
 
 /**
+ * `.partial()` с сохранением `.meta()` полей: Zod v4 привязывает мету к экземпляру схемы, а
+ * `.partial()` создаёт новые обёртки без неё.
+ */
+function partialKeepingMeta<T extends z.ZodObject>(schema: T): ReturnType<T['partial']> {
+  const partial = schema.partial()
+  const source: Record<string, z.ZodType> = schema.shape
+  const shape: Record<string, z.ZodType> = {}
+  for (const [key, wrapped] of Object.entries<z.ZodType>(partial.shape)) {
+    const meta = source[key]?.meta()
+    shape[key] = meta ? wrapped.meta(meta) : wrapped
+  }
+  return partial.extend(shape) as unknown as ReturnType<T['partial']>
+}
+
+/**
  * Create schema for Contact with UI metadata.
  */
 export const ContactCreateFormSchema = z.object({
@@ -29,7 +44,7 @@ export const ContactCreateFormSchema = z.object({
 /**
  * Update schema for Contact (all fields optional).
  */
-export const ContactUpdateFormSchema = ContactCreateFormSchema.partial()
+export const ContactUpdateFormSchema = partialKeepingMeta(ContactCreateFormSchema)
 
 /**
  * Fields excluded from forms.
