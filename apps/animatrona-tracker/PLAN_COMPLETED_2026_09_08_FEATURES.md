@@ -160,7 +160,7 @@ Endpoint для автосинхронизации Kubo config в desktop Animat
 
 ### Сервер s3 и его роль в экосистеме (2026-06-14)
 
-Сервер s3 (HDD S16, 16 ГБ RAM) — см. **[PLAN-INFRA-1.md §15](../../PLAN-INFRA-1.md#15--сервер-s3--медиа-e2e-ipfs-бэкап-)**.
+Сервер s3 (HDD S16, 16 ГБ RAM) — см. **[PLAN-INFRA-1.md §15](../../docs/plans/PLAN-INFRA-1.md#15--сервер-s3--медиа-e2e-ipfs-бэкап-)**.
 Его Kubo-нод (`ipfs.letar.best`) — **отдельный от pinner1/pinner3** и обслуживает другую задачу:
 хранение общих медиафайлов веб-приложений (svoichuzhie, kami и др.) через Pin Registry с `appId`.
 
