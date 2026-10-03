@@ -16,19 +16,28 @@
     "Снимать пин можно — но осознанно: удали запись отсюда тем же коммитом и напиши",
     "в PLAN-INFRA-*, почему причина отпала."
   ],
-
   "overridePins": [
     {
       "package": "@zenstackhq/cli",
-      "override": { "zod": "4.4.3" },
+      "override": {
+        "zod": "4.4.3"
+      },
       "since": "2026-09-16",
       "reason": "Тот же класс, тот же прогон deps-update, соседний пакет: @zenstackhq/cli (dependencies.zod: \"^4.0.0\", совместим с 4.4.3) тоже получил приватную копию zod@4.6.5 под bun isolated linker. Следствие — TS2321 'Excessive stack depth comparing types MapType<Schema,?>' (класс уже описан в tsgo-excessive-stack-depth-zenstack.md) в 4 НОВЫХ местах grandslamcup (citySlug-страницы) сверх уже существовавшего техдолга, плюс годная копия сохранилась в domwellbes только благодаря совпадению с MCP-фиксом.",
       "doc": "PLAN-INFRA-*.md — деплой-запись про /infra:deps-update 2026-09-16",
       "unpinWhen": "grep -n '\"@zenstackhq/cli/zod\"' bun.lock даёт пусто и БЕЗ override — тогда убрать override и эту запись одним коммитом."
     }
   ],
-
   "pins": [
+    {
+      "package": "better-call",
+      "version": "1.4.0",
+      "field": "dependencies",
+      "since": "2026-10-03",
+      "reason": "better-auth и @better-auth/oauth-provider держат peer better-call ровно 1.4.0. Корневой ^1.4.1 разводит копии: плагины (jwt, oauthProvider, nextCookies) типизированы по 1.4.0, а betterAuth() в libs/auth — по 1.4.1, и typecheck:tsgo падает TS2322 'not assignable to type undefined' во всех потребителях @letar/auth.",
+      "doc": "PLAN-INFRA-*.md — прогон /infra:deps-update 2026-10-03",
+      "unpinWhen": "better-auth выпустит релиз с peer better-call >=1.4.1; тогда заменить на диапазон и удалить запись одним коммитом."
+    },
     {
       "package": "web-ifc",
       "version": "0.0.77",
@@ -43,7 +52,7 @@
       "version": "1.16.2",
       "field": "devDependencies",
       "since": "2026-09-29",
-      "reason": "@swc/core 1.16.12 (и, вероятно, часть промежуточных 1.16.x) при загрузке нативного биндинга проверяет DACL каталога кеша (%LOCALAPPDATA%/swc или SWC_NATIVE_BINDING_CACHE) и отказывает, если права на замену есть у посторонних SID. На Windows-машине владельца каталог наследует ACL с SID AppContainer/CodexSandboxUsers, в результате `Failed to load native binding`: Nx не может загрузить next.config.* и граф проектов не строится вовсе (`Failed to process project graph`) — падают все nx-таргеты. 1.16.2 грузится без проверки.",
+      "reason": "@swc/core 1.16.12 (и, вероятно, часть промежуточных 1.16.x) при загрузке нативного биндинга проверяет DACL каталога кеша (%LOCALAPPDATA%/swc или SWC_NATIVE_BINDING_CACHE) и отказывает, если права на замену есть у посторонних SID. На Windows-машине владельца каталог наследует ACL с SID AppContainer/CodexSandboxUsers, в результате `Failed to load native binding`: Nx не может загрузить next.config.* и граф проектов не строится вовсе (`Failed to process project graph`) — падают все nx-таргеты. 1.16.2 грузится без проверки. С 2026-10-03 дополнительно закреплён в overrides/resolutions корневого package.json (\"@swc/core\": \"1.16.2\"): next-intl 4.14.9 просит ~1.16.0, и bun клал ему вложенную копию 1.16.13 — Nx снова не строил граф. Снимать override вместе с пином.",
       "doc": "PLAN-INFRA-*.md — прогон /infra:deps-update 2026-09-29",
       "unpinWhen": "Свежая версия @swc/core грузит биндинг на этой машине: поставить её, проверить `nx show projects` (без Failed to process project graph), затем снять пин и удалить запись одним коммитом. Либо очищен ACL %LOCALAPPDATA%/swc."
     },
@@ -128,7 +137,6 @@
       "unpinWhen": "react-native перейдёт на диапазон вместо точного hermes-compiler в своей dependencies, либо появится задокументированное решение владельца, что расхождение версий компилятора и рантайма Hermes безопасно (маловероятно — нативный байткод)."
     }
   ],
-
   "lockstepGroups": [
     {
       "id": "nx",
@@ -162,7 +170,6 @@
       "doc": "PLAN-INFRA-5.md §107 § «Оставлены как есть (намеренные исключения)»"
     }
   ],
-
   "unexplained": {
     "_": [
       "Точные пины, для которых причина НЕ найдена: git-история ведёт в initial commit или",

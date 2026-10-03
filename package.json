@@ -24,7 +24,8 @@
     "engine.io-client": "^6.6.6",
     "socket.io-adapter": "^2.5.8",
     "socket.io-parser": "^4.2.7",
-    "undici": "^7.29.0"
+    "undici": "^7.29.0",
+    "@swc/core": "1.16.2"
   },
   "overrides": {
     "minimist": "^1.2.8",
@@ -47,6 +48,7 @@
     "socket.io-adapter": "^2.5.8",
     "socket.io-parser": "^4.2.7",
     "undici": "^7.29.0",
+    "@swc/core": "1.16.2",
     "@libsql/isomorphic-ws": {
       "ws": "^8.21.3"
     },
@@ -150,7 +152,7 @@
     "async-mutex": "^0.5.0",
     "bcryptjs": "^3.0.3",
     "better-auth": "^1.7.7",
-    "better-call": "^1.4.1",
+    "better-call": "1.4.0",
     "better-sqlite3": "^13.0.3",
     "bufferutil": "^4.1.0",
     "bwip-js": "^4.11.4",
@@ -210,7 +212,7 @@
     "nextjs-toploader": "^3.9.17",
     "node-cron": "^4.6.0",
     "node-fetch": "^3.3.2",
-    "nodemailer": "^9.1.1",
+    "nodemailer": "^10.0.13",
     "number-to-words": "^1.2.4",
     "ora": "^9.4.1",
     "pdfjs-dist": "^6.3.289",
