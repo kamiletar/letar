@@ -1,0 +1,52 @@
+import createMDX from '@next/mdx'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+// Корень монорепо. Приложение может стать отдельным git submodule (приватное), и тогда Turbopack
+// принимает его `.git` за workspace root и не видит node_modules в корне монорепо («Could not find
+// the Next.js package»). Для публичного приложения значение совпадает с автоопределением — безвредно.
+// См. .claude/docs/turbopack-private-submodule-root.md
+const workspaceRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
+
+const nextConfig = {
+  pageExtensions: ['js', 'jsx', 'ts', 'tsx', 'md', 'mdx'],
+  turbopack: { root: workspaceRoot },
+
+  // Workspace-либы вне корня приложения: без явного непустого `transpilePackages` webpack
+  // (`next build --webpack`) не транспилирует TS из `libs/*` (`Module parse failed`). Работает
+  // наличие ключа, а не имена в нём. См. .claude/docs/nextjs-nx-composeplugins-migration.md и
+  // .claude/docs/transpile-packages-array-presence-not-content.md
+  transpilePackages: [
+    '@letar/analytics',
+    '@letar/auth',
+    '@letar/pg-url',
+    '@letar/chakra-provider',
+    '@letar/env-load',
+    '@letar/forms',
+    '@letar/forms-core',
+    '@letar/forms-react',
+    '@letar/ui',
+  ],
+
+  // Если это приложение подключит @letar/query-provider И в его project.json стоит
+  // `next dev --webpack` (не Turbopack по умолчанию) — раскомментируй блок ниже.
+  // @tanstack/devtools-ui@0.7.0+ (транзитивная зависимость @tanstack/react-devtools через
+  // @letar/query-provider) импортирует именованный `use` из solid-js/web, которого нет в
+  // серверной сборке пакета под webpack. Разбор и список уже исправленных приложений —
+  // PLAN.md §51 (корень репозитория), apps/driving-school/next.config.js — образец.
+  // webpack: (config, { dev, isServer }) => {
+  //   if (isServer || !dev) {
+  //     config.resolve.alias['@tanstack/devtools-ui'] = false
+  //   }
+  //   return config
+  // },
+}
+
+const withMDX = createMDX({
+  options: {
+    remarkPlugins: [],
+    rehypePlugins: [],
+  },
+})
+
+export default withMDX(nextConfig)

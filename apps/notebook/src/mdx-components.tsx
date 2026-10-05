@@ -1,0 +1,36 @@
+import { Code, Heading, Link, Text } from '@chakra-ui/react'
+import type { MDXComponents } from 'mdx/types'
+
+/**
+ * MDX компоненты для Блокнот Ками
+ *
+ * Маппинг HTML элементов на Chakra UI компоненты
+ */
+export function useMDXComponents(components: MDXComponents): MDXComponents {
+  return {
+    h1: (props) => (
+      <Heading asChild size="3xl" mt={8} mb={4}>
+        <h1 {...props} />
+      </Heading>
+    ),
+    h2: (props) => (
+      <Heading asChild size="2xl" mt={6} mb={3}>
+        <h2 {...props} />
+      </Heading>
+    ),
+    h3: (props) => (
+      <Heading asChild size="xl" mt={4} mb={2}>
+        <h3 {...props} />
+      </Heading>
+    ),
+    h4: (props) => (
+      <Heading asChild size="lg" mt={3} mb={2}>
+        <h4 {...props} />
+      </Heading>
+    ),
+    p: (props) => <Text mb={4} lineHeight="tall" {...props} />,
+    a: (props) => <Link color="brand.fg" textDecoration="underline" {...props} />,
+    code: (props) => <Code fontSize="sm" {...props} />,
+    ...components,
+  }
+}

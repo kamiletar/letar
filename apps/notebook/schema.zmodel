@@ -1,0 +1,213 @@
+// ZenStack schema для Блокнот Ками
+//
+// Воркфлоу: `nx zenstack:generate notebook` → `nx db:migrate notebook -- --name <описание>`.
+// Правила и запреты (НИКОГДА db:push на production) — .claude/rules/database.md.
+
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client"
+  output   = "./prisma"
+}
+
+plugin prisma {
+  provider = '@core/prisma'
+  output = './src/generated/schema.prisma'
+}
+
+plugin typescript {
+  provider = '@core/typescript'
+  output = './src/generated'
+}
+
+plugin policy {
+  provider = '@zenstackhq/plugin-policy'
+}
+
+// Генерация Zod схем с UI метаданными для @letar/forms
+plugin formSchema {
+  provider = '../../libs/zenstack-form-plugin/dist/index.js'
+  output = './src/generated/form-schemas'
+}
+
+// ========================================
+// Better Auth (core schema)
+// ========================================
+
+// Пользователь. В приложении один владелец, но модель стандартная для Better Auth
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String
+  image         String?
+  emailVerified Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts      Account[]
+  sessions      Session[]
+  notes         Note[]
+  rubrics       Rubric[]
+
+  @@allow('create', true)
+  @@allow('read,update', auth() == this)
+
+  @@index([email])
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  userId                String
+  accountId             String
+  providerId            String
+
+  accessToken           String?
+  refreshToken          String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  idToken               String?
+  password              String?
+  issuer                String?
+
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([providerId, accountId])
+  @@index([userId])
+
+  // Только Better Auth через Prisma напрямую
+  @@deny('all', true)
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@deny('all', true)
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@deny('all', true)
+}
+
+// ========================================
+// Блокнот
+// ========================================
+
+/// Состояние заметки на пути на сайт
+enum NoteStatus {
+  /// Черновик, виден только владельцу
+  PRIVATE
+  /// Отправлена в рубрику, ждёт одобрения
+  PENDING
+  /// Одобрена и опубликована
+  PUBLISHED
+}
+
+/// Рубрика сайта: Веб-архитектор, Поэт, Аудиофил, Синефил, Отаку и свои
+model Rubric {
+  id        String   @id @default(cuid())
+  ownerId   String
+  slug      String
+  name      String
+  sort      Int      @default(0)
+  createdAt DateTime @default(now())
+
+  owner User         @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  notes NoteRubric[]
+
+  @@unique([ownerId, slug])
+  @@index([ownerId])
+
+  // Рубрики видны всем (публичный сайт), менять может только владелец
+  @@allow('read', true)
+  @@allow('create,update,delete', auth() == owner)
+}
+
+/// Заметка. Текст хранится в версиях, здесь только указатели на них
+model Note {
+  id                 String     @id @default(cuid())
+  ownerId            String
+  status             NoteStatus @default(PRIVATE)
+  /// Текущая версия (последняя принятая)
+  currentVersionId   String?
+  /// Версия, закреплённая на сайте. Меняется только при одобрении
+  publishedVersionId String?
+  publishedAt        DateTime?
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+  deletedAt          DateTime?
+
+  owner    User          @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  versions NoteVersion[]
+  rubrics  NoteRubric[]
+
+  @@index([ownerId, updatedAt])
+  @@index([status])
+
+  @@allow('all', auth() == owner)
+  // Опубликованные заметки читают все. Текст версии отдаёт серверный код сайта
+  @@allow('read', status == PUBLISHED && deletedAt == null)
+}
+
+/// Неизменяемая версия заметки. Откат создаёт новую версию со старым текстом
+model NoteVersion {
+  id        String   @id @default(cuid())
+  noteId    String
+  /// Версия, от которой отталкивалась правка. Две версии с одним родителем образуют ветки
+  parentId  String?
+  title     String   @default("")
+  /// Markdown
+  body      String   @default("")
+  /// Устройство, на котором сделана правка
+  deviceId  String?
+  createdAt DateTime @default(now())
+
+  note   Note          @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  parent NoteVersion?  @relation("VersionParent", fields: [parentId], references: [id])
+  nexts  NoteVersion[] @relation("VersionParent")
+
+  @@index([noteId, createdAt])
+  @@index([parentId])
+
+  @@allow('create,read', auth() == note.owner)
+  // Версии не меняются и не удаляются по одной: только вместе с заметкой (каскад)
+  @@deny('update,delete', true)
+}
+
+/// Заметка может лежать в нескольких рубриках
+model NoteRubric {
+  noteId   String
+  rubricId String
+
+  note   Note   @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  rubric Rubric @relation(fields: [rubricId], references: [id], onDelete: Cascade)
+
+  @@id([noteId, rubricId])
+  @@index([rubricId])
+
+  @@allow('all', auth() == note.owner)
+  @@allow('read', true)
+}

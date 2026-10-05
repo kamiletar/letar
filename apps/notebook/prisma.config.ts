@@ -1,0 +1,18 @@
+import { loadEnvCascade } from '@letar/env-load'
+import { defineConfig } from 'prisma/config'
+
+loadEnvCascade()
+
+export default defineConfig({
+  schema: 'src/generated/schema.prisma',
+  migrations: {
+    path: 'prisma/migrations',
+  },
+  datasource: {
+    // Плейсхолдер для `prisma generate` без DATABASE_URL; реальное значение — в .env.local
+    url: process.env.DATABASE_URL ?? 'postgresql://placeholder:placeholder@localhost:5432/notebook',
+    // Нужна для `migrate diff --from-migrations` (Prisma 7, см. .claude/rules/database.md)
+    shadowDatabaseUrl: process.env.SHADOW_DATABASE_URL
+      ?? 'postgresql://placeholder:placeholder@localhost:5432/notebook_shadow',
+  },
+})
