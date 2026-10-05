@@ -55,7 +55,7 @@ export function createPatternSvg(config: PatternConfigV1, elements: string[]): s
 
   return [
     `<svg xmlns="http://www.w3.org/2000/svg" width="${safeConfig.widthMm}mm" height="${safeConfig.heightMm}mm"`
-    + ` viewBox="0 0 1000 ${height}">`,
+    + ` viewBox="0 0 1000 ${height}" overflow="hidden">`,
     background,
     ...elements,
     '</svg>',
