@@ -926,6 +926,15 @@
       "name": "mandala-e2e",
       "version": "0.0.1",
     },
+    "apps/notebook": {
+      "name": "@letar/notebook",
+      "version": "0.2.0",
+      "dependencies": {
+        "@letar/auth": "workspace:*",
+        "@letar/env-load": "workspace:*",
+        "@letar/pg-url": "workspace:*",
+      },
+    },
     "apps/poster-microtext-desktop": {
       "name": "@letar/poster-microtext-desktop",
       "version": "0.19.8",
@@ -2932,6 +2941,8 @@
     "@letar/mcp-test-kit": ["@letar/mcp-test-kit@workspace:libs/mcp-test-kit"],
 
     "@letar/media-client": ["@letar/media-client@workspace:libs/media-client"],
+
+    "@letar/notebook": ["@letar/notebook@workspace:apps/notebook"],
 
     "@letar/number-words": ["@letar/number-words@workspace:libs/number-words"],
 
