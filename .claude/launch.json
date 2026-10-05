@@ -16,6 +16,13 @@
       "port": 3007
     },
     {
+      "name": "notebook",
+      "runtimeExecutable": "bun",
+      "runtimeArgs": ["x", "next", "dev", "-p", "3127"],
+      "cwd": "apps/notebook",
+      "port": 3127
+    },
+    {
       "name": "aira-web",
       "runtimeExecutable": "nx",
       "runtimeArgs": ["dev", "aira-web"],
