@@ -1615,6 +1615,10 @@
         "to-words": "^5.3.0",
       },
     },
+    "libs/pattern-generator": {
+      "name": "@letar/pattern-generator",
+      "version": "0.1.0",
+    },
     "libs/pg-url": {
       "name": "@letar/pg-url",
       "version": "0.1.0",
@@ -2930,6 +2934,8 @@
     "@letar/media-client": ["@letar/media-client@workspace:libs/media-client"],
 
     "@letar/number-words": ["@letar/number-words@workspace:libs/number-words"],
+
+    "@letar/pattern-generator": ["@letar/pattern-generator@workspace:libs/pattern-generator"],
 
     "@letar/pg-url": ["@letar/pg-url@workspace:libs/pg-url"],
 
