@@ -71,3 +71,45 @@
 - [animatrona-dual-build-alias-drift](/.claude/docs/animatrona-dual-build-alias-drift.md) —
   соседняя, но другая ловушка того же приложения: `main/` собирается webpack и esbuild
   независимо, каждый со своим списком алиасов (`resolve.alias` vs `tsconfig.json paths`).
+
+## Вторая ловушка той же пары: `strict` расходится, и сужение типов работает по-разному
+
+Те же два файла расходятся не только в `paths`. Шаблон `electron-app` до 2026-10-07 выдавал
+`renderer/tsconfig.json` с `"strict": false`, а корневой `tsconfig.json` приложения — со
+`"strict": true`. Что видит каждый:
+
+- `typecheck:tsgo` читал **только** корневой файл (`strict: true`) и был зелёным;
+- `next build` проверяет типы по `renderer/tsconfig.json` (`strict: false`) и падал.
+
+Падение — на discriminated union вида `{ ok: true; v } | { ok: false; error }`. Без
+`strictNullChecks` условие `if (x.ok)` и `x.success ? … : x.error` **не сужает** тип, и
+`x.error` даёт `TS2339: Property 'error' does not exist`. Парадокс: строгий режим здесь
+**мягче** к такому коду, нестрогий — жёстче. Воспроизводится одним файлом и в `tsc`, и в `tsgo`:
+
+```ts
+type R = { ok: true; v: number } | { ok: false; error: string }
+export function f(x: R) {
+  return x.ok ? x.v : x.error
+} // TS2339 при strict: false
+```
+
+Прецедент: `poster-microtext-desktop` v0.35.1 — упала `nx build:win`, фикс `=== true` лечил
+симптом.
+
+**Фикс (с v0.35.2 и в шаблоне генератора):**
+
+1. `renderer/tsconfig.json` → `"strict": true`. Для `poster-microtext-desktop` это ничего не
+   стоило: `tsgo -p renderer/tsconfig.json --strict` — 0 ошибок.
+2. `typecheck:tsgo` — два прогона подряд, второй по `renderer/tsconfig.json`
+   (`nx:run-commands`, `parallel: false`). Так любое будущее расхождение опций или путей
+   ловится до сборки, а не на `next build`.
+
+⚠️ **Остальные приложения с той же ловушкой на 2026-10-07** (по `renderer/tsconfig.json`,
+правка не сделана — вне задачи): `label-printer-desktop`, `animatrona-folder-player`,
+`animatrona-ipfs-player`. `animatrona` и `kami-key-the` уже `strict: true`. С `--strict`
+у `label-printer-desktop` и `animatrona-ipfs-player` по 0 ошибок; у `animatrona-folder-player`
+5 в `main/services/embedded-subtitles.ts` (нет типов `matroska-subtitles`; `main/` попадает в
+renderer-проект через `include`, нужен `declare module` или узкий `include`).
+⚠️ В нестрогом режиме `tsgo -p renderer/tsconfig.json` у этих трёх приложений ещё и сыплет
+`TS2339` из `libs/forms/.../field-data-grid.tsx` — чужой код ломается от `strict: false`
+сам по себе.
