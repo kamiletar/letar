@@ -18,6 +18,26 @@ Agent Mail (`animatrona-folder-player-dev`) — задача «довести д
 
 ## Черновик (новые идеи)
 
+- [ ] **Установщик с галочками компонентов (bootstrapper)** — идея 2026-10-07, «сделаем позже».
+      Решение: **вариант A** — маленький `Animatrona-Setup.exe` (~5–10 МБ) с экраном выбора;
+      отмеченные компоненты докачиваются из GitHub Releases `kamiletar/letar` по тегам
+      `animatrona-v*`, `animatrona-folder-player-v*` и т.д. Вариант B (один NSIS с секциями)
+      отклонён: вес инсталлятора = сумма всех компонентов, галочки не уменьшают загрузку.
+  - Компоненты (черновик `components.json` в артефактах релиза): `folder-player`,
+    `ipfs-player`, `library` (полная Animatrona; тянет `ffmpeg-gpl` отдельно), `extras`
+    (ярлыки, `fileAssociations`, автозапуск, язык ru/en, папка библиотеки, GPU/CPU-ffmpeg,
+    портативный режим — состав «чотамищё» уточнить).
+  - Порядок: 1) починить релизный контур Animatrona (`electron-builder.yml` публикует в
+    `repo: letar`, workflow льёт в `kamiletar/animatrona`; `latest.yml` не отдаётся) →
+    2) формат `components.json` → 3) прототип bootstrapper с проверкой SHA-256 →
+    4) подключить к лендингу вместо отдельных кнопок скачивания.
+  - Открытые вопросы: один пакет с режимами или три отдельных приложения под общим
+    оркестратором (сейчас три nx-проекта); платформы (только Windows/NSIS или ещё
+    macOS/Linux); технология bootstrapper (Electron / Tauri / NSIS + плагин скачивания);
+    подпись exe (SmartScreen строже к скачивающим exe).
+  - Координация: folder-player и лендинг ведут `animatrona-folder-player-dev` и
+    `animatrona-landing-dev` — задачи им только через `animatrona-coordinator-dev`.
+
 ## Техдолг: `as=` на Chakra-компонентах — Box/Text/Heading (не Icon) [ЗАКРЫТО 2026-09-06]
 
 `<Icon as={IconComponent}>` теперь почищен полностью и в `renderer/src/components/**` (475
