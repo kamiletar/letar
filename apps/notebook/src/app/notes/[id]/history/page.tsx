@@ -1,10 +1,12 @@
+import { DiffView } from '@/app/_components/diff-view'
 import { MergePanel } from '@/app/_components/merge-panel'
 import { RevertButton } from '@/app/_components/revert-button'
 import { findHeads } from '@/lib/branches'
 import { getEnhancedPrisma } from '@/lib/db'
+import { DATE_FORMAT } from '@/lib/format'
 import { requireOwner } from '@/lib/owner'
 import { diffLines, displayTitle } from '@/lib/versions'
-import { Badge, Box, Button, Container, Heading, HStack, Stack, Text } from '@chakra-ui/react'
+import { Badge, Button, Container, Heading, HStack, Stack, Text } from '@chakra-ui/react'
 import NextLink from 'next/link'
 import { notFound } from 'next/navigation'
 
@@ -14,18 +16,6 @@ interface HistoryPageProps {
   params: Promise<{ id: string }>
   searchParams: Promise<{ from?: string; to?: string }>
 }
-
-const DATE_FORMAT = new Intl.DateTimeFormat('ru-RU', {
-  dateStyle: 'medium',
-  timeStyle: 'short',
-  timeZone: 'Europe/Moscow',
-})
-
-const LINE_STYLE = {
-  same: { bg: 'transparent', prefix: ' ' },
-  add: { bg: 'green.subtle', prefix: '+' },
-  del: { bg: 'red.subtle', prefix: '−' },
-} as const
 
 function pick(v: { id: string; title: string; body: string; createdAt: Date }) {
   return { id: v.id, title: v.title, body: v.body, createdAt: DATE_FORMAT.format(v.createdAt) }
@@ -89,14 +79,7 @@ export default async function HistoryPage({ params, searchParams }: HistoryPageP
               : 'Первая версия'}
           </Text>
           {titleChanged && <Text fontSize="sm">Заголовок: «{older.title}» → «{newer.title}»</Text>}
-          <Box borderWidth="1px" borderRadius="md" overflowX="auto" fontFamily="mono" fontSize="sm">
-            {diff.length === 0 && <Text p={3} color="fg.muted">Текст пуст</Text>}
-            {diff.map((line, index) => (
-              <Box key={index} bg={LINE_STYLE[line.type].bg} px={3} whiteSpace="pre-wrap">
-                {LINE_STYLE[line.type].prefix} {line.text}
-              </Box>
-            ))}
-          </Box>
+          <DiffView lines={diff} empty="Текст пуст" />
         </Stack>
 
         <Stack gap={2}>

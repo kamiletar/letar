@@ -1,8 +1,9 @@
 'use client'
 
 import { mergeBranchesAction } from '@/app/_actions/notes.action'
+import { DiffView } from '@/app/_components/diff-view'
 import { diffLines } from '@/lib/versions'
-import { Box, Button, HStack, Stack, Text, Textarea } from '@chakra-ui/react'
+import { Button, HStack, Stack, Text, Textarea } from '@chakra-ui/react'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
 
@@ -19,12 +20,6 @@ interface MergePanelProps {
   main: HeadView
   other: HeadView
 }
-
-const LINE_STYLE = {
-  same: { bg: 'transparent', prefix: ' ' },
-  add: { bg: 'green.subtle', prefix: '+' },
-  del: { bg: 'red.subtle', prefix: '−' },
-} as const
 
 /** Слияние двух веток: показывает разницу, владелец собирает итоговый текст и сохраняет */
 export function MergePanel({ noteId, main, other }: MergePanelProps) {
@@ -54,13 +49,7 @@ export function MergePanel({ noteId, main, other }: MergePanelProps) {
   return (
     <Stack gap={3} borderWidth="1px" borderColor="orange.muted" borderRadius="md" p={4}>
       <Text fontWeight="medium">Ветка от {other.createdAt} расходится с основной ({main.createdAt})</Text>
-      <Box borderWidth="1px" borderRadius="md" overflowX="auto" fontFamily="mono" fontSize="sm">
-        {diff.map((line, index) => (
-          <Box key={index} bg={LINE_STYLE[line.type].bg} px={3} whiteSpace="pre-wrap">
-            {LINE_STYLE[line.type].prefix} {line.text}
-          </Box>
-        ))}
-      </Box>
+      <DiffView lines={diff} />
       <HStack wrap="wrap" gap={2}>
         <Button size="xs" variant="outline" onClick={() => setBody(main.body)}>Взять основную</Button>
         <Button size="xs" variant="outline" onClick={() => setBody(other.body)}>Взять ветку</Button>

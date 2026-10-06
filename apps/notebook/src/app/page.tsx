@@ -1,4 +1,5 @@
 import { getEnhancedPrisma } from '@/lib/db'
+import { DATE_FORMAT } from '@/lib/format'
 import { requireOwner } from '@/lib/owner'
 import { ensureDefaultRubrics } from '@/lib/rubrics'
 import { displayTitle } from '@/lib/versions'
@@ -6,12 +7,6 @@ import { Button, Container, Heading, HStack, Stack, Tag, Text } from '@chakra-ui
 import NextLink from 'next/link'
 
 export const dynamic = 'force-dynamic'
-
-const DATE_FORMAT = new Intl.DateTimeFormat('ru-RU', {
-  dateStyle: 'medium',
-  timeStyle: 'short',
-  timeZone: 'Europe/Moscow',
-})
 
 export default async function HomePage() {
   const user = await requireOwner()

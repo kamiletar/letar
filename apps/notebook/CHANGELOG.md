@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Рефакторинг: отрисовка построчной разницы вынесена в `DiffView` (`_components/diff-view.tsx`), формат даты — в `src/lib/format.ts`; вид и поведение прежние
+
 ## [0.4.1] - 2026-10-06
 
 ### Added
