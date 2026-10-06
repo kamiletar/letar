@@ -56,7 +56,14 @@
       }
     },
     "typecheck:tsgo": {
-      "command": "tsgo --project apps/animatrona-folder-player/tsconfig.json --noEmit"
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "tsgo --project apps/animatrona-folder-player/tsconfig.json --noEmit",
+          "tsgo --project apps/animatrona-folder-player/renderer/tsconfig.json --noEmit"
+        ],
+        "parallel": false
+      }
     },
     "format": {
       "command": "dprint fmt apps/animatrona-folder-player/**/*.{ts,tsx,json}"

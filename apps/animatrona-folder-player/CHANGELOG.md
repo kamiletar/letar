@@ -6,6 +6,9 @@
 
 ### Changed
 
+- `renderer/tsconfig.json`: `"strict": true` (раньше `false`, при `strict: true` в корневом `tsconfig.json`) и `typecheck:tsgo` теперь два прогона подряд — по корневому и по `renderer/tsconfig.json`, чтобы расхождение ловилось до `next build`
+  ([разбор](/.claude/docs/electron-nextron-dual-tsconfig-paths-drift.md)). В `renderer/tsconfig.json` добавлен `include` для `main/types/matroska-subtitles.d.ts` — `main/services/embedded-subtitles.ts` попадает в renderer-проект.
+
 - `vitest.config.mts`: убран избыточный alias `@letar/folder-scan` — пакет уже прямая
   зависимость, симлинк bun резолвит его без alias.
 
