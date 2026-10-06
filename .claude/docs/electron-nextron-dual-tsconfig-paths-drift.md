@@ -104,12 +104,9 @@ export function f(x: R) {
    (`nx:run-commands`, `parallel: false`). Так любое будущее расхождение опций или путей
    ловится до сборки, а не на `next build`.
 
-⚠️ **Остальные приложения с той же ловушкой на 2026-10-07** (по `renderer/tsconfig.json`,
-правка не сделана — вне задачи): `label-printer-desktop`, `animatrona-folder-player`,
-`animatrona-ipfs-player`. `animatrona` и `kami-key-the` уже `strict: true`. С `--strict`
-у `label-printer-desktop` и `animatrona-ipfs-player` по 0 ошибок; у `animatrona-folder-player`
-5 в `main/services/embedded-subtitles.ts` (нет типов `matroska-subtitles`; `main/` попадает в
-renderer-проект через `include`, нужен `declare module` или узкий `include`).
-⚠️ В нестрогом режиме `tsgo -p renderer/tsconfig.json` у этих трёх приложений ещё и сыплет
-`TS2339` из `libs/forms/.../field-data-grid.tsx` — чужой код ломается от `strict: false`
-сам по себе.
+✅ **Переведены 2026-10-07:** `label-printer-desktop` (0.5.25), `animatrona-folder-player` (0.7.4),
+`animatrona-ipfs-player` (0.6.2) — `strict: true` + второй прогон `typecheck:tsgo`. `animatrona` и
+`kami-key-the` уже были `strict: true`. У `animatrona-folder-player` `main/` попадал в renderer-проект
+и давал 5 ошибок из-за `matroska-subtitles` без типов — лечится `include` для готового
+`main/types/matroska-subtitles.d.ts` в `renderer/tsconfig.json`. В нестрогом режиме `tsgo` по
+renderer ещё и сыпал `TS2339` из `libs/forms/.../field-data-grid.tsx` — `strict: false` ломал чужой код сам по себе.
