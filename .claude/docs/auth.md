@@ -35,7 +35,8 @@
 по `libs/auth/src` и `apps/auth-hub/src` `trustedClients` не встречается ни разу как код, только
 как текст в комментариях и в helper-тексте админки.
 
-**Реально работающий путь на сегодня — только через админку** (`apps/auth-hub/src/app/admin/clients/`):
+**Реально работающий путь на сегодня — через админку или прямую запись в `"oauthApplication"`
+(см. «Создать клиент прямой записью в БД» ниже; обе дают одну и ту же запись)** (`apps/auth-hub/src/app/admin/clients/`):
 создаётся запись `OauthApplication` в БД. Чекбокс «Пропустить экран consent» в форме
 (`client-form.tsx`) при этом честно предупреждает пользователя, что поле не действует — то есть
 `skipConsent` для этого пути **гарантированно не работает**, и экран согласия покажется всегда,
@@ -66,7 +67,7 @@ export const auth = betterAuth({
       config: [
         {
           providerId: 'letar-auth',
-          discoveryUrl: 'https://auth.letar.best/.well-known/openid-configuration',
+          discoveryUrl: process.env.OIDC_DISCOVERY_URL!, // см. пункт 4: путь с /api/auth
           clientId: process.env.OIDC_CLIENT_ID!,
           clientSecret: process.env.OIDC_CLIENT_SECRET!,
           scopes: ['openid', 'profile', 'email'],
@@ -87,21 +88,57 @@ authClient.signIn.oauth2({ providerId: 'letar-auth' })
 #### 4. Env переменные клиента (вместо 10+ секретов)
 
 ```bash
-OIDC_CLIENT_ID=<из trustedClients или admin-панели>
-OIDC_CLIENT_SECRET=<секрет>
+OIDC_CLIENT_ID=<app>-prod                # по соглашению; запись в таблице "oauthApplication" Ключницы
+OIDC_CLIENT_SECRET=<секрет>              # открытый текст; в БД Ключницы лежит только его хеш
+OIDC_DISCOVERY_URL=https://auth.letar.best/api/auth/.well-known/openid-configuration
 ```
+
+⚠️ **`OIDC_DISCOVERY_URL` — обязательно с `/api/auth`.** Без него (`/.well-known/openid-configuration`
+в корне) — 404, а Better Auth **молча пропускает провайдер**: вход не ломается с ошибкой, кнопка
+просто не работает, в логе одна строка `Provider "letar-auth": discovery left no usable
+authorization endpoint`. Искать её в логе приложения при «не работает вход через Ключницу».
+
+`clientId`/`clientSecret` берутся из записи `OauthApplication`, не из `trustedClients` (его в коде
+нет, см. пункт 1). Секрет показывается один раз при создании — сразу в `.env.docker.enc`
+([env-files.md](/.claude/rules/env-files.md)).
+
+#### Создать клиент прямой записью в БД Ключницы
+
+Альтернатива админке — вставка в таблицу `"oauthApplication"` (контейнер `auth-hub-db` на s2).
+Подключение: `/c/Windows/System32/OpenSSH/ssh.exe s2.letar.best`, дальше
+`docker exec -it auth-hub-db psql -U $POSTGRES_USER -d $POSTGRES_DB` (переменные — внутри
+контейнера).
+
+| Поле                      | Значение                                                                                                                                       |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`                      | уникальный, например cuid                                                                                                                      |
+| `clientId`                | `<app>-prod`                                                                                                                                   |
+| `clientSecret`            | **SHA-256(секрет) в base64url без padding** — как `hashOauthClientSecret` в `apps/auth-hub/src/lib/oauth-client-secret.ts`. Не открытый секрет |
+| `name`                    | человекочитаемое имя                                                                                                                           |
+| `redirectUrls`            | CSV из redirect URI                                                                                                                            |
+| `redirectUris`            | `text[]` с теми же URI (заполняются оба поля)                                                                                                  |
+| `tokenEndpointAuthMethod` | `client_secret_post`                                                                                                                           |
+| `type`                    | `web`                                                                                                                                          |
+| `enableEndSession`        | `true`                                                                                                                                         |
+
+Секрет: `randomBytes(32).toString('hex')` (Node) — показывается один раз, в БД попадает только хеш.
+Хеш считать функцией из репо, а не вручную, иначе вход упадёт с `invalid_client`.
 
 ### Callback URL формат
 
-Better Auth `genericOAuth` использует путь:
+При `genericOAuth` с `providerId: 'letar-auth'` приложение шлёт в запросе `authorize`
+`redirect_uri`:
 
 ```
-${baseURL}/api/auth/oauth2/callback/${providerId}
+${baseURL}/api/auth/callback/${providerId}
 ```
 
-Например: `https://archetest.letar.best/api/auth/oauth2/callback/letar-auth`
+Например: `https://archetest.letar.best/api/auth/callback/letar-auth`. Именно этот URI должен быть в
+`redirectUrls`/`redirectUris` клиента (проверено 2026-10-06 при подключении `notebook`).
 
-> ⚠️ **НЕ** `/api/auth/callback/` — это другой формат!
+> ⚠️ **НЕ** `/api/auth/oauth2/callback/${providerId}` — другой путь, любой URI, не совпавший с
+> реально отправленным, ломает вход, а в логах приложения ничего не видно (отказ у Ключницы).
+> Раньше в этом разделе стоял именно `oauth2/callback` — это было неверно.
 
 ### Consent endpoint (POST /api/auth/oauth2/consent)
 
