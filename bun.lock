@@ -967,7 +967,7 @@
     },
     "apps/studio": {
       "name": "@letar/studio",
-      "version": "0.72.1",
+      "version": "0.73.0",
       "dependencies": {
         "@letar/admin-ui": "workspace:*",
         "@letar/consent": "workspace:*",
