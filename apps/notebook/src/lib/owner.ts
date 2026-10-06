@@ -18,3 +18,9 @@ export async function requireOwner() {
   }
   return user
 }
+
+/** Владелец для server actions: без редиректа, чтобы вернуть ошибку клиенту */
+export async function getOwner() {
+  const user = await getCurrentUser()
+  return user && isOwnerEmail(user.email) ? user : null
+}
