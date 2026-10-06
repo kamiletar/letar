@@ -52,6 +52,12 @@ bash scripts/hooks/install.sh
   проверяет **индекс**, незастейдженная запись не считается. Обход — `GIT_SKIP_DOCS_INDEX=1`.
 - `pre-commit-sops.sh` — авто-шифрует `.env.docker` → `.env.docker.enc`, если доступен sops +
   age-ключ; подробнее — [secret-manager](/.claude/docs/secret-manager.md).
+- `pre-push-lock-versions-check.sh` — блокирует push `main`, если в отправляемом коммите версии
+  workspace в `bun.lock` не совпадают с `package.json` (package.json submodule — по записанному SHA);
+  иначе `--frozen-lockfile` на сервере роняет деплой ВСЕХ приложений. Обход —
+  `GIT_ALLOW_LOCK_VERSION_DRIFT=1 git push`. Тот же скрипт в режиме `--index` сверяет lock в
+  `pre-commit-deps-integrity.sh` по записанному, а не по рабочему дереву. Разбор —
+  [bun-lock-drift](/.claude/docs/bun-lock-drift-unpushed-commits-blocks-all-deploys.md).
 - `pre-push-submodule-check.sh` — блокирует push letar, если записанный SHA submodule ещё не
   существует на его origin. Такой push ломает **не приложение-виновника, а весь деплой сразу**
   (`upload-pack: not our ref` внутри `git submodule update` — до выбора приложения). Обход —

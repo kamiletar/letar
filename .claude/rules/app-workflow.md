@@ -46,7 +46,8 @@
 3. `apps/<app>/CHANGELOG.md` — запись об изменениях
 4. `apps/<app>/PLAN_TESTING.md` — если добавил тесты
 5. `apps/<app>/package.json` — поднять версию (semver)
-   ⚠️ и **сразу** `bun.lock`: сверка `bun scripts/check-lock-workspace-versions.mjs`, при расхождении
+   ⚠️ и **сразу** `bun.lock`: сверка `bun scripts/check-lock-workspace-versions.mjs --index` (по записанному
+   состоянию, чужой WIP в рабочем дереве не мешает; без флага — по диску), при расхождении
    `bun install --lockfile-only` (только в чистом дереве) и отдельный коммит lock. Без этого
    `--frozen-lockfile` на сервере роняет деплой ВСЕХ приложений. Версия выросла внутри приватного
    submodule — lock коммить после push submodule

@@ -104,21 +104,48 @@ git push origin main
 
 `scripts/check-lock-workspace-versions.mjs` (реестр `check-all`, id `lock-versions`, группа
 `deps`, gate) сверяет блок `workspaces` в `bun.lock` с `package.json` каждого пакета: `version`,
-четыре карты зависимостей, а также наличие workspace на диске без записи в lock. 36 мс.
+четыре карты зависимостей, а также наличие workspace без записи в lock.
 
-- **pre-commit** (`pre-commit-deps-integrity.sh`): коммит, содержащий сам `bun.lock`, при
+**Три режима источника** — откуда брать «состояние»:
+
+| Режим                 | bun.lock и обычные package.json | package.json submodule                                            | Для чего                     |
+| --------------------- | ------------------------------- | ----------------------------------------------------------------- | ---------------------------- |
+| `--worktree` (умолч.) | рабочее дерево                  | рабочее дерево submodule                                          | ручной прогон «что на диске» |
+| `--index`             | индекс (`git show :path`)       | по gitlink-SHA из индекса (`git -C <sm> show <sha>:package.json`) | pre-commit, ~0.6 с           |
+| `--ref=<коммит>`      | коммит                          | по gitlink-SHA этого коммита                                      | pre-push                     |
+
+Зачем git-режимы: в общем чекауте у приватных submodule на диске часто лежит версия **новее**
+записанного в letar SHA (чужая работа, ещё не забампленная). Сверка по рабочему дереву ругалась на
+эти чужие расхождения и блокировала правильный коммит lock — гейт приходилось отключать целиком
+(`GIT_SKIP_DEPS_INTEGRITY=1`), то есть именно тогда, когда он нужен (2026-10-06, два submodule).
+Сервер же видит только записанное состояние — его и сверяем. Объекта записанного SHA нет в
+локальном submodule (или submodule не выкачан) — workspace попадает в «неполное покрытие»,
+которое печатается вслух, а не зеленеет молча ([verification-pitfalls](verification-pitfalls.md)).
+Чтение — одним `git cat-file --batch` на репозиторий: ~140 процессов `git show` на Windows стоили ~5 с.
+
+- **pre-commit** (`pre-commit-deps-integrity.sh`, режим `--index`): коммит, содержащий сам `bun.lock`, при
   расхождении **блокируется**. Коммит `package.json` или сдвига указателя submodule — только
   **предупреждение**: lock и `package.json` едут разными коммитами (scope-guard режет связку
   `bun.lock` и `apps/<x>` как multi-scope), и в момент бампа расхождение неизбежно — но хук напоминает про
   lock ровно в тот момент, когда про него обычно забывают. Внутри submodule хук запускает ту же
-  сверку от корня letar (предупреждением).
+  сверку от корня letar по рабочему дереву (предупреждением): индекса letar там нет.
+- **pre-push** (`pre-push-lock-versions-check.sh`, режим `--ref=<вершина>`): push `main` блокируется,
+  если в **вершине** пушимого коммита версии в `bun.lock` не совпадают с `package.json` по
+  записанным SHA. Закрывает вторую дыру 2026-10-06: letar ушёл на origin с новым SHA submodule и
+  СТАРОЙ версией в lock (коммит lock молча не состоялся, цепочка команд дошла до push) — ~2 минуты
+  `origin/main` был несогласован, а `--frozen-lockfile` на сервере в таком состоянии роняет деплой
+  всех приложений. Проверяется вершина, а не каждый коммит диапазона: bump и lock — раздельные
+  коммиты, промежуточное расхождение законно, а на origin важен итог. Другие ветки не проверяются
+  (деплой идёт с `main`). Обход — `GIT_ALLOW_LOCK_VERSION_DRIFT=1 git push` (блокировка → предупреждение).
 - **В CI не запускается** (`ci: 'no'`): шаг `Install dependencies` там идёт **без**
   `--frozen-lockfile` и перезаписывает `bun.lock` до проверки — она сверяла бы уже пересобранный
   lock и зеленела бы всегда. Это тот же класс, что «проверка, которая не может упасть»
   ([verification-pitfalls](verification-pitfalls.md)).
 - ⚠️ Хук — копия на момент `install.sh` ([precommit-hook-install-staleness](precommit-hook-install-staleness.md)):
   чтобы он заработал в корне и во всех 14 submodule, нужно `bash scripts/hooks/install.sh
-  --all-submodules`. До этого защищает только ручной `bun scripts/check-all.mjs --only=lock-versions`.
+  --all-submodules`. До этого защищает только ручной `bun scripts/check-all.mjs --only=lock-versions`
+  (он идёт по рабочему дереву). Pre-push-хук внутри submodule ничего не проверяет — корневого
+  `bun.lock` там нет.
 
 ### Как чинить, когда сверка красная
 
