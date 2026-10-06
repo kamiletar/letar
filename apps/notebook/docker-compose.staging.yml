@@ -1,0 +1,75 @@
+name: notebook-staging
+
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: notebook-staging-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: notebook_staging
+      POSTGRES_USER: lena_user
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+    volumes:
+      - notebook-staging-data:/var/lib/postgresql/data
+    # Хостовый порт на s1 — следующий свободный после kami (5467).
+    # ⚠️ Комментарий НЕ должен стоять между `ports:` и первой записью порта — deploy-affected.sh
+    # извлекает DB_PORT через `grep -A 1 "ports:"`, захватывая первую строку после `ports:`
+    # буквально.
+    ports:
+      - '5468:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U lena_user -d notebook_staging']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    image: notebook:staging
+    container_name: notebook-staging-app
+    restart: unless-stopped
+    ports:
+      # Внутренний 3127 — из Dockerfile.production. Хостовый 3039 — следующий свободный после 3038.
+      - '3039:3127'
+    env_file:
+      - .env.staging
+    environment:
+      DATABASE_URL: postgresql://lena_user:${DB_PASSWORD:-postgres}@notebook-staging-db:5432/notebook_staging
+      # ⚠️ Реальный публичный домен, не localhost: Better Auth доверяет только Origin, совпадающему
+      # с baseURL (тот же класс бага, что на kami/mandala/aboi). Тот же адрес — redirect URI клиента
+      # Ключницы, иначе вход закончится ошибкой redirect_uri_mismatch
+      BETTER_AUTH_URL: https://notebook-stage.s1.letar.best
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - default
+      - traefik-network
+    labels:
+      traefik.enable: 'true'
+      traefik.docker.network: 'traefik-network'
+      traefik.http.routers.notebook-stage.rule: 'Host(`notebook-stage.s1.letar.best`)'
+      traefik.http.routers.notebook-stage.entrypoints: 'websecure'
+      # ⛔ Без `certresolver` — сертификат уже выпущен (wildcard `*.s1.letar.best`), роутер его
+      # только использует.
+      traefik.http.routers.notebook-stage.tls: 'true'
+      # Порт КОНТЕЙНЕРА, не хостовый
+      traefik.http.services.notebook-stage.loadbalancer.server.port: '3127'
+    healthcheck:
+      # Принимаем и 200, и редирект на /login: главная закрыта входом
+      test:
+        [
+          'CMD-SHELL',
+          "node -e \"require('http').get('http://0.0.0.0:3127/login', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))\"",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 15s
+
+volumes:
+  notebook-staging-data:
+
+networks:
+  # Traefik маршрутизирует только контейнеры в своей сети. Сеть создаётся один раз на сервере
+  traefik-network:
+    external: true

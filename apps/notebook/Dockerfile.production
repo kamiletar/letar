@@ -1,0 +1,23 @@
+# Dockerfile.production - для уже собранных приложений
+# Используется когда сборка выполнена на сервере с nx build
+# Build context: workspace root (C:\web\letar)
+
+FROM letar-node-runtime:24 AS runner
+WORKDIR /app
+
+# Копируем уже собранный standalone output (включает нужные node_modules)
+COPY --chown=nextjs:nodejs apps/notebook/.next/standalone ./
+
+# Статика и public не входят в standalone автоматически. В public лежат sw.js и offline.html:
+# без них service worker не зарегистрируется
+COPY --chown=nextjs:nodejs apps/notebook/.next/static ./apps/notebook/.next/static
+COPY --chown=nextjs:nodejs apps/notebook/public ./apps/notebook/public
+
+USER nextjs
+
+EXPOSE 3127
+
+ENV PORT=3127
+ENV HOSTNAME="0.0.0.0"
+
+CMD ["node", "apps/notebook/server.js"]

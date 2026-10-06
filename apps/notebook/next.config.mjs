@@ -9,6 +9,7 @@ import { fileURLToPath } from 'node:url'
 const workspaceRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 
 const nextConfig = {
+  output: 'standalone', // Для Docker деплоя
   pageExtensions: ['js', 'jsx', 'ts', 'tsx', 'md', 'mdx'],
   turbopack: { root: workspaceRoot },
 
@@ -27,7 +28,6 @@ const nextConfig = {
     '@letar/forms-react',
     '@letar/ui',
   ],
-
   // Если это приложение подключит @letar/query-provider И в его project.json стоит
   // `next dev --webpack` (не Turbopack по умолчанию) — раскомментируй блок ниже.
   // @tanstack/devtools-ui@0.7.0+ (транзитивная зависимость @tanstack/react-devtools через

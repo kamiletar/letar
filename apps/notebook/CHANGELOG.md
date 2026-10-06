@@ -4,6 +4,12 @@
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-10-06
+
+### Added
+
+- Деплой на staging: `Dockerfile.production`, `docker-compose.staging.yml` (Postgres + приложение за Traefik), `.env.staging.enc` (SOPS), `output: 'standalone'`
+
 ## [0.4.0] - 2026-10-06
 
 ### Added
