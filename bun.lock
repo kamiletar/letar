@@ -928,7 +928,7 @@
     },
     "apps/notebook": {
       "name": "@letar/notebook",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "dependencies": {
         "@letar/auth": "workspace:*",
         "@letar/env-load": "workspace:*",
