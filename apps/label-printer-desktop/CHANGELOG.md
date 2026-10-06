@@ -4,6 +4,13 @@
 
 ## [Unreleased]
 
+## [0.5.25] - 2026-10-07
+
+### Changed
+
+- `renderer/tsconfig.json`: `"strict": true` (раньше `false`, при `strict: true` в корневом `tsconfig.json`) и `typecheck:tsgo` теперь два прогона подряд — по корневому и по `renderer/tsconfig.json`, чтобы расхождение ловилось до `next build`
+  ([разбор](/.claude/docs/electron-nextron-dual-tsconfig-paths-drift.md)).
+
 ## [0.5.24] - 2026-09-30
 
 ### Changed

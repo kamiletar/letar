@@ -95,7 +95,14 @@
         "zenstack:generate",
         "typecheck:main"
       ],
-      "command": "tsgo --project apps/label-printer-desktop/tsconfig.json --noEmit"
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "tsgo --project apps/label-printer-desktop/tsconfig.json --noEmit",
+          "tsgo --project apps/label-printer-desktop/renderer/tsconfig.json --noEmit"
+        ],
+        "parallel": false
+      }
     },
     "typecheck:main": {
       "command": "tsgo --project apps/label-printer-desktop/main/tsconfig.json --noEmit"
