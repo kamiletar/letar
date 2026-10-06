@@ -200,6 +200,9 @@ Better Auth, cookie-баннер и т.д.), которую не всем нов
 `src/generated/` в сгенерированный `.gitignore` submodule'а (публичным приложениям это не нужно —
 корневой `.gitignore` монорепо уже исключает `/apps/**/src/generated/`).
 
+`vitest.config.mts` каркаса содержит `passWithNoTests: true`: в свежем приложении тестов нет, и без флага
+`nx test <name>` падает с «No test files found». Появились первые тесты — флаг ничему не мешает.
+
 Формы (`@letar/forms`) и аутентификация (Better Auth) каркасом **не** создаются — это отдельные шаги
 после того, как в `schema.zmodel` появятся реальные модели (`.claude/docs/forms.md`, `.claude/docs/auth.md`).
 

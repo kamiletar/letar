@@ -70,6 +70,15 @@ describe('new-app generator', () => {
     expect(env).toContain('PORT=3001')
   })
 
+  it('vitest.config.mts пропускает отсутствие тестов и не использует __dirname', async () => {
+    await newAppGenerator(tree, { name: 'my-app' })
+
+    const vitestConfig = tree.read('apps/my-app/vitest.config.mts', 'utf-8')
+    expect(vitestConfig).toContain('passWithNoTests: true')
+    expect(vitestConfig).toContain('import.meta.dirname')
+    expect(vitestConfig).not.toContain('__dirname')
+  })
+
   it('создаёт полный набор файлов приложения', async () => {
     await newAppGenerator(tree, { name: 'my-app' })
 
