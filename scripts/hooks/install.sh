@@ -11,7 +11,9 @@
 #   - pre-commit-dprint-check.sh — блокирует commit staged-файлов не в стиле dprint (напр.
 #                                   после случайного Prettier-форматирования `nx format`)
 #   - pre-commit-deps-integrity.sh — целостность зависимостей (патчи + peer), запускается
-#                                   ТОЛЬКО если в коммите есть bun.lock/package.json
+#                                   ТОЛЬКО если в коммите есть bun.lock/package.json. Версии workspace в
+#                                   bun.lock сверяются по ИНДЕКСУ и записанным SHA submodule
+#                                   (`check-lock-workspace-versions.mjs --index`), а не по рабочему дереву
 #   - pre-commit-public-domains.sh — домены и ИНН коммерческих приложений в публичных файлах
 #   - pre-commit-docs-index.sh   — индекс документации (каждый .claude/docs/*.md упомянут и в
 #                                   AGENTS.md, и в INDEX.md; ссылки живы), запускается ТОЛЬКО
@@ -29,6 +31,11 @@
 #   - pre-push-submodule-check.sh — блокирует push, если записанный SHA submodule ещё не
 #                                   существует на его origin (иначе падает деплой ВСЕХ
 #                                   приложений: `upload-pack: not our ref`)
+#   - pre-push-lock-versions-check.sh — блокирует push main, если в отправляемом коммите версии
+#                                   workspace в bun.lock расходятся с package.json (по записанным
+#                                   SHA submodule; иначе `--frozen-lockfile` роняет деплой ВСЕХ
+#                                   приложений). Обход — GIT_ALLOW_LOCK_VERSION_DRIFT=1. Только в
+#                                   корне letar (нужен bun.lock)
 #
 # Использование:
 #   bash scripts/hooks/install.sh                                  # из корня letar
@@ -126,19 +133,26 @@ DISPATCH
   # чтобы правки чекера применялись без переустановки хуков.
   cp "$SRC_DIR/pre-push-submodule-check.sh" "$hooks_dir/_pre-push-submodule-check.sh"
   cp "$SRC_DIR/../check-submodule-push-state.sh" "$hooks_dir/_check-submodule-push-state.sh"
-  chmod +x "$hooks_dir/_pre-push-submodule-check.sh" "$hooks_dir/_check-submodule-push-state.sh"
+  cp "$SRC_DIR/pre-push-lock-versions-check.sh" "$hooks_dir/_pre-push-lock-versions-check.sh"
+  cp "$SRC_DIR/../check-lock-workspace-versions.mjs" "$hooks_dir/_check-lock-workspace-versions.mjs"
+  chmod +x "$hooks_dir/_pre-push-submodule-check.sh" "$hooks_dir/_check-submodule-push-state.sh"     "$hooks_dir/_pre-push-lock-versions-check.sh"
 
   cat > "$hooks_dir/pre-push" <<'PUSH_DISPATCH'
 #!/usr/bin/env bash
 # Сгенерировано scripts/hooks/install.sh — не редактируй руками, правь исходники в scripts/hooks/
 set -uo pipefail
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-exec bash "$DIR/_pre-push-submodule-check.sh" "$@"
+# stdin pre-push читается один раз — обоим хукам отдаём его копию.
+input="$(cat)"
+status=0
+printf '%s\n' "$input" | bash "$DIR/_pre-push-submodule-check.sh" "$@" || status=$?
+printf '%s\n' "$input" | bash "$DIR/_pre-push-lock-versions-check.sh" "$@" || status=$?
+exit $status
 PUSH_DISPATCH
   chmod +x "$hooks_dir/pre-push"
 
   echo "✅ $label → $hooks_dir/pre-commit (scope-guard + syntax-check + semgrep + dprint-check + deps-integrity + docs-index + schema-migration-check + section-number-check + stray-dts-check + public-domains + sops)"
-  echo "   $label → $hooks_dir/pre-push (submodule-check)"
+  echo "   $label → $hooks_dir/pre-push (submodule-check + lock-versions-check)"
 }
 
 if [[ "${1:-}" == "--all-submodules" ]]; then

@@ -66,11 +66,17 @@ fi
 #     блокировать его нельзя — но забыть про lock после него нельзя тоже.
 # Цена пропуска — встают деплои ВСЕХ приложений сразу
 # (.claude/docs/bun-lock-drift-unpushed-commits-blocks-all-deploys.md).
+#
+# ⚠️ Сверка идёт по ЗАПИСАННОМУ состоянию (`--index`), а не по рабочему дереву: в общем
+# чекауте у приватных submodule на диске часто лежит версия новее записанного SHA, и чужие
+# расхождения блокировали правильный коммит lock — гейт приходилось отключать целиком
+# (2026-10-06). Деплой на сервере видит именно записанное, его и сверяем. Внутри submodule
+# (`mode=worktree`) индекса letar нет — там сверка только предупреждает, по диску.
 lock_versions_check() {
-  local root="$1" lock_staged="$2"
+  local root="$1" lock_staged="$2" mode="${3:---index}"
   [[ -f "$root/scripts/check-lock-workspace-versions.mjs" ]] || return 0
   local out
-  if out="$(bun "$root/scripts/check-lock-workspace-versions.mjs" 2>&1)"; then
+  if out="$(LOCK_CHECK_REPO_ROOT="$root" bun "$root/scripts/check-lock-workspace-versions.mjs" "$mode" 2>&1)"; then
     return 0
   fi
   echo "$out" >&2
@@ -108,7 +114,7 @@ if [[ -n "$super_root" ]]; then
   echo "ℹ️  package.json внутри submodule — целостность зависимостей проверяется" >&2
   echo "    в корне монорепо: bun scripts/check-all.mjs --group=deps" >&2
   if command -v bun > /dev/null 2>&1; then
-    lock_versions_check "$super_root" 0
+    lock_versions_check "$super_root" 0 --worktree
   fi
   exit 0
 fi

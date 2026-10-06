@@ -100,7 +100,9 @@ const CHECKS = [
     // ⚠️ В CI не запускается: шаг «Install dependencies» там идёт БЕЗ
     // --frozen-lockfile (см. ci.yml) и перезаписывает bun.lock ДО этой проверки —
     // она сверяла бы уже пересобранный lock с package.json и зеленела всегда.
-    // Настоящие точки: pre-commit (коммит bun.lock блокируется) и ручной прогон.
+    // Настоящие точки: pre-commit (`--index`, коммит bun.lock блокируется), pre-push
+    // (`--ref=<вершина>`, push main блокируется) и ручной прогон. Здесь запускается режим
+    // по рабочему дереву — он ловит и «забытый» bump на диске, но видит чужой WIP.
     ci: 'no',
     doc: '.claude/docs/bun-lock-drift-unpushed-commits-blocks-all-deploys.md',
   },
