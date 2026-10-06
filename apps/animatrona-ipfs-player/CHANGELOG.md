@@ -6,6 +6,9 @@
 
 ### Changed
 
+- `renderer/tsconfig.json`: `"strict": true` (раньше `false`, при `strict: true` в корневом `tsconfig.json`) и `typecheck:tsgo` теперь два прогона подряд — по корневому и по `renderer/tsconfig.json`, чтобы расхождение ловилось до `next build`
+  ([разбор](/.claude/docs/electron-nextron-dual-tsconfig-paths-drift.md)).
+
 - **Локальный дубль `enum TrackPreference` убран из `schema.zmodel`** — теперь резолвится через
   фрагмент `libs/zenstack-fragments/src/animatrona.zmodel` (импорт в шапке файла уже был).
   Консолидация выполнена `animatrona-dev` по задаче, переданной через `animatrona-coordinator-dev`

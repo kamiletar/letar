@@ -33,7 +33,14 @@
       }
     },
     "typecheck:tsgo": {
-      "command": "tsgo --project apps/animatrona-ipfs-player/tsconfig.json --noEmit"
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "tsgo --project apps/animatrona-ipfs-player/tsconfig.json --noEmit",
+          "tsgo --project apps/animatrona-ipfs-player/renderer/tsconfig.json --noEmit"
+        ],
+        "parallel": false
+      }
     },
     "format": {
       "command": "dprint fmt apps/animatrona-ipfs-player/**/*.{ts,tsx,json}"
