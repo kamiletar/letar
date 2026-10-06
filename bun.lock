@@ -926,6 +926,15 @@
       "name": "mandala-e2e",
       "version": "0.0.1",
     },
+    "apps/mugcup": {
+      "name": "@letar/mugcup",
+      "version": "0.2.0",
+      "dependencies": {
+        "@letar/env-load": "workspace:*",
+        "@letar/pg-url": "workspace:*",
+        "@letar/seed-utils": "workspace:*",
+      },
+    },
     "apps/notebook": {
       "name": "@letar/notebook",
       "version": "0.4.1",
@@ -2941,6 +2950,8 @@
     "@letar/mcp-test-kit": ["@letar/mcp-test-kit@workspace:libs/mcp-test-kit"],
 
     "@letar/media-client": ["@letar/media-client@workspace:libs/media-client"],
+
+    "@letar/mugcup": ["@letar/mugcup@workspace:apps/mugcup"],
 
     "@letar/notebook": ["@letar/notebook@workspace:apps/notebook"],
 
