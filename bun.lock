@@ -937,7 +937,7 @@
     },
     "apps/poster-microtext-desktop": {
       "name": "@letar/poster-microtext-desktop",
-      "version": "0.19.8",
+      "version": "0.21.0",
       "dependencies": {
         "@letar/chakra-provider": "workspace:*",
         "@letar/icon-generator": "workspace:*",
