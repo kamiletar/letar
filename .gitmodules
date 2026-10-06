@@ -43,3 +43,6 @@
 [submodule "apps/flora"]
 	path = apps/flora
 	url = git@github.com:kamiletar/letar-private-flora.git
+[submodule "apps/mugcup"]
+	path = apps/mugcup
+	url = git@github.com:kamiletar/letar-private-mugcup.git
