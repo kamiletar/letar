@@ -1,5 +1,9 @@
 # Блокнот Ками — выполненные задачи
 
+## Рефакторинг: DiffView и format.ts (2026-10-06, Unreleased)
+
+- Построчная разница вынесена в `src/app/_components/diff-view.tsx` (prop `lines`, необязательный `empty`), использована в истории и `MergePanel`; `DATE_FORMAT` — в `src/lib/format.ts` (история и главная). Вид и поведение прежние
+
 ## v0.4.1 — Деплой на staging (2026-10-06)
 
 - `Dockerfile.production`, `docker-compose.staging.yml` (Postgres + приложение за Traefik, host-порты 5468 и 3039), `.env.staging.enc` (SOPS), `output: 'standalone'`
