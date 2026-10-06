@@ -1,4 +1,6 @@
+import { MergePanel } from '@/app/_components/merge-panel'
 import { RevertButton } from '@/app/_components/revert-button'
+import { findHeads } from '@/lib/branches'
 import { getEnhancedPrisma } from '@/lib/db'
 import { requireOwner } from '@/lib/owner'
 import { diffLines, displayTitle } from '@/lib/versions'
@@ -25,6 +27,10 @@ const LINE_STYLE = {
   del: { bg: 'red.subtle', prefix: '−' },
 } as const
 
+function pick(v: { id: string; title: string; body: string; createdAt: Date }) {
+  return { id: v.id, title: v.title, body: v.body, createdAt: DATE_FORMAT.format(v.createdAt) }
+}
+
 export default async function HistoryPage({ params, searchParams }: HistoryPageProps) {
   const user = await requireOwner()
   const { id } = await params
@@ -36,6 +42,10 @@ export default async function HistoryPage({ params, searchParams }: HistoryPageP
     notFound()
   }
   const versions = await db.noteVersion.findMany({ where: { noteId: note.id }, orderBy: { createdAt: 'desc' } })
+
+  const heads = findHeads(versions)
+  const mainHead = heads.find((v) => v.id === note.currentVersionId) ?? heads[0]
+  const otherHeads = heads.filter((v) => v.id !== mainHead?.id)
 
   const current = versions.find((v) => v.id === note.currentVersionId) ?? versions[0]
   // По умолчанию показываем, что изменилось в последней версии
@@ -57,6 +67,20 @@ export default async function HistoryPage({ params, searchParams }: HistoryPageP
         <Heading asChild size="xl">
           <h1>История: {current ? displayTitle(current) : 'Без названия'}</h1>
         </Heading>
+
+        {mainHead && otherHeads.length > 0 && (
+          <Stack gap={3}>
+            <Heading asChild size="md">
+              <h2>Ветки ждут слияния ({otherHeads.length})</h2>
+            </Heading>
+            {/* Сливаем по одной: после слияния страница обновится и покажет следующую */}
+            <MergePanel
+              noteId={note.id}
+              main={{ ...pick(mainHead) }}
+              other={{ ...pick(otherHeads[0]) }}
+            />
+          </Stack>
+        )}
 
         <Stack gap={2}>
           <Text color="fg.muted" fontSize="sm">

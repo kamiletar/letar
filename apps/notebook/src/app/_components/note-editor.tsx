@@ -1,6 +1,8 @@
 'use client'
 
 import { deleteNoteAction, saveNoteAction } from '@/app/_actions/notes.action'
+import { flushOutbox, getOutbox, queueEdit } from '@/lib/offline/outbox-store'
+import type { OutboxItem } from '@/lib/outbox'
 import { Box, Button, Field, HStack, Input, Stack, Tabs, Text, Textarea } from '@chakra-ui/react'
 import NextLink from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -18,11 +20,14 @@ const ERROR_TEXT: Record<string, string> = {
   UNAUTHORIZED: 'Сессия закончилась, войдите снова',
   VALIDATION_ERROR: 'Текст слишком длинный',
   NOT_FOUND: 'Заметка не найдена',
-  CONFLICT: 'Заметку изменили на другом устройстве. Обновите страницу, чтобы не потерять версии',
   DATABASE_ERROR: 'Не удалось сохранить, попробуйте ещё раз',
 }
 
-const OK_MESSAGES = ['Сохранено', 'Без изменений']
+const OK_MESSAGES = [
+  'Сохранено',
+  'Без изменений',
+  'Сохранено отдельной веткой: заметку менял другой экран. Слить ветки можно в истории',
+]
 
 /** Устройство нужно, чтобы в истории видеть, откуда пришла правка */
 function getDeviceId(): string | null {
@@ -38,12 +43,43 @@ function getDeviceId(): string | null {
   }
 }
 
-export function NoteEditor(
+/** Правки, которые устройство уже приняло, но сервер ещё не получил, важнее того, что пришло в HTML */
+export function NoteEditor(props: NoteEditorProps) {
+  const [draft, setDraft] = useState<OutboxItem | null>(null)
+  const { noteId } = props
+
+  useEffect(() => {
+    let active = true
+    void getOutbox().then((queue) => {
+      const found = noteId ? queue.find((item) => item.noteId === noteId) : undefined
+      if (active && found) {
+        setDraft(found)
+      }
+    })
+    return () => {
+      active = false
+    }
+  }, [noteId])
+
+  return (
+    <NoteEditorForm
+      key={draft?.queuedAt ?? 'server'}
+      {...props}
+      initialTitle={draft?.title ?? props.initialTitle}
+      initialBody={draft?.body ?? props.initialBody}
+      versionId={draft ? draft.baseVersionId : props.versionId}
+    />
+  )
+}
+
+function NoteEditorForm(
   { noteId: initialNoteId, versionId: initialVersionId, initialTitle, initialBody }: NoteEditorProps,
 ) {
   const router = useRouter()
   const [noteId, setNoteId] = useState(initialNoteId)
   const [baseVersionId, setBaseVersionId] = useState(initialVersionId)
+  // Идентификатор черновика на устройстве: у новой заметки серверного id ещё нет
+  const [localId] = useState(() => (initialNoteId ? `note:${initialNoteId}` : `new:${crypto.randomUUID()}`))
   const [title, setTitle] = useState(initialTitle)
   const [body, setBody] = useState(initialBody)
   const [saved, setSaved] = useState({ title: initialTitle, body: initialBody })
@@ -54,28 +90,68 @@ export function NoteEditor(
 
   function save() {
     startTransition(async () => {
-      const result = await saveNoteAction({
-        noteId: noteId ?? undefined,
+      const item: OutboxItem = {
+        localId,
+        noteId,
         baseVersionId,
         title,
         body,
         deviceId: getDeviceId(),
-      })
+        queuedAt: Date.now(),
+      }
+      // Сначала на устройство, потом на сервер: правка не пропадёт, даже если сеть оборвётся на полпути
+      const queued = await queueEdit(item)
+      if (!queued) {
+        await saveDirect(item)
+        return
+      }
+      setSaved({ title, body })
+      const report = await flushOutbox()
+      const result = report.synced.get(localId)
+      if (!result) {
+        setMessage(
+          report.unauthorized
+            ? ERROR_TEXT.UNAUTHORIZED
+            : report.offline
+            ? 'Сохранено на устройстве, отправится при появлении сети'
+            : ERROR_TEXT.DATABASE_ERROR,
+        )
+        return
+      }
+      applyResult(result)
+    })
+  }
+
+  /** Запасной путь, если IndexedDB недоступна */
+  async function saveDirect(item: OutboxItem) {
+    try {
+      const result = await saveNoteAction({ ...item, noteId: item.noteId ?? undefined })
       if (!result.success) {
         setMessage(ERROR_TEXT[result.error] ?? ERROR_TEXT.DATABASE_ERROR)
         return
       }
-      const { noteId: savedNoteId, versionId } = result.data
-      if (savedNoteId && savedNoteId !== noteId) {
-        setNoteId(savedNoteId)
-        window.history.replaceState(null, '', `/notes/${savedNoteId}`)
-      }
-      if (versionId) {
-        setBaseVersionId(versionId)
-      }
       setSaved({ title, body })
-      setMessage(versionId ? OK_MESSAGES[0] : OK_MESSAGES[1])
-    })
+      applyResult(result.data)
+    } catch {
+      setMessage('Нет сети, а память устройства недоступна: текст не сохранён')
+    }
+  }
+
+  function applyResult(
+    { noteId: savedNoteId, versionId, branched }: {
+      noteId: string | null
+      versionId: string | null
+      branched: boolean
+    },
+  ) {
+    if (savedNoteId && savedNoteId !== noteId) {
+      setNoteId(savedNoteId)
+      window.history.replaceState(null, '', `/notes/${savedNoteId}`)
+    }
+    if (versionId) {
+      setBaseVersionId(versionId)
+    }
+    setMessage(branched ? OK_MESSAGES[2] : versionId ? OK_MESSAGES[0] : OK_MESSAGES[1])
   }
 
   // Ctrl+S / Cmd+S сохраняет, а не открывает диалог браузера. Ссылка на save свежая на каждый рендер

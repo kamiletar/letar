@@ -178,6 +178,8 @@ model NoteVersion {
   noteId    String
   /// Версия, от которой отталкивалась правка. Две версии с одним родителем образуют ветки
   parentId  String?
+  /// Вторая голова, слитая в эту версию (слияние веток). Родитель при этом — основная голова
+  mergedFromId String?
   title     String   @default("")
   /// Markdown
   body      String   @default("")
@@ -188,8 +190,11 @@ model NoteVersion {
   note   Note          @relation(fields: [noteId], references: [id], onDelete: Cascade)
   parent NoteVersion?  @relation("VersionParent", fields: [parentId], references: [id])
   nexts  NoteVersion[] @relation("VersionParent")
+  mergedFrom NoteVersion?  @relation("VersionMerge", fields: [mergedFromId], references: [id])
+  merges     NoteVersion[] @relation("VersionMerge")
 
   @@index([noteId, createdAt])
+  @@index([mergedFromId])
   @@index([parentId])
 
   @@allow('create,read', auth() == note.owner)

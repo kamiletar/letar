@@ -1,5 +1,6 @@
 'use server'
 
+import { branchInput, findHeads, mergeInput } from '@/lib/branches'
 import { getEnhancedPrisma } from '@/lib/db'
 import { getOwner } from '@/lib/owner'
 import { nextVersionInput, revertInput } from '@/lib/versions'
@@ -8,7 +9,7 @@ import { z } from 'zod/v4'
 
 type ActionResult<T = void> = { success: true; data: T } | { success: false; error: ActionError }
 
-type ActionError = 'UNAUTHORIZED' | 'VALIDATION_ERROR' | 'NOT_FOUND' | 'CONFLICT' | 'DATABASE_ERROR'
+type ActionError = 'UNAUTHORIZED' | 'VALIDATION_ERROR' | 'NOT_FOUND' | 'DATABASE_ERROR'
 
 const SaveSchema = z
   .object({
@@ -30,6 +31,8 @@ export interface SaveResult {
   noteId: string | null
   /** `null`, если текст не менялся и новая версия не создавалась */
   versionId: string | null
+  /** Правка пришла от устаревшей версии и сохранена отдельной веткой, текущая версия не менялась */
+  branched: boolean
 }
 
 /** Сохранить заметку: новая версия с родителем — текущей версией */
@@ -55,7 +58,18 @@ export async function saveNoteAction(input: unknown): Promise<ActionResult<SaveR
       return { success: false, error: 'NOT_FOUND' }
     }
     if (note && (note.currentVersionId ?? null) !== (baseVersionId ?? null)) {
-      return { success: false, error: 'CONFLICT' }
+      // Устройство правило не последнюю версию (например, заметку меняли офлайн): сохраняем ветку,
+      // ничего не затирая. Слить ветки владелец сможет на странице истории
+      const base = baseVersionId
+        ? await db.noteVersion.findFirst({ where: { id: baseVersionId, noteId: note.id } })
+        : null
+      const branch = branchInput(base, { title, body }, deviceId ?? null)
+      if (!branch) {
+        return { success: true, data: { noteId: note.id, versionId: null, branched: false } }
+      }
+      const created = await db.noteVersion.create({ data: { ...branch, noteId: note.id } })
+      revalidatePath(`/notes/${note.id}/history`)
+      return { success: true, data: { noteId: note.id, versionId: created.id, branched: true } }
     }
 
     const current = note?.currentVersionId
@@ -63,14 +77,14 @@ export async function saveNoteAction(input: unknown): Promise<ActionResult<SaveR
       : null
     const next = nextVersionInput(current, { title, body }, deviceId ?? null)
     if (!next) {
-      return { success: true, data: { noteId: note?.id ?? null, versionId: null } }
+      return { success: true, data: { noteId: note?.id ?? null, versionId: null, branched: false } }
     }
 
     const saved = await db.$transaction(async (tx) => {
       const target = note ?? await tx.note.create({ data: { ownerId: owner.id } })
       const version = await tx.noteVersion.create({ data: { ...next, noteId: target.id } })
       await tx.note.update({ where: { id: target.id }, data: { currentVersionId: version.id } })
-      return { noteId: target.id, versionId: version.id }
+      return { noteId: target.id, versionId: version.id, branched: false }
     })
     revalidatePath('/')
     return { success: true, data: saved }
@@ -106,7 +120,7 @@ export async function revertNoteAction(input: unknown): Promise<ActionResult<Sav
     }
     const next = revertInput(current, target)
     if (!next) {
-      return { success: true, data: { noteId: note.id, versionId: null } }
+      return { success: true, data: { noteId: note.id, versionId: null, branched: false } }
     }
 
     const version = await db.$transaction(async (tx) => {
@@ -116,7 +130,7 @@ export async function revertNoteAction(input: unknown): Promise<ActionResult<Sav
     })
     revalidatePath('/')
     revalidatePath(`/notes/${note.id}`)
-    return { success: true, data: { noteId: note.id, versionId: version.id } }
+    return { success: true, data: { noteId: note.id, versionId: version.id, branched: false } }
   } catch (error) {
     console.error('[revertNote] Error:', error)
     return { success: false, error: 'DATABASE_ERROR' }
@@ -147,6 +161,65 @@ export async function deleteNoteAction(input: unknown): Promise<ActionResult> {
     return { success: true, data: undefined }
   } catch (error) {
     console.error('[deleteNote] Error:', error)
+    return { success: false, error: 'DATABASE_ERROR' }
+  }
+}
+
+const MergeSchema = z
+  .object({
+    noteId: z.string().min(1),
+    /** Основная голова: от неё продолжится история */
+    mainId: z.string().min(1),
+    /** Вторая голова, которую сливаем */
+    otherId: z.string().min(1),
+    title: z.string().max(200),
+    body: z.string().max(500_000),
+  })
+  .strip()
+
+/** Слить две ветки: новая версия с выбранным владельцем текстом, она становится текущей */
+export async function mergeBranchesAction(input: unknown): Promise<ActionResult<SaveResult>> {
+  const owner = await getOwner()
+  if (!owner) {
+    return { success: false, error: 'UNAUTHORIZED' }
+  }
+  const parsed = MergeSchema.safeParse(input)
+  if (!parsed.success) {
+    return { success: false, error: 'VALIDATION_ERROR' }
+  }
+  const { noteId, mainId, otherId, title, body } = parsed.data
+
+  try {
+    const db = getEnhancedPrisma(owner)
+    const note = await db.note.findFirst({ where: { id: noteId, ownerId: owner.id, deletedAt: null } })
+    if (!note) {
+      return { success: false, error: 'NOT_FOUND' }
+    }
+    const versions = await db.noteVersion.findMany({
+      where: { noteId },
+      select: { id: true, parentId: true, mergedFromId: true },
+    })
+    const heads = new Set(findHeads(versions).map((v) => v.id))
+    // Сливать можно только актуальные головы: иначе перезапишем уже слитое
+    if (!heads.has(mainId) || !heads.has(otherId)) {
+      return { success: false, error: 'NOT_FOUND' }
+    }
+    const merge = mergeInput({ id: mainId }, { id: otherId }, { title, body })
+    if (!merge) {
+      return { success: false, error: 'VALIDATION_ERROR' }
+    }
+
+    const created = await db.$transaction(async (tx) => {
+      const version = await tx.noteVersion.create({ data: { ...merge, noteId } })
+      await tx.note.update({ where: { id: noteId }, data: { currentVersionId: version.id } })
+      return version
+    })
+    revalidatePath('/')
+    revalidatePath(`/notes/${noteId}`)
+    revalidatePath(`/notes/${noteId}/history`)
+    return { success: true, data: { noteId, versionId: created.id, branched: false } }
+  } catch (error) {
+    console.error('[mergeBranches] Error:', error)
     return { success: false, error: 'DATABASE_ERROR' }
   }
 }

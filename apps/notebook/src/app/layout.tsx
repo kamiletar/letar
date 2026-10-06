@@ -1,6 +1,7 @@
 import { UmamiScript } from '@letar/analytics'
 import type { Metadata } from 'next'
 
+import { OfflineSync } from './_components/offline-sync'
 import { Providers } from './_components/providers'
 
 export const metadata: Metadata = {
@@ -12,7 +13,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ru" suppressHydrationWarning>
       <body>
-        <Providers>{children}</Providers>
+        <Providers>
+          {children}
+          <OfflineSync />
+        </Providers>
         <UmamiScript />
       </body>
     </html>
