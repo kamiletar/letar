@@ -11,6 +11,16 @@
 - Отправка метрик в Dashboard
 - WebSocket для real-time
 
+## [0.20.0] — 2026-10-07
+
+### Added
+
+- **`GET /api/e2e/wait`** — long-poll версия `/api/e2e/status` (параметры `app`, `runId`, `sinceLine`,
+  `waitSeconds` по умолчанию 60, кап 120с под Fastify/nginx-таймауты на туннеле). Держит запрос, пока
+  в логе не появятся строки после `sinceLine` или прогон не завершится; ответ — снапшот `/status`.
+  Каркас ожидания — `lib/long-poll.ts` (`waitUntil`, `parseWaitMs`); снапшот вынесен в `buildSnapshot`.
+  Клиент — инструмент `e2e_wait` в `libs/deploy-mcp`.
+
 ## [0.19.1] — 2026-09-30
 
 ### Removed

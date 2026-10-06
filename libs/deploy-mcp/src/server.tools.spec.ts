@@ -135,6 +135,37 @@ describe('deploy_app — отказ e2e-gate', () => {
   })
 })
 
+describe('e2e_wait — long-poll', () => {
+  beforeEach(() => {
+    vi.mocked(agentRequest).mockReset()
+    vi.mocked(agentRequest).mockResolvedValue({ success: true, data: { run: null, lastStatus: null } })
+  })
+
+  it('ходит на /api/e2e/wait на s1 с курсором и увеличенным таймаутом клиента', async () => {
+    const { client } = await connect()
+    await client.callTool({
+      name: 'e2e_wait',
+      arguments: { app: 'aboi', runId: 'run-1', sinceLine: 42, waitSeconds: 90 },
+    })
+    expect(agentRequest).toHaveBeenCalledWith('s1', {
+      path: '/api/e2e/wait?app=aboi&runId=run-1&sinceLine=42&waitSeconds=90',
+      timeoutMs: 105_000,
+    })
+  })
+
+  it('без waitSeconds таймаут клиента покрывает серверный дефолт 60с', async () => {
+    const { client } = await connect()
+    await client.callTool({ name: 'e2e_wait', arguments: { app: 'aboi' } })
+    expect(agentRequest).toHaveBeenCalledWith('s1', { path: '/api/e2e/wait?app=aboi', timeoutMs: 75_000 })
+  })
+
+  it('waitSeconds больше 120 отвергается схемой', async () => {
+    const { client } = await connect()
+    await expectValidationError(client, 'e2e_wait', { app: 'aboi', waitSeconds: 121 })
+    expect(agentRequest).not.toHaveBeenCalled()
+  })
+})
+
 // Регрессия 2026-09-19 (run_e2e) в общем виде: zod по умолчанию молча отбрасывает неизвестные ключи,
 // и вызов с опечаткой (`srv`, `staging: true`, `dryRun`) выполняется с дефолтами — деплой уходит на
 // s2/production, курсор лога и фильтры игнорируются. Здесь у каждого инструмента с аргументами —
@@ -149,6 +180,7 @@ describe('строгие входные схемы — неизвестный а
     ['deploy_app', { app: 'svoichuzhie', target: 'staging' }],
     ['deploy_infra', { service: 'traefik', server: 's1' }],
     ['e2e_status', { app: 'svoichuzhie' }],
+    ['e2e_wait', { app: 'svoichuzhie', sinceLine: 3, waitSeconds: 5 }],
   ]
 
   beforeEach(() => {

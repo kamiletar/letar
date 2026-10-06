@@ -18,6 +18,7 @@
 
 import { type ChildProcess, spawn } from 'child_process'
 import { randomUUID } from 'crypto'
+import { EventEmitter } from 'events'
 import type { FastifyInstance } from 'fastify'
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs'
 import path from 'path'
@@ -26,6 +27,7 @@ import { buildLastStatusUpdate, describeRunScope, type LastE2eStatus } from '../
 import { getCurrentCommit } from '../lib/git'
 import { hostShellArgs } from '../lib/host-exec'
 import { getHostLock, releaseHostLock, tryAcquireHostLock } from '../lib/host-lock'
+import { parseWaitMs, waitUntil } from '../lib/long-poll'
 import { getCurrentServer } from '../lib/server-config'
 import type { ApiResponse } from '../types'
 
@@ -64,6 +66,14 @@ interface E2eRun {
 const e2eHistory: E2eRun[] = []
 let currentProcess: ChildProcess | null = null
 
+// Long-poll /api/e2e/wait: прогон один на хост (isE2eRunning отклоняет параллельные), но ключом
+// служит runId — слушатель чужого прогона не просыпается. Событие шлёт appendOutput (новая строка).
+// ⚠️ Финальные строки close/error-обработчиков пишутся ПОСЛЕ running=false, но lastStatus
+// записывается в том же синхронном обработчике — продолжение ожидающего запроса идёт микрозадачей
+// после него, поэтому в ответе lastStatus уже свежий.
+const e2eEvents = new EventEmitter()
+e2eEvents.setMaxListeners(50)
+
 function createRun(partial: Omit<E2eRun, 'runId' | 'output' | 'truncatedLines'>): E2eRun {
   const run: E2eRun = { runId: randomUUID(), output: [], truncatedLines: 0, ...partial }
   e2eHistory.push(run)
@@ -79,6 +89,7 @@ function appendOutput(run: E2eRun, line: string): void {
     run.output.shift()
     run.truncatedLines++
   }
+  e2eEvents.emit(run.runId)
 }
 
 function getLatestRun(app?: string): E2eRun | undefined {
@@ -173,6 +184,25 @@ function readE2eReportStats(reportFile: string): PlaywrightReportStats | null {
   }
 }
 
+interface E2eSnapshot {
+  run: (Omit<E2eRun, 'output'> & { output: string[]; totalLines: number; fromLine: number }) | null
+  lastStatus: LastE2eStatus | null
+}
+
+/** Снапшот для /api/e2e/status и /api/e2e/wait: прогон с хвостом лога от курсора + lastStatus. */
+function buildSnapshot(run: E2eRun | undefined, app: string | undefined, sinceLine: string | undefined): E2eSnapshot {
+  const lastStatus = app ? (readLastStatus(app) ?? null) : null
+  if (!run) {
+    return { run: null, lastStatus }
+  }
+  const totalLines = run.truncatedLines + run.output.length
+  const since = sinceLine !== undefined ? Math.max(0, parseInt(sinceLine, 10) || 0) : 0
+  const startIdx = Math.max(0, since - run.truncatedLines)
+  const output = run.output.slice(startIdx)
+  const fromLine = run.truncatedLines + startIdx
+  return { run: { ...run, output, totalLines, fromLine }, lastStatus }
+}
+
 export async function e2eRoutes(fastify: FastifyInstance): Promise<void> {
   /**
    * GET /api/e2e/status — статус e2e-прогона
@@ -186,33 +216,40 @@ export async function e2eRoutes(fastify: FastifyInstance): Promise<void> {
    */
   fastify.get<{ Querystring: { app?: string; runId?: string; sinceLine?: string } }>(
     '/api/e2e/status',
-    async (
-      request,
-    ): Promise<
-      ApiResponse<{
-        run: (Omit<E2eRun, 'output'> & { output: string[]; totalLines: number; fromLine: number }) | null
-        lastStatus: LastE2eStatus | null
-      }>
-    > => {
+    async (request): Promise<ApiResponse<E2eSnapshot>> => {
       const { app, runId, sinceLine } = request.query
       const run = runId ? e2eHistory.find((r) => r.runId === runId) : getLatestRun(app)
-      const lastStatus = app ? (readLastStatus(app) ?? null) : null
+      return { success: true, data: buildSnapshot(run, app, sinceLine), timestamp: new Date().toISOString() }
+    },
+  )
 
-      if (!run) {
-        return { success: true, data: { run: null, lastStatus }, timestamp: new Date().toISOString() }
+  /**
+   * GET /api/e2e/wait — long-poll версия /api/e2e/status (по образцу /api/deploy/wait).
+   * Query: app, runId, sinceLine — как в /status; waitSeconds — сколько максимум ждать
+   *   (по умолчанию 60, кап MAX_WAIT_SECONDS=120 сверху — Fastify/nginx-таймауты на туннеле).
+   *
+   * Держит запрос, пока в логе не появятся строки после sinceLine или прогон не завершится
+   * (running:false); иначе по таймауту отдаёт тот же снапшот без новых строк. Ответ — тот же, что у
+   * /status: `run.totalLines` — курсор для следующего sinceLine. Прогона нет — отвечает сразу
+   * (ждать нечего), как /status.
+   */
+  fastify.get<{ Querystring: { app?: string; runId?: string; sinceLine?: string; waitSeconds?: string } }>(
+    '/api/e2e/wait',
+    async (request): Promise<ApiResponse<E2eSnapshot>> => {
+      const { app, runId, sinceLine, waitSeconds } = request.query
+      const run = runId ? e2eHistory.find((r) => r.runId === runId) : getLatestRun(app)
+
+      if (run) {
+        const since = sinceLine !== undefined ? Math.max(0, parseInt(sinceLine, 10) || 0) : 0
+        await waitUntil({
+          emitter: e2eEvents,
+          key: run.runId,
+          waitMs: parseWaitMs(waitSeconds),
+          ready: () => !run.running || run.truncatedLines + run.output.length > since,
+        })
       }
 
-      const totalLines = run.truncatedLines + run.output.length
-      const since = sinceLine !== undefined ? Math.max(0, parseInt(sinceLine, 10) || 0) : 0
-      const startIdx = Math.max(0, since - run.truncatedLines)
-      const output = run.output.slice(startIdx)
-      const fromLine = run.truncatedLines + startIdx
-
-      return {
-        success: true,
-        data: { run: { ...run, output, totalLines, fromLine }, lastStatus },
-        timestamp: new Date().toISOString(),
-      }
+      return { success: true, data: buildSnapshot(run, app, sinceLine), timestamp: new Date().toISOString() }
     },
   )
 

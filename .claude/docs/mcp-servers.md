@@ -61,7 +61,7 @@ domwellbes-assist ×2) слиты в один процесс `letar`; 8 Postgres
 | studio      | `libs/studio-mcp`                     | `studio_client_*`/`studio_project_*`/`studio_recurring_*`/`studio_invoice_*`                                                                       |
 | umami       | `libs/umami-mcp`                      | `umami_*` — см. ниже                                                                                                                               |
 | glitchtip   | `libs/glitchtip-mcp`                  | `glitchtip_*` (`glitchtip_set_issue_status` — единственная запись, только по просьбе пользователя)                                                 |
-| deploy      | `libs/deploy-mcp`                     | `deploy_*`, `run_e2e`, `e2e_status` — см. ниже                                                                                                     |
+| deploy      | `libs/deploy-mcp`                     | `deploy_*`, `run_e2e`, `e2e_status`, `e2e_wait` — см. ниже                                                                                         |
 | form        | `libs/form-mcp`                       | `list_fields`, `get_field_props`, `get_field_example`, `get_form_pattern`, `get_directives`, `generate_form` + resources `form-docs://*` + prompts |
 | synth       | `apps/synth/src/mcp`                  | `load_patch`, `play_demo`, `send_midi_sequence`, `generate_chord_pattern`, `highlight_param`, `focus_section`, `dim_all`                           |
 | assist      | `apps/domwellbes/src/mcp` (submodule) | `assist_*` — наставник domwellbes, см. ниже                                                                                                        |
@@ -79,14 +79,14 @@ domwellbes-assist ×2) слиты в один процесс `letar`; 8 Postgres
 эффектом или с фильтрами объявлены как `z.strictObject` — лишний ключ даёт `isError: true` с
 `Input validation error` до обращения к внешнему сервису (2026-09-21).
 
-| Библиотека        | Строго                                                                                                                                                  | Не строго и почему                                                                                                      |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `deploy-mcp`      | всё с аргументами: `deploy_app`, `deploy_infra`, `deploy_cancel`, `deploy_status`, `deploy_wait`, `run_e2e`, `e2e_status`, `git_status`, `agent_health` | `list_servers` — без аргументов                                                                                         |
-| `studio-mcp`      | все мутации и списки с фильтрами (`*_create`/`*_update`/`*_set_*`/`*_toggle`/`*_delete`/`*_send`/`*_mark_paid`/`*_cancel`, `*_list`, `time_entries`)    | `*_get` — единственный аргумент `id`, терять нечего                                                                     |
-| `studio-time-mcp` | все, кроме `time_fix_internal_billable`                                                                                                                 | `time_fix_internal_billable` — без аргументов                                                                           |
-| `umami-mcp`       | `umami_find_website`, `umami_get_website_stats`, `umami_create_website`                                                                                 | `umami_list_websites` — без аргументов                                                                                  |
-| `glitchtip-mcp`   | `glitchtip_list_issues`, `glitchtip_get_issue_event`, `glitchtip_set_issue_status`                                                                      | `glitchtip_list_projects` — без аргументов                                                                              |
-| `form-mcp`        | —                                                                                                                                                       | опубликован в npm, его вызывают внешние клиенты, лишние поля там не наша территория; инструменты — read-only справочник |
+| Библиотека        | Строго                                                                                                                                                              | Не строго и почему                                                                                                      |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `deploy-mcp`      | всё с аргументами: `deploy_app`, `deploy_infra`, `deploy_cancel`, `deploy_status`, `deploy_wait`, `run_e2e`, `e2e_status`, `e2e_wait`, `git_status`, `agent_health` | `list_servers` — без аргументов                                                                                         |
+| `studio-mcp`      | все мутации и списки с фильтрами (`*_create`/`*_update`/`*_set_*`/`*_toggle`/`*_delete`/`*_send`/`*_mark_paid`/`*_cancel`, `*_list`, `time_entries`)                | `*_get` — единственный аргумент `id`, терять нечего                                                                     |
+| `studio-time-mcp` | все, кроме `time_fix_internal_billable`                                                                                                                             | `time_fix_internal_billable` — без аргументов                                                                           |
+| `umami-mcp`       | `umami_find_website`, `umami_get_website_stats`, `umami_create_website`                                                                                             | `umami_list_websites` — без аргументов                                                                                  |
+| `glitchtip-mcp`   | `glitchtip_list_issues`, `glitchtip_get_issue_event`, `glitchtip_set_issue_status`                                                                                  | `glitchtip_list_projects` — без аргументов                                                                              |
+| `form-mcp`        | —                                                                                                                                                                   | опубликован в npm, его вызывают внешние клиенты, лишние поля там не наша территория; инструменты — read-only справочник |
 
 Где опасность конкретно: `studio_client_update`/`studio_project_update` — «полная замена»,
 опечатка в необязательном поле молча стирает значение; `studio_recurring_delete({ id, dryRun })`
@@ -108,7 +108,7 @@ domwellbes-assist ×2) слиты в один процесс `letar`; 8 Postgres
 ### ⚠️ Внутренний in-memory клиент режет любой вызов на 60с {#internal-client-timeout}
 
 `letar` вызывает каждую часть через внутренний SDK-`Client`, а у `client.callTool()` без опции
-`timeout` стоит `DEFAULT_REQUEST_TIMEOUT_MSEC = 60000`. Long-poll инструменты (`deploy_wait` до
+`timeout` стоит `DEFAULT_REQUEST_TIMEOUT_MSEC = 60000`. Long-poll инструменты (`deploy_wait`/`e2e_wait` до
 120с, `assist_wait`) на 60-й секунде обрывались с «Request timed out» — текст без нашего префикса
 (`❌ deploy_wait на …`), потому что исключение бросает SDK до того, как часть-фабрика ответила.
 Тот же ответ приходил и «раньше срока» (клиент отсчитывает 60с от вызова, а не от начала ожидания
@@ -313,6 +313,7 @@ docker compose pull && docker compose up -d
 | `deploy_app`          | Запуск деплоя (`target`: `production`\|`staging`; staging → s1) + e2e-gate                                                                                                                                                                                                                                 |
 | `run_e2e`             | Playwright e2e на s1 против staging-контейнера (Фаза 2); строгая схема: только `app`/`baseUrl`/`project`/`grep`/`workers`                                                                                                                                                                                  |
 | `e2e_status`          | Статус e2e-прогона + персистентный `lastStatus` (что читает gate)                                                                                                                                                                                                                                          |
+| `e2e_wait`            | Long-poll вместо серии `e2e_status` — отпускает раньше `waitSeconds` (≤120с) при новых строках лога после `sinceLine` или завершении прогона                                                                                                                                                               |
 
 ### Таблица маршрутов Next.js: две копии регулярок, синхронность стережёт скрипт {#route-table-regex-sync}
 

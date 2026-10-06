@@ -674,7 +674,7 @@ export function createDeployMcpServer(options: DeployMcpOptions = {}): McpServer
       '⚠️ Для гейта годится только ПОЛНЫЙ прогон (без grep и project; workers можно). Фильтрованный',
       'прогон может статус только ухудшить: зелёный в файл не пишется (остаётся прошлый полный),',
       'красный пишется как passed:false — упавший тест блокирует прод-деплой до нового полного прогона.',
-      'Возвращает runId — опрашивай через e2e_status.',
+      'Возвращает runId — следи через e2e_wait (long-poll) или e2e_status (мгновенно).',
       '',
       'grep — точечный прогон вместо всего набора (playwright test --grep): имя файла-спека, название',
       'теста/describe-блока (подстрока) или regex. Экономит время, когда нужно подтвердить фикс в паре',
@@ -755,7 +755,9 @@ export function createDeployMcpServer(options: DeployMcpOptions = {}): McpServer
             ]
             : []),
           '',
-          `Опрашивай прогресс: \`e2e_status({ app: "${app}", runId: "${data?.runId ?? ''}", sinceLine: 0 })\``,
+          `Следи за прогрессом: \`e2e_wait({ app: "${app}", runId: "${
+            data?.runId ?? ''
+          }", sinceLine: 0 })\` (long-poll; e2e_status — мгновенный снапшот)`,
           '',
           pretty(res.data),
         ].join('\n'),
@@ -797,6 +799,54 @@ export function createDeployMcpServer(options: DeployMcpOptions = {}): McpServer
       return text(`## E2E статус${app ? ` (${app})` : ''}\n\n${pretty(res.data)}`)
     } catch (err) {
       return errorText(`❌ e2e_status: ${err instanceof Error ? err.message : String(err)}`)
+    }
+  })
+
+  // ─── e2e_wait ────────────────────────────────────────────────────────────────
+  server.registerTool('e2e_wait', {
+    description: [
+      'Long-poll ожидание прогресса e2e-прогона на s1 (GET /api/e2e/wait) — вместо серии быстрых',
+      'опросов e2e_status. Зеркалит e2e_status (тот же снапшот: run + lastStatus), но держит запрос',
+      'открытым и отпускает РАНЬШЕ waitSeconds, как только в логе появились строки после sinceLine',
+      'или прогон завершился (`run.running: false`). Для следующего вызова передай в sinceLine',
+      '`run.totalLines` из ответа. waitSeconds по умолчанию 60, сервер капает до 120с (Fastify/nginx-',
+      'таймауты на туннеле) — зови повторно, пока `run.running: true`.',
+    ].join('\n'),
+    inputSchema: z.strictObject({
+      app: z.string().optional().describe('Имя приложения (для lastStatus и последнего прогона)'),
+      runId: z.string().optional().describe('ID конкретного прогона из истории'),
+      sinceLine: z.number().int().min(0).optional().describe('Курсор лога: ждать строк после этой'),
+      waitSeconds: z.number().int().min(1).max(120).optional().describe(
+        'Сколько максимум ждать (по умолчанию 60, сервер капает до 120с)',
+      ),
+    }),
+  }, async ({ app, runId, sinceLine, waitSeconds }) => {
+    const params = new URLSearchParams()
+    if (app) {
+      params.set('app', app)
+    }
+    if (runId) {
+      params.set('runId', runId)
+    }
+    if (sinceLine !== undefined) {
+      params.set('sinceLine', String(sinceLine))
+    }
+    if (waitSeconds !== undefined) {
+      params.set('waitSeconds', String(waitSeconds))
+    }
+    const qs = params.toString()
+    try {
+      const res = await agentRequest('s1', {
+        path: `/api/e2e/wait${qs ? `?${qs}` : ''}`,
+        // Как у deploy_wait: дефолтный таймаут agentRequest (30с) оборвал бы long-poll раньше ответа сервера.
+        timeoutMs: (Math.min(waitSeconds ?? 60, 120) + 15) * 1000,
+      })
+      if (!res.success) {
+        return errorText(`ℹ️ e2e на s1: ${res.error ?? 'нет данных'}`)
+      }
+      return text(`## E2E статус${app ? ` (${app})` : ''}\n\n${pretty(res.data)}`)
+    } catch (err) {
+      return errorText(`❌ e2e_wait: ${err instanceof Error ? err.message : String(err)}`)
     }
   })
 

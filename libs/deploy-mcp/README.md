@@ -21,10 +21,11 @@ MCP-сервер: структурированный слой над REST API da
 | `deploy_infra({ service, server })`                                                      | Деплой `infra/<service>` (Traefik, acme-dns, ...) — расшифровка `secrets/deploy.conf` + `docker compose up -d`, без e2e-gate (§18.8.1)                                                                      | `POST /api/deploy/infra`  |
 | `run_e2e({ app, baseUrl, project?, grep?, workers? })`                                   | Запуск Playwright e2e на s1 против `baseUrl`; `grep` — точечный прогон. Схема строгая: неизвестные аргументы (`extraArgs`) отвергаются                                                                      | `POST /api/e2e/run`       |
 | `e2e_status({ app?, runId?, sinceLine? })`                                               | Статус e2e-прогона + персистентный `lastStatus` (что читает gate)                                                                                                                                           | `GET /api/e2e/status`     |
+| `e2e_wait({ app?, runId?, sinceLine?, waitSeconds? })`                                   | Long-poll вместо серии быстрых `e2e_status` — отпускает раньше `waitSeconds` (по умолчанию 60, ≤120с) при новых строках лога после `sinceLine` или завершении прогона; ответ как у `e2e_status`             | `GET /api/e2e/wait`       |
 
 `server` — `s2` (прод, по умолчанию) или `s1` (staging). Значение `s3` отвергается: настоящий s3 —
 хранилище без dashboard-agent, deploy-инструменты на него не ходят. В `deploy_app` сервер резолвится
-автоматически из `app` + `target` (staging → всегда s1). `run_e2e`/`e2e_status` всегда ходят
+автоматически из `app` + `target` (staging → всегда s1). `run_e2e`/`e2e_status`/`e2e_wait` всегда ходят
 на s1 — это единственный e2e-раннер (см. `e2e-testing.md`). `deploy_infra` не резолвит сервер
 автоматически — в отличие от приложений, у infra-сервисов нет единого маппинга «сервис →
 сервер» (`traefik` живёт на s1, `acme-dns` — на s2), `server` в `deploy_infra` обязателен.
@@ -93,7 +94,8 @@ dashboard-agent (с 0.18.4) зелёный итог фильтрованного
 ```
 deploy_app({ app: "grandslamcup", target: "staging" })                              // → образ на s1
 run_e2e({ app: "grandslamcup", baseUrl: "https://grandslamcup-stage.s1.letar.best" }) // → nx e2e против staging
-e2e_status({ app: "grandslamcup", sinceLine: 0 })                                    // поллинг + финальный lastStatus
+e2e_wait({ app: "grandslamcup", sinceLine: 0 })                                      // long-poll: повторяй с sinceLine = run.totalLines, пока run.running: true
+e2e_status({ app: "grandslamcup" })                                                  // мгновенный снапшот + финальный lastStatus
 deploy_app({ app: "grandslamcup" })                                                  // production — гейт проверит зелёный прогон
 ```
 
@@ -120,6 +122,14 @@ deploy_wait({ server: "s2", deployId, waitSeconds: 90 })  // ждёт смены
 `deploy_status`, но `output` — только хвост (20 строк), не весь лог по курсору.
 
 ⚠️ Внутри `letar` вызов идёт через in-memory клиент с таймаутом 10 мин (`INTERNAL_CALL_OPTIONS`); до 2026-09-21 там стояли дефолтные 60с и `waitSeconds` > ~55 обрывался с «Request timed out» — [разбор](/.claude/docs/mcp-servers.md#internal-client-timeout).
+
+`e2e_wait` — то же для e2e (60+ тестов у aboi идут 4–5 минут, лог растёт по строке на тест): вместо
+десятков быстрых `e2e_status` держит запрос и возвращает снапшот, как только после `sinceLine`
+появились новые строки или прогон завершился (`run.running: false`, `lastStatus` уже записан).
+Следующий `sinceLine` — `run.totalLines` из ответа. В отличие от `deploy_wait`, `output` — не хвост, а
+все строки от курсора (как у `e2e_status`). Тишина дольше `waitSeconds` (кап 120с на сервере — те же
+Fastify/nginx-таймауты на туннеле) — вернётся тот же снапшот без новых строк. Эндпоинт
+`/api/e2e/wait` живёт в `dashboard-agent` на s1 — после правки нужен деплой агента.
 
 `deploy_status({ server, deployId, sinceLine })` остаётся для точечного снапшота и полного
 курсорного чтения лога — `sinceLine` возвращает только новые строки начиная с этого номера
