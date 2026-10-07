@@ -8,6 +8,14 @@ import { prisma } from '@/lib/db'
 import { sendPushToAll } from '@/lib/push-notifications'
 import { NextResponse } from 'next/server'
 
+/** Поля матча, нужные для текста уведомления */
+interface ReminderMatchRow {
+  scheduledAt: Date | null
+  homeTeam: { team: { name: string } }
+  awayTeam: { team: { name: string } }
+  venue: { name: string } | null
+}
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const secret = searchParams.get('secret')
@@ -47,8 +55,9 @@ export async function GET(request: Request) {
     return NextResponse.json({ sent: 0, matches: 0, message: 'Нет матчей на завтра' })
   }
 
-  // Формируем текст уведомления
-  const matchLines = matches.map((m) => {
+  // Формируем текст уведомления. Узкий тип: tsgo падает с TS2321 на полном типе ZenStack
+  const reminderMatches: ReminderMatchRow[] = matches
+  const matchLines = reminderMatches.map((m) => {
     const time = m.scheduledAt
       ? new Date(m.scheduledAt.getTime() + mskOffset).toLocaleTimeString('ru-RU', {
         hour: '2-digit',
@@ -58,8 +67,8 @@ export async function GET(request: Request) {
     return `${time} ${m.homeTeam.team.name} — ${m.awayTeam.team.name}`
   })
 
-  const body = matches.length === 1
-    ? `${matchLines[0]}${matches[0].venue ? ` (${matches[0].venue.name})` : ''}`
+  const body = reminderMatches.length === 1
+    ? `${matchLines[0]}${reminderMatches[0].venue ? ` (${reminderMatches[0].venue.name})` : ''}`
     : matchLines.join('\n')
 
   const result = await sendPushToAll({

@@ -16,6 +16,17 @@ import { LuExternalLink, LuMapPin, LuUsers } from 'react-icons/lu'
 
 import { YandexMap } from '../_components/yandex-map'
 
+/** Поля матча, нужные карточке матча на странице площадки */
+interface VenueMatchRow {
+  id: string
+  status: string
+  scheduledAt: Date | null
+  homeScore: number | null
+  awayScore: number | null
+  homeTeam: { team: { name: string } }
+  awayTeam: { team: { name: string } }
+}
+
 type Params = Promise<{ citySlug: string; slug: string }>
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
@@ -64,6 +75,9 @@ export default async function VenueDetailPage({ params }: { params: Params }) {
     notFound()
   }
 
+  // Узкий тип вместо выведенного из ZenStack: иначе tsgo падает с TS2321 на .map() ниже
+  // (см. .claude/docs/tsgo-excessive-stack-depth-zenstack.md)
+  const recentMatches: VenueMatchRow[] = venue.matches
   const hasCoords = venue.latitude !== null && venue.longitude !== null
   /** Ссылка на Яндекс.Карты по адресу */
   const yandexMapsUrl = venue.address
@@ -200,13 +214,13 @@ export default async function VenueDetailPage({ params }: { params: Params }) {
       </Box>
 
       {/* Последние матчи */}
-      {venue.matches.length > 0 && (
+      {recentMatches.length > 0 && (
         <Box>
           <SectionHeading size="md" mb={3}>
             Последние матчи
           </SectionHeading>
           <SimpleGrid columns={{ base: 1, md: 2 }} gap={3}>
-            {venue.matches.map((m) => (
+            {recentMatches.map((m) => (
               <MatchCard
                 key={m.id}
                 id={m.id}

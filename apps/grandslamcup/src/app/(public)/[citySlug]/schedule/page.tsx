@@ -13,6 +13,23 @@ import { Box, Flex, Heading, Text, VStack } from '@chakra-ui/react'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
+/**
+ * Только поля, которые нужны карточке матча. Вручную узкий тип: tsgo падает с TS2321
+ * на структурном сравнении полного ZenStack-типа результата запроса
+ * (см. .claude/docs/tsgo-excessive-stack-depth-zenstack.md).
+ */
+interface ScheduleMatchRow {
+  id: string
+  status: string
+  scheduledAt: Date | null
+  homeScore: number | null
+  awayScore: number | null
+  matchType: string
+  homeTeam: { team: { name: string } }
+  awayTeam: { team: { name: string } }
+  venue: { name: string } | null
+}
+
 type Params = Promise<{ citySlug: string }>
 type SearchParams = Promise<{ season?: string }>
 
@@ -105,11 +122,12 @@ export default async function SchedulePage({ params, searchParams }: { params: P
       {/* Разделяем на будущие и прошедшие */}
       {(() => {
         const isSeasonFinished = currentSeason.status === 'FINISHED'
-        const live = matches.filter((m) => m.status === 'LIVE')
-        const upcoming = isSeasonFinished ? [] : matches.filter((m) => isMatchUpcoming(m))
-        const finished = isSeasonFinished ? matches : matches.filter((m) => isMatchPast(m))
+        const rows: ScheduleMatchRow[] = matches
+        const live = rows.filter((m) => m.status === 'LIVE')
+        const upcoming = isSeasonFinished ? [] : rows.filter((m) => isMatchUpcoming(m))
+        const finished = isSeasonFinished ? rows : rows.filter((m) => isMatchPast(m))
 
-        const renderMatch = (m: (typeof matches)[0]) => (
+        const renderMatch = (m: ScheduleMatchRow) => (
           <MatchCard
             key={m.id}
             id={m.id}

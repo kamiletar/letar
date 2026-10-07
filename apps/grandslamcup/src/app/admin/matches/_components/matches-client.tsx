@@ -29,7 +29,7 @@ import { getDisplayStatus, matchStatusColors, matchStatusLabels } from '@/lib/ma
 import { deleteMatchAction } from '../_actions/match-admin.action'
 import { StaffPicker } from './staff-picker'
 
-interface MatchItem {
+export interface MatchItem {
   id: string
   matchType: string
   status: string
