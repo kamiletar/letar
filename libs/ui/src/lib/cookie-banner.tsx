@@ -15,6 +15,9 @@ import { usePublishedHeight } from './use-published-height'
  */
 const BANNER_HEIGHT_VAR = '--letar-cookie-banner-height'
 
+/** `id` <style> в <head>, который inline-скрипт ставит, если согласие уже принято */
+const HIDE_STYLE_ID = 'letar-cookie-banner-hide'
+
 export interface CookieBannerProps {
   /** Ключ приложения для namespace событий/localStorage, напр. 'auth-hub' */
   appKey: string
@@ -122,6 +125,8 @@ export function CookieBanner({
           // игнорируем некорректный JSON
         }
       }
+      // Снимаем правило, поставленное inline-скриптом, иначе повторно открытый баннер остался бы скрыт
+      document.getElementById(HIDE_STYLE_ID)?.remove()
       setShown(true)
       setExpanded(true)
     }
@@ -180,9 +185,13 @@ export function CookieBanner({
       {
         /* Прячет баннер ДО первой отрисовки, если согласие уже есть: SSR не знает про localStorage,
           а ждать эффекта гидратации — секундная вспышка у вернувшегося пользователя. Скрипт
-          исполняется при разборе HTML сразу перед баннером, поэтому браузер его не рисует. Для
-          новых пользователей баннер остаётся в серверной разметке (LCP не страдает). Эффект выше
-          после гидратации всё равно размонтирует баннер — скрипт лишь убирает вспышку.
+          исполняется при разборе HTML сразу перед баннером и кладёт в <head> правило
+          `[data-letar-cookie-banner]{display:none}` — оно сработает, как только баннер появится
+          в DOM. ⚠️ Нельзя искать баннер через `document.currentScript.nextElementSibling`: в
+          момент выполнения скрипта следующий элемент ещё не разобран, там всегда `null` (так
+          работал фикс 0.25.1 — не скрывал ничего). Для новых пользователей баннер остаётся в
+          серверной разметке (LCP не страдает). Эффект выше после гидратации размонтирует баннер,
+          а при повторном открытии настроек снимает правило (см. handleOpen).
           Содержимое — только JSON.stringify констант конфигурации, пользовательского ввода нет. */
       }
       {/* nosemgrep: letar-dangerously-set-inner-html-unsanitized -- только константы конфигурации */}
@@ -190,11 +199,14 @@ export function CookieBanner({
         dangerouslySetInnerHTML={{
           __html: `try{var r=localStorage.getItem(${JSON.stringify(config.storageKey)});if(r&&JSON.parse(r).version===${
             JSON.stringify(policyVersion)
-          }){var s=document.currentScript,b=s&&s.nextElementSibling;if(b)b.style.display='none'}}catch(e){}`,
+          }){var st=document.createElement('style');st.id=${
+            JSON.stringify(HIDE_STYLE_ID)
+          };st.textContent='[data-letar-cookie-banner]{display:none!important}';document.head.appendChild(st)}}catch(e){}`,
         }}
       />
       <Box
         ref={rootRef}
+        data-letar-cookie-banner=""
         suppressHydrationWarning
         position="fixed"
         bottom={0}
