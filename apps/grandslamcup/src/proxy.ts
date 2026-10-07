@@ -18,6 +18,7 @@ const RESERVED_SEGMENTS = new Set([
   'poet',
   'privacy',
   'profile',
+  'reader',
   'sign-in',
   'bracket',
   'donate',

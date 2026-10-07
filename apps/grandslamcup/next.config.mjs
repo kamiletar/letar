@@ -15,6 +15,10 @@ const withSerwist = withSerwistInit({
   swDest: 'public/sw.js',
   cacheOnNavigation: true,
   reloadOnOnline: true,
+  // Страница режима чтеца статична и без данных — кладём её в precache вместе с чанками,
+  // чтобы она открывалась без сети независимо от того, заходил ли на неё пользователь.
+  // revision меняется на каждой сборке: обновлённая страница подтягивается при деплое.
+  additionalPrecacheEntries: [{ url: '/reader', revision: String(Date.now()) }],
   register: false,
   disable: process.env.NODE_ENV === 'development',
 })

@@ -7,7 +7,7 @@
 
 /// <reference lib="webworker" />
 import { defaultCache } from '@serwist/next/worker'
-import { Serwist } from 'serwist'
+import { NetworkOnly, Serwist } from 'serwist'
 
 declare const self: ServiceWorkerGlobalScope & {
   __SW_MANIFEST: Array<{ url: string; revision: string | null }>
@@ -18,7 +18,12 @@ const serwist = new Serwist({
   skipWaiting: true,
   clientsClaim: true,
   navigationPreload: true,
-  runtimeCaching: defaultCache,
+  runtimeCaching: [
+    // Личные стихи поэта не кэшируем в воркере: офлайн-копию ведёт сама страница /reader
+    // (localStorage), а кэш воркера пережил бы выход из аккаунта. Правило — первым в списке.
+    { matcher: ({ url }) => url.pathname.startsWith('/api/poet/'), handler: new NetworkOnly() },
+    ...defaultCache,
+  ],
 })
 
 serwist.addEventListeners()

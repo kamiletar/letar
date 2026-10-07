@@ -7,7 +7,7 @@
 import { Box, Flex, Text, VStack } from '@chakra-ui/react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LuBookOpen, LuHouse, LuUserRound } from 'react-icons/lu'
+import { LuBookOpen, LuHouse, LuMic, LuUserRound } from 'react-icons/lu'
 
 export interface PoetNavItem {
   href: string
@@ -18,6 +18,7 @@ export interface PoetNavItem {
 export const poetNavItems: PoetNavItem[] = [
   { href: '/poet', label: 'Дашборд', icon: LuHouse },
   { href: '/poet/poems', label: 'Мои стихи', icon: LuBookOpen },
+  { href: '/reader', label: 'Режим чтеца', icon: LuMic },
   { href: '/poet/profile', label: 'Профиль', icon: LuUserRound },
 ]
 
