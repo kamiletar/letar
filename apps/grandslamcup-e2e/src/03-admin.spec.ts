@@ -17,7 +17,7 @@ test.describe('Админка — авторизованный', () => {
 
   test('дашборд загружается', async ({ page }) => {
     await page.goto('/admin')
-    await expect(page.getByText('Claude Admin')).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Дашборд' })).toBeVisible()
   })
 
   test('sidebar навигация видна', async ({ page }) => {
@@ -33,8 +33,10 @@ test.describe('Админка — авторизованный', () => {
     await page.goto('/admin/cities')
     await expect(page.getByRole('heading', { name: /Города/i })).toBeVisible()
     // Должны быть СПб и Москва (из seed-v2)
-    await expect(page.getByText('Санкт-Петербург')).toBeVisible()
-    await expect(page.getByText('Москва')).toBeVisible()
+    // Список рисуется дважды (карточки для телефона и таблица для md+), одна версия скрыта —
+    // берём видимый элемент, иначе strict-mode violation
+    await expect(page.getByText('Санкт-Петербург').filter({ visible: true }).first()).toBeVisible()
+    await expect(page.getByText('Москва').filter({ visible: true }).first()).toBeVisible()
   })
 
   test('список площадок загружается', async ({ page }) => {
@@ -45,7 +47,7 @@ test.describe('Админка — авторизованный', () => {
   test('список сезонов загружается', async ({ page }) => {
     await page.goto('/admin/seasons')
     await expect(page.getByRole('heading', { name: /Сезоны/i })).toBeVisible()
-    await expect(page.getByText('КБС СПб Сезон 1')).toBeVisible()
+    await expect(page.getByText('КБС СПб Сезон 1').filter({ visible: true }).first()).toBeVisible()
   })
 
   test('список команд загружается', async ({ page }) => {
