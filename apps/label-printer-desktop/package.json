@@ -27,6 +27,6 @@
     "serialport": "^13.0.0"
   },
   "devDependencies": {
-    "electron": "44.5.1"
+    "electron": "44.7.0"
   }
 }
