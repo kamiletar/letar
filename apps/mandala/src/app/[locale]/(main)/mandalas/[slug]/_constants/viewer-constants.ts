@@ -228,7 +228,6 @@ export const ATMOSPHERE_PRESETS = {
       audioEnabled: true,
       audioTrack: 'meditation-background',
       audioVolume: 30,
-      breathingEnabled: false,
       vignetteEnabled: true,
       vignetteIntensity: 40,
       glowEnabled: true,

@@ -15,8 +15,6 @@ import { ToggleControl } from './toggle-control'
 interface AtmosphereControlsProps {
   /** Ночной режим */
   nightMode: boolean
-  /** Анимация дыхания */
-  breathingEnabled: boolean
   /** Режим медитации */
   meditationEnabled: boolean
   /** Длительность медитации в минутах */
@@ -105,18 +103,18 @@ function IntensitySlider({
 }
 
 /**
- * Базовые переключатели атмосферы (ночь, дыхание, медитация).
+ * Базовые переключатели атмосферы (ночь, медитация).
+ * Дыхание (вдох/выдох) здесь не переключается: оно включено всегда.
  */
 export function AtmosphereSwitches({
   nightMode,
-  breathingEnabled,
   meditationEnabled,
   meditationDuration,
   onChange,
   variant = 'normal',
 }: Pick<
   AtmosphereControlsProps,
-  'nightMode' | 'breathingEnabled' | 'meditationEnabled' | 'meditationDuration' | 'onChange' | 'variant'
+  'nightMode' | 'meditationEnabled' | 'meditationDuration' | 'onChange' | 'variant'
 >) {
   const styles = useVariantStyles(variant)
 
@@ -132,16 +130,6 @@ export function AtmosphereSwitches({
           size={styles.switchSize}
           labelColor={styles.textColor}
           labelFontSize={styles.labelFontSize}
-        />
-        <ToggleControl
-          checked={breathingEnabled}
-          onCheckedChange={(checked) => onChange({ breathingEnabled: checked })}
-          label="Дыхание"
-          colorPalette="teal"
-          size={styles.switchSize}
-          labelColor={styles.textColor}
-          labelFontSize={styles.labelFontSize}
-          data-onboarding="breathing-btn"
         />
         <ToggleControl
           checked={meditationEnabled}
@@ -167,13 +155,10 @@ export function AtmosphereSwitches({
         colorPalette="blue"
       />
 
-      {/* Дыхание */}
-      <ToggleControl
-        checked={breathingEnabled}
-        onCheckedChange={(checked) => onChange({ breathingEnabled: checked })}
-        label="Анимация дыхания"
-        colorPalette="teal"
-      />
+      {/* Дыхание — без переключателя, включено всегда */}
+      <Text fontSize={styles.valueFontSize} color="fg.muted">
+        Дыхание (вдох — выдох) включено всегда
+      </Text>
 
       {/* Медитация */}
       <HStack justify="space-between">
@@ -270,7 +255,6 @@ export function AtmosphereControls(props: AtmosphereControlsProps) {
     <>
       <AtmosphereSwitches
         nightMode={props.nightMode}
-        breathingEnabled={props.breathingEnabled}
         meditationEnabled={props.meditationEnabled}
         meditationDuration={props.meditationDuration}
         onChange={props.onChange}

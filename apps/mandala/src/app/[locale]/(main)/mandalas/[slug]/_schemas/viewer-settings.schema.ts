@@ -55,8 +55,12 @@ export const ViewerSettingsSchema = z.object({
   meditationEnabled: z.boolean().default(false),
   /** Длительность медитации в минутах */
   meditationDuration: z.number().min(1).max(60).default(5),
-  /** Анимация дыхания (пульсация) */
-  breathingEnabled: z.boolean().default(false),
+  /**
+   * Анимация дыхания (вдох/выдох) — всегда включена и не отключается.
+   * transform гасит любое сохранённое `false` (старые настройки из localStorage), а тип `true`
+   * не даёт коду из пресетов и компонентов записать `false`.
+   */
+  breathingEnabled: z.boolean().default(true).transform((): true => true),
   /** Ночной режим (приглушённые цвета) */
   nightMode: z.boolean().default(false),
   /** Включена ли фоновая музыка */
@@ -159,7 +163,7 @@ export const defaultViewerSettings: ViewerSettings = {
   gradientDuration: 4200,
   meditationEnabled: false,
   meditationDuration: 5,
-  breathingEnabled: false,
+  breathingEnabled: true,
   nightMode: false,
   audioEnabled: false,
   audioSource: 'player',

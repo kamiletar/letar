@@ -49,9 +49,6 @@ export function ShareButton({
     if (settings.nightMode) {
       params.set('night', '1')
     }
-    if (settings.breathingEnabled) {
-      params.set('breathe', '1')
-    }
 
     const baseUrl = `${window.location.origin}/mandalas/${mandalaSlug}`
     const queryString = params.toString()

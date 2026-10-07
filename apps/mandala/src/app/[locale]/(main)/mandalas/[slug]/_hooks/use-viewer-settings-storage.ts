@@ -55,7 +55,9 @@ export function useViewerSettingsStorage(mandalaSlug: string, initialEffectIndex
 
   // Обработчик изменения настроек
   const updateSettings = useCallback((newSettings: Partial<ViewerSettings>) => {
-    setSettings((prev) => ({ ...prev, ...newSettings }))
+    // breathingEnabled принудительно true: режим дыхания не отключается, даже если вызывающий код
+    // (не проверенный типами) передал false
+    setSettings((prev) => ({ ...prev, ...newSettings, breathingEnabled: true }))
   }, [])
 
   // Сброс настроек к значениям по умолчанию

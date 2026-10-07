@@ -296,7 +296,6 @@ export function ViewerControls({
           {/* Атмосфера */}
           <AtmosphereSwitches
             nightMode={settings.nightMode}
-            breathingEnabled={settings.breathingEnabled}
             meditationEnabled={settings.meditationEnabled}
             meditationDuration={settings.meditationDuration}
             onChange={onSettingsChange}
@@ -511,7 +510,6 @@ export function ViewerControls({
           <VStack gap={3} align="stretch">
             <AtmosphereSwitches
               nightMode={settings.nightMode}
-              breathingEnabled={settings.breathingEnabled}
               meditationEnabled={settings.meditationEnabled}
               meditationDuration={settings.meditationDuration}
               onChange={onSettingsChange}

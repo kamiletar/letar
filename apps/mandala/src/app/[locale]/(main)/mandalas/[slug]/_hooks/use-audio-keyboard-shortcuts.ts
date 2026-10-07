@@ -34,7 +34,6 @@ interface KeyboardShortcutsConfig {
  * - `L` — Loop (TODO)
  * - `N/P` — Next/Previous трек
  * - `V` — Toggle визуализатор спектра
- * - `B` — Toggle breathing guide
  * - `1-9` — Seek на 10-90% трека (TODO)
  */
 export function useAudioKeyboardShortcuts({
@@ -84,13 +83,6 @@ export function useAudioKeyboardShortcuts({
   }, [settings.audioVolume, onSettingsChange])
 
   /**
-   * Переключение режима дыхания
-   */
-  const toggleBreathing = useCallback(() => {
-    onSettingsChange({ breathingEnabled: !settings.breathingEnabled })
-  }, [settings.breathingEnabled, onSettingsChange])
-
-  /**
    * Обработчик нажатия клавиш
    */
   const handleKeyDown = useCallback(
@@ -127,11 +119,6 @@ export function useAudioKeyboardShortcuts({
           toggleMute()
           break
 
-        case 'KeyB':
-          event.preventDefault()
-          toggleBreathing()
-          break
-
         case 'KeyV':
           event.preventDefault()
           onToggleSpectrum?.()
@@ -154,7 +141,7 @@ export function useAudioKeyboardShortcuts({
           // case 'Digit1'-'Digit9': seekToPercent(digit * 10)
       }
     },
-    [togglePlayback, changeVolume, toggleMute, toggleBreathing, onToggleSpectrum, onNextTrack, onPrevTrack],
+    [togglePlayback, changeVolume, toggleMute, onToggleSpectrum, onNextTrack, onPrevTrack],
   )
 
   /**

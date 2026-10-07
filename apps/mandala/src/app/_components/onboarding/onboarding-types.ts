@@ -46,13 +46,6 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     description: 'Быстро настройте атмосферу: спокойствие, энергия или медитация',
     position: 'bottom',
   },
-  {
-    id: 'breathing',
-    target: 'breathing-btn',
-    title: 'Дыхательные упражнения',
-    description: 'Следуйте ритму дыхания для медитации',
-    position: 'left',
-  },
 ]
 
 /** Ключ localStorage для сохранения состояния онбординга */
