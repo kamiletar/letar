@@ -1,55 +1,56 @@
 'use client'
 
 /**
- * Режим чтеца: список стихов поэта и крупное чтение с листанием.
+ * Режим чтеца: список стихов поэта, крупное чтение с листанием и правка без сети.
  *
  * Стихи берутся из локальной копии (localStorage) и обновляются с сервера, когда есть сеть.
- * Открытое стихотворение и размер шрифта запоминаются: страница перезагружается сама, когда
- * возвращается интернет (`reloadOnOnline` у Serwist), и выступление не должно сбиваться.
+ * Правки (новые стихи, изменения, удаления) сначала попадают в очередь на телефоне и уходят
+ * на сайт сами через несколько секунд, как только сеть есть, — этих секунд хватает, чтобы
+ * передумать («Вернуть»). Открытое стихотворение и размер шрифта запоминаются: страница
+ * перезагружается сама, когда возвращается интернет (`reloadOnOnline` у Serwist), и
+ * выступление не должно сбиваться.
  */
 
 import {
+  applySyncResults,
   clampFontSize,
+  discardPending,
+  keepMine,
+  listPendingDeletes,
+  loadPending,
   loadPrefs,
   loadSnapshot,
-  type ReaderPoem,
+  mergePoems,
+  type PendingChange,
+  type PoemDraft,
   type ReaderSnapshot,
+  recordDelete,
+  recordSave,
+  savePending,
   savePrefs,
   type SyncResult,
   syncSnapshot,
 } from '@/lib/offline/poems-store'
-import { Badge, Box, Button, Container, Flex, Heading, HStack, IconButton, Text, VStack } from '@chakra-ui/react'
+import { Container } from '@chakra-ui/react'
 import { useIsHydrated, useOfflineConsent } from '@letar/hooks'
-import { useCallback, useEffect, useRef, useState } from 'react'
-import {
-  LuCheck,
-  LuChevronLeft,
-  LuChevronRight,
-  LuMaximize,
-  LuMinimize,
-  LuMinus,
-  LuPlus,
-  LuRefreshCw,
-  LuWifiOff,
-  LuX,
-} from 'react-icons/lu'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { useFullscreen } from '../_hooks/use-fullscreen'
 import { useWakeLock } from '../_hooks/use-wake-lock'
+import { PoemEditor } from './poem-editor'
+import { PoemListView, type SyncState } from './poem-list-view'
+import { PoemReadingView } from './poem-reading-view'
 
 /** Тот же ключ, что в root layout: одно согласие на офлайн для всего приложения */
 const OFFLINE_CONSENT_KEY = 'grandslamcup-offline-consent'
 
-/** Минимальный сдвиг пальца по горизонтали, который считается листанием, px */
-const SWIPE_THRESHOLD = 70
+/** Через сколько после правки она уходит на сайт; пока можно передумать, мс */
+const AUTO_SYNC_DELAY_MS = 4000
 
-type SyncState = 'syncing' | 'ok' | 'unauthorized' | 'offline' | 'error'
-
-function formatSyncedAt(iso: string): string {
-  const date = new Date(iso)
-  return Number.isNaN(date.getTime())
-    ? ''
-    : date.toLocaleString('ru-RU', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })
+/** Редактор: id = null — новое стихотворение; key не меняется, даже когда id становится серверным */
+interface EditorState {
+  id: string | null
+  key: number
 }
 
 /** Проверяет, лежит ли сама страница чтеца в кэше service worker'а */
@@ -70,44 +71,91 @@ export function PoemReader() {
 
 function PoemReaderContent() {
   const [snapshot, setSnapshot] = useState<ReaderSnapshot | null>(loadSnapshot)
+  const [pending, setPending] = useState<PendingChange[]>(loadPending)
   const [prefs] = useState(loadPrefs)
   const [syncState, setSyncState] = useState<SyncState>('syncing')
   const [openId, setOpenId] = useState<string | null>(prefs.poemId)
   const [fontSize, setFontSize] = useState(prefs.fontSize)
+  const [editor, setEditor] = useState<EditorState | null>(null)
   const [shellCached, setShellCached] = useState(false)
   const { isAccepted, accept } = useOfflineConsent(OFFLINE_CONSENT_KEY)
   const { supported: fullscreenSupported, isFullscreen, toggle: toggleFullscreen } = useFullscreen()
-  const touchStartX = useRef<number | null>(null)
 
-  const poems = snapshot?.poems ?? []
+  // Актуальная очередь для асинхронных обработчиков: замыкание с прошлого рендера её не видит
+  const pendingRef = useRef(pending)
+  const syncingRef = useRef(false)
+  const editorKey = useRef(0)
+
+  const serverPoems = useMemo(() => snapshot?.poems ?? [], [snapshot])
+  const poems = useMemo(() => mergePoems(serverPoems, pending), [serverPoems, pending])
+  const pendingDeletes = useMemo(() => listPendingDeletes(serverPoems, pending), [serverPoems, pending])
+  const sendable = pending.filter((change) => !change.conflict)
+  const conflictCount = pending.length - sendable.length
+
   // Если открытого стихотворения больше нет (удалили на сайте) — openIndex = -1, виден список
   const openIndex = poems.findIndex((poem) => poem.id === openId)
-  const openPoem: ReaderPoem | null = openIndex >= 0 ? poems[openIndex]! : null
+  const openPoem = openIndex >= 0 ? poems[openIndex]! : null
 
-  useWakeLock(openPoem !== null)
+  useWakeLock(openPoem !== null && editor === null)
 
-  const applySync = useCallback((result: SyncResult) => {
-    if (result.status === 'ok') {
-      setSnapshot(result.snapshot)
-    }
-    setSyncState(result.status)
+  /** Новая очередь: в память, в ref и на диск сразу — вкладку могут закрыть в любой момент */
+  const commitPending = useCallback((next: PendingChange[]) => {
+    pendingRef.current = next
+    setPending(next)
+    savePending(next)
   }, [])
+
+  const handleSyncResult = useCallback((result: SyncResult) => {
+    syncingRef.current = false
+    setSyncState(result.status === 'ok' ? 'ok' : result.status)
+    if (result.status !== 'ok') {
+      return
+    }
+
+    setSnapshot(result.snapshot)
+    const applied = applySyncResults(pendingRef.current, result.sent, result.results)
+    commitPending(applied.pending)
+
+    // Новое стихотворение получило серверный id — переносим на него открытый экран
+    const { idMap } = applied
+    if (Object.keys(idMap).length > 0) {
+      setOpenId((current) => (current && idMap[current]) || current)
+      setEditor((current) => (current?.id && idMap[current.id] ? { ...current, id: idMap[current.id]! } : current))
+    }
+  }, [commitPending])
+
+  const startSync = useCallback(() => {
+    if (syncingRef.current) {
+      return
+    }
+    syncingRef.current = true
+    void syncSnapshot(pendingRef.current).then(handleSyncResult)
+  }, [handleSyncResult])
 
   const refresh = useCallback(() => {
     setSyncState('syncing')
-    void syncSnapshot().then(applySync)
-  }, [applySync])
+    startSync()
+  }, [startSync])
 
   // Свежие данные с сервера: при открытии и каждый раз, когда возвращается сеть
   useEffect(() => {
-    void syncSnapshot().then(applySync)
+    startSync()
 
     // Просим браузер не вычищать копию стихов при нехватке места
     void navigator.storage?.persist?.()
 
     window.addEventListener('online', refresh)
     return () => window.removeEventListener('online', refresh)
-  }, [applySync, refresh])
+  }, [refresh, startSync])
+
+  // Правка уходит на сайт сама через несколько секунд (без сети попытка просто вернёт «офлайн»)
+  useEffect(() => {
+    if (sendable.length === 0) {
+      return
+    }
+    const timer = setTimeout(refresh, AUTO_SYNC_DELAY_MS)
+    return () => clearTimeout(timer)
+  }, [pending, sendable.length, refresh])
 
   // Запоминаем, что открыто и каким шрифтом
   useEffect(() => {
@@ -153,9 +201,14 @@ function PoemReaderContent() {
     setFontSize((current) => clampFontSize(current + delta))
   }, [])
 
+  const openEditor = useCallback((id: string | null) => {
+    editorKey.current += 1
+    setEditor({ id, key: editorKey.current })
+  }, [])
+
   // Листание стрелками клавиатуры и Escape — удобно на планшете и компьютере
   useEffect(() => {
-    if (openPoem === null) {
+    if (openPoem === null || editor !== null) {
       return
     }
     const handleKey = (event: KeyboardEvent) => {
@@ -169,268 +222,88 @@ function PoemReaderContent() {
     }
     window.addEventListener('keydown', handleKey)
     return () => window.removeEventListener('keydown', handleKey)
-  }, [goTo, openIndex, openPoem])
+  }, [editor, goTo, openIndex, openPoem])
+
+  const handleSave = (draft: PoemDraft) => {
+    if (!editor) {
+      return
+    }
+    const saved = recordSave(pendingRef.current, serverPoems, editor.id, draft)
+    commitPending(saved.pending)
+    setEditor(null)
+    if (editor.id === null) {
+      setOpenId(saved.id)
+    }
+  }
+
+  const handleDelete = () => {
+    if (!editor?.id) {
+      return
+    }
+    commitPending(recordDelete(pendingRef.current, serverPoems, editor.id))
+    setEditor(null)
+    setOpenId(null)
+  }
+
+  // ───────────────────────── Редактор ─────────────────────────
+  if (editor) {
+    const editing = editor.id === null ? null : poems.find((poem) => poem.id === editor.id) ?? null
+    return (
+      <Container maxW="720px" py={6}>
+        <PoemEditor
+          key={editor.key}
+          initial={editing && { title: editing.title, text: editing.text, published: editing.published }}
+          onSave={handleSave}
+          onCancel={() => setEditor(null)}
+          onDelete={editing ? handleDelete : undefined}
+        />
+      </Container>
+    )
+  }
 
   // ───────────────────────── Чтение ─────────────────────────
   if (openPoem) {
     return (
-      <Flex
-        direction="column"
-        position="fixed"
-        inset={0}
-        zIndex={10000}
-        bg="#0b0b0b"
-        color="#f3f3f3"
-        onTouchStart={(event) => {
-          touchStartX.current = event.touches[0]?.clientX ?? null
+      <PoemReadingView
+        poem={openPoem}
+        index={openIndex}
+        total={poems.length}
+        fontSize={fontSize}
+        fullscreenSupported={fullscreenSupported}
+        isFullscreen={isFullscreen}
+        onClose={() => setOpenId(null)}
+        onGoTo={goTo}
+        onFontChange={changeFont}
+        onToggleFullscreen={toggleFullscreen}
+        onEdit={() => openEditor(openPoem.id)}
+        onKeepMine={() => {
+          commitPending(keepMine(pendingRef.current, openPoem.id))
+          refresh()
         }}
-        onTouchEnd={(event) => {
-          const start = touchStartX.current
-          touchStartX.current = null
-          const end = event.changedTouches[0]?.clientX
-          if (start === null || end === undefined) {
-            return
-          }
-          const delta = end - start
-          if (delta <= -SWIPE_THRESHOLD) {
-            goTo(openIndex + 1)
-          } else if (delta >= SWIPE_THRESHOLD) {
-            goTo(openIndex - 1)
-          }
-        }}
-      >
-        {/* Верхняя панель */}
-        <HStack
-          gap={1}
-          px={2}
-          py={2}
-          borderBottomWidth="1px"
-          borderColor="whiteAlpha.200"
-          flexShrink={0}
-          pt="max(8px, env(safe-area-inset-top))"
-        >
-          <IconButton aria-label="К списку стихов" variant="ghost" color="inherit" onClick={() => setOpenId(null)}>
-            <LuX />
-          </IconButton>
-          <Text flex={1} minW={0} fontSize="sm" color="whiteAlpha.700" lineClamp={1} textAlign="center">
-            {openIndex + 1} из {poems.length}
-          </Text>
-          <IconButton
-            aria-label="Меньше шрифт"
-            variant="ghost"
-            color="inherit"
-            onClick={() => changeFont(-2)}
-          >
-            <LuMinus />
-          </IconButton>
-          <IconButton
-            aria-label="Больше шрифт"
-            variant="ghost"
-            color="inherit"
-            onClick={() => changeFont(2)}
-          >
-            <LuPlus />
-          </IconButton>
-          {fullscreenSupported && (
-            <IconButton
-              aria-label={isFullscreen ? 'Выйти из полного экрана' : 'На весь экран'}
-              variant="ghost"
-              color="inherit"
-              onClick={toggleFullscreen}
-            >
-              {isFullscreen ? <LuMinimize /> : <LuMaximize />}
-            </IconButton>
-          )}
-        </HStack>
-
-        {/* Текст стихотворения */}
-        <Box flex={1} overflowY="auto" px={{ base: 5, md: 10 }} py={6}>
-          <Box maxW="820px" mx="auto">
-            <Heading asChild fontSize={`${Math.round(fontSize * 1.15)}px`} lineHeight="short" mb={6} color="#ffffff">
-              <h1>{openPoem.title}</h1>
-            </Heading>
-            <Text fontSize={`${fontSize}px`} lineHeight="1.55" whiteSpace="pre-wrap" wordBreak="break-word">
-              {openPoem.text}
-            </Text>
-          </Box>
-        </Box>
-
-        {/* Нижняя панель: предыдущее и следующее */}
-        <HStack
-          gap={2}
-          px={3}
-          py={2}
-          borderTopWidth="1px"
-          borderColor="whiteAlpha.200"
-          flexShrink={0}
-          pb="max(8px, env(safe-area-inset-bottom))"
-        >
-          <Button
-            flex={1}
-            variant="outline"
-            color="inherit"
-            borderColor="whiteAlpha.300"
-            size="lg"
-            disabled={openIndex <= 0}
-            onClick={() => goTo(openIndex - 1)}
-          >
-            <LuChevronLeft />
-            Назад
-          </Button>
-          <Button
-            flex={1}
-            variant="outline"
-            color="inherit"
-            borderColor="whiteAlpha.300"
-            size="lg"
-            disabled={openIndex >= poems.length - 1}
-            onClick={() => goTo(openIndex + 1)}
-          >
-            Дальше
-            <LuChevronRight />
-          </Button>
-        </HStack>
-      </Flex>
+        onTakeServer={() => commitPending(discardPending(pendingRef.current, openPoem.id))}
+      />
     )
   }
 
   // ───────────────────────── Список ─────────────────────────
   return (
-    <Container maxW="720px" py={6}>
-      <VStack gap={5} align="stretch">
-        <Flex justify="space-between" align="center" gap={3}>
-          <Heading asChild size="xl">
-            <h1>Режим чтеца</h1>
-          </Heading>
-          <HStack gap={2}>
-            {fullscreenSupported && (
-              <IconButton
-                aria-label={isFullscreen ? 'Выйти из полного экрана' : 'На весь экран'}
-                variant="outline"
-                onClick={toggleFullscreen}
-              >
-                {isFullscreen ? <LuMinimize /> : <LuMaximize />}
-              </IconButton>
-            )}
-            <IconButton
-              aria-label="Обновить стихи"
-              variant="outline"
-              onClick={refresh}
-              loading={syncState === 'syncing'}
-            >
-              <LuRefreshCw />
-            </IconButton>
-          </HStack>
-        </Flex>
-
-        {/* Состояние: что сохранено и будет ли работать без сети */}
-        <VStack gap={2} align="stretch" bg="bg.panel" borderRadius="xl" borderWidth="1px" borderColor="border" p={4}>
-          {snapshot
-            ? (
-              <HStack gap={2} align="start">
-                <Box color="green.fg" mt={1}>
-                  <LuCheck />
-                </Box>
-                <Text fontSize="sm">
-                  Сохранено на этом телефоне: {poems.length} {pluralizePoems(poems.length)}.{' '}
-                  <Text asChild color="fg.muted">
-                    <span>Обновлено {formatSyncedAt(snapshot.syncedAt)}.</span>
-                  </Text>
-                </Text>
-              </HStack>
-            )
-            : <Text fontSize="sm" color="fg.muted">Стихи ещё не сохранены на телефон.</Text>}
-
-          {syncState === 'unauthorized' && (
-            <Text fontSize="sm" color="orange.fg">
-              Вы не вошли. Войдите, пока есть интернет, и стихи сохранятся.{' '}
-              <a href="/sign-in?returnTo=/reader" style={{ textDecoration: 'underline' }}>Войти</a>
-            </Text>
-          )}
-          {syncState === 'offline' && (
-            <HStack gap={2} color="fg.muted">
-              <LuWifiOff />
-              <Text fontSize="sm">Нет сети. Показаны сохранённые стихи.</Text>
-            </HStack>
-          )}
-          {syncState === 'error' && (
-            <Text fontSize="sm" color="red.fg">Не удалось обновить стихи. Показаны сохранённые.</Text>
-          )}
-
-          {isAccepted
-            ? shellCached
-              ? (
-                <HStack gap={2} align="start">
-                  <Box color="green.fg" mt={1}>
-                    <LuCheck />
-                  </Box>
-                  <Text fontSize="sm">Эта страница откроется без интернета.</Text>
-                </HStack>
-              )
-              : <Text fontSize="sm" color="fg.muted">Готовим страницу для работы без интернета…</Text>
-            : (
-              <Button size="sm" colorPalette="brand" alignSelf="start" onClick={accept}>
-                Включить работу без интернета
-              </Button>
-            )}
-          {!fullscreenSupported && (
-            <Text fontSize="xs" color="fg.muted">
-              Полный экран: в меню браузера выберите «Добавить на экран „Домой“» и открывайте с иконки.
-            </Text>
-          )}
-        </VStack>
-
-        {poems.length === 0
-          ? (
-            <Text color="fg.muted">
-              Стихов нет. Напишите их в кабинете поэта, затем откройте эту страницу с интернетом.
-            </Text>
-          )
-          : (
-            <VStack gap={2} align="stretch">
-              {poems.map((poem) => (
-                <Box
-                  key={poem.id}
-                  asChild
-                  textAlign="left"
-                  bg="bg.panel"
-                  borderRadius="xl"
-                  borderWidth="1px"
-                  borderColor="border"
-                  p={4}
-                  cursor="pointer"
-                  _hover={{ borderColor: 'border.emphasized' }}
-                  _active={{ bg: 'bg.muted' }}
-                >
-                  <button type="button" onClick={() => setOpenId(poem.id)}>
-                    <HStack justify="space-between" gap={3} align="start">
-                      <VStack gap={1} align="start" minW={0}>
-                        <Text fontWeight="semibold" lineClamp={1}>{poem.title}</Text>
-                        <Text fontSize="sm" color="fg.muted" lineClamp={2} whiteSpace="pre-line">
-                          {poem.text.slice(0, 120)}
-                        </Text>
-                      </VStack>
-                      {!poem.published && <Badge variant="subtle" size="sm" flexShrink={0}>Черновик</Badge>}
-                    </HStack>
-                  </button>
-                </Box>
-              ))}
-            </VStack>
-          )}
-      </VStack>
-    </Container>
+    <PoemListView
+      snapshot={snapshot}
+      poems={poems}
+      pendingDeletes={pendingDeletes}
+      pendingCount={sendable.length}
+      conflictCount={conflictCount}
+      syncState={syncState}
+      offlineConsentGiven={isAccepted}
+      shellCached={shellCached}
+      fullscreenSupported={fullscreenSupported}
+      isFullscreen={isFullscreen}
+      onOpen={setOpenId}
+      onCreate={() => openEditor(null)}
+      onRestore={(id) => commitPending(discardPending(pendingRef.current, id))}
+      onRefresh={refresh}
+      onAcceptOffline={accept}
+      onToggleFullscreen={toggleFullscreen}
+    />
   )
-}
-
-/** «1 стихотворение», «2 стихотворения», «5 стихотворений» */
-function pluralizePoems(count: number): string {
-  const mod10 = count % 10
-  const mod100 = count % 100
-  if (mod10 === 1 && mod100 !== 11) {
-    return 'стихотворение'
-  }
-  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) {
-    return 'стихотворения'
-  }
-  return 'стихотворений'
 }
