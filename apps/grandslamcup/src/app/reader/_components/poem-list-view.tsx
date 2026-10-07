@@ -5,9 +5,11 @@
  * заработает ли страница без интернета.
  */
 
-import type { DisplayPoem, ReaderPoem, ReaderSnapshot } from '@/lib/offline/poems-store'
+import { coverSource, type DisplayPoem, type ReaderPoem, type ReaderSnapshot } from '@/lib/offline/poems-store'
 import { Badge, Box, Button, Container, Flex, Heading, HStack, IconButton, Text, VStack } from '@chakra-ui/react'
 import { LuCheck, LuMaximize, LuMinimize, LuPlus, LuRefreshCw, LuWifiOff } from 'react-icons/lu'
+
+import { CoverThumb } from './cover-thumb'
 
 export type SyncState = 'syncing' | 'ok' | 'unauthorized' | 'offline' | 'error'
 
@@ -196,17 +198,22 @@ export function PoemListView({
                   _active={{ bg: 'bg.muted' }}
                 >
                   <button type="button" onClick={() => onOpen(poem.id)}>
-                    <VStack gap={1} align="start" minW={0}>
-                      <Flex wrap="wrap" align="center" gap={2}>
-                        <Text fontWeight="semibold" lineClamp={2} wordBreak="break-word">{poem.title}</Text>
-                        {poem.conflict && <Badge colorPalette="red" size="sm">Конфликт</Badge>}
-                        {poem.pending && !poem.conflict && <Badge colorPalette="orange" size="sm">Не отправлено</Badge>}
-                        {!poem.published && <Badge variant="subtle" size="sm">Черновик</Badge>}
-                      </Flex>
-                      <Text fontSize="sm" color="fg.muted" lineClamp={2} whiteSpace="pre-line" wordBreak="break-word">
-                        {poem.text.slice(0, 120)}
-                      </Text>
-                    </VStack>
+                    <HStack gap={3} align="start" w="100%">
+                      <CoverThumb {...coverSource(poem)} size={56} />
+                      <VStack gap={1} align="start" minW={0} flex={1}>
+                        <Flex wrap="wrap" align="center" gap={2}>
+                          <Text fontWeight="semibold" lineClamp={2} wordBreak="break-word">{poem.title}</Text>
+                          {poem.conflict && <Badge colorPalette="red" size="sm">Конфликт</Badge>}
+                          {poem.pending && !poem.conflict && (
+                            <Badge colorPalette="orange" size="sm">Не отправлено</Badge>
+                          )}
+                          {!poem.published && <Badge variant="subtle" size="sm">Черновик</Badge>}
+                        </Flex>
+                        <Text fontSize="sm" color="fg.muted" lineClamp={2} whiteSpace="pre-line" wordBreak="break-word">
+                          {poem.text.slice(0, 120)}
+                        </Text>
+                      </VStack>
+                    </HStack>
                   </button>
                 </Box>
               ))}

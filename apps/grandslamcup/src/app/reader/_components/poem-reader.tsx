@@ -11,8 +11,11 @@
  * выступление не должно сбиваться.
  */
 
+import { cacheServerCovers, pruneBlobs } from '@/lib/offline/blob-store'
+import { uploadPendingCovers } from '@/lib/offline/cover-upload'
 import {
   applySyncResults,
+  attachUploads,
   clampFontSize,
   discardPending,
   keepMine,
@@ -21,8 +24,9 @@ import {
   loadPrefs,
   loadSnapshot,
   mergePoems,
+  pendingBlobKeys,
   type PendingChange,
-  type PoemDraft,
+  type PoemEdit,
   type ReaderSnapshot,
   recordDelete,
   recordSave,
@@ -116,6 +120,10 @@ function PoemReaderContent() {
     const applied = applySyncResults(pendingRef.current, result.sent, result.results)
     commitPending(applied.pending)
 
+    // Обложки с сайта — на телефон, чтобы показывались без сети; доехавшие фото с телефона — стереть
+    void cacheServerCovers(result.snapshot.poems.map((poem) => poem.coverImage ?? null))
+    void pruneBlobs(pendingBlobKeys(applied.pending))
+
     // Новое стихотворение получило серверный id — переносим на него открытый экран
     const { idMap } = applied
     if (Object.keys(idMap).length > 0) {
@@ -129,8 +137,15 @@ function PoemReaderContent() {
       return
     }
     syncingRef.current = true
-    void syncSnapshot(pendingRef.current).then(handleSyncResult)
-  }, [handleSyncResult])
+    void (async () => {
+      // Фото, выбранные без сети, сначала едут на сайт; путь запоминается в правке
+      const uploads = await uploadPendingCovers(pendingRef.current)
+      if (Object.keys(uploads).length > 0) {
+        commitPending(attachUploads(pendingRef.current, uploads))
+      }
+      return syncSnapshot(pendingRef.current)
+    })().then(handleSyncResult)
+  }, [commitPending, handleSyncResult])
 
   const refresh = useCallback(() => {
     setSyncState('syncing')
@@ -224,12 +239,13 @@ function PoemReaderContent() {
     return () => window.removeEventListener('keydown', handleKey)
   }, [editor, goTo, openIndex, openPoem])
 
-  const handleSave = (draft: PoemDraft) => {
+  const handleSave = (draft: PoemEdit) => {
     if (!editor) {
       return
     }
     const saved = recordSave(pendingRef.current, serverPoems, editor.id, draft)
     commitPending(saved.pending)
+    void pruneBlobs(pendingBlobKeys(saved.pending))
     setEditor(null)
     if (editor.id === null) {
       setOpenId(saved.id)
@@ -240,7 +256,9 @@ function PoemReaderContent() {
     if (!editor?.id) {
       return
     }
-    commitPending(recordDelete(pendingRef.current, serverPoems, editor.id))
+    const afterDelete = recordDelete(pendingRef.current, serverPoems, editor.id)
+    commitPending(afterDelete)
+    void pruneBlobs(pendingBlobKeys(afterDelete))
     setEditor(null)
     setOpenId(null)
   }
@@ -252,7 +270,13 @@ function PoemReaderContent() {
       <Container maxW="720px" py={6}>
         <PoemEditor
           key={editor.key}
-          initial={editing && { title: editing.title, text: editing.text, published: editing.published }}
+          initial={editing && {
+            title: editing.title,
+            text: editing.text,
+            published: editing.published,
+            coverImage: editing.coverImage,
+            cover: editing.cover,
+          }}
           onSave={handleSave}
           onCancel={() => setEditor(null)}
           onDelete={editing ? handleDelete : undefined}

@@ -24,6 +24,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': resolve(import.meta.dirname, './src'),
+      '@letar/upload-validation': resolve(import.meta.dirname, '../../libs/upload-validation/src/index.ts'),
       '@letar/image-upload/server': resolve(import.meta.dirname, '../../libs/image-upload/src/server'),
     },
   },

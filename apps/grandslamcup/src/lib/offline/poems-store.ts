@@ -19,6 +19,8 @@ export interface ReaderPoem {
   text: string
   published: boolean
   updatedAt: string
+  /** Путь обложки на сайте (`poems/…`); в старых копиях поля нет */
+  coverImage?: string | null
 }
 
 /** Снимок всех стихов поэта на момент последней синхронизации */
@@ -44,6 +46,19 @@ export interface PoemDraft {
   published: boolean
 }
 
+/**
+ * Что сделали с обложкой (если ничего — поля нет):
+ * - `set` — фото выбрано на телефоне и лежит в IndexedDB под `blobKey`; `uploaded` — путь на
+ *   сайте после загрузки (файл уже там, но к стиху ещё не привязан);
+ * - `remove` — обложку убрали.
+ */
+export type CoverEdit = { kind: 'set'; blobKey: string; uploaded?: string } | { kind: 'remove' }
+
+/** Что редактор отдаёт наверх: текстовые поля и правка обложки */
+export interface PoemEdit extends PoemDraft {
+  cover?: CoverEdit | undefined
+}
+
 export type PendingKind = 'create' | 'update' | 'delete'
 
 /** Версия стихотворения на сайте, с которой разошлась локальная правка */
@@ -53,6 +68,8 @@ export interface ConflictServerVersion extends PoemDraft {
 
 /** Правка, ещё не отправленная на сервер */
 export interface PendingChange extends PoemDraft {
+  /** Правка обложки; undefined — обложку не трогали */
+  cover?: CoverEdit | undefined
   /** id стихотворения: серверный или `local-…` для нового */
   id: string
   kind: PendingKind
@@ -66,14 +83,26 @@ export interface PendingChange extends PoemDraft {
 
 /** Стихотворение для показа: серверная версия с наложенной локальной правкой */
 export interface DisplayPoem extends ReaderPoem {
+  /** Обложка на сайте (серверная копия), без учёта локальной правки */
+  coverImage: string | null
+  /** Локальная правка обложки */
+  cover: CoverEdit | undefined
   pending: PendingKind | null
   conflict: boolean
 }
 
-/** Правка в том виде, в каком она уходит на сервер */
+/** Правка в том виде, в каком она уходит на сервер; `coverImage`: путь — задать, null — убрать, нет поля — не трогать */
 export type WireChange =
-  | { kind: 'create'; id: string; title: string; text: string; published: boolean }
-  | { kind: 'update'; id: string; title: string; text: string; published: boolean; baseUpdatedAt: string }
+  | { kind: 'create'; id: string; title: string; text: string; published: boolean; coverImage?: string | null }
+  | {
+    kind: 'update'
+    id: string
+    title: string
+    text: string
+    published: boolean
+    baseUpdatedAt: string
+    coverImage?: string | null
+  }
   | { kind: 'delete'; id: string }
 
 /** Итог по одной правке (ответ сервера) */
@@ -128,6 +157,20 @@ export function isReaderPoem(value: unknown): value is ReaderPoem {
     && typeof poem.text === 'string'
     && typeof poem.published === 'boolean'
     && typeof poem.updatedAt === 'string'
+    && (poem.coverImage === undefined || poem.coverImage === null || typeof poem.coverImage === 'string')
+}
+
+function isCoverEdit(value: unknown): value is CoverEdit {
+  if (typeof value !== 'object' || value === null) {
+    return false
+  }
+  const cover = value as Record<string, unknown>
+  if (cover.kind === 'remove') {
+    return true
+  }
+  return cover.kind === 'set'
+    && typeof cover.blobKey === 'string'
+    && (cover.uploaded === undefined || typeof cover.uploaded === 'string')
 }
 
 /** Проверяет, что разобранный JSON похож на снимок; битые данные не должны ронять страницу */
@@ -163,6 +206,7 @@ function isPendingChange(value: unknown): value is PendingChange {
     && typeof change.editedAt === 'string'
     && (change.baseUpdatedAt === null || typeof change.baseUpdatedAt === 'string')
     && (change.conflict === null || isConflict(change.conflict))
+    && (change.cover === undefined || isCoverEdit(change.cover))
 }
 
 /** Разбирает ответ сервера: снимок плюс итоги по отправленным правкам */
@@ -291,6 +335,28 @@ function sameContent(a: PoemDraft, b: PoemDraft): boolean {
 }
 
 /**
+ * Какую обложку показывать: `blobKey` — фото с телефона, `path` — файл на сайте.
+ * Убранная обложка — оба null.
+ */
+export function coverSource(poem: Pick<DisplayPoem, 'coverImage' | 'cover'>): {
+  blobKey: string | null
+  path: string | null
+} {
+  if (poem.cover?.kind === 'set') {
+    return { blobKey: poem.cover.blobKey, path: null }
+  }
+  if (poem.cover?.kind === 'remove') {
+    return { blobKey: null, path: null }
+  }
+  return { blobKey: null, path: poem.coverImage }
+}
+
+/** Ключи IndexedDB, на которые ссылается очередь: остальные фото с телефона можно стирать */
+export function pendingBlobKeys(pending: PendingChange[]): string[] {
+  return pending.flatMap((change) => (change.cover?.kind === 'set' ? [change.cover.blobKey] : []))
+}
+
+/**
  * Стихи для показа: серверная копия с наложенными правками.
  * Новые (и те, чей оригинал пропал с сайта) идут первыми, удалённые скрыты.
  */
@@ -307,24 +373,29 @@ export function mergePoems(serverPoems: ReaderPoem[], pending: PendingChange[]):
       text: change.text,
       published: change.published,
       updatedAt: change.editedAt,
+      coverImage: null,
+      cover: change.cover?.kind === 'set' ? change.cover : undefined,
       pending: 'create' as const,
       conflict: false,
     }))
 
   const fromServer = serverPoems.flatMap((poem): DisplayPoem[] => {
     const change = byId.get(poem.id)
+    const coverImage = poem.coverImage ?? null
     if (!change) {
-      return [{ ...poem, pending: null, conflict: false }]
+      return [{ ...poem, coverImage, cover: undefined, pending: null, conflict: false }]
     }
     if (change.kind === 'delete') {
       return []
     }
     if (change.kind === 'create') {
       // такой id уже есть на сайте — серверная версия главнее старой записи очереди
-      return [{ ...poem, pending: null, conflict: false }]
+      return [{ ...poem, coverImage, cover: undefined, pending: null, conflict: false }]
     }
     return [{
       ...poem,
+      coverImage,
+      cover: change.cover,
       title: change.title,
       text: change.text,
       published: change.published,
@@ -334,6 +405,26 @@ export function mergePoems(serverPoems: ReaderPoem[], pending: PendingChange[]):
   })
 
   return [...created, ...fromServer]
+}
+
+/**
+ * Итоговая правка обложки для записи в очередь. Убрать можно только то, что есть на сайте;
+ * `uploaded` сохраняется, если это то же самое фото, которое уже загрузили.
+ */
+function resolveCover(
+  draft: CoverEdit | undefined,
+  server: ReaderPoem | undefined,
+  isCreate: boolean,
+  previous: CoverEdit | undefined,
+): CoverEdit | undefined {
+  if (!draft) {
+    return undefined
+  }
+  if (draft.kind === 'set') {
+    const uploaded = previous?.kind === 'set' && previous.blobKey === draft.blobKey ? previous.uploaded : undefined
+    return uploaded ? { kind: 'set', blobKey: draft.blobKey, uploaded } : { kind: 'set', blobKey: draft.blobKey }
+  }
+  return isCreate || !server?.coverImage ? undefined : draft
 }
 
 /** Стихи, помеченные на удаление и ещё не отправленные: их можно вернуть */
@@ -350,17 +441,19 @@ export function recordSave(
   pending: PendingChange[],
   serverPoems: ReaderPoem[],
   id: string | null,
-  draft: PoemDraft,
+  draft: PoemEdit,
   now: string = new Date().toISOString(),
 ): { pending: PendingChange[]; id: string } {
   const clean = cleanDraft(draft)
 
   if (id === null) {
     const newId = createLocalId()
+    const cover = resolveCover(draft.cover, undefined, true, undefined)
     const change: PendingChange = {
       id: newId,
       kind: 'create',
       ...clean,
+      ...(cover ? { cover } : {}),
       baseUpdatedAt: null,
       editedAt: now,
       conflict: null,
@@ -373,17 +466,21 @@ export function recordSave(
 
   if (existing) {
     const kind: PendingKind = existing.kind === 'delete' ? 'update' : existing.kind
+    const cover = resolveCover(draft.cover, server, kind === 'create' || !server, existing.cover)
     // правка вернула текст к серверному — очередь не нужна (если нет конфликта)
-    if (kind === 'update' && server && existing.conflict === null && sameContent(clean, server)) {
+    if (kind === 'update' && server && existing.conflict === null && sameContent(clean, server) && !cover) {
       return { pending: pending.filter((change) => change.id !== id), id }
     }
     return {
-      pending: pending.map((change) => (change.id === id ? { ...change, ...clean, kind, editedAt: now } : change)),
+      pending: pending.map((
+        change,
+      ) => (change.id === id ? { ...change, ...clean, cover, kind, editedAt: now } : change)),
       id,
     }
   }
 
-  if (!server || sameContent(clean, server)) {
+  const cover = resolveCover(draft.cover, server, !server, undefined)
+  if (!server || (sameContent(clean, server) && !cover)) {
     return { pending, id }
   }
 
@@ -391,6 +488,7 @@ export function recordSave(
     id,
     kind: 'update',
     ...clean,
+    ...(cover ? { cover } : {}),
     baseUpdatedAt: server.updatedAt,
     editedAt: now,
     conflict: null,
@@ -411,7 +509,9 @@ export function recordDelete(
     return pending.filter((change) => change.id !== id)
   }
   if (existing) {
-    return pending.map((change) => (change.id === id ? { ...change, kind: 'delete', editedAt: now } : change))
+    return pending.map((change) =>
+      change.id === id ? { ...change, kind: 'delete', cover: undefined, editedAt: now } : change
+    )
   }
 
   const server = serverPoems.find((poem) => poem.id === id)
@@ -454,11 +554,36 @@ export function toWireChanges(pending: PendingChange[]): WireChange[] {
     if (change.kind === 'delete') {
       return [{ kind: 'delete', id: change.id }]
     }
-    const draft = { title: change.title, text: change.text, published: change.published }
+    // Фото, которое ещё не загружено, в запрос не попадает: текст уходит сразу, фото — позже
+    const coverImage = change.cover?.kind === 'remove' ? null : change.cover?.uploaded
+    const draft = {
+      title: change.title,
+      text: change.text,
+      published: change.published,
+      ...(coverImage !== undefined ? { coverImage } : {}),
+    }
     if (change.kind === 'create' || change.baseUpdatedAt === null) {
       return [{ kind: 'create', id: change.id, ...draft }]
     }
     return [{ kind: 'update', id: change.id, ...draft, baseUpdatedAt: change.baseUpdatedAt }]
+  })
+}
+
+/**
+ * Запоминает загрузки фото: `path` — файл на сайте, null — фото на телефоне потерялось и
+ * отправить его нечем (обложку из правки убираем). Если за время загрузки фото успели
+ * заменить, результат игнорируется.
+ */
+export function attachUploads(
+  pending: PendingChange[],
+  uploads: Record<string, { blobKey: string; path: string | null }>,
+): PendingChange[] {
+  return pending.map((change) => {
+    const upload = uploads[change.id]
+    if (!upload || change.cover?.kind !== 'set' || change.cover.blobKey !== upload.blobKey) {
+      return change
+    }
+    return { ...change, cover: upload.path ? { ...change.cover, uploaded: upload.path } : undefined }
   })
 }
 
@@ -484,12 +609,26 @@ export function applySyncResults(
       if (result.poem && result.poem.id !== change.id) {
         idMap[change.id] = result.poem.id
       }
+      const poem = result.poem
       const editedWhileSending = change.kind !== 'delete' && sent[change.id] !== change.editedAt
-      if (editedWhileSending && result.poem) {
-        // стих правили, пока шёл запрос: оставляем правку, но от свежей серверной версии
+      // Обложка применена, если на сайте теперь то же, что в правке (фото ещё не загружено — не применена)
+      const cover = change.cover
+      const coverDone = !cover
+        || (cover.kind === 'remove'
+          ? !poem?.coverImage
+          : cover.uploaded !== undefined && cover.uploaded === poem?.coverImage)
+      if (poem && (editedWhileSending || !coverDone)) {
+        // стих правили, пока шёл запрос, или фото ещё не доехало: правка остаётся, но от свежей серверной версии
         next = next.map((item) =>
           item === change
-            ? { ...change, id: result.poem!.id, kind: 'update', baseUpdatedAt: result.poem!.updatedAt, conflict: null }
+            ? {
+              ...change,
+              id: poem.id,
+              kind: 'update',
+              baseUpdatedAt: poem.updatedAt,
+              conflict: null,
+              cover: coverDone ? undefined : cover,
+            }
             : item
         )
       } else {

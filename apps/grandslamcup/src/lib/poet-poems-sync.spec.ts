@@ -9,7 +9,10 @@ const poemDb = vi.hoisted(() => ({
   delete: vi.fn(),
 }))
 
+const deleteFile = vi.hoisted(() => vi.fn())
+
 vi.mock('@/lib/db', () => ({ prisma: { poem: poemDb } }))
+vi.mock('@letar/upload-validation', () => ({ deleteFileFromDisk: deleteFile }))
 
 import { applyPoemChanges, SyncRequestSchema } from './poet-poems-sync'
 
@@ -24,6 +27,7 @@ function row(overrides: Record<string, unknown> = {}) {
 beforeEach(() => {
   vi.clearAllMocks()
   poemDb.findUnique.mockResolvedValue(null)
+  deleteFile.mockResolvedValue(undefined)
 })
 
 describe('SyncRequestSchema', () => {
@@ -38,6 +42,73 @@ describe('SyncRequestSchema', () => {
       changes: [{ kind: 'create', id: 'a', title: 'T', text: '', published: false }],
     })
     expect(empty.success).toBe(false)
+  })
+})
+
+describe('обложка в правках', () => {
+  const base = { kind: 'update' as const, id: 'p1', title: 'Первое', text: 'текст', published: true }
+  const parse = (coverImage: unknown) =>
+    SyncRequestSchema.safeParse({ changes: [{ ...base, baseUpdatedAt: T0.toISOString(), coverImage }] }).success
+
+  it('принимает только свежезагруженный файл из временной папки или null', () => {
+    expect(parse('poems/temp/1700000000-abc.jpg')).toBe(true)
+    expect(parse(null)).toBe(true)
+    expect(parse(undefined)).toBe(true)
+    expect(parse('poems/temp/../../etc/passwd')).toBe(false)
+    expect(parse('poems/temp/..')).toBe(false)
+    expect(parse('poems/чужой-id/x.jpg')).toBe(false)
+    expect(parse('https://evil.example/x.jpg')).toBe(false)
+  })
+
+  it('смена обложки без правки текста применяется и удаляет прежний файл', async () => {
+    poemDb.findUnique.mockResolvedValueOnce(row({ coverImage: 'poems/p1/old.jpg' }))
+    poemDb.update.mockResolvedValue(row({ coverImage: 'poems/temp/new.jpg', updatedAt: T1 }))
+
+    const [result] = await applyPoemChanges(PLAYER, [
+      { ...base, baseUpdatedAt: T0.toISOString(), coverImage: 'poems/temp/new.jpg' },
+    ])
+
+    expect(result).toMatchObject({ status: 'ok', poem: { coverImage: 'poems/temp/new.jpg' } })
+    expect(poemDb.update.mock.calls[0]![0].data).toMatchObject({ coverImage: 'poems/temp/new.jpg' })
+    expect(deleteFile).toHaveBeenCalledWith('poems/p1/old.jpg')
+  })
+
+  it('null убирает обложку; без поля обложка не трогается', async () => {
+    poemDb.findUnique.mockResolvedValueOnce(row({ coverImage: 'poems/p1/old.jpg' }))
+    poemDb.update.mockResolvedValue(row({ coverImage: null, updatedAt: T1 }))
+    await applyPoemChanges(PLAYER, [{ ...base, baseUpdatedAt: T0.toISOString(), coverImage: null }])
+    expect(poemDb.update.mock.calls[0]![0].data).toMatchObject({ coverImage: null })
+
+    poemDb.findUnique.mockResolvedValueOnce(row({ coverImage: 'poems/p1/old.jpg' }))
+    poemDb.update.mockResolvedValue(row({ text: 'другой', updatedAt: T1 }))
+    await applyPoemChanges(PLAYER, [{ ...base, text: 'другой', baseUpdatedAt: T0.toISOString() }])
+    expect(poemDb.update.mock.calls[1]![0].data).not.toHaveProperty('coverImage')
+    expect(deleteFile).toHaveBeenCalledTimes(1)
+  })
+
+  it('повтор после потерянного ответа не пишет второй раз; сбой удаления файла правку не отменяет', async () => {
+    poemDb.findUnique.mockResolvedValueOnce(row({ coverImage: 'poems/temp/new.jpg', updatedAt: T1 }))
+    const [again] = await applyPoemChanges(PLAYER, [
+      { ...base, baseUpdatedAt: T0.toISOString(), coverImage: 'poems/temp/new.jpg' },
+    ])
+    expect(again).toMatchObject({ status: 'ok' })
+    expect(poemDb.update).not.toHaveBeenCalled()
+
+    deleteFile.mockRejectedValueOnce(new Error('диск'))
+    vi.spyOn(console, 'error').mockImplementation(() => undefined)
+    poemDb.findUnique.mockResolvedValueOnce(row({ coverImage: 'poems/p1/old.jpg' }))
+    poemDb.update.mockResolvedValue(row({ coverImage: null, updatedAt: T1 }))
+    const [removed] = await applyPoemChanges(PLAYER, [{ ...base, baseUpdatedAt: T0.toISOString(), coverImage: null }])
+    expect(removed).toMatchObject({ status: 'ok' })
+  })
+
+  it('create с обложкой записывает её', async () => {
+    poemDb.findFirst.mockResolvedValue(null)
+    poemDb.create.mockResolvedValue(row({ id: 'srv', coverImage: 'poems/temp/new.jpg' }))
+    await applyPoemChanges(PLAYER, [
+      { kind: 'create', id: 'local-1', title: 'Новое', text: 'т', published: false, coverImage: 'poems/temp/new.jpg' },
+    ])
+    expect(poemDb.create.mock.calls[0]![0].data).toMatchObject({ coverImage: 'poems/temp/new.jpg' })
   })
 })
 

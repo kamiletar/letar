@@ -12,14 +12,27 @@
 import { prisma } from '@/lib/db'
 import type { ChangeResult, ReaderPoem } from '@/lib/offline/poems-store'
 import { transliterate } from '@/lib/transliterate'
+import { deleteFileFromDisk } from '@letar/upload-validation'
 import { z } from 'zod/v4'
 
 const IdSchema = z.string().min(1).max(100)
 const TitleSchema = z.string().trim().min(1).max(500)
 const TextSchema = z.string().min(1).max(100_000)
+/**
+ * Обложка: путь файла, только что загруженного через `/api/upload/poem-cover` (временная папка),
+ * либо null — убрать. Другие пути не принимаем: иначе можно привязать к стиху чужой файл.
+ */
+const CoverSchema = z.string().regex(/^poems\/temp\/[A-Za-z0-9_-][A-Za-z0-9._-]{0,200}$/).nullable().optional()
 
 const ChangeSchema = z.discriminatedUnion('kind', [
-  z.object({ kind: z.literal('create'), id: IdSchema, title: TitleSchema, text: TextSchema, published: z.boolean() }),
+  z.object({
+    kind: z.literal('create'),
+    id: IdSchema,
+    title: TitleSchema,
+    text: TextSchema,
+    published: z.boolean(),
+    coverImage: CoverSchema,
+  }),
   z.object({
     kind: z.literal('update'),
     id: IdSchema,
@@ -27,6 +40,7 @@ const ChangeSchema = z.discriminatedUnion('kind', [
     text: TextSchema,
     published: z.boolean(),
     baseUpdatedAt: z.string().min(1).max(40),
+    coverImage: CoverSchema,
   }),
   z.object({ kind: z.literal('delete'), id: IdSchema }),
 ])
@@ -43,10 +57,11 @@ interface PoemRow {
   text: string
   published: boolean
   updatedAt: Date
+  coverImage?: string | null
   playerId?: string
 }
 
-const POEM_SELECT = { id: true, title: true, text: true, published: true, updatedAt: true } as const
+const POEM_SELECT = { id: true, title: true, text: true, published: true, updatedAt: true, coverImage: true } as const
 
 function toReaderPoem(row: PoemRow): ReaderPoem {
   return {
@@ -55,6 +70,7 @@ function toReaderPoem(row: PoemRow): ReaderPoem {
     text: row.text,
     published: row.published,
     updatedAt: row.updatedAt.toISOString(),
+    coverImage: row.coverImage ?? null,
   }
 }
 
@@ -99,6 +115,7 @@ async function applyCreate(
       slug: await uniqueSlug(change.title),
       text: change.text,
       published: change.published,
+      ...(change.coverImage ? { coverImage: change.coverImage } : {}),
       playerId,
     },
     select: POEM_SELECT,
@@ -118,8 +135,11 @@ async function applyUpdate(
     return { id: change.id, status: 'missing' }
   }
 
+  // Обложка в запросе: путь — задать, null — убрать, нет поля — не трогать
+  const coverChanged = change.coverImage !== undefined && change.coverImage !== (current.coverImage ?? null)
+
   // Уже применено (повтор после потерянного ответа) — успех, без второй записи
-  if (sameDraft(current, change)) {
+  if (sameDraft(current, change) && !coverChanged) {
     return { id: change.id, status: 'ok', poem: toReaderPoem(current) }
   }
 
@@ -135,9 +155,22 @@ async function applyUpdate(
   const slug = current.title === change.title ? undefined : await uniqueSlug(change.title, change.id)
   const updated: PoemRow = await prisma.poem.update({
     where: { id: change.id },
-    data: { title: change.title, text: change.text, published: change.published, ...(slug ? { slug } : {}) },
+    data: {
+      title: change.title,
+      text: change.text,
+      published: change.published,
+      ...(coverChanged ? { coverImage: change.coverImage } : {}),
+      ...(slug ? { slug } : {}),
+    },
     select: POEM_SELECT,
   })
+
+  // Прежний файл обложки больше никому не нужен; сбой удаления не должен отменять правку
+  if (coverChanged && current.coverImage) {
+    await deleteFileFromDisk(current.coverImage).catch((error: unknown) => {
+      console.error('[poet-poems-sync] не удалось удалить старую обложку:', error)
+    })
+  }
   return { id: change.id, status: 'ok', poem: toReaderPoem(updated) }
 }
 

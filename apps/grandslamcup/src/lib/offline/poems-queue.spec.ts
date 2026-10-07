@@ -2,12 +2,15 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import {
   applySyncResults,
+  attachUploads,
+  coverSource,
   discardPending,
   isLocalId,
   keepMine,
   listPendingDeletes,
   loadPending,
   mergePoems,
+  pendingBlobKeys,
   type PendingChange,
   type ReaderPoem,
   recordDelete,
@@ -180,6 +183,112 @@ describe('applySyncResults', () => {
   it('ошибка оставляет правку в очереди', () => {
     const pending = recordSave([], poems, '1', draft('Первое', 'моё'), NOW).pending
     expect(applySyncResults(pending, { '1': NOW }, [{ id: '1', status: 'error' }]).pending).toEqual(pending)
+  })
+})
+
+describe('обложки', () => {
+  const withCover: ReaderPoem[] = [{ ...poems[0]!, coverImage: 'poems/temp/old.jpg' }, poems[1]!]
+  const photo = (key = 'pending:1-a') => ({ kind: 'set' as const, blobKey: key })
+
+  it('выбор фото без правки текста ставит правку в очередь', () => {
+    const { pending } = recordSave([], poems, '1', { ...draft('Первое', 'строка\nвторая'), cover: photo() }, NOW)
+    expect(pending).toHaveLength(1)
+    expect(pending[0]).toMatchObject({ kind: 'update', cover: { kind: 'set', blobKey: 'pending:1-a' } })
+  })
+
+  it('новый стих с фото: оно в create, «убрать» у нового ничего не значит', () => {
+    const { pending } = recordSave([], poems, null, { ...draft('Новое', 'а'), cover: photo() }, NOW)
+    expect(pending[0]).toMatchObject({ kind: 'create', cover: { kind: 'set' } })
+
+    const none = recordSave([], poems, null, { ...draft('Новое', 'а'), cover: { kind: 'remove' } }, NOW)
+    expect(none.pending[0]!.cover).toBeUndefined()
+  })
+
+  it('убрать можно только обложку, которая есть на сайте', () => {
+    const noCover = recordSave([], poems, '1', { ...draft('Первое', 'строка\nвторая'), cover: { kind: 'remove' } }, NOW)
+    expect(noCover.pending).toEqual([])
+
+    const removed = recordSave(
+      [],
+      withCover,
+      '1',
+      { ...draft('Первое', 'строка\nвторая'), cover: { kind: 'remove' } },
+      NOW,
+    )
+    expect(removed.pending[0]).toMatchObject({ kind: 'update', cover: { kind: 'remove' } })
+  })
+
+  it('повторная правка текста сохраняет уже загруженное фото', () => {
+    const first = recordSave([], poems, '1', { ...draft('Первое', 'раз'), cover: photo() }, NOW).pending
+    const uploaded = attachUploads(first, { '1': { blobKey: 'pending:1-a', path: 'poems/temp/new.jpg' } })
+    const again = recordSave(uploaded, poems, '1', { ...draft('Первое', 'два'), cover: photo() }, NOW).pending
+    expect(again[0]!.cover).toEqual({ kind: 'set', blobKey: 'pending:1-a', uploaded: 'poems/temp/new.jpg' })
+
+    const replaced = recordSave(uploaded, poems, '1', { ...draft('Первое', 'два'), cover: photo('pending:2-b') }, NOW)
+    expect(replaced.pending[0]!.cover).toEqual({ kind: 'set', blobKey: 'pending:2-b' })
+  })
+
+  it('отмена всех правок (в том числе обложки) убирает запись из очереди', () => {
+    const first = recordSave([], poems, '1', { ...draft('Первое', 'строка\nвторая'), cover: photo() }, NOW).pending
+    const back = recordSave(first, poems, '1', draft('Первое', 'строка\nвторая'), NOW).pending
+    expect(back).toEqual([])
+  })
+
+  it('mergePoems показывает фото с телефона и скрытую обложку', () => {
+    const set = recordSave([], withCover, '1', { ...draft('Первое', 'строка\nвторая'), cover: photo() }, NOW).pending
+    expect(coverSource(mergePoems(withCover, set)[0]!)).toEqual({ blobKey: 'pending:1-a', path: null })
+
+    const removed =
+      recordSave([], withCover, '1', { ...draft('Первое', 'строка\nвторая'), cover: { kind: 'remove' } }, NOW)
+        .pending
+    expect(coverSource(mergePoems(withCover, removed)[0]!)).toEqual({ blobKey: null, path: null })
+    expect(coverSource(mergePoems(withCover, [])[0]!)).toEqual({ blobKey: null, path: 'poems/temp/old.jpg' })
+  })
+
+  it('на сервер уходит только загруженное фото; удаление — null', () => {
+    const set = recordSave([], poems, '1', { ...draft('Первое', 'раз'), cover: photo() }, NOW).pending
+    expect(toWireChanges(set)[0]).not.toHaveProperty('coverImage')
+
+    const uploaded = attachUploads(set, { '1': { blobKey: 'pending:1-a', path: 'poems/temp/new.jpg' } })
+    expect(toWireChanges(uploaded)[0]).toMatchObject({ coverImage: 'poems/temp/new.jpg' })
+
+    const removed =
+      recordSave([], withCover, '1', { ...draft('Первое', 'строка\nвторая'), cover: { kind: 'remove' } }, NOW)
+        .pending
+    expect(toWireChanges(removed)[0]).toMatchObject({ coverImage: null })
+  })
+
+  it('результат загрузки игнорируется, если фото успели заменить; потерянное фото снимается с правки', () => {
+    const set = recordSave([], poems, '1', { ...draft('Первое', 'раз'), cover: photo('pending:2-b') }, NOW).pending
+    expect(attachUploads(set, { '1': { blobKey: 'pending:1-a', path: 'poems/temp/x.jpg' } })).toEqual(set)
+    expect(attachUploads(set, { '1': { blobKey: 'pending:2-b', path: null } })[0]!.cover).toBeUndefined()
+  })
+
+  it('доехавшие текст и фото очищают очередь; фото без загрузки остаётся в ней', () => {
+    const set = recordSave([], poems, '1', { ...draft('Первое', 'раз'), cover: photo() }, NOW).pending
+    const serverNoCover = { ...poems[0]!, text: 'раз', updatedAt: '2026-10-07T13:00:02.000Z', coverImage: null }
+
+    // фото ещё не загружено: правка остаётся, но уже только про фото и от свежей версии
+    const kept = applySyncResults(set, { '1': NOW }, [{ id: '1', status: 'ok', poem: serverNoCover }])
+    expect(kept.pending).toHaveLength(1)
+    expect(kept.pending[0]).toMatchObject({
+      baseUpdatedAt: serverNoCover.updatedAt,
+      cover: { kind: 'set', blobKey: 'pending:1-a' },
+    })
+
+    // фото загружено и привязано
+    const uploaded = attachUploads(set, { '1': { blobKey: 'pending:1-a', path: 'poems/temp/new.jpg' } })
+    const done = applySyncResults(uploaded, { '1': NOW }, [
+      { id: '1', status: 'ok', poem: { ...serverNoCover, coverImage: 'poems/temp/new.jpg' } },
+    ])
+    expect(done.pending).toEqual([])
+    expect(pendingBlobKeys(done.pending)).toEqual([])
+  })
+
+  it('удаление стиха выбрасывает фото из очереди', () => {
+    const set = recordSave([], poems, '1', { ...draft('Первое', 'раз'), cover: photo() }, NOW).pending
+    expect(pendingBlobKeys(set)).toEqual(['pending:1-a'])
+    expect(pendingBlobKeys(recordDelete(set, poems, '1', NOW))).toEqual([])
   })
 })
 
