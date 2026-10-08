@@ -372,6 +372,7 @@
 
 ## Медиа, почта, звук
 
+- [vk-audio-downloader](/.claude/docs/vk-audio-downloader.md) — скачивание прямых MP3 из библиотек VK: закрытый audio API, проверка полноты списка, повторы и докачка; инструкция в `scripts/vk-audio/README.md`
 - [media-server](/.claude/docs/media-server.md) ⚠️ `libx264` без `-pix_fmt yuv420p` делает из 10-битного или 4:2:2 исходника High 10 / High 4:2:2 — Chromium не играет, ошибки нет нигде; HDR (PQ/HLG, обычная запись iPhone) без тонмаппинга блёклый — `zscale` + `tonemap=mobius:param=0.7` при `npl=203`, частый рецепт с `hable` темнит; ffmpeg 7+ перетирает `-color_primaries` свойствами кадра — нужен `setparams`; постер JPEG — BT.601 полного диапазона; `-ss 1` на ролике короче секунды молча не пишет файл; сборка образа падает без `zscale`/`tonemap`/`libdav1d`
 - [email](/.claude/docs/email.md)
 - [maddy-creds-create-missing-imap-acct](/.claude/docs/maddy-creds-create-missing-imap-acct.md) ⚠️ `maddy creds create` заводит только SMTP/IMAP-логин, не хранилище — приём почты на новый адрес требует ещё `maddy imap-acct create`, иначе `501 5.1.1 User does not exist` при формально существующем `creds list`

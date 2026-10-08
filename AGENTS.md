@@ -10,6 +10,8 @@
 Перед работой в незнакомой области найди в ней нужный раздел. Правила, которые
 применяются к конкретным файлам, находятся в `.claude/rules/`.
 
+- [VK Audio Downloader](/.claude/docs/vk-audio-downloader.md) — Python CLI для библиотек VK, доступ к audio API и докачка.
+
 ## Быстрый старт
 
 **Приложения:** Используй MCP `nx_workspace` для списка приложений и портов. Подробнее: [environment](/.claude/docs/environment.md)
