@@ -35,7 +35,11 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
     ? `${home} ${match.homeScore} : ${match.awayScore} ${away} — результат матча`
     : `${home} vs ${away} — матч Кубка Большого Слэма`
 
-  const ogImages = match.posterUrl ? [{ url: `/api/files/${match.posterUrl}`, alt: `${home} vs ${away}` }] : undefined
+  // Ручной постер приоритетнее; без него — автогенерируемая картинка из opengraph-image.tsx.
+  // Явный fallback: при заданном openGraph без images Next не подставляет файловую конвенцию.
+  const ogImages = match.posterUrl
+    ? [{ url: `/api/files/${match.posterUrl}`, alt: `${home} vs ${away}` }]
+    : [{ url: `/matches/${id}/opengraph-image`, alt: `${home} vs ${away}` }]
 
   return {
     title: `${home} vs ${away}`,

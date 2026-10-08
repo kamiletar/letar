@@ -85,7 +85,7 @@
       («keep proxy checks fast, avoid fetching full content there»). Закрыт был именно самый
       широкий риск — перехват произвольного URL верхнего уровня.
 
-- [ ] **`opengraph-image.tsx` не подключён к `og:image` матча — подключить как fallback.**
+- [x] **(сделано 2026-10-08, v3.42.1: явный fallback `/matches/{id}/opengraph-image`; проверено только typecheck/lint — на проде проверить `og:image` матча без постера)** `opengraph-image.tsx` не подключён к `og:image` матча — подключить как fallback.**
       Найдено 2026-09-05 при разборе бага сборки (`hb.wasm` ENOENT, см. `CHANGELOG.md`).
       `src/app/(public)/matches/[id]/page.tsx` в `generateMetadata()` сам задаёт
       `openGraph.images` из `match.posterUrl` (ручной аплоад постера) — это полностью
