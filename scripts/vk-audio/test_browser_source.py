@@ -92,6 +92,16 @@ class BrowserTests(unittest.TestCase):
         client = web.WebAudioClient(session, jar, threading.Event())
         self.assertEqual(client.user_id, 456)
 
+    def test_vk_session_id_after_nested_config(self):
+        page = '''window.vk = {
+            config: { id: 999, token: "text with } and id: 888," },
+            id: 456,
+            lang: 0
+        }; window.other = { id: 789 };'''
+        self.assertEqual(web.session_id_from_html(page), 456)
+        self.assertEqual(web.session_id_from_html('window.vk = {config:{id:999}}; other={id:888}'), 0)
+        self.assertEqual(web.session_id_from_html('window.vk = {"id":456};'), 456)
+
     def test_web_list_preserves_hidden_tracks_and_limit(self):
         session = Mock()
         session.headers = {}

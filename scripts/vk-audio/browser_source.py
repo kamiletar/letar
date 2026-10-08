@@ -27,6 +27,42 @@ def is_vk_domain(domain: str) -> bool:
     return any(host == root or host.endswith("." + root) for root in ("vk.ru", "vk.com"))
 
 
+def session_id_from_html(page: str) -> int:
+    """Читает только верхний id объекта vk, пропуская вложенные объекты и строки."""
+    start = re.search(r'\bvk\s*=\s*\{', page)
+    if start:
+        depth = 1
+        quote = None
+        escaped = False
+        for index in range(start.end(), len(page)):
+            char = page[index]
+            if quote:
+                if escaped:
+                    escaped = False
+                elif char == "\\":
+                    escaped = True
+                elif char == quote:
+                    quote = None
+                continue
+            if depth == 1 and (page[index - 1].isspace() or page[index - 1] in "{,"):
+                field = re.match(r'(?:id|["\']id["\'])\s*:\s*(\d+)\b', page[index:index + 100])
+                if field:
+                    return int(field.group(1))
+            if char in "\"'`":
+                quote = char
+            elif char == "{":
+                depth += 1
+            elif char == "}":
+                depth -= 1
+                if not depth:
+                    break
+    for pattern in (r'\bvk\.id\s*=\s*(\d+)', r'["\']currentUserId["\']\s*:\s*(\d+)'):
+        match = re.search(pattern, page)
+        if match:
+            return int(match.group(1))
+    return 0
+
+
 def load_vk_cookies(cookie_file: Path | None = None, profile: str | None = None) -> RequestsCookieJar:
     result = RequestsCookieJar()
     if cookie_file:
@@ -129,13 +165,7 @@ class WebAudioClient:
                 break
         if not self.user_id:
             response = self.get("https://vk.ru/feed")
-            patterns = [r'\bvk\s*=\s*\{\s*["\']?id["\']?\s*:\s*(\d+)',
-                        r'\bvk\.id\s*=\s*(\d+)', r'["\']currentUserId["\']\s*:\s*(\d+)']
-            for pattern in patterns:
-                match = re.search(pattern, response.text)
-                if match:
-                    self.user_id = int(match.group(1))
-                    break
+            self.user_id = session_id_from_html(response.text)
         if not self.user_id:
             raise BrowserSourceError("Не удалось определить ID своей сессии VK. Обновите экспорт cookies.")
 
