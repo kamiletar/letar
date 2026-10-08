@@ -1,5 +1,26 @@
 # Выполненные задачи: Mandala
 
+## Режим дыхания всегда включён + ключи i18n форм (2026-10-07…08, v0.40.36–0.40.38)
+
+**Дыхание.** Режим дыхания (вдох/выдох) в просмотрщике мандал нельзя выключить. В
+`viewer-settings.schema.ts` `breathingEnabled` — `z.boolean().default(true).transform((): true => true)`:
+тип `true` не даёт записать `false` в пресетах и компонентах, а сохранённое в localStorage `false`
+превращается в `true` при чтении. Страховка в рантайме — `updateSettings` в
+`use-viewer-settings-storage.ts` принудительно ставит `breathingEnabled: true`. Убраны переключатели
+«Дыхание» в обеих панелях (`atmosphere-controls.tsx`; в обычной панели вместо него подпись),
+клавиша `B`, шаг онбординга `breathing`, параметр `breathe` в ссылке «Поделиться» (его никто не
+читал), `breathingEnabled: false` в пресете «Спокойствие». Тест — `viewer-settings.schema.spec.ts`.
+
+**e2e на staging.** Первый деплой остановил гейт: staging-БД была пустой (`auth.setup` не входил),
+после сида упали два теста, искавшие `<img>` (файлов `uploads/` на staging нет). Тесты
+`01-public-pages.guest` и `05-full-checkout.guest` теперь проверяют заголовок h1 товара и название
+в корзине, а не картинку. Данные staging не трогали.
+
+**`MISSING_MESSAGE` при сборке.** `@letar/forms` просит у next-intl ключи `formErrors.title` и
+`formPersistence.*` (шесть штук); в `messages/ru.json` и `en.json` их не было. Добавлены в оба файла
+(тексты — дефолты библиотеки). После деплоя 0.40.38 `MISSING_MESSAGE` в логах сборки нет. Деплой:
+0.40.36 → production 2026-10-08 (commit `4c5d02bbd`), 0.40.38 → production (commit `cf7a74637`).
+
 ## Фикс e2e-флейка: гонка setInputFiles/Dropzone сразу после пейнта формы (2026-09-22, v0.40.33)
 
 Расследование стороннего вопроса (наблюдалось в другом приложении на том же паттерне
