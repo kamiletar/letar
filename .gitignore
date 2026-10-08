@@ -266,3 +266,4 @@ apps/animatrona-tv/screen-*.png
 
 # §25 PLAN-INFRA.md — локальный кэш последнего запуска scripts/deps-scan.ts
 .claude/state/
+.vitest
