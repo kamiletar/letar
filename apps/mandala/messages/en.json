@@ -337,6 +337,18 @@
       "sendCodeFailed": "Failed to send code"
     }
   },
+  "formErrors": {
+    "title": "Please fix the following errors:"
+  },
+  "formPersistence": {
+    "clearDraftButton": "Clear draft",
+    "restoreDialog": {
+      "title": "Restore saved data?",
+      "description": "You have unsaved changes from a previous session.",
+      "restoreButton": "Restore",
+      "discardButton": "Start over"
+    }
+  },
   "validation": {
     "required": "Required field",
     "too_small": {

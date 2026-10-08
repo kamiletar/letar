@@ -2,6 +2,12 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.40.38] - 2026-10-08
+
+### Fixed
+
+- `messages/en.json`: те же ключи `formErrors.title` и `formPersistence.*` на английском — на английской локали `@letar/forms` тоже сыпал `MISSING_MESSAGE`.
+
 ## [0.40.37] - 2026-10-08
 
 ### Fixed
