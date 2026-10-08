@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Пакетное скачивание прямых MP3-ссылок, доступных через VK audio.get."""
+"""Пакетное скачивание аудио VK через API или браузерную сессию Brave."""
 
 from __future__ import annotations
 
@@ -25,8 +25,10 @@ import vk_api
 from dotenv import load_dotenv
 from vk_api.exceptions import ApiError, ApiHttpError
 
+from browser_source import BrowserSourceError, WebAudioClient, load_vk_cookies
+from hls_downloader import HlsError, convert_hls
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 PAGE_SIZE = 2000
 MAX_RETRIES = 3
 TIMEOUT = (10, 30)
@@ -232,7 +234,23 @@ def download_track(track: Track, stop: threading.Event, log: logging.Logger,
         if parsed.scheme not in ("https", "http") or not parsed.hostname:
             return Result("error", "Некорректная прямая ссылка")
         if parsed.path.lower().endswith(".m3u8"):
-            return Result("error", "HLS-плейлист: требуется отдельная обработка, это не MP3")
+            for attempt in range(MAX_RETRIES + 1):
+                if stop.is_set():
+                    return Result("cancelled")
+                try:
+                    if not convert_hls(track.url, part, stop):
+                        return Result("cancelled")
+                    with part.open("rb") as output:
+                        if not looks_like_mp3(output.read(8192)):
+                            return Result("error", "ffmpeg не создал MP3")
+                    part.replace(track.path)
+                    return Result("downloaded")
+                except HlsError as error:
+                    if not error.retryable or attempt == MAX_RETRIES:
+                        return Result("error", str(error))
+                    log.warning("Повтор HLS %s/%s: %s [%s]", attempt + 1, MAX_RETRIES, track.label, track.key)
+                    if stop.wait((2 ** attempt) * base_delay):
+                        return Result("cancelled")
         for attempt in range(MAX_RETRIES + 1):
             if stop.is_set():
                 return Result("cancelled")
@@ -355,15 +373,24 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--output", type=Path, default=Path("vk_downloaded_music"), help="Папка MP3 и логов")
     parser.add_argument("--env", type=Path, default=Path(__file__).with_name(".env"), help="Файл с VK_ACCESS_TOKEN")
     parser.add_argument("--workers", type=int, choices=range(1, 9), default=6, help="1–8 потоков, по умолчанию 6")
-    parser.add_argument("--check", action="store_true", help="Проверить API и число URL без загрузки файлов")
+    source = parser.add_mutually_exclusive_group()
+    source.add_argument("--browser", choices=["brave"], help="Использовать локальную сессию Brave без API-токена")
+    source.add_argument("--cookies", type=Path, help="Cookies VK: строка Cookie, Netscape TXT или JSON")
+    source.add_argument("--api", action="store_true", help="Использовать VK_ACCESS_TOKEN")
+    parser.add_argument("--brave-profile", help='Профиль Brave: Default или "Profile 1"')
+    parser.add_argument("--limit", type=int, help="Обработать первые N записей каждого профиля для проверки")
+    parser.add_argument("--check", action="store_true", help="Проверить сессию и список URL без скачивания")
     parser.add_argument("--version", action="version", version=__version__)
     args = parser.parse_args(argv)
+    if args.limit is not None and args.limit < 1:
+        parser.error("--limit должен быть положительным")
     stop = threading.Event()
     loggers: tuple[logging.Logger, ...] = ()
     try:
         load_dotenv(args.env, override=False)
         token = os.environ.get("VK_ACCESS_TOKEN", "").strip()
-        if not token:
+        use_web = bool(args.browser or args.cookies or (not token and not args.api))
+        if not use_web and not token:
             print("Не задан VK_ACCESS_TOKEN. Заполните .env рядом со скриптом или переменную окружения.",
                   file=sys.stderr)
             return 2
@@ -373,10 +400,15 @@ def main(argv: list[str] | None = None) -> int:
         totals: Counter = Counter()
         owner_errors = 0
         with TimedSession() as session:
-            api = vk_api.VkApi(token=token, api_version=os.getenv("VK_API_VERSION", "5.199"), session=session,
-                               config_filename=str(args.output / "vk_config.json"))
-            # Обработчик vk_api для кода 6 рекурсивен; повторы ограничивает api_call.
-            api.error_handlers.pop(6, None)
+            if use_web:
+                cookies = load_vk_cookies(args.cookies, args.brave_profile)
+                print(f"Источник: сессия {'Brave' if not args.cookies else 'из локального файла'}; cookies VK: {len(cookies)}.")
+                api = WebAudioClient(session, cookies, stop, args.limit)
+            else:
+                api = vk_api.VkApi(token=token, api_version=os.getenv("VK_API_VERSION", "5.199"), session=session,
+                                   config_filename=str(args.output / "vk_config.json"))
+                # Обработчик vk_api для кода 6 рекурсивен; повторы ограничивает api_call.
+                api.error_handlers.pop(6, None)
             owners: set[int] = set()
             for profile in args.profiles:
                 try:
@@ -385,6 +417,8 @@ def main(argv: list[str] | None = None) -> int:
                         continue
                     owners.add(owner)
                     items = fetch_tracks(api, owner, stop)
+                    if args.limit:
+                        items = items[:args.limit]
                     directory = args.output / str(owner) if len(args.profiles) > 1 else args.output
                     directory.mkdir(parents=True, exist_ok=True)
                     tracks = prepare_tracks(items, directory, owner)
@@ -396,7 +430,7 @@ def main(argv: list[str] | None = None) -> int:
                         totals.update(result)
                         if stop.is_set():
                             break
-                except DownloadError as error:
+                except (DownloadError, BrowserSourceError) as error:
                     owner_errors += 1
                     print(f"Ошибка списка: {error}", file=sys.stderr)
                     log.error("Ошибка списка: %s", error)
@@ -414,6 +448,9 @@ def main(argv: list[str] | None = None) -> int:
         return 130
     except OSError as error:
         print(f"Ошибка файловой системы: {type(error).__name__}.", file=sys.stderr)
+        return 1
+    except BrowserSourceError as error:
+        print(f"Ошибка браузерной сессии: {error}", file=sys.stderr)
         return 1
     finally:
         for logger in loggers:

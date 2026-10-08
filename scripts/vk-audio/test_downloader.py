@@ -7,7 +7,9 @@ import io
 import logging
 import os
 from pathlib import Path
+import shutil
 import socket
+import subprocess
 import tempfile
 import threading
 import unittest
@@ -23,6 +25,7 @@ MP3 = b"ID3\x04\x00\x00\x00\x00\x00\x00" + b"\xff\xfb\x90\x00" * 300
 
 class Handler(BaseHTTPRequestHandler):
     calls: Counter = Counter()
+    assets: dict[str, bytes] = {}
 
     def log_message(self, *args):
         pass
@@ -55,8 +58,8 @@ class Handler(BaseHTTPRequestHandler):
             self.connection.shutdown(socket.SHUT_RDWR)
             self.connection.close()
             return
-        body = {"/html": b"<html>Login required</html>", "/empty": b"",
-                "/hls": b"#EXTM3U\n#EXT-X-VERSION:3"}.get(self.path, MP3)
+        body = Handler.assets.get(self.path, {"/html": b"<html>Login required</html>", "/empty": b"",
+                "/hls": b"#EXTM3U\n#EXT-X-VERSION:3"}.get(self.path, MP3))
         self.send_response(200)
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
@@ -84,6 +87,7 @@ class DownloadTests(unittest.TestCase):
         self.log = logging.getLogger("vk-test")
         self.log.addHandler(logging.NullHandler())
         Handler.calls.clear()
+        Handler.assets.clear()
 
     def tearDown(self):
         self.temp.cleanup()
@@ -134,6 +138,39 @@ class DownloadTests(unittest.TestCase):
             track = self.track()
             result = dl.download_track(track, self.stop, self.log, base_delay=0)
         self.assertEqual(result.status, "downloaded")
+
+    @unittest.skipUnless(shutil.which("ffmpeg"), "Для HLS-проверки нужен ffmpeg")
+    def test_hls_is_converted_to_mp3_with_real_ffmpeg(self):
+        playlist = self.directory / "fixture.m3u8"
+        subprocess.run([shutil.which("ffmpeg"), "-hide_banner", "-loglevel", "error", "-nostdin", "-y",
+                        "-f", "lavfi", "-i", "sine=frequency=440:duration=1", "-c:a", "aac", "-f", "hls",
+                        "-hls_time", "1", "-hls_list_size", "0", str(playlist)],
+                       check=True, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE,
+                       creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+        for path in self.directory.glob("fixture*"):
+            Handler.assets["/" + path.name] = path.read_bytes()
+        track = self.track("/fixture.m3u8", "result.mp3")
+        result = dl.download_track(track, self.stop, self.log)
+        self.assertEqual(result.status, "downloaded", result.detail)
+        self.assertTrue(dl.looks_like_mp3(track.path.read_bytes()[:8192]))
+        self.assertGreater(track.path.stat().st_size, 1000)
+        self.assertFalse(track.path.with_suffix(".mp3.part").exists())
+
+    def test_hls_temporary_failure_is_retried(self):
+        attempts = 0
+
+        def convert(url, path, stop):
+            nonlocal attempts
+            attempts += 1
+            if attempts == 1:
+                raise dl.HlsError("network", retryable=True)
+            path.write_bytes(MP3)
+            return True
+
+        with patch.object(dl, "convert_hls", side_effect=convert) as converter:
+            result = dl.download_track(self.track("/playlist.m3u8"), self.stop, self.log, base_delay=0)
+        self.assertEqual(result.status, "downloaded")
+        self.assertEqual(converter.call_count, 2)
 
     def test_missing_url_does_not_make_request(self):
         track = dl.Track("1_2", "Нет URL", "", self.directory / "missing.mp3")
@@ -205,6 +242,22 @@ class DownloadTests(unittest.TestCase):
             self.assertEqual(dl.main(["1", "--output", str(self.directory), "--check"]), 0)
         self.assertEqual(sum(Handler.calls.values()), 0)
         self.assertEqual(list(self.directory.glob("*.mp3")), [])
+
+    def test_cli_cookie_header_source_with_limit(self):
+        cookies = self.directory / "cookies-header.txt"
+        cookies.write_text("remixsid=TEST_SESSION; remixmid=123", encoding="utf-8")
+        client = Mock()
+        client.method.return_value = {"count": 2, "items": [
+            {"id": 1, "artist": "A", "title": "One", "url": self.base + "/mp3"},
+            {"id": 2, "artist": "A", "title": "Two", "url": self.base + "/mp3"},
+        ]}
+        with patch.object(dl, "WebAudioClient", return_value=client) as source, \
+                patch.dict(os.environ, {"VK_ACCESS_TOKEN": ""}), redirect_stdout(io.StringIO()):
+            result = dl.main(["1", "--cookies", str(cookies), "--limit", "1", "--output", str(self.directory)])
+        self.assertEqual(result, 0)
+        self.assertEqual(len(list(self.directory.glob("*.mp3"))), 1)
+        self.assertEqual(len(source.call_args.args[1]), 2)
+        self.assertEqual(source.call_args.args[3], 1)
 
 
 class ListTests(unittest.TestCase):

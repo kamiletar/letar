@@ -6,3 +6,6 @@ __pycache__/
 vk_downloaded_music/
 *.log
 *.part
+cookies*.txt
+cookies*.json
+*.network-request
