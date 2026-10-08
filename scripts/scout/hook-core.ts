@@ -32,6 +32,8 @@ import {
   layoutHits,
   phraseRanking,
   prfExpansion,
+  type QuerySignals,
+  querySignals,
   type ScoutIndex,
   type ScoutResult,
   truncate,
@@ -39,6 +41,7 @@ import {
 import { readAppBriefs } from './app-briefs'
 import { loadAssoc } from './assoc'
 import { loadIndex, saveIndex, sourcesMtime } from './index-store'
+import { scoutHome } from './paths'
 import { loadPhraseStore, type PhraseStore } from './phrases'
 import { EMBED_URL, loadVectorStore, type VectorStore } from './vectors'
 
@@ -231,6 +234,37 @@ export function requestVectorRefresh(root: string, home: string, options: { forc
 /** Как построена полка форм: по эмбеддингам или откатом на BM25 и почему */
 export type FormsSource = 'dense' | 'no-vectors' | 'embed-down' | 'stale-vectors'
 
+/** Почему запрос к эмбеддеру не удался: таймаут, отказ соединения, HTTP-ошибка, прочее */
+export type EmbedError = 'timeout' | 'refused' | 'http' | 'other'
+
+/** Исход запроса к эмбеддеру; нет поля — запроса не было (нет векторов или они устарели) */
+export interface EmbedOutcome {
+  ok: boolean
+  ms: number
+  error?: EmbedError
+}
+
+/**
+ * Причина отказа эмбеддера по брошенной ошибке. `postJson` бросает `Error('<path>: HTTP <код> …')`,
+ * таймаут `AbortSignal.timeout` — `TimeoutError`, закрытый порт в Bun — `code: ConnectionRefused`.
+ */
+export function classifyEmbedError(e: unknown): EmbedError {
+  const err = e as { name?: unknown; code?: unknown; message?: unknown } | null
+  const name = typeof err?.name === 'string' ? err.name : ''
+  const code = typeof err?.code === 'string' ? err.code : ''
+  const message = typeof err?.message === 'string' ? err.message : ''
+  if (name === 'TimeoutError' || name === 'AbortError') {
+    return 'timeout'
+  }
+  if (code === 'ConnectionRefused' || code === 'ECONNREFUSED' || /refused|Unable to connect/i.test(message)) {
+    return 'refused'
+  }
+  if (message.includes('HTTP ')) {
+    return 'http'
+  }
+  return 'other'
+}
+
 /**
  * Вектор запроса и косинусный рейтинг полей и паттернов. На полке форм эмбеддинги дают +20 п.п.
  * полноты (замер в local-scout.md); на доках гибрид с BM25 помогает только по неупомянутым в запросе.
@@ -241,7 +275,13 @@ async function denseForms(
   query: string,
   deps: HookDeps,
   root?: string,
-): Promise<{ ranking?: FormRanking; source: FormsSource; vector?: Float32Array; store?: VectorStore }> {
+): Promise<{
+  ranking?: FormRanking
+  source: FormsSource
+  vector?: Float32Array
+  store?: VectorStore
+  embed?: EmbedOutcome
+}> {
   const store = deps.store === undefined ? loadVectorStore(home) : deps.store ?? undefined
   if (!store) {
     return { source: 'no-vectors' }
@@ -257,14 +297,23 @@ async function denseForms(
     return { source: 'stale-vectors' }
   }
   const dense = store.dense
+  const embedStarted = performance.now()
   try {
     const [vector] = await embedTexts([formatQuery(query)], {
       url: deps.embedUrl ?? EMBED_URL,
       timeoutMs: deps.embedTimeoutMs ?? EMBED_TIMEOUT_MS,
     })
-    return { ranking: formRanking(engine.cards, dense, vector), source: 'dense', vector, store }
-  } catch {
-    return { source: 'embed-down' }
+    const embed = { ok: true, ms: performance.now() - embedStarted }
+    return { ranking: formRanking(engine.cards, dense, vector), source: 'dense', vector, store, embed }
+  } catch (e) {
+    // Сторож эмбеддера срабатывает и посреди дня: `requestVectorRefresh` ограничен раз в 10 минут
+    if (root) {
+      requestVectorRefresh(root, home)
+    }
+    return {
+      source: 'embed-down',
+      embed: { ok: false, ms: performance.now() - embedStarted, error: classifyEmbedError(e) },
+    }
   }
 }
 
@@ -273,6 +322,12 @@ export interface ScoutQueryResult {
   forms: FormsSource
   /** Чем построены доки и ловушки: гибридом BM25 + эмбеддинги (+ формулировки к докам) или одним BM25 */
   docsSource: 'hybrid+phrases' | 'hybrid' | 'bm25'
+  /** Сырые сигналы пунктов справки для лога (порог молчания подбирают по ним) */
+  signals: QuerySignals
+  /** Исход запроса к эмбеддеру; нет — запроса не было */
+  embed?: EmbedOutcome
+  /** Лучший док-score раскладки BM25, с которым `layoutHits` сравнивает инструмент (`toolRelative`) */
+  toolTop: number
   ms: number
 }
 
@@ -313,8 +368,17 @@ export async function scoutQuery(
   const bm25 = engine.search(query, 500)
   // Поля, паттерн и инструмент — по BM25-раскладке: их пороги подобраны под неё
   const base = layoutHits(engine.cards, bm25, query, { forms: forms.ranking })
+  const toolTop = Math.max(0, ...base.docs.map((d) => d.score), ...base.traps.map((d) => d.score))
   if (!forms.vector || !forms.store) {
-    return { result: base, forms: forms.source, docsSource: 'bm25', ms: performance.now() - started }
+    return {
+      result: base,
+      forms: forms.source,
+      docsSource: 'bm25',
+      signals: querySignals(engine.cards, base, bm25),
+      embed: forms.embed,
+      toolTop,
+      ms: performance.now() - started,
+    }
   }
   // Доки и ловушки — по слиянию с плотным поиском (RRF); формулировки к докам — третий список
   // `SCOUT_NO_PHRASES=1` — хук без формулировок (для сравнения в бенче)
@@ -331,6 +395,9 @@ export async function scoutQuery(
     result: { ...base, docs: docs.docs, traps: docs.traps },
     forms: forms.source,
     docsSource: phrases ? 'hybrid+phrases' : 'hybrid',
+    signals: querySignals(engine.cards, docs, bm25, forms.store.dense, forms.vector),
+    embed: forms.embed,
+    toolTop,
     ms: performance.now() - started,
   }
 }
@@ -415,6 +482,11 @@ function appBriefRun(
   return { output, log }
 }
 
+/** Сигналы в лог пишем с четырьмя знаками: RRF-очки порядка 0,03 иначе округляются в нули */
+function round4(v: number | undefined): number | undefined {
+  return v === undefined ? undefined : Math.round(v * 10000) / 10000
+}
+
 /** Один вызов UserPromptSubmit: решение, поиск, лог, вывод по режиму */
 export async function runScoutHook(
   payload: HookPayload,
@@ -436,7 +508,13 @@ export async function runScoutHook(
     return {}
   }
   const engine = new Bm25(freshIndex(root, home))
-  const { result, forms, docsSource } = await scoutQuery(engine, home, decision.query, deps, root)
+  const { result, forms, docsSource, signals, embed, toolTop } = await scoutQuery(
+    engine,
+    home,
+    decision.query,
+    deps,
+    root,
+  )
   const brief = formatBrief(result)
   const line = formatOneLine(result)
   writeState(home, sessionId, { attempts: state.attempts + 1, briefed: Boolean(brief) })
@@ -456,7 +534,19 @@ export async function runScoutHook(
     pattern: result.pattern?.name,
     forms,
     docs_by: docsSource,
-    scores: [...result.docs, ...result.traps].map((d) => Math.round(d.score * 10) / 10),
+    items: signals.items.map((i) => ({
+      p: i.path,
+      s: round4(i.score),
+      cos: round4(i.cos),
+      bm25: round4(i.bm25),
+      r: i.bm25Rank,
+    })),
+    topCos: round4(signals.topCos),
+    topCosPath: signals.topCosPath,
+    topBm25: round4(signals.topBm25),
+    toolScore: result.tool ? round4(result.tool.score) : undefined,
+    toolTop: result.tool ? round4(toolTop) : undefined,
+    embed: embed ? { ok: embed.ok, ms: Math.round(embed.ms), error: embed.error } : undefined,
     chars: brief.length,
     ms: Math.round(performance.now() - started),
   }
@@ -549,8 +639,20 @@ export function scoutVersion(): string {
   try {
     const root = join(import.meta.dir, '..', '..')
     const hash = createHash('sha1')
-    for (const file of [...listSourceFiles(join(root, 'libs/scout/src')), join(root, 'scripts/scout/hook-core.ts')]) {
+    for (
+      const file of [
+        ...listSourceFiles(join(root, 'libs/scout/src')),
+        ...['hook-core', 'vectors', 'phrases', 'embedder-watch'].map((n) => join(root, `scripts/scout/${n}.ts`)),
+      ]
+    ) {
       hash.update(readFileSync(file))
+    }
+    // Смена формулировок к докам меняет выдачу, хотя код тот же: учитываем файл по размеру и mtime
+    try {
+      const st = statSync(join(scoutHome(), 'phrases.jsonl'))
+      hash.update(`${st.size}:${st.mtimeMs}`)
+    } catch {
+      hash.update('')
     }
     cachedScoutVersion = `${INDEX_VERSION}-${hash.digest('hex').slice(0, 8)}`
   } catch {

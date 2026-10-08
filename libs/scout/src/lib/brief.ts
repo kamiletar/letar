@@ -40,6 +40,23 @@ function shortField(name: string): string {
   return name.replace(/^Form\.(Field|Document)\./, '')
 }
 
+/** Пункт справки: док или ловушка */
+export interface BriefItem {
+  doc: DocHit
+  trap: boolean
+}
+
+/**
+ * Порядок пунктов «Что посмотреть»: доки и ловушки одним списком по очкам; при равных — доки раньше
+ * ловушек (sort стабилен). Общий для справки и для лога сигналов, чтобы они не разошлись.
+ */
+export function briefOrder(result: Pick<ScoutResult, 'docs' | 'traps'>): BriefItem[] {
+  return [
+    ...result.docs.map((doc) => ({ doc, trap: false })),
+    ...result.traps.map((doc) => ({ doc, trap: true })),
+  ].sort((a, b) => b.doc.score - a.doc.score)
+}
+
 /** Полная справка для агента. Пустая строка — сказать нечего, хук молчит */
 export function formatBrief(result: ScoutResult, options: BriefOptions = {}): string {
   const { summaryChars = 250, fullItems = 3 } = options
@@ -54,11 +71,7 @@ export function formatBrief(result: ScoutResult, options: BriefOptions = {}): st
     const { name, summary } = result.pattern
     lines.push(`Паттерн формы: \`${name}\` — ${truncate(summary, 160)}; код — MCP \`get_form_pattern("${name}")\``)
   }
-  // Доки и ловушки одним списком по очкам; при равных — доки раньше ловушек (sort стабилен)
-  const items = [
-    ...result.docs.map((doc) => ({ doc, trap: false })),
-    ...result.traps.map((doc) => ({ doc, trap: true })),
-  ].sort((a, b) => b.doc.score - a.doc.score)
+  const items = briefOrder(result)
   if (items.length) {
     lines.push('Что посмотреть:', ...items.slice(0, fullItems).map((i) => docLine(i.doc, summaryChars, i.trap)))
     const rest = items.slice(fullItems)

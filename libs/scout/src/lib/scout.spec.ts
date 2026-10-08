@@ -1,5 +1,5 @@
 import { Bm25, buildIndex } from './bm25'
-import { BRIEF_HEADER, formatBrief, formatOneLine } from './brief'
+import { BRIEF_HEADER, briefOrder, formatBrief, formatOneLine } from './brief'
 import { parsePatternRegistry } from './collect'
 import {
   DenseIndex,
@@ -14,6 +14,7 @@ import {
 } from './dense'
 import { parseFrontmatter } from './frontmatter'
 import { type DocHit, FORM_WORDS, layoutHits, mentionedIn, scout } from './search'
+import { querySignals } from './signals'
 import {
   docCards,
   fieldCatalogCards,
@@ -545,5 +546,73 @@ describe('phraseRanking и fuseWithDense с extra', () => {
     expect(without.map((h) => h.card.id)).toEqual([ids[2]])
     const withExtra = fuseWithDense(engine.cards, bm25, dense, query, { depth: 1, extra: [[ids[0]]] })
     expect(withExtra.map((h) => h.card.id).sort()).toEqual([ids[0], ids[2]].sort())
+  })
+})
+
+describe('querySignals', () => {
+  const doc = (path: string, body = '') =>
+    docCards({
+      path,
+      markdown: `# ${path}
+## Первая секция
+${body} текст первой секции про деплой
+## Вторая секция
+${body} текст второй секции про деплой
+`,
+    })
+  const cards = [...doc('.claude/docs/a.md'), ...doc('.claude/docs/b.md')]
+  const engine = new Bm25(JSON.parse(JSON.stringify(buildIndex(cards, 'test'))))
+  const pathCards = (path: string) => engine.cards.filter((c) => c.path === path)
+  const hit = (path: string, score: number, extra: Partial<DocHit> = {}): DocHit => ({
+    path,
+    line: 1,
+    title: path,
+    summary: '',
+    score,
+    ...extra,
+  })
+
+  it('порядок items совпадает с порядком пунктов formatBrief: ловушка с большими очками выше дока', () => {
+    const docs = [hit('.claude/docs/a.md', 1), hit('.claude/docs/d.md', 0.5)]
+    const traps = [hit('.claude/docs/t.md', 2, { warn: true })]
+    const shown = { docs, traps }
+    const signals = querySignals(engine.cards, shown, engine.search('деплой', 500))
+    const briefPaths = [
+      ...formatBrief({ query: 'q', fields: [], matched: 3, ...shown }).matchAll(/^- (?:⚠️ )?(\S+?):1/gm),
+    ]
+      .map((m) => m[1])
+    expect(signals.items.map((i) => i.path)).toEqual(briefPaths)
+    expect(signals.items.map((i) => i.path)).toEqual(briefOrder(shown).map((i) => i.doc.path))
+    expect(signals.items[0].path).toBe('.claude/docs/t.md')
+  })
+
+  it('cos пути — максимум по его карточкам; topCos виден и для дока, которого нет в items', () => {
+    const a = pathCards('.claude/docs/a.md')
+    const b = pathCards('.claude/docs/b.md')
+    expect(a.length).toBeGreaterThanOrEqual(3)
+    // У a: док и две секции с разными векторами; у b: один вектор, точно по запросу (док назван в запросе, в items его нет)
+    const vectors = new Map<string, number[]>()
+    a.forEach((c, i) => vectors.set(c.id, i === 0 ? [1, 0] : i === 1 ? [0.6, 0.8] : [0.8, 0.6]))
+    b.forEach((c) => vectors.set(c.id, [0, 1]))
+    const ids = [...vectors.keys()]
+    const dense = new DenseIndex(ids, Float32Array.from(ids.flatMap((id) => vectors.get(id) as number[])), 2)
+    const shown = { docs: [hit('.claude/docs/a.md', 1)], traps: [] }
+    const signals = querySignals(engine.cards, shown, engine.search('деплой', 500), dense, Float32Array.from([0, 1]))
+    expect(signals.items).toHaveLength(1)
+    expect(signals.items[0].cos).toBeCloseTo(0.8)
+    expect(signals.topCos).toBeCloseTo(1)
+    expect(signals.topCosPath).toBe('.claude/docs/b.md')
+  })
+
+  it('без dense и вектора cos и topCos не заданы, а bm25 и bm25Rank есть', () => {
+    const bm25 = engine.search('деплой', 500)
+    const shown = { docs: [hit('.claude/docs/a.md', 1)], traps: [] }
+    const signals = querySignals(engine.cards, shown, bm25)
+    expect(signals.topCos).toBeUndefined()
+    expect(signals.topCosPath).toBeUndefined()
+    expect(signals.items[0].cos).toBeUndefined()
+    expect(signals.items[0].bm25).toBeGreaterThan(0)
+    expect(signals.items[0].bm25Rank).toBeGreaterThanOrEqual(1)
+    expect(signals.topBm25).toBe(bm25[0].score)
   })
 })

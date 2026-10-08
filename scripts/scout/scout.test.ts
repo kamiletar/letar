@@ -8,6 +8,7 @@ import {
   type Card,
   collectCards,
   DenseIndex,
+  embedTexts,
   mentionedIn,
   scout,
   type ScoutResult,
@@ -30,7 +31,9 @@ import { buildCases, evaluate, evaluateTools, toolRanking } from './eval'
 import {
   abGroup,
   appendLog,
+  classifyEmbedError,
   decide,
+  freshIndex,
   LOG_MAX_BYTES,
   MAX_ATTEMPTS,
   runScoutHook,
@@ -1128,5 +1131,122 @@ describe('resolveRunRef: --compare принимает метку', () => {
     expect(resolveRunRef(dir, path)).toBe(path)
     expect(resolveRunRef(dir, 'нет-такой')).toBeUndefined()
     expect(resolveRunRef(join(dir, 'нет-каталога'), 'last')).toBeUndefined()
+  })
+})
+
+describe('classifyEmbedError', () => {
+  it('закрытый порт → refused', async () => {
+    const probe = Bun.serve({ port: 0, fetch: () => new Response('') })
+    const port = probe.port
+    await probe.stop(true)
+    const err = await fetch(`http://127.0.0.1:${port}/v1/embeddings`, { signal: AbortSignal.timeout(2000) })
+      .then(() => undefined, (e: unknown) => e)
+    expect(classifyEmbedError(err)).toBe('refused')
+  })
+
+  it('сервер, который не отвечает, при таймауте 100 мс → timeout', async () => {
+    const server = Bun.serve({ port: 0, fetch: () => new Promise<Response>(() => {}) })
+    try {
+      const err = await embedTexts(['x'], { url: `http://127.0.0.1:${server.port}`, timeoutMs: 100 })
+        .then(() => undefined, (e: unknown) => e)
+      expect(classifyEmbedError(err)).toBe('timeout')
+    } finally {
+      await server.stop(true)
+    }
+  })
+
+  it('ответ 500 → http, прочее → other', async () => {
+    const server = Bun.serve({ port: 0, fetch: () => new Response('boom', { status: 500 }) })
+    try {
+      const err = await embedTexts(['x'], { url: `http://127.0.0.1:${server.port}`, timeoutMs: 2000 })
+        .then(() => undefined, (e: unknown) => e)
+      expect(classifyEmbedError(err)).toBe('http')
+    } finally {
+      await server.stop(true)
+    }
+    expect(classifyEmbedError(new Error('странное'))).toBe('other')
+    expect(classifyEmbedError(undefined)).toBe('other')
+  })
+})
+
+describe('runScoutHook: сигналы и исход эмбеддера в логе', () => {
+  function repoWithVectors() {
+    const root = mkdtempSync(join(tmpdir(), 'scout-repo-'))
+    mkdirSync(join(root, '.claude', 'docs'), { recursive: true })
+    writeFileSync(join(root, 'nx.json'), '{}')
+    writeFileSync(
+      join(root, '.claude', 'docs', 'INDEX.md'),
+      '## Формы\n- [date-field](/.claude/docs/date-field.md) ⚠️ поле даты в форме отдаёт строку\n',
+    )
+    writeFileSync(
+      join(root, '.claude', 'docs', 'date-field.md'),
+      '# Дата строкой\n## Симптом\nформа отдаёт дату строкой в onSubmit\n',
+    )
+    const home = mkdtempSync(join(tmpdir(), 'scout-home-'))
+    // Свежий маркер: сбой эмбеддера не запускает фоновый пересчёт
+    mkdirSync(join(home, 'state'), { recursive: true })
+    writeFileSync(join(home, 'state', 'refresh-requested'), '')
+    const cards = freshIndex(root, home).cards
+    const ids = cards.map((c) => c.id)
+    const store = {
+      dense: new DenseIndex(ids, Float32Array.from(ids.flatMap(() => [0, 1])), 2),
+      hashById: new Map<string, string>(),
+    }
+    return { root, home, store }
+  }
+
+  it('эмбеддер ответил: items, topCos, embed.ok, без scores', async () => {
+    const { root, home, store } = repoWithVectors()
+    const server = Bun.serve({
+      port: 0,
+      fetch: () => Response.json({ data: [{ index: 0, embedding: [0, 1] }] }),
+    })
+    try {
+      process.env.SCOUT_MODE = 'shadow'
+      const run = await runScoutHook({ session_id: 'sig1', prompt: 'форма отдаёт дату строкой' }, root, home, {
+        store,
+        phrases: null,
+        embedUrl: `http://127.0.0.1:${server.port}`,
+        embedTimeoutMs: 2000,
+      })
+      const log = run.log as Record<string, any>
+      expect(log.docs_by).toBe('hybrid')
+      expect(log.embed.ok).toBe(true)
+      expect(log.embed.error).toBeUndefined()
+      expect(log.topCos).toBeCloseTo(1, 3)
+      expect(log.items.length).toBeGreaterThan(0)
+      expect(log.items[0].p).toBe('.claude/docs/date-field.md')
+      expect(log.items[0].cos).toBeCloseTo(1, 3)
+      expect(log).not.toHaveProperty('scores')
+    } finally {
+      delete process.env.SCOUT_MODE
+      await server.stop(true)
+    }
+  })
+
+  it('эмбеддер упал: embed.ok false с причиной, docs_by bm25, items без cos', async () => {
+    const { root, home, store } = repoWithVectors()
+    const probe = Bun.serve({ port: 0, fetch: () => new Response('') })
+    const port = probe.port
+    await probe.stop(true)
+    process.env.SCOUT_MODE = 'shadow'
+    try {
+      const run = await runScoutHook({ session_id: 'sig2', prompt: 'форма отдаёт дату строкой' }, root, home, {
+        store,
+        phrases: null,
+        embedUrl: `http://127.0.0.1:${port}`,
+        embedTimeoutMs: 1000,
+      })
+      const log = run.log as Record<string, any>
+      expect(log.docs_by).toBe('bm25')
+      expect(log.forms).toBe('embed-down')
+      expect(log.embed.ok).toBe(false)
+      expect(log.embed.error).toBe('refused')
+      expect(log.topCos).toBeUndefined()
+      expect(log.items[0].cos).toBeUndefined()
+      expect(log.items[0].bm25).toBeGreaterThan(0)
+    } finally {
+      delete process.env.SCOUT_MODE
+    }
   })
 })

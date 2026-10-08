@@ -7,7 +7,7 @@ export {
   prfExpansion,
 } from './lib/assoc'
 export { Bm25, type Bm25Options, buildIndex, type Hit } from './lib/bm25'
-export { BRIEF_HEADER, type BriefOptions, formatBrief, formatOneLine } from './lib/brief'
+export { BRIEF_HEADER, type BriefItem, type BriefOptions, briefOrder, formatBrief, formatOneLine } from './lib/brief'
 export { collectCards, parsePatternRegistry, PATTERN_HINTS } from './lib/collect'
 export {
   cardEmbedText,
@@ -46,6 +46,7 @@ export {
   type ScoutResult,
   type ToolHit,
 } from './lib/search'
+export { type DocSignal, type QuerySignals, querySignals } from './lib/signals'
 export {
   docCards,
   type DocInput,
