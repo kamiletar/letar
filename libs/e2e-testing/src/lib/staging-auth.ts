@@ -1,3 +1,4 @@
+import type { Browser, Page } from '@playwright/test'
 import { chromium } from '@playwright/test'
 import { mkdirSync } from 'node:fs'
 import { resolve } from 'node:path'
@@ -117,5 +118,80 @@ export async function devSessionLogin(options: DevSessionLoginOptions): Promise<
     }
   } finally {
     await browser.close()
+  }
+}
+
+export interface OpenDevSessionPageOptions {
+  /** Браузер текущего теста (фикстура `browser`) — контекст создаётся в нём, а не в новом процессе */
+  browser: Browser
+  /** Базовый URL окружения; обычно `test.info().project.use.baseURL` */
+  baseURL: string
+  /** `DEV_SESSION_TOKEN`, см. {@link requireDevSessionToken} */
+  token: string
+  /** Путь страницы, на которой окажется сессия после логина (например `/admin/paper-types`) */
+  redirect: string
+  /**
+   * Email фикстуры. Не передан — роут выбирает свой дефолт (для aboi это админ), см.
+   * `createDevSessionRoute` из `@letar/auth/server`.
+   */
+  email?: string
+  /** Локаль контекста браузера. По умолчанию `ru-RU`. */
+  locale?: string
+  /**
+   * Подготовка страницы ДО логина — например `addInitScript` с согласием на cookie, чтобы баннер
+   * не перекрывал клики на страницах, которые откроются дальше.
+   */
+  prepare?: (page: Page) => Promise<void>
+}
+
+/**
+ * Открывает страницу под dev-session в **отдельном контексте браузера**. Отдельный контекст нужен,
+ * когда сценарию одновременно требуются две роли (гость в основном `page` и админ рядом): cookie
+ * сессий в разных контекстах не смешиваются. Для одной роли на весь набор тестов проще
+ * {@link devSessionLogin} + `storageState` в `global-setup`.
+ *
+ * Успех проверяем по ответу и по финальному адресу, а не через `waitForURL('**\/admin**')`: адрес
+ * неудачного запроса (403) тоже содержит `redirect=/admin…` и дал бы ложный успех
+ * (`.claude/docs/e2e-testing.md`, «Ловушка в `global-setup.ts`»). При неудаче контекст закрывается
+ * сам, при успехе его закрывает вызывающий: `await page.context().close()`.
+ *
+ * @example
+ * ```ts
+ * const admin = await openDevSessionPage({ browser, baseURL, token, redirect: '/admin/paper-types' })
+ * try {
+ *   // ...сценарий...
+ * } finally {
+ *   await admin.context().close()
+ * }
+ * ```
+ */
+export async function openDevSessionPage(options: OpenDevSessionPageOptions): Promise<Page> {
+  const { browser, baseURL, token, redirect, email, locale = 'ru-RU', prepare } = options
+
+  const context = await browser.newContext({ baseURL, locale })
+  try {
+    const page = await context.newPage()
+    await prepare?.(page)
+
+    const params = new URLSearchParams({ token, redirect, ...(email && { email }) })
+    const response = await page.goto(`/api/auth/dev-session?${params.toString()}`)
+    if (!response?.ok()) {
+      throw new Error(
+        `[openDevSessionPage] dev-session не создал сессию (HTTP ${response?.status() ?? 'нет ответа'}) — `
+          + 'проверь ALLOW_DEV_SESSION и DEV_SESSION_TOKEN на сервере',
+      )
+    }
+
+    const expectedPath = new URL(redirect, baseURL).pathname.replace(/\/+$/, '')
+    const actualPath = new URL(page.url()).pathname
+    if (!actualPath.startsWith(expectedPath)) {
+      throw new Error(
+        `[openDevSessionPage] после dev-session ждали страницу '${expectedPath}', оказались на '${actualPath}'`,
+      )
+    }
+    return page
+  } catch (error) {
+    await context.close()
+    throw error
   }
 }

@@ -6,5 +6,5 @@ export {
   fillWithHydrationRetry,
   setInputFilesWithHydrationRetry,
 } from './lib/hydration-retry'
-export { devSessionLogin, requireDevSessionToken, storagePaths } from './lib/staging-auth'
-export type { DevSessionLoginOptions } from './lib/staging-auth'
+export { devSessionLogin, openDevSessionPage, requireDevSessionToken, storagePaths } from './lib/staging-auth'
+export type { DevSessionLoginOptions, OpenDevSessionPageOptions } from './lib/staging-auth'

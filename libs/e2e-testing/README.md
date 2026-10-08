@@ -33,6 +33,7 @@ staging используется отдельный staging-only роут `/api/
 - `storagePaths(e2eRoot, filename)` — пути для записи `storageState` (config-директория + CWD).
 - `requireDevSessionToken()` — читает `DEV_SESSION_TOKEN` из окружения, бросает понятную ошибку
   вместо непрозрачного 403 при пустом значении.
+- `openDevSessionPage({ browser, baseURL, token, redirect, email?, locale?, prepare? })` — открывает страницу под dev-session в **отдельном контексте** (гость в основном `page`, админ рядом), проверяет `response.ok()` и финальный pathname, а не `waitForURL`; при неудаче сам закрывает контекст, при успехе контекст закрывает вызывающий (`page.context().close()`). `prepare` — подготовка страницы до логина (например согласие на cookie). Для одной роли на весь набор проще `devSessionLogin` + `storageState`.
 - `devSessionLogin(options)` — логинится через `/api/auth/dev-session`, опционально делает
   дополнительный переход (`postLoginPath`) для триггера серверных побочных эффектов, сохраняет
   `storageState`.
