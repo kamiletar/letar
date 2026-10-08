@@ -127,6 +127,7 @@ submodule (2089 файлов) и трогает чужие файлы, даже 
 ⚠️ `lint` автоматически запускает oxlint первым (fast-fail), затем ESLint. `typecheck:tsgo` в 9-38x быстрее обычного typecheck.
 
 **Окружение:** Windows (нативный), `nx` и `bun` глобальные (❌ НЕ `bunx nx`/`npx nx`). При передаче аргументов в underlying tool: `nx e2e app-e2e -- --project=chromium`
+⚠️ `nx dev <app>` падает с `could not find bin metadata file` — у шима `node_modules/.bin/<name>.exe` нет парного `.bunx`; без `bun install --force` в общем чекауте: [bun-bin-shim-missing-bunx](/.claude/docs/bun-bin-shim-missing-bunx.md)
 
 **MCP серверы:** nx-mcp, **letar** (объединяет studio-time/studio/umami/glitchtip/deploy/form/synth/
 domwellbes-assist в один процесс), **letar-db** (все Postgres-базы), context-mode (плагин),
