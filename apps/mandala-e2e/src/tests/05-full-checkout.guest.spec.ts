@@ -41,6 +41,10 @@ test.describe('Полный Checkout Flow', () => {
     await page.goto(productHref ?? '/shop')
     await page.waitForURL(/\/shop\/.+/)
 
+    // Название товара — чтобы потом найти его в корзине (картинка на пустом staging может
+    // отсутствовать: файлов uploads/ там нет)
+    const productName = (await page.getByRole('heading', { level: 1 }).innerText()).trim()
+
     // 4. Клик "Добавить в корзину"
     // Кнопка может содержать иконку, поэтому ищем по тексту внутри
     const addToCartButton = page.locator('button:has-text("Добавить в корзину")')
@@ -58,8 +62,7 @@ test.describe('Полный Checkout Flow', () => {
     await expect(page).toHaveURL(/\/cart/)
 
     // 7. Проверка что товар в корзине
-    const cartItem = page.locator('img[alt]').first()
-    await expect(cartItem).toBeVisible()
+    await expect(page.getByText(productName).first()).toBeVisible()
 
     // 8. Клик "Оформить заказ"
     const checkoutLink = page.getByRole('link', { name: /оформить заказ/i })

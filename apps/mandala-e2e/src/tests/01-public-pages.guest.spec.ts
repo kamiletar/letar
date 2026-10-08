@@ -95,8 +95,9 @@ test.describe('Публичные страницы', () => {
         const productHref = await productCard.getAttribute('href')
         await page.goto(productHref ?? '/shop')
         await page.waitForURL(/\/shop\/.+/)
-        // Проверяем, что загрузилась страница товара
-        await expect(page.locator('img').first()).toBeVisible()
+        // Проверяем, что загрузилась страница товара: по заголовку, а не по картинке — на пустом
+        // staging (без загруженных файлов uploads/) у товара может не быть ни одного изображения
+        await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
       }
     })
   })
