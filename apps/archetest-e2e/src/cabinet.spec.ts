@@ -1,4 +1,5 @@
-import { expect, type Page, test } from '@playwright/test'
+import { openDevSessionPage } from '@letar/e2e-testing'
+import { type Browser, expect, type Page, test } from '@playwright/test'
 
 /**
  * E2E: кабинет психолога целиком (Фаза 4, пул 2026-09-24, волна 6).
@@ -21,28 +22,46 @@ const RUN = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
 const PSY_EMAIL = `e2e-cabinet-psy-${RUN}@archetest.test`
 const CLIENT_EMAIL = `e2e-cabinet-client-${RUN}@archetest.test`
 
-async function signIn(page: Page, email: string): Promise<void> {
+/** Открытые страницы — их контексты закрывает `afterEach`: `openDevSessionPage` оставляет это вызывающему. */
+const openedPages: Page[] = []
+
+/**
+ * Страница под dev-session в отдельном контексте браузера (cookie психолога и клиента не смешиваются).
+ * Общий `openDevSessionPage` заодно проверяет ответ и финальный адрес — 403 даёт понятную ошибку,
+ * а не тест, который молча идёт дальше без сессии.
+ */
+async function signIn(browser: Browser, email: string): Promise<Page> {
   const token = process.env['DEV_SESSION_TOKEN']
   if (!token) {
     throw new Error('DEV_SESSION_TOKEN не задан в окружении e2e-раннера — dev-session вернёт 403')
   }
-  await page.goto(`/api/auth/dev-session?email=${encodeURIComponent(email)}&token=${encodeURIComponent(token)}`)
+  const baseURL = test.info().project.use.baseURL
+  if (!baseURL) {
+    throw new Error('baseURL не задан в playwright.config.ts — некуда отправлять запрос dev-session')
+  }
+  // Раньше redirect не передавали — роут вёл на '/ru', а next-intl сворачивает дефолтную локаль в '/'.
+  // Хелпер сверяет итоговый адрес с redirect, поэтому указываем уже свёрнутый '/': страница та же.
+  const page = await openDevSessionPage({ browser, baseURL, token, email, redirect: '/' })
+  openedPages.push(page)
+  return page
 }
 
 test.describe('кабинет психолога', () => {
+  test.afterEach(async () => {
+    await Promise.all(openedPages.splice(0).map((page) => page.context().close()))
+  })
+
   test('привязка клиента, карточка клиента, заметка', async ({ browser }) => {
     test.setTimeout(180_000)
-    const psy = await (await browser.newContext()).newPage()
-    const client = await (await browser.newContext()).newPage()
 
     // 1. Психолог назначает себя специалистом
-    await signIn(psy, PSY_EMAIL)
+    const psy = await signIn(browser, PSY_EMAIL)
     await psy.goto('/ru/cabinet')
     await psy.getByRole('button', { name: 'Я специалист' }).click()
     await expect(psy.getByText('Пока нет привязанных клиентов')).toBeVisible({ timeout: 30_000 })
 
     // 2. Клиент привязывает психолога по email
-    await signIn(client, CLIENT_EMAIL)
+    const client = await signIn(browser, CLIENT_EMAIL)
     await client.goto('/ru/settings')
     await client.getByPlaceholder('Email психолога').fill(PSY_EMAIL)
     await client.getByRole('button', { name: 'Привязать' }).click()
