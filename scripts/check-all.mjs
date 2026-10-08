@@ -361,6 +361,19 @@ const CHECKS = [
     doc: 'docs/plans/PLAN-INFRA-4.md §120',
   },
   {
+    id: 'bun-bin-shims',
+    group: 'hygiene',
+    title: 'каждый шим node_modules/.bin/*.exe имеет парный .bunx (Bun на Windows)',
+    run: ['node', ['scripts/check-bun-bin-shims.mjs']],
+    // warn: локальная порча одной машины, а не свойство репозитория — починка (добавить
+    // недостающий .bunx) не требует коммита, поэтому gate роняло бы прогон из-за чужого
+    // node_modules. Без пары `nx dev <app>` молча завершается за 5 секунд (2026-10-08).
+    severity: 'warn',
+    ci: 'no',
+    ciNote: 'node_modules в CI свежие, порча только у локальной установки Bun на Windows',
+    doc: '.claude/docs/bun-bin-shim-missing-bunx.md',
+  },
+  {
     id: 'stray-dts',
     group: 'hygiene',
     title: 'закоммиченные .d.ts/.d.ts.map — побочные артефакты typecheck:tsgo',

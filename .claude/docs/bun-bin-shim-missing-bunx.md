@@ -19,6 +19,12 @@ Bun на Windows кладёт в `node_modules/.bin/` не `.cmd`, а пару �
 for f in node_modules/.bin/*.exe; do [ -f "${f%.exe}.bunx" ] || echo "нет .bunx: $f"; done
 ```
 
+То же умеет проверка раннера `bun-bin-shims` (уровень warn, в CI не запускается — порча локальная):
+
+```bash
+bun scripts/check-all.mjs --only=bun-bin-shims
+```
+
 **Это не проблема `project.json`.** Цель `dev` выводится плагином `@nx/next` (`nx.json` →
 `devTargetName: "dev"`) как `next dev` с `cwd` приложения; `nx` ищет `next` в `node_modules/.bin`.
 Менять команду в одном приложении бессмысленно: шим общий, сломаны были бы все Next-приложения.
