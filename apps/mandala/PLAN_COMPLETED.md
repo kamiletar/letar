@@ -1,5 +1,13 @@
 # Выполненные задачи: Mandala
 
+## Lint mandala-e2e: `playwright/no-networkidle` (2026-10-08)
+
+`nx lint mandala-e2e` падал на `waitForLoadState('networkidle')` в `07-full-mandala-crud.admin.spec.ts`.
+Ожидание оставлено (оно гасит флейк `setInputFiles`/Dropzone, см. запись ниже), поверх него —
+`eslint-disable-next-line playwright/no-networkidle` с причиной. Замена хелпером
+`setInputFilesWithHydrationRetry` (`@letar/e2e-testing`, а не `mandala-e2e`) не годится: `ImageUploadField`
+дизейблит `<input>` на время загрузки, ретрай виснет. Код ожидания не менялся — только комментарий.
+
 ## Режим дыхания всегда включён + ключи i18n форм (2026-10-07…08, v0.40.36–0.40.38)
 
 **Дыхание.** Режим дыхания (вдох/выдох) в просмотрщике мандал нельзя выключить. В
