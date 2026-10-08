@@ -332,6 +332,15 @@ class ListTests(unittest.TestCase):
         self.assertNotIn("SECRET", str(caught.exception))
         api.method.assert_called_once()
 
+    def test_failed_keys_use_last_recorded_result(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "download.log"
+            path.write_text("date ERROR song [1_2]: failed\n"
+                            "date INFO downloaded: song [1_2]\n"
+                            "date ERROR other [1_3]: failed\n"
+                            "date WARNING repeat [1_3]\n", encoding="utf-8")
+            self.assertEqual(dl.failed_keys(path), {"1_3"})
+
 
 if __name__ == "__main__":
     unittest.main()

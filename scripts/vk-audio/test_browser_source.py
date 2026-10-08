@@ -128,6 +128,21 @@ class BrowserTests(unittest.TestCase):
             with self.assertRaises(web.BrowserSourceError):
                 client.fetch(50)
 
+    def test_retry_refreshes_only_failed_ids_but_preserves_name_collisions(self):
+        session = Mock()
+        session.headers = {}
+        client = web.WebAudioClient(session, cookie_jar(), threading.Event(), target_keys={"50_2"})
+        response = Mock()
+        response.json.return_value = {"data": [{"list": [audio_row(1), audio_row(2)], "hasMore": False}]}
+        track = {"id": 2, "owner_id": 50, "title": "Title", "artist": "Artist", "url": "https://cdn.invalid/audio.m3u8"}
+        with patch.object(client, "post", return_value=response), \
+                patch.object(web, "scrap_tracks", return_value=iter([track])) as reload, redirect_stdout(io.StringIO()):
+            rows = client.fetch(50)
+        self.assertEqual(len(rows), 2)
+        self.assertEqual([item[1] for item in reload.call_args.args[0]], ["2"])
+        self.assertEqual(rows[0]["url"], "")
+        self.assertEqual(rows[1]["url"], track["url"])
+
     def test_vks_login_redirect_is_reported(self):
         session = Mock()
         session.headers = {}

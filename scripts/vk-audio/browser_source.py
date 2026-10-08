@@ -13,6 +13,7 @@ from typing import Any
 from urllib.parse import urlsplit
 
 import requests
+from bs4 import BeautifulSoup
 from requests.cookies import RequestsCookieJar, create_cookie
 from vk_api.audio import scrap_ids, scrap_tracks
 from vk_api.vk_api import DEFAULT_USERAGENT
@@ -152,12 +153,13 @@ class WebAudioClient:
     """Совместимый интерфейс для получения списков без вызовов официального API."""
 
     def __init__(self, session: requests.Session, cookies: RequestsCookieJar,
-                 stop: threading.Event, limit: int | None = None):
+                 stop: threading.Event, limit: int | None = None, target_keys: set[str] | None = None):
         self.http = session
         self.http.headers["User-Agent"] = DEFAULT_USERAGENT
         self.http.cookies.update(cookies)
         self.stop = stop
         self.limit = limit
+        self.target_keys = target_keys
         self.user_id = 0
         for cookie in cookies:
             if cookie.name == "remixmid" and cookie.value.isdigit():
@@ -247,8 +249,9 @@ class WebAudioClient:
                     raise BrowserSourceError("VK вернул некорректный audio ID.") from None
                 if key in items:
                     continue
-                items[key] = {"id": key[1], "owner_id": key[0], "title": str(row[3]),
-                              "artist": str(row[4]), "url": ""}
+                items[key] = {"id": key[1], "owner_id": key[0],
+                              "title": BeautifulSoup(str(row[3]).strip(), "html.parser").text,
+                              "artist": BeautifulSoup(str(row[4]), "html.parser").text, "url": ""}
                 selected.append(row)
                 if self.limit and len(items) >= self.limit:
                     break
@@ -256,6 +259,8 @@ class WebAudioClient:
                 raise BrowserSourceError("VK возвращает пустую/повторяющуюся страницу при hasMore.")
             ids = []
             for row in selected:
+                if self.target_keys is not None and f"{row[1]}_{row[0]}" not in self.target_keys:
+                    continue
                 try:
                     ids.extend(scrap_ids([row]))
                 except (IndexError, TypeError, AttributeError):

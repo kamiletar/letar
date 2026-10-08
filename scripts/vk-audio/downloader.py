@@ -28,7 +28,7 @@ from vk_api.exceptions import ApiError, ApiHttpError
 from browser_source import BrowserSourceError, WebAudioClient, load_vk_cookies
 from hls_downloader import HlsError, convert_hls
 
-__version__ = "1.1.1"
+__version__ = "1.2.0"
 PAGE_SIZE = 2000
 MAX_RETRIES = 3
 TIMEOUT = (10, 30)
@@ -327,6 +327,24 @@ def setup_log(directory: Path) -> tuple[logging.Logger, logging.Logger]:
     return logs[0], logs[1]
 
 
+def failed_keys(log_path: Path) -> set[str]:
+    """Читает последнее состояние записей, чтобы обновлять ссылки только после ошибок."""
+    states: dict[str, bool] = {}
+    if not log_path.is_file():
+        return set()
+    with log_path.open(encoding="utf-8") as source:
+        for line in source:
+            matches = re.findall(r"\[(-?\d+_\d+)\]", line)
+            if not matches:
+                continue
+            key = matches[-1]
+            if " ERROR " in line:
+                states[key] = True
+            elif re.search(r" INFO (?:downloaded|existing): ", line):
+                states[key] = False
+    return {key for key, failed in states.items() if failed}
+
+
 def run_downloads(tracks: list[Track], workers: int, stop: threading.Event,
                   log: logging.Logger, skipped: logging.Logger) -> Counter:
     counts: Counter = Counter()
@@ -379,11 +397,14 @@ def main(argv: list[str] | None = None) -> int:
     source.add_argument("--api", action="store_true", help="Использовать VK_ACCESS_TOKEN")
     parser.add_argument("--brave-profile", help='Профиль Brave: Default или "Profile 1"')
     parser.add_argument("--limit", type=int, help="Обработать первые N записей каждого профиля для проверки")
+    parser.add_argument("--retry-errors", action="store_true", help="Повторить только неудачные записи из download.log со свежими URL")
     parser.add_argument("--check", action="store_true", help="Проверить сессию и список URL без скачивания")
     parser.add_argument("--version", action="version", version=__version__)
     args = parser.parse_args(argv)
     if args.limit is not None and args.limit < 1:
         parser.error("--limit должен быть положительным")
+    if args.retry_errors and args.limit:
+        parser.error("--retry-errors и --limit нельзя использовать одновременно")
     stop = threading.Event()
     loggers: tuple[logging.Logger, ...] = ()
     try:
@@ -399,11 +420,18 @@ def main(argv: list[str] | None = None) -> int:
         loggers = (log, skipped)
         totals: Counter = Counter()
         owner_errors = 0
+        targets = failed_keys(args.output / "download.log") if args.retry_errors else None
+        if targets is not None and not targets:
+            print("В download.log нет неудачных записей для повторной загрузки.")
+            return 0
         with TimedSession() as session:
             if use_web:
                 cookies = load_vk_cookies(args.cookies, args.brave_profile)
                 print(f"Источник: сессия {'Brave' if not args.cookies else 'из локального файла'}; cookies VK: {len(cookies)}.")
-                api = WebAudioClient(session, cookies, stop, args.limit)
+                if targets is not None:
+                    api = WebAudioClient(session, cookies, stop, args.limit, targets)
+                else:
+                    api = WebAudioClient(session, cookies, stop, args.limit)
             else:
                 api = vk_api.VkApi(token=token, api_version=os.getenv("VK_API_VERSION", "5.199"), session=session,
                                    config_filename=str(args.output / "vk_config.json"))
@@ -422,6 +450,8 @@ def main(argv: list[str] | None = None) -> int:
                     directory = args.output / str(owner) if len(args.profiles) > 1 else args.output
                     directory.mkdir(parents=True, exist_ok=True)
                     tracks = prepare_tracks(items, directory, owner)
+                    if targets is not None:
+                        tracks = [track for track in tracks if track.key in targets]
                     urls = sum(bool(track.url) for track in tracks)
                     print(f"Профиль {owner}: {len(tracks)} уникальных треков, URL есть у {urls}.")
                     log.info("Профиль %s: %s треков, %s URL", owner, len(tracks), urls)
