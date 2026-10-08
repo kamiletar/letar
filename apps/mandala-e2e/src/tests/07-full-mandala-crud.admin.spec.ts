@@ -39,6 +39,9 @@ test.describe('Админ: Полный CRUD мандалы', () => {
       // тот же symptom воспроизведён и на domwellbes (supplier-quote-upload, supplier-price-
       // import-form) на полностью свежем сервере. Дождаться networkidle ДО взаимодействия с
       // dropzone — единственный найденный надёжный обход (3/3 против 3/3 без него).
+      // Замены нет: setInputFilesWithHydrationRetry (@letar/e2e-testing) не годится — ImageUploadField
+      // дизейблит input на время загрузки, ретрай виснет (2/2 падений, e2e-testing.md § networkidle).
+      // eslint-disable-next-line playwright/no-networkidle -- осознанно, см. комментарий выше
       await adminPage.waitForLoadState('networkidle')
 
       // Заполнение обязательного поля name (textbox с placeholder "Введите название")
