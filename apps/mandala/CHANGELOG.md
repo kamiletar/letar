@@ -2,6 +2,16 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.40.39] - 2026-10-08
+
+### Changed
+
+- Адаптер `t` для `FormI18nProvider` (`form-i18n-wrapper.tsx`, логика в `form-translate.ts`) проверяет `nextIntlT.has(key)` и на отсутствующий ключ возвращает сам ключ без вызова `t()`: next-intl больше не пишет `MISSING_MESSAGE` на ключи `formDirtyGuard.*`, `formToolbar.*`, `formSelection.*` и другие, которых нет в `messages`; тексты берутся из встроенного словаря `@letar/forms`. Ключи `formErrors`/`formPersistence` из 0.40.37–0.40.38 остаются как переопределения.
+
+### Added
+
+- Тест `form-translate.spec.ts` (4 кейса): перевод, интерполяция, отсутствующий ключ без `onError`, ошибка форматирования.
+
 ## [0.40.38] - 2026-10-08
 
 ### Fixed
