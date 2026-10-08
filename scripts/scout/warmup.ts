@@ -3,7 +3,8 @@
  * Фоновое обновление скаута, всё fail-open: ничего не печатает, код выхода всегда 0.
  * Запускается отсоединённым процессом (`requestVectorRefresh`) при старте сессии и при устаревших векторах:
  * 1. пересобирает индекс, если источники новее;
- * 2. будит эмбеддер запросом «прогрев» (GPU и модель после простоя отвечают долго);
+ * 2. сторож эмбеддера: проверяет сервер, поднимает или перезапускает упавший (`embedder-watch.ts`),
+ *    будит запросом «прогрев» (GPU и модель после простоя отвечают долго); не готов — выходит;
  * 3. досчитывает векторы карточек, у которых их нет или хеш текста другой;
  * 4. досчитывает векторы формулировок к докам (сами формулировки пишет `phrases.ts --generate`).
  *
@@ -11,12 +12,34 @@
  */
 import { existsSync, mkdirSync, rmSync, statSync, writeFileSync } from 'node:fs'
 import { dirname } from 'node:path'
-import { collectCards, embedTexts } from '../../libs/scout/src/index'
+import { collectCards } from '../../libs/scout/src/index'
+import { ensureEmbedder } from './embedder-watch'
 import { freshIndex } from './hook-core'
 import { findRepoRoot } from './index-store'
 import { scoutHome } from './paths'
 import { buildPhraseVectors } from './phrases'
 import { buildVectors, EMBED_URL, loadVectorStore, staleCards, vectorsLockPath } from './vectors'
+
+/** Сколько ждём, пока поднятый или грузящийся эмбеддер ответит на /health */
+const READY_TIMEOUT_MS = 60_000
+const READY_POLL_MS = 2000
+
+/** Опрос /health раз в 2 с до готовности; `true` — сервер отвечает */
+async function waitReady(url: string): Promise<boolean> {
+  const deadline = Date.now() + READY_TIMEOUT_MS
+  while (Date.now() < deadline) {
+    try {
+      const response = await fetch(`${url}/health`, { signal: AbortSignal.timeout(2000) })
+      if (response.ok) {
+        return true
+      }
+    } catch {
+      // ещё не поднялся
+    }
+    await new Promise((resolve) => setTimeout(resolve, READY_POLL_MS))
+  }
+  return false
+}
 
 /** Блокировка моложе этого срока — пересчёт уже идёт */
 const LOCK_TTL_MS = 15 * 60 * 1000
@@ -48,7 +71,15 @@ try {
   if (root) {
     const home = scoutHome()
     freshIndex(root, home)
-    await embedTexts(['прогрев'], { url: EMBED_URL, timeoutMs: 5000 })
+    const watch = await ensureEmbedder(home, EMBED_URL)
+    let ready = watch.state === 'ok' || watch.state === 'slow'
+    if (watch.action === 'start' || watch.action === 'restart' || watch.state === 'loading') {
+      ready = await waitReady(EMBED_URL)
+    }
+    // Эмбеддер не готов — векторы досчитает следующий запуск
+    if (!ready) {
+      process.exit(0)
+    }
     const cards = collectCards(root)
     const lock = vectorsLockPath(home)
     if (takeLock(lock)) {
