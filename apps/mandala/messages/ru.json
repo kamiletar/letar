@@ -341,6 +341,18 @@
       "sendCodeFailed": "Не удалось отправить код"
     }
   },
+  "formErrors": {
+    "title": "Пожалуйста, исправьте следующие ошибки:"
+  },
+  "formPersistence": {
+    "clearDraftButton": "Очистить черновик",
+    "restoreDialog": {
+      "title": "Восстановить сохранённые данные?",
+      "description": "У вас есть несохранённые изменения с предыдущей сессии.",
+      "restoreButton": "Восстановить",
+      "discardButton": "Начать заново"
+    }
+  },
   "validation": {
     "required": "Обязательное поле",
     "too_small": {

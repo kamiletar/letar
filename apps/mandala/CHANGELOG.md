@@ -2,6 +2,12 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.40.37] - 2026-10-08
+
+### Fixed
+
+- `messages/ru.json`: добавлены ключи `formErrors.title` и `formPersistence.*` (кнопка «Очистить черновик», диалог восстановления черновика) — `@letar/forms` запрашивал их у next-intl, и сборка сыпала `MISSING_MESSAGE`.
+
 ## [0.40.36] - 2026-10-07
 
 ### Changed
