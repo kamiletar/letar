@@ -3079,3 +3079,25 @@ Overrides/resolutions корневого `package.json` для закрытия 
       прогона отношения не имеют (`read-ifc`/`house-drawings` — 29/29), но на чистом `main` не сверялись — проверить, что
       падали и раньше.
 - [ ] Повторно проверить остаток audit, когда выйдут новая prisma, nx с `axios ≥1.20`, `braces` 3.0.4+.
+
+## §210 (2026-10-08) /infra:deps-update + `nx migrate latest` → Nx 23.3.0
+
+`bun update` в диапазонах (~70 пакетов: Next 16.4.0, Playwright 1.64, Electron 44.7.0, radix, fumadocs, ai-sdk, lucide,
+pdfjs-dist, jsdom 30.1.2 и др.), мажоры и пины из `intentional-pins.json` не тронуты. Electron выровнен во всех шести
+Electron-приложениях (иначе `electron-drift`; `poster-microtext-desktop` — отдельный коммит в submodule, пушить его первым).
+`nx migrate latest` → 23.3.0: единственная миграция (Vitest 5) добавила `.vitest` в `.gitignore`, правок кода не потребовала;
+`migrations.json` и AI-промпт удалены после применения. Gate-проверки `--group=deps` зелёные, новых строк в `peer-deps` нет.
+
+⚠️ **`jsdom` 30.1.2 больше не фокусирует элементы, скрытые через `display`** (changelog релиза). `@letar/forms`,
+`table-keyboard-commit.spec.tsx` (Tab/Escape) падает с `The element to be cleared could not be focused`: десктопная таблица
+в jsdom без media queries скрыта (`display` base/md). Причина по changelog, откатом `jsdom` не проверялась.
+
+Тесты: 115 из 120 задач зелёные. Не связаны с прогоном: `@letar/infra-config` (`app-server.guard` — 0 деклараций, читает файлы
+репо), `domwellbes` (общая БД: FK-нарушения, ИНН `Counterparty`, `server-only`). Нестабильные при нагрузке: `ipfs-kubo-core`,
+`forms-vue-shadcn`, `stale-draft` в forms — при повторном прогоне проходят.
+
+- [ ] ⚠️ Открытый вопрос: как чинить `@letar/forms` `table-keyboard-commit.spec.tsx` — (1) тест (раскрыть таблицу/переопределить
+      `display`; правильнее) или (2) запинить `jsdom` 30.1.1 с записью в `intentional-pins.json`. Владелец не выбрал.
+- [ ] Починить/разобрать `@letar/infra-config` `app-server.guard.spec.ts` (0 деклараций) — на чистом `main` не сверялось.
+- [ ] `nx build` после обновления не запускался; `typecheck:tsgo` падает в `grandslamcup` (ZenStack TS2321, известный долг)
+      и `aboi` (варианты рецептов Chakra `primary`/`secondary`/`micro`, причина не установлена).
