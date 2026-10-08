@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test'
 import type { SessionReport } from './report'
-import { abDifference, pickSample, wilson } from './report-stats'
+import { abDifference, embedDownStats, pickSample, watchdogStats, wilson } from './report-stats'
 
 function session(id: string, shown: boolean, hits: number, suggested = 4): SessionReport {
   return {
@@ -53,5 +53,39 @@ describe('отчёт: статистика', () => {
     expect(rows.every((r) => r.diff === undefined)).toBe(true)
     const onlyA = abDifference([session('a', true, 2)])
     expect(onlyA[0].diff).toBeUndefined()
+  })
+})
+
+describe('отчёт: эмбеддер', () => {
+  test('доля без эмбеддера: строки нового и старого вида, справки приложения не считаются', () => {
+    const stats = embedDownStats([
+      { docs_by: 'hybrid', embed: { ok: true } },
+      { docs_by: 'bm25', embed: { ok: false, error: 'timeout' } },
+      { docs_by: 'bm25', embed: { ok: false, error: 'refused' } },
+      { docs_by: 'bm25', forms: 'no-vectors' },
+      // старая строка: поля embed нет, справка без эмбеддера определяется по docs_by
+      { docs_by: 'bm25', forms: 'embed-down' },
+      { docs_by: 'hybrid+phrases', forms: 'dense' },
+      { kind: 'app' },
+    ])
+    expect(stats).toEqual({
+      n: 4,
+      total: 6,
+      byError: { timeout: 1, refused: 1, 'no-vectors': 1, неизвестно: 1 },
+    })
+    expect(embedDownStats([])).toEqual({ n: 0, total: 0, byError: {} })
+  })
+
+  test('события сторожа за период', () => {
+    const rows = [
+      { ts: '2026-09-30T10:00:00Z', state: 'down', action: 'start' },
+      { ts: '2026-10-02T10:00:00Z', state: 'down', action: 'start' },
+      { ts: '2026-10-03T10:00:00Z', state: 'hung', action: 'restart' },
+      { ts: '2026-10-04T10:00:00Z', state: 'slow', action: 'none' },
+      { ts: '2026-10-05T10:00:00Z', state: 'hung', action: 'cooldown' },
+    ]
+    expect(watchdogStats(rows, Date.parse('2026-10-01'))).toEqual({ start: 1, restart: 1, slow: 1 })
+    expect(watchdogStats(rows)).toEqual({ start: 2, restart: 1, slow: 1 })
+    expect(watchdogStats([])).toEqual({ start: 0, restart: 0, slow: 0 })
   })
 })

@@ -107,3 +107,77 @@ export function abDifference(reports: SessionReport[], iterations = 2000, seed =
     }
   })
 }
+
+/** Поля строки лога справок, нужные для подсчёта «без эмбеддера» */
+export interface EmbedRow {
+  kind?: string
+  docs_by?: string
+  forms?: string
+  embed?: { ok?: boolean; error?: string }
+}
+
+export interface EmbedDownStats {
+  /** Поисковых справок без эмбеддера */
+  n: number
+  /** Всех поисковых справок (справки приложения `kind: app` не в счёте) */
+  total: number
+  /** Причина → сколько справок */
+  byError: Record<string, number>
+}
+
+/**
+ * Доля поисковых справок, собранных без эмбеддера. Причина — из `embed.error`; у строк без поля
+ * `embed` (до scout-19, либо запроса к серверу не было) справка без эмбеддера определяется по
+ * `docs_by === 'bm25'`, причина — `no-vectors`/`stale-vectors` из `forms`, иначе `неизвестно`.
+ */
+export function embedDownStats(rows: EmbedRow[]): EmbedDownStats {
+  const search = rows.filter((r) => r.kind !== 'app')
+  const byError: Record<string, number> = {}
+  let n = 0
+  for (const r of search) {
+    let reason: string | undefined
+    if (r.embed) {
+      reason = r.embed.ok ? undefined : (r.embed.error ?? 'неизвестно')
+    } else if (r.docs_by === 'bm25') {
+      reason = r.forms === 'no-vectors' || r.forms === 'stale-vectors' ? r.forms : 'неизвестно'
+    }
+    if (reason) {
+      n++
+      byError[reason] = (byError[reason] ?? 0) + 1
+    }
+  }
+  return { n, total: search.length, byError }
+}
+
+/** Строка журнала сторожа `logs/watchdog.jsonl` */
+export interface WatchdogRow {
+  ts?: string
+  state?: string
+  action?: string
+}
+
+export interface WatchdogStats {
+  start: number
+  restart: number
+  /** Эмбеддер ответил со второй попытки: видеокарта была занята */
+  slow: number
+}
+
+/** События сторожа за период: запуски, перезапуски, «занята видеокарта» */
+export function watchdogStats(rows: WatchdogRow[], sinceMs = 0): WatchdogStats {
+  const stats: WatchdogStats = { start: 0, restart: 0, slow: 0 }
+  for (const r of rows) {
+    if (sinceMs && !(Date.parse(r.ts ?? '') >= sinceMs)) {
+      continue
+    }
+    if (r.action === 'start') {
+      stats.start++
+    } else if (r.action === 'restart') {
+      stats.restart++
+    }
+    if (r.state === 'slow') {
+      stats.slow++
+    }
+  }
+  return stats
+}

@@ -20,7 +20,7 @@ import { loadIndex } from './index-store'
 import { JUDGE_MODEL, type JudgeItem, judgeItems, type JudgeLabel, labelKey, loadLabels } from './judge'
 import { mineSession } from './mine-transcripts'
 import { scoutHome } from './paths'
-import { abDifference, pickSample, wilson } from './report-stats'
+import { abDifference, embedDownStats, pickSample, type WatchdogRow, watchdogStats, wilson } from './report-stats'
 import { canonicalTools } from './tool-names'
 
 /** Транскрипт, изменённый позже этого срока назад, считается сессией «в работе» */
@@ -41,6 +41,11 @@ export interface BriefRow {
   kind?: 'app'
   /** Версия скаута (`INDEX_VERSION` + хеш кода) на момент справки; нет поля — запись до версионирования */
   scoutVersion?: string
+  /** Чем построены доки: `bm25` — без эмбеддера */
+  docs_by?: string
+  forms?: string
+  /** Исход запроса к эмбеддеру (с scout-19); нет — запроса не было или запись старая */
+  embed?: { ok?: boolean; ms?: number; error?: string }
 }
 
 export type SessionStatus = 'ok' | 'no-transcript' | 'in-progress'
@@ -111,6 +116,25 @@ export function readBriefRows(logsDir: string): BriefRow[] {
       } catch {
         // битая строка — пропускаем
       }
+    }
+  }
+  return rows
+}
+
+/** Журнал сторожа эмбеддера; нет файла — пустой список */
+export function readWatchdogRows(logsDir: string): WatchdogRow[] {
+  const file = join(logsDir, 'watchdog.jsonl')
+  if (!existsSync(file)) {
+    return []
+  }
+  const rows: WatchdogRow[] = []
+  for (const line of readFileSync(file, 'utf8').split('\n')) {
+    try {
+      if (line.trim()) {
+        rows.push(JSON.parse(line) as WatchdogRow)
+      }
+    } catch {
+      // битая строка — пропускаем
     }
   }
   return rows
@@ -316,6 +340,23 @@ async function main() {
       + `транскрипт не найден: ${count('no-transcript')}`,
   )
   console.log(`Версии скаута: ${versionBreakdown(rows).map((v) => `${v.version} ×${v.count}`).join(', ') || '—'}`)
+  const embedDown = embedDownStats(rows)
+  console.log(
+    `без эмбеддера: ${embedDown.n} из ${embedDown.total} поисковых справок (${
+      pct(embedDown.total ? embedDown.n / embedDown.total : undefined)
+    })`
+      + (embedDown.n
+        ? ` — ${Object.entries(embedDown.byError).map(([reason, n]) => `${reason} ${n}`).join(', ')}`
+        : ''),
+  )
+  const logsDir = join(home, 'logs')
+  const watchdogRows = readWatchdogRows(logsDir)
+  const watchdog = watchdogStats(watchdogRows, since ? Date.parse(since) : 0)
+  if (existsSync(join(logsDir, 'watchdog.jsonl'))) {
+    console.log(
+      `сторож: запусков ${watchdog.start}, перезапусков ${watchdog.restart}, «занята видеокарта» ${watchdog.slow}`,
+    )
+  }
   console.log('группа | вид | сессий | со справкой | точность | полнота | до правки | инструмент | медиана запроса')
   for (const g of summary) {
     console.log(
@@ -367,7 +408,7 @@ async function main() {
   const outDir = join(home, 'reports')
   mkdirSync(outDir, { recursive: true })
   const out = join(outDir, `${new Date().toISOString().slice(0, 10)}.json`)
-  writeFileSync(out, JSON.stringify({ since, summary, abDiff: diff, sessions: reports }, null, 2))
+  writeFileSync(out, JSON.stringify({ since, summary, abDiff: diff, embedDown, watchdog, sessions: reports }, null, 2))
   console.log(`\nJSON → ${out}`)
 }
 
