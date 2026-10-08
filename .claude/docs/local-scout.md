@@ -29,6 +29,7 @@
 | `scripts/scout/eval.ts`          | Recall@5/8, Hit@8, MRR, top-1 инструмента на реальных сессиях; собирает `eval-cases.jsonl` для бенча                                                                                                                                                                                                                                        |
 | `scripts/scout/bench.ts`         | бенч на боевом пути (`scoutQuery`): флаги, общий кеш запросов, журнал и сравнение; журнал и JSON прогонов — `SCOUT_HOME/bench`. Сьюты (docs, forms, latency, robust, hook, judge, app, edit, tools, clm) — файлы в `scripts/scout/suites/`; новый сьют = новый файл (контракт — `suites/types.ts`) + строка в реестре `SUITES` в `bench.ts` |
 | `scripts/scout/judge.ts`         | судья на локальной 9B: оценка пар «запрос–док», кеш меток                                                                                                                                                                                                                                                                                   |
+| `scripts/scout/judge-compare.ts` | сравнение судей с эталоном Sonnet: `--prepare` готовит пачки для внешнего судьи (Haiku, дообученная 9B), `--compare` считает согласие, κ, «по делу@k», позиции и бутстрэп-интервалы; данные — `SCOUT_DATA/judge-compare`                                                                                                                    |
 | `scripts/scout/ask.ts`           | CLI: спросить скаута руками, лог `logs/asks.jsonl`                                                                                                                                                                                                                                                                                          |
 | `scripts/scout/warmup.ts`        | прогрев эмбеддера и досчёт векторов; запускает хук `.claude/hooks/scout-warmup.ts` (SessionStart)                                                                                                                                                                                                                                           |
 | `scripts/scout/smoke.ts`         | дымовая проверка `scout-smoke` в `bun scripts/check-all.mjs`                                                                                                                                                                                                                                                                                |
@@ -126,6 +127,10 @@
 - **Судья:** пул как в TREC (первые 5 пунктов вариантов; упомянутые и всегда загруженные не входят),
   эталон — Sonnet, дешёвый — 9B. У 9B κ «по делу» с Sonnet 0,47, но **порядок вариантов у них
   совпадает** → 9B годится для сравнения вариантов, не для абсолютных чисел.
+- **Haiku 5.5 как судья (2026-10-08, `judge-compare.ts`, 861 пара, 100 сессий):** κ «по делу» с Sonnet 0,58
+  против 0,47 у **базовой** 9B (разница 0,05–0,18 по бутстрэпу). Но Haiku завышает: «по делу@3» 66% против
+  56% у Sonnet (9B занижает — 45%), хвост справки оценивает щедро. Ставить вместо 9B рано; 9B ещё не
+  дообучалась, цифра 0,47 не потолок. Подробности и оговорки — `bench/lab-notes.md`, итерация 17.
 - **Точность по позиции** (гибрид, Sonnet, «по делу»): #1 80%, #2 67%, #3 37%, #4 32%, #5 31% —
   полезны первые два пункта; хвост нужен для полноты, но без полной аннотации.
 - Эталон «что агент прочёл» зашумлён: 36% неупомянутых эталонов лежат дальше 50-го места, в основном
@@ -247,6 +252,8 @@ bun scripts/scout/vectors.ts                # досчитать векторы 
 bun scripts/scout/forms-eval.ts --backend hybrid --probes C:/ai/data/forms-probes-holdout.jsonl --show
 bun scripts/scout/ask.ts "<запрос>"          # спросить скаута руками
 bun scripts/scout/bench.ts --label <имя> --compare last   # бенч; --compare принимает и метку прогона; --suite judge — судья (нужна 9B на 8092)
+bun scripts/scout/judge-compare.ts --prepare   # пачки пар «задача — док» для судьи-кандидата (эталон Sonnet в них не попадает)
+bun scripts/scout/judge-compare.ts --compare   # ответы судьи из judge-compare/out против Sonnet и кеша 9B; --bootstrap N — число повторов
 bun scripts/scout/tool-gold.ts --prepare    # пачки задач для слепой разметки инструментов судьёй
 bun scripts/scout/clm.ts --check            # перенос головы CLM совпадает с эталоном torch (нужен 8093)
 bun scripts/scout/warmup.ts                 # прогреть эмбеддер и досчитать векторы
