@@ -18,6 +18,7 @@ from unittest.mock import Mock, patch
 import requests
 
 import downloader as dl
+import hls_downloader as hls
 
 
 MP3 = b"ID3\x04\x00\x00\x00\x00\x00\x00" + b"\xff\xfb\x90\x00" * 300
@@ -340,6 +341,21 @@ class ListTests(unittest.TestCase):
                             "date ERROR other [1_3]: failed\n"
                             "date WARNING repeat [1_3]\n", encoding="utf-8")
             self.assertEqual(dl.failed_keys(path), {"1_3"})
+
+
+class HlsErrorTests(unittest.TestCase):
+    def test_ffmpeg_new_server_error_message_is_retryable_and_redacted(self):
+        process = Mock()
+        process.returncode = 1
+        process.poll.return_value = 1
+        process.communicate.return_value = (None, b"Error opening input: Server returned 5XX Server Error reply\nSECRET_URL")
+        with patch.object(hls.shutil, "which", return_value="ffmpeg"), \
+                patch.object(hls.subprocess, "Popen", return_value=process):
+            with self.assertRaises(hls.HlsError) as caught:
+                hls.convert_hls("https://example.invalid/SECRET_URL", Path("unused.part"), threading.Event())
+        self.assertTrue(caught.exception.retryable)
+        self.assertIn("5xx", str(caught.exception))
+        self.assertNotIn("SECRET_URL", str(caught.exception))
 
 
 if __name__ == "__main__":

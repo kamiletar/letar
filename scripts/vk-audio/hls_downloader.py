@@ -39,10 +39,12 @@ def convert_hls(url: str, target: Path, stop: threading.Event) -> bool:
                 continue
         if process.returncode:
             text = stderr.decode("utf-8", errors="replace").lower()
-            retryable = any(marker in text for marker in (
-                "http error 5", "http error 429", "timed out", "connection reset", "connection refused"
+            server_error = "http error 5" in text or "server returned 5xx" in text
+            retryable = server_error or any(marker in text for marker in (
+                "http error 429", "timed out", "connection reset", "connection refused"
             ))
-            raise HlsError("ffmpeg не смог получить или обработать HLS-поток", retryable=retryable)
+            detail = "сервер аудио вернул HTTP 5xx" if server_error else "не удалось получить или обработать HLS-поток"
+            raise HlsError(f"ffmpeg: {detail}", retryable=retryable)
         if not target.is_file() or not target.stat().st_size:
             raise HlsError("ffmpeg создал пустой файл")
         return True

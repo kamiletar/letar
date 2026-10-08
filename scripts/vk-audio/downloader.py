@@ -28,7 +28,7 @@ from vk_api.exceptions import ApiError, ApiHttpError
 from browser_source import BrowserSourceError, WebAudioClient, load_vk_cookies
 from hls_downloader import HlsError, convert_hls
 
-__version__ = "1.2.0"
+__version__ = "1.2.1"
 PAGE_SIZE = 2000
 MAX_RETRIES = 3
 TIMEOUT = (10, 30)
