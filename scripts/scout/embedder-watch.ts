@@ -43,7 +43,8 @@ export interface WatchDeps {
   health(url: string, timeoutMs: number): Promise<'ok' | 'loading' | 'refused' | 'timeout'>
   /** Настоящий запрос на эмбеддинг (`embedTexts(['прогрев'])`): сервер отвечает на /health и при зависшей модели */
   probe(url: string, timeoutMs: number): Promise<boolean>
-  findListener(port: number): { pid: number; name: string } | undefined
+  /** Кто держит порт на адресе `host`; чужой слушатель общего адреса (`::`, `0.0.0.0`) не в счёт — см. `pickListener` */
+  findListener(port: number, host: string): { pid: number; name: string } | undefined
   kill(pid: number): void
   launch(launcher: string): void
   sleep(ms: number): Promise<void>
@@ -58,11 +59,34 @@ export const KEEP_EMBEDDER_LOGS = 5
 const LOCAL_HOSTS = new Set(['127.0.0.1', 'localhost'])
 const SERVER_NAME = /^llama-server(\.exe)?$/i
 
+export interface Listener {
+  pid: number
+  name: string
+  /** Адрес привязки: `127.0.0.1`, `::`, `0.0.0.0`… */
+  address: string
+}
+
+/**
+ * Кого считать хозяином порта эмбеддера. На Windows привязка к `127.0.0.1:порт` уживается с чужой
+ * привязкой к общему адресу того же порта (`[::]:8090` у стороннего приложения): пока наш
+ * сервер жив, запросы идут ему, упал — тому, кто на общем адресе. Поэтому сначала ищем свой
+ * `llama-server`, затем слушателя ровно на нашем адресе; чужой на общем адресе порт «не держит».
+ */
+export function pickListener(listeners: Listener[], host: string): Listener | undefined {
+  const ours = listeners.find((l) => SERVER_NAME.test(l.name))
+  if (ours) {
+    return ours
+  }
+  const addresses = host === 'localhost' ? ['127.0.0.1', '::1'] : [host]
+  return listeners.find((l) => addresses.includes(l.address))
+}
+
 const defaultDeps: WatchDeps = {
   async health(url, timeoutMs) {
     try {
       const response = await fetch(`${url}/health`, { signal: AbortSignal.timeout(timeoutMs) })
-      return response.status === 503 ? 'loading' : 'ok'
+      // Не 2xx и не 503 — на порту отвечает не наш сервер (чужой слушатель общего адреса): считаем, что нашего нет
+      return response.status === 503 ? 'loading' : response.ok ? 'ok' : 'refused'
     } catch (e) {
       const name = (e as { name?: unknown } | null)?.name
       return name === 'TimeoutError' || name === 'AbortError' ? 'timeout' : 'refused'
@@ -76,18 +100,21 @@ const defaultDeps: WatchDeps = {
       return false
     }
   },
-  findListener(port) {
-    // Кто слушает порт: PID из Get-NetTCPConnection и имя процесса из Get-Process
+  findListener(port, host) {
+    // Все слушатели порта: PID и адрес из Get-NetTCPConnection, имя процесса из Get-Process
     const script =
-      `$c = Get-NetTCPConnection -LocalPort ${port} -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1; `
-      + `if ($c) { $p = Get-Process -Id $c.OwningProcess -ErrorAction SilentlyContinue; "$($c.OwningProcess)|$($p.ProcessName)" }`
+      `Get-NetTCPConnection -LocalPort ${port} -State Listen -ErrorAction SilentlyContinue | ForEach-Object { `
+      + `$p = Get-Process -Id $_.OwningProcess -ErrorAction SilentlyContinue; "$($_.OwningProcess)|$($p.ProcessName)|$($_.LocalAddress)" }`
     const out = spawnSync('powershell', ['-NoProfile', '-Command', script], {
       encoding: 'utf8',
       timeout: 15_000,
       windowsHide: true,
     })
-    const [pid, name] = String(out.stdout ?? '').trim().split('|')
-    return Number(pid) > 0 ? { pid: Number(pid), name: name ?? '' } : undefined
+    const listeners = String(out.stdout ?? '').split('\n').flatMap((line): Listener[] => {
+      const [pid, name, address] = line.trim().split('|')
+      return Number(pid) > 0 ? [{ pid: Number(pid), name: name ?? '', address: address ?? '' }] : []
+    })
+    return pickListener(listeners, host)
   },
   kill(pid) {
     process.kill(pid)
@@ -198,7 +225,8 @@ export async function ensureEmbedder(home: string, url: string, deps: Partial<Wa
       } else {
         let proceed = true
         if (state === 'hung') {
-          const listener = d.findListener(Number(new URL(url).port) || 80)
+          const target = new URL(url)
+          const listener = d.findListener(Number(target.port) || 80, target.hostname)
           if (listener && !SERVER_NAME.test(listener.name)) {
             // Порт держит чужой процесс: убивать нельзя
             action = 'not-ours'

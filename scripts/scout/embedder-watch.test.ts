@@ -2,7 +2,7 @@ import { describe, expect, it } from 'bun:test'
 import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { ensureEmbedder, KEEP_EMBEDDER_LOGS, type WatchDeps } from './embedder-watch'
+import { ensureEmbedder, KEEP_EMBEDDER_LOGS, pickListener, type WatchDeps } from './embedder-watch'
 
 const URL_LOCAL = 'http://127.0.0.1:8090'
 
@@ -166,5 +166,49 @@ describe('ensureEmbedder', () => {
     const copies = readdirSync(logs).filter((f) => /^embedder-\d{8}-\d{6}\.log$/.test(f))
     expect(copies.length).toBeLessThanOrEqual(KEEP_EMBEDDER_LOGS)
     expect(copies.some((f) => readFileSync(join(logs, f), 'utf8') === 'причина падения')).toBe(true)
+  })
+})
+
+describe('pickListener', () => {
+  const foreign = { pid: 1, name: 'other-app', address: '::' }
+  const ours = { pid: 2, name: 'llama-server', address: '127.0.0.1' }
+
+  it('свой llama-server выбирается, даже если чужой слушатель общего адреса стоит первым', () => {
+    expect(pickListener([foreign, ours], '127.0.0.1')).toEqual(ours)
+  })
+
+  it('чужой слушатель общего адреса порт не держит → никого', () => {
+    expect(pickListener([foreign], '127.0.0.1')).toBeUndefined()
+    expect(pickListener([{ ...foreign, address: '0.0.0.0' }], '127.0.0.1')).toBeUndefined()
+  })
+
+  it('чужой процесс ровно на нашем адресе — он и держит порт', () => {
+    const exact = { pid: 3, name: 'node', address: '127.0.0.1' }
+    expect(pickListener([foreign, exact], '127.0.0.1')).toEqual(exact)
+    expect(pickListener([exact], 'localhost')).toEqual(exact)
+  })
+})
+
+describe('ensureEmbedder: на порту отвечает не наш сервер', () => {
+  it('ответ 404 на /health считается «сервера нет» → down, а не hung', async () => {
+    const server = Bun.serve({ port: 0, hostname: '127.0.0.1', fetch: () => new Response('нет', { status: 404 }) })
+    try {
+      const home = homeWithLauncher(false)
+      const calls = { kill: 0, find: 0 }
+      const result = await ensureEmbedder(home, `http://127.0.0.1:${server.port}`, {
+        findListener: () => {
+          calls.find++
+          return undefined
+        },
+        kill: () => {
+          calls.kill++
+        },
+        sleep: async () => {},
+      })
+      expect(result).toMatchObject({ state: 'down', action: 'no-launcher' })
+      expect(calls).toEqual({ kill: 0, find: 0 })
+    } finally {
+      server.stop(true)
+    }
   })
 })
