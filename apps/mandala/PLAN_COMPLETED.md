@@ -1,5 +1,21 @@
 # Выполненные задачи: Mandala
 
+## Адаптер переводов форм без `MISSING_MESSAGE` (2026-10-08, v0.40.39)
+
+Сборка 0.40.38 (ключи `formErrors`/`formPersistence` добавлены) шума не давала, но это не
+доказательство: prerender не рендерит админку. По коду `mandala` в админке запрашивает ещё
+`formDirtyGuard.*` (5 ключей, при каждом рендере `DirtyGuard`), `formField.richText.placeholder` и
+`formToolbar.*` (13 ключей `Field.RichText`), в поповерах `formImagePopover.*`/`formLinkPopover.*`,
+у Select/Combobox — `formSelection.*`. Приложение без своего `onError` next-intl логирует каждый.
+Вместо дублирования ~30 текстов библиотеки в `messages` адаптер `t`
+(`src/app/_components/form-translate.ts`, подключён в `form-i18n-wrapper.tsx`) проверяет
+`nextIntlT.has(key)` и на отсутствующий ключ возвращает сам ключ — `resolveTranslation` из
+`@letar/forms-core` считает это «перевода нет» и берёт встроенный словарь ru/en. Ошибка форматирования
+(нет параметра) тоже даёт ключ. Тест `form-translate.spec.ts` на `createTranslator` из next-intl
+(4 кейса). Прочие приложения с next-intl (`aboi`, `archetest`, `flora`, `kami`, `studio`) передают в
+провайдер только `locale`, без `t`, — им ключи не нужны и правки не требуются. Рантайм в браузере не
+проверялся; push и деплой не выполнены.
+
 ## Lint mandala-e2e: `playwright/no-networkidle` (2026-10-08)
 
 `nx lint mandala-e2e` падал на `waitForLoadState('networkidle')` в `07-full-mandala-crud.admin.spec.ts`.

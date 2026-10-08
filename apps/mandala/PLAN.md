@@ -140,6 +140,15 @@
 - [x] Режим дыхания (вдох/выдох) в просмотрщике включён всегда и не отключается — v0.40.36
       (2026-10-07): `breathingEnabled` в `viewer-settings.schema.ts` — константа `true`, убраны
       переключатели, клавиша `B`, шаг онбординга и `breathe` в ссылке «Поделиться».
+- [x] Адаптер `t` для `FormI18nProvider` не вызывает next-intl на ключи, которых нет в `messages` —
+      v0.40.39 (2026-10-08): проверка `nextIntlT.has(key)` в `form-translate.ts`, тест
+      `form-translate.spec.ts`. Убирает `MISSING_MESSAGE` на `formDirtyGuard.*`, `formToolbar.*`,
+      `formSelection.*` и др.
+- [ ] ⚠️ Открытый вопрос (2026-10-08): коммиты 0.40.39 (код и `bun.lock`) лежат в `main` не
+      запушенными, деплой не запрошен — нужно одобрение владельца на push, затем `deploy-request`
+      к `deploy-agent-dev`. Заодно проверить в браузере форму админки (`content-pages`, `mandalas`):
+      в консоли нет `MISSING_MESSAGE`, тулбар RichText и диалог `DirtyGuard` на русском — рантайм
+      я не открывал, админка за авторизацией.
 - [ ] ⚠️ Открытый вопрос (2026-10-08): аудио-синхронизация (`audioSyncDisabled =
       settings.breathingEnabled` в `mandala-viewer.tsx`) после v0.40.36 выключена всегда — её
       настройки (чувствительность к басу/ритму, пульсация на бит, hue-rotate от баса) ничего не
