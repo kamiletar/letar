@@ -134,6 +134,15 @@ python downloader.py 12345 --output .\vk_downloaded_music\12345
 Одна ошибка получения списка не мешает обработке следующих профилей.
 Ссылки на отдельные `audio_playlist...` не поддерживаются: эта версия скачивает библиотеки профилей.
 
+Для собственных названий папок задавайте `--output` при каждом отдельном запуске:
+
+```powershell
+python downloader.py 12345 --cookies cookies-header.txt --output Muerta
+python downloader.py 67890 --cookies cookies-header.txt --output Kami
+```
+
+При повторе ошибок также указывайте ту же папку: `--output Muerta --retry-errors`.
+
 Если часть HLS-треков завершилась ошибками, получите свежие ссылки только для них:
 
 ```powershell
