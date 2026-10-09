@@ -137,6 +137,33 @@ describe('openDevSessionPage', () => {
     await expect(openDevSessionPage({ browser, baseURL, token: 'tok', redirect: '/admin/' })).resolves.toBeDefined()
   })
 
+  it('падает без expectedPath, если приложение свернуло redirect в другой адрес (next-intl: /ru → /)', async () => {
+    const { browser, context } = createBrowser({ finalUrl: `${baseURL}/` })
+
+    await expect(openDevSessionPage({ browser, baseURL, token: 'tok', redirect: '/ru' })).rejects.toThrow(
+      "ждали страницу '/ru', оказались на '/'",
+    )
+    expect(context.close).toHaveBeenCalledTimes(1)
+  })
+
+  it('принимает свёрнутый адрес, если он задан через expectedPath, а в dev-session уходит исходный redirect', async () => {
+    const { browser, page } = createBrowser({ finalUrl: `${baseURL}/` })
+
+    await openDevSessionPage({ browser, baseURL, token: 'tok', redirect: '/ru', expectedPath: '/' })
+
+    const url = new URL(`${baseURL}${page.goto.mock.calls[0]?.[0]}`)
+    expect(url.searchParams.get('redirect')).toBe('/ru')
+  })
+
+  it('с expectedPath сверяет именно его: другая страница по-прежнему ошибка', async () => {
+    const { browser, context } = createBrowser({ finalUrl: `${baseURL}/signin` })
+
+    await expect(
+      openDevSessionPage({ browser, baseURL, token: 'tok', redirect: '/ru', expectedPath: '/cabinet' }),
+    ).rejects.toThrow("ждали страницу '/cabinet', оказались на '/signin'")
+    expect(context.close).toHaveBeenCalledTimes(1)
+  })
+
   it('бросает ошибку и закрывает контекст, если dev-session вернул 403', async () => {
     // Адрес 403-ответа тоже содержит redirect=/admin — проверка только по URL дала бы ложный успех
     const { browser, context } = createBrowser({

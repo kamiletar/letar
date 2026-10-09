@@ -131,6 +131,14 @@ export interface OpenDevSessionPageOptions {
   /** Путь страницы, на которой окажется сессия после логина (например `/admin/paper-types`) */
   redirect: string
   /**
+   * Путь, на котором должна оказаться страница после логина, если он не совпадает с `redirect`.
+   * По умолчанию это путь из `redirect`. Нужен, когда приложение переписывает адрес по дороге:
+   * `next-intl` с локалью по умолчанию без префикса сворачивает `redirect: '/ru'` в `/`, и сверка
+   * по `redirect` падает с «ждали '/ru', оказались на '/'». Сверка — по префиксу (`startsWith`),
+   * хвостовые слэши отбрасываются; `'/'` принимает любую страницу этого же сайта.
+   */
+  expectedPath?: string
+  /**
    * Email фикстуры. Не передан — роут выбирает свой дефолт (для aboi это админ), см.
    * `createDevSessionRoute` из `@letar/auth/server`.
    */
@@ -155,6 +163,10 @@ export interface OpenDevSessionPageOptions {
  * (`.claude/docs/e2e-testing.md`, «Ловушка в `global-setup.ts`»). При неудаче контекст закрывается
  * сам, при успехе его закрывает вызывающий: `await page.context().close()`.
  *
+ * ⚠️ Адрес сверяется с `redirect` по префиксу. Если приложение переписывает адрес (`next-intl`
+ * сворачивает `/ru` в `/`, когда `ru` — локаль по умолчанию без префикса), передай `expectedPath`
+ * с тем адресом, который реально окажется в строке браузера.
+ *
  * @example
  * ```ts
  * const admin = await openDevSessionPage({ browser, baseURL, token, redirect: '/admin/paper-types' })
@@ -166,7 +178,8 @@ export interface OpenDevSessionPageOptions {
  * ```
  */
 export async function openDevSessionPage(options: OpenDevSessionPageOptions): Promise<Page> {
-  const { browser, baseURL, token, redirect, email, locale = 'ru-RU', prepare } = options
+  const { browser, baseURL, token, redirect, expectedPath: expectedPathOption, email, locale = 'ru-RU', prepare } =
+    options
 
   const context = await browser.newContext({ baseURL, locale })
   try {
@@ -182,7 +195,7 @@ export async function openDevSessionPage(options: OpenDevSessionPageOptions): Pr
       )
     }
 
-    const expectedPath = new URL(redirect, baseURL).pathname.replace(/\/+$/, '')
+    const expectedPath = new URL(expectedPathOption ?? redirect, baseURL).pathname.replace(/\/+$/, '')
     const actualPath = new URL(page.url()).pathname
     if (!actualPath.startsWith(expectedPath)) {
       throw new Error(

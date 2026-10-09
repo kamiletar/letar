@@ -843,6 +843,25 @@ if (!cookies.find((c) => c.name === 'better-auth.session_token')) {
 }
 ```
 
+### `openDevSessionPage`: адрес после логина сверяется с `redirect` — при `next-intl` передай `expectedPath`
+
+Хелпер `openDevSessionPage` из `@letar/e2e-testing` после логина сверяет путь страницы с путём из
+`redirect` по префиксу (`startsWith`, хвостовые слэши отбрасываются). Если приложение переписывает
+адрес по дороге, сверка падает: `ждали страницу '/ru', оказались на '/'`. Типичный случай —
+`next-intl` с локалью по умолчанию без префикса (`localePrefix: 'as-needed'`): dev-session ведёт на
+`/ru`, а в строке браузера оказывается `/`. Прецедент — `archetest`, где `cabinet.spec.ts` сперва
+обошёл это через `redirect: '/'`.
+
+```typescript
+// ✅ в dev-session уходит настоящий redirect, а сверяется тот адрес, что реально окажется в браузере
+const page = await openDevSessionPage({ browser, baseURL, token, email, redirect: '/ru', expectedPath: '/' })
+```
+
+⚠️ `expectedPath: '/'` принимает любую страницу сайта: ловушку «403 вместо входа» это не ослабляет
+(её ловит проверка `response.ok()`), но «редирект на `/signin`» с таким значением тоже пройдёт.
+Если нужен точный адрес — указывай его (`expectedPath: '/cabinet'`). Без `expectedPath` поведение
+прежнее (так работает `apps/aboi-e2e`).
+
 ### Ручная проверка через Browser pane: смена email в открытой сессии требует явный sign-out
 
 При ручной проверке dev-session роута агентом через Claude Browser pane (preview-инструменты,
