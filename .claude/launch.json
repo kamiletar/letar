@@ -2,6 +2,12 @@
   "version": "0.0.1",
   "configurations": [
     {
+      "name": "mugcup",
+      "runtimeExecutable": "nx",
+      "runtimeArgs": ["dev", "mugcup"],
+      "port": 3128
+    },
+    {
       "name": "forms-vue-shadcn-demo",
       "runtimeExecutable": "bunx",
       "runtimeArgs": ["vite", "demo", "--config", "demo/vite.config.ts", "--port", "5173"],
