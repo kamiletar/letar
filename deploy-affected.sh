@@ -398,6 +398,14 @@ remote_ssh() {
 # запись не начинается. Отчёт dry-run остаётся в логе деплоя. Сбой сида — предупреждение, не отказ деплоя.
 run_app_seed() {
   local db_url="$1" app="$2" a has_sync=false has_dry=false
+  # Сид стейджа — отдельный таргет `db:seed:staging` (= прод-сид + демо-данные, см. seed.staging.ts
+  # приложения). На staging берём его, если он объявлен в project.json; на проде и у приложений без
+  # него — обычный `db:seed`, чтобы демо-данные не попали в прод.
+  local seed_target="db:seed"
+  if [ "$STAGING" = true ] && grep -q '"db:seed:staging"' "apps/${app}/project.json" 2>/dev/null; then
+    seed_target="db:seed:staging"
+    echo -e "${YELLOW}🌱 ${app}: staging → ${seed_target}${NC}"
+  fi
   for a in ${SEED_ARGS[@]+"${SEED_ARGS[@]}"}; do
     [ "$a" = "--sync-texts" ] && has_sync=true
     [ "$a" = "--dry-run" ] && has_dry=true
@@ -408,12 +416,12 @@ run_app_seed() {
   fi
   if [ "$has_sync" = true ] && [ "$has_dry" = false ]; then
     echo -e "${YELLOW}🌱 ${app}: dry-run перед реальной синхронизацией текстов...${NC}"
-    if ! DATABASE_URL="$db_url" nx run "${app}:db:seed" -- --sync-texts --dry-run; then
+    if ! DATABASE_URL="$db_url" nx run "${app}:${seed_target}" -- --sync-texts --dry-run; then
       echo -e "${RED}⚠️  dry-run не прошёл — реальная синхронизация не запущена${NC}"
       return 1
     fi
   fi
-  DATABASE_URL="$db_url" nx run "${app}:db:seed" ${SEED_ARGS[@]+-- "${SEED_ARGS[@]}"}
+  DATABASE_URL="$db_url" nx run "${app}:${seed_target}" ${SEED_ARGS[@]+-- "${SEED_ARGS[@]}"}
 }
 
 # Туннель к Postgres приложения на s2: s1:localhost:<порт+20000> → s2:127.0.0.1:<порт>.
