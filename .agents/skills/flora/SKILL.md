@@ -42,8 +42,9 @@ disable-model-invocation: true
 Запрещено деплоить самостоятельно — см. `.claude/rules/app-workflow.md` § 4. Запрос —
 `deploy-agent-dev` через Agent Mail с `subject: "deploy-request: flora"`.
 
-⚠️ Приложение ещё не готово к деплою: нет `Dockerfile.production`, `docker-compose.production.yml`,
-`.env.docker(.enc)` и регистрации в Dashboard — см. скил `create-new-app`.
+Dockerfile.production, compose staging/prod и примеры env подготовлены в T1.16.
+Это не подтверждает настроенное окружение/SOPS или регистрацию Dashboard. Текущая задача —
+FL-002; push/bump SHA — FL-001, e2e — FL-003. Одобрение владельца требуется до deploy-request.
 
 ## Работа с submodule
 
