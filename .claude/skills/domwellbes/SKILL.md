@@ -12,12 +12,13 @@ disable-model-invocation: true
    Не жди, пока прояснится задача — таймер обновляется через `time_switch`, когда направление
    работы становится понятным (см. «Учёт времени» ниже)
 2. Прочитай `.claude/rules/nextjs-apps.md` для общих правил Next.js
-3. ⚠️ **Точка входа — [`apps/domwellbes/PLAN_INDEX.md`](/apps/domwellbes/PLAN_INDEX.md), не
-   `PLAN.md` напрямую.** Планы приложения разрезаны на части (`PLAN_SHOP*`, `ROADMAP*` и т.д.),
-   `PLAN_INDEX.md` — карта, «первый час нового исполнителя» и текущая ⭐ Задача №1, которая
-   меняется по ходу работы и может расходиться с тем, что видно из одного `PLAN.md`. Прочитай его
-   целиком, следуя порядку внутри файла (там же — обязательные `PLAN_SHOP.md §0` и `§0.5`), прежде
-   чем читать `PLAN.md` или выбирать задачу самостоятельно
+3. ⚠️ **Очередь задач — `apps/domwellbes/tasks/`** (формат — [tasks-per-file](/.claude/docs/tasks-per-file.md)).
+   Прочитай [`tasks/README.md`](/apps/domwellbes/tasks/README.md) и выполни
+   `bun scripts/tasks.mjs next domwellbes`. Вызов с id (`/domwellbes DW-012`) — сразу
+   `bun scripts/tasks.mjs show DW-012`. `PLAN_INDEX.md`, `PLAN.md` и остальные `PLAN*.md`
+   **заморожены** и остаются справкой: целиком их не читать, открывать только раздел из поля
+   `source` выбранной задачи (`grep -n` и `Read` с `offset`). Перед работой в области —
+   `PLAN_SHOP.md §0` и `§0.5`, если задача про магазин
 
 ## Регистрация в Agent Mail
 
@@ -37,13 +38,14 @@ disable-model-invocation: true
 
 После изучения документации:
 
-- Определи текущую фазу разработки
-- Выбери следующую задачу из плана
-- Предложи план действий
+- Выбери задачу из «можно брать», `start DW-NNN --owner domwellbes-dev`
+- План работы запиши в раздел «План» файла задачи и предложи его
+- Находку вне задачи заводи через `tasks new domwellbes …`, не абзацем в плане
 
 ## После завершения задачи
 
-Общий чек-лист — `.claude/rules/app-workflow.md`.
+`bun scripts/tasks.mjs done DW-NNN --summary "…"`, дальше общий чек-лист —
+`.claude/rules/app-workflow.md` (версия, CHANGELOG, `time_stage_close` по полю `stage`).
 
 ## Деплой
 

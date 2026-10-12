@@ -1,7 +1,7 @@
 ---
 id: LT-031
 title: Перевести domwellbes на задачи по файлам
-status: ready
+status: done
 size: L
 area: rollout
 priority: 1
@@ -11,6 +11,7 @@ stage: ""
 source: tasks-per-file
 created: 2026-10-12
 updated: 2026-10-12
+closed: 2026-10-12
 ---
 
 ## Что и зачем
@@ -30,3 +31,5 @@ updated: 2026-10-12
 ## Журнал
 
 ## Итог
+
+domwellbes переведён: apps/domwellbes/tasks (префикс DW, 15 задач: 2 можно брать, 12 ждут людей, 1 идея), компас 46 строк, баннеры в PLAN.md и PLAN_INDEX.md, скилл domwellbes стартует через tasks next. Старт сессии: компас 3,2 КБ и вывод next 0,5 КБ вместо PLAN_INDEX.md 143 КБ. Коммит в submodule, не запушен. Перенесено только живое из Задачи №1, вопросов владельцу, списка «ждут людей» и аудита 2026-09-27; открытые пункты тематических планов остались справкой.
