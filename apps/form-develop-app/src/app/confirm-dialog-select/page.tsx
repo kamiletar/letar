@@ -11,7 +11,7 @@ const options = [
 ]
 
 /**
- * Демо FM-014: Form.Field.Select внутри ConfirmDialog (Select рисует список в Portal).
+ * Демо FM-014/FM-015: Select, Combobox и Autocomplete внутри ConfirmDialog (список рисуется в Portal).
  */
 export default function ConfirmDialogSelectPage() {
   const [open, setOpen] = useState(false)
@@ -29,12 +29,14 @@ export default function ConfirmDialogSelectPage() {
           confirmText="Готово"
           colorPalette="blue"
           description={
-            <Form initialValue={{ color: '' }} onSubmit={() => undefined}>
+            <Form initialValue={{ color: '', color2: '', city: '' }} onSubmit={() => undefined}>
               <Form.Field.Select
                 name="color"
                 label="Цвет"
                 options={options}
               />
+              <Form.Field.Combobox name="color2" label="Цвет (Combobox)" options={options} minChars={0} />
+              <Form.Field.Autocomplete name="city" label="Город (Autocomplete)" suggestions={['Москва', 'Мурманск']} />
             </Form>
           }
         />

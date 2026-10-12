@@ -1017,6 +1017,9 @@ const FieldComboboxBase = createField<ComboboxFieldProps, string, ComboboxFieldS
         <SelectionActionsProvider value={actionsValue}>
           <Combobox.Root
             collection={fieldState.collection}
+            // FM-015: список в Portal монтируем при открытии, иначе модальный диалог скроет его aria-hidden
+            lazyMount
+            unmountOnExit
             size={componentProps.size ?? 'md'}
             variant={componentProps.variant ?? 'outline'}
             value={currentValue ? [currentValue] : []}

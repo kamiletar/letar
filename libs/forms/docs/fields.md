@@ -67,7 +67,7 @@
   ```
   Гонка устаревших ответов при быстром наборе текста обрабатывается внутри хука.
 
-### `Form.Field.Select` в модальном диалоге (v2.37.1+)
+### `Select`, `Combobox` и `Autocomplete` в модальном диалоге (v2.37.1+, Combobox/Autocomplete — v2.38.1+)
 
 Список `Select` рисуется в Portal вне диалога. Раньше он стоял в `body` уже при открытии диалога, и тот
 скрывал его через `aria-hidden`: мышью выбрать можно, а скринридер и Testing Library опций не видели
@@ -76,8 +76,8 @@
 
 Проверка в jsdom без обхода hidden: `await user.click(screen.getByRole('combobox'))`, затем
 `await screen.findByRole('option', { name })`. Образец — `field-select-in-dialog.spec.tsx`.
-`Combobox`, `Autocomplete`, `CascadingSelect` и `DateRange` в диалоге пока устроены по-старому
-(задачи FM-015 и FM-016).
+У `Combobox` и `Autocomplete` то же самое с v2.38.1 (FM-015); образец — `field-combobox-in-dialog.spec.tsx`.
+`CascadingSelect` и `DateRange` в диалоге пока устроены по-старому (задача FM-016).
 
 ### Поиск в `Form.Field.Select`: `searchable` (v2.21.0+)
 

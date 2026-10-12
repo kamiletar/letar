@@ -2,6 +2,12 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.1.27] - 2026-10-13
+
+### Added
+
+- `/confirm-dialog-select`: `Combobox` и `Autocomplete` рядом с `Select` в `ConfirmDialog` (FM-015).
+
 ## [0.1.26] - 2026-10-13
 
 ### Added

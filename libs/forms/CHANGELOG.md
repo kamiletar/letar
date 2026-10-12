@@ -4,6 +4,14 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.38.1] - 2026-10-13
+
+### Исправлено
+
+- `Form.Field.Combobox` и `Form.Field.Autocomplete` внутри модального диалога: опции были под
+  `aria-hidden` диалога и не находились по роли `option`. Список монтируется при открытии
+  (`lazyMount`, `unmountOnExit`), как у `Select`; тест `field-combobox-in-dialog.spec.tsx` (FM-015).
+
 ## [2.38.0] - 2026-10-13
 
 ### Добавлено
