@@ -1,16 +1,17 @@
 ---
 id: FM-013
 title: "Steps.Indicator: перенос/сжатие на 360 px (страница уезжает вбок)"
-status: ready
+status: done
 size: S
 area: ""
 priority: 2
 blocked_by: []
-owner: ""
+owner: forms-dev
 stage: ""
 source: тред forms-steps-indicator-mobile (от domwellbes-dev, DW-016)
 created: 2026-10-13
 updated: 2026-10-13
+closed: 2026-10-13
 ---
 
 ## Что и зачем
@@ -39,3 +40,5 @@ updated: 2026-10-13
 ## Журнал
 
 ## Итог
+
+Steps.Indicator ниже md прячет подписи и описания, остаются номера (aria-label с названием), проп collapseLabelsBelow. 360 px: scrollWidth=clientWidth в обеих темах, ≥md без изменений. forms 2.37.0.

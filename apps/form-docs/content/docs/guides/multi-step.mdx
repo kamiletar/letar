@@ -81,6 +81,17 @@ form-level, not a `Field`) with a smaller two-step schema — same mechanics, di
 - Available since `@letar/forms` 2.14.22; the same props exist in `@letar/forms-shadcn`,
   `@letar/forms-vue` and `@letar/forms-vue-shadcn`.
 
+## Indicator on narrow screens
+
+Below the `md` breakpoint (default) `Form.Steps.Indicator` hides step titles and descriptions and
+keeps only the numbers: four labelled steps stretched the page sideways at 360 px. The step title
+stays in the button's `aria-label`. Change the threshold with `collapseLabelsBelow`
+(`'sm' | 'md' | 'lg' | 'xl'`); `false` keeps labels at every width.
+
+```tsx
+<Form.Steps.Indicator showDescriptions collapseLabelsBelow="lg" />
+```
+
 ## Completed screen
 
 `Form.Steps.CompletedContent` renders a screen shown after the last step is confirmed — a summary

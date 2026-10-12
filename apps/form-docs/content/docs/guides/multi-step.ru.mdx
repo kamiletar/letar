@@ -81,6 +81,17 @@ import { SkinCodeFile } from '@/components/skin/skin-code-file'
 - Доступно с `@letar/forms` 2.14.22; те же пропсы есть в `@letar/forms-shadcn`, `@letar/forms-vue`
   и `@letar/forms-vue-shadcn`.
 
+## Индикатор на узком экране
+
+Ниже брейкпоинта `md` (по умолчанию) `Form.Steps.Indicator` скрывает подписи и описания шагов и
+оставляет только номера: четыре шага с подписями на 360 px растягивали страницу вбок. Название шага
+остаётся в `aria-label` кнопки. Порог меняется пропом `collapseLabelsBelow` (`'sm' | 'md' | 'lg' | 'xl'`),
+`false` возвращает подписи на любой ширине.
+
+```tsx
+<Form.Steps.Indicator showDescriptions collapseLabelsBelow="lg" />
+```
+
 ## Экран после завершения
 
 `Form.Steps.CompletedContent` рендерит экран, показываемый после подтверждения последнего шага —

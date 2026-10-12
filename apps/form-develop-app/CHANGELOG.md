@@ -2,6 +2,12 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.1.25] - 2026-10-13
+
+### Added
+
+- Страница `/steps-indicator-mobile`: индикатор из четырёх шагов на узком экране (FM-013).
+
 ## [0.1.24] - 2026-09-27
 
 ### Added

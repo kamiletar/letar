@@ -4,6 +4,24 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.37.0] - 2026-10-13
+
+### Исправлено
+
+- `Form.Steps.Indicator`: на узком экране (360 px) четыре шага с подписями растягивали страницу вбок
+  (`scrollWidth` 678 против `clientWidth` 360). Подписи и описания шагов теперь скрываются ниже `md`.
+
+### Добавлено
+
+- Проп `collapseLabelsBelow` у `Form.Steps.Indicator` (`'sm' | 'md' | 'lg' | 'xl' | false`).
+- Демо `form-develop-app` `/steps-indicator-mobile` с четырьмя шагами.
+
+### Изменения поведения
+
+- Ниже `md` индикатор показывает только номера шагов, название шага — в `aria-label` кнопки
+  (`Steps.Trigger`). Прежний вид на любой ширине — `collapseLabelsBelow={false}`. На `≥ md` ничего
+  не изменилось.
+
 ## [2.36.1] - 2026-09-27
 
 ### Изменено

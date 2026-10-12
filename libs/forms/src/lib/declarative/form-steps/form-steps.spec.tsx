@@ -207,3 +207,45 @@ describe('FormSteps — валидация видит поля внутри ка
     })
   })
 })
+
+describe('FormStepsIndicator — узкие экраны (FM-013)', () => {
+  const renderSteps = (collapseLabelsBelow?: 'md' | false) =>
+    render(
+      <Form initialValue={{ a: '', b: '' }} onSubmit={vi.fn()}>
+        <Form.Steps>
+          <Form.Steps.Indicator collapseLabelsBelow={collapseLabelsBelow} />
+          <Form.Steps.Step title="Первый">
+            <Form.Field.String name="a" />
+          </Form.Steps.Step>
+          <Form.Steps.Step title="Второй">
+            <Form.Field.String name="b" />
+          </Form.Steps.Step>
+        </Form.Steps>
+      </Form>,
+      { wrapper: TestWrapper },
+    )
+
+  const hidden = (cls: string) => new RegExp(String.raw`\.${cls}\{[^}]*display:none`)
+
+  const titleStyles = () => {
+    const css = Array.from(document.querySelectorAll('style')).map((s) => s.textContent ?? '').join('')
+    return {
+      first: screen.getByText('Первый').className.split(' ').pop() ?? '',
+      second: screen.getByText('Второй').className.split(' ').pop() ?? '',
+      css,
+    }
+  }
+
+  it('прячет подписи шагов на узком экране и оставляет название в aria-label', () => {
+    renderSteps()
+    const { first, css } = titleStyles()
+    expect(css).toMatch(hidden(first))
+    expect(screen.getByRole('tab', { name: 'Первый' })).toBeInTheDocument()
+  })
+
+  it('collapseLabelsBelow=false не прячет подписи', () => {
+    renderSteps(false)
+    const { second, css } = titleStyles()
+    expect(css).not.toMatch(hidden(second))
+  })
+})
