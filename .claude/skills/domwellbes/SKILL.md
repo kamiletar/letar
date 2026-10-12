@@ -6,6 +6,8 @@ disable-model-invocation: true
 
 # DomWellbes - Воркфлоу разработки
 
+Структура блоков старта — [шаблон](/.claude/docs/tasks-per-file.md#шаблон-блока-старта-для-скилла); ниже только то, что относится к этому приложению.
+
 ## Инициализация
 
 1. **Сразу стартуй таймер** — `time_start({ app: "domwellbes", description: "изучение плана и постановка задачи" })`.
@@ -24,7 +26,7 @@ disable-model-invocation: true
 
 Фиксированное имя агента: `domwellbes-dev`. Общий шаблон вызова `macro_start_session` —
 см. `.claude/rules/app-workflow.md`. Модель — `claude-opus-5` (не дефолтная `claude-sonnet-5`).
-Токен — в `agent_fixed_names_tokens.md`.
+Токен одной строкой: `grep -m1 '^| domwellbes ' ~/.claude/projects/C--web-letar/memory/agent_fixed_names_tokens.md` (файл целиком не читать).
 
 ⛔ **Если токен не подошёл — НЕ пытайся зарегистрировать `domwellbes-dev` повторно тем же именем.**
 Это типичный симптом одновременного старта нескольких `/domwellbes`: сервер проверяет владение
