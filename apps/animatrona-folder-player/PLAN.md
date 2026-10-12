@@ -1,5 +1,10 @@
 # PLAN — Animatrona Folder Player
 
+> ⚠️ **С 2026-10-12 файл заморожен.** Очередь задач — в [`tasks/`](tasks/README.md)
+> (`bun scripts/tasks.mjs next animatrona-folder-player`). Новые задачи, журнал и итоги сюда не
+> пишутся: хук `pre-commit-tasks-check.sh` не пропустит рост файла. Здесь остаётся справка.
+> Формат — [tasks-per-file](/.claude/docs/tasks-per-file.md).
+
 ## ✅ Переименование из `animatrona-player` (2026-09-08)
 
 Приложение переименовано в `animatrona-folder-player` по решению владельца (задача от

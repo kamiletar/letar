@@ -1,0 +1,5 @@
+{
+  "project": "animatrona-folder-player",
+  "prefix": "FP",
+  "frozen": ["PLAN.md", "PLAN_COMPLETED.md", "PLAN_TESTING.md"]
+}

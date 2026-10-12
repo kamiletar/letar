@@ -10,7 +10,10 @@ disable-model-invocation: true
 
 1. Прочитай `.claude/rules/nextjs-apps.md` для общих правил Next.js
 2. Прочитай `.claude/rules/electron.md` для граблей Electron-приложений
-3. Прочитай `apps/animatrona-folder-player/PLAN.md` для текущего состояния задач
+3. **Очередь задач — `apps/animatrona-folder-player/tasks/`.** `Read` её `README.md` (компас), затем
+   `bun scripts/tasks.mjs next animatrona-folder-player`. Вызвали с id (`FP-004`) — сразу
+   `bun scripts/tasks.mjs show FP-004`. `PLAN.md` (224 КБ) заморожен и целиком не читается:
+   секцию из `source` задачи открывай через `grep -n` и `Read` с `offset`.
 
 ## Регистрация в Agent Mail
 
@@ -33,8 +36,8 @@ identity `animatrona-dev` — той, что по конвенции `<роль>
 
 После изучения документации:
 
-- Определи текущую фазу разработки (см. `PLAN.md` — сейчас Фаза 1, MVP)
-- Выбери следующую задачу из плана
+- Возьми задачу из `next`: `bun scripts/tasks.mjs start <ID> --owner animatrona-folder-player-dev`, план
+  работ запиши в файл задачи, находки по ходу — `tasks new`
 - Предложи план действий
 
 ## Особенности проекта
