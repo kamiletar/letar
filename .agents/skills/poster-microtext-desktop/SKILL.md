@@ -13,14 +13,17 @@ disable-model-invocation: true
 1. Зарегистрируйся в Agent Mail и стартуй таймер — см. `.claude/rules/app-workflow.md`
    (agent_name `poster-microtext-desktop-dev`)
 2. Прочитай `.claude/rules/electron.md` для общих правил Electron-приложений
-3. Прочитай `apps/poster-microtext-desktop/PLAN.md` для текущего состояния задач
+3. **Очередь задач — `apps/poster-microtext-desktop/tasks/`.** `Read` её `README.md` (компас), затем
+   `bun scripts/tasks.mjs next poster-microtext-desktop`. Вызвали с id (`PM-008`) — сразу
+   `bun scripts/tasks.mjs show PM-008`. `PLAN.md` (317 КБ) и `PLAN_COMPLETED.md` заморожены и
+   целиком не читаются: секцию из `source` задачи открывай через `grep -n` и `Read` с `offset`.
 
 ## Действия
 
 После изучения документации:
 
-- Определи текущую фазу разработки
-- Выбери следующую задачу из плана
+- Возьми задачу из `next`: `bun scripts/tasks.mjs start <ID> --owner poster-microtext-desktop-dev`,
+  план работ запиши в файл задачи, находки по ходу — `tasks new`
 - Предложи план действий
 
 ## Особенности приложения
@@ -38,7 +41,7 @@ disable-model-invocation: true
 
 ## После завершения задачи
 
-Общий чеклист — `.claude/rules/app-workflow.md` (обнови PLAN.md/CHANGELOG.md/версию,
+Общий чеклист — `.claude/rules/app-workflow.md` (закрой задачу `tasks done <ID> --summary "…"`, обнови CHANGELOG.md/версию,
 формат/лайнт/тайпчек, коммит). Специфика этого приложения:
 
 1. Обнови `README.md`, если менялся интерфейс/параметры
