@@ -24,6 +24,9 @@ mcp__agent-mail__macro_start_session(
 
 Возвращает `{project, agent, file_reservations, inbox}` — сразу видно inbox и резервации.
 
+⚠️ Файл токенов — 23 КБ, **целиком не читать**. Имя и токен приложения — одной строкой таблицы:
+`grep -m1 '^| <app> ' ~/.claude/projects/C--web-letar/memory/agent_fixed_names_tokens.md`.
+
 ### ⚠️ Всегда передавай `agent_name` + `registration_token`
 
 Без них сервер молча заведёт **новую** identity со случайным именем (`SunnyTower`,
