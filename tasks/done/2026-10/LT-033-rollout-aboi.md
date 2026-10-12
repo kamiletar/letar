@@ -1,7 +1,7 @@
 ---
 id: LT-033
 title: Перевести aboi на задачи по файлам
-status: ready
+status: done
 size: M
 area: rollout
 priority: 2
@@ -12,6 +12,7 @@ stage: ""
 source: tasks-per-file
 created: 2026-10-12
 updated: 2026-10-12
+closed: 2026-10-12
 ---
 
 ## Что и зачем
@@ -31,3 +32,5 @@ updated: 2026-10-12
 ## Журнал
 
 ## Итог
+
+Очередь aboi переведена: tasks/ с 20 задачами AB (можно брать 7, ждут 9, идеи 4), компас 3,4 КБ, баннеры в PLAN.md, PLAN_COMPLETED.md, PLAN_TESTING.md, скилл стартует через next. Старт: компас 3,4 КБ + next 0,9 КБ вместо PLAN.md 500 КБ. Коммит в submodule apps/aboi, не запушен.

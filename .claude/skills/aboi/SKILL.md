@@ -11,9 +11,14 @@ disable-model-invocation: true
 1. Прочитай `.claude/rules/nextjs-apps.md` — общие правила Next.js
 2. Прочитай `.claude/rules/database.md` — workflow ZenStack + Prisma + миграции
 3. Прочитай `.claude/rules/security.md` — валидация, ZenStack policies, secrets
-4. Прочитай `apps/aboi/PLAN.md` — полный план разработки и текущая фаза
-5. Прочитай `apps/aboi/CHANGELOG.md` — что уже реализовано
-6. Прочитай артефакты концепции (если работаешь по UX/копирайту; `.claude/artifacts/` вне git — читай, только если файлы есть локально):
+4. ⚠️ **Очередь задач — `apps/aboi/tasks/`** (формат — [tasks-per-file](/.claude/docs/tasks-per-file.md)).
+   Прочитай [`tasks/README.md`](/apps/aboi/tasks/README.md) и выполни
+   `bun scripts/tasks.mjs next aboi`. Вызов с id (`/aboi AB-003`) — сразу
+   `bun scripts/tasks.mjs show AB-003`. `PLAN.md`, `PLAN_COMPLETED.md`, `PLAN_TESTING.md`
+   **заморожены** и остаются справкой: целиком их не читать (500 КБ и больше), открывать только
+   раздел из поля `source` выбранной задачи (`grep -n` и `Read` с `offset`).
+   `CHANGELOG.md` целиком не читать: нужная запись ищется `grep`
+5. Прочитай артефакты концепции (если работаешь по UX/копирайту; `.claude/artifacts/` вне git — читай, только если файлы есть локально):
    - `.claude/artifacts/aboi-requirements.md`
    - `.claude/artifacts/aboi-landing-concept.md`
    - `.claude/artifacts/aboi-plan-research.md` (best practices)
@@ -34,9 +39,9 @@ disable-model-invocation: true
 
 После изучения документации:
 
-- Определи текущую фазу разработки (E0…E10 — см. `PLAN.md` §3)
-- Выбери следующую невыполненную задачу из плана
-- Предложи план действий с acceptance-критериями
+- Выбери задачу из «можно брать», `start AB-NNN --owner aboi-dev`
+- План с acceptance-критериями запиши в раздел «План» файла задачи и предложи его
+- Находку вне задачи заводи через `tasks new aboi …`, не абзацем в плане
 - Перед массивными правками — согласуй scope с пользователем
 
 ## Юридические запреты
@@ -49,7 +54,8 @@ disable-model-invocation: true
 
 ## После завершения задачи
 
-Общий чек-лист — `.claude/rules/app-workflow.md`. Дополнительно для aboi:
+`bun scripts/tasks.mjs done AB-NNN --summary "…"`, дальше общий чек-лист —
+`.claude/rules/app-workflow.md`. Дополнительно для aboi:
 
 - Прогнать `nx test aboi` (помимо format/lint/typecheck)
 - Запусти `preview_start aboi` и визуально проверь изменения, если они UI-наблюдаемы
