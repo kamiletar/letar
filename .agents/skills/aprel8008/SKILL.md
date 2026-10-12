@@ -8,7 +8,11 @@ disable-model-invocation: true
 
 ## Инициализация
 
-1. Прочитай `apps/aprel8008/PLAN.md` для текущего состояния задач
+1. ⚠️ **Очередь задач — `apps/aprel8008/tasks/`** (формат — [tasks-per-file](/.claude/docs/tasks-per-file.md)).
+   Прочитай [`tasks/README.md`](/apps/aprel8008/tasks/README.md) и выполни
+   `bun scripts/tasks.mjs next aprel8008`. Вызов с id (`/aprel8008 AP-003`) — сразу
+   `bun scripts/tasks.mjs show AP-003`. `PLAN.md` и `PLAN_COMPLETED.md` **заморожены** и остаются
+   справкой: целиком их не читать, открывать только раздел из поля `source` выбранной задачи
 
 ## Регистрация в Agent Mail
 
@@ -24,13 +28,13 @@ disable-model-invocation: true
 
 После изучения документации:
 
-- Определи текущую фазу разработки
-- Выбери следующую задачу из плана
-- Предложи план действий
+- Выбери задачу из «можно брать», `start AP-NNN --owner aprel8008-dev`
+- План работы запиши в раздел «План» файла задачи и предложи его
+- Находку вне задачи заводи через `tasks new aprel8008 …`, не абзацем в плане
 
 ## После завершения задачи
 
-Общий чек-лист — `.claude/rules/app-workflow.md`.
+`bun scripts/tasks.mjs done AP-NNN --summary "…"`, дальше общий чек-лист — `.claude/rules/app-workflow.md`.
 
 ## Деплой
 

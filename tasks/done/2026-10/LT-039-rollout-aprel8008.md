@@ -1,7 +1,7 @@
 ---
 id: LT-039
 title: Перевести aprel8008 на задачи по файлам
-status: ready
+status: done
 size: M
 area: rollout
 priority: 3
@@ -12,6 +12,7 @@ stage: ""
 source: tasks-per-file
 created: 2026-10-12
 updated: 2026-10-12
+closed: 2026-10-12
 ---
 
 ## Что и зачем
@@ -31,3 +32,5 @@ updated: 2026-10-12
 ## Журнал
 
 ## Итог
+
+aprel8008 переведён: AP-001…AP-012 (можно брать 2, ждут 8, идеи 2), компас tasks/README.md, PLAN и PLAN_COMPLETED заморожены, скилл стартует через tasks next. Содержание комикса и семейные подробности не переносил: только ссылки на секции плана. Коммит в submodule, не запушен.
