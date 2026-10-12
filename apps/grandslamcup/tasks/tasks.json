@@ -1,0 +1,5 @@
+{
+  "project": "grandslamcup",
+  "prefix": "GS",
+  "frozen": ["PLAN.md", "PLAN_COMPLETED.md", "PLAN_TESTING.md"]
+}

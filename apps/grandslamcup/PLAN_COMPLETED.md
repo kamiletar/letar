@@ -1,5 +1,10 @@
 # Grand Slam Cup — Выполненные задачи
 
+> ⚠️ **С 2026-10-12 файл заморожен.** Очередь задач — в [`tasks/`](tasks/README.md)
+> (`bun scripts/tasks.mjs next grandslamcup`). Новые задачи, журнал и итоги сюда не пишутся: хук
+> `pre-commit-tasks-check.sh` не пропустит рост файла. Здесь остаётся справка. Формат —
+> [tasks-per-file](/.claude/docs/tasks-per-file.md).
+
 Детальное описание всех реализованных фич.
 
 ## og:image матча без постера (2026-10-08, v3.42.1)

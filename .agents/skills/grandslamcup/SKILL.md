@@ -9,7 +9,10 @@ disable-model-invocation: true
 ## Инициализация
 
 1. Прочитай `.claude/rules/nextjs-apps.md` для общих правил Next.js
-2. Прочитай `apps/grandslamcup/PLAN.md` для текущего состояния задач
+2. **Очередь задач — `apps/grandslamcup/tasks/`.** `Read` её `README.md` (компас), затем
+   `bun scripts/tasks.mjs next grandslamcup`. Вызвали с id (`GS-006`) — сразу
+   `bun scripts/tasks.mjs show GS-006`. `PLAN.md` (265 КБ) и `PLAN_COMPLETED.md` заморожены и
+   целиком не читаются: секцию из `source` задачи открывай через `grep -n` и `Read` с `offset`.
 
 ## Регистрация в Agent Mail
 
@@ -25,8 +28,8 @@ disable-model-invocation: true
 
 После изучения документации:
 
-- Определи текущую фазу разработки
-- Выбери следующую задачу из плана
+- Возьми задачу из `next`: `bun scripts/tasks.mjs start <ID> --owner grandslamcup-dev`, план
+  работ запиши в файл задачи, находки по ходу — `tasks new`
 - Предложи план действий
 
 ## После завершения задачи

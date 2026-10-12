@@ -1,17 +1,18 @@
 ---
 id: LT-036
 title: Перевести grandslamcup на задачи по файлам
-status: ready
+status: done
 size: M
 area: rollout
 priority: 2
 blocked_by:
   - LT-031
-owner: ""
+owner: repo-dev
 stage: ""
 source: tasks-per-file
 created: 2026-10-12
 updated: 2026-10-12
+closed: 2026-10-12
 ---
 
 ## Что и зачем
@@ -31,3 +32,5 @@ updated: 2026-10-12
 ## Журнал
 
 ## Итог
+
+grandslamcup переведён: tasks/ с префиксом GS, 22 задачи (можно брать 5, ждут 9, идеи 8), компас, баннеры в PLAN.md (265 КБ), PLAN_COMPLETED.md и PLAN_TESTING.md, скилл стартует через tasks next. Каталог входит в публичный репозиторий: в задачах нет имён игроков, команд и реквизитов. Фазы 9–15 (ТЗ не начаты) сведены в идеи, вопросы R.10 пивота — одна задача блокера на владельца. Устаревшие вопросы раздела 12 ТЗ КБС не переносил.
