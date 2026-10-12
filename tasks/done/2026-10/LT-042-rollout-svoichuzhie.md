@@ -1,7 +1,7 @@
 ---
 id: LT-042
 title: Перевести svoichuzhie на задачи по файлам
-status: ready
+status: done
 size: M
 area: rollout
 priority: 3
@@ -12,6 +12,7 @@ stage: ""
 source: tasks-per-file
 created: 2026-10-12
 updated: 2026-10-12
+closed: 2026-10-12
 ---
 
 ## Что и зачем
@@ -31,3 +32,5 @@ updated: 2026-10-12
 ## Журнал
 
 ## Итог
+
+svoichuzhie переведён: SV-001…SV-015 (можно брать 3, ждут 9, идеи 3), компас, четыре PLAN-файла заморожены, скилл стартует через tasks next. CLIENT_TODO.md не заморожен (его рисует страница /plan). Коммит в submodule, не запушен.
