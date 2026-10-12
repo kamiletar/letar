@@ -1,0 +1,5 @@
+{
+  "project": "kami-key-the",
+  "prefix": "KK",
+  "frozen": ["PLAN.md", "PLAN_COMPLETED.md", "PLAN_TESTING.md"]
+}
