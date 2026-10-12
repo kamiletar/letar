@@ -1,7 +1,7 @@
 ---
 id: LT-054
 title: Замер стоимости старта сессии до и после перевода
-status: ready
+status: done
 size: S
 area: tooling
 priority: 2
@@ -12,6 +12,7 @@ stage: ""
 source: tasks-per-file
 created: 2026-10-12
 updated: 2026-10-12
+closed: 2026-10-12
 ---
 
 ## Что и зачем
@@ -27,3 +28,5 @@ updated: 2026-10-12
 ## Журнал
 
 ## Итог
+
+Замер записан в tasks-per-file.md: стартовое чтение сократилось с 21 КБ–1,96 МБ до 3,7–6 КБ (letar ~500 раз, aboi ~116, domwellbes ~39, flora ~3,5). Скилл приложения 5–8 КБ остаётся — его сжимает LT-056.
