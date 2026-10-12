@@ -33,4 +33,4 @@ closed: 2026-10-12
 
 ## Итог
 
-animatrona переведена: очередь tasks/ (префикс AN), PLAN.md, PLAN_COMPLETED*.md и PLAN_TESTING.md заморожены баннером, скилл стартует через tasks next. Спецификации (экосистемный план, e2e, ТЗ) не заморожены. Коммит в submodule apps/animatrona, не запушен.
+animatrona переведена: очередь tasks/ (префикс AN), PLAN.md, PLAN_COMPLETED*.md и PLAN_TESTING.md заморожены баннером, скилл стартует через tasks next. Спецификации (экосистемный план, e2e, ТЗ) не заморожены. Каталог apps/animatrona входит в публичный репозиторий letar, не запушен.
