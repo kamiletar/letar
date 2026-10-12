@@ -77,7 +77,7 @@
 Проверка в jsdom без обхода hidden: `await user.click(screen.getByRole('combobox'))`, затем
 `await screen.findByRole('option', { name })`. Образец — `field-select-in-dialog.spec.tsx`.
 У `Combobox` и `Autocomplete` то же самое с v2.38.1 (FM-015); образец — `field-combobox-in-dialog.spec.tsx`.
-`CascadingSelect` и `DateRange` в диалоге пока устроены по-старому (задача FM-016).
+`CascadingSelect` — то же с v2.38.2 (FM-016; тест `field-cascading-select-in-dialog.spec.tsx`). `DateRange`: меню пресетов в Chakra уже монтируется лениво, правки не понадобились, поведение закреплено тестом `field-date-range-in-dialog.spec.tsx`.
 
 ### Поиск в `Form.Field.Select`: `searchable` (v2.21.0+)
 

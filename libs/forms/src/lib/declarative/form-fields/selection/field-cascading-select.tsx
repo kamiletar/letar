@@ -192,6 +192,9 @@ function CascadingSelectContent<TParent = string, TValue = string>({
           <Field.Root invalid={hasError} required={resolved.required} disabled={isDisabled}>
             <Select.Root
               collection={collection}
+              // FM-016: список в Portal монтируем при открытии, иначе модальный диалог скроет его aria-hidden
+              lazyMount
+              unmountOnExit
               size={size}
               variant={variant}
               value={currentValue ? [currentValue] : []}
