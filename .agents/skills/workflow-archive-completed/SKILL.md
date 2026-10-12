@@ -5,6 +5,8 @@ allowed-tools: Read, Write, Edit, Glob
 disable-model-invocation: true
 ---
 
+> Только для проектов без `tasks/`. В проектах с очередью задач закрытые файлы уходят в `tasks/done/` сами (`tasks.mjs done`), архивировать вручную нечего — [tasks-per-file](/.claude/docs/tasks-per-file.md).
+
 # Архивация выполненных задач и CHANGELOG
 
 Перенеси выполненные задачи и старые записи CHANGELOG в архивные файлы для экономии контекста.

@@ -6,7 +6,7 @@
 
 ## Что запрещено писать в публичные файлы
 
-Касается: `PLAN.md`, `PLAN-INFRA.md`, `PLAN_COMPLETED.md`, `.claude/docs/*` и любых других
+Касается: `PLAN.md`, `PLAN-INFRA.md`, `PLAN_COMPLETED.md`, `tasks/**`, `.claude/docs/*` и любых других
 файлов публичного репозитория (не submodule).
 
 - ❌ Домены коммерческих приложений (вида `example-app.ru`: реальные имена не приводим даже как пример).

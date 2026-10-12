@@ -41,20 +41,19 @@
 
 ## 3. После завершения задачи
 
-1. `apps/<app>/PLAN.md` — отметить задачу выполненной
-2. `apps/<app>/PLAN_COMPLETED.md` — детали реализации (если ведётся отдельно)
-3. `apps/<app>/CHANGELOG.md` — запись об изменениях
-4. `apps/<app>/PLAN_TESTING.md` — если добавил тесты
-5. `apps/<app>/package.json` — поднять версию (semver)
+1. Есть `<проект>/tasks/` — `bun scripts/tasks.mjs done <ID> --summary "…"` (итог и детали живут в файле задачи). Нет — `apps/<app>/PLAN.md` отметить выполненным и детали в `PLAN_COMPLETED.md`
+2. `apps/<app>/CHANGELOG.md` — запись об изменениях
+3. `apps/<app>/PLAN_TESTING.md` — если добавил тесты
+4. `apps/<app>/package.json` — поднять версию (semver)
    ⚠️ и **сразу** `bun.lock`: сверка `bun scripts/check-lock-workspace-versions.mjs --index` (по записанному
    состоянию, чужой WIP в рабочем дереве не мешает; без флага — по диску), при расхождении
    `bun install --lockfile-only` (только в чистом дереве) и отдельный коммит lock. Без этого
    `--frozen-lockfile` на сервере роняет деплой ВСЕХ приложений. Версия выросла внутри приватного
    submodule — lock коммить после push submodule
    ([разбор](/.claude/docs/bun-lock-drift-unpushed-commits-blocks-all-deploys.md))
-6. `time_stage_close`, если работал в рамках именованного этапа
-7. `nx run-many -t format --projects=<app>` → `nx lint <app>` → `nx typecheck:tsgo <app>`
-8. Закоммитить осмысленным сообщением ([git.md](/.claude/rules/git.md))
+5. `time_stage_close`, если работал в рамках именованного этапа
+6. `nx run-many -t format --projects=<app>` → `nx lint <app>` → `nx typecheck:tsgo <app>`
+7. Закоммитить осмысленным сообщением ([git.md](/.claude/rules/git.md))
 
 ## 4. Деплой
 

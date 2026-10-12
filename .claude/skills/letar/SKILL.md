@@ -61,8 +61,8 @@ nx affected -t lint typecheck:tsgo test
 
 ## После завершения задачи
 
-1. Обнови `PLAN.md` затронутых приложений — отметь задачи выполненными.
-2. Обнови `CHANGELOG.md` / `PLAN_COMPLETED.md` там, где они ведутся.
+1. Затронутые проекты с `tasks/` — закрой задачу: `bun scripts/tasks.mjs done <ID> --summary "…"`. Остальные — отметь задачи выполненными в `PLAN.md`.
+2. Обнови `CHANGELOG.md` там, где он ведётся; `PLAN_COMPLETED.md` — только в проектах без `tasks/`.
 3. Подними версию в `package.json` затронутых проектов (semver).
 4. Для изменений в `libs/**` — обнови README библиотеки и затронутые `.claude/docs/`.
 5. Закоммить логически связанные изменения (см. `.claude/rules/git.md`).
