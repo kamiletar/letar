@@ -1,7 +1,7 @@
 ---
 id: LT-041
 title: Перевести kami на задачи по файлам
-status: ready
+status: done
 size: M
 area: rollout
 priority: 3
@@ -12,6 +12,7 @@ stage: ""
 source: tasks-per-file
 created: 2026-10-12
 updated: 2026-10-12
+closed: 2026-10-12
 ---
 
 ## Что и зачем
@@ -31,3 +32,5 @@ updated: 2026-10-12
 ## Журнал
 
 ## Итог
+
+kami переведён: KM-001…KM-008 (можно брать 1, ждут 5, идеи 2), компас tasks/README.md, три PLAN-файла заморожены, скилл стартует через tasks next. Не переносил: сделанные фазы 1–9 и журнал; личные тексты «Обо мне» ссылкой на .claude/private. TZ.md не заморожен. Коммит в публичном корне.
