@@ -19,6 +19,10 @@
 #                                   AGENTS.md, и в INDEX.md; ссылки живы), запускается ТОЛЬКО
 #                                   если в коммите есть .claude/docs/*.md или AGENTS.md;
 #                                   проверяется ИНДЕКС (только в корне letar)
+#   - pre-commit-tasks-check.sh  — очередь задач «одна задача — один файл» и заморозка старых
+#                                   планов (рост >5 строк блокируется); запускается ТОЛЬКО если в
+#                                   коммите есть tasks/**, PLAN*/ROADMAP*.md или docs/plans/**;
+#                                   чекер берётся из superproject/корня, работает и в submodule
 #   - pre-commit-schema-migration-check.sh — блокирует commit schema.zmodel со структурным
 #                                   изменением (новое/изменённое поле, @@unique/@@index/...)
 #                                   без новой папки prisma/migrations/ рядом
@@ -68,6 +72,7 @@ install_into() {
   cp "$SRC_DIR/pre-commit-dprint-check.sh" "$hooks_dir/_pre-commit-dprint-check.sh"
   cp "$SRC_DIR/pre-commit-deps-integrity.sh" "$hooks_dir/_pre-commit-deps-integrity.sh"
   cp "$SRC_DIR/pre-commit-docs-index.sh" "$hooks_dir/_pre-commit-docs-index.sh"
+  cp "$SRC_DIR/pre-commit-tasks-check.sh" "$hooks_dir/_pre-commit-tasks-check.sh"
   cp "$SRC_DIR/pre-commit-schema-migration-check.sh" "$hooks_dir/_pre-commit-schema-migration-check.sh"
   cp "$SRC_DIR/../check-schema-migration.mjs" "$hooks_dir/_check-schema-migration.mjs"
   cp "$SRC_DIR/pre-commit-section-number-check.sh" "$hooks_dir/_pre-commit-section-number-check.sh"
@@ -85,7 +90,7 @@ install_into() {
     "$hooks_dir/_pre-commit-deps-integrity.sh" "$hooks_dir/_pre-commit-docs-index.sh" \
     "$hooks_dir/_pre-commit-schema-migration-check.sh" "$hooks_dir/_pre-commit-section-number-check.sh" \
     "$hooks_dir/_pre-commit-stray-dts-check.sh" "$hooks_dir/_pre-commit-syntax-check.sh" \
-    "$hooks_dir/_pre-commit-public-domains.sh"
+    "$hooks_dir/_pre-commit-public-domains.sh" "$hooks_dir/_pre-commit-tasks-check.sh"
 
   cat > "$hooks_dir/pre-commit" <<'DISPATCH'
 #!/usr/bin/env bash
@@ -108,6 +113,9 @@ if [[ $status -eq 0 ]]; then
 fi
 if [[ $status -eq 0 ]]; then
   bash "$DIR/_pre-commit-docs-index.sh" || status=$?
+fi
+if [[ $status -eq 0 ]]; then
+  bash "$DIR/_pre-commit-tasks-check.sh" || status=$?
 fi
 if [[ $status -eq 0 ]]; then
   bash "$DIR/_pre-commit-schema-migration-check.sh" || status=$?
@@ -151,7 +159,7 @@ exit $status
 PUSH_DISPATCH
   chmod +x "$hooks_dir/pre-push"
 
-  echo "✅ $label → $hooks_dir/pre-commit (scope-guard + syntax-check + semgrep + dprint-check + deps-integrity + docs-index + schema-migration-check + section-number-check + stray-dts-check + public-domains + sops)"
+  echo "✅ $label → $hooks_dir/pre-commit (scope-guard + syntax-check + semgrep + dprint-check + deps-integrity + docs-index + tasks-check + schema-migration-check + section-number-check + stray-dts-check + public-domains + sops)"
   echo "   $label → $hooks_dir/pre-push (submodule-check + lock-versions-check)"
 }
 

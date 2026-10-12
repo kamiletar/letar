@@ -460,6 +460,20 @@ const CHECKS = [
     doc: '.claude/docs/documentation-guidelines.md',
   },
   {
+    id: 'tasks-check',
+    group: 'docs',
+    title: 'очередь задач по файлам: шапки, статусы, расположение, компас до 120 строк',
+    run: ['bun', ['scripts/tasks.mjs', 'check']],
+    // gate: формат «одна задача — один файл» держится только на проверке (прошлый разрез
+    // PLAN_INDEX.md без барьера вырос обратно за четыре недели). На коммит-пути та же проверка
+    // идёт в режиме --staged (pre-commit-tasks-check.sh) и ещё следит за ростом замороженных планов.
+    // Задачи публичного корня лежат в репозитории целиком; приватные submodule в CI не
+    // выкачиваются, их очереди проверяет локальный прогон.
+    severity: 'gate',
+    ci: 'full',
+    doc: '.claude/docs/tasks-per-file.md',
+  },
+  {
     id: 'scout-smoke',
     group: 'docs',
     title: 'локальный скаут собирает индекс и находит известные доки',
