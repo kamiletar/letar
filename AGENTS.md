@@ -11,6 +11,7 @@
 применяются к конкретным файлам, находятся в `.claude/rules/`.
 
 - [VK Audio Downloader](/.claude/docs/vk-audio-downloader.md) — Python CLI для библиотек VK, доступ к audio API и докачка.
+- [Сбой отправки emailOTP](/.claude/docs/better-auth-emailotp-silent-send-failure.md) — подтверждение доставки кода и защита формы от ложного успеха.
 - [Semgrep в submodule и исторических снимках](/.claude/docs/semgrep-per-submodule-rules-pattern.md) — правила, границы проверки и явный `--project-root` для выгрузки внутри монорепо.
 
 ## Быстрый старт
