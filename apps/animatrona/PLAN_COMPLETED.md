@@ -1,5 +1,10 @@
 # Выполненные задачи — Animatrona
 
+> ⚠️ **С 2026-10-12 файл заморожен.** Очередь задач — в [`tasks/`](/apps/animatrona/tasks/README.md)
+> (`bun scripts/tasks.mjs next animatrona` из корня монорепо). Новые задачи, журнал и итоги сюда
+> не пишутся: хук не пропустит рост файла. Здесь остаётся справка. Формат —
+> [tasks-per-file](/.claude/docs/tasks-per-file.md).
+
 Детальное описание всех реализованных фич. Файл разрезан на части по объёму (декомпозиция
 2026-09-07, см. [plan-decomposition-pattern](/.claude/docs/plan-decomposition-pattern.md)) — этот
 файл только координирует, содержательных разделов здесь больше нет.

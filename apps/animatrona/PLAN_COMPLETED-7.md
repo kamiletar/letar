@@ -1,5 +1,10 @@
 # Animatrona — Выполненные задачи (Часть 7)
 
+> ⚠️ **С 2026-10-12 файл заморожен.** Очередь задач — в [`tasks/`](/apps/animatrona/tasks/README.md)
+> (`bun scripts/tasks.mjs next animatrona` из корня монорепо). Новые задачи, журнал и итоги сюда
+> не пишутся: хук не пропустит рост файла. Здесь остаётся справка. Формат —
+> [tasks-per-file](/.claude/docs/tasks-per-file.md).
+
 > Точка входа и карта всех частей — [PLAN_COMPLETED.md](./PLAN_COMPLETED.md).
 > Диапазон: 2026-06-19 (v0.52.2) + миграция торрент-клиента/pre-encode/хранилище (перенесено из PLAN.md 2026-08-09).
 
