@@ -1,0 +1,5 @@
+{
+  "project": "letar",
+  "prefix": "LT",
+  "frozen": ["PLAN.md", "docs/plans/PLAN-INFRA*.md", "docs/plans/PLAN-JOURNAL-*.md", "docs/plans/PLAN_COMPLETED.md"]
+}
