@@ -1,7 +1,7 @@
 ---
-id: LT-038
-title: Перевести animatrona на задачи по файлам
-status: ready
+id: LT-034
+title: Перевести studio на задачи по файлам
+status: done
 size: M
 area: rollout
 priority: 2
@@ -12,6 +12,7 @@ stage: ""
 source: tasks-per-file
 created: 2026-10-12
 updated: 2026-10-12
+closed: 2026-10-12
 ---
 
 ## Что и зачем
@@ -31,3 +32,5 @@ updated: 2026-10-12
 ## Журнал
 
 ## Итог
+
+studio переведён: очередь tasks/ (префикс ST), планы заморожены баннером, скилл стартует через tasks next. Замороженные планы остаются справкой. Коммит в submodule apps/studio, не запушен.

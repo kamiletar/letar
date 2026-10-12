@@ -9,7 +9,12 @@ disable-model-invocation: true
 ## Инициализация
 
 1. Прочитай `.claude/rules/nextjs-apps.md` для общих правил Next.js
-2. Прочитай `apps/animatrona/PLAN.md` для текущего состояния задач
+2. ⚠️ **Очередь задач — `apps/animatrona/tasks/`** (формат — [tasks-per-file](/.claude/docs/tasks-per-file.md)).
+   Прочитай [`tasks/README.md`](/apps/animatrona/tasks/README.md) и выполни
+   `bun scripts/tasks.mjs next animatrona`. Вызов с id (`/animatrona AN-003`) — сразу
+   `bun scripts/tasks.mjs show AN-003`. `PLAN.md`, `PLAN_COMPLETED*.md`, `PLAN_TESTING.md`
+   **заморожены** и остаются справкой: целиком их не читать (`PLAN.md` 184 КБ, архивы больше),
+   открывать только раздел из поля `source` выбранной задачи (`grep -n` и `Read` с `offset`)
 
 ## Регистрация в Agent Mail
 
@@ -25,9 +30,9 @@ disable-model-invocation: true
 
 После изучения документации:
 
-- Определи текущую фазу разработки
-- Выбери следующую задачу из плана
-- Предложи план действий
+- Выбери задачу из «можно брать», `start AN-NNN --owner animatrona-dev`
+- План с acceptance-критериями запиши в раздел «План» файла задачи и предложи его
+- Находку вне задачи заводи через `tasks new animatrona …`, не абзацем в плане
 
 ## Координация (Animatrona Coordinator)
 
@@ -45,7 +50,7 @@ send_message(to: ["animatrona-coordinator-dev"], subject: "change: <описан
 
 ## После завершения задачи
 
-Общий чек-лист — `.claude/rules/app-workflow.md`.
+`bun scripts/tasks.mjs done AN-NNN --summary "…"`, дальше общий чек-лист — `.claude/rules/app-workflow.md`.
 
 ## Проект
 

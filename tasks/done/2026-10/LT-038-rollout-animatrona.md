@@ -1,7 +1,7 @@
 ---
-id: LT-034
-title: Перевести studio на задачи по файлам
-status: ready
+id: LT-038
+title: Перевести animatrona на задачи по файлам
+status: done
 size: M
 area: rollout
 priority: 2
@@ -12,6 +12,7 @@ stage: ""
 source: tasks-per-file
 created: 2026-10-12
 updated: 2026-10-12
+closed: 2026-10-12
 ---
 
 ## Что и зачем
@@ -31,3 +32,5 @@ updated: 2026-10-12
 ## Журнал
 
 ## Итог
+
+animatrona переведена: очередь tasks/ (префикс AN), PLAN.md, PLAN_COMPLETED*.md и PLAN_TESTING.md заморожены баннером, скилл стартует через tasks next. Спецификации (экосистемный план, e2e, ТЗ) не заморожены. Коммит в submodule apps/animatrona, не запушен.
