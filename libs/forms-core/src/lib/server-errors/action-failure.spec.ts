@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { z } from 'zod/v4'
 
 import {
   actionFailure,
@@ -8,6 +9,7 @@ import {
   isDbErrorCode,
   isFkViolation,
   isUniqueViolation,
+  parseActionInput,
   uniqueFieldsFromConstraint,
   unwrapActionResult,
   UserFacingError,
@@ -309,5 +311,45 @@ describe('разбор отказа в mapServerErrors', () => {
       fieldErrors: [],
       formErrors: ['a', 'b'],
     })
+  })
+})
+
+describe('parseActionInput', () => {
+  const schema = z.object({
+    name: z.string().min(2, 'Слишком короткое имя'),
+    nested: z.object({ code: z.string().min(1, 'Нужен код') }).strip(),
+  }).strip()
+
+  it('валидный ввод возвращается данными, лишние поля срезаются схемой', () => {
+    const result = parseActionInput(schema, { name: 'Анна', nested: { code: 'a' }, extra: 1 }, 'Неверные данные')
+    expect(result).toEqual({ name: 'Анна', nested: { code: 'a' } })
+    expect(isActionFailure(result)).toBe(false)
+  })
+
+  it('ошибка берёт текст схемы и первый сегмент пути как поле', () => {
+    expect(parseActionInput(schema, { name: 'А', nested: { code: 'a' } }, 'Неверные данные')).toEqual({
+      success: false,
+      error: 'Слишком короткое имя',
+      field: 'name',
+    })
+  })
+
+  it('для вложенной ошибки поле — корневой сегмент пути', () => {
+    expect(parseActionInput(schema, { name: 'Анна', nested: { code: '' } }, 'Неверные данные')).toEqual({
+      success: false,
+      error: 'Нужен код',
+      field: 'nested',
+    })
+  })
+
+  it('ошибка без пути (не объект) — без поля, текст схемы', () => {
+    const failure = parseActionInput(schema, 'не объект', 'Неверные данные')
+    expect(isActionFailure(failure)).toBe(true)
+    expect(failure).not.toHaveProperty('field')
+  })
+
+  it('схема без текста ошибки и без пути отдаёт fallbackMessage', () => {
+    const bare = { safeParse: () => ({ success: false as const, error: { issues: [] } }) }
+    expect(parseActionInput(bare, {}, 'Неверные данные')).toEqual({ success: false, error: 'Неверные данные' })
   })
 })

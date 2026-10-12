@@ -1,5 +1,11 @@
 # Changelog — @letar/form-mcp
 
+## 2.5.2 (2026-10-13)
+
+### Changed
+
+- Паттерн server-errors: упомянут `parseActionInput` (проверка входа Server Action схемой, отказ — `ActionFailure`).
+
 ## 2.5.1 (2026-09-27)
 
 ### Changed

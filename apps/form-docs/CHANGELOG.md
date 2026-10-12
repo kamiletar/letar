@@ -2,6 +2,12 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.6.19] - 2026-10-13
+
+### Added
+
+- Гайд «Server errors» (ru/en): `parseActionInput` — проверка входа Server Action схемой с отказом `ActionFailure`.
+
 ## [0.6.18] - 2026-10-13
 
 ### Added

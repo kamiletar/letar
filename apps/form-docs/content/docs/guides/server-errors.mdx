@@ -184,6 +184,24 @@ const { formRef, middleware } = useActionFormErrors()
 
 `onSuccess` and the success toast are not called on a failure.
 
+**Validating the input — `parseActionInput`** (`@letar/forms` ≥ 2.38.0). Check a Server Action's
+input with a zod schema; the first issue becomes an `ActionFailure` (text from the schema, field =
+first path segment, no text → `fallbackMessage`). No need to keep your own `safeParse` +
+`actionFailure` copy:
+
+```ts
+'use server'
+import { isActionFailure, parseActionInput } from '@letar/forms/server-errors'
+
+export async function createCategory(input: unknown) {
+  const parsed = parseActionInput(CategorySchema, input, 'Check the form data')
+  if (isActionFailure(parsed)) {
+    return parsed
+  }
+  // parsed is CategoryInput
+}
+```
+
 **The marker.** A failure is `{ success: false, error: string, field?: string }`. The explicit
 `success: false` matters: a successful result that happens to carry an `error` field
 (`{ items, error: 'some rows skipped' }`) is **not** treated as a failure. Build it with
@@ -255,6 +273,12 @@ import { mapServerErrors } from '@letar/forms/server-errors'
 import { parsePrismaError, parseZenStackError } from '@letar/forms/server-errors'
 
 // Rejecting a Server Action with a value (server — no React; client — hooks)
-import { actionFailure, catchActionFailure, unwrapActionResult, UserFacingError } from '@letar/forms/server-errors'
+import {
+  actionFailure,
+  catchActionFailure,
+  parseActionInput,
+  unwrapActionResult,
+  UserFacingError,
+} from '@letar/forms/server-errors'
 import { useActionFormErrors, useFormServerAction } from '@letar/forms'
 ```

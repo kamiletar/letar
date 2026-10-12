@@ -27,11 +27,12 @@ export {
   isDbErrorCode,
   isFkViolation,
   isUniqueViolation,
+  parseActionInput,
   uniqueFieldsFromConstraint,
   unwrapActionResult,
   UserFacingError,
 } from './action-failure'
-export type { ActionFailure, CatchActionFailureOptions } from './action-failure'
+export type { ActionFailure, ActionInputSchema, CatchActionFailureOptions } from './action-failure'
 export { applyServerErrors, mapServerErrors } from './map-server-errors'
 export {
   parseActionFailureError,

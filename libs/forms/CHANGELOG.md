@@ -4,6 +4,15 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.38.0] - 2026-10-13
+
+### Добавлено
+
+- `parseActionInput(schema, input, fallbackMessage)` и тип `ActionInputSchema` в
+  `@letar/forms/server-errors`: проверка входа Server Action схемой, ошибка — `ActionFailure`.
+  Заменяет локальные копии `safeParse` + `actionFailure` в приложениях. Раздел в
+  `docs/server-errors.md`.
+
 ## [2.37.1] - 2026-10-13
 
 ### Исправлено

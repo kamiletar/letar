@@ -1,16 +1,17 @@
 ---
 id: FM-001
 title: parseActionInput в forms-core/server-errors
-status: ready
+status: done
 size: S
 area: forms
 priority: 2
 blocked_by: []
-owner: ""
+owner: forms-dev
 stage: ""
 source: libs/forms/PLAN.md Backlog 2026-09-27 «parseActionInput»
 created: 2026-10-12
-updated: 2026-10-12
+updated: 2026-10-13
+closed: 2026-10-13
 ---
 
 ## Что и зачем
@@ -29,3 +30,5 @@ updated: 2026-10-12
 ## Журнал
 
 ## Итог
+
+parseActionInput добавлен в forms-core/server-errors (структурный тип схемы, без зависимости от zod), экспорт через @letar/forms/server-errors; 5 тестов, доки (docs, form-docs ru/en, form-mcp), версии forms-core 0.29.0, forms 2.38.0, form-docs 0.6.19, form-mcp 2.5.2. Замена локальной копии в приложении — за его владельцем. Демо-страницу не заводил: серверный хелпер без UI.

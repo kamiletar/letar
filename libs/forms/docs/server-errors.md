@@ -300,6 +300,28 @@ const { formRef, middleware } = useActionFormErrors()
 
 При отказе `onSuccess` и тост успеха не вызываются.
 
+### Проверка входа — `parseActionInput` (`@letar/forms` ≥ 2.38.0)
+
+Вход Server Action проверяют схемой zod; ошибка первой же проблемы становится `ActionFailure`
+(текст — из схемы, поле — первый сегмент пути, нет текста — `fallbackMessage`). Свою копию
+`safeParse` + `actionFailure` в приложении держать не нужно:
+
+```typescript
+'use server'
+import { isActionFailure, parseActionInput } from '@letar/forms/server-errors'
+
+export async function createCategory(input: unknown) {
+  const parsed = parseActionInput(CategorySchema, input, 'Проверьте данные формы')
+  if (isActionFailure(parsed)) {
+    return parsed
+  }
+  // parsed — CategoryInput
+}
+```
+
+Схема описана структурно (`ActionInputSchema`: метод `safeParse`), поэтому `forms-core` от zod не
+зависит.
+
 ### Маркер и ложные срабатывания
 
 Отказ — это значение вида `{ success: false, error: string, field?: string }`. Маркер
@@ -423,5 +445,11 @@ import { parsePrismaError, parseZenStackError } from '@letar/forms/server-errors
 
 // Отказ Server Action значением — сервер (без React) и клиент
 import { useActionFormErrors, useFormServerAction } from '@letar/forms'
-import { actionFailure, catchActionFailure, unwrapActionResult, UserFacingError } from '@letar/forms/server-errors'
+import {
+  actionFailure,
+  catchActionFailure,
+  parseActionInput,
+  unwrapActionResult,
+  UserFacingError,
+} from '@letar/forms/server-errors'
 ```

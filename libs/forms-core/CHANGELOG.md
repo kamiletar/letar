@@ -4,6 +4,15 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.29.0] - 2026-10-13
+
+### Добавлено
+
+- `parseActionInput(schema, input, fallbackMessage)` (`@letar/forms-core/server-errors`) — проверка
+  входа Server Action: успех возвращает данные, первая ошибка схемы — `ActionFailure` (текст из
+  схемы, поле — первый сегмент пути, нет текста — `fallbackMessage`). Схема описана структурно
+  (`ActionInputSchema`, метод `safeParse`), зависимости от zod в ядре нет.
+
 ## [0.28.0] - 2026-09-27
 
 ### Добавлено

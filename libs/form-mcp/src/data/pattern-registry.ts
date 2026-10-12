@@ -258,7 +258,7 @@ function ContactForm() {
     name: 'server-errors' as FormPattern,
     title: 'Server Error Mapping',
     description:
-      'Auto-map Prisma, ZenStack, Zod server errors to form fields. Supports P2002 (unique), P2003 (FK), policy rejection, Zod flatten, ActionResult. A Server Action must RETURN an expected failure as a value (actionFailure / catchActionFailure) — production Next.js strips the text of a thrown error; useFormServerAction.run rethrows it on the client.',
+      'Auto-map Prisma, ZenStack, Zod server errors to form fields. Supports P2002 (unique), P2003 (FK), policy rejection, Zod flatten, ActionResult. A Server Action must RETURN an expected failure as a value (actionFailure / catchActionFailure; parseActionInput validates the input with a schema) — production Next.js strips the text of a thrown error; useFormServerAction.run rethrows it on the client.',
     example: `import { applyServerErrors, mapServerErrors } from '@letar/forms'
 
 <Form schema={UserSchema} onSubmit={async ({ value }) => {

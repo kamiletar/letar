@@ -31,6 +31,34 @@ export function actionFailure(error: string, field?: string): ActionFailure {
   return { success: false, error, ...(field ? { field } : {}) }
 }
 
+/**
+ * Схема валидации в минимальной форме: подходит `z.ZodType` из zod v4 и любой Standard-совместимый
+ * объект с `safeParse`. Ядро не зависит от zod, поэтому тип описан структурно.
+ */
+export type ActionInputSchema<T> = {
+  safeParse(input: unknown):
+    | { success: true; data: T }
+    | { success: false; error: { issues: ReadonlyArray<{ message?: string; path: ReadonlyArray<PropertyKey> }> } }
+}
+
+/**
+ * Серверная сторона: проверяет вход Server Action схемой. Успех — данные как есть, ошибка —
+ * `ActionFailure` по первой проблеме (текст из схемы, поле из первого сегмента пути). Нет текста —
+ * `fallbackMessage`. Вызывающий сужает результат через `isActionFailure`.
+ */
+export function parseActionInput<T>(
+  schema: ActionInputSchema<T>,
+  input: unknown,
+  fallbackMessage: string,
+): T | ActionFailure {
+  const parsed = schema.safeParse(input)
+  if (!parsed.success) {
+    const issue = parsed.error.issues[0]
+    return actionFailure(issue?.message ?? fallbackMessage, issue?.path[0]?.toString())
+  }
+  return parsed.data
+}
+
 export function isActionFailure(value: unknown): value is ActionFailure {
   return (
     typeof value === 'object'
