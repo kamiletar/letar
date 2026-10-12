@@ -1,0 +1,5 @@
+{
+  "project": "forms",
+  "prefix": "FM",
+  "frozen": ["PLAN.md", "PLAN_COMPLETED.md"]
+}

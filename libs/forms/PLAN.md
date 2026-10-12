@@ -1,5 +1,10 @@
 # PLAN.md — @letar/forms
 
+> ⚠️ **С 2026-10-12 файл заморожен.** Очередь задач библиотеки форм — в [`tasks/`](tasks/README.md)
+> (`bun scripts/tasks.mjs next forms`). Новые задачи, журнал и итоги сюда не пишутся: хук
+> `pre-commit-tasks-check.sh` не пропустит рост файла. Здесь остаётся справка. Формат —
+> [tasks-per-file](/.claude/docs/tasks-per-file.md).
+
 План развития UI-библиотеки компонентов форм.
 
 ---

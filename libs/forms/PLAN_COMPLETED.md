@@ -1,5 +1,10 @@
 # Выполненные задачи — @letar/forms
 
+> ⚠️ **С 2026-10-12 файл заморожен.** Очередь задач библиотеки форм — в [`tasks/`](tasks/README.md)
+> (`bun scripts/tasks.mjs next forms`). Новые задачи, журнал и итоги сюда не пишутся: хук
+> `pre-commit-tasks-check.sh` не пропустит рост файла. Здесь остаётся справка. Формат —
+> [tasks-per-file](/.claude/docs/tasks-per-file.md).
+
 ## 2026-09-30 (`OliveDesert`, временная identity) — `UpdateFormSchema` сохраняет `.meta()` полей (zenstack-form-plugin 4.4.3)
 
 **Проблема:** `<Model>UpdateFormSchema = CreateFormSchema.partial()` — `.partial()` оборачивает поля в новые `ZodOptional`, а `.meta()` в Zod v4 привязан к экземпляру схемы; форма рисовала поле без label/плейсхолдера/тултипа, typecheck зелёный.

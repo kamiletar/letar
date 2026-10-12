@@ -53,12 +53,13 @@ disable-model-invocation: true
    ```
    fetch_inbox(topic: "form-feature-request", include_bodies: true)
    ```
-7. **Прочитай `libs/forms/PLAN.md` ЦЕЛИКОМ** (не только Backlog!) — там стратегический roadmap и
-   **активная фаза**. Сейчас активна **Фаза 7** (расслоение на `forms-core` + UI-скины Chakra/shadcn +
-   Vue-пруф-адаптер, dependency-free ядро по Clean Architecture/DIP). Определи текущую фазу отсюда.
-8. **Проверь backlog:** `libs/forms/PLAN.md` → секция "Backlog (запросы от агентов)"
-9. Прочитай `apps/form-develop-app/PLAN.md` для текущего состояния задач песочницы
-10. **Приоритизация:** входящие запросы от агентов > backlog > активная фаза из `libs/forms/PLAN.md`
+7. **Очередь задач — `libs/forms/tasks/`.** `Read libs/forms/tasks/README.md` (компас), затем
+   `bun scripts/tasks.mjs next forms`. Вызвали с id (`/forms-dev FM-004`) — сразу
+   `bun scripts/tasks.mjs show FM-004`. `PLAN.md` (1 МБ) и `PLAN_COMPLETED.md` заморожены и целиком
+   не читаются: секцию из `source` задачи открывай через `grep -n` и `Read` с `offset`.
+8. Прочитай `apps/form-develop-app/PLAN.md` для текущего состояния задач песочницы.
+9. **Приоритизация:** задачи от координатора и входящие запросы > очередь (`next forms`). Новый
+   запрос агента, которого нет в очереди, — сразу `bun scripts/tasks.mjs new forms "<заголовок>" --source "<тред>"`.
 
 ## Координация (Forms Coordinator)
 
@@ -81,8 +82,7 @@ kebab-case имя ловило баг сервера agent-mail в `send_message
 
 - Если есть задачи от координатора форм `forms-coordinator-dev` (topic: `forms-task`) — **обработай их первыми**
 - Если есть входящие запросы (topic: `form-feature-request`) — обработай следующими
-- Если есть backlog запросы в PLAN.md — обработай следующими
-- Иначе — определи текущую фазу и выбери задачу из плана
+- Иначе — возьми задачу из `bun scripts/tasks.mjs next forms`: `start <ID> --owner forms-dev`, план работ запиши в файл задачи, находки по ходу — `tasks new`
 - Предложи план действий
 
 ## После завершения задачи
@@ -109,7 +109,7 @@ kebab-case имя ловило баг сервера agent-mail в `send_message
 
 - [ ] `src/app/<demo-name>/page.tsx` — демо-страница нового компонента
 - [ ] `src/app/page.tsx` — ссылка на демо с главной
-- [ ] `PLAN.md` — отметь задачу как выполненную
+- [ ] Задача закрыта: `bun scripts/tasks.mjs done <ID> --summary "…"` (итог живёт в файле задачи, `PLAN.md` не трогать)
 - [ ] `CHANGELOG.md` — запись об изменениях
 - [ ] `PLAN_TESTING.md` — если добавил тесты
 
@@ -182,7 +182,7 @@ kebab-case имя ловило баг сервера agent-mail в `send_message
 **Версия:** см. `libs/forms/package.json`
 **npm пакет:** @letar/forms
 **Описание:** compound component API, Zod v4, offline, i18n, ZenStack интеграция, MCP-сервер
-**Стратегия:** open-core, широкий OSS-охват — см. `libs/forms/PLAN.md` → Фаза 7 (расслоение core + скины)
+**Стратегия:** open-core, широкий OSS-охват — см. задачу FM-011 и справку `libs/forms/PLAN.md` → Фаза 7 (расслоение core + скины)
 
 ### @letar/zenstack-form-plugin (плагин)
 

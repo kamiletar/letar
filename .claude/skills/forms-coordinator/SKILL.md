@@ -60,7 +60,7 @@ set_contact_policy(
 
 3. Изучи текущее состояние:
    - `libs/forms/README.md` — API и компоненты
-   - `libs/forms/PLAN.md` — backlog запросов
+   - `libs/forms/tasks/README.md` и `bun scripts/tasks.mjs next forms` — очередь запросов (`PLAN.md` заморожен, целиком не читать)
    - `.claude/rules/forms.md` — правила работы с формами
    - `.claude/rules/form-delegation.md` — протокол делегации
 
@@ -293,17 +293,15 @@ topic: "deploy", importance: "high", ack_required: true)
 ````
 ## Backlog управление
 
-Координатор ведёт backlog в `libs/forms/PLAN.md`:
+Координатор ведёт backlog задачами в `libs/forms/tasks/` (префикс `FM`):
 
-```markdown
-## Backlog (запросы от агентов)
+```bash
+bun scripts/tasks.mjs new forms "LocationPicker: выбор города с автокомплитом"   --status ready --priority 2 --source "тред form-location-picker (от grandslamcup)"
+bun scripts/tasks.mjs start FM-013 --owner forms-dev
+```
 
-### [2026-04-09] LocationPicker (от grandslamcup)
-- **Запросил:** GrandslamcupAgent
-- **Приоритет:** high
-- **Описание:** Выбор города с автокомплитом и картой
-- **Статус:** в работе → forms-dev
-````
+Кто запросил, приоритет и описание пишутся в «Что и зачем» файла задачи; статус и исполнитель —
+в шапке. `PLAN.md` не дополняется: хук не пропустит рост файла.
 
 ## Конфликты и приоритизация
 
@@ -334,3 +332,4 @@ send_message(to: ["<consumer-agent>"],
 - **Крупные фичи** — через forms-dev агента
 - **form-mcp ВСЕГДА синхронизируй** после изменений в form-components
 - **Деплой** — через deploy-agent-dev
+````
