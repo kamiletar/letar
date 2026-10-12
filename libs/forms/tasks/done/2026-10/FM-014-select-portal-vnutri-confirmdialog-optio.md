@@ -1,16 +1,17 @@
 ---
 id: FM-014
 title: "Select Portal внутри ConfirmDialog: option недоступны (aria-hidden/inert), FL-034"
-status: ready
+status: done
 size: M
 area: ""
 priority: 2
 blocked_by: []
-owner: ""
+owner: forms-dev
 stage: ""
 source: тред flora-fl-034-select-modal (от flora-dev-refusal)
 created: 2026-10-13
 updated: 2026-10-13
+closed: 2026-10-13
 ---
 
 ## Что и зачем
@@ -38,3 +39,5 @@ Testing Library не находит доступные `option`: Portal спис
 ## Журнал
 
 ## Итог
+
+Дефект настоящий и в браузере: positioner списка в Portal получал aria-hidden от модального диалога (мышью выбор работал, скринридер и getByRole('option') опций не видели). Фикс: lazyMount + unmountOnExit у Select.Root в uikit-chakra.tsx. Тест field-select-in-dialog.spec.tsx (3 теста, красные без фикса), демо /confirm-dialog-select, рецепт в docs/fields.md. Combobox/Autocomplete воспроизводятся так же: FM-015, CascadingSelect/DateRange: FM-016. Клавиатуру в живом браузере не гонял (панель скрыта), только в jsdom.

@@ -4,6 +4,14 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.37.1] - 2026-10-13
+
+### Исправлено
+
+- `Form.Field.Select` внутри модального диалога (`ConfirmDialog`, `Dialog`): опции списка были под
+  `aria-hidden` диалога и не находились по роли `option`. Список монтируется при открытии
+  (`lazyMount`, `unmountOnExit`), выбор мышью и клавиатурой покрыт тестом `field-select-in-dialog.spec.tsx`.
+
 ## [2.37.0] - 2026-10-13
 
 ### Исправлено

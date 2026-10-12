@@ -106,3 +106,9 @@ automatic dependency inference from foreign keys.
 `Form.Field.CascadingSelect` is deprecated and unchanged. Replace `loadOptions(parentValue)` with
 `loadOptions(search, { deps })` on `Form.Field.Select`; the property names `dependsOn`, `clearOnParentChange`,
 `disableWhenParentEmpty` and `placeholderWhenDisabled` are the same.
+
+## Select inside a modal dialog
+
+The `Select` list is drawn in a Portal outside the dialog. Since `@letar/forms` 2.37.1 it mounts when opened, so the
+dialog's `aria-hidden` no longer hides the options. In tests, open it with `await user.click(screen.getByRole('combobox'))`
+and find options with `await screen.findByRole('option', { name })`. No need to bypass `hidden`.

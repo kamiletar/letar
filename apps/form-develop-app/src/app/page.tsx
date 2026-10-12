@@ -86,6 +86,9 @@ export default function HomePage() {
             Зависимые селекты (dependsOn: страна → регион → город, компания → сотрудник)
           </Link>
         </Button>
+        <Button asChild colorPalette="purple" variant="outline" size="lg" width="fit-content">
+          <Link href="/confirm-dialog-select">Select внутри ConfirmDialog (список в Portal, FM-014)</Link>
+        </Button>
         <Button asChild colorPalette="orange" variant="outline" size="lg" width="fit-content">
           <Link href="/dirty-guard-demo">DirtyGuard (защита от потери данных в createForm и на форме)</Link>
         </Button>

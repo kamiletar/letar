@@ -104,3 +104,9 @@ model Address {
 
 `Form.Field.CascadingSelect` устарел и не меняется. Замените `loadOptions(parentValue)` на `loadOptions(search, { deps })`
 у `Form.Field.Select`; имена `dependsOn`, `clearOnParentChange`, `disableWhenParentEmpty`, `placeholderWhenDisabled` те же.
+
+## Select в модальном диалоге
+
+Список `Select` рисуется в Portal вне диалога. С `@letar/forms` 2.37.1 он монтируется при открытии, поэтому `aria-hidden`
+диалога опции больше не скрывает. В тестах: `await user.click(screen.getByRole('combobox'))`, затем
+`await screen.findByRole('option', { name })`. Обходить `hidden` не нужно.

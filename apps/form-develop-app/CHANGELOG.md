@@ -2,6 +2,12 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.1.26] - 2026-10-13
+
+### Added
+
+- Страница `/confirm-dialog-select`: `Form.Field.Select` внутри `ConfirmDialog` (FM-014).
+
 ## [0.1.25] - 2026-10-13
 
 ### Added

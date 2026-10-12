@@ -67,6 +67,18 @@
   ```
   Гонка устаревших ответов при быстром наборе текста обрабатывается внутри хука.
 
+### `Form.Field.Select` в модальном диалоге (v2.37.1+)
+
+Список `Select` рисуется в Portal вне диалога. Раньше он стоял в `body` уже при открытии диалога, и тот
+скрывал его через `aria-hidden`: мышью выбрать можно, а скринридер и Testing Library опций не видели
+(`getByRole('option')` не находил). Теперь список монтируется при открытии (`lazyMount` +
+`unmountOnExit`) и остаётся в дереве доступности.
+
+Проверка в jsdom без обхода hidden: `await user.click(screen.getByRole('combobox'))`, затем
+`await screen.findByRole('option', { name })`. Образец — `field-select-in-dialog.spec.tsx`.
+`Combobox`, `Autocomplete`, `CascadingSelect` и `DateRange` в диалоге пока устроены по-старому
+(задачи FM-015 и FM-016).
+
 ### Поиск в `Form.Field.Select`: `searchable` (v2.21.0+)
 
 В открытом списке `Select` с **10 и более опциями** появляется поле поиска с автофокусом — само, без пропа.

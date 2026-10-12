@@ -294,6 +294,10 @@ export const chakraUIKit: ChakraUIKit = {
     return (
       <ChakraSelect.Root
         collection={collection}
+        // FM-014: список в Portal монтируем при открытии. Иначе узел уже стоит в body, когда
+        // модальный диалог скрывает соседей через aria-hidden, и опции пропадают из дерева доступности.
+        lazyMount
+        unmountOnExit
         size={(size as 'sm' | 'md' | 'lg') ?? 'md'}
         variant={(variant as 'outline' | 'subtle') ?? 'outline'}
         value={selected}
