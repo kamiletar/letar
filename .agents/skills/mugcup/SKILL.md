@@ -9,7 +9,12 @@ disable-model-invocation: true
 ## Инициализация
 
 1. Прочитай `.claude/rules/nextjs-apps.md` для общих правил Next.js
-2. Прочитай `apps/mugcup/PLAN.md` — там ТЗ, архитектурные решения и текущая фаза
+2. ⚠️ **Очередь задач — `apps/mugcup/tasks/`** (формат — [tasks-per-file](/.claude/docs/tasks-per-file.md)).
+   Прочитай [`tasks/README.md`](/apps/mugcup/tasks/README.md) и выполни
+   `bun scripts/tasks.mjs next mugcup`. Вызов с id (`/mugcup MC-001`) — сразу
+   `bun scripts/tasks.mjs show MC-001`. `PLAN*.md` **заморожены** и остаются справкой: целиком их
+   не читать, открывать только раздел из поля `source` выбранной задачи (`grep -n` и `Read` с `offset`)
+   (ТЗ и принятые решения — в `PLAN.md` разделы «ТЗ» и «Принятые решения», только по `grep -n`)
 
 ## Регистрация в Agent Mail
 
@@ -26,9 +31,9 @@ disable-model-invocation: true
 
 После изучения документации:
 
-- Определи текущую фазу разработки
-- Выбери следующую задачу из плана
-- Покажи план действий до кода
+- Выбери задачу из «можно брать», `start MC-NNN --owner mugcup-dev`
+- План работы запиши в раздел «План» файла задачи и покажи до кода
+- Находку вне задачи заводи через `tasks new mugcup …`, не абзацем в плане
 
 ## Что важно помнить
 
@@ -40,7 +45,8 @@ disable-model-invocation: true
 
 ## После завершения задачи
 
-Общий чек-лист — `.claude/rules/app-workflow.md`.
+`bun scripts/tasks.mjs done MC-NNN --summary "…"`, дальше общий чек-лист —
+`.claude/rules/app-workflow.md`.
 
 ## Деплой
 

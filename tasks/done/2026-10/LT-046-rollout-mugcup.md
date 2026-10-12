@@ -1,17 +1,18 @@
 ---
 id: LT-046
 title: Перевести mugcup на задачи по файлам
-status: ready
+status: done
 size: M
 area: rollout
 priority: 3
 blocked_by:
   - LT-031
-owner: ""
+owner: repo-dev
 stage: ""
 source: tasks-per-file
 created: 2026-10-12
 updated: 2026-10-12
+closed: 2026-10-12
 ---
 
 ## Что и зачем
@@ -31,3 +32,5 @@ updated: 2026-10-12
 ## Журнал
 
 ## Итог
+
+Очередь mugcup переведена: tasks/ с 12 задачами MC (можно брать 2, ждут 8, идеи 2), компас 49 строк, баннеры в PLAN, PLAN_COMPLETED и PLAN_TESTING, скилл стартует через next. Коммит в submodule apps/mugcup, не запушен. Старт: компас 2,3 КБ вместо PLAN.md 65 КБ.

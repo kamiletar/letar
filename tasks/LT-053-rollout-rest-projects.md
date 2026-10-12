@@ -18,7 +18,7 @@ updated: 2026-10-12
 
 Перевести очередь проекта на формат «одна задача — один файл» по рецепту [tasks-per-file § «Как перевести проект»](/.claude/docs/tasks-per-file.md). Одна общая задача: по каждому проекту из списка выполнить чек-лист ниже, при необходимости выделить отдельную задачу.
 
-Проекты: animatrona-tracker, aira-web, time, form-develop-app, pravda, flora, animatrona-tv, mandala, label-printer-desktop, kami-key-the-landing, form-develop-app-shadcn, dashboard, form-example, libs/form-mcp, notebook, letar-landing, animatrona-landing, umami.
+Проекты: animatrona-tracker, aira-web, time, form-develop-app, pravda, animatrona-tv, mandala, label-printer-desktop, kami-key-the-landing, form-develop-app-shadcn, dashboard, form-example, libs/form-mcp, notebook, letar-landing, animatrona-landing, umami.
 
 ## Приёмка
 
@@ -31,5 +31,7 @@ updated: 2026-10-12
 ## План
 
 ## Журнал
+
+- 2026-10-12: flora переведена (FL-001…FL-019: можно брать 4, ждут 12, идеи 3; замороженны PLAN*, TASKS, BACKLOG, SESSION-*); коммит в submodule apps/flora, не запушен
 
 ## Итог

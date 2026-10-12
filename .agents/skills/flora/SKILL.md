@@ -11,7 +11,11 @@ disable-model-invocation: true
 1. **Сразу стартуй таймер** — `time_start({ app: "flora", description: "изучение плана и постановка задачи" })`,
    затем `time_switch`, когда направление работы прояснится (см. «Учёт времени» ниже)
 2. Прочитай `.claude/rules/nextjs-apps.md` для общих правил Next.js
-3. Прочитай `apps/flora/PLAN.md` для текущего состояния задач
+3. ⚠️ **Очередь задач — `apps/flora/tasks/`** (формат — [tasks-per-file](/.claude/docs/tasks-per-file.md)).
+   Прочитай [`tasks/README.md`](/apps/flora/tasks/README.md) и выполни
+   `bun scripts/tasks.mjs next flora`. Вызов с id (`/flora FL-011`) — сразу
+   `bun scripts/tasks.mjs show FL-011`. `PLAN*.md`, `TASKS.md`, `BACKLOG.md` **заморожены** и остаются справкой: целиком их
+   не читать, открывать только раздел из поля `source` выбранной задачи (`grep -n` и `Read` с `offset`)
 
 ## Регистрация в Agent Mail
 
@@ -24,13 +28,14 @@ disable-model-invocation: true
 
 После изучения документации:
 
-- Определи текущую фазу разработки
-- Выбери следующую задачу из плана
-- Предложи план действий
+- Выбери задачу из «можно брать», `start FL-NNN --owner flora-dev`
+- План работы запиши в раздел «План» файла задачи и предложи его
+- Находку вне задачи заводи через `tasks new flora …`, не абзацем в плане
 
 ## После завершения задачи
 
-Общий чек-лист — `.claude/rules/app-workflow.md` § 3.
+`bun scripts/tasks.mjs done FL-NNN --summary "…"`, дальше общий чек-лист —
+`.claude/rules/app-workflow.md` § 3.
 
 ## Деплой
 
