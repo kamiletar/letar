@@ -1,10 +1,10 @@
 import { ChakraProvider, defaultSystem } from '@chakra-ui/react'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { ReactNode } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 
-import { Form } from '../../'
+import { applyServerErrors, Form, mapServerErrors, useFormRef } from '../../../..'
 
 const TestWrapper = ({ children }: { children: ReactNode }) => (
   <ChakraProvider value={defaultSystem}>{children}</ChakraProvider>
@@ -138,6 +138,142 @@ describe('FieldEditIntent', () => {
       expect(onSubmit).toHaveBeenCalledWith(
         expect.objectContaining({ apiKey: { isEdited: true, value: 'sk_live_new_secret' } }),
       )
+    })
+  })
+
+  describe('disabled', () => {
+    it('в view mode кнопка «Заменить» недоступна, правка не начинается', async () => {
+      const user = userEvent.setup()
+      const { container } = render(
+        <Form initialValue={{ apiKey: { isEdited: false, value: null } }} onSubmit={vi.fn()}>
+          <Form.Field.EditIntent name="apiKey" displayValue="****" emptyValue="" disabled>
+            <Form.Field.Password name="apiKey.value" />
+          </Form.Field.EditIntent>
+        </Form>,
+        { wrapper: TestWrapper },
+      )
+
+      const button = screen.getByRole('button', { name: 'Заменить' })
+      expect(button).toBeDisabled()
+      await user.click(button)
+      expect(container.querySelector('input[type="password"]')).not.toBeInTheDocument()
+    })
+  })
+
+  describe('после успешной отправки', () => {
+    it('введённое значение отправляется один раз, форма остаётся в режиме правки без повторной отправки старого', async () => {
+      const onSubmit = vi.fn()
+      const user = userEvent.setup()
+      const { container } = render(
+        <Form initialValue={{ apiKey: { isEdited: false, value: null } }} onSubmit={onSubmit}>
+          <Form.Field.EditIntent name="apiKey" displayValue="****" emptyValue="">
+            <Form.Field.Password name="apiKey.value" />
+          </Form.Field.EditIntent>
+          <Form.Button.Submit>Сохранить</Form.Button.Submit>
+        </Form>,
+        { wrapper: TestWrapper },
+      )
+
+      await user.click(screen.getByRole('button', { name: 'Заменить' }))
+      await user.type(container.querySelector('input[type="password"]') as HTMLInputElement, 'sk_new')
+      await user.click(screen.getByRole('button', { name: 'Сохранить' }))
+      await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1))
+
+      // Дочерний ввод не потерял значение молча: пользователь видит, что отправил (форма не мигает в view mode)
+      expect(container.querySelector('input[type="password"]')).toHaveValue('sk_new')
+    })
+  })
+
+  describe('ошибки', () => {
+    it('серверная ошибка на `${name}.value` показывается у дочернего поля', async () => {
+      const user = userEvent.setup()
+
+      function ServerErrorForm() {
+        const formRef = useFormRef()
+        const applyServerError = () => {
+          // Так middleware.onError кладёт ответ сервера на поле после неудачного сабмита
+          const mapped = mapServerErrors(
+            { code: 'P2002', meta: { target: ['apiKey.value'] } },
+            { fieldMap: { 'apiKey.value': { field: 'apiKey.value', message: 'Ключ уже используется' } } },
+          )
+          if (formRef.current) {
+            applyServerErrors(formRef.current, mapped)
+          }
+        }
+        return (
+          <Form initialValue={{ apiKey: { isEdited: true, value: '' } }} formRef={formRef} onSubmit={vi.fn()}>
+            <Form.Field.EditIntent name="apiKey" displayValue="****" emptyValue="">
+              <Form.Field.Password name="apiKey.value" label="Ключ" />
+            </Form.Field.EditIntent>
+            <button type="button" onClick={applyServerError}>
+              Применить ошибку
+            </button>
+          </Form>
+        )
+      }
+
+      render(<ServerErrorForm />, { wrapper: TestWrapper })
+      await user.type(screen.getByLabelText('Ключ'), 'sk_dup')
+      await user.click(screen.getByRole('button', { name: 'Применить ошибку' }))
+
+      expect(await screen.findByText('Ключ уже используется')).toBeInTheDocument()
+    })
+  })
+
+  describe('клавиатура и скринридер', () => {
+    it('Enter на «Заменить» начинает правку и переводит фокус в поле', async () => {
+      const user = userEvent.setup()
+      const { container } = render(
+        <Form initialValue={{ apiKey: { isEdited: false, value: null } }} onSubmit={vi.fn()}>
+          <Form.Field.EditIntent name="apiKey" displayValue="****" emptyValue="">
+            <Form.Field.Password name="apiKey.value" />
+          </Form.Field.EditIntent>
+        </Form>,
+        { wrapper: TestWrapper },
+      )
+
+      await user.tab()
+      expect(screen.getByRole('button', { name: 'Заменить' })).toHaveFocus()
+      await user.keyboard('{Enter}')
+
+      const input = container.querySelector('input[type="password"]') as HTMLInputElement
+      expect(input).toBeInTheDocument()
+      await waitFor(() => expect(input).toHaveFocus())
+    })
+
+    it('«Оставить текущее» достижима с клавиатуры и возвращает фокус на «Заменить»', async () => {
+      const user = userEvent.setup()
+      render(
+        <Form initialValue={{ apiKey: { isEdited: true, value: '' } }} onSubmit={vi.fn()}>
+          <Form.Field.EditIntent name="apiKey" displayValue="****" emptyValue="">
+            <Form.Field.Password name="apiKey.value" />
+          </Form.Field.EditIntent>
+        </Form>,
+        { wrapper: TestWrapper },
+      )
+
+      const cancel = screen.getByRole('button', { name: 'Оставить текущее' })
+      cancel.focus()
+      await user.keyboard('{Enter}')
+
+      const replace = await screen.findByRole('button', { name: 'Заменить' })
+      await waitFor(() => expect(replace).toHaveFocus())
+    })
+
+    it('у кнопок есть доступные имена, маска не читается как поле ввода', () => {
+      render(
+        <Form initialValue={{ apiKey: { isEdited: false, value: null } }} onSubmit={vi.fn()}>
+          <Form.Field.EditIntent name="apiKey" displayValue="************P9x4" emptyValue="" editLabel="Обновить ключ">
+            <Form.Field.Password name="apiKey.value" />
+          </Form.Field.EditIntent>
+        </Form>,
+        { wrapper: TestWrapper },
+      )
+
+      expect(screen.getByRole('button', { name: 'Обновить ключ' })).toBeInTheDocument()
+      // Маска — обычный текст, а не поле: скринридер не предлагает вводить в неё значение
+      expect(screen.queryByRole('textbox')).not.toBeInTheDocument()
+      expect(screen.getByText('************P9x4').tagName).not.toBe('INPUT')
     })
   })
 })
