@@ -20,4 +20,5 @@ export { type OfflineConsentState, useOfflineConsent } from './lib/browser/use-o
 export { useOfflineServiceWorker, type UseOfflineServiceWorkerOptions } from './lib/browser/use-offline-service-worker'
 export { useOnlineStatus } from './lib/browser/use-online-status'
 export { type ScrollDirection, useScrollDirection } from './lib/browser/use-scroll-direction'
+export { useWakeLock } from './lib/browser/use-wake-lock'
 export { useWindowSize, type WindowSize } from './lib/browser/use-window-size'
