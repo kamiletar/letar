@@ -149,7 +149,7 @@ LAST_DEPLOY_DIR="$WORKSPACE_ROOT/.last-deploy"
 # dashboard-agent, см. PLAN-INFRA.md §66 п.2). Пусто = разрешить любое explicit --app.
 S1_APPS=""
 # s2.letar.best apps
-S2_APPS="dashboard dashboard-agent driving-school auth-hub archetest time form-docs form-example grandslamcup aira-web mandala kami pravda umami animatrona-landing animatrona-tracker kami-key-the-landing letar-landing dsperevod aboi svoichuzhie aprel8008 studio domwellbes"
+S2_APPS="dashboard dashboard-agent driving-school auth-hub archetest time form-docs form-example grandslamcup aira-web mandala kami pravda umami animatrona-landing animatrona-tracker kami-key-the-landing letar-landing dsperevod aboi svoichuzhie aprel8008 studio domwellbes mugcup"
 
 # Detect current server. Приоритет — явная переменная DEPLOY_SERVER_NAME (для серверов, где
 # hostname -f не совпадает с *.letar.best — у старого s3 это был hostname хостинг-провайдера,
