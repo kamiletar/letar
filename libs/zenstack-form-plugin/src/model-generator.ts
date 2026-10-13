@@ -545,6 +545,12 @@ function serializeExpression(expr: Expression): string {
     case 'StringLiteral':
       return `{ kind: 'literal', value: ${JSON.stringify(expr.value)} }`
     case 'ReferenceExpr':
+      // Член enum (`status != DRAFT`) — это значение, а не поле: как `{ kind: 'field' }` он в рантайме читался
+      // из данных формы как `null`, и сравнение молча становилось всегда истинным (FM-002). Мок-фикстуры
+      // тестов кладут только `$refText` без `ref` — они остаются полем.
+      if (expr.target.ref?.$type === 'EnumField') {
+        return `{ kind: 'literal', value: ${JSON.stringify(expr.target.$refText)} }`
+      }
       return `{ kind: 'field', field: ${JSON.stringify(expr.target.$refText)} }`
     case 'ThisExpr':
       return `{ kind: 'this' }`

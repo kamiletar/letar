@@ -1,16 +1,17 @@
 ---
 id: FM-002
 title: "zenstack-form-plugin: @@validate со сравнением с членом enum всегда true"
-status: ready
+status: done
 size: M
 area: zenstack
 priority: 3
 blocked_by: []
-owner: ""
+owner: forms-dev
 stage: ""
 source: libs/forms/PLAN.md Backlog 2026-09-27 «@@validate со сравнением с членом enum»
 created: 2026-10-12
-updated: 2026-10-12
+updated: 2026-10-13
+closed: 2026-10-13
 ---
 
 ## Что и зачем
@@ -29,3 +30,5 @@ updated: 2026-10-12
 ## Журнал
 
 ## Итог
+
+serializeExpression: ссылка на член enum (target.ref.$type === EnumField) теперь даёт { kind: 'literal', value: имя }, ссылки на поля без изменений. Падающий live-тест на настоящем разборе схемы (model-generator-live.spec.ts) + контрольный на поля. zenstack-form-plugin 4.4.4, CHANGELOG и README. nx test 263 теста, typecheck зелёный. Обходной .refine() в приложении-репортёре убирает его владелец.

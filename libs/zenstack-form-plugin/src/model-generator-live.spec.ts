@@ -132,3 +132,64 @@ describe('отбор полей формы на настоящем разбор�
     expect(roots.size).toBe(1)
   })
 })
+
+describe('@@validate на настоящем разборе: ссылка на член enum (FM-002)', () => {
+  let dir: string
+
+  beforeEach(async () => {
+    dir = await mkdtemp(join(tmpdir(), 'zfp-live-validate-'))
+  })
+
+  afterEach(async () => {
+    await rm(dir, { recursive: true, force: true })
+  })
+
+  async function conditionOf(modelBody: string): Promise<string> {
+    const schemaPath = join(dir, 'schema.zmodel')
+    await writeFile(
+      schemaPath,
+      `${DATASOURCE}
+enum Status {
+  DRAFT
+  PUBLISHED
+}
+
+model Doc {
+  id     String @id
+${modelBody}
+}
+`,
+      'utf-8',
+    )
+    const result = await loadDocument(schemaPath)
+    if (!result.success) {
+      throw new Error(`схема не разобралась: ${result.errors.join('; ')}`)
+    }
+    const enumSet = new Set(result.model.declarations.filter(isEnum).map((e) => e.name))
+    const model = result.model.declarations.find((d) => isDataModel(d) && d.name === 'Doc') as DataModel
+    const info = extractModelInfo(model, enumSet)
+    return info.validations![0]!.conditionExpr
+  }
+
+  it('сравнение с членом enum даёт литерал, а не ссылку на поле', async () => {
+    const expr = await conditionOf(`  status Status
+  note   String?
+  @@validate(status != DRAFT || note != null, 'Нужна заметка')`)
+
+    expect(expr).toContain(`{ kind: 'literal', value: "DRAFT" }`)
+    expect(expr).not.toContain(`field: "DRAFT"`)
+    // Ссылка на настоящее поле осталась полем
+    expect(expr).toContain(`{ kind: 'field', field: "status" }`)
+    expect(expr).toContain(`{ kind: 'field', field: "note" }`)
+  })
+
+  it('сравнение двух полей не меняется', async () => {
+    const expr = await conditionOf(`  a Int
+  b Int
+  @@validate(a < b, 'a меньше b')`)
+
+    expect(expr).toContain(`{ kind: 'field', field: "a" }`)
+    expect(expr).toContain(`{ kind: 'field', field: "b" }`)
+    expect(expr).not.toContain(`kind: 'literal'`)
+  })
+})

@@ -672,6 +672,9 @@ export const BookingCreateFormSchema = withNative(
 `model-generator.ts`). `message`/`path` — как у Zod `.refine()`: `path` привязывает ошибку к
 конкретному полю формы вместо общей ошибки формы.
 
+**Член enum — значение, не поле:** `@@validate(status != DRAFT || note != null, ...)` сравнивает `status` со строкой
+`"DRAFT"`. До 4.4.4 `DRAFT` уходил как ссылка на поле, читался как `null`, и сравнение было всегда истинным.
+
 **Ограничения:**
 
 - **Только `{Model}CreateFormSchema`.** `{Model}UpdateFormSchema` строится из внутреннего

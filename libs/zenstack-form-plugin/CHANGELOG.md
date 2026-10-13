@@ -1,5 +1,16 @@
 # Changelog
 
+## [4.4.4] - 2026-10-13
+
+### Fixed
+
+- **`@@validate`: сравнение с членом enum больше не всегда истинно** (FM-002). `serializeExpression` (`case 'ReferenceExpr'`) эмитил
+  `{ kind: 'field' }` для любой ссылки, включая член enum: в `@@validate(status != DRAFT || note != null)` `DRAFT` читался
+  из данных формы как `null`, `status != null` истинно всегда, и проверка молча отключалась. Теперь ссылка на член enum
+  (`target.ref.$type === 'EnumField'`) эмитится как `{ kind: 'literal', value: "DRAFT" }`, ссылки на поля не изменились.
+  После `zenstack generate` файлы моделей с такой проверкой изменятся. Обходной `.refine()` в приложении можно убрать.
+  Тест на настоящем разборе схемы (`model-generator-live.spec.ts`).
+
 ## [4.4.3] - 2026-09-30
 
 ### Fixed
