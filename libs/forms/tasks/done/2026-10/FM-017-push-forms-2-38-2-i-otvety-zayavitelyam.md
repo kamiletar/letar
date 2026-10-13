@@ -1,7 +1,7 @@
 ---
 id: FM-017
 title: Push forms 2.38.2 и ответы заявителям (flora FL-034, domwellbes DW-016/parseActionInput)
-status: blocked
+status: done
 size: S
 area: ""
 priority: 2
@@ -12,6 +12,7 @@ stage: ""
 source: сессия forms-coordinator 2026-10-13
 created: 2026-10-13
 updated: 2026-10-13
+closed: 2026-10-13
 ---
 
 ## Что и зачем
@@ -30,3 +31,5 @@ forms-dev закрыл FM-001, 013, 014, 015, 016 (`@letar/forms` 2.38.2), вс�
 ## Журнал
 
 ## Итог
+
+Запушено 2026-10-13 по слову владельца: forms 2.39.0, form-mcp 2.5.3, lock выровнен (9309954ba)
