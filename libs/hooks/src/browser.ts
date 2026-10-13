@@ -9,6 +9,7 @@ export {
   type UseEventSourceOptions,
   type UseEventSourceResult,
 } from './lib/browser/use-event-source'
+export { useFullscreen } from './lib/browser/use-fullscreen'
 export {
   useInfiniteScrollSentinel,
   type UseInfiniteScrollSentinelOptions,
