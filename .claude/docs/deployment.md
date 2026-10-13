@@ -812,6 +812,7 @@ services:
 | aprel8008            | 3023                                                                              | 3023            | s2     |
 | mandala              | 3025                                                                              | 3004            | s2     |
 | animatrona-tracker   | 3026                                                                              | 3010            | s2     |
+| mugcup               | 3128 (staging, host=container); prod — rollout без host-порта                     | 3128            | s2     |
 | dsperevod            | ⚠️ **КОНФЛИКТ** — занял 3021 (svoichuzhie). Нужно назначить свободный порт (3027+) | 3019            | s2     |
 
 ### Свободные порты (s2)
