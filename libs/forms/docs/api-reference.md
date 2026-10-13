@@ -271,7 +271,7 @@ interface FormOfflineConfig {
   storageKey?: string
   onQueued?: () => void
   onSynced?: () => void
-  onSyncError?: (error: Error) => void
+  onSyncError?: (error: string, code?: 'sensitive-fields-offline') => void
 }
 ```
 

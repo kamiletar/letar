@@ -3,7 +3,7 @@
 import { omitAtPaths } from '@letar/forms-core/security'
 import { useSensitiveFieldPaths } from '@letar/forms-react'
 import { useCallback, useEffect, useRef } from 'react'
-import { type FormOfflineConfig, useOfflineForm } from '../../offline'
+import { type FormOfflineConfig, OfflineSensitiveFieldsError, useOfflineForm } from '../../offline'
 import { type FormPersistenceConfig, useFormPersistence } from '../form-persistence'
 import type { FormOfflineState } from '../types'
 
@@ -170,6 +170,8 @@ export function useFormFeatures<TData extends object>({
       }
     },
     onQueued: offline?.onQueued,
+    // Секреты (EditIntent и др.) не должны попадать в IndexedDB: без сети такая форма не ставится в очередь
+    hasSensitiveFields: sensitivePaths.length > 0,
     onError: offline?.onSyncError,
   })
 
@@ -188,7 +190,11 @@ export function useFormFeatures<TData extends object>({
     async (value: TData): Promise<void> => {
       if (isOfflineEnabled) {
         // Use offline-aware submit
-        await offlineForm.submit(value)
+        const result = await offlineForm.submit(value)
+        // Отказ из-за чувствительных полей — не успех: бросаем, чтобы форма не сбросилась и не вызвала afterSuccess
+        if (result.errorCode === 'sensitive-fields-offline') {
+          throw new OfflineSensitiveFieldsError(result.error ?? 'Offline submit is not available')
+        }
       } else {
         // Direct submit
         await onlineSubmit(value)

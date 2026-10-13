@@ -8,6 +8,7 @@ export type {
   FormOfflineConfig,
   FormSubmitHandler,
   OfflineIndicatorProps,
+  OfflineSubmitErrorCode,
   OfflineSubmitResult,
   ProcessQueueResult,
   SyncAction,

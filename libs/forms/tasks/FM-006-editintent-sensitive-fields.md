@@ -1,16 +1,16 @@
 ---
 id: FM-006
 title: "EditIntent: чувствительные поля в analytics и offline-очереди"
-status: ready
+status: doing
 size: M
 area: security
 priority: 3
 blocked_by: []
-owner: ""
+owner: forms-dev
 stage: ""
 source: libs/forms/PLAN.md «Отложено (решение владельца 2026-09-19)»
 created: 2026-10-12
-updated: 2026-10-12
+updated: 2026-10-13
 ---
 
 ## Что и зачем
@@ -26,5 +26,7 @@ updated: 2026-10-12
 ## План
 
 ## Журнал
+
+- 2026-10-13: Проверка утечки 2026-10-13. Analytics: события (forms-core/analytics/types.ts) несут только имена полей, время и счётчики; значений нет. field_error.error — строка от вызывающего trackError, библиотека её сама не шлёт (useFormAnalytics нигде не подключён внутри libs). Утечки нет. Offline: use-offline-form.ts:78 кладёт payload: value (весь submit) в IndexedDB через useSyncQueue.addAction; реестр чувствительных путей (useSensitiveFieldPaths) в offline не читается — у persistence фильтр omitAtPaths есть (use-form-features.ts:100,224), у offline нет. Реестр наполняет только EditIntent (sensitive по умолчанию true) => секрет из EditIntent при офлайн-сабмите лежит в IndexedDB открытым текстом. ЕСТЬ УТЕЧКА (at-rest), приоритет поднимается до P1; вопрос к координатору: как чинить (вырезать значение и потерять при синке, шифровать, или не ставить в очередь формы с чувствительными полями).
 
 ## Итог

@@ -8,7 +8,7 @@ import {
 } from '@letar/forms-react'
 import { type ReactElement, type ReactNode, useEffect, useMemo } from 'react'
 import { useAppForm } from '../../form-hook'
-import type { FormOfflineConfig } from '../../offline'
+import { type FormOfflineConfig, OfflineSensitiveFieldsError } from '../../offline'
 import { type DirtyGuardOptions, DirtyGuardScope } from '../dirty-guard'
 import { DeclarativeFormContext } from '../form-context'
 import { FormDebugValues } from '../form-debug-values'
@@ -174,6 +174,11 @@ export function FormSimple<TData extends object>({
         // Call onError middleware
         if (middleware?.onError) {
           await middleware.onError(error instanceof Error ? error : new Error(String(error)))
+        }
+        // Отказ от офлайн-очереди (чувствительные поля) уже доложен через `onError`/`offline.onSyncError`:
+        // форма не сбрасывается и не считается отправленной, но это не сбой — не бросаем дальше
+        if (error instanceof OfflineSensitiveFieldsError) {
+          return
         }
         throw error
       }

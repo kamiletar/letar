@@ -4,6 +4,14 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.29.1] - 2026-10-13
+
+### Исправлено
+
+- Офлайн-очередь: `OfflineSubmitErrorCode` (`'sensitive-fields-offline'`), `OfflineSubmitResult.errorCode`,
+  `UseOfflineFormOptions.hasSensitiveFields`, второй аргумент `code` у `onError`/`onSyncError`. Форма с
+  чувствительными полями не ставится в очередь без сети (FM-006).
+
 ## [0.29.0] - 2026-10-13
 
 ### Добавлено

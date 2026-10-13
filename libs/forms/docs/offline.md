@@ -127,6 +127,33 @@ const { submit, isOffline, pendingCount, isProcessing } = useOfflineForm({
 
 ---
 
+## Формы с чувствительными полями
+
+Очередь лежит в IndexedDB открытым текстом, поэтому форма с чувствительными полями (секрет
+`Form.Field.EditIntent`, любое поле в реестре `SensitiveFieldsProvider`) **без сети не ставится в очередь**.
+Проверка идёт по тому же реестру, что и фильтр черновика (`omitAtPaths`).
+
+Что происходит при отправке без сети:
+
+- в очередь ничего не попадает, `onSubmit` не вызывается;
+- `Form` вызывает `middleware.onError` с `OfflineSensitiveFieldsError` и `offline.onSyncError(message, 'sensitive-fields-offline')`;
+- форма не сбрасывается и не считается отправленной (`afterSuccess` не вызывается), исключение дальше не бросается;
+- текст отказа переводится: ключ `formOffline.sensitiveFieldsOffline` в `FormI18nProvider`, встроенные ru/en.
+
+```tsx
+import { OfflineSensitiveFieldsError } from '@letar/forms'
+
+<Form
+  offline={{ actionType: 'FORM_SUBMIT', onSyncError: (message, code) => toaster.error({ title: message }) }}
+  middleware={{ onError: (e) => e instanceof OfflineSensitiveFieldsError && showOnlineOnlyHint() }}
+>
+```
+
+Различайте отказ по `code === 'sensitive-fields-offline'` или `instanceof`, а не по тексту. Для `useOfflineForm`
+напрямую флаг передаёт вызывающий: `hasSensitiveFields: true`, результат — `errorCode: 'sensitive-fields-offline'`.
+
+---
+
 ## Типы действий
 
 Настраиваемые типы синхронизации:

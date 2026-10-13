@@ -6,6 +6,7 @@ export type {
   FormOfflineConfig,
   FormSubmitHandler,
   OfflineIndicatorProps,
+  OfflineSubmitErrorCode,
   OfflineSubmitResult,
   ProcessQueueResult,
   SyncAction,
@@ -32,6 +33,13 @@ export {
   removeFromQueue,
   subscribeToStatusChanges,
 } from './offline-service'
+
+// Ошибка отказа от офлайн-очереди для форм с чувствительными полями
+export {
+  OfflineSensitiveFieldsError,
+  resolveSensitiveFieldsOfflineText,
+  SENSITIVE_FIELDS_OFFLINE_CODE,
+} from './offline-sensitive-error'
 
 // Hooks
 export { useOfflineForm } from './use-offline-form'

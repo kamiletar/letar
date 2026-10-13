@@ -98,6 +98,13 @@ export interface SyncQueueStore {
 // ============================================
 
 /**
+ * Код ошибки офлайн-отправки (машиночитаемый, не зависит от языка сообщения)
+ * - `sensitive-fields-offline`: в форме есть чувствительные поля (реестр `SensitiveFieldsProvider`),
+ *   без сети она не ставится в очередь — значения не должны лежать в IndexedDB открытым текстом
+ */
+export type OfflineSubmitErrorCode = 'sensitive-fields-offline'
+
+/**
  * Offline form submission result
  */
 export interface OfflineSubmitResult {
@@ -105,6 +112,8 @@ export interface OfflineSubmitResult {
   success: boolean
   /** Error message */
   error?: string
+  /** Код ошибки, если отказ не от сервера (см. {@link OfflineSubmitErrorCode}) */
+  errorCode?: OfflineSubmitErrorCode
   /** Whether the action was added to queue (offline) */
   queued?: boolean
   /** Queue item ID */
@@ -129,7 +138,13 @@ export interface UseOfflineFormOptions<T> {
   /** Callback when added to queue */
   onQueued?: () => void
   /** Callback on error */
-  onError?: (error: string) => void
+  onError?: (error: string, code?: OfflineSubmitErrorCode) => void
+  /**
+   * В форме есть чувствительные поля. Без сети такая форма не ставится в очередь: сабмит возвращает
+   * `errorCode: 'sensitive-fields-offline'` (очередь лежит в IndexedDB открытым текстом).
+   * `Form` выставляет флаг сам по реестру чувствительных путей.
+   */
+  hasSensitiveFields?: boolean
 }
 
 /**
@@ -189,7 +204,7 @@ export interface FormOfflineConfig {
   /** Callback on successful sync */
   onSynced?: () => void
   /** Callback on sync error */
-  onSyncError?: (error: string) => void
+  onSyncError?: (error: string, code?: OfflineSubmitErrorCode) => void
 }
 
 /**

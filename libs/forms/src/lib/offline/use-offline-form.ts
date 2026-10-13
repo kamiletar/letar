@@ -1,7 +1,9 @@
 'use client'
 
+import { useFormI18n } from '@letar/forms-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
+import { resolveSensitiveFieldsOfflineText, SENSITIVE_FIELDS_OFFLINE_CODE } from './offline-sensitive-error'
 import type { OfflineSubmitResult, SyncAction, UseOfflineFormOptions, UseOfflineFormResult } from './types'
 import { useOfflineStatus } from './use-offline-status'
 import { useSyncQueue } from './use-sync-queue'
@@ -57,10 +59,12 @@ export function useOfflineForm<T extends object>({
   onSuccess,
   onQueued,
   onError,
+  hasSensitiveFields = false,
 }: UseOfflineFormOptions<T>): UseOfflineFormResult<T> {
   const isOffline = useOfflineStatus()
   const { addAction, processQueue, pendingCount, isProcessing, queueLength } = useSyncQueue()
   const [lastSyncAttempt, setLastSyncAttempt] = useState<number | null>(null)
+  const i18n = useFormI18n()
 
   // Ref to prevent repeated queue processing
   const processingRef = useRef(false)
@@ -72,6 +76,12 @@ export function useOfflineForm<T extends object>({
     async (value: T): Promise<OfflineSubmitResult> => {
       // Offline — add to queue
       if (isOffline) {
+        // Очередь лежит в IndexedDB открытым текстом: форму с чувствительными полями в неё не кладём
+        if (hasSensitiveFields) {
+          const error = resolveSensitiveFieldsOfflineText(i18n)
+          onError?.(error, SENSITIVE_FIELDS_OFFLINE_CODE)
+          return { success: false, error, errorCode: SENSITIVE_FIELDS_OFFLINE_CODE, queued: false }
+        }
         try {
           const queueItem = await addAction({
             type: actionType,
@@ -120,7 +130,7 @@ export function useOfflineForm<T extends object>({
         }
       }
     },
-    [isOffline, actionType, addAction, onlineSubmit, onSuccess, onQueued, onError],
+    [isOffline, hasSensitiveFields, i18n, actionType, addAction, onlineSubmit, onSuccess, onQueued, onError],
   )
 
   /**

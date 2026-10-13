@@ -186,11 +186,20 @@ export {
 } from './lib/contexts'
 
 // Offline support
-export { FormOfflineIndicator, FormSyncStatus, useOfflineForm, useOfflineStatus, useSyncQueue } from './lib/offline'
+export {
+  FormOfflineIndicator,
+  FormSyncStatus,
+  OfflineSensitiveFieldsError,
+  SENSITIVE_FIELDS_OFFLINE_CODE,
+  useOfflineForm,
+  useOfflineStatus,
+  useSyncQueue,
+} from './lib/offline'
 
 export type {
   FormOfflineConfig,
   OfflineIndicatorProps,
+  OfflineSubmitErrorCode,
   OfflineSubmitResult,
   SyncAction,
   SyncActionType,
