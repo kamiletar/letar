@@ -754,6 +754,10 @@
         "@letar/theme-check": "workspace:*",
       },
     },
+    "apps/flora-e2e": {
+      "name": "@letar/flora-e2e",
+      "version": "0.0.1",
+    },
     "apps/form-develop-app": {
       "name": "form-develop-app",
       "version": "0.1.27",
@@ -2872,6 +2876,7 @@
     "@letar/file-scan": ["@letar/file-scan@workspace:libs/file-scan"],
 
     "@letar/flora": ["@letar/flora@workspace:apps/flora"],
+    "@letar/flora-e2e": ["@letar/flora-e2e@workspace:apps/flora-e2e"],
 
     "@letar/folder-player-react": ["@letar/folder-player-react@workspace:libs/folder-player-react"],
 
