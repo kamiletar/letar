@@ -3,7 +3,27 @@
 import { Field, HStack, NumberInput, Text } from '@chakra-ui/react'
 import type { ReactElement } from 'react'
 import type { DurationFieldProps } from '../../types'
-import { createField, FieldError, FieldLabel, useFieldDefaultString } from '../base'
+import {
+  createField,
+  FieldError,
+  FieldLabel,
+  numberTouchControlsCss,
+  TOUCH_TARGET_PX,
+  useFieldDefaultString,
+} from '../base'
+
+/**
+ * Стили поля часов/минут в формате HH:MM: 80 px на мыши; на сенсорном указателе степперы 44×44 в ряд
+ * (FM-021), поэтому поле расширяется до отступа под обе кнопки + место под две цифры. Две такие пары
+ * с двоеточием укладываются в 392 px.
+ */
+const durationPartCss = {
+  width: '80px',
+  '@media (pointer: coarse)': {
+    ...numberTouchControlsCss['@media (pointer: coarse)'],
+    width: `${TOUCH_TARGET_PX * 2 + 4 + 52}px`,
+  },
+} as const
 
 /**
  * Converts minutes to HH:MM format
@@ -99,6 +119,7 @@ export const FieldDuration = createField<DurationFieldProps, number, DurationFie
             min={min}
             max={max}
             step={step}
+            css={numberTouchControlsCss}
           >
             <NumberInput.Control>
               <NumberInput.IncrementTrigger />
@@ -135,7 +156,7 @@ export const FieldDuration = createField<DurationFieldProps, number, DurationFie
             onBlur={field.handleBlur}
             min={0}
             max={Math.floor(max / 60)}
-            width="80px"
+            css={durationPartCss}
           >
             <NumberInput.Control>
               <NumberInput.IncrementTrigger />
@@ -156,7 +177,7 @@ export const FieldDuration = createField<DurationFieldProps, number, DurationFie
             min={0}
             max={59}
             step={step}
-            width="80px"
+            css={durationPartCss}
           >
             <NumberInput.Control>
               <NumberInput.IncrementTrigger />

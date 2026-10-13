@@ -63,4 +63,38 @@ describe('FieldDuration', () => {
       expect(screen.getByText('Формат: HH:MM')).toBeInTheDocument()
     })
   })
+
+  describe('цели касания (FM-021)', () => {
+    const readCss = () =>
+      Array.from(document.querySelectorAll('style'))
+        .map((el) => el.textContent ?? '')
+        .join('\n')
+
+    it('HH:MM: степперы получают правило 44×44 под pointer: coarse', () => {
+      render(
+        <Form initialValue={{ duration: 90 }} onSubmit={vi.fn()}>
+          <Form.Field.Duration name="duration" />
+        </Form>,
+        { wrapper: TestWrapper },
+      )
+
+      const css = readCss()
+      expect(css).toContain('pointer: coarse')
+      expect(css).toContain('data-part="increment-trigger"')
+      expect(css).toContain('44px')
+      // на сенсорном указателе поле шире 80 px, чтобы вместить два степпера
+      expect(css).toContain('144px')
+    })
+
+    it('minutes: степперы тоже получают правило 44×44', () => {
+      render(
+        <Form initialValue={{ duration: 90 }} onSubmit={vi.fn()}>
+          <Form.Field.Duration name="duration" format="minutes" />
+        </Form>,
+        { wrapper: TestWrapper },
+      )
+
+      expect(readCss()).toContain('data-part="decrement-trigger"')
+    })
+  })
 })
