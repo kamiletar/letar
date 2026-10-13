@@ -10,6 +10,13 @@ const TestWrapper = ({ children }: { children: ReactNode }) => (
   <ChakraProvider value={defaultSystem}>{children}</ChakraProvider>
 )
 
+/** Весь CSS, который emotion вставил в документ (jsdom не считает media-query, но текст правил доступен) */
+function injectedCss(): string {
+  return Array.from(document.querySelectorAll('style'))
+    .map((el) => el.textContent ?? '')
+    .join('\n')
+}
+
 describe('FieldPassword', () => {
   describe('рендеринг', () => {
     it('рендерит поле пароля', () => {
@@ -77,6 +84,25 @@ describe('FieldPassword', () => {
 
       // Теперь text
       expect(container.querySelector('input[type="text"]')).toBeInTheDocument()
+    })
+  })
+
+  describe('цели касания (FM-020)', () => {
+    it('кнопка показа пароля получает правило 44×44 под pointer: coarse', () => {
+      render(
+        <Form initialValue={{ password: '' }} onSubmit={vi.fn()}>
+          <Form.Field.Password name="password" />
+        </Form>,
+        { wrapper: TestWrapper },
+      )
+
+      const button = screen.getByRole('button', { name: 'Toggle password visibility' })
+      const className = button.className.split(' ').find((c) => c.startsWith('css-'))
+      expect(className).toBeTruthy()
+      const css = injectedCss()
+      const rule = css.slice(css.indexOf('pointer: coarse', css.indexOf(className!)))
+      expect(css).toContain('pointer: coarse')
+      expect(rule).toContain('44px')
     })
   })
 

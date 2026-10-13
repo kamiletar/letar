@@ -124,6 +124,28 @@ describe('FieldNumber', () => {
     })
   })
 
+  describe('цели касания (FM-019)', () => {
+    it('степперы получают правило 44×44 под pointer: coarse', () => {
+      const { container } = render(
+        <TestWrapper>
+          <Form initialValue={{ width: 5 }} onSubmit={vi.fn()}>
+            <Form.Field.Number name="width" />
+          </Form>
+        </TestWrapper>,
+      )
+
+      const root = container.querySelector('[data-part="root"][data-scope="number-input"]') as HTMLElement
+      const className = root.className.split(' ').find((c) => c.startsWith('css-'))
+      expect(className).toBeTruthy()
+      const css = Array.from(document.querySelectorAll('style'))
+        .map((el) => el.textContent ?? '')
+        .join('\n')
+      expect(css).toContain('pointer: coarse')
+      expect(css).toContain('data-part="increment-trigger"')
+      expect(css).toContain('44px')
+    })
+  })
+
   describe('constraints', () => {
     it('применяет min', () => {
       render(

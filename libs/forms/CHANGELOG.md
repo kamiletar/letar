@@ -4,6 +4,15 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.39.1] - 2026-10-13
+
+### Изменено
+
+- Цели касания ≥44×44 px на `@media (pointer: coarse)` (FM-020): кнопка показа пароля в `Form.Field.Password`
+  (была 36×32); степперы `NumberInput`, `Currency` и `Percentage` встают в ряд, как у `Field.Number`.
+  На мыши вид прежний. Общие стили — `numberTouchControlsCss` и `touchIconButtonCss` в `form-fields/base/touch-targets.ts`.
+- `Form.Field.Duration` не менялся: у его степперов ширина 80 px, цели не проверены.
+
 ## [2.39.0] - 2026-10-13
 
 ### Добавлено

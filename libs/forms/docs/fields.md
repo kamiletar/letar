@@ -25,7 +25,8 @@
 | `Form.Field.Currency`    | Денежное поле с форматированием |
 | `Form.Field.Percentage`  | Процентное поле                 |
 
-`Form.Field.Number` рисует степперы «+/−»; на сенсорном указателе (`pointer: coarse`) каждый 44×44 px.
+Степперы «+/−» у `Number`, `NumberInput`, `Currency` и `Percentage`, а также кнопка показа пароля у `Password`
+на сенсорном указателе (`pointer: coarse`) 44×44 px; на мыши вид прежний.
 Шаг не нужен (метры участка, вес) — `hideControls` убирает степперы, остаётся поле с `inputMode="decimal"`:
 
 ```tsx

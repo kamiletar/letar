@@ -4,7 +4,7 @@ import { IconButton, Input, InputGroup } from '@chakra-ui/react'
 import { type ReactElement, useState } from 'react'
 import { LuEye, LuEyeOff } from 'react-icons/lu'
 import type { PasswordFieldProps } from '../../types'
-import { createField, FieldWrapper } from '../base'
+import { createField, FieldWrapper, touchIconButtonCss } from '../base'
 
 /**
  * State for toggling password visibility
@@ -54,6 +54,7 @@ export const FieldPassword = createField<PasswordFieldProps, string, PasswordFie
             variant="ghost"
             height="calc(100% - {spacing.2})"
             aria-label="Toggle password visibility"
+            css={touchIconButtonCss}
             disabled={resolved.disabled}
             onPointerDown={(e) => {
               if (resolved.disabled) {

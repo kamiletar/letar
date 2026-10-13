@@ -1,16 +1,17 @@
 ---
 id: FM-020
 title: "Field.Password: кнопка показа пароля ≥44px на touch"
-status: ready
+status: done
 size: S
 area: ""
 priority: 2
 blocked_by: []
-owner: ""
+owner: forms-dev
 stage: ""
 source: тред forms-number-touch-targets (domwellbes DW-017)
 created: 2026-10-13
 updated: 2026-10-13
+closed: 2026-10-13
 ---
 
 ## Что и зачем
@@ -27,3 +28,5 @@ updated: 2026-10-13
 ## Журнал
 
 ## Итог
+
+Кнопка показа пароля 44×44 на pointer: coarse (touchIconButtonCss), степперы NumberInput/Currency/Percentage — как у Number (numberTouchControlsCss), общий хелпер base/touch-targets.ts. Проверено в браузере на 392 px: все триггеры и кнопка пароля 44×44, scrollWidth=clientWidth. Duration не менял. forms 2.39.1; nx test forms 151 файл, 1124 теста зелёные.

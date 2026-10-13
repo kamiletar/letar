@@ -5,7 +5,7 @@ import { useFormI18n } from '@letar/forms-react'
 import { useStore } from '@tanstack/react-form'
 import { type ReactElement, useMemo } from 'react'
 import type { PercentageFieldProps } from '../../types'
-import { createField, FieldWrapper, useUncontrolledNumberSync } from '../base'
+import { createField, FieldWrapper, numberTouchControlsCss, useUncontrolledNumberSync } from '../base'
 
 /**
  * Form.Field.Percentage - Percentage input field
@@ -83,6 +83,7 @@ export const FieldPercentage = createField<PercentageFieldProps, number | undefi
     return (
       <FieldWrapper resolved={resolved} hasError={hasError} errorMessage={errorMessage} fullPath={fullPath}>
         <NumberInput.Root
+          css={numberTouchControlsCss}
           key={resetKey}
           defaultValue={displayedValue?.toString() ?? ''}
           onValueChange={(details: { valueAsNumber: number }) => {

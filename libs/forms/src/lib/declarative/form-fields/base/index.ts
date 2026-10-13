@@ -53,3 +53,6 @@ export { useUncontrolledNumberSync } from './use-uncontrolled-number-sync'
 
 // Встроенные дефолты статичных строк отдельных специализированных полей (placeholder)
 export { type FieldDefaultStringKey, resolveFieldDefaultString, useFieldDefaultString } from './field-default-strings'
+
+// Цели касания ≥44 px на pointer: coarse (FM-019, FM-020)
+export { numberTouchControlsCss, TOUCH_TARGET_PX, touchIconButtonCss } from './touch-targets'

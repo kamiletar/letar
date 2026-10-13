@@ -4,7 +4,7 @@ import { NumberInput } from '@chakra-ui/react'
 import { useFormI18n } from '@letar/forms-react'
 import type { ReactElement } from 'react'
 import type { NumberInputFieldProps } from '../../types'
-import { createField, FieldWrapper } from '../base'
+import { createField, FieldWrapper, numberTouchControlsCss } from '../base'
 
 /**
  * zag-js `parseValue`/`formatValue` парсят `parseFloat`/`value.toString()` (игнорируя `locale`
@@ -57,6 +57,7 @@ export const FieldNumberInput = createField<NumberInputFieldProps, number | unde
     return (
       <FieldWrapper resolved={resolved} hasError={hasError} errorMessage={errorMessage} fullPath={fullPath}>
         <NumberInput.Root
+          css={numberTouchControlsCss}
           value={value?.toString() ?? ''}
           onValueChange={(details: { valueAsNumber: number }) => {
             const num = details.valueAsNumber
