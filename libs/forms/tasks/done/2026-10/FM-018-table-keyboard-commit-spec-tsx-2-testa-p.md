@@ -1,16 +1,17 @@
 ---
 id: FM-018
 title: "table-keyboard-commit.spec.tsx: 2 теста падают (Tab коммитит значение, Escape отменяет)"
-status: ready
+status: done
 size: S
 area: ""
 priority: 3
 blocked_by: []
-owner: ""
+owner: forms-dev
 stage: ""
 source: отчёт forms-dev по FM-014 (тред flora-fl-034-select-modal)
 created: 2026-10-13
 updated: 2026-10-13
+closed: 2026-10-13
 ---
 
 ## Что и зачем
@@ -34,3 +35,5 @@ forms-dev при FM-014 прогнал полный `nx test forms`: упали 
 ## Журнал
 
 ## Итог
+
+Причина — тест, не код: контейнер десктопной таблицы в jsdom получает display:none (base:none, md не срабатывает), а jsdom 30 не фокусирует элементы внутри display:none, user.clear падал «could not be focused». Тест показывает контейнер инлайн-стилем (showDesktopTable). Продуктовый код не менялся. Падало на актуальном main при jsdom 30; на чистом main до FM-013..016 не перепроверял отдельно — причина не связана с этими изменениями. nx test forms: 151 файл, 1122 теста зелёные; два теста — два прогона подряд.

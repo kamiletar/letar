@@ -46,6 +46,19 @@ describe('TableEditor клавиатурная навигация коммити
     )
   }
 
+  /**
+   * Контейнер десктопной таблицы скрыт через `display: { base: 'none', md: 'block' }`, а media-query `md` в jsdom не
+   * срабатывает. jsdom 30 не фокусирует элементы внутри `display: none` («The element to be cleared could not be
+   * focused»), поэтому показываем контейнер инлайн-стилем — в браузере на десктопе он и так виден (FM-018).
+   */
+  function showDesktopTable(container: HTMLElement): HTMLTableElement {
+    const table = container.querySelector('table')
+    expect(table).toBeTruthy()
+    const wrapper = table!.parentElement as HTMLElement
+    wrapper.style.display = 'block'
+    return table!
+  }
+
   it('Tab коммитит значение вместо отката к предыдущему', async () => {
     const user = userEvent.setup()
     const { container } = renderTable()
@@ -58,8 +71,7 @@ describe('TableEditor клавиатурная навигация коммити
     )
 
     // Десктопная таблица (мобильная скрыта через display base/md)
-    const desktopTable = container.querySelector('table')
-    expect(desktopTable).toBeTruthy()
+    const desktopTable = showDesktopTable(container)
 
     const priceCell = desktopTable!.querySelector('[data-row="0"][data-col="1"]') as HTMLElement
     fireEvent.click(priceCell)
@@ -88,7 +100,7 @@ describe('TableEditor клавиатурная навигация коммити
       { timeout: 10000 },
     )
 
-    const desktopTable = container.querySelector('table')
+    const desktopTable = showDesktopTable(container)
     const priceCell = desktopTable!.querySelector('[data-row="0"][data-col="1"]') as HTMLElement
     fireEvent.click(priceCell)
 
