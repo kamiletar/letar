@@ -67,6 +67,15 @@ const APP_CONFIG = {
       user: 'dashboard_user',
     },
   },
+  mugcup: {
+    secretsPath: '/secrets/mugcup.env',
+    containerName: 'mugcup-db',
+    defaults: {
+      port: 5432,
+      database: 'mugcup',
+      user: 'mugcup',
+    },
+  },
   archetest: {
     secretsPath: '/secrets/archetest.env',
     containerName: 'archetest-db',

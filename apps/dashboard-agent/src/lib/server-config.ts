@@ -45,6 +45,7 @@ const APP_REGISTRY: Record<string, AppRegistryEntry> = {
   dsperevod: { server: 's2', port: 3019, host: process.env.DSPEREVOD_HOST ?? 'dsperevod-app' },
   studio: { server: 's2', port: 3024, host: process.env.STUDIO_HOST ?? 'studio-app' },
   archetest: { server: 's2' },
+  mugcup: { server: 's2' },
   // Rollout-профиль (§18.6): нет фиксированного порта/имени контейнера, внутренний порт
   // приложения всегда 3010 (см. docker-compose.production.yml traefik.loadbalancer.server.port),
   // network alias — статический (сохраняет NPM/Traefik forward host независимо от scale).

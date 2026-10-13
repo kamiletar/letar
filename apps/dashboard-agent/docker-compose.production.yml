@@ -100,6 +100,7 @@ services:
       # Secrets от всех приложений (для подключения к БД)
       - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/driving-school/.env.docker:/secrets/driving-school.env:ro
       - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/archetest/.env.docker:/secrets/archetest.env:ro
+      - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/mugcup/.env.docker:/secrets/mugcup.env:ro
       - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/auth-hub/.env.docker:/secrets/auth-hub.env:ro
       - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/time/.env.docker:/secrets/time.env:ro
       - ${WORKSPACE_PATH:-/home/deploy/letar}/apps/dashboard/.env.docker:/secrets/dashboard.env:ro
