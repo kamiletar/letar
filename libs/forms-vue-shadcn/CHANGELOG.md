@@ -1,5 +1,11 @@
 # Changelog @letar/forms-vue-shadcn
 
+## 0.25.0 (2026-10-13)
+
+- **Feature:** примитив `NumberInput` поддерживает `hideControls` из контракта `forms-core/uikit` —
+  скрывает нативные степперы `type="number"` (FM-022). `Field.Number` этого пакета пропсов поля
+  не принимает вовсе (ни `min`/`max`/`step`), поэтому `hideControls` пока доступен только через UIKit.
+
 ## 0.24.0 (2026-09-29)
 
 `Field.Combobox` — `dependsOn` (паритет с

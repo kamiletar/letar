@@ -207,6 +207,12 @@ export interface UIKitNumberInputProps {
   disabled?: boolean
   readOnly?: boolean
   /**
+   * Скрыть степперы (кнопки +/−, нативные стрелки `type="number"`). Скин без степперов (например
+   * текстовый спинбаттон shadcn-React) проп принимает и ничего не меняет. Паритет с `hideControls`
+   * у `Field.Number` в Chakra-скине.
+   */
+  hideControls?: boolean
+  /**
    * Локаль для разбора десятичного разделителя (из `useFormI18n()?.locale` на стороне поля).
    * Без неё — только точка (как раньше у нативного `<input type="number">`). С `"ru"` (и любой
    * другой локалью, где `Intl.NumberFormat` использует запятую) — запятая тоже разбирается как

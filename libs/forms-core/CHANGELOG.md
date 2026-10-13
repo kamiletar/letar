@@ -4,6 +4,13 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.30.0] - 2026-10-13
+
+### Добавлено
+
+- `UIKitNumberInputProps.hideControls` — скрыть степперы числового поля; скин без степперов проп
+  принимает и игнорирует (паритет с `hideControls` у `Field.Number` в Chakra-скине, FM-022).
+
 ## [0.29.1] - 2026-10-13
 
 ### Исправлено
