@@ -1,16 +1,17 @@
 ---
 id: FM-019
 title: "Field.Number: hideControls и цели касания ≥44px (степперы, clear)"
-status: ready
+status: done
 size: S
 area: ""
 priority: 2
 blocked_by: []
-owner: ""
+owner: forms-dev
 stage: ""
 source: тред forms-number-touch-targets (domwellbes DW-017)
 created: 2026-10-13
 updated: 2026-10-13
+closed: 2026-10-13
 ---
 
 ## Что и зачем
@@ -36,3 +37,5 @@ updated: 2026-10-13
 ## Журнал
 
 ## Итог
+
+Field.Number: проп hideControls (степперов нет, inputMode=decimal) и на pointer: coarse степперы в ряд 44×44 (было 23×19). Проверено в браузере на 392 px: scrollWidth=clientWidth, 44×44. Версии forms 2.39.0, form-mcp 2.5.3. Кнопки «Clear value» в Field.Number нет в коде — у DW-017 она из другого места, не закрыта. NumberInput/Currency/Percentage не менялись.

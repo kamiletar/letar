@@ -136,8 +136,21 @@ const COMBOBOX_PROPS: FieldPropInfo[] = [
   },
 ]
 
+/** Number: скрытие степперов (@letar/forms >= 2.39.0) */
+const NUMBER_PROPS: FieldPropInfo[] = [
+  {
+    name: 'hideControls',
+    type: 'boolean',
+    default: 'false',
+    description:
+      'Hide the +/- steppers: a plain input remains (inputMode="decimal"). For values that need no step (plot size in metres, weight). '
+      + 'Without it, the steppers are 44x44 px on a coarse pointer (touch) and a narrow column on a fine one.',
+  },
+]
+
 /** Дополнительные пропсы по короткому имени поля (в нижнем регистре) */
 export const FIELD_EXTRA_PROPS: Record<string, FieldPropInfo[]> = {
+  number: NUMBER_PROPS,
   select: SELECT_PROPS,
   combobox: COMBOBOX_PROPS,
 }

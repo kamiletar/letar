@@ -43,6 +43,31 @@ interface NumberFieldState {
   markInternalChange: (value: number | undefined) => void
 }
 
+/**
+ * Цели касания ≥44×44 px на сенсорном указателе (WCAG 2.5.8 / мобильный гейт студии).
+ * На десктопе степперы остаются узкой колонкой в высоту поля; на `pointer: coarse` встают в ряд,
+ * каждый 44×44, а поле получает высоту 44 и отступ под обе кнопки.
+ */
+const TOUCH_TARGET_PX = 44
+
+const touchControlsCss = {
+  '@media (pointer: coarse)': {
+    '& [data-part="input"]': {
+      minHeight: `${TOUCH_TARGET_PX}px`,
+      paddingInlineEnd: `${TOUCH_TARGET_PX * 2 + 4}px`,
+    },
+    '& [data-part="control"]': {
+      flexDirection: 'row',
+      width: 'auto',
+    },
+    '& [data-part="increment-trigger"], & [data-part="decrement-trigger"]': {
+      width: `${TOUCH_TARGET_PX}px`,
+      minHeight: `${TOUCH_TARGET_PX}px`,
+      height: 'auto',
+    },
+  },
+} as const
+
 export const FieldNumber = createField<NumberFieldProps, number | undefined, NumberFieldState>({
   displayName: 'FieldNumber',
 
@@ -90,11 +115,14 @@ export const FieldNumber = createField<NumberFieldProps, number | undefined, Num
           locale={fieldState.locale}
           formatOptions={fieldState.formatOptions}
           size={componentProps.size}
+          css={componentProps.hideControls ? undefined : touchControlsCss}
         >
-          <NumberInput.Control>
-            <NumberInput.IncrementTrigger />
-            <NumberInput.DecrementTrigger />
-          </NumberInput.Control>
+          {!componentProps.hideControls && (
+            <NumberInput.Control>
+              <NumberInput.IncrementTrigger />
+              <NumberInput.DecrementTrigger />
+            </NumberInput.Control>
+          )}
           <NumberInput.Input
             placeholder={resolved.placeholder}
             data-field-name={fullPath}

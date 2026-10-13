@@ -128,6 +128,12 @@ export interface NumberFieldProps extends BaseFieldProps {
   step?: number
   /** Size */
   size?: FieldSize
+  /**
+   * Скрыть степперы «+/−»: остаётся чистое поле ввода с `inputMode="decimal"`.
+   * Для значений, где шаг не нужен (метры участка, площадь, вес).
+   * @default false
+   */
+  hideControls?: boolean
 }
 
 /**

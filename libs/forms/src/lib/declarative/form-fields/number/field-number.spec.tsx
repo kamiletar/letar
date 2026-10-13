@@ -75,6 +75,55 @@ describe('FieldNumber', () => {
     })
   })
 
+  describe('hideControls (FM-019)', () => {
+    it('по умолчанию рисует степперы «+/−»', () => {
+      const { container } = render(
+        <TestWrapper>
+          <Form initialValue={{ width: 5 }} onSubmit={vi.fn()}>
+            <Form.Field.Number name="width" />
+          </Form>
+        </TestWrapper>,
+      )
+
+      expect(container.querySelector('[data-part="increment-trigger"]')).toBeInTheDocument()
+      expect(container.querySelector('[data-part="decrement-trigger"]')).toBeInTheDocument()
+    })
+
+    it('hideControls убирает степперы, поле остаётся с inputMode=decimal', () => {
+      const { container } = render(
+        <TestWrapper>
+          <Form initialValue={{ width: 5 }} onSubmit={vi.fn()}>
+            <Form.Field.Number name="width" hideControls />
+          </Form>
+        </TestWrapper>,
+      )
+
+      expect(container.querySelector('[data-part="control"]')).not.toBeInTheDocument()
+      expect(container.querySelector('[data-part="increment-trigger"]')).not.toBeInTheDocument()
+      expect(screen.getByRole('spinbutton')).toHaveAttribute('inputmode', 'decimal')
+    })
+
+    it('hideControls не мешает вводу значения', async () => {
+      const user = userEvent.setup()
+      const onSubmit = vi.fn()
+      render(
+        <TestWrapper>
+          <Form initialValue={{ width: 0 }} onSubmit={onSubmit}>
+            <Form.Field.Number name="width" hideControls />
+            <Form.Button.Submit>Отправить</Form.Button.Submit>
+          </Form>
+        </TestWrapper>,
+      )
+
+      const input = screen.getByRole('spinbutton')
+      await user.clear(input)
+      await user.type(input, '12')
+      await user.click(screen.getByRole('button', { name: 'Отправить' }))
+
+      expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ width: 12 }))
+    })
+  })
+
   describe('constraints', () => {
     it('применяет min', () => {
       render(

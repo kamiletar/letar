@@ -1,5 +1,11 @@
 # Changelog — @letar/form-mcp
 
+## 2.5.3 (2026-10-13)
+
+### Added
+
+- `get_field_props('Number')`: проп `hideControls` (`@letar/forms` >= 2.39.0), поведение степперов на сенсорном указателе.
+
 ## 2.5.2 (2026-10-13)
 
 ### Changed

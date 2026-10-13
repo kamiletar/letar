@@ -46,6 +46,16 @@ z.number().int()
 // → step={1} (integer only)
 ```
 
+### Without steppers
+
+For values that need no step (plot size in metres, weight), `hideControls` removes the +/- steppers and
+keeps a plain input with `inputMode="decimal"`. Without it, the steppers are 44×44 px on a touch
+pointer (`pointer: coarse`) so they are easy to hit on a phone.
+
+```tsx
+<Form.Field.Number name="plotWidth" label="Plot width, m" hideControls />
+```
+
 ## Slider
 
 **API:** `Form.Field.Slider`

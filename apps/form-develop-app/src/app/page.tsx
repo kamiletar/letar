@@ -16,6 +16,9 @@ export default function HomePage() {
         <Button asChild colorPalette="purple" size="lg" width="fit-content">
           <Link href="/numeric-demo">Числовые поля (NumberInput, Currency, Percentage)</Link>
         </Button>
+        <Button asChild colorPalette="purple" size="lg" width="fit-content">
+          <Link href="/number-controls-demo">Field.Number: степперы и hideControls</Link>
+        </Button>
         <Button asChild colorPalette="orange" size="lg" width="fit-content">
           <Link href="/masked-demo">Маскированные поля (Phone, MaskedInput)</Link>
         </Button>

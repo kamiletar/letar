@@ -25,6 +25,13 @@
 | `Form.Field.Currency`    | Денежное поле с форматированием |
 | `Form.Field.Percentage`  | Процентное поле                 |
 
+`Form.Field.Number` рисует степперы «+/−»; на сенсорном указателе (`pointer: coarse`) каждый 44×44 px.
+Шаг не нужен (метры участка, вес) — `hideControls` убирает степперы, остаётся поле с `inputMode="decimal"`:
+
+```tsx
+<Form.Field.Number name="plotWidth" label="Ширина участка, м" hideControls />
+```
+
 ## Дата и время
 
 | Компонент                   | Описание                       |

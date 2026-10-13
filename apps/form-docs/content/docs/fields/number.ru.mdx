@@ -47,6 +47,16 @@ z.number().int()
 // → step={1} (только целые числа)
 ```
 
+### Без степперов
+
+Если шаг не нужен (метры участка, вес), `hideControls` убирает степперы «+/−» и оставляет поле ввода
+с `inputMode="decimal"`. Без него на сенсорном указателе (`pointer: coarse`) степперы 44×44 px, чтобы
+в них было удобно попасть на телефоне.
+
+```tsx
+<Form.Field.Number name="plotWidth" label="Ширина участка, м" hideControls />
+```
+
 ## Slider
 
 **API:** `Form.Field.Slider`
