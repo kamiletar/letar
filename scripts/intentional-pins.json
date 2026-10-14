@@ -31,10 +31,10 @@
   "pins": [
     {
       "package": "better-call",
-      "version": "1.4.0",
+      "version": "1.4.2",
       "field": "dependencies",
       "since": "2026-10-03",
-      "reason": "better-auth и @better-auth/oauth-provider держат peer better-call ровно 1.4.0. Корневой ^1.4.1 разводит копии: плагины (jwt, oauthProvider, nextCookies) типизированы по 1.4.0, а betterAuth() в libs/auth — по 1.4.1, и typecheck:tsgo падает TS2322 'not assignable to type undefined' во всех потребителях @letar/auth.",
+      "reason": "better-auth и @better-auth/oauth-provider держат peer better-call ровно 1.4.x (сейчас 1.4.2). Корневой ^1.4.1 разводит копии: плагины (jwt, oauthProvider, nextCookies) типизированы по 1.4.0, а betterAuth() в libs/auth — по 1.4.1, и typecheck:tsgo падает TS2322 'not assignable to type undefined' во всех потребителях @letar/auth.",
       "doc": "PLAN-INFRA-*.md — прогон /infra:deps-update 2026-10-03",
       "unpinWhen": "better-auth выпустит релиз с peer better-call >=1.4.1; тогда заменить на диапазон и удалить запись одним коммитом."
     },
