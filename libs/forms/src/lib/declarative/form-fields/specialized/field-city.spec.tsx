@@ -15,7 +15,7 @@ describe('FieldCity', () => {
       render(
         <TestWrapper>
           <Form initialValue={{ city: '' }} onSubmit={vi.fn()}>
-            <Form.Field.City name="city" />
+            <Form.Field.City name="city" source="provider" />
           </Form>
         </TestWrapper>,
       )
@@ -27,7 +27,7 @@ describe('FieldCity', () => {
       render(
         <TestWrapper>
           <Form initialValue={{ city: '' }} onSubmit={vi.fn()}>
-            <Form.Field.City name="city" label="Город" />
+            <Form.Field.City name="city" label="Город" source="provider" />
           </Form>
         </TestWrapper>,
       )
@@ -39,7 +39,7 @@ describe('FieldCity', () => {
       render(
         <TestWrapper>
           <Form initialValue={{ city: '' }} onSubmit={vi.fn()}>
-            <Form.Field.City name="city" placeholder="Введите город" />
+            <Form.Field.City name="city" placeholder="Введите город" source="provider" />
           </Form>
         </TestWrapper>,
       )
@@ -53,7 +53,7 @@ describe('FieldCity', () => {
       render(
         <TestWrapper>
           <Form initialValue={{ city: '' }} onSubmit={vi.fn()}>
-            <Form.Field.City name="city" disabled />
+            <Form.Field.City name="city" disabled source="provider" />
           </Form>
         </TestWrapper>,
       )

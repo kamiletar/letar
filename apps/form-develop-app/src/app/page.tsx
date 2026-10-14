@@ -122,6 +122,9 @@ export default function HomePage() {
         <Button asChild colorPalette="red" variant="outline" size="lg" width="fit-content">
           <Link href="/edit-intent-demo">EditIntent (замена секрета без передачи старого клиенту)</Link>
         </Button>
+        <Button asChild colorPalette="cyan" variant="outline" size="lg" width="fit-content">
+          <Link href="/city-demo">City (выбор города из справочника России)</Link>
+        </Button>
         <Button asChild colorPalette="orange" variant="outline" size="lg" width="fit-content">
           <Link href="/captcha-demo">CAPTCHA (Turnstile, reCAPTCHA, hCaptcha)</Link>
         </Button>

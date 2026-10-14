@@ -43,6 +43,7 @@ import { FieldSelect } from './form-fields/selection/field-select'
 import { FieldTags } from './form-fields/selection/field-tags'
 
 import { FieldAddress } from './form-fields/specialized/field-address'
+import { FieldCity } from './form-fields/specialized/field-city'
 import { FieldColorPicker } from './form-fields/specialized/field-color-picker'
 import { FieldEditIntent } from './form-fields/specialized/field-edit-intent'
 import { FieldFileUpload } from './form-fields/specialized/field-file-upload'
@@ -443,6 +444,8 @@ export function renderFieldByType(type: FieldComponentType, props: FieldRenderPr
     // Specialized fields
     case 'phone':
       return <FieldPhone key={name} {...baseProps} {...fieldProps} />
+    case 'city':
+      return <FieldCity key={name} {...baseProps} {...fieldProps} />
     case 'address': {
       // FieldAddress requires token from fieldProps
       const token = fieldProps.token as string | undefined

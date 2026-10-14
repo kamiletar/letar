@@ -174,6 +174,9 @@ export {
 export { createAsyncActionQuery, useAsyncActionQuery, useAsyncSearch, useDebounce } from './lib/declarative'
 export type { AsyncQueryFn, AsyncQueryResult, UseAsyncSearchOptions, UseAsyncSearchResult } from './lib/declarative'
 
+// Справочник городов России: `matchCity` сопоставляет свободный текст с городом справочника
+export { type CityEntry, type CityMatch, loadCities, matchCity, matchCityIn, searchCities } from './lib/declarative'
+
 // Field UI components
 export { FieldLabel, type FieldLabelProps, FieldTooltip, type FieldTooltipProps } from './lib/declarative'
 

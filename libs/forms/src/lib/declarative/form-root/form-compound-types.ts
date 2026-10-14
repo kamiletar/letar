@@ -52,6 +52,7 @@ import type {
 import type { FormWatchProps } from '../form-watch'
 import type {
   CheckboxFieldProps,
+  CityFieldProps,
   DateFieldProps,
   FormPropsWithApi,
   NumberFieldProps,
@@ -204,7 +205,7 @@ export interface FormFieldComponents {
   FileUpload: (props: FileUploadFieldProps) => ReactElement
   Phone: (props: { name?: string; label?: string; country?: string; showFlag?: boolean }) => ReactElement
   Address: (props: { name?: string; label?: string; provider?: string; apiKey?: string }) => ReactElement
-  City: (props: { name?: string; label?: string }) => ReactElement
+  City: (props: CityFieldProps) => ReactElement
   Auto: (props: { name: string; label?: string }) => ReactElement
 
   // Утилитарные

@@ -57,6 +57,7 @@ export type FieldComponentType =
   | 'tags'
   // Specialized fields
   | 'phone'
+  | 'city'
   | 'address'
   | 'pinInput'
   | 'otpInput'

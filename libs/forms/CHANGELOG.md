@@ -4,6 +4,26 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.40.0] - 2026-10-15
+
+### Добавлено
+
+- **`Form.Field.City` — режим словаря (FM-024).** Встроенный справочник ~1100 городов России с регионом
+  (Wikidata, CC0), без внешнего API: закрытый список с поиском по вводу (регистр и ё/е не важны, сначала
+  совпадения с начала названия, крупные города выше, `Мск`/`СПб`), пункт «Другой город» для городов вне
+  справочника (`allowOther`). Построен на `Form.Field.Combobox` (`loadOptions`), справочник грузится лениво.
+  Значение — строка с названием; одноимённые города различаются регионом (`'Советск, Калининградская область'`).
+- Пропсы `source` (`dictionary` | `provider`), `allowOther`, `otherLabel`, `limit`, `countries`.
+- `matchCity(text)` / `matchCityIn` / `searchCities` / `loadCities` и типы `CityEntry`, `CityMatch` — сопоставление
+  старых свободных значений со справочником.
+- `@meta("form.type", "city")` рисуется `Form.AutoFields`/`Form.Field.Auto`.
+- `scripts/build-city-dataset.mjs` — пересборка справочника из Wikidata.
+
+### Изменено
+
+- Без настроенного провайдера (проп, `createForm`, `token`, `NEXT_PUBLIC_DADATA_API_KEY`) `Form.Field.City` теперь
+  показывает справочник, а не голый текстовый ввод. Прежний режим — `source="provider"`.
+
 ## [2.39.3] - 2026-10-13
 
 ### Изменено

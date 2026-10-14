@@ -6,6 +6,7 @@ import { type ReactElement, useCallback, useEffect, useRef, useState } from 'rea
 import { useDeclarativeFormOptional } from '../../form-context'
 import type { CityFieldProps } from '../../types'
 import { createField, FieldError, FieldLabel, useDebounce, useFieldDefaultString } from '../base'
+import { FieldCityDictionary } from './city/field-city-dictionary'
 import type { AddressProvider, AddressSuggestion } from './providers'
 import { createDaDataProvider } from './providers'
 
@@ -76,8 +77,8 @@ interface CityFieldState {
  * <Form.Field.City name="city" label="City" />
  * ```
  */
-export const FieldCity = createField<CityFieldProps, string, CityFieldState>({
-  displayName: 'FieldCity',
+const FieldCityProvider = createField<CityFieldProps, string, CityFieldState>({
+  displayName: 'FieldCityProvider',
 
   useFieldState: (props, _resolved, { form, fullPath }) => {
     const { provider: propProvider, token, minChars = 2, debounceMs = 300 } = props
@@ -314,3 +315,22 @@ export const FieldCity = createField<CityFieldProps, string, CityFieldState>({
     )
   },
 })
+
+/**
+ * Form.Field.City — выбор города.
+ *
+ * Два режима (`source`): `dictionary` — встроенный справочник городов России, закрытый список с поиском по
+ * вводу и без внешнего API; `provider` — подсказки адресного провайдера (DaData или свой). Без явного `source`
+ * берётся `provider`, если он настроен (проп, `createForm`, `token`, `NEXT_PUBLIC_DADATA_API_KEY`), иначе
+ * `dictionary` — раньше в этом случае поле было обычным текстовым вводом без подсказок.
+ *
+ * @example Справочник (по умолчанию без провайдера)
+ * ```tsx
+ * <Form.Field.City name="city" label="Город" />
+ * ```
+ */
+export function FieldCity(props: CityFieldProps): ReactElement {
+  const provider = useCityProvider(props.provider, props.token)
+  const source = props.source ?? (provider ? 'provider' : 'dictionary')
+  return source === 'dictionary' ? <FieldCityDictionary {...props} /> : <FieldCityProvider {...props} />
+}

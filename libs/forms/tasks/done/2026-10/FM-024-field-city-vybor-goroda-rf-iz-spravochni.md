@@ -1,7 +1,7 @@
 ---
 id: FM-024
 title: "Field.City: выбор города РФ из справочника с поиском"
-status: ready
+status: done
 size: L
 area: ""
 priority: 2
@@ -11,6 +11,7 @@ stage: ""
 source: тред form-city-field (запрос потребителя)
 created: 2026-10-15
 updated: 2026-10-15
+closed: 2026-10-15
 ---
 
 ## Что и зачем
@@ -46,3 +47,5 @@ API: `<Form.Field.City name="city" />`, `countries={['RU']}` по умолчан
   Владелец может переиграть.
 
 ## Итог
+
+Режим словаря в Form.Field.City (React/Chakra, @letar/forms 2.40.0): ~1100 городов РФ из Wikidata, поиск, «Другой город», matchCity, form.type=city. Остались скины Vue/Angular/shadcn и витрина form-example — отдельной задачей.

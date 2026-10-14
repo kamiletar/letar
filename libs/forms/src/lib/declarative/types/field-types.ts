@@ -440,6 +440,26 @@ export interface AddressFieldProps extends BaseFieldProps {
  * Props for city selection field.
  */
 export interface CityFieldProps extends BaseFieldProps {
+  /**
+   * Source of cities. `dictionary` — built-in dictionary of Russian cities: closed list, search as you type,
+   * no external API (the value is the canonical name; same names are told apart by region: «Советск, Кировская
+   * область»). `provider` — suggestions from an address provider (DaData or your own), free text is kept.
+   * Default: `provider` when one is configured (prop, `createForm`, `token`, `NEXT_PUBLIC_DADATA_API_KEY`),
+   * otherwise `dictionary`.
+   */
+  source?: 'dictionary' | 'provider'
+  /** Countries of the dictionary. Only `RU` exists for now (the default) */
+  countries?: readonly 'RU'[]
+  /**
+   * Dictionary only: the last item «Другой город» lets the user enter a city that is not in the list
+   * (another country, a village). The typed text becomes the value. Default `true`; `false` — a closed list.
+   * Whether a stored value is a dictionary city: `matchCity(value) !== null`.
+   */
+  allowOther?: boolean
+  /** Dictionary only: text of the «Другой город» item (default: localized) */
+  otherLabel?: string
+  /** Dictionary only: maximum rows in the list (default 20) */
+  limit?: number
   /** Address suggestion provider (recommended) */
   provider?: AddressProvider
   /** DaData API token (backward compatible — creates DaData provider internally) */

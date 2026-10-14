@@ -144,7 +144,7 @@ const ArticleSchema = z.object({
 | Дата/время  | `date`, `time`, `dateRange`, `dateTimePicker`, `duration`, `schedule`                                                                |
 | Булевые     | `checkbox`, `switch`                                                                                                                 |
 | Выбор       | `select`, `nativeSelect`, `combobox`, `autocomplete`, `listbox`, `radioGroup`, `radioCard`, `segmentedGroup`, `checkboxCard`, `tags` |
-| Специальные | `phone`, `address`, `pinInput`, `otpInput`, `colorPicker`, `fileUpload`, `maskedInput`                                               |
+| Специальные | `phone`, `city`, `address`, `pinInput`, `otpInput`, `colorPicker`, `fileUpload`, `maskedInput`                                       |
 
 **fieldProps — дополнительные props:**
 

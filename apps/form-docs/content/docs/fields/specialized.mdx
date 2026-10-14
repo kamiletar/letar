@@ -128,11 +128,18 @@ const Schema = z.object({
 
 **API:** `Form.Field.City`
 
-City autocomplete — standalone city picker.
+City picker with two modes (`source`). `dictionary` — built-in dictionary of ~1100 Russian cities with region:
+closed list, search as you type (case and ё/е insensitive, large cities first), no external API, loaded lazily.
+`provider` — suggestions from DaData or your own `AddressProvider`. Without `source` the provider is used when one
+is configured, otherwise the dictionary.
 
 ```tsx
-<Form.Field.City name="city" />
+<Form.Field.City name="city" label="City" />
+<Form.Field.City name="city" allowOther={false} /> {/* closed list, no «Other city» item */}
 ```
+
+The value is a string: the city name (`'Тверь'`); same-named cities carry the region
+(`'Советск, Калининградская область'`). `matchCity(text)` maps legacy free text to a dictionary city.
 
 ## Duration
 

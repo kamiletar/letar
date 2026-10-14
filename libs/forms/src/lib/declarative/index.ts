@@ -627,6 +627,16 @@ export {
   type SuggestionOptions,
 } from './form-fields/specialized/providers'
 
+// Справочник городов России (режим словаря Form.Field.City)
+export {
+  type CityEntry,
+  type CityMatch,
+  loadCities,
+  matchCity,
+  matchCityIn,
+  searchCities,
+} from './form-fields/specialized/city/city-search'
+
 // Security utilities
 export {
   HoneypotField,

@@ -14,6 +14,7 @@ import { useFormI18n } from '@letar/forms-react'
 export type FieldDefaultStringKey =
   | 'formField.address.placeholder'
   | 'formField.city.placeholder'
+  | 'formField.city.other'
   | 'formField.signature.placeholder'
   | 'formField.editable.placeholder'
   | 'formField.passwordStrength.placeholder'
@@ -28,6 +29,7 @@ export type FieldDefaultStringKey =
 const BUILTIN_FIELD_DEFAULT_STRINGS: Record<FieldDefaultStringKey, Record<string, string>> = {
   'formField.address.placeholder': { en: 'Start typing address...', ru: 'Начните вводить адрес...' },
   'formField.city.placeholder': { en: 'Enter city', ru: 'Введите город' },
+  'formField.city.other': { en: 'Other city', ru: 'Другой город' },
   'formField.signature.placeholder': { en: 'Sign here', ru: 'Распишитесь здесь' },
   'formField.editable.placeholder': { en: 'Click to edit', ru: 'Нажмите, чтобы изменить' },
   'formField.passwordStrength.placeholder': { en: 'Enter password', ru: 'Введите пароль' },

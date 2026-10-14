@@ -548,7 +548,7 @@ function CategoryCombobox({ name, ...rest }: CategoryComboboxProps) {
 | `Form.Field.Phone`       | Телефон с маской                                             |
 | `Form.Field.MaskedInput` | Универсальная маска                                          |
 | `Form.Field.Address`     | Адрес с автодополнением (DaData)                             |
-| `Form.Field.City`        | Город с автодополнением (DaData)                             |
+| `Form.Field.City`        | Город: справочник России с поиском или подсказки DaData      |
 | `Form.Field.Signature`   | Цифровая подпись (canvas draw + typed)                       |
 | `Form.Field.CreditCard`  | Данные банковской карты                                      |
 | `Form.Field.EditIntent`  | Замена значения без передачи старого (API key/Client Secret) |
