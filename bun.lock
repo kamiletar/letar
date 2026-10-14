@@ -932,9 +932,12 @@
     },
     "apps/mugcup": {
       "name": "@letar/mugcup",
-      "version": "0.2.0",
+      "version": "0.24.4",
       "dependencies": {
+        "@letar/consent": "workspace:*",
+        "@letar/email": "workspace:*",
         "@letar/env-load": "workspace:*",
+        "@letar/format-utils": "workspace:*",
         "@letar/pg-url": "workspace:*",
         "@letar/seed-utils": "workspace:*",
       },
@@ -2876,6 +2879,7 @@
     "@letar/file-scan": ["@letar/file-scan@workspace:libs/file-scan"],
 
     "@letar/flora": ["@letar/flora@workspace:apps/flora"],
+
     "@letar/flora-e2e": ["@letar/flora-e2e@workspace:apps/flora-e2e"],
 
     "@letar/folder-player-react": ["@letar/folder-player-react@workspace:libs/folder-player-react"],
