@@ -6,6 +6,8 @@
 
 ## Документация
 
+- [Гонки взаимных post-update политик](/.claude/docs/zenstack-cross-table-post-update-write-skew.md) — общая блокировка связанных строк, прямой ORM и проверка на двух соединениях.
+
 - [Node-импорты instrumentation](/.claude/docs/nextjs-instrumentation-runtime-guard.md) — положительная ветка NEXT_RUNTIME для исключения sharp из edge в webpack dev.
 
 Карта документации и найденных ловушек: [INDEX.md](/.claude/docs/INDEX.md).

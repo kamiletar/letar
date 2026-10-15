@@ -76,6 +76,8 @@
 
 ## База данных и ZenStack
 
+- [zenstack-cross-table-post-update-write-skew](/.claude/docs/zenstack-cross-table-post-update-write-skew.md) ⚠️ когда инвариант зависит от двух таблиц: взаимные post-update проверки при READ COMMITTED видят старые данные; общая блокировка родителя для прямого ORM, BEFORE-триггер, deadlock и тест на двух соединениях
+
 - [database](/.claude/docs/database.md)
 - [seed-scripts](/.claude/docs/seed-scripts.md) идемпотентный `prisma/seed.ts`
 - [zenstack-decimal-optional-fields](/.claude/docs/zenstack-decimal-optional-fields.md) optional `Decimal` не принимает `number`
