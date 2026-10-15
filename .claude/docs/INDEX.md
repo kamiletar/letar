@@ -388,6 +388,8 @@
 
 ## Продукт и контент
 
+- [aboi-category-prices-recursive-hero](/.claude/docs/aboi-category-prices-recursive-hero.md) — перед изменением цен, форматов или двух иллюстраций главной aboi; единый расчёт цены категории, доставка через менеджера, SVG-рекурсия и шрифты под Chakra preflight.
+
 - [ecommerce-cart-orders](/.claude/docs/ecommerce-cart-orders.md)
 - [ecommerce-cart-orders § Anonymous-сессии](/.claude/docs/ecommerce-cart-orders.md#7-anonymous-сессии-better-auth-anonymous-plugin--новая-per-user-модель-требует-двух-согласованных-правок) ⚠️ новая per-user модель, доступная гостю (Better Auth `anonymous` plugin) — нужен и анонимно-инклюзивный геттер сессии в её actions, и явный перенос в merge-функции при регистрации; пропуск любого не ловится typecheck/lint
 - [payment-webhook-idempotency-pattern](/.claude/docs/payment-webhook-idempotency-pattern.md) уникальный ID события + select-then-create + guard по терминальному статусу; расхождение aboi (только status-guard, без таблицы событий) — не образец для переноса
