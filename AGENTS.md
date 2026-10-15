@@ -6,6 +6,8 @@
 
 ## Документация
 
+- [Node-импорты instrumentation](/.claude/docs/nextjs-instrumentation-runtime-guard.md) — положительная ветка NEXT_RUNTIME для исключения sharp из edge в webpack dev.
+
 Карта документации и найденных ловушек: [INDEX.md](/.claude/docs/INDEX.md).
 Перед работой в незнакомой области найди в ней нужный раздел. Правила, которые
 применяются к конкретным файлам, находятся в `.claude/rules/`.
