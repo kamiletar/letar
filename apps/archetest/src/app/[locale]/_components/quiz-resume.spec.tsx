@@ -19,7 +19,10 @@ vi.mock(
   () => ({ StickyActionBar: ({ children }: { children: React.ReactNode }) => <div>{children}</div> }),
 )
 vi.mock('../_actions/quiz.action', () => ({ submitQuizAction: vi.fn(), getRandomQuestionsAction: vi.fn() }))
-vi.mock('../_lib/client-scoring', () => ({ computeClientScores: () => ({ PAR: 50 }) }))
+vi.mock('../_lib/client-scoring', async (importOriginal) => ({
+  ...await importOriginal<typeof import('../_lib/client-scoring')>(),
+  computeClientScores: () => ({ PAR: 50 }),
+}))
 vi.mock('./quiz-intro', () => ({
   QuizIntro: ({ onStart }: { onStart: () => void }) => <button onClick={onStart}>Начать полный тест</button>,
 }))

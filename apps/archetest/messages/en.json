@@ -396,19 +396,19 @@
       "title": "Compatibility with Other Instruments"
     },
     "differential": {
-      "p2": "If the profile shows simultaneously elevated BOR and BAR, this is a signal: verify whether the \"borderline\" presentation may be better explained by a cyclical mood disorder. The test includes 10 dedicated differential items (1946–1955) that distinguish reactive instability of BOR from endogenous cyclicity of BAR.",
-      "p1": "The BAR scale is a key differentiation tool. In practice, clients with unrecognized bipolar disorder are frequently misdiagnosed with Borderline (BOR), Narcissistic (NAR), or Histrionic (HIS) personality disorder.",
-      "title": "Differential Diagnosis"
+      "title": "Clarifying the picture in consultation",
+      "p1": "Discuss mood and trait indicators in the context of the person’s circumstances and the course of their experiences. Archetest scores cannot distinguish clinical conditions or confirm a diagnosis.",
+      "p2": "Elevated BOR and BAR together can prompt questions about how the person understood the items and what was happening in their life. Items 1946–1955 address different descriptions of instability; their diagnostic discrimination has not been established."
     },
     "consultation": {
       "p1": "The client completes the test before the first session or between the first and second sessions. The profile immediately highlights areas requiring attention, allowing you to start with targeted questions. Any discrepancy between your clinical impression and the profile is valuable material for discussion.",
       "title": "During Initial Consultation"
     },
     "scales": {
-      "rest": "The remaining 9 core scales — the Light and Dark triads, destructive patterns (sadism, masochism-beta), and the developmental spectrum (systemizing, directness, alexithymia) — are described with their prototypes in the \"Methodology\" section above.",
+      "rest": "The other 14 main-profile scales cover triads and additional traits (MAC, HUM, KAN, FAI, SAD, MAS, ASD, DIR, ALX), attention and activity (INA, HYI), close relationships (AAX, AAV), and honesty and humility (HON). Full names and conceptual references are listed in the tables.",
       "dpr": "DPR — Depressive Personality (from DSM-IV appendix, chronic depressive temperament as a trait).",
       "pag": "PAG — Passive-Aggressive (negativistic) pattern (removed from DSM-5, retained due to clinical relevance).",
-      "bar": "BAR — Bipolar Affective Disorder (mood disorder screening as a differential-diagnostic filter).",
+      "bar": "BAR describes self-reported fluctuations in mood and activity. An elevated score offers a topic for further discussion; it does not establish bipolar disorder.",
       "supplHeading": "3 supplementary scales:",
       "clusterC": "Cluster C (anxious): Avoidant (AVD), Dependent (DEP), Obsessive-Compulsive (OBC).",
       "clusterB": "Cluster B (dramatic): Antisocial (ANT), Borderline (BOR), Histrionic (HIS), Narcissistic (NAR).",
@@ -448,7 +448,7 @@
       "colSource": "Source",
       "colPrototype": "Conceptual reference",
       "colScale": "Archetest scale",
-      "intro": "The test does not invent scales from scratch. Most scales are grounded in validated instruments — at the construct level, never by borrowing items: every archetest question is an original, situational formulation. This preserves licensing cleanliness (some prototypes, e.g. TAS-20, are commercial; others are research-only) while keeping the test connected to the accumulated evidence base and norms.",
+      "intro": "Scales refer to established psychological constructs. Items are author-developed: they are not versions of the listed questionnaires, and their norms cannot be transferred to Archetest. The sources below explain the conceptual background; our bank requires its own measurement studies.",
       "title": "Methodology"
     },
     "about": {
@@ -461,7 +461,19 @@
       "description": "What Archetest is grounded in: {coreScales} scales mapped onto validated instruments (PID-5, Light Triad Scale, SD3, AQ, TAS-20), the AMPD and ICD-11 dimensional models, the Dark Factor of Personality, and a clinician dashboard with client dynamics.",
       "title": "For Clinicians: Test Methodology"
     },
-    "subtitle": "A guide for clinical psychologists, psychotherapists, and psychiatrists."
+    "subtitle": "A guide for clinical psychologists, psychotherapists, and psychiatrists.",
+    "reading": {
+      "title": "Reading results",
+      "percent": "A percentage is the share of the maximum available score for answered items on that scale. It is not a percentile, a diagnostic probability or a comparison with other people. Scores across scales do not add up to 100%.",
+      "missing": "Counts show answered items relevant to each scale. Skips are excluded from the denominator. Coverage reflects answer counts, not validated diagnostic accuracy; unavailable metadata is marked “Unknown”.",
+      "newScales": "The main profile includes INA and HYI (attention, activity and impulses; 9 items each), AAX and AAV (anxiety and avoidance in a chosen safe close relationship; 10 each), and HON (honesty and humility; 15). These are author-developed scales, not ASRS, ECR-R or HEXACO. Once a scale’s items run out, its result remains available, but later portions no longer refine it."
+    },
+    "export": {
+      "title": "PDF report",
+      "contents": "The report includes a radar, a table of 27 scales with percentages and answer counts, interpretations and practices. The professional cabinet adds the three experimental indicators separately. A portion’s results and the cumulative profile are clearly labelled.",
+      "how": "Select “Save as PDF” on the results screen, in the expanded “My profile” section or in a client’s record. The browser opens a complete report in its print dialog; choose “Save as PDF”.",
+      "privacy": "The browser creates the file. Individual answers, email, private professional notes and internal data are excluded. A client report contains the client’s name if provided. Obtain the client’s agreement before sharing the report with them or another professional."
+    }
   },
   "profileDetails": {
     "advice": "Advice",
@@ -546,5 +558,40 @@
   },
   "print": {
     "button": "Save as PDF"
+  },
+  "resultReport": {
+    "title": "Results report",
+    "source": {
+      "session": "This portion’s results",
+      "cumulative": "Cumulative profile"
+    },
+    "created": "Created {date}",
+    "meaning": "A percentage is the share of the maximum available score for answered items on that scale. It is not a percentile, a diagnostic probability or a comparison with other people. Scores across scales do not add up to 100%.",
+    "limits": "Archetest is an author-developed self-observation tool. Results do not establish a diagnosis, attachment type or need for treatment and do not replace a conversation with a professional.",
+    "radar": "Profile radar",
+    "radarNote": "Only scales with results have markers. Gaps mean missing data; zero is shown at the centre. Codes are explained in the table.",
+    "tableTitle": "All scales and percentages",
+    "code": "Code",
+    "scale": "Scale",
+    "score": "Result",
+    "answered": "Answers",
+    "coverage": "Coverage",
+    "unknown": "Unknown",
+    "noData": "No data",
+    "countsNote": "Counts show answered items relevant to each scale. Skips are excluded from the denominator. Coverage reflects answer counts, not validated diagnostic accuracy; unavailable metadata is marked “Unknown”.",
+    "confidence": {
+      "insufficient": "Insufficient",
+      "low": "Limited",
+      "moderate": "Moderate",
+      "high": "Extensive"
+    },
+    "detailsTitle": "Interpretations and recommendations",
+    "recommendationsNote": "Descriptions explain what a scale concerns; they do not assert that every feature applies to you. Practices are ideas to choose according to your circumstances, not individual prescriptions. This report provides no universal boundary between normality and pathology.",
+    "context": "For discussion:",
+    "practices": "Ideas to try",
+    "beta": "beta",
+    "noInterpretation": "No result is available for this scale. No personal interpretation or recommendations have been generated.",
+    "experimentalTitle": "Additional cabinet indicators",
+    "experimentalNote": "Three experimental scales are available to the professional separately from the main profile. They are excluded from the radar and are not diagnostic indicators."
   }
 }

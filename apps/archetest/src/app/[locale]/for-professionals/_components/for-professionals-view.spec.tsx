@@ -32,6 +32,18 @@ function renderView(locale: 'ru' | 'en') {
 }
 
 describe('ForProfessionalsView: строки из messages', () => {
+  it.each(['ru', 'en'] as const)('%s: есть инструкция экспорта, смысл процентов и пять новых шкал', (locale) => {
+    const { container } = renderView(locale)
+    expect(container.textContent).toContain(locale === 'ru' ? 'Отчёт в PDF' : 'PDF report')
+    expect(container.textContent).toContain(locale === 'ru' ? 'не процентиль' : 'not a percentile')
+    expect(container.textContent).toContain('INA')
+    expect(container.textContent).toContain('HYI')
+    expect(container.textContent).toContain('AAX')
+    expect(container.textContent).toContain('AAV')
+    expect(container.textContent).toContain('HON')
+    expect(container.textContent).not.toContain('Остальные 9 шкал')
+    expect(container.textContent).not.toContain('которые разводят реактивную нестабильность')
+  })
   it.each(['ru', 'en'] as const)('%s: ни одного отсутствующего ключа или ошибки ICU', (locale) => {
     const { onError, container } = renderView(locale)
     expect(onError).not.toHaveBeenCalled()

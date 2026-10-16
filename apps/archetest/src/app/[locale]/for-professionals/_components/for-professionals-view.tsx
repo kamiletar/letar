@@ -37,6 +37,18 @@ export function ForProfessionalsView({ locale }: { locale: string }) {
           </Text>
         </Section>
 
+        <Section title={t('reading.title')}>
+          <Text>{t('reading.percent')}</Text>
+          <Text>{t('reading.missing')}</Text>
+          <Text>{t('reading.newScales')}</Text>
+        </Section>
+
+        <Section title={t('export.title')}>
+          <Text>{t('export.contents')}</Text>
+          <Text>{t('export.how')}</Text>
+          <Text>{t('export.privacy')}</Text>
+        </Section>
+
         {/* Методология */}
         <Section title={t('methodology.title')} id="methodology">
           <Text>

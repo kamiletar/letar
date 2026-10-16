@@ -11,7 +11,9 @@ import { DISCLAIMER_CONSENT_KEY } from '../_data/disclaimer'
 import { PERSONALITY_TYPES } from '../_data/personality-types'
 import { DisclaimerConsentCheckbox, DisclaimerSummary } from './disclaimer-consent'
 import { PersonalityRadarChart } from './personality-radar-chart'
+import { PrintButton } from './print-button'
 import { ProfileDetails } from './profile-details'
+import { ResultReport } from './result-report'
 import { STICKY_BAR_BLEED } from './sticky-bar-bleed'
 
 interface QuizIntroProps {
@@ -164,11 +166,21 @@ export function QuizIntro({ onStart, progress, initialDisclaimerAccepted }: Quiz
               </Text>
             )}
             {progress?.cumulativeScores && (
-              <ProfileDetails
-                scores={progress.cumulativeScores.normalized}
-                confidence={progress.cumulativeScores.confidence}
-                relevantCounts={progress.cumulativeScores.relevantCounts}
-              />
+              <>
+                <PrintButton reportId="cumulative-result-report" />
+                <ResultReport
+                  id="cumulative-result-report"
+                  source="cumulative"
+                  scores={progress.cumulativeScores.normalized}
+                  confidence={progress.cumulativeScores.confidence}
+                  relevantCounts={progress.cumulativeScores.relevantCounts}
+                />
+                <ProfileDetails
+                  scores={progress.cumulativeScores.normalized}
+                  confidence={progress.cumulativeScores.confidence}
+                  relevantCounts={progress.cumulativeScores.relevantCounts}
+                />
+              </>
             )}
           </VStack>
         )}

@@ -29,6 +29,28 @@ afterEach(() => {
 })
 
 describe('PrintButton', () => {
+  it('печатает отдельный полный отчёт и убирает режим после отмены или размонтирования', () => {
+    const report = document.createElement('article')
+    report.id = 'test-report'
+    document.body.append(report)
+    const { unmount } = render(
+      <ChakraProvider value={defaultSystem}>
+        <NextIntlClientProvider locale="ru" messages={ruMessages}>
+          <PrintButton reportId="test-report" />
+        </NextIntlClientProvider>
+      </ChakraProvider>,
+    )
+    window.dispatchEvent(new Event('beforeprint'))
+    expect(document.body.hasAttribute('data-print-report')).toBe(true)
+    expect(report.hasAttribute('data-print-active')).toBe(true)
+    window.dispatchEvent(new Event('afterprint'))
+    expect(document.body.hasAttribute('data-print-report')).toBe(false)
+    window.dispatchEvent(new Event('beforeprint'))
+    unmount()
+    expect(report.hasAttribute('data-print-active')).toBe(false)
+    expect(document.body.hasAttribute('data-print-report')).toBe(false)
+    report.remove()
+  })
   it('подпись в обеих локалях; клик — window.print; помечена как непечатаемая', () => {
     const print = vi.spyOn(window, 'print').mockImplementation(() => undefined)
     renderIn('en')

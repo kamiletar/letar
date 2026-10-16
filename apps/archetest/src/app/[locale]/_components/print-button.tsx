@@ -10,7 +10,7 @@ import { LuPrinter } from 'react-icons/lu'
  * тёмной темы на белой бумаге почти не виден. Слушатели `beforeprint`/`afterprint` ловят и
  * Ctrl+P, не только кнопку. Возвращаем ровно тот класс, что был.
  */
-function useLightThemeWhilePrinting() {
+function useLightThemeWhilePrinting(reportId?: string) {
   useEffect(() => {
     const root = document.documentElement
     let wasDark = false
@@ -20,8 +20,17 @@ function useLightThemeWhilePrinting() {
       if (root.classList.replace('dark', 'light')) {
         wasDark = true
       }
+      const report = reportId ? document.getElementById(reportId) : null
+      if (report) {
+        document.body.setAttribute('data-print-report', '')
+        report.setAttribute('data-print-active', '')
+      }
     }
     const after = () => {
+      document.body.removeAttribute('data-print-report')
+      if (reportId) {
+        document.getElementById(reportId)?.removeAttribute('data-print-active')
+      }
       if (wasDark) {
         root.classList.replace('light', 'dark')
         wasDark = false
@@ -32,8 +41,9 @@ function useLightThemeWhilePrinting() {
     return () => {
       window.removeEventListener('beforeprint', before)
       window.removeEventListener('afterprint', after)
+      after()
     }
-  }, [])
+  }, [reportId])
 }
 
 /**
@@ -41,9 +51,9 @@ function useLightThemeWhilePrinting() {
  * принтеров. Серверного рендера PDF нет намеренно (`.claude/rules/heavy-work-off-main-thread.md`);
  * что прячется на бумаге — `@media print` в `theme/index.ts` и атрибут `data-print-hide`.
  */
-export function PrintButton(props: Omit<ButtonProps, 'onClick'>) {
+export function PrintButton({ reportId, ...props }: Omit<ButtonProps, 'onClick'> & { reportId?: string }) {
   const t = useTranslations('print')
-  useLightThemeWhilePrinting()
+  useLightThemeWhilePrinting(reportId)
 
   return (
     <Button variant="outline" {...props} onClick={() => window.print()} data-print-hide="">

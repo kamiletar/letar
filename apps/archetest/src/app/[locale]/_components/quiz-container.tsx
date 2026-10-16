@@ -9,7 +9,7 @@ import { getRandomQuestionsAction, submitQuizAction } from '../_actions/quiz.act
 import { ACHIEVEMENTS_MAP } from '../_data/achievements'
 import type { PersonalityTypeCode } from '../_data/personality-types'
 import { QUESTION_BANK_VERSION } from '../_data/question-bank-version'
-import { computeClientScores } from '../_lib/client-scoring'
+import { computeClientRelevantCounts, computeClientScores } from '../_lib/client-scoring'
 import { clearQuizDraft, type QuizDraft, readQuizDraft, restoreQuizDraft, saveQuizDraft } from '../_lib/quiz-draft'
 import { readPendingQuiz, savePendingQuiz } from '../_lib/quiz-pending'
 import type { ScaleConfidence } from '../_lib/scoring-core'
@@ -335,6 +335,7 @@ export function QuizContainer({
     }
 
     const clientScores = calculateClientScores(answers)
+    setRelevantCounts(computeClientRelevantCounts(answers, currentQuestions))
     // Очередь отправки создаётся только при явном завершении, отдельно от черновика.
     savePendingQuiz({
       completed: true,
@@ -412,6 +413,7 @@ export function QuizContainer({
     isAuthenticated,
     seed,
     calculateClientScores,
+    currentQuestions,
     skipped,
     mood,
     sessionLocale,

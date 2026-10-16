@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { QuizQuestionDTO } from '../_actions/quiz.action'
-import { computeClientScores } from './client-scoring'
+import { computeClientRelevantCounts, computeClientScores } from './client-scoring'
 
 /** Мини-фабрика вопроса с заданным scoring вариантов */
 function q(id: string, options: Record<string, number>[]): QuizQuestionDTO {
@@ -13,6 +13,14 @@ function q(id: string, options: Record<string, number>[]): QuizQuestionDTO {
 }
 
 describe('computeClientScores', () => {
+  it('покрытие различает нулевой ответ, пропуск и невалидный индекс, не считает шкалу дважды', () => {
+    const questions = [q('1', [{ INA: 3 }, { INA: 0 }]), q('2', [{ HYI: 3 }, { HYI: 1 }]), q('3', [{ HON: 3 }])]
+    const counts = computeClientRelevantCounts(new Map([['1', 1], ['3', 8], ['missing', 0]]), questions)
+    expect(counts.INA).toBe(1)
+    expect(counts.HYI).toBe(0)
+    expect(counts.HON).toBe(0)
+    expect(computeClientRelevantCounts(new Map([['2', 0]]), questions).HYI).toBe(1)
+  })
   it('нет ответов → все шкалы 0', () => {
     const scores = computeClientScores(new Map(), [q('1', [{ MAC: 3 }, { MAC: 0 }])])
     expect(scores.MAC).toBe(0)

@@ -1,0 +1,41 @@
+.result-report { display: none; }
+
+@media print {
+  @page { size: A4; margin: 16mm; }
+  body[data-print-report] > :not([data-print-active]) { display: none !important; }
+  .result-report[data-print-active] {
+    display: block !important;
+    font-family: Arial, sans-serif;
+    font-size: 10pt;
+    line-height: 1.5;
+    color: var(--chakra-colors-fg);
+    background: var(--chakra-colors-white);
+    overflow: visible;
+  }
+  .result-report h1 { font-size: 27pt; line-height: 1.2; margin: 7mm 0; }
+  .result-report h2 { font-size: 17pt; margin: 0 0 5mm; }
+  .result-report h3 { font-size: 12pt; margin: 0 0 3mm; break-after: avoid; }
+  .result-report h4 { font-size: 10pt; margin: 3mm 0 1mm; break-after: avoid; }
+  .result-report p { margin: 0 0 3mm; orphans: 3; widows: 3; }
+  .result-report small { display: block; font-size: 8pt; }
+  .report-brand { font-size: 9pt; letter-spacing: 0.1em; font-weight: bold; }
+  .report-subject { font-size: 14pt; }
+  .report-note { font-size: 9pt; }
+  .report-cover { break-after: page; }
+  .report-table-section { break-after: page; }
+  .result-report table { width: 100%; border-collapse: collapse; font-size: 8.5pt; line-height: 1.25; }
+  .result-report th, .result-report td { text-align: left; padding: 1.3mm 2mm; border-bottom: 1px solid var(--chakra-colors-border); vertical-align: top; }
+  .result-report thead { display: table-header-group; }
+  .result-report tr { break-inside: avoid; }
+  .result-report td:nth-child(3), .result-report td:nth-child(4) { white-space: nowrap; }
+  .report-scale { padding: 4mm 0; border-bottom: 1px solid var(--chakra-colors-border); break-inside: avoid; }
+  .result-report ul { padding-left: 5mm; list-style: disc; }
+  .result-report li { margin-bottom: 2mm; }
+  .result-report footer { margin-top: 8mm; font-size: 8pt; border-top: 1px solid var(--chakra-colors-border); padding-top: 3mm; }
+  .report-radar { display: block; width: 115mm; height: 115mm; margin: 3mm auto; }
+  .report-grid { stroke: var(--chakra-colors-border-emphasized); stroke-width: 0.7; fill: none; }
+  .report-axis { font-size: 10px; fill: var(--chakra-colors-fg); }
+  .report-ring-label { font-size: 8px; fill: var(--chakra-colors-fg-muted); }
+  .report-value { stroke: var(--chakra-colors-fg); stroke-width: 2; }
+  .report-dot { fill: var(--chakra-colors-fg); }
+}

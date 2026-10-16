@@ -10,6 +10,7 @@ import { HexagramChart } from '../../_components/hexagram-chart'
 import { PersonalityRadarChart } from '../../_components/personality-radar-chart'
 import { PrintButton } from '../../_components/print-button'
 import { ProfileDetails } from '../../_components/profile-details'
+import { ResultReport } from '../../_components/result-report'
 import {
   EXPERIMENTAL_SCALE_CODES,
   HEXAGRAM_SCALE_CODES,
@@ -158,8 +159,22 @@ export default function ClientDetailPage({ params }: { params: Promise<{ clientI
           <Button asChild variant="ghost" size="sm">
             <Link href="/cabinet">{t('backToList')}</Link>
           </Button>
-          <PrintButton size="sm" />
+          <PrintButton size="sm" reportId={detail.cumulativeScores ? 'client-result-report' : undefined} />
         </HStack>
+
+        {detail.cumulativeScores && (
+          <ResultReport
+            id="client-result-report"
+            source="cumulative"
+            subject={detail.client.name ?? undefined}
+            scores={detail.cumulativeScores}
+            confidence={detail.scoreConfidence}
+            relevantCounts={detail.scoreRelevantCounts}
+            showClinical
+            experimentalScores={detail.cumulativeScores}
+            experimentalCounts={detail.scoreRelevantCounts}
+          />
+        )}
 
         {/* Имя клиента и displayName */}
         <Card.Root w="100%" variant="outline">

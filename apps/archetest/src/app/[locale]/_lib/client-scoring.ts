@@ -54,3 +54,25 @@ export function computeClientScores(
   }
   return normalized as Record<PersonalityTypeCode, number>
 }
+
+/** Покрытие клиентского предпросмотра: учитываем отвеченный пункт даже при нулевом ключе. */
+export function computeClientRelevantCounts(
+  answers: Map<string, number>,
+  questions: QuizQuestionDTO[],
+): Record<PersonalityTypeCode, number> {
+  const counts = Object.fromEntries(ALL_SCALE_CODES.map((code) => [code, 0]))
+  for (const question of questions) {
+    const selected = answers.get(question.id)
+    if (selected === undefined || !question.options[selected]) {
+      continue
+    }
+    const relevant = new Set<string>()
+    for (const option of question.options) {
+      for (const [code, score] of Object.entries(option.scoring)) {
+        if (score > 0) { relevant.add(code) }
+      }
+    }
+    for (const code of relevant) { counts[code] = (counts[code] ?? 0) + 1 }
+  }
+  return counts as Record<PersonalityTypeCode, number>
+}

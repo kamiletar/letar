@@ -18,6 +18,7 @@ import { PrintButton } from './print-button'
 import { ProfileDetails } from './profile-details'
 import { PsychologistLinkBlock } from './psychologist-link-block'
 import { RankBadge } from './rank-badge'
+import { ResultReport } from './result-report'
 import { DarkReassuranceNote, SafetyNetBlock } from './safety-net-block'
 import { ShareResultButton } from './share-result-button'
 import { StatesBlock } from './states-block'
@@ -348,7 +349,15 @@ export function QuizResults({
           {/* Поделиться результатом (5.4) */}
           <ShareResultButton shareText={t('shareText')} shareTitle={t('results.title')} size="md" />
           {/* Сохранить в PDF / распечатать (7.6) */}
-          <PrintButton size="md" />
+          <PrintButton size="md" reportId="session-result-report" />
+          <ResultReport
+            id="session-result-report"
+            source="session"
+            scores={scores}
+            confidence={confidence}
+            relevantCounts={relevantCounts}
+            showClinical={showClinical}
+          />
         </VStack>
         {/* Сокращённый дисклеймер */}
         <Text fontSize="xs" color="fg.subtle" textAlign="center" maxW="lg">

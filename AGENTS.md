@@ -6,6 +6,8 @@
 
 ## Документация
 
+- [Печать результатов в PDF](/.claude/docs/print-to-pdf-dark-theme-pattern.md) — полный отчёт Archetest, изоляция портала, честный ноль, тёмная тема и повторная печать.
+
 - [auth-hub: единый вход и регистрация](/.claude/docs/auth-hub-unified-entry-ux.md) — UX-исследование, выбор способов, ссылка/код/пароль и план проверки с пользователями.
 
 - [Локализованные и общие ссылки Next.js](/.claude/docs/nextjs-intl-plain-link-drops-locale-prefix.md) — выбор Link для `[locale]` и общего `/sign-in`, исключения intl proxy и язык возврата.
