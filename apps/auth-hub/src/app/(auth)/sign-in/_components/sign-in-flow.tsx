@@ -62,10 +62,10 @@ export function SignInFlow({ otherProviders, hasTelegram }: SignInFlowProps) {
       {step === 'methods'
         ? (
           <Stack gap={3}>
-            <AuthOAuthButtons providers={['vk', 'yandex']} />
             <Button ref={emailButtonRef} variant="outline" minH="48px" onClick={() => setStep('email')}>
               <LuMail aria-hidden="true" /> Продолжить с почтой
             </Button>
+            <AuthOAuthButtons providers={['vk', 'yandex']} />
             <Collapsible.Root>
               <Collapsible.Trigger asChild>
                 <Button variant="plain" color="fg.muted" fontSize="sm" minH="44px" w="full">
