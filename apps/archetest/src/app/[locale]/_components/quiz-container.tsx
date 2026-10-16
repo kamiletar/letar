@@ -10,36 +10,22 @@ import { ACHIEVEMENTS_MAP } from '../_data/achievements'
 import type { PersonalityTypeCode } from '../_data/personality-types'
 import { QUESTION_BANK_VERSION } from '../_data/question-bank-version'
 import { computeClientScores } from '../_lib/client-scoring'
-import { clearQuizDraft, type QuizDraft, restoreQuizDraft, saveQuizDraft } from '../_lib/quiz-draft'
+import { clearQuizDraft, type QuizDraft, readQuizDraft, restoreQuizDraft, saveQuizDraft } from '../_lib/quiz-draft'
+import { readPendingQuiz, savePendingQuiz } from '../_lib/quiz-pending'
 import type { ScaleConfidence } from '../_lib/scoring-core'
 import { shuffleWithSeed } from '../_lib/seeded-shuffle'
 import { PENDING_QUIZ_KEY } from '../_lib/storage-keys'
 import type { MoodValue } from './mood-check-in'
 import { MoodCheckIn } from './mood-check-in'
+import { QuizGuidance } from './quiz-guidance'
 import { QuizIntro } from './quiz-intro'
 import { QuizProgressBar } from './quiz-progress-bar'
 import { QuizQuestionCard } from './quiz-question-card'
 import { QuizResults } from './quiz-results'
 
-/** Формат данных для sessionStorage */
-interface PendingQuiz {
-  /** Только явно завершённый тест разрешено автоматически отправлять после входа. */
-  completed: true
-  userId?: string | null
-  mode?: 'full' | 'express'
-  seed: number
-  answers: { questionId: string; selectedOption: number }[]
-  /** Пропущенные вопросы (видел и осознанно пропустил) */
-  skipped: string[]
-  /** Mood check-in перед сессией (этап 5.9.2), null если пропущен */
-  mood: MoodValue | null
-  /** Локаль прохождения (5.9.5): нормы ru/en раздельно; свойство сессии, не юзера */
-  locale?: 'ru' | 'en'
-}
-
 const STORAGE_KEY = PENDING_QUIZ_KEY
 
-type QuizState = 'intro' | 'mood' | 'quiz' | 'submitting' | 'results' | 'loading_more'
+type QuizState = 'intro' | 'guidance' | 'mood' | 'quiz' | 'submitting' | 'results' | 'loading_more'
 
 interface QuizContainerProps {
   questions: QuizQuestionDTO[]
@@ -96,7 +82,7 @@ export function QuizContainer({
     saveQuizDraft('full', userId, {
       bankVersion: QUESTION_BANK_VERSION,
       seed,
-      phase: state === 'mood' ? 'mood' : 'quiz',
+      phase: state === 'guidance' ? 'guidance' : state === 'mood' ? 'mood' : 'quiz',
       questions: currentQuestions,
       currentIndex,
       answers: Array.from(answers),
@@ -153,20 +139,10 @@ export function QuizContainer({
     }
     hasProcessedPending.current = true
 
-    let pending: PendingQuiz | null = null
-    try {
-      const raw = sessionStorage.getItem(STORAGE_KEY)
-      const stored: PendingQuiz | null = raw ? JSON.parse(raw) : null
-      // Незавершённые записи старого формата и результат другого аккаунта не отправляем.
-      if (isAuthenticated && stored?.completed === true && (!stored.userId || stored.userId === userId)) {
-        pending = stored
-      }
-    } catch {
-      // Повреждённая очередь не мешает восстановить черновик.
-    }
-
-    const draft = restoreQuizDraft('full', userId)
-    if (draft && pending?.mode !== 'express') {
+    const stored = readPendingQuiz(userId)
+    const pending = isAuthenticated || (stored?.mode === 'full' && stored.previewScores) ? stored : null
+    const draft = pending ? null : restoreQuizDraft('full', userId)
+    if (draft) {
       // Синхронизация с браузерным хранилищем после гидратации, не чтение в рендере.
       // oxlint-disable-next-line react/set-state-in-effect -- восстановление внешнего состояния
       setCurrentQuestions(draft.questions)
@@ -180,7 +156,21 @@ export function QuizContainer({
     }
 
     if (!pending) { return }
-    const pendingMode = pending.mode ?? 'full'
+    const pendingMode = pending.mode
+    if (!isAuthenticated && (pendingMode !== 'full' || !pending.previewScores)) { return }
+
+    // Восстанавливаем и сам результат, и исходные ответы для ручного повтора при сбое сети.
+    setSeed(pending.seed)
+    setAnswers(new Map(pending.answers.map((answer) => [answer.questionId, answer.selectedOption])))
+    setSkipped(new Set(pending.skipped))
+    setMood(pending.mood)
+    if (pending.previewScores) { setScores(pending.previewScores as Record<PersonalityTypeCode, number>) }
+    if (!isAuthenticated) {
+      setState('results')
+      return
+    }
+    // После первого входа очередь принадлежит этому аккаунту, даже если отправка не удалась.
+    savePendingQuiz({ ...pending, userId })
 
     // Автосабмит pending данных с сервера — легитимная синхронизация с внешней
     // системой (sessionStorage + сетевой запрос), не производное от пропсов значение
@@ -196,12 +186,12 @@ export function QuizContainer({
     }).then((result) => {
       if (result.error) {
         setSubmitError(result.error)
-        setState('intro')
+        setState(pending.previewScores ? 'results' : 'intro')
         return
       }
       if (result.data) {
         sessionStorage.removeItem(STORAGE_KEY)
-        clearQuizDraft(pendingMode, userId)
+        if (readQuizDraft(pendingMode, userId)?.seed === pending.seed) { clearQuizDraft(pendingMode, userId) }
         setScores(result.data.scores.normalized)
         setConfidence(result.data.scores.confidence)
         setRelevantCounts(result.data.scores.relevantCounts)
@@ -210,18 +200,24 @@ export function QuizContainer({
         setRankInfo(result.data.rankInfo)
         setXpCountedToday(result.data.xpCountedToday)
         if (result.data.progress) {
-          setProgress((prev) => (prev ? { ...prev, ...result.data!.progress } : null))
+          setProgress((prev) => ({
+            ...result.data!.progress!,
+            totalSkipped: prev?.totalSkipped ?? 0,
+            sessionsCount: (prev?.sessionsCount ?? 0) + 1,
+            cumulativeScores: prev?.cumulativeScores ?? null,
+            averagedScores: result.data!.averagedScores,
+          }))
         }
         showAchievementToasts(result.data.newAchievements)
         setState('results')
       }
     }).catch(() => {
       setSubmitError('network_error')
-      setState('intro')
+      setState(pending.previewScores ? 'results' : 'intro')
     })
   }, [isAuthenticated, userId, showAchievementToasts])
 
-  // Начать тест — сперва mood check-in (5.9.2)
+  // Начать тест — сначала инструкция, затем mood check-in (5.9.2).
   const handleStart = useCallback(() => {
     // seed должен влезать в Int (max ~2.1 млрд), Date.now() > 1.7 трлн
     const newSeed = Date.now() % 2_000_000_000 || 1
@@ -229,7 +225,7 @@ export function QuizContainer({
     try {
       sessionStorage.removeItem(STORAGE_KEY)
     } catch { /* хранилище может быть недоступно */ }
-    persistDraft({ seed: newSeed, phase: 'mood', currentIndex: 0, answers: [], skipped: [], mood: null })
+    persistDraft({ seed: newSeed, phase: 'guidance', currentIndex: 0, answers: [], skipped: [], mood: null })
     setSeed(newSeed)
     setCurrentIndex(0)
     setAnswers(new Map())
@@ -243,7 +239,7 @@ export function QuizContainer({
     setNewAchievements([])
     setRankInfo(null)
     setXpCountedToday(undefined)
-    setState('mood')
+    setState('guidance')
   }, [userId, persistDraft])
 
   // Mood check-in завершён (выбор или пропуск) — переходим к вопросам
@@ -338,26 +334,22 @@ export function QuizContainer({
       return
     }
 
+    const clientScores = calculateClientScores(answers)
     // Очередь отправки создаётся только при явном завершении, отдельно от черновика.
-    try {
-      const pending: PendingQuiz = {
-        completed: true,
-        userId,
-        mode: 'full',
-        seed,
-        answers: answersArray,
-        skipped: Array.from(skipped),
-        mood,
-        locale: sessionLocale,
-      }
-      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(pending))
-    } catch {
-      // Запрет sessionStorage не мешает отправить результат в текущей вкладке.
-    }
+    savePendingQuiz({
+      completed: true,
+      userId,
+      mode: 'full',
+      seed,
+      answers: answersArray,
+      skipped: Array.from(skipped),
+      mood,
+      locale: sessionLocale,
+      previewScores: clientScores,
+    })
 
     if (isAuthenticated) {
       // Показать результаты сразу (client-side)
-      const clientScores = calculateClientScores(answers)
       setScores(clientScores)
       setState('submitting')
 
@@ -379,7 +371,7 @@ export function QuizContainer({
         if (result.data) {
           // Успех — очищаем sessionStorage
           sessionStorage.removeItem(STORAGE_KEY)
-          clearQuizDraft('full', userId)
+          if (readQuizDraft('full', userId)?.seed === seed) { clearQuizDraft('full', userId) }
           setScores(result.data.scores.normalized)
           setConfidence(result.data.scores.confidence)
           setRelevantCounts(result.data.scores.relevantCounts)
@@ -411,7 +403,6 @@ export function QuizContainer({
       }
     } else {
       // Гость: показываем client-side результаты, сохраняем ответы для автосабмита после логина
-      const clientScores = calculateClientScores(answers)
       setScores(clientScores)
       clearQuizDraft('full', userId)
       setState('results')
@@ -506,6 +497,18 @@ export function QuizContainer({
   // INTRO
   if (state === 'intro') {
     return <QuizIntro onStart={handleStart} progress={progress} initialDisclaimerAccepted={initialDisclaimerAccepted} />
+  }
+
+  if (state === 'guidance') {
+    return (
+      <QuizGuidance
+        isAuthenticated={isAuthenticated}
+        onContinue={() => {
+          persistDraft({ phase: 'mood' })
+          setState('mood')
+        }}
+      />
+    )
   }
 
   // MOOD CHECK-IN (5.9.2) — перед каждой новой порцией вопросов
@@ -626,7 +629,7 @@ export function QuizContainer({
                     }
                     if (result.data) {
                       sessionStorage.removeItem(STORAGE_KEY)
-                      clearQuizDraft('full', userId)
+                      if (readQuizDraft('full', userId)?.seed === seed) { clearQuizDraft('full', userId) }
                       setScores(result.data.scores.normalized)
                       setConfidence(result.data.scores.confidence)
                       setRelevantCounts(result.data.scores.relevantCounts)

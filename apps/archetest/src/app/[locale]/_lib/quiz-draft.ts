@@ -15,7 +15,7 @@ const questionSchema = z.object({
 const draftSchema = z.object({
   bankVersion: z.literal(QUESTION_BANK_VERSION),
   seed: z.number().int().min(1).max(2_000_000_000),
-  phase: z.enum(['mood', 'quiz']),
+  phase: z.enum(['guidance', 'mood', 'quiz']),
   questions: z.array(questionSchema).min(1).max(100),
   currentIndex: z.number().int().min(0),
   answers: z.array(z.tuple([z.string(), z.number().int().min(0).max(3)])).max(100),

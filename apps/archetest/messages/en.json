@@ -109,14 +109,28 @@
     "backToIntro": "Back",
     "disclaimer": "This test is for entertainment purposes only and is not a clinical diagnosis.",
     "guestBanner": {
-      "title": "Save your profile",
-      "description": "Personality isn't a photograph — it's a film. Mood, stress, and life circumstances shape your answers. Take the test periodically and watch how your profile evolves over time. Each new batch of questions improves accuracy, and registration preserves the entire journey.",
-      "benefit1": "Cumulative profile — more precise with each session",
-      "benefit2": "Change history — track your mood dynamics",
-      "benefit3": "Achievements and ranks — gamified progression",
+      "title": "Keep this result in your profile",
+      "description": "You have already answered the questions — keep that work. Create an account so this result stays with you and future sessions can build on it.",
+      "benefit1": "Keep these answers without taking the test again",
+      "benefit2": "See how your results change over time",
+      "benefit3": "New batches of questions add to your cumulative profile",
       "benefit4": "Precise normalization — server-side recalculation across all answers",
-      "signIn": "Sign In",
-      "signUp": "Create Account"
+      "signIn": "Already have an account? Sign in",
+      "signUp": "Create account and save",
+      "returnHint": "After signing in, you will return to this result. You can create an account now or use an existing one."
+    },
+    "guidance": {
+      "eyebrow": "Before the first question",
+      "title": "How to take the test",
+      "intro": "What matters is your usual reaction. There are no right or wrong answers.",
+      "answer": "Read the situation and choose the response that feels closest to you and first resonates. You do not need to compare every option at length, but take the time you need to understand the question.",
+      "honesty": "Do not look for the most moral or socially approved answer. Thinking at length can shift your focus to how you ought to behave rather than how you usually react.",
+      "skip": "If nothing fits, choose “No suitable answer”. You do not need to make yourself fit an option.",
+      "guestTitle": "You are taking the test as a guest",
+      "guestDescription": "Sign in to keep your session in your profile and see your result history. We will bring you back here after signing in, so you will not need to start over.",
+      "signIn": "Sign in or create account",
+      "guestChoice": "You can continue as a guest and create an account to save your answers on the results screen.",
+      "continue": "Continue"
     },
     "results": {
       "title": "Your Personality Profile",

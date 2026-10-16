@@ -21,9 +21,20 @@ async function acceptConsentAndStart(page: import('@playwright/test').Page) {
   const consentCheckbox = page.getByTestId('disclaimer-consent-checkbox')
   await clickWithHydrationRetry(consentCheckbox, { locator: startButton, state: 'enabled' })
   await startButton.click()
+  await expect(page.getByRole('heading', { name: 'Как проходить тест' })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Войти или создать аккаунт' })).toBeVisible()
+  await page.getByRole('button', { name: 'Продолжить', exact: true }).click()
 }
 
 test.describe('Mood check-in', () => {
+  test('на телефоне инструкция продолжается без закрытия cookie-баннера', async ({ page }) => {
+    await page.goto('/')
+    await page.setViewportSize({ width: 390, height: 844 })
+    await expect(page.getByRole('button', { name: 'Настроить', exact: true })).toBeVisible()
+    await acceptConsentAndStart(page)
+    await expect(page.getByRole('heading', { name: 'Как вы сейчас?' })).toBeVisible()
+  })
+
   test.beforeEach(async ({ page }) => {
     await page.goto('/ru')
   })

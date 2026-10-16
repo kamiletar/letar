@@ -6,6 +6,7 @@ import messages from '../../../../messages/ru.json'
 import type { QuizQuestionDTO } from '../_actions/quiz.action'
 import { submitQuizAction } from '../_actions/quiz.action'
 import { DISCLAIMER_CONSENT_KEY } from '../_data/disclaimer'
+import { readQuizDraft, saveQuizDraft } from '../_lib/quiz-draft'
 import { ExpressContainer } from './express-container'
 import { KioskResetButton } from './kiosk-reset-button'
 import { QuizContainer } from './quiz-container'
@@ -87,7 +88,10 @@ function mount(mode: 'full' | 'express', prefix = 'исходные', userId: st
 
 function start(mode: 'full' | 'express') {
   fireEvent.click(screen.getByRole('button', { name: mode === 'full' ? 'Начать полный тест' : messages.express.start }))
-  if (mode === 'full') { fireEvent.click(screen.getByRole('button', { name: 'Пропустить настроение' })) }
+  if (mode === 'full') {
+    fireEvent.click(screen.getByRole('button', { name: 'Продолжить', exact: true }))
+    fireEvent.click(screen.getByRole('button', { name: 'Пропустить настроение' }))
+  }
 }
 
 beforeEach(() => {
@@ -98,6 +102,32 @@ beforeEach(() => {
 })
 
 afterEach(cleanup)
+
+describe('Инструкция перед полным тестом', () => {
+  it('после начала показывает инструкцию и вход, после продолжения — настроение', () => {
+    mount('full')
+    fireEvent.click(screen.getByRole('button', { name: 'Начать полный тест' }))
+    expect(screen.getByRole('heading', { name: 'Как проходить тест' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Войти или создать аккаунт' })).toHaveAttribute(
+      'href',
+      '/sign-in?callbackURL=%2F%23quiz-guidance',
+    )
+    expect(screen.queryByRole('button', { name: 'Пропустить настроение' })).not.toBeInTheDocument()
+    expect(submitQuizAction).not.toHaveBeenCalled()
+    fireEvent.click(screen.getByRole('button', { name: 'Продолжить', exact: true }))
+    expect(screen.getByRole('button', { name: 'Пропустить настроение' })).toBeInTheDocument()
+  })
+
+  it('после входа возвращается к инструкции без гостевого напоминания', () => {
+    const guest = mount('full')
+    fireEvent.click(screen.getByRole('button', { name: 'Начать полный тест' }))
+    guest.unmount()
+    mount('full', 'новые вопросы', 'user-1')
+    expect(screen.getByRole('heading', { name: 'Как проходить тест' })).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'Войти или создать аккаунт' })).not.toBeInTheDocument()
+    expect(submitQuizAction).not.toHaveBeenCalled()
+  })
+})
 
 describe.each(['full', 'express'] as const)('Восстановление %s', (mode) => {
   it.each([null, 'user-1'])('переживает закрытие вкладки у %s и сохраняет исходную выборку', (userId) => {
@@ -156,6 +186,102 @@ describe.each(['full', 'express'] as const)('Восстановление %s', (
 })
 
 describe('Очередь отправки полного теста', () => {
+  const savedResult = {
+    data: {
+      scores: { normalized: { PAR: 65 }, confidence: { PAR: 'high' }, relevantCounts: { PAR: 3 } },
+      averagedScores: null,
+      newAchievements: [],
+      rankInfo: null,
+    },
+  } as Awaited<ReturnType<typeof submitQuizAction>>
+
+  function finishAsGuest() {
+    const view = mount('full')
+    start('full')
+    for (let index = 0; index < 3; index++) {
+      fireEvent.click(screen.getByRole('button', { name: 'Ответить' }))
+      fireEvent.click(screen.getByRole('button', { name: 'Дальше' }))
+    }
+    view.unmount()
+  }
+
+  it('возвращает гостя к завершённым результатам после отмены входа или перезагрузки', async () => {
+    finishAsGuest()
+    mount('full', 'новая выборка')
+    expect(await screen.findByRole('button', { name: 'Пройти заново' })).toBeInTheDocument()
+    expect(submitQuizAction).not.toHaveBeenCalled()
+  })
+
+  it('после регистрации сохраняет гостевые ответы и показывает результаты', async () => {
+    finishAsGuest()
+    const pending = JSON.parse(sessionStorage.getItem('quiz_pending')!)
+    vi.mocked(submitQuizAction).mockResolvedValue(savedResult)
+    mount('full', 'новая выборка', 'new-user')
+    expect(await screen.findByRole('button', { name: 'Пройти заново' })).toBeInTheDocument()
+    expect(submitQuizAction).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({
+      seed: pending.seed,
+      answers: pending.answers,
+    }))
+    expect(sessionStorage.getItem('quiz_pending')).toBeNull()
+  })
+
+  it('при ошибке сохранения остаётся на результатах и закрепляет очередь за вошедшим аккаунтом', async () => {
+    finishAsGuest()
+    vi.mocked(submitQuizAction).mockRejectedValue(new Error('offline'))
+    const view = mount('full', 'новые вопросы', 'user-1')
+    expect(await screen.findByRole('button', { name: 'Пройти заново' })).toBeInTheDocument()
+    expect(JSON.parse(sessionStorage.getItem('quiz_pending')!).userId).toBe('user-1')
+    view.unmount()
+    mount('full', 'чужие вопросы', 'user-2')
+    expect(screen.queryByRole('button', { name: 'Пройти заново' })).not.toBeInTheDocument()
+    expect(submitQuizAction).toHaveBeenCalledOnce()
+  })
+
+  it('завершённый гостевой результат не вытесняется личным незавершённым тестом', async () => {
+    const personal = mount('full', 'личная выборка', 'user-1')
+    start('full')
+    fireEvent.click(screen.getByRole('button', { name: 'Ответить' }))
+    personal.unmount()
+    const draft = readQuizDraft('full', 'user-1')!
+    saveQuizDraft('full', 'user-1', { ...draft, seed: 7 })
+    finishAsGuest()
+    vi.mocked(submitQuizAction).mockRejectedValue(new Error('offline'))
+    mount('full', 'новые вопросы', 'user-1')
+    expect(await screen.findByRole('button', { name: 'Пройти заново' })).toBeInTheDocument()
+    expect(submitQuizAction).toHaveBeenCalledOnce()
+    expect(readQuizDraft('full', 'user-1')?.seed).toBe(7)
+    const pending = JSON.parse(sessionStorage.getItem('quiz_pending')!)
+    vi.mocked(submitQuizAction).mockResolvedValue(savedResult)
+    fireEvent.click(screen.getByRole('button', { name: messages.quiz.container.retry }))
+    await screen.findByRole('button', { name: 'Пройти заново' })
+    expect(submitQuizAction).toHaveBeenLastCalledWith(expect.objectContaining({
+      seed: pending.seed,
+      answers: pending.answers,
+    }))
+    expect(sessionStorage.getItem('quiz_pending')).toBeNull()
+    expect(readQuizDraft('full', 'user-1')?.seed).toBe(7)
+  })
+
+  it('гостевая очередь экспресса не блокирует незавершённый полный тест', () => {
+    const view = mount('full')
+    start('full')
+    fireEvent.click(screen.getByRole('button', { name: 'Ответить' }))
+    const scenario = screen.getByTestId('scenario').textContent
+    view.unmount()
+    sessionStorage.setItem(
+      'quiz_pending',
+      JSON.stringify({
+        completed: true,
+        mode: 'express',
+        seed: 42,
+        answers: [{ questionId: 'express-1', selectedOption: 0 }],
+      }),
+    )
+    mount('full', 'новые вопросы')
+    expect(screen.getByTestId('scenario')).toHaveTextContent(scenario!)
+    expect(submitQuizAction).not.toHaveBeenCalled()
+  })
+
   it('старую незавершённую очередь не отправляет автоматически', () => {
     sessionStorage.setItem(
       'quiz_pending',
@@ -178,6 +304,8 @@ describe('Очередь отправки полного теста', () => {
     mount('full', 'вопросы', 'user-1')
     expect(await screen.findByRole('button', { name: 'Начать полный тест' })).toBeInTheDocument()
     expect(submitQuizAction).toHaveBeenCalledOnce()
-    expect(JSON.parse(sessionStorage.getItem('quiz_pending')!)).toEqual(pending)
+    expect(JSON.parse(sessionStorage.getItem('quiz_pending')!)).toEqual(
+      expect.objectContaining({ ...pending, userId: 'user-1' }),
+    )
   })
 })

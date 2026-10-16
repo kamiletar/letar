@@ -167,6 +167,7 @@ test.describe('Safety-net триггер (DPR/BAR/BOR)', () => {
     }
     await expect(startButton).toBeEnabled({ timeout: 15_000 })
     await startButton.click()
+    await page.getByRole('button', { name: 'Продолжить', exact: true }).click()
 
     // Mood check-in (5.9.2) — пропускаем, не влияет на скоринг
     await page.getByRole('button', { name: 'Пропустить' }).click()

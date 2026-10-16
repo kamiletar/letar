@@ -8,6 +8,7 @@ import { useMemo } from 'react'
 import { LuArrowRight, LuTriangleAlert } from 'react-icons/lu'
 import type { PersonalityTypeCode } from '../_data/personality-types'
 import { HEXAGRAM_SCALE_CODES, PERSONALITY_TYPES } from '../_data/personality-types'
+import { getQuizSignInHref } from '../_lib/quiz-navigation'
 import { needsDarkReassurance, needsSafetyNet } from '../_lib/safety-net'
 import type { ScaleConfidence } from '../_lib/scoring-core'
 import { AchievementCard } from './achievement-card'
@@ -104,7 +105,7 @@ export function QuizResults({
   const locale = useLocale()
   const isRu = locale === 'ru'
   // Вход находится вне [locale]; язык сохраняем в адресе возврата после авторизации.
-  const signInHref = `/sign-in?callbackURL=${encodeURIComponent(isRu ? '/' : '/en')}`
+  const signInHref = getQuizSignInHref(locale, 'results')
   const showClinical = useShowClinicalNames()
   // Данные для радарного чарта — формат «Бдительный Страж»
   const chartData = useMemo(
@@ -147,11 +148,45 @@ export function QuizResults({
   const showDarkReassurance = useMemo(() => needsDarkReassurance(scores), [scores])
 
   return (
-    <Container maxW="6xl" py={8}>
+    <Container id="quiz-results" maxW="6xl" py={8}>
       <VStack gap={8}>
         <Heading size="xl" textAlign="center">
           {t('results.title')}
         </Heading>
+
+        {!isAuthenticated && (
+          <Box
+            role="region"
+            aria-labelledby="save-result-title"
+            w="100%"
+            p={{ base: 5, md: 6 }}
+            borderRadius="xl"
+            bg="bg.subtle"
+            borderWidth="1px"
+            borderColor="border"
+            data-print-hide=""
+          >
+            <Heading id="save-result-title" size="md" mb={3}>{t('guestBanner.title')}</Heading>
+            <Text color="fg.muted" mb={4}>{t('guestBanner.description')}</Text>
+            <SimpleGrid columns={{ base: 1, md: 3 }} gap={3} mb={5}>
+              {(['benefit1', 'benefit2', 'benefit3'] as const).map((key) => (
+                <HStack key={key} gap={2} align="start">
+                  <Text color="brand.fg" aria-hidden="true">✓</Text>
+                  <Text fontSize="sm">{t(`guestBanner.${key}`)}</Text>
+                </HStack>
+              ))}
+            </SimpleGrid>
+            <HStack gap={3} flexWrap="wrap">
+              <Button asChild size="lg" colorPalette="brand" w={{ base: 'full', md: 'auto' }}>
+                <Link href={signInHref}>{t('guestBanner.signUp')}</Link>
+              </Button>
+              <Button asChild size="lg" variant="outline" w={{ base: 'full', md: 'auto' }}>
+                <Link href={signInHref}>{t('guestBanner.signIn')}</Link>
+              </Button>
+            </HStack>
+            <Text fontSize="sm" color="fg.muted" mt={3}>{t('guestBanner.returnHint')}</Text>
+          </Box>
+        )}
 
         {/* Прогресс прохождения */}
         {progress && (
@@ -282,42 +317,6 @@ export function QuizResults({
               {newAchievements.map((code) => (
                 <AchievementCard key={code} code={code} unlocked unlockedAt={new Date()} />
               ))}
-            </HStack>
-          </Box>
-        )}
-
-        {/* Баннер для незалогиненных — предложение сохранить результаты */}
-        {!isAuthenticated && (
-          <Box
-            w="100%"
-            p={6}
-            borderRadius="lg"
-            bg="bg.subtle"
-            borderWidth="1px"
-            borderColor="border"
-            data-print-hide=""
-          >
-            <Heading size="md" mb={3}>
-              {t('guestBanner.title')}
-            </Heading>
-            <Text color="fg.muted" mb={4}>
-              {t('guestBanner.description')}
-            </Text>
-            <SimpleGrid columns={{ base: 1, md: 2 }} gap={2} mb={4}>
-              {(['benefit1', 'benefit2', 'benefit3', 'benefit4'] as const).map((key) => (
-                <HStack key={key} gap={2} align="start">
-                  <Text color="brand.fg">•</Text>
-                  <Text fontSize="sm">{t(`guestBanner.${key}`)}</Text>
-                </HStack>
-              ))}
-            </SimpleGrid>
-            <HStack gap={3}>
-              <Button asChild size="md" colorPalette="brand">
-                <Link href={signInHref}>{t('guestBanner.signIn')}</Link>
-              </Button>
-              <Button asChild size="md" variant="outline">
-                <Link href={signInHref}>{t('guestBanner.signUp')}</Link>
-              </Button>
             </HStack>
           </Box>
         )}

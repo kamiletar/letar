@@ -20,7 +20,7 @@ vi.mock('@/i18n/navigation', () => ({
   },
 }))
 // Тяжёлые дочерние блоки не относятся к проверяемым строкам
-vi.mock('./personality-radar-chart', () => ({ PersonalityRadarChart: () => null }))
+vi.mock('./personality-radar-chart', () => ({ PersonalityRadarChart: () => <div data-testid="chart" /> }))
 vi.mock('./hexagram-chart', () => ({ HexagramChart: () => null }))
 vi.mock('./profile-details', () => ({ ProfileDetails: () => null }))
 vi.mock('./psychologist-link-block', () => ({ PsychologistLinkBlock: () => null }))
@@ -55,13 +55,16 @@ describe('QuizResults: строки интерфейса из messages', () => {
   it.each(['ru', 'en'] as const)('%s: вход и создание аккаунта ведут на общий маршрут авторизации', (locale) => {
     renderResults(locale, { isAuthenticated: false })
 
-    for (const name of locale === 'ru' ? ['Войти', 'Создать аккаунт'] : ['Sign In', 'Create Account']) {
+    const messages = locale === 'ru' ? ruMessages : enMessages
+    for (const name of [messages.quiz.guestBanner.signIn, messages.quiz.guestBanner.signUp]) {
       const link = screen.getByRole('link', { name, exact: true })
       const url = new URL(link.getAttribute('href')!, 'https://archetest.letar.best')
 
       expect(url.pathname).toBe('/sign-in')
-      expect(url.searchParams.get('callbackURL')).toBe(locale === 'ru' ? '/' : '/en')
+      expect(url.searchParams.get('callbackURL')).toBe(`${locale === 'ru' ? '/' : '/en'}#quiz-results`)
     }
+    const banner = screen.getByRole('region', { name: messages.quiz.guestBanner.title })
+    expect(banner.compareDocumentPosition(screen.getByTestId('chart')) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
   })
 
   it('RU: прогресс, кнопки, дисклеймер', () => {
