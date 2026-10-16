@@ -1,91 +1,103 @@
 [
   {
-    "_facet": "Чувствительность к сигналам",
-    "scenario": "Партнёр весь вечер отвечает на ваши сообщения коротко и без смайликов.",
-    "scenarioEn": "All evening your partner has been replying to your messages briefly, without a single emoji.",
+    "_facet": "Сигналы охлаждения",
+    "_reverse": false,
+    "_reviewVersion": 2,
+    "scenario": "Вспомните одни безопасные близкие отношения, в которых вы хотите сохранять связь, и отвечайте о них. За последние шесть месяцев как часто после непривычно короткого сообщения близкого человека вы долго тревожитесь, что его чувства к вам изменились? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Think of one safe close relationship you want to maintain and answer about that relationship. Over the past six months, how often after an unusually brief message from someone close you worry for a long time that their feelings for you have changed? If you have not experienced such situations or cannot answer, skip this question.",
     "options": [
       {
-        "text": "Начинаю перебирать, что сделал(а) не так, и не могу успокоиться, пока не спрошу",
-        "textEn": "I start going over what I might have done wrong and can't settle until I ask",
+        "text": "Никогда или почти никогда",
+        "textEn": "Never or almost never",
+        "scoring": {}
+      },
+      {
+        "text": "Редко",
+        "textEn": "Rarely",
         "scoring": {
-          "AAX": 3
+          "AAX": 1
         }
       },
       {
-        "text": "Наверное, устал(а) или занят(а) — поговорим, когда увидимся",
-        "textEn": "They're probably tired or busy — we'll talk when we see each other",
-        "scoring": {}
-      },
-      {
-        "text": "Тоже отвечаю коротко",
-        "textEn": "I keep my replies short too",
-        "scoring": {}
-      },
-      {
-        "text": "Пишу «Всё в порядке?» — и дальше не переживаю",
-        "textEn": "I write \"Everything OK?\" and then stop worrying about it",
+        "text": "Часто",
+        "textEn": "Often",
         "scoring": {
-          "AAX": 1
+          "AAX": 2
+        }
+      },
+      {
+        "text": "Почти каждый раз",
+        "textEn": "Almost every time",
+        "scoring": {
+          "AAX": 3
         }
       }
     ]
   },
   {
-    "_facet": "Потребность в подтверждении",
-    "scenario": "Близкий человек редко говорит о чувствах словами — зато заботится делами.",
-    "scenarioEn": "Someone close to you rarely puts their feelings into words — they show they care through what they do.",
+    "_facet": "Подтверждение связи",
+    "_reverse": false,
+    "_reviewVersion": 2,
+    "scenario": "Вспомните одни безопасные близкие отношения, в которых вы хотите сохранять связь, и отвечайте о них. За последние шесть месяцев как часто получив искреннее подтверждение тёплых чувств, вы вскоре снова нуждаетесь в нём, чтобы не сомневаться в отношениях? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Think of one safe close relationship you want to maintain and answer about that relationship. Over the past six months, how often soon after receiving sincere reassurance of affection you need it again to stop doubting the relationship? If you have not experienced such situations or cannot answer, skip this question.",
     "options": [
       {
-        "text": "Дела для меня важнее слов",
-        "textEn": "Actions matter more to me than words",
+        "text": "Никогда или почти никогда",
+        "textEn": "Never or almost never",
         "scoring": {}
       },
       {
-        "text": "Иногда прошу сказать это вслух — и мне достаточно",
-        "textEn": "Now and then I ask them to say it out loud — and that's enough for me",
+        "text": "Редко",
+        "textEn": "Rarely",
         "scoring": {
           "AAX": 1
         }
       },
       {
-        "text": "Мне этого мало: без слов я то и дело сомневаюсь, что меня ещё любят",
-        "textEn": "That isn't enough for me: without the words I keep doubting that I'm still loved",
+        "text": "Часто",
+        "textEn": "Often",
         "scoring": {
-          "AAX": 3
+          "AAX": 2
         }
       },
       {
-        "text": "Сам(а) тоже не любитель говорить о чувствах",
-        "textEn": "I'm not one for talking about feelings either",
-        "scoring": {}
+        "text": "Почти каждый раз",
+        "textEn": "Almost every time",
+        "scoring": {
+          "AAX": 3
+        }
       }
     ]
   },
   {
     "_facet": "Разлука",
-    "scenario": "Партнёр на неделю уходит в поход в горы — связи там почти не будет.",
-    "scenarioEn": "Your partner is off hiking in the mountains for a week — there'll be hardly any signal.",
+    "_reverse": false,
+    "_reviewVersion": 2,
+    "scenario": "Вспомните одни безопасные близкие отношения, в которых вы хотите сохранять связь, и отвечайте о них. За последние шесть месяцев как часто во время заранее согласованной разлуки вы тревожитесь именно о том, что близкий человек перестанет нуждаться в отношениях с вами? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Think of one safe close relationship you want to maintain and answer about that relationship. Over the past six months, how often during an agreed time apart you worry specifically that the person will stop wanting a relationship with you? If you have not experienced such situations or cannot answer, skip this question.",
     "options": [
       {
-        "text": "Всё в порядке: отдохну и займусь своими делами",
-        "textEn": "I'm fine: I'll have a rest and catch up on my own things",
+        "text": "Никогда или почти никогда",
+        "textEn": "Never or almost never",
         "scoring": {}
       },
       {
-        "text": "Первые дни скучаю, потом втягиваюсь",
-        "textEn": "I miss them for the first few days, then I settle in",
-        "scoring": {}
+        "text": "Редко",
+        "textEn": "Rarely",
+        "scoring": {
+          "AAX": 1
+        }
       },
       {
-        "text": "Прошу выходить на связь при любой возможности — без вестей места себе не нахожу",
-        "textEn": "I ask them to get in touch whenever they can — without news I can't settle",
+        "text": "Часто",
+        "textEn": "Often",
         "scoring": {
           "AAX": 2
         }
       },
       {
-        "text": "Всю неделю внутри тревожно: вдруг там, без меня, он(а) поймёт, что так даже лучше",
-        "textEn": "All week I'm uneasy inside: what if, away from me, they realise it's better that way",
+        "text": "Почти каждый раз",
+        "textEn": "Almost every time",
         "scoring": {
           "AAX": 3
         }
@@ -93,94 +105,34 @@
     ]
   },
   {
-    "_facet": "Протестное поведение",
-    "_reverse": true,
-    "scenario": "После ссоры партнёр ушёл в другую комнату и молчит уже час.",
-    "scenarioEn": "After an argument, your partner went into another room and has been silent for an hour.",
+    "_facet": "Пауза после разногласия",
+    "_reverse": false,
+    "_reviewVersion": 2,
+    "scenario": "Вспомните одни безопасные близкие отношения, в которых вы хотите сохранять связь, и отвечайте о них. За последние шесть месяцев как часто пока близкий человек берёт согласованную паузу после спора, вы воспринимаете это как угрозу вашим отношениям? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Think of one safe close relationship you want to maintain and answer about that relationship. Over the past six months, how often while someone close takes an agreed break after a disagreement you experience it as a threat to your relationship? If you have not experienced such situations or cannot answer, skip this question.",
     "options": [
       {
-        "text": "Иду мириться первым(ой) — не хочу, чтобы ссора остывала в тишине",
-        "textEn": "I go to make up first — I don't want the argument to cool off in silence",
+        "text": "Никогда или почти никогда",
+        "textEn": "Never or almost never",
         "scoring": {}
       },
       {
-        "text": "Делаю вид, что мне всё равно, но прислушиваюсь к каждому звуку из-за двери",
-        "textEn": "I act as if I don't care, but I'm listening to every sound from behind the door",
+        "text": "Редко",
+        "textEn": "Rarely",
         "scoring": {
-          "AAX": 3
+          "AAX": 1
         }
       },
       {
-        "text": "Даю время остыть — вернёмся к разговору позже",
-        "textEn": "I give them time to cool off — we'll come back to it later",
-        "scoring": {}
-      },
-      {
-        "text": "Занимаюсь своими делами — так мне даже спокойнее",
-        "textEn": "I get on with my own things — honestly, it's calmer that way",
-        "scoring": {
-          "AAV": 1
-        }
-      }
-    ]
-  },
-  {
-    "_facet": "Самоценность через отношения",
-    "scenario": "Близкий человек не спросил, как прошёл ваш важный день, хотя вы говорили о нём всю неделю.",
-    "scenarioEn": "Someone close to you didn't ask how your big day went, even though you'd talked about it all week.",
-    "options": [
-      {
-        "text": "Рассказываю сам(а) — наверное, просто забыл(а)",
-        "textEn": "I tell them myself — they probably just forgot",
-        "scoring": {}
-      },
-      {
-        "text": "Кажется, я для этого человека не так уж важен(на), — и от этого тяжело",
-        "textEn": "It feels like I don't matter that much to them — and that's hard",
-        "scoring": {
-          "AAX": 3
-        }
-      },
-      {
-        "text": "Немного обидно, но не придаю значения",
-        "textEn": "A bit hurtful, but I don't read much into it",
-        "scoring": {}
-      },
-      {
-        "text": "Жду, вспомнит ли сам(а), — и с каждым часом тревожнее",
-        "textEn": "I wait to see whether they'll remember — and get more anxious by the hour",
+        "text": "Часто",
+        "textEn": "Often",
         "scoring": {
           "AAX": 2
         }
-      }
-    ]
-  },
-  {
-    "_facet": "Гипербдительность",
-    "_reverse": true,
-    "scenario": "Партнёр говорит, что вечером задержится с коллегами.",
-    "scenarioEn": "Your partner says they'll be late tonight — out with colleagues.",
-    "options": [
-      {
-        "text": "Хорошо, проведу вечер по-своему",
-        "textEn": "Fine — I'll spend the evening my own way",
-        "scoring": {}
       },
       {
-        "text": "Прошу написать, когда поедет домой",
-        "textEn": "I ask them to text when they're heading home",
-        "scoring": {}
-      },
-      {
-        "text": "Расстраиваюсь и говорю об этом прямо",
-        "textEn": "I get upset and say so directly",
-        "scoring": {
-          "AAX": 1
-        }
-      },
-      {
-        "text": "Говорю «конечно, хорошо тебе провести время», а потом весь вечер проверяю, когда он(а) был(а) в сети",
-        "textEn": "I say \"of course, have a good time\", and then spend all evening checking when they were last online",
+        "text": "Почти каждый раз",
+        "textEn": "Almost every time",
         "scoring": {
           "AAX": 3
         }
@@ -188,123 +140,209 @@
     ]
   },
   {
-    "_facet": "Страх покинутости",
-    "scenario": "Партнёр говорит: «Мне нужно побыть наедине с собой в эти выходные».",
-    "scenarioEn": "Your partner says: \"I need some time on my own this weekend.\"",
+    "_facet": "Значимость для другого",
+    "_reverse": false,
+    "_reviewVersion": 2,
+    "scenario": "Вспомните одни безопасные близкие отношения, в которых вы хотите сохранять связь, и отвечайте о них. За последние шесть месяцев как часто если близкий человек забыл спросить о важном для вас событии, вы начинаете сомневаться, дороги ли вы ему? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Think of one safe close relationship you want to maintain and answer about that relationship. Over the past six months, how often when someone close forgets to ask about an event important to you you begin doubting whether you matter to them? If you have not experienced such situations or cannot answer, skip this question.",
     "options": [
       {
-        "text": "Понимаю — мне это тоже бывает нужно",
-        "textEn": "I get it — I need that sometimes too",
+        "text": "Никогда или почти никогда",
+        "textEn": "Never or almost never",
         "scoring": {}
       },
       {
-        "text": "Внутри всё обрывается: кажется, это начало конца",
-        "textEn": "Something drops inside me: it feels like the beginning of the end",
-        "scoring": {
-          "AAX": 3
-        }
-      },
-      {
-        "text": "Немного обидно, но переживу",
-        "textEn": "A bit hurtful, but I'll live",
+        "text": "Редко",
+        "textEn": "Rarely",
         "scoring": {
           "AAX": 1
         }
       },
       {
-        "text": "Отлично, у меня как раз свои планы",
-        "textEn": "Great — I've got my own plans anyway",
-        "scoring": {}
+        "text": "Часто",
+        "textEn": "Often",
+        "scoring": {
+          "AAX": 2
+        }
+      },
+      {
+        "text": "Почти каждый раз",
+        "textEn": "Almost every time",
+        "scoring": {
+          "AAX": 3
+        }
       }
     ]
   },
   {
-    "_facet": "Сравнение",
-    "_reverse": true,
-    "scenario": "Партнёр с теплотой вспоминает, как весело было в студенческой компании — ещё до знакомства с вами.",
-    "scenarioEn": "Your partner fondly remembers how much fun their student crowd was — back before they met you.",
+    "_facet": "Проверки связи",
+    "_reverse": false,
+    "_reviewVersion": 2,
+    "scenario": "Вспомните одни безопасные близкие отношения, в которых вы хотите сохранять связь, и отвечайте о них. За последние шесть месяцев как часто когда близкий человек занят своими делами, вы снова и снова проверяете его доступность, чтобы убедиться, что связь между вами сохраняется? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Think of one safe close relationship you want to maintain and answer about that relationship. Over the past six months, how often when someone close is busy with their own activities you repeatedly check their availability to reassure yourself that your bond remains? If you have not experienced such situations or cannot answer, skip this question.",
     "options": [
       {
-        "text": "Улыбаюсь и киваю, а потом весь вечер прокручиваю, не было ли ему(ей) тогда лучше, чем сейчас со мной",
-        "textEn": "I smile and nod, but afterwards I spend the whole evening wondering whether they were happier then than they are now with me",
-        "scoring": {
-          "AAX": 3
-        }
+        "text": "Никогда или почти никогда",
+        "textEn": "Never or almost never",
+        "scoring": {}
       },
       {
-        "text": "Спрашиваю полушутя: «А сейчас скучно?»",
-        "textEn": "I ask, half-joking: \"So is it boring now?\"",
+        "text": "Редко",
+        "textEn": "Rarely",
         "scoring": {
           "AAX": 1
         }
       },
       {
-        "text": "С интересом слушаю — хорошие были времена",
-        "textEn": "I listen with interest — sounds like good times",
-        "scoring": {}
-      },
-      {
-        "text": "Рассказываю в ответ свои студенческие истории",
-        "textEn": "I share my own student stories in return",
-        "scoring": {}
-      }
-    ]
-  },
-  {
-    "_facet": "Тревога в затишье",
-    "scenario": "В отношениях уже месяц всё ровно: без ссор, но и без особых событий.",
-    "scenarioEn": "For a month, things in your relationship have been steady: no arguments, but nothing special either.",
-    "options": [
-      {
-        "text": "Хорошо — спокойствие и значит, что всё в порядке",
-        "textEn": "Good — calm means everything's fine",
-        "scoring": {}
-      },
-      {
-        "text": "Предлагаю что-то новое — поездку, общее дело",
-        "textEn": "I suggest something new — a trip, a shared project",
-        "scoring": {}
-      },
-      {
-        "text": "Становится тревожно: затишье кажется подозрительным, хочется проверить, что чувства на месте",
-        "textEn": "I get anxious: the lull feels suspicious, and I want to check the feelings are still there",
+        "text": "Часто",
+        "textEn": "Often",
         "scoring": {
-          "AAX": 3
+          "AAX": 2
         }
       },
       {
-        "text": "Скучновато, но это нормально",
-        "textEn": "A bit dull, but that's normal",
-        "scoring": {}
+        "text": "Почти каждый раз",
+        "textEn": "Almost every time",
+        "scoring": {
+          "AAX": 3
+        }
       }
     ]
   },
   {
-    "_facet": "Страх разочаровать",
-    "_reverse": true,
-    "scenario": "Вы сделали близкому человеку приятное, а благодарность прозвучала сдержанно.",
-    "scenarioEn": "You did something nice for someone close to you, and their thanks sounded rather reserved.",
+    "_facet": "Отдельное время",
+    "_reverse": false,
+    "_reviewVersion": 2,
+    "scenario": "Вспомните одни безопасные близкие отношения, в которых вы хотите сохранять связь, и отвечайте о них. За последние шесть месяцев как часто просьба близкого человека провести время отдельно вызывает у вас страх, что он хочет закончить отношения? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Think of one safe close relationship you want to maintain and answer about that relationship. Over the past six months, how often a close person’s request for time apart makes you fear that they want to end the relationship? If you have not experienced such situations or cannot answer, skip this question.",
     "options": [
       {
-        "text": "Мне не нужны бурные реакции — главное, что порадовал(а)",
-        "textEn": "I don't need a big reaction — what matters is that I made them happy",
+        "text": "Никогда или почти никогда",
+        "textEn": "Never or almost never",
         "scoring": {}
       },
       {
-        "text": "Спрашиваю, понравилось ли на самом деле",
-        "textEn": "I ask whether they really liked it",
+        "text": "Редко",
+        "textEn": "Rarely",
         "scoring": {
           "AAX": 1
         }
       },
       {
-        "text": "В следующий раз придумаю что-то другое",
-        "textEn": "Next time I'll come up with something different",
+        "text": "Часто",
+        "textEn": "Often",
+        "scoring": {
+          "AAX": 2
+        }
+      },
+      {
+        "text": "Почти каждый раз",
+        "textEn": "Almost every time",
+        "scoring": {
+          "AAX": 3
+        }
+      }
+    ]
+  },
+  {
+    "_facet": "Сравнение отношений",
+    "_reverse": false,
+    "_reviewVersion": 2,
+    "scenario": "Вспомните одни безопасные близкие отношения, в которых вы хотите сохранять связь, и отвечайте о них. За последние шесть месяцев как часто слыша о других дорогих близкому человеку людях, вы долго тревожитесь, что ваши отношения для него менее важны? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Think of one safe close relationship you want to maintain and answer about that relationship. Over the past six months, how often after hearing about other people important to someone close you worry for a long time that your relationship matters less? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": [
+      {
+        "text": "Никогда или почти никогда",
+        "textEn": "Never or almost never",
         "scoring": {}
       },
       {
-        "text": "Говорю себе, что это неважно, но потом ещё долго гадаю, не разочаровал(а) ли",
-        "textEn": "I tell myself it doesn't matter, but for a long time afterwards I wonder whether I let them down",
+        "text": "Редко",
+        "textEn": "Rarely",
+        "scoring": {
+          "AAX": 1
+        }
+      },
+      {
+        "text": "Часто",
+        "textEn": "Often",
+        "scoring": {
+          "AAX": 2
+        }
+      },
+      {
+        "text": "Почти каждый раз",
+        "textEn": "Almost every time",
+        "scoring": {
+          "AAX": 3
+        }
+      }
+    ]
+  },
+  {
+    "_facet": "Спокойный период",
+    "_reverse": false,
+    "_reviewVersion": 2,
+    "scenario": "Вспомните одни безопасные близкие отношения, в которых вы хотите сохранять связь, и отвечайте о них. За последние шесть месяцев как часто в спокойный период отношений вы ищете признаки охлаждения, хотя конкретных поводов для этого не замечаете? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Think of one safe close relationship you want to maintain and answer about that relationship. Over the past six months, how often during a calm period in the relationship you look for signs of fading affection even though you see no specific reason to do so? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": [
+      {
+        "text": "Никогда или почти никогда",
+        "textEn": "Never or almost never",
+        "scoring": {}
+      },
+      {
+        "text": "Редко",
+        "textEn": "Rarely",
+        "scoring": {
+          "AAX": 1
+        }
+      },
+      {
+        "text": "Часто",
+        "textEn": "Often",
+        "scoring": {
+          "AAX": 2
+        }
+      },
+      {
+        "text": "Почти каждый раз",
+        "textEn": "Almost every time",
+        "scoring": {
+          "AAX": 3
+        }
+      }
+    ]
+  },
+  {
+    "_facet": "Сдержанная реакция",
+    "_reverse": false,
+    "_reviewVersion": 2,
+    "scenario": "Вспомните одни безопасные близкие отношения, в которых вы хотите сохранять связь, и отвечайте о них. За последние шесть месяцев как часто сдержанная благодарность близкого человека заставляет вас долго сомневаться в его расположении к вам? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Think of one safe close relationship you want to maintain and answer about that relationship. Over the past six months, how often a close person’s reserved expression of thanks leaves you doubting their affection for a long time? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": [
+      {
+        "text": "Никогда или почти никогда",
+        "textEn": "Never or almost never",
+        "scoring": {}
+      },
+      {
+        "text": "Редко",
+        "textEn": "Rarely",
+        "scoring": {
+          "AAX": 1
+        }
+      },
+      {
+        "text": "Часто",
+        "textEn": "Often",
+        "scoring": {
+          "AAX": 2
+        }
+      },
+      {
+        "text": "Почти каждый раз",
+        "textEn": "Almost every time",
         "scoring": {
           "AAX": 3
         }

@@ -50,6 +50,11 @@ const CORE_CODES = [
   'ASD',
   'DIR',
   'ALX',
+  'INA',
+  'HYI',
+  'AAX',
+  'AAV',
+  'HON',
 ]
 /** Экспериментальные шкалы вне ядра (этап 5.5) */
 const EXPERIMENTAL_CODES = ['RES_PHYS', 'RES_AFF', 'SPEC_INT']
@@ -62,7 +67,7 @@ interface BatchConfig {
   order: string[]
   /** Ожидаемое число вопросов в файле шкалы — одно на все или своё для каждой шкалы */
   perScale: number | Record<string, number>
-  /** Минимум reverse-вопросов на шкалу (≥ 1/3) — одно на все или своё для каждой шкалы */
+  /** Историческая квота reverse для старых пакетов; новые ключи проверяются по содержанию */
   minReverse: number | Record<string, number>
   /** Коды, которыми варианты вправе скорить (изоляция ядра для экспериментальных) */
   allowedScoringCodes: string[]
@@ -78,16 +83,14 @@ const CONFIGS: Record<string, BatchConfig> = {
   },
   '5.5': {
     dir: '5.5',
-    order: EXPERIMENTAL_CODES,
+    order: ['RES_PHYS', 'RES_AFF', 'SPEC_INT'],
     perScale: 10,
     minReverse: 4,
     // Только экспериментальные коды: варианты не касаются ядра → actual_max ядра неизменен
     allowedScoringCodes: EXPERIMENTAL_CODES,
   },
-  // Новая шкала «Доброжелательность» (HEXACO Honesty-Humility).
-  // ⚠️ НЕ вливать до возврата вердиктов ревьюера и до того,
-  // как HON появится в ALL_SCALE_CODES приложения. Сейчас конфиг нужен для
-  // `--dry-run`: он прогоняет батч через ту же валидацию, что и боевой merge.
+  // Честность–скромность: после содержательного ревью v2 включена как
+  // обычная шкала профиля; эмпирические нормы ещё не установлены.
   // Изоляция скоринга (только HON) — методологическое требование, см.
   // docs/honesty-humility-brief.md: общие пункты с тёмными шкалами сделали бы
   // будущую корреляцию артефактом дизайна.
@@ -95,37 +98,36 @@ const CONFIGS: Record<string, BatchConfig> = {
     dir: 'hh',
     order: ['HON'],
     perScale: 15,
-    minReverse: 5,
+    minReverse: 0,
     allowedScoringCodes: ['HON'],
   },
-  // Добор редких шкал ядра до порога high=30 (docs/rare-scales-brief.md). ⚠️ Это ЯДРО:
+  // Добор редких шкал ядра (docs/rare-scales-brief.md). Это ЯДРО:
   // вливание сдвигает actual_max SAD/ASD/MAS/ALX и вторичных шкал → только с бампом
-  // QUESTION_BANK_VERSION, пачкой, после вердиктов ревьюера. До того — только `--dry-run`.
+  // QUESTION_BANK_VERSION; пакет v2 включён в версию банка 3.
   rare: {
     dir: 'rare',
     order: ['SAD', 'ASD', 'MAS', 'ALX'],
     perScale: { SAD: 9, ASD: 8, MAS: 7, ALX: 6 },
-    minReverse: { SAD: 3, ASD: 3, MAS: 3, ALX: 2 },
+    minReverse: 0,
     allowedScoringCodes: CORE_CODES,
   },
-  // СДВГ-скрининг: INA — невнимательность, HYI — гиперактивность/импульсивность
-  // (docs/adhd-screening-brief.md). ⚠️ НЕ вливать до вердиктов ревьюера и решения Kami
-  // о месте в продукте; до того конфиг нужен только для `--dry-run`. Скоринг изолирован
+  // Авторский пакет СДВГ: INA — невнимательность, HYI — гиперактивность/импульсивность.
+  // После содержательного ревью v2 — обычная шкала профиля, с изолированным ключом. Скоринг изолирован
   // на двух кодах — ядро и его `actual_max` не затрагиваются.
   adhd: {
     dir: 'adhd',
     order: ['INA', 'HYI'],
-    perScale: 7,
-    minReverse: 3,
+    perScale: 9,
+    minReverse: 0,
     allowedScoringCodes: ['INA', 'HYI'],
   },
   // Привязанность (прототип ECR-R): AAX — тревога, AAV — избегание (docs/attachment-brief.md).
-  // ⚠️ Только `--dry-run` до вердиктов ревьюера и решения Kami (экспериментальный блок или ядро).
+  // После содержательного ревью v2 — обычный профиль, без типологических ярлыков.
   attachment: {
     dir: 'attachment',
     order: ['AAX', 'AAV'],
     perScale: 10,
-    minReverse: 4,
+    minReverse: 0,
     allowedScoringCodes: ['AAX', 'AAV'],
   },
 }
@@ -195,7 +197,7 @@ for (const scale of config.order) {
     }
     const reverseCount = qs.filter((q) => q._reverse).length
     if (reverseCount < minReverse) {
-      throw new Error(`${scale}: reverse-вопросов ${reverseCount} < ${minReverse} (нужно ≥ 1/3)`)
+      throw new Error(`${scale}: reverse-вопросов ${reverseCount} < ${minReverse} по конфигурации пакета`)
     }
   }
 
@@ -203,7 +205,7 @@ for (const scale of config.order) {
     if (!q.scenario || !q.scenarioEn) {
       throw new Error(`${scale} #${i}: пустой сценарий`)
     }
-    if (q.options.length < 2 || q.options.length > 6) {
+    if (q.options.length < 2 || q.options.length > 4) {
       throw new Error(`${scale} #${i}: ${q.options.length} опций`)
     }
     // основная шкала должна встречаться хотя бы в одной опции
@@ -446,7 +448,9 @@ for (const code of allTouched) {
 }
 maxJson.metadata.total_questions = dump.length + newRecords.length
 maxJson.metadata.parsed_questions = dump.length + newRecords.length
-maxJson.metadata.scales = [...CORE_CODES, ...EXPERIMENTAL_CODES]
+maxJson.metadata.scales = [
+  ...new Set([...CORE_CODES, ...EXPERIMENTAL_CODES, ...Object.keys(maxJson.global_max_scores)]),
+]
 
 // ── Отчёт ──────────────────────────────────────────────────────────────────
 console.log(`Батч: ${config.dir}`)

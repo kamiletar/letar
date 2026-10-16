@@ -42,6 +42,33 @@ export interface ScalePrototype {
 
 export const SCALE_PROTOTYPES: ScalePrototype[] = [
   {
+    group: 'Внимание и активность (INA/HYI)',
+    groupEn: 'Attention and activity (INA/HYI)',
+    prototype: 'Симптомные области СДВГ; авторские пункты, не ASRS',
+    prototypeEn: 'ADHD symptom domains; original items, not ASRS',
+    source: 'Ustun et al., 2017',
+    doi: '10.1001/jamapsychiatry.2017.0298',
+    shortLabel: 'Симптомные области СДВГ / ADHD symptom domains',
+  },
+  {
+    group: 'Близкая связь (AAX/AAV)',
+    groupEn: 'Close bonds (AAX/AAV)',
+    prototype: 'Тревога и избегание привязанности; не ECR-R/ECR-RS',
+    prototypeEn: 'Attachment anxiety and avoidance; not ECR-R/ECR-RS',
+    source: 'Fraley, Waller & Brennan, 2000',
+    doi: '10.1037/0022-3514.78.2.350',
+    shortLabel: 'Тревога и избегание / Attachment anxiety and avoidance',
+  },
+  {
+    group: 'Честность и скромность (HON)',
+    groupEn: 'Honesty and humility (HON)',
+    prototype: 'HEXACO Honesty-Humility — только конструкт, не пункты',
+    prototypeEn: 'HEXACO Honesty-Humility — construct only, not items',
+    source: 'Ashton & Lee, 2009',
+    doi: '10.1080/00223890902935878',
+    shortLabel: 'Honesty-Humility (HEXACO)',
+  },
+  {
     group: 'Светлая триада (HUM/KAN/FAI)',
     groupEn: 'Light Triad (HUM/KAN/FAI)',
     prototype: 'Light Triad Scale (LTS), 12 пунктов',

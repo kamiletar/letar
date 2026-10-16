@@ -42,8 +42,8 @@ describe('ForProfessionalsView: строки из messages', () => {
   it('RU: заголовки, подстановки чисел, списки, ссылка из t.rich', () => {
     renderView('ru')
     expect(screen.getByRole('heading', { name: 'Если вы психолог' })).toBeTruthy()
-    expect(screen.getByText(new RegExp(`${TOTAL_QUESTIONS} вопросов, ${CORE_SCALE_COUNT} шкалы`))).toBeTruthy()
-    expect(screen.getByText(new RegExp(`Валидированное ядро — ${CORE_SCALE_COUNT - 1} из ${CORE_SCALE_COUNT}`)))
+    expect(screen.getByText(new RegExp(`${TOTAL_QUESTIONS} вопросов, ${CORE_SCALE_COUNT} шкал`))).toBeTruthy()
+    expect(screen.getByText(new RegExp(`Общий профиль включает ${CORE_SCALE_COUNT} шкал`)))
       .toBeTruthy()
     expect(screen.getByText('• Отстранённость — SZD, AVD, PAR')).toBeTruthy()
     expect(screen.getByText('• Личным заметкам о клиенте (видны только вам)')).toBeTruthy()

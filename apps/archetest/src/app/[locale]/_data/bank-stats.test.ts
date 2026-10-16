@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import ruMessages from '../../../../messages/ru.json'
 import { CORE_SCALE_COUNT, EXPERIMENTAL_SCALE_COUNT, TOTAL_QUESTIONS } from './bank-stats'
 import maxScoresData from './max-scores-per-question.json'
 import { ALL_SCALE_CODES, EXPERIMENTAL_SCALES } from './personality-types'
@@ -19,8 +20,9 @@ describe('bank-stats', () => {
     expect(EXPERIMENTAL_SCALE_COUNT).toBe(EXPERIMENTAL_SCALES.length)
   })
 
-  it('русские формы слова «шкала» рассчитаны на 22–24 — за границами нужна ревизия текстов', () => {
-    expect(CORE_SCALE_COUNT).toBeGreaterThanOrEqual(22)
-    expect(CORE_SCALE_COUNT).toBeLessThanOrEqual(24)
+  it('для нынешних 27 шкал в публичных подстановках используется форма «шкал»', () => {
+    expect(CORE_SCALE_COUNT).toBe(27)
+    expect(ruMessages.meta.description).toContain('{coreScales} шкал')
+    expect(ruMessages.forProfessionals.about.p1).toContain('{coreScales} шкал')
   })
 })

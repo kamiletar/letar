@@ -20,10 +20,10 @@ import {
   TEASER_SCALE_CODES,
 } from './personality-types'
 
-describe('шкалы ядра (22 = 13 + 9)', () => {
-  it('ALL_SCALE_CODES содержит 22 уникальных кода', () => {
-    expect(ALL_SCALE_CODES).toHaveLength(22)
-    expect(new Set(ALL_SCALE_CODES).size).toBe(22)
+describe('шкалы ядра (27 = 13 + 9 + 5)', () => {
+  it('ALL_SCALE_CODES содержит 27 уникальных кода', () => {
+    expect(ALL_SCALE_CODES).toHaveLength(27)
+    expect(new Set(ALL_SCALE_CODES).size).toBe(27)
   })
 
   it('BASE_SCALE_CODES не изменился (10 шкал DSM-5)', () => {
@@ -75,22 +75,22 @@ describe('шкалы ядра (22 = 13 + 9)', () => {
     }
   })
 
-  it('GLOBAL_MAX_SCORES содержит все 22 кода', () => {
+  it('GLOBAL_MAX_SCORES содержит все 27 кодов', () => {
     expect(Object.keys(GLOBAL_MAX_SCORES).sort()).toEqual([...ALL_SCALE_CODES].sort())
   })
 })
 
 describe('экспериментальные шкалы (этап 5.5, вне ядра)', () => {
-  it('EXPERIMENTAL_SCALE_CODES — 3 кода, ни один не в ядре 22', () => {
+  it('EXPERIMENTAL_SCALE_CODES — 3 кода, ни один не в ядре 27', () => {
     expect(EXPERIMENTAL_SCALE_CODES).toEqual(['RES_PHYS', 'RES_AFF', 'SPEC_INT'])
     for (const code of EXPERIMENTAL_SCALE_CODES) {
       expect(ALL_SCALE_CODES as string[], `${code} не должен быть в ядре`).not.toContain(code)
     }
   })
 
-  it('SCORED_SCALE_CODES = ядро 22 + экспериментальные 3 = 25 уникальных', () => {
-    expect(SCORED_SCALE_CODES).toHaveLength(25)
-    expect(new Set(SCORED_SCALE_CODES).size).toBe(25)
+  it('SCORED_SCALE_CODES = ядро 27 + экспериментальные 3 = 30 уникальных', () => {
+    expect(SCORED_SCALE_CODES).toHaveLength(30)
+    expect(new Set(SCORED_SCALE_CODES).size).toBe(30)
     for (const code of ALL_SCALE_CODES) {
       expect(SCORED_SCALE_CODES).toContain(code)
     }

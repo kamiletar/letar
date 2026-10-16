@@ -73,7 +73,7 @@ export function ForProfessionalsView({ locale }: { locale: string }) {
             </Table.Root>
           </Table.ScrollArea>
           <Text>
-            {t('methodology.core', { validatedScales: CORE_SCALE_COUNT - 1, coreScales: CORE_SCALE_COUNT })}
+            {t('methodology.core', { coreScales: CORE_SCALE_COUNT })}
           </Text>
           <Text>
             {t('methodology.experimental', { coreScales: CORE_SCALE_COUNT })}

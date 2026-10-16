@@ -55,6 +55,8 @@ export function ExperimentalScalesBlock({ scores, relevantCounts }: Experimental
         <VStack gap={4} align="stretch">
           {EXPERIMENTAL_SCALES.map((scale) => {
             const value = scores[scale.code] ?? 0
+            const count = relevantCounts?.[scale.code] ?? 0
+            const hasAnswers = count > 0
             return (
               <Box key={scale.code}>
                 <HStack justify="space-between" mb={1}>
@@ -67,13 +69,16 @@ export function ExperimentalScalesBlock({ scores, relevantCounts }: Experimental
                     </Badge>
                   </HStack>
                   <Text fontWeight="bold" fontSize="sm" color="fg.muted">
-                    {value}%
+                    {hasAnswers ? `${value}%` : t('noData')}
                   </Text>
                 </HStack>
                 {/* Полоса балла */}
-                <ScoreBar value={value} color={scale.color} mb={2} />
+                {hasAnswers && <ScoreBar value={value} color={scale.color} mb={2} />}
+                <Text fontSize="xs" color="fg.subtle" mb={2}>
+                  {t('answered', { count })}
+                </Text>
                 <Text fontSize="xs" color="fg.muted">
-                  {value >= 50
+                  {!hasAnswers ? t('notInterpreted') : value >= 50
                     ? isRu
                       ? scale.whenHigh
                       : scale.whenHighEn

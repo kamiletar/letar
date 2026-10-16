@@ -1,123 +1,208 @@
 [
   {
-    "_facet": "Удержание внимания",
-    "scenario": "Коллега пятнадцать минут объясняет по телефону, как оформить документы, — скучно, но важно.",
-    "scenarioEn": "A colleague spends fifteen minutes on the phone explaining how to fill in some paperwork — dull, but important.",
+    "_facet": "Внимание к деталям",
+    "_reverse": false,
+    "_reviewVersion": 2,
+    "scenario": "За последние шесть месяцев как часто в обычных условиях, с привычной помощью и лечением, если они есть, в знакомых повседневных заданиях вы пропускаете важную деталь, хотя знаете, как выполнить задание? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often in your usual circumstances, with any support or treatment you normally use, you miss an important detail in a familiar everyday task even though you know how to do it? If you have not experienced such situations or cannot answer, skip this question.",
     "options": [
       {
-        "text": "Где-то на середине ловлю себя на том, что думаю о своём, и прошу повторить",
-        "textEn": "Somewhere in the middle I realise my mind has wandered off, and I ask them to repeat it",
-        "scoring": {
-          "INA": 3
-        }
-      },
-      {
-        "text": "Слушаю и параллельно записываю ключевые шаги",
-        "textEn": "I listen and jot down the key steps as we go",
+        "text": "Никогда или почти никогда",
+        "textEn": "Never or almost never",
         "scoring": {}
       },
       {
-        "text": "Прошу прислать то же самое письмом — так надёжнее",
-        "textEn": "I ask them to send the same thing by email — that's safer",
+        "text": "Редко",
+        "textEn": "Rarely",
         "scoring": {
           "INA": 1
         }
       },
       {
-        "text": "Дослушиваю и задаю пару уточняющих вопросов",
-        "textEn": "I hear them out and ask a couple of follow-up questions",
-        "scoring": {}
+        "text": "Часто",
+        "textEn": "Often",
+        "scoring": {
+          "INA": 2
+        }
+      },
+      {
+        "text": "Почти каждый раз",
+        "textEn": "Almost every time",
+        "scoring": {
+          "INA": 3
+        }
       }
     ]
   },
   {
-    "_facet": "Доведение до конца",
-    "scenario": "Дома копятся незаконченные дела: полусобранная полка, начатый онлайн-курс, одна переклеенная стена. Как обычно складываются такие проекты у вас?",
-    "scenarioEn": "Unfinished things pile up at home: a half-assembled shelf, an online course you started, one wall you re-papered. How do projects like these usually go for you?",
+    "_facet": "Удержание внимания",
+    "_reverse": false,
+    "_reviewVersion": 2,
+    "scenario": "За последние шесть месяцев как часто в обычных условиях, с привычной помощью и лечением, если они есть, во время необходимого, но однообразного дела ваше внимание уходит от задачи? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often in your usual circumstances, with any support or treatment you normally use, your attention drifts away during a necessary but repetitive task? If you have not experienced such situations or cannot answer, skip this question.",
     "options": [
       {
-        "text": "Если начал(а), довожу — пусть медленно",
-        "textEn": "If I've started, I finish — even if slowly",
+        "text": "Никогда или почти никогда",
+        "textEn": "Never or almost never",
         "scoring": {}
       },
       {
-        "text": "Начинаю с азартом, но как только становится рутинно — бросаю ради нового",
-        "textEn": "I start with a lot of excitement, but once it turns routine I drop it for something new",
+        "text": "Редко",
+        "textEn": "Rarely",
         "scoring": {
-          "INA": 3
+          "INA": 1
         }
       },
       {
-        "text": "Незаконченного почти нет: редко берусь за то, что не успею",
-        "textEn": "There's hardly anything unfinished: I rarely take on what I can't get done",
+        "text": "Часто",
+        "textEn": "Often",
+        "scoring": {
+          "INA": 2
+        }
+      },
+      {
+        "text": "Почти каждый раз",
+        "textEn": "Almost every time",
+        "scoring": {
+          "INA": 3
+        }
+      }
+    ]
+  },
+  {
+    "_facet": "Слушание",
+    "_reverse": false,
+    "_reviewVersion": 2,
+    "scenario": "За последние шесть месяцев как часто в обычных условиях, с привычной помощью и лечением, если они есть, в разговоре один на один вы обнаруживаете, что пропустили часть сказанного, хотя хотели слушать? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often in your usual circumstances, with any support or treatment you normally use, in a one-to-one conversation you realize you missed part of what was said even though you wanted to listen? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": [
+      {
+        "text": "Никогда или почти никогда",
+        "textEn": "Never or almost never",
         "scoring": {}
       },
       {
-        "text": "Доделываю, только когда кто-то ждёт результат или горит срок",
-        "textEn": "I only finish when someone is waiting for the result or a deadline is looming",
+        "text": "Редко",
+        "textEn": "Rarely",
         "scoring": {
           "INA": 1
+        }
+      },
+      {
+        "text": "Часто",
+        "textEn": "Often",
+        "scoring": {
+          "INA": 2
+        }
+      },
+      {
+        "text": "Почти каждый раз",
+        "textEn": "Almost every time",
+        "scoring": {
+          "INA": 3
+        }
+      }
+    ]
+  },
+  {
+    "_facet": "Завершение",
+    "_reverse": false,
+    "_reviewVersion": 2,
+    "scenario": "За последние шесть месяцев как часто в обычных условиях, с привычной помощью и лечением, если они есть, вы оставляете необходимое дело незавершённым, переключившись на другое, хотя решили его закончить? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often in your usual circumstances, with any support or treatment you normally use, you leave a necessary task unfinished after switching to something else even though you intended to finish it? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": [
+      {
+        "text": "Никогда или почти никогда",
+        "textEn": "Never or almost never",
+        "scoring": {}
+      },
+      {
+        "text": "Редко",
+        "textEn": "Rarely",
+        "scoring": {
+          "INA": 1
+        }
+      },
+      {
+        "text": "Часто",
+        "textEn": "Often",
+        "scoring": {
+          "INA": 2
+        }
+      },
+      {
+        "text": "Почти каждый раз",
+        "textEn": "Almost every time",
+        "scoring": {
+          "INA": 3
         }
       }
     ]
   },
   {
     "_facet": "Организация",
-    "_reverse": true,
-    "scenario": "В один день нужно оплатить квитанцию, забрать посылку, записаться к врачу и вернуть книгу в библиотеку.",
-    "scenarioEn": "In a single day you need to pay a bill, pick up a parcel, book a doctor's appointment and return a library book.",
+    "_reverse": false,
+    "_reviewVersion": 2,
+    "scenario": "За последние шесть месяцев как часто в обычных условиях, с привычной помощью и лечением, если они есть, вам трудно выстроить порядок шагов в обычном деле, даже когда понятно, какой результат нужен? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often in your usual circumstances, with any support or treatment you normally use, you struggle to put the steps of an everyday task in order even when the desired outcome is clear? If you have not experienced such situations or cannot answer, skip this question.",
     "options": [
       {
-        "text": "Держу всё в голове и спокойно успеваю",
-        "textEn": "I keep it all in my head and get through it calmly",
+        "text": "Никогда или почти никогда",
+        "textEn": "Never or almost never",
         "scoring": {}
       },
       {
-        "text": "Выстраиваю маршрут, чтобы всё было по пути",
-        "textEn": "I plan a route so everything is on the way",
-        "scoring": {}
-      },
-      {
-        "text": "Пишу список и ставлю напоминание на каждый пункт — без них половина точно выпадет",
-        "textEn": "I write a list and set a reminder for each item — without them half of it would definitely slip",
-        "scoring": {
-          "INA": 3
-        }
-      },
-      {
-        "text": "Делаю одно-два дела, остальное как-то само переезжает на потом",
-        "textEn": "I do one or two things, and the rest somehow drifts to later",
-        "scoring": {
-          "INA": 2
-        }
-      }
-    ]
-  },
-  {
-    "_facet": "Забывчивость",
-    "scenario": "Друг напоминает: «Ты обещал(а) вернуть зарядку ещё на прошлой неделе».",
-    "scenarioEn": "A friend reminds you: \"You promised to give my charger back last week.\"",
-    "options": [
-      {
-        "text": "Извиняюсь: закрутился(ась), со мной такое бывает редко",
-        "textEn": "I apologise: things got hectic, that rarely happens to me",
-        "scoring": {}
-      },
-      {
-        "text": "Помню, просто было неудобно заехать",
-        "textEn": "I remembered, it just wasn't convenient to drop by",
-        "scoring": {}
-      },
-      {
-        "text": "Тут же ставлю напоминание в телефон, иначе забуду снова",
-        "textEn": "I set a reminder on my phone right away, or I'll forget again",
+        "text": "Редко",
+        "textEn": "Rarely",
         "scoring": {
           "INA": 1
         }
       },
       {
-        "text": "Опять вылетело из головы — со мной это постоянно, хотя я правда собирался(ась)",
-        "textEn": "It slipped my mind again — that happens to me all the time, even though I really meant to",
+        "text": "Часто",
+        "textEn": "Often",
+        "scoring": {
+          "INA": 2
+        }
+      },
+      {
+        "text": "Почти каждый раз",
+        "textEn": "Almost every time",
+        "scoring": {
+          "INA": 3
+        }
+      }
+    ]
+  },
+  {
+    "_facet": "Длительное умственное усилие",
+    "_reverse": false,
+    "_reviewVersion": 2,
+    "scenario": "За последние шесть месяцев как часто в обычных условиях, с привычной помощью и лечением, если они есть, вы откладываете посильную, но требующую длительного внимания задачу именно из-за трудности удерживать умственное усилие? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often in your usual circumstances, with any support or treatment you normally use, you put off a manageable task requiring sustained attention specifically because keeping up the mental effort feels difficult? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": [
+      {
+        "text": "Никогда или почти никогда",
+        "textEn": "Never or almost never",
+        "scoring": {}
+      },
+      {
+        "text": "Редко",
+        "textEn": "Rarely",
+        "scoring": {
+          "INA": 1
+        }
+      },
+      {
+        "text": "Часто",
+        "textEn": "Often",
+        "scoring": {
+          "INA": 2
+        }
+      },
+      {
+        "text": "Почти каждый раз",
+        "textEn": "Almost every time",
         "scoring": {
           "INA": 3
         }
@@ -126,30 +211,33 @@
   },
   {
     "_facet": "Потеря вещей",
-    "_reverse": true,
-    "scenario": "Утро, вы выходите из дома.",
-    "scenarioEn": "Morning, you're heading out of the house.",
+    "_reverse": false,
+    "_reviewVersion": 2,
+    "scenario": "За последние шесть месяцев как часто в обычных условиях, с привычной помощью и лечением, если они есть, вы не можете найти нужную для текущего дела вещь, потому что не помните, куда её положили? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often in your usual circumstances, with any support or treatment you normally use, you cannot find something needed for a task because you do not remember where you put it? If you have not experienced such situations or cannot answer, skip this question.",
     "options": [
       {
-        "text": "Просто беру всё нужное и выхожу",
-        "textEn": "I just grab what I need and go",
+        "text": "Никогда или почти никогда",
+        "textEn": "Never or almost never",
         "scoring": {}
       },
       {
-        "text": "Минут десять ищу ключи или телефон — обычное утро",
-        "textEn": "I spend ten minutes looking for my keys or phone — a normal morning",
+        "text": "Редко",
+        "textEn": "Rarely",
+        "scoring": {
+          "INA": 1
+        }
+      },
+      {
+        "text": "Часто",
+        "textEn": "Often",
         "scoring": {
           "INA": 2
         }
       },
       {
-        "text": "Проверяю, выключены ли плита и утюг",
-        "textEn": "I check that the stove and the iron are off",
-        "scoring": {}
-      },
-      {
-        "text": "У меня жёсткое правило: ключи, кошелёк, телефон — всегда в одном месте, иначе начинаются поиски",
-        "textEn": "I have a strict rule: keys, wallet and phone always go in the same spot — otherwise the hunt begins",
+        "text": "Почти каждый раз",
+        "textEn": "Almost every time",
         "scoring": {
           "INA": 3
         }
@@ -157,62 +245,71 @@
     ]
   },
   {
-    "_facet": "Отвлекаемость",
-    "scenario": "Вы пишете отчёт в опенспейсе: рядом обсуждают чей-то отпуск, у кого-то звонит телефон.",
-    "scenarioEn": "You're writing a report in an open-plan office: nearby, people are discussing someone's holiday and a phone keeps ringing.",
+    "_facet": "Отвлечение",
+    "_reverse": false,
+    "_reviewVersion": 2,
+    "scenario": "За последние шесть месяцев как часто в обычных условиях, с привычной помощью и лечением, если они есть, посторонний звук или движение отвлекает вас от дела, и вам трудно вернуться к нему? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often in your usual circumstances, with any support or treatment you normally use, an unrelated sound or movement draws you away from a task and you find it hard to return to it? If you have not experienced such situations or cannot answer, skip this question.",
     "options": [
       {
-        "text": "Надеваю наушники и продолжаю",
-        "textEn": "I put on headphones and keep going",
+        "text": "Никогда или почти никогда",
+        "textEn": "Never or almost never",
         "scoring": {}
       },
       {
-        "text": "Шум мне не мешает, даже наоборот",
-        "textEn": "Noise doesn't bother me — if anything, it helps",
-        "scoring": {}
-      },
-      {
-        "text": "Каждая фраза рядом выдёргивает меня — к концу часа написано два абзаца",
-        "textEn": "Every snippet of conversation pulls me out — by the end of the hour I've written two paragraphs",
+        "text": "Редко",
+        "textEn": "Rarely",
         "scoring": {
-          "INA": 3
+          "INA": 1
         }
       },
       {
-        "text": "Ухожу в переговорку потише",
-        "textEn": "I move to a quieter meeting room",
-        "scoring": {}
+        "text": "Часто",
+        "textEn": "Often",
+        "scoring": {
+          "INA": 2
+        }
+      },
+      {
+        "text": "Почти каждый раз",
+        "textEn": "Almost every time",
+        "scoring": {
+          "INA": 3
+        }
       }
     ]
   },
   {
-    "_facet": "Внимание к деталям",
-    "_reverse": true,
-    "scenario": "Вы заполняете заявление на двадцать полей: даты, номера документов, адреса.",
-    "scenarioEn": "You're filling in an application with twenty fields: dates, document numbers, addresses.",
+    "_facet": "Забывчивость",
+    "_reverse": false,
+    "_reviewVersion": 2,
+    "scenario": "За последние шесть месяцев как часто в обычных условиях, с привычной помощью и лечением, если они есть, повседневная договорённость выпадает у вас из памяти, хотя вы собирались её выполнить? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often in your usual circumstances, with any support or treatment you normally use, you forget an everyday commitment even though you intended to follow through? If you have not experienced such situations or cannot answer, skip this question.",
     "options": [
       {
-        "text": "Перечитываю дважды: знаю, что иначе пропущу опечатку, не ту дату или вложение",
-        "textEn": "I reread it twice: I know that otherwise I'll miss a typo, a wrong date or the attachment",
+        "text": "Никогда или почти никогда",
+        "textEn": "Never or almost never",
+        "scoring": {}
+      },
+      {
+        "text": "Редко",
+        "textEn": "Rarely",
         "scoring": {
-          "INA": 3
+          "INA": 1
         }
       },
       {
-        "text": "Отправляю сразу — обычно всё в порядке",
-        "textEn": "I send it straight away — it's usually fine",
-        "scoring": {}
-      },
-      {
-        "text": "Прошу кого-нибудь глянуть, если дело важное",
-        "textEn": "If it matters, I ask someone to look it over",
-        "scoring": {}
-      },
-      {
-        "text": "Замечаю ошибку уже после отправки — со мной это частая история",
-        "textEn": "I notice the mistake only after I've sent it — that's a familiar story for me",
+        "text": "Часто",
+        "textEn": "Often",
         "scoring": {
           "INA": 2
+        }
+      },
+      {
+        "text": "Почти каждый раз",
+        "textEn": "Almost every time",
+        "scoring": {
+          "INA": 3
         }
       }
     ]

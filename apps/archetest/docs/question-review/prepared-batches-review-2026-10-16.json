@@ -1,0 +1,4919 @@
+{
+  "date": "2026-10-16",
+  "author": "Codex — внутреннее содержательное ревью",
+  "status": "content-reviewed-for-pilot",
+  "empiricalValidation": false,
+  "interviewsConducted": false,
+  "bankBefore": 2126,
+  "bankAfter": 2209,
+  "sourceHashes": {
+    "adhd/INA": "71e360d71959a6ded757767f31eaf832271592b86f1aca332d96a4c0e559bded",
+    "adhd/HYI": "9ac4b7ef75f7fc8adeef547440b54592d544f9fc7f4e279d0ee7da5bdb59a2a5",
+    "attachment/AAX": "5e4af66b465405fd83fa96b00a6691dc7156bc9e12a2c3232aef795ec1fad40b",
+    "attachment/AAV": "8dc5d8954bb2bdfb9444bfacf72a9362e2d3ea2d08839224e02a3f17f9e52ed0",
+    "hh/HON": "aa4365e27c6e719606a8e3c832e4a328284d5fb1254b282023305054ce1e1ecb",
+    "rare/SAD": "1eb8a8a733af8237d66724ba0a17b1e7ec785676f5c0eb2d98f65f30ab7c2443",
+    "rare/ASD": "5020c39ccd88b4ecfcf39f50aa83a6303212b000bbfb16defd9ab88d2829788e",
+    "rare/MAS": "5ec979c0514349d6b4cc0205b5654ffe27620094df0c413383c3daa94f1b8e85",
+    "rare/ALX": "d7583c911e771089b59ed653307557ee98f4c237b34d422a67a2add07e7495c0"
+  },
+  "revisedHashes": {
+    "adhd/INA": "0fa8260f81ee0425b50fd168ae4efdaa3aa4486dc7680c560c755c05df1c82fd",
+    "adhd/HYI": "10d3f1f58a31bb46382102ad91394b29f190d13cb8a20934b96724560e0a8a6d",
+    "attachment/AAX": "fb6b582539167d6c6a180dc5e08fb0bc875127cbd2c59c137d99f7a163996693",
+    "attachment/AAV": "0855bf9b4379847eb11feb75a16b989017ac57b8fd4aca9e6bb851c0c3b7d147",
+    "hh/HON": "6efeae8ec1e40d8bb305960be4657b5f8786afd6dac12ff7a1bd42a633531ad9",
+    "rare/SAD": "60a68a71431cebbae4b577e2609f639185a9eca718a2e091fd455807605d6d17",
+    "rare/ASD": "b091e603658f5d92399c044fc434f0973e7b1ebb2b13398c9cc5b8df6622374b",
+    "rare/MAS": "dc53710aad347c3554baf2cfabb9fed7e1ed622e2aa8ef5aeaa2a9838e378766",
+    "rare/ALX": "647a6e4ddd849f27de6d89a22178efb9eb2802740973c0bf808a015870888e3b"
+  },
+  "items": [
+    {
+      "source": "adhd/INA",
+      "number": 1,
+      "before": {
+        "_facet": "Удержание внимания",
+        "scenario": "Коллега пятнадцать минут объясняет по телефону, как оформить документы, — скучно, но важно.",
+        "scenarioEn": "A colleague spends fifteen minutes on the phone explaining how to fill in some paperwork — dull, but important.",
+        "options": [
+          {
+            "text": "Где-то на середине ловлю себя на том, что думаю о своём, и прошу повторить",
+            "textEn": "Somewhere in the middle I realise my mind has wandered off, and I ask them to repeat it",
+            "scoring": {
+              "INA": 3
+            }
+          },
+          {
+            "text": "Слушаю и параллельно записываю ключевые шаги",
+            "textEn": "I listen and jot down the key steps as we go",
+            "scoring": {}
+          },
+          {
+            "text": "Прошу прислать то же самое письмом — так надёжнее",
+            "textEn": "I ask them to send the same thing by email — that's safer",
+            "scoring": {
+              "INA": 1
+            }
+          },
+          {
+            "text": "Дослушиваю и задаю пару уточняющих вопросов",
+            "textEn": "I hear them out and ask a couple of follow-up questions",
+            "scoring": {}
+          }
+        ]
+      },
+      "originalKeys": [
+        {
+          "INA": 3
+        },
+        {},
+        {
+          "INA": 1
+        },
+        {}
+      ],
+      "defect": "Смешаны невнимательность и полезные способы слушать.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        2
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Недосып, тревога, состояние здоровья или перегрузка тоже могут дать такой ответ; причина из пункта не устанавливается.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "adhd/INA",
+      "number": 2,
+      "before": {
+        "_facet": "Доведение до конца",
+        "scenario": "Дома копятся незаконченные дела: полусобранная полка, начатый онлайн-курс, одна переклеенная стена. Как обычно складываются такие проекты у вас?",
+        "scenarioEn": "Unfinished things pile up at home: a half-assembled shelf, an online course you started, one wall you re-papered. How do projects like these usually go for you?",
+        "options": [
+          {
+            "text": "Если начал(а), довожу — пусть медленно",
+            "textEn": "If I've started, I finish — even if slowly",
+            "scoring": {}
+          },
+          {
+            "text": "Начинаю с азартом, но как только становится рутинно — бросаю ради нового",
+            "textEn": "I start with a lot of excitement, but once it turns routine I drop it for something new",
+            "scoring": {
+              "INA": 3
+            }
+          },
+          {
+            "text": "Незаконченного почти нет: редко берусь за то, что не успею",
+            "textEn": "There's hardly anything unfinished: I rarely take on what I can't get done",
+            "scoring": {}
+          },
+          {
+            "text": "Доделываю, только когда кто-то ждёт результат или горит срок",
+            "textEn": "I only finish when someone is waiting for the result or a deadline is looming",
+            "scoring": {
+              "INA": 1
+            }
+          }
+        ]
+      },
+      "originalKeys": [
+        {},
+        {
+          "INA": 3
+        },
+        {},
+        {
+          "INA": 1
+        }
+      ],
+      "defect": "Завершение смешано с интересом и внешним сроком.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        4
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Недосып, тревога, состояние здоровья или перегрузка тоже могут дать такой ответ; причина из пункта не устанавливается.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "adhd/INA",
+      "number": 3,
+      "before": {
+        "_facet": "Организация",
+        "_reverse": true,
+        "scenario": "В один день нужно оплатить квитанцию, забрать посылку, записаться к врачу и вернуть книгу в библиотеку.",
+        "scenarioEn": "In a single day you need to pay a bill, pick up a parcel, book a doctor's appointment and return a library book.",
+        "options": [
+          {
+            "text": "Держу всё в голове и спокойно успеваю",
+            "textEn": "I keep it all in my head and get through it calmly",
+            "scoring": {}
+          },
+          {
+            "text": "Выстраиваю маршрут, чтобы всё было по пути",
+            "textEn": "I plan a route so everything is on the way",
+            "scoring": {}
+          },
+          {
+            "text": "Пишу список и ставлю напоминание на каждый пункт — без них половина точно выпадет",
+            "textEn": "I write a list and set a reminder for each item — without them half of it would definitely slip",
+            "scoring": {
+              "INA": 3
+            }
+          },
+          {
+            "text": "Делаю одно-два дела, остальное как-то само переезжает на потом",
+            "textEn": "I do one or two things, and the rest somehow drifts to later",
+            "scoring": {
+              "INA": 2
+            }
+          }
+        ]
+      },
+      "originalKeys": [
+        {},
+        {},
+        {
+          "INA": 3
+        },
+        {
+          "INA": 2
+        }
+      ],
+      "defect": "Список оценивается выше сохраняющейся трудности.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        5
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Недосып, тревога, состояние здоровья или перегрузка тоже могут дать такой ответ; причина из пункта не устанавливается.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "adhd/INA",
+      "number": 4,
+      "before": {
+        "_facet": "Забывчивость",
+        "scenario": "Друг напоминает: «Ты обещал(а) вернуть зарядку ещё на прошлой неделе».",
+        "scenarioEn": "A friend reminds you: \"You promised to give my charger back last week.\"",
+        "options": [
+          {
+            "text": "Извиняюсь: закрутился(ась), со мной такое бывает редко",
+            "textEn": "I apologise: things got hectic, that rarely happens to me",
+            "scoring": {}
+          },
+          {
+            "text": "Помню, просто было неудобно заехать",
+            "textEn": "I remembered, it just wasn't convenient to drop by",
+            "scoring": {}
+          },
+          {
+            "text": "Тут же ставлю напоминание в телефон, иначе забуду снова",
+            "textEn": "I set a reminder on my phone right away, or I'll forget again",
+            "scoring": {
+              "INA": 1
+            }
+          },
+          {
+            "text": "Опять вылетело из головы — со мной это постоянно, хотя я правда собирался(ась)",
+            "textEn": "It slipped my mind again — that happens to me all the time, even though I really meant to",
+            "scoring": {
+              "INA": 3
+            }
+          }
+        ]
+      },
+      "originalKeys": [
+        {},
+        {},
+        {
+          "INA": 1
+        },
+        {
+          "INA": 3
+        }
+      ],
+      "defect": "Напоминание смешано с частотой забывания.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        9
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Недосып, тревога, состояние здоровья или перегрузка тоже могут дать такой ответ; причина из пункта не устанавливается.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "adhd/INA",
+      "number": 5,
+      "before": {
+        "_facet": "Потеря вещей",
+        "_reverse": true,
+        "scenario": "Утро, вы выходите из дома.",
+        "scenarioEn": "Morning, you're heading out of the house.",
+        "options": [
+          {
+            "text": "Просто беру всё нужное и выхожу",
+            "textEn": "I just grab what I need and go",
+            "scoring": {}
+          },
+          {
+            "text": "Минут десять ищу ключи или телефон — обычное утро",
+            "textEn": "I spend ten minutes looking for my keys or phone — a normal morning",
+            "scoring": {
+              "INA": 2
+            }
+          },
+          {
+            "text": "Проверяю, выключены ли плита и утюг",
+            "textEn": "I check that the stove and the iron are off",
+            "scoring": {}
+          },
+          {
+            "text": "У меня жёсткое правило: ключи, кошелёк, телефон — всегда в одном месте, иначе начинаются поиски",
+            "textEn": "I have a strict rule: keys, wallet and phone always go in the same spot — otherwise the hunt begins",
+            "scoring": {
+              "INA": 3
+            }
+          }
+        ]
+      },
+      "originalKeys": [
+        {},
+        {
+          "INA": 2
+        },
+        {},
+        {
+          "INA": 3
+        }
+      ],
+      "defect": "Система хранения ошибочно даёт больше баллов, чем потеря.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        7
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Недосып, тревога, состояние здоровья или перегрузка тоже могут дать такой ответ; причина из пункта не устанавливается.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "adhd/INA",
+      "number": 6,
+      "before": {
+        "_facet": "Отвлекаемость",
+        "scenario": "Вы пишете отчёт в опенспейсе: рядом обсуждают чей-то отпуск, у кого-то звонит телефон.",
+        "scenarioEn": "You're writing a report in an open-plan office: nearby, people are discussing someone's holiday and a phone keeps ringing.",
+        "options": [
+          {
+            "text": "Надеваю наушники и продолжаю",
+            "textEn": "I put on headphones and keep going",
+            "scoring": {}
+          },
+          {
+            "text": "Шум мне не мешает, даже наоборот",
+            "textEn": "Noise doesn't bother me — if anything, it helps",
+            "scoring": {}
+          },
+          {
+            "text": "Каждая фраза рядом выдёргивает меня — к концу часа написано два абзаца",
+            "textEn": "Every snippet of conversation pulls me out — by the end of the hour I've written two paragraphs",
+            "scoring": {
+              "INA": 3
+            }
+          },
+          {
+            "text": "Ухожу в переговорку потише",
+            "textEn": "I move to a quieter meeting room",
+            "scoring": {}
+          }
+        ]
+      },
+      "originalKeys": [
+        {},
+        {},
+        {
+          "INA": 3
+        },
+        {}
+      ],
+      "defect": "Исключительный шум и объём отчёта не задают частоту.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        8
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Недосып, тревога, состояние здоровья или перегрузка тоже могут дать такой ответ; причина из пункта не устанавливается.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "adhd/INA",
+      "number": 7,
+      "before": {
+        "_facet": "Внимание к деталям",
+        "_reverse": true,
+        "scenario": "Вы заполняете заявление на двадцать полей: даты, номера документов, адреса.",
+        "scenarioEn": "You're filling in an application with twenty fields: dates, document numbers, addresses.",
+        "options": [
+          {
+            "text": "Перечитываю дважды: знаю, что иначе пропущу опечатку, не ту дату или вложение",
+            "textEn": "I reread it twice: I know that otherwise I'll miss a typo, a wrong date or the attachment",
+            "scoring": {
+              "INA": 3
+            }
+          },
+          {
+            "text": "Отправляю сразу — обычно всё в порядке",
+            "textEn": "I send it straight away — it's usually fine",
+            "scoring": {}
+          },
+          {
+            "text": "Прошу кого-нибудь глянуть, если дело важное",
+            "textEn": "If it matters, I ask someone to look it over",
+            "scoring": {}
+          },
+          {
+            "text": "Замечаю ошибку уже после отправки — со мной это частая история",
+            "textEn": "I notice the mistake only after I've sent it — that's a familiar story for me",
+            "scoring": {
+              "INA": 2
+            }
+          }
+        ]
+      },
+      "originalKeys": [
+        {
+          "INA": 3
+        },
+        {},
+        {},
+        {
+          "INA": 2
+        }
+      ],
+      "defect": "Перепроверка ошибочно оценивается выше ошибки.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        1
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Недосып, тревога, состояние здоровья или перегрузка тоже могут дать такой ответ; причина из пункта не устанавливается.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "adhd/HYI",
+      "number": 1,
+      "before": {
+        "_facet": "Двигательное беспокойство",
+        "scenario": "Двухчасовое совещание, сидеть нужно на месте.",
+        "scenarioEn": "A two-hour meeting where you have to stay in your seat.",
+        "options": [
+          {
+            "text": "Сижу спокойно, если тема интересная",
+            "textEn": "I sit calmly if the topic is interesting",
+            "scoring": {}
+          },
+          {
+            "text": "Кручу ручку, качаю ногой, выхожу «за водой» — сидеть без движения тяжело",
+            "textEn": "I twirl a pen, jiggle my leg, step out \"for water\" — sitting still is hard",
+            "scoring": {
+              "HYI": 3
+            }
+          },
+          {
+            "text": "Сижу, но мысленно уже на другой задаче",
+            "textEn": "I stay seated, but in my head I've moved on to another task",
+            "scoring": {}
+          },
+          {
+            "text": "Устаю, но это обычная усталость",
+            "textEn": "I get tired, but it's ordinary tiredness",
+            "scoring": {}
+          }
+        ]
+      },
+      "originalKeys": [
+        {},
+        {
+          "HYI": 3
+        },
+        {},
+        {}
+      ],
+      "defect": "Двухчасовое сидение и интерес к теме дают разные основания ответа.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        1
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Недосып, тревога, состояние здоровья или перегрузка тоже могут дать такой ответ; причина из пункта не устанавливается.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "adhd/HYI",
+      "number": 2,
+      "before": {
+        "_facet": "Трудность ждать",
+        "scenario": "Очередь в поликлинике движется медленно, перед вами ещё человек десять.",
+        "scenarioEn": "The queue at the clinic is moving slowly; there are still about ten people ahead of you.",
+        "options": [
+          {
+            "text": "Достаю книгу или телефон и жду",
+            "textEn": "I take out a book or my phone and wait",
+            "scoring": {}
+          },
+          {
+            "text": "Разговариваю с соседями по очереди",
+            "textEn": "I chat with the people around me",
+            "scoring": {}
+          },
+          {
+            "text": "Ухожу и возвращаюсь позже, когда будет меньше народу",
+            "textEn": "I leave and come back later when it's less crowded",
+            "scoring": {
+              "HYI": 1
+            }
+          },
+          {
+            "text": "Через пять минут хожу туда-сюда и выясняю, кто за кем, — ждать для меня пытка",
+            "textEn": "Within five minutes I'm pacing and checking who's after whom — waiting is torture for me",
+            "scoring": {
+              "HYI": 3
+            }
+          }
+        ]
+      },
+      "originalKeys": [
+        {},
+        {},
+        {
+          "HYI": 1
+        },
+        {
+          "HYI": 3
+        }
+      ],
+      "defect": "Пять минут ожидания и уход из очереди не выделяют признак.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        8
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Недосып, тревога, состояние здоровья или перегрузка тоже могут дать такой ответ; причина из пункта не устанавливается.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "adhd/HYI",
+      "number": 3,
+      "before": {
+        "_facet": "Перебивание",
+        "_reverse": true,
+        "scenario": "Близкий человек подробно рассказывает о своём дне, а вам уже понятно, к чему идёт рассказ.",
+        "scenarioEn": "Someone close to you is telling you about their day in detail, and you can already see where the story is going.",
+        "options": [
+          {
+            "text": "Дослушиваю — интересно, как расскажет",
+            "textEn": "I hear them out — I'm curious how they'll tell it",
+            "scoring": {}
+          },
+          {
+            "text": "Нарочно держу паузу и прикусываю язык — иначе закончу фразу за собеседника, я за собой это знаю",
+            "textEn": "I deliberately pause and bite my tongue — otherwise I'll finish their sentence for them; I know this about myself",
+            "scoring": {
+              "HYI": 3
+            }
+          },
+          {
+            "text": "Договариваю мысль сам(а), чтобы ускорить",
+            "textEn": "I finish the thought myself to speed things up",
+            "scoring": {
+              "HYI": 2
+            }
+          },
+          {
+            "text": "Киваю, но думаю о своём",
+            "textEn": "I nod, but I'm thinking about my own stuff",
+            "scoring": {}
+          }
+        ]
+      },
+      "originalKeys": [
+        {},
+        {
+          "HYI": 3
+        },
+        {
+          "HYI": 2
+        },
+        {}
+      ],
+      "defect": "Успешная пауза ошибочно оценивается выше перебивания.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        9
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Недосып, тревога, состояние здоровья или перегрузка тоже могут дать такой ответ; причина из пункта не устанавливается.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "adhd/HYI",
+      "number": 4,
+      "before": {
+        "_facet": "Импульсивные решения",
+        "scenario": "В интернете попадается распродажа вещи, о которой вы раньше не думали, но выглядит здорово.",
+        "scenarioEn": "Online you come across a sale on something you'd never thought about, but it looks great.",
+        "options": [
+          {
+            "text": "Кладу в корзину и возвращаюсь через день-два",
+            "textEn": "I put it in the basket and come back a day or two later",
+            "scoring": {}
+          },
+          {
+            "text": "Сравниваю цены на других сайтах",
+            "textEn": "I compare prices on other sites",
+            "scoring": {}
+          },
+          {
+            "text": "Закрываю вкладку: раз не думал(а) о ней раньше, значит, не нужна",
+            "textEn": "I close the tab: if I hadn't thought about it before, I don't need it",
+            "scoring": {}
+          },
+          {
+            "text": "Оформляю заказ за пару минут — я вообще быстро решаю, а разбираюсь потом",
+            "textEn": "I place the order in a couple of minutes — I generally decide fast and figure things out later",
+            "scoring": {
+              "HYI": 3
+            }
+          }
+        ]
+      },
+      "originalKeys": [
+        {},
+        {},
+        {},
+        {
+          "HYI": 3
+        }
+      ],
+      "defect": "Спонтанная покупка смешана с ценой и интересом; заменить на отдельный признак.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        2
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Недосып, тревога, состояние здоровья или перегрузка тоже могут дать такой ответ; причина из пункта не устанавливается.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "adhd/HYI",
+      "number": 5,
+      "before": {
+        "_facet": "Внутренний двигатель",
+        "_reverse": true,
+        "scenario": "Впереди семь часов перелёта в кресле самолёта.",
+        "scenarioEn": "Seven hours of flying ahead of you, strapped into an aeroplane seat.",
+        "options": [
+          {
+            "text": "С удовольствием сплю или смотрю фильмы",
+            "textEn": "I'm happy to sleep or watch films",
+            "scoring": {}
+          },
+          {
+            "text": "Заранее набираю занятий на все семь часов и встаю пройтись каждый час — иначе к концу полёта буду как на иголках",
+            "textEn": "I pack enough to keep me busy for all seven hours and get up to walk every hour — otherwise by the end I'll be on edge",
+            "scoring": {
+              "HYI": 3
+            }
+          },
+          {
+            "text": "Читаю, иногда дремлю",
+            "textEn": "I read and doze off now and then",
+            "scoring": {}
+          },
+          {
+            "text": "Ёрзаю, то и дело встаю, листаю всё подряд — долго сидеть мне тяжело",
+            "textEn": "I fidget, keep getting up, flick through everything — sitting for long is hard for me",
+            "scoring": {
+              "HYI": 2
+            }
+          }
+        ]
+      },
+      "originalKeys": [
+        {},
+        {
+          "HYI": 3
+        },
+        {},
+        {
+          "HYI": 2
+        }
+      ],
+      "defect": "Семичасовой перелёт вызывает обычный дискомфорт; заменить на внутреннее беспокойство.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        3
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Недосып, тревога, состояние здоровья или перегрузка тоже могут дать такой ответ; причина из пункта не устанавливается.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "adhd/HYI",
+      "number": 6,
+      "before": {
+        "_facet": "Реплики на опережение",
+        "scenario": "На встрече с малознакомыми людьми разговор заходит о теме, в которой вы хорошо разбираетесь.",
+        "scenarioEn": "At a meeting with people you barely know, the conversation turns to a topic you know well.",
+        "options": [
+          {
+            "text": "Ответ вылетает раньше, чем договорят вопрос, — потом неловко, но удержаться трудно",
+            "textEn": "My answer comes out before they've finished the question — awkward afterwards, but hard to hold back",
+            "scoring": {
+              "HYI": 3
+            }
+          },
+          {
+            "text": "Жду паузы и тогда вступаю",
+            "textEn": "I wait for a pause and then join in",
+            "scoring": {}
+          },
+          {
+            "text": "Молчу, пока меня прямо не спросят",
+            "textEn": "I stay quiet until someone asks me directly",
+            "scoring": {}
+          },
+          {
+            "text": "Даю понять, что хочу сказать, и жду очереди",
+            "textEn": "I signal that I'd like to speak and wait my turn",
+            "scoring": {}
+          }
+        ]
+      },
+      "originalKeys": [
+        {
+          "HYI": 3
+        },
+        {},
+        {},
+        {}
+      ],
+      "defect": "Одна реплика не задаёт частоту; пересекается с перебиванием.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        7
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Недосып, тревога, состояние здоровья или перегрузка тоже могут дать такой ответ; причина из пункта не устанавливается.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "adhd/HYI",
+      "number": 7,
+      "before": {
+        "_facet": "Импульсивные реакции",
+        "_reverse": true,
+        "scenario": "Пришло сообщение, которое вас задело.",
+        "scenarioEn": "You get a message that stings.",
+        "options": [
+          {
+            "text": "Спокойно пишу ответ — эмоции не мешают",
+            "textEn": "I calmly write a reply — the emotions don't get in the way",
+            "scoring": {}
+          },
+          {
+            "text": "Не отвечаю вовсе",
+            "textEn": "I don't reply at all",
+            "scoring": {}
+          },
+          {
+            "text": "Отвечаю сразу, как чувствую",
+            "textEn": "I reply straight away, the way I feel",
+            "scoring": {
+              "HYI": 2
+            }
+          },
+          {
+            "text": "Выжидаю хотя бы час, прежде чем отвечать, — по опыту знаю, что с первого порыва наговорю лишнего",
+            "textEn": "I wait at least an hour before replying — I know from experience that in the first rush I'll say too much",
+            "scoring": {
+              "HYI": 3
+            }
+          }
+        ]
+      },
+      "originalKeys": [
+        {},
+        {},
+        {
+          "HYI": 2
+        },
+        {
+          "HYI": 3
+        }
+      ],
+      "defect": "Эмоциональный ответ и полезная пауза не выделяют гиперактивность; заменить на вмешательство.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        5
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Недосып, тревога, состояние здоровья или перегрузка тоже могут дать такой ответ; причина из пункта не устанавливается.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "attachment/AAX",
+      "number": 1,
+      "before": {
+        "_facet": "Чувствительность к сигналам",
+        "scenario": "Партнёр весь вечер отвечает на ваши сообщения коротко и без смайликов.",
+        "scenarioEn": "All evening your partner has been replying to your messages briefly, without a single emoji.",
+        "options": [
+          {
+            "text": "Начинаю перебирать, что сделал(а) не так, и не могу успокоиться, пока не спрошу",
+            "textEn": "I start going over what I might have done wrong and can't settle until I ask",
+            "scoring": {
+              "AAX": 3
+            }
+          },
+          {
+            "text": "Наверное, устал(а) или занят(а) — поговорим, когда увидимся",
+            "textEn": "They're probably tired or busy — we'll talk when we see each other",
+            "scoring": {}
+          },
+          {
+            "text": "Тоже отвечаю коротко",
+            "textEn": "I keep my replies short too",
+            "scoring": {}
+          },
+          {
+            "text": "Пишу «Всё в порядке?» — и дальше не переживаю",
+            "textEn": "I write \"Everything OK?\" and then stop worrying about it",
+            "scoring": {
+              "AAX": 1
+            }
+          }
+        ]
+      },
+      "originalKeys": [
+        {
+          "AAX": 3
+        },
+        {},
+        {},
+        {
+          "AAX": 1
+        }
+      ],
+      "defect": "Короткое сообщение может означать усталость; выделена длительная тревога о связи.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        1
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Реальная ненадёжность или опасность отношений может объяснить ответ; не распространять вывод на все отношения.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "attachment/AAX",
+      "number": 2,
+      "before": {
+        "_facet": "Потребность в подтверждении",
+        "scenario": "Близкий человек редко говорит о чувствах словами — зато заботится делами.",
+        "scenarioEn": "Someone close to you rarely puts their feelings into words — they show they care through what they do.",
+        "options": [
+          {
+            "text": "Дела для меня важнее слов",
+            "textEn": "Actions matter more to me than words",
+            "scoring": {}
+          },
+          {
+            "text": "Иногда прошу сказать это вслух — и мне достаточно",
+            "textEn": "Now and then I ask them to say it out loud — and that's enough for me",
+            "scoring": {
+              "AAX": 1
+            }
+          },
+          {
+            "text": "Мне этого мало: без слов я то и дело сомневаюсь, что меня ещё любят",
+            "textEn": "That isn't enough for me: without the words I keep doubting that I'm still loved",
+            "scoring": {
+              "AAX": 3
+            }
+          },
+          {
+            "text": "Сам(а) тоже не любитель говорить о чувствах",
+            "textEn": "I'm not one for talking about feelings either",
+            "scoring": {}
+          }
+        ]
+      },
+      "originalKeys": [
+        {},
+        {
+          "AAX": 1
+        },
+        {
+          "AAX": 3
+        },
+        {}
+      ],
+      "defect": "Потребность в словах не равна тревоге; выделено повторное сомнение после подтверждения.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        2
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Реальная ненадёжность или опасность отношений может объяснить ответ; не распространять вывод на все отношения.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "attachment/AAX",
+      "number": 3,
+      "before": {
+        "_facet": "Разлука",
+        "scenario": "Партнёр на неделю уходит в поход в горы — связи там почти не будет.",
+        "scenarioEn": "Your partner is off hiking in the mountains for a week — there'll be hardly any signal.",
+        "options": [
+          {
+            "text": "Всё в порядке: отдохну и займусь своими делами",
+            "textEn": "I'm fine: I'll have a rest and catch up on my own things",
+            "scoring": {}
+          },
+          {
+            "text": "Первые дни скучаю, потом втягиваюсь",
+            "textEn": "I miss them for the first few days, then I settle in",
+            "scoring": {}
+          },
+          {
+            "text": "Прошу выходить на связь при любой возможности — без вестей места себе не нахожу",
+            "textEn": "I ask them to get in touch whenever they can — without news I can't settle",
+            "scoring": {
+              "AAX": 2
+            }
+          },
+          {
+            "text": "Всю неделю внутри тревожно: вдруг там, без меня, он(а) поймёт, что так даже лучше",
+            "textEn": "All week I'm uneasy inside: what if, away from me, they realise it's better that way",
+            "scoring": {
+              "AAX": 3
+            }
+          }
+        ]
+      },
+      "originalKeys": [
+        {},
+        {},
+        {
+          "AAX": 2
+        },
+        {
+          "AAX": 3
+        }
+      ],
+      "defect": "Нет связи в горах: тревога может быть за безопасность.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        3
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Реальная ненадёжность или опасность отношений может объяснить ответ; не распространять вывод на все отношения.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "attachment/AAX",
+      "number": 4,
+      "before": {
+        "_facet": "Протестное поведение",
+        "_reverse": true,
+        "scenario": "После ссоры партнёр ушёл в другую комнату и молчит уже час.",
+        "scenarioEn": "After an argument, your partner went into another room and has been silent for an hour.",
+        "options": [
+          {
+            "text": "Иду мириться первым(ой) — не хочу, чтобы ссора остывала в тишине",
+            "textEn": "I go to make up first — I don't want the argument to cool off in silence",
+            "scoring": {}
+          },
+          {
+            "text": "Делаю вид, что мне всё равно, но прислушиваюсь к каждому звуку из-за двери",
+            "textEn": "I act as if I don't care, but I'm listening to every sound from behind the door",
+            "scoring": {
+              "AAX": 3
+            }
+          },
+          {
+            "text": "Даю время остыть — вернёмся к разговору позже",
+            "textEn": "I give them time to cool off — we'll come back to it later",
+            "scoring": {}
+          },
+          {
+            "text": "Занимаюсь своими делами — так мне даже спокойнее",
+            "textEn": "I get on with my own things — honestly, it's calmer that way",
+            "scoring": {
+              "AAV": 1
+            }
+          }
+        ]
+      },
+      "originalKeys": [
+        {},
+        {
+          "AAX": 3
+        },
+        {},
+        {
+          "AAV": 1
+        }
+      ],
+      "defect": "Примирение и пауза совместимы; убран чужой код AAV.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        4
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Реальная ненадёжность или опасность отношений может объяснить ответ; не распространять вывод на все отношения.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "attachment/AAX",
+      "number": 5,
+      "before": {
+        "_facet": "Самоценность через отношения",
+        "scenario": "Близкий человек не спросил, как прошёл ваш важный день, хотя вы говорили о нём всю неделю.",
+        "scenarioEn": "Someone close to you didn't ask how your big day went, even though you'd talked about it all week.",
+        "options": [
+          {
+            "text": "Рассказываю сам(а) — наверное, просто забыл(а)",
+            "textEn": "I tell them myself — they probably just forgot",
+            "scoring": {}
+          },
+          {
+            "text": "Кажется, я для этого человека не так уж важен(на), — и от этого тяжело",
+            "textEn": "It feels like I don't matter that much to them — and that's hard",
+            "scoring": {
+              "AAX": 3
+            }
+          },
+          {
+            "text": "Немного обидно, но не придаю значения",
+            "textEn": "A bit hurtful, but I don't read much into it",
+            "scoring": {}
+          },
+          {
+            "text": "Жду, вспомнит ли сам(а), — и с каждым часом тревожнее",
+            "textEn": "I wait to see whether they'll remember — and get more anxious by the hour",
+            "scoring": {
+              "AAX": 2
+            }
+          }
+        ]
+      },
+      "originalKeys": [
+        {},
+        {
+          "AAX": 3
+        },
+        {},
+        {
+          "AAX": 2
+        }
+      ],
+      "defect": "Разовая обида не показывает тревогу о собственной значимости.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        5
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Реальная ненадёжность или опасность отношений может объяснить ответ; не распространять вывод на все отношения.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "attachment/AAX",
+      "number": 6,
+      "before": {
+        "_facet": "Гипербдительность",
+        "_reverse": true,
+        "scenario": "Партнёр говорит, что вечером задержится с коллегами.",
+        "scenarioEn": "Your partner says they'll be late tonight — out with colleagues.",
+        "options": [
+          {
+            "text": "Хорошо, проведу вечер по-своему",
+            "textEn": "Fine — I'll spend the evening my own way",
+            "scoring": {}
+          },
+          {
+            "text": "Прошу написать, когда поедет домой",
+            "textEn": "I ask them to text when they're heading home",
+            "scoring": {}
+          },
+          {
+            "text": "Расстраиваюсь и говорю об этом прямо",
+            "textEn": "I get upset and say so directly",
+            "scoring": {
+              "AAX": 1
+            }
+          },
+          {
+            "text": "Говорю «конечно, хорошо тебе провести время», а потом весь вечер проверяю, когда он(а) был(а) в сети",
+            "textEn": "I say \"of course, have a good time\", and then spend all evening checking when they were last online",
+            "scoring": {
+              "AAX": 3
+            }
+          }
+        ]
+      },
+      "originalKeys": [
+        {},
+        {},
+        {
+          "AAX": 1
+        },
+        {
+          "AAX": 3
+        }
+      ],
+      "defect": "Проверка безопасности и ревность смешаны с тревогой о связи.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        6
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Реальная ненадёжность или опасность отношений может объяснить ответ; не распространять вывод на все отношения.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "attachment/AAX",
+      "number": 7,
+      "before": {
+        "_facet": "Страх покинутости",
+        "scenario": "Партнёр говорит: «Мне нужно побыть наедине с собой в эти выходные».",
+        "scenarioEn": "Your partner says: \"I need some time on my own this weekend.\"",
+        "options": [
+          {
+            "text": "Понимаю — мне это тоже бывает нужно",
+            "textEn": "I get it — I need that sometimes too",
+            "scoring": {}
+          },
+          {
+            "text": "Внутри всё обрывается: кажется, это начало конца",
+            "textEn": "Something drops inside me: it feels like the beginning of the end",
+            "scoring": {
+              "AAX": 3
+            }
+          },
+          {
+            "text": "Немного обидно, но переживу",
+            "textEn": "A bit hurtful, but I'll live",
+            "scoring": {
+              "AAX": 1
+            }
+          },
+          {
+            "text": "Отлично, у меня как раз свои планы",
+            "textEn": "Great — I've got my own plans anyway",
+            "scoring": {}
+          }
+        ]
+      },
+      "originalKeys": [
+        {},
+        {
+          "AAX": 3
+        },
+        {
+          "AAX": 1
+        },
+        {}
+      ],
+      "defect": "Обиды и собственных планов недостаточно для градации.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        7
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Реальная ненадёжность или опасность отношений может объяснить ответ; не распространять вывод на все отношения.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "attachment/AAX",
+      "number": 8,
+      "before": {
+        "_facet": "Сравнение",
+        "_reverse": true,
+        "scenario": "Партнёр с теплотой вспоминает, как весело было в студенческой компании — ещё до знакомства с вами.",
+        "scenarioEn": "Your partner fondly remembers how much fun their student crowd was — back before they met you.",
+        "options": [
+          {
+            "text": "Улыбаюсь и киваю, а потом весь вечер прокручиваю, не было ли ему(ей) тогда лучше, чем сейчас со мной",
+            "textEn": "I smile and nod, but afterwards I spend the whole evening wondering whether they were happier then than they are now with me",
+            "scoring": {
+              "AAX": 3
+            }
+          },
+          {
+            "text": "Спрашиваю полушутя: «А сейчас скучно?»",
+            "textEn": "I ask, half-joking: \"So is it boring now?\"",
+            "scoring": {
+              "AAX": 1
+            }
+          },
+          {
+            "text": "С интересом слушаю — хорошие были времена",
+            "textEn": "I listen with interest — sounds like good times",
+            "scoring": {}
+          },
+          {
+            "text": "Рассказываю в ответ свои студенческие истории",
+            "textEn": "I share my own student stories in return",
+            "scoring": {}
+          }
+        ]
+      },
+      "originalKeys": [
+        {
+          "AAX": 3
+        },
+        {
+          "AAX": 1
+        },
+        {},
+        {}
+      ],
+      "defect": "Вопрос затрагивал только романтическую ревность и прошлое.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        8
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Реальная ненадёжность или опасность отношений может объяснить ответ; не распространять вывод на все отношения.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "attachment/AAX",
+      "number": 9,
+      "before": {
+        "_facet": "Тревога в затишье",
+        "scenario": "В отношениях уже месяц всё ровно: без ссор, но и без особых событий.",
+        "scenarioEn": "For a month, things in your relationship have been steady: no arguments, but nothing special either.",
+        "options": [
+          {
+            "text": "Хорошо — спокойствие и значит, что всё в порядке",
+            "textEn": "Good — calm means everything's fine",
+            "scoring": {}
+          },
+          {
+            "text": "Предлагаю что-то новое — поездку, общее дело",
+            "textEn": "I suggest something new — a trip, a shared project",
+            "scoring": {}
+          },
+          {
+            "text": "Становится тревожно: затишье кажется подозрительным, хочется проверить, что чувства на месте",
+            "textEn": "I get anxious: the lull feels suspicious, and I want to check the feelings are still there",
+            "scoring": {
+              "AAX": 3
+            }
+          },
+          {
+            "text": "Скучновато, но это нормально",
+            "textEn": "A bit dull, but that's normal",
+            "scoring": {}
+          }
+        ]
+      },
+      "originalKeys": [
+        {},
+        {},
+        {
+          "AAX": 3
+        },
+        {}
+      ],
+      "defect": "Скука отделена от поиска угрозы связи.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        9
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Реальная ненадёжность или опасность отношений может объяснить ответ; не распространять вывод на все отношения.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "attachment/AAX",
+      "number": 10,
+      "before": {
+        "_facet": "Страх разочаровать",
+        "_reverse": true,
+        "scenario": "Вы сделали близкому человеку приятное, а благодарность прозвучала сдержанно.",
+        "scenarioEn": "You did something nice for someone close to you, and their thanks sounded rather reserved.",
+        "options": [
+          {
+            "text": "Мне не нужны бурные реакции — главное, что порадовал(а)",
+            "textEn": "I don't need a big reaction — what matters is that I made them happy",
+            "scoring": {}
+          },
+          {
+            "text": "Спрашиваю, понравилось ли на самом деле",
+            "textEn": "I ask whether they really liked it",
+            "scoring": {
+              "AAX": 1
+            }
+          },
+          {
+            "text": "В следующий раз придумаю что-то другое",
+            "textEn": "Next time I'll come up with something different",
+            "scoring": {}
+          },
+          {
+            "text": "Говорю себе, что это неважно, но потом ещё долго гадаю, не разочаровал(а) ли",
+            "textEn": "I tell myself it doesn't matter, but for a long time afterwards I wonder whether I let them down",
+            "scoring": {
+              "AAX": 3
+            }
+          }
+        ]
+      },
+      "originalKeys": [
+        {},
+        {
+          "AAX": 1
+        },
+        {},
+        {
+          "AAX": 3
+        }
+      ],
+      "defect": "Вопрос о подарке смешивал вкус, реакцию и тревогу.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        10
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Реальная ненадёжность или опасность отношений может объяснить ответ; не распространять вывод на все отношения.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "attachment/AAV",
+      "number": 1,
+      "before": {
+        "_facet": "Откровенность",
+        "scenario": "Партнёр просит рассказать, что вас на самом деле тревожит последнее время.",
+        "scenarioEn": "Your partner asks you to tell them what's really been worrying you lately.",
+        "options": [
+          {
+            "text": "Рассказываю — с близким можно",
+            "textEn": "I tell them — with someone close, I can",
+            "scoring": {}
+          },
+          {
+            "text": "Отшучиваюсь или говорю «всё нормально» — делиться таким мне неуютно",
+            "textEn": "I laugh it off or say \"it's all fine\" — sharing things like that feels uncomfortable",
+            "scoring": {
+              "AAV": 3
+            }
+          },
+          {
+            "text": "Рассказываю частично, самое личное оставляю при себе",
+            "textEn": "I tell them part of it and keep the most personal bits to myself",
+            "scoring": {
+              "AAV": 1
+            }
+          },
+          {
+            "text": "Расскажу, когда сам(а) созрею, — пока нет",
+            "textEn": "I'll talk when I'm ready — and I'm not yet",
+            "scoring": {}
+          }
+        ]
+      },
+      "originalKeys": [
+        {},
+        {
+          "AAV": 3
+        },
+        {
+          "AAV": 1
+        },
+        {}
+      ],
+      "defect": "Личные границы и время готовности не означают избегание.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        1
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Реальная ненадёжность или опасность отношений может объяснить ответ; не распространять вывод на все отношения.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "attachment/AAV",
+      "number": 2,
+      "before": {
+        "_facet": "Опора на себя",
+        "scenario": "Вы несколько дней лежите с температурой, и близкий человек предлагает приехать и помочь.",
+        "scenarioEn": "You've been in bed with a fever for a few days, and someone close offers to come over and help.",
+        "options": [
+          {
+            "text": "С радостью соглашаюсь",
+            "textEn": "I gladly accept",
+            "scoring": {}
+          },
+          {
+            "text": "Прошу только привезти лекарства",
+            "textEn": "I just ask them to bring some medicine",
+            "scoring": {}
+          },
+          {
+            "text": "Соглашаюсь, хотя мне неловко",
+            "textEn": "I accept, though it makes me uncomfortable",
+            "scoring": {
+              "AAV": 1
+            }
+          },
+          {
+            "text": "Отказываюсь: справлюсь сам(а), не люблю быть обузой и чувствовать себя обязанным(ой)",
+            "textEn": "I say no: I'll manage on my own — I don't like being a burden or owing anyone",
+            "scoring": {
+              "AAV": 3
+            }
+          }
+        ]
+      },
+      "originalKeys": [
+        {},
+        {},
+        {
+          "AAV": 1
+        },
+        {
+          "AAV": 3
+        }
+      ],
+      "defect": "Риск заразить и неловкость смешаны с неприятием опоры.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        2
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Реальная ненадёжность или опасность отношений может объяснить ответ; не распространять вывод на все отношения.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "attachment/AAV",
+      "number": 3,
+      "before": {
+        "_facet": "Дистанция при сближении",
+        "scenario": "Отношения развиваются хорошо, и партнёр предлагает съехаться.",
+        "scenarioEn": "The relationship is going well, and your partner suggests moving in together.",
+        "options": [
+          {
+            "text": "Радуюсь — давно этого хотел(а)",
+            "textEn": "I'm glad — I've wanted this for a while",
+            "scoring": {}
+          },
+          {
+            "text": "Обсуждаем, как будем делить пространство и быт",
+            "textEn": "We talk through how we'll share the space and the chores",
+            "scoring": {}
+          },
+          {
+            "text": "Чем серьёзнее всё становится, тем сильнее хочется притормозить и отступить",
+            "textEn": "The more serious things get, the more I want to slow down and step back",
+            "scoring": {
+              "AAV": 3
+            }
+          },
+          {
+            "text": "Соглашаюсь, но выговариваю себе отдельную комнату",
+            "textEn": "I agree, but I negotiate a room of my own",
+            "scoring": {
+              "AAV": 1
+            }
+          }
+        ]
+      },
+      "originalKeys": [
+        {},
+        {},
+        {
+          "AAV": 3
+        },
+        {
+          "AAV": 1
+        }
+      ],
+      "defect": "Отдельная комната и отказ съехаться могут быть разумны.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        3
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Реальная ненадёжность или опасность отношений может объяснить ответ; не распространять вывод на все отношения.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "attachment/AAV",
+      "number": 4,
+      "before": {
+        "_facet": "Эмоциональная сдержанность",
+        "_reverse": true,
+        "scenario": "Партнёр плачет после тяжёлого разговора с родителями.",
+        "scenarioEn": "Your partner is crying after a hard conversation with their parents.",
+        "options": [
+          {
+            "text": "Обнимаю и просто побуду рядом",
+            "textEn": "I hug them and just stay close",
+            "scoring": {}
+          },
+          {
+            "text": "Предлагаю дельные решения — так от меня больше пользы, чем от объятий",
+            "textEn": "I offer practical solutions — I'm more useful that way than with hugs",
+            "scoring": {
+              "AAV": 3
+            }
+          },
+          {
+            "text": "Мне неловко, хочется выйти из комнаты",
+            "textEn": "I feel awkward and want to leave the room",
+            "scoring": {
+              "AAV": 2
+            }
+          },
+          {
+            "text": "Спрашиваю, чем могу помочь",
+            "textEn": "I ask how I can help",
+            "scoring": {}
+          }
+        ]
+      },
+      "originalKeys": [
+        {},
+        {
+          "AAV": 3
+        },
+        {
+          "AAV": 2
+        },
+        {}
+      ],
+      "defect": "Совет как поддержка ошибочно оценён выше ухода из контакта.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        4
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Реальная ненадёжность или опасность отношений может объяснить ответ; не распространять вывод на все отношения.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "attachment/AAV",
+      "number": 5,
+      "before": {
+        "_facet": "Личное пространство",
+        "scenario": "Партнёр хочет проводить вместе все выходные подряд.",
+        "scenarioEn": "Your partner wants to spend every weekend together.",
+        "options": [
+          {
+            "text": "Здорово, мне тоже этого хочется",
+            "textEn": "Great — I want that too",
+            "scoring": {}
+          },
+          {
+            "text": "Договариваемся: день вместе, день каждый по-своему",
+            "textEn": "We agree on one day together and one day each doing our own thing",
+            "scoring": {}
+          },
+          {
+            "text": "Через пару дней вместе начинаю задыхаться и ищу повод побыть в одиночестве",
+            "textEn": "After a couple of days together I start to feel suffocated and look for a reason to be alone",
+            "scoring": {
+              "AAV": 3
+            }
+          },
+          {
+            "text": "Соглашаюсь, но заранее придумываю себе дела",
+            "textEn": "I agree, but make up plans for myself in advance",
+            "scoring": {
+              "AAV": 2
+            }
+          }
+        ]
+      },
+      "originalKeys": [
+        {},
+        {},
+        {
+          "AAV": 3
+        },
+        {
+          "AAV": 2
+        }
+      ],
+      "defect": "Слишком много совместного времени само вызывает усталость.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        5
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Реальная ненадёжность или опасность отношений может объяснить ответ; не распространять вывод на все отношения.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "attachment/AAV",
+      "number": 6,
+      "before": {
+        "_facet": "Разговоры о будущем",
+        "_reverse": true,
+        "scenario": "Партнёр заводит разговор о планах на пять лет вперёд: дети, ипотека, переезд.",
+        "scenarioEn": "Your partner starts talking about plans five years ahead: kids, a mortgage, a move.",
+        "options": [
+          {
+            "text": "С интересом обсуждаю",
+            "textEn": "I'm keen to talk it through",
+            "scoring": {}
+          },
+          {
+            "text": "Честно говорю, что пока не готов(а) к таким планам",
+            "textEn": "I say honestly that I'm not ready for plans like that yet",
+            "scoring": {
+              "AAV": 1
+            }
+          },
+          {
+            "text": "Предлагаю вернуться к этому, когда прояснится с работой",
+            "textEn": "I suggest coming back to it once work is more settled",
+            "scoring": {}
+          },
+          {
+            "text": "Говорю, что загадывать так далеко бессмысленно, — хотя на самом деле от таких разговоров мне просто не по себе",
+            "textEn": "I say there's no point planning that far ahead — though really, conversations like this just make me uneasy",
+            "scoring": {
+              "AAV": 3
+            }
+          }
+        ]
+      },
+      "originalKeys": [
+        {},
+        {
+          "AAV": 1
+        },
+        {},
+        {
+          "AAV": 3
+        }
+      ],
+      "defect": "Неготовность к детям и ипотеке не доказывает избегания.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        6
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Реальная ненадёжность или опасность отношений может объяснить ответ; не распространять вывод на все отношения.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "attachment/AAV",
+      "number": 7,
+      "before": {
+        "_facet": "Неприятие зависимости",
+        "scenario": "Близкий человек всё чаще советуется с вами по любому поводу и явно на вас опирается.",
+        "scenarioEn": "Someone close to you keeps asking your advice about everything and clearly leans on you.",
+        "options": [
+          {
+            "text": "Мне приятно быть опорой",
+            "textEn": "I like being someone they can lean on",
+            "scoring": {}
+          },
+          {
+            "text": "Меня это напрягает: не люблю, когда от меня так зависят",
+            "textEn": "It bothers me: I don't like people depending on me that much",
+            "scoring": {
+              "AAV": 3
+            }
+          },
+          {
+            "text": "Поддерживаю, но мягко подталкиваю к самостоятельности",
+            "textEn": "I support them, but gently nudge them towards independence",
+            "scoring": {}
+          },
+          {
+            "text": "Помогаю, но начинаю отвечать всё реже",
+            "textEn": "I help, but start replying less and less often",
+            "scoring": {
+              "AAV": 2
+            }
+          }
+        ]
+      },
+      "originalKeys": [
+        {},
+        {
+          "AAV": 3
+        },
+        {},
+        {
+          "AAV": 2
+        }
+      ],
+      "defect": "Чрезмерная зависимость другого создаёт разумную потребность в границах.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        7
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Реальная ненадёжность или опасность отношений может объяснить ответ; не распространять вывод на все отношения.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "attachment/AAV",
+      "number": 8,
+      "before": {
+        "_facet": "Уход от выяснения",
+        "_reverse": true,
+        "scenario": "Партнёр хочет обсудить то, что давно назревало в отношениях.",
+        "scenarioEn": "Your partner wants to talk about something that's been brewing in the relationship for a while.",
+        "options": [
+          {
+            "text": "Соглашаюсь: давно пора",
+            "textEn": "I agree: it's overdue",
+            "scoring": {}
+          },
+          {
+            "text": "Предлагаю сначала каждому спокойно всё обдумать — и потом так и не возвращаюсь к разговору",
+            "textEn": "I suggest we each think it over calmly first — and then never quite come back to it",
+            "scoring": {
+              "AAV": 3
+            }
+          },
+          {
+            "text": "Ухожу от темы и переключаюсь на дела",
+            "textEn": "I steer away from the topic and busy myself with other things",
+            "scoring": {
+              "AAV": 2
+            }
+          },
+          {
+            "text": "Прошу назначить время, чтобы подготовиться",
+            "textEn": "I ask us to set a time so I can prepare",
+            "scoring": {}
+          }
+        ]
+      },
+      "originalKeys": [
+        {},
+        {
+          "AAV": 3
+        },
+        {
+          "AAV": 2
+        },
+        {}
+      ],
+      "defect": "Полезная пауза смешана с постоянным уходом от обсуждения.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        8
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Реальная ненадёжность или опасность отношений может объяснить ответ; не распространять вывод на все отношения.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "attachment/AAV",
+      "number": 9,
+      "before": {
+        "_facet": "Телесная близость",
+        "scenario": "Партнёр любит держаться за руки и обниматься на людях.",
+        "scenarioEn": "Your partner likes to hold hands and hug in public.",
+        "options": [
+          {
+            "text": "Мне это тоже нравится",
+            "textEn": "I like it too",
+            "scoring": {}
+          },
+          {
+            "text": "Нравится, но не на людях",
+            "textEn": "I like it, just not in public",
+            "scoring": {}
+          },
+          {
+            "text": "Мягко высвобождаюсь и перевожу всё в шутку",
+            "textEn": "I gently slip away and turn it into a joke",
+            "scoring": {
+              "AAV": 2
+            }
+          },
+          {
+            "text": "Терплю, но внутренне сжимаюсь — слишком много близости",
+            "textEn": "I put up with it, but inside I tense up — it's too much closeness",
+            "scoring": {
+              "AAV": 3
+            }
+          }
+        ]
+      },
+      "originalKeys": [
+        {},
+        {},
+        {
+          "AAV": 2
+        },
+        {
+          "AAV": 3
+        }
+      ],
+      "defect": "Публичные прикосновения зависят от культуры и сенсорных предпочтений.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        9
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Реальная ненадёжность или опасность отношений может объяснить ответ; не распространять вывод на все отношения.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "attachment/AAV",
+      "number": 10,
+      "before": {
+        "_facet": "Самодостаточность",
+        "_reverse": true,
+        "scenario": "На работе трудный период, и вечером близкий человек спрашивает, как у вас дела.",
+        "scenarioEn": "You're going through a tough patch at work, and in the evening someone close asks how you're doing.",
+        "options": [
+          {
+            "text": "Рассказываю — мне становится легче",
+            "textEn": "I tell them — it makes me feel better",
+            "scoring": {}
+          },
+          {
+            "text": "Говорю, что справляюсь, — и справляюсь; зачем грузить близких",
+            "textEn": "I say I'm handling it — and I am; why load it onto the people I love",
+            "scoring": {
+              "AAV": 3
+            }
+          },
+          {
+            "text": "Жалуюсь от души",
+            "textEn": "I have a good long moan",
+            "scoring": {}
+          },
+          {
+            "text": "Рассказываю, но только когда всё уже решено",
+            "textEn": "I tell them, but only once it's all sorted",
+            "scoring": {
+              "AAV": 2
+            }
+          }
+        ]
+      },
+      "originalKeys": [
+        {},
+        {
+          "AAV": 3
+        },
+        {},
+        {
+          "AAV": 2
+        }
+      ],
+      "defect": "Умение справляться ошибочно повышало балл избегания.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        10
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Реальная ненадёжность или опасность отношений может объяснить ответ; не распространять вывод на все отношения.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "hh/HON",
+      "number": 1,
+      "before": {
+        "_facet": "Искренность",
+        "scenario": "Сосед третий раз за месяц просит подвезти его до работы — вам не по пути, крюк минут двадцать.",
+        "scenarioEn": "For the third time this month a neighbour asks for a lift to work — it is out of your way, about a twenty-minute detour.",
+        "options": [
+          {
+            "text": "Говорю прямо, что мне неудобно, и предлагаю скинуться на такси",
+            "textEn": "I say straight out that it does not work for me and suggest splitting a taxi",
+            "scoring": {
+              "HON": 3
+            }
+          },
+          {
+            "text": "Соглашаюсь, но потом «случайно» выезжаю раньше, чтобы он не успел",
+            "textEn": "I agree, but then \"accidentally\" leave earlier so he misses me",
+            "scoring": {}
+          },
+          {
+            "text": "Ссылаюсь на несуществующие дела — так мягче",
+            "textEn": "I refer to plans I do not actually have — it lands more gently",
+            "scoring": {}
+          },
+          {
+            "text": "Подвожу и молчу, хотя раздражаюсь",
+            "textEn": "I give him the lift and say nothing, though it irritates me",
+            "scoring": {}
+          }
+        ]
+      },
+      "originalKeys": [
+        {
+          "HON": 3
+        },
+        {},
+        {},
+        {}
+      ],
+      "defect": "Ассертивность и щедрость не равны искренности ради отсутствия манипуляции.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        1
+      ],
+      "newKey": [
+        3,
+        2,
+        1,
+        0
+      ],
+      "counterExample": "Социально желательный ответ и отсутствие возможностей поведения могут влиять на ответы.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "hh/HON",
+      "number": 2,
+      "before": {
+        "_facet": "Искренность",
+        "_reverse": true,
+        "scenario": "Вы опоздали на встречу, потому что проспали. Вас спрашивают, что случилось.",
+        "scenarioEn": "You are late for a meet-up because you overslept. You are asked what happened.",
+        "options": [
+          {
+            "text": "Говорю как есть: проспал",
+            "textEn": "I say it as it is: I overslept",
+            "scoring": {
+              "HON": 3
+            }
+          },
+          {
+            "text": "«Пробки» — звучит уважительнее и никого не задевает",
+            "textEn": "\"Traffic\" — it sounds more acceptable and hurts no one",
+            "scoring": {}
+          },
+          {
+            "text": "Ссылаюсь на затянувшийся звонок: формально почти правда",
+            "textEn": "I blame a call that ran long: technically almost true",
+            "scoring": {}
+          },
+          {
+            "text": "Извиняюсь, но причину не называю вовсе",
+            "textEn": "I apologize but do not name a reason at all",
+            "scoring": {
+              "HON": 1
+            }
+          }
+        ]
+      },
+      "originalKeys": [
+        {
+          "HON": 3
+        },
+        {},
+        {},
+        {
+          "HON": 1
+        }
+      ],
+      "defect": "Неуказание причины не означает ложь.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        2
+      ],
+      "newKey": [
+        3,
+        2,
+        1,
+        0
+      ],
+      "counterExample": "Социально желательный ответ и отсутствие возможностей поведения могут влиять на ответы.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "hh/HON",
+      "number": 3,
+      "before": {
+        "_facet": "Искренность",
+        "_reverse": true,
+        "scenario": "В компании увлечённо обсуждают сериал, которого вы не смотрели. К вам поворачиваются: «Ну а ты как считаешь?»",
+        "scenarioEn": "A group is eagerly discussing a show you have not watched. They turn to you: \"So what do you think?\"",
+        "options": [
+          {
+            "text": "Говорю, что не смотрел, и слушаю дальше",
+            "textEn": "I say I have not seen it and go on listening",
+            "scoring": {
+              "HON": 3
+            }
+          },
+          {
+            "text": "Отвечаю общо — по обрывкам разговора вполне можно поддержать",
+            "textEn": "I answer in general terms — the snippets of conversation are enough to keep up",
+            "scoring": {}
+          },
+          {
+            "text": "Пересказываю чужое мнение как своё, я его где-то слышал",
+            "textEn": "I repeat someone else's take as my own; I heard it somewhere",
+            "scoring": {}
+          },
+          {
+            "text": "Перевожу тему на то, в чём разбираюсь",
+            "textEn": "I steer the topic to something I do know",
+            "scoring": {}
+          }
+        ]
+      },
+      "originalKeys": [
+        {
+          "HON": 3
+        },
+        {},
+        {},
+        {}
+      ],
+      "defect": "Неведение и перевод темы не подтверждают неискренность ради выгоды.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        3
+      ],
+      "newKey": [
+        3,
+        2,
+        1,
+        0
+      ],
+      "counterExample": "Социально желательный ответ и отсутствие возможностей поведения могут влиять на ответы.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "hh/HON",
+      "number": 4,
+      "before": {
+        "_facet": "Искренность",
+        "_reverse": true,
+        "scenario": "Вы заполняете анкету в приложении для знакомств. Поля про рост, доход, увлечения.",
+        "scenarioEn": "You are filling out a dating-app profile. Fields for height, income, interests.",
+        "options": [
+          {
+            "text": "Пишу как есть, включая скучные места",
+            "textEn": "I write it as it is, dull parts included",
+            "scoring": {
+              "HON": 3
+            }
+          },
+          {
+            "text": "Округляю в свою пользу — так делают все",
+            "textEn": "I round things in my favour — everyone does",
+            "scoring": {}
+          },
+          {
+            "text": "Добавляю увлечения, которые были давно и недолго",
+            "textEn": "I add hobbies I had briefly, long ago",
+            "scoring": {}
+          },
+          {
+            "text": "Оставляю неудобные поля пустыми",
+            "textEn": "I leave the awkward fields blank",
+            "scoring": {
+              "HON": 1
+            }
+          }
+        ]
+      },
+      "originalKeys": [
+        {
+          "HON": 3
+        },
+        {},
+        {},
+        {
+          "HON": 1
+        }
+      ],
+      "defect": "Приватность и отсутствие анкеты не равны нечестности.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        4
+      ],
+      "newKey": [
+        3,
+        2,
+        1,
+        0
+      ],
+      "counterExample": "Социально желательный ответ и отсутствие возможностей поведения могут влиять на ответы.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "hh/HON",
+      "number": 5,
+      "before": {
+        "_facet": "Справедливость",
+        "scenario": "Продаёте свой велосипед. Вы знаете, что через сезон придётся менять узел — по виду это не заметно.",
+        "scenarioEn": "You are selling your bicycle. You know one part will need replacing after a season — it is not visible from the outside.",
+        "options": [
+          {
+            "text": "Говорю про узел сам и ставлю цену с учётом этого",
+            "textEn": "I bring the part up myself and price the bike accordingly",
+            "scoring": {
+              "HON": 3
+            }
+          },
+          {
+            "text": "Скажу, если спросят прямо; сам тему не поднимаю",
+            "textEn": "I will mention it if asked directly; I do not raise it myself",
+            "scoring": {
+              "HON": 1
+            }
+          },
+          {
+            "text": "Продаю как есть: осматривать — задача покупателя",
+            "textEn": "I sell it as is: inspecting is the buyer's job",
+            "scoring": {}
+          },
+          {
+            "text": "Перед продажей вычищаю и полирую, чтобы выглядел свежее",
+            "textEn": "Before the sale I clean and polish it so it looks fresher",
+            "scoring": {}
+          }
+        ]
+      },
+      "originalKeys": [
+        {
+          "HON": 3
+        },
+        {
+          "HON": 1
+        },
+        {},
+        {}
+      ],
+      "defect": "Полировка велосипеда не доказывает сокрытие недостатка.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        5
+      ],
+      "newKey": [
+        3,
+        2,
+        1,
+        0
+      ],
+      "counterExample": "Социально желательный ответ и отсутствие возможностей поведения могут влиять на ответы.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "hh/HON",
+      "number": 6,
+      "before": {
+        "_facet": "Справедливость",
+        "_reverse": true,
+        "scenario": "В доме собирают деньги на замену домофона. Сбор добровольный, домофон поставят в любом случае.",
+        "scenarioEn": "Your building is collecting money to replace the entry system. Contributing is voluntary; it will be installed either way.",
+        "options": [
+          {
+            "text": "Сдаю свою долю — пользоваться буду наравне со всеми",
+            "textEn": "I pay my share — I will use it the same as everyone",
+            "scoring": {
+              "HON": 3
+            }
+          },
+          {
+            "text": "Не сдаю: раз добровольно, значит без меня обошлись",
+            "textEn": "I do not pay: if it is voluntary, they managed without me",
+            "scoring": {}
+          },
+          {
+            "text": "Сдаю меньше, чем просят, — у меня и старый работал",
+            "textEn": "I give less than asked — the old one worked fine for me",
+            "scoring": {}
+          },
+          {
+            "text": "Сдаю, но хочу, чтобы это было видно в общем чате",
+            "textEn": "I pay, but I want it visible in the building chat",
+            "scoring": {}
+          }
+        ]
+      },
+      "originalKeys": [
+        {
+          "HON": 3
+        },
+        {},
+        {},
+        {}
+      ],
+      "defect": "Добровольный взнос зависит от дохода и согласия.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        6
+      ],
+      "newKey": [
+        3,
+        2,
+        1,
+        0
+      ],
+      "counterExample": "Социально желательный ответ и отсутствие возможностей поведения могут влиять на ответы.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "hh/HON",
+      "number": 7,
+      "before": {
+        "_facet": "Справедливость",
+        "scenario": "У вас есть карта со скидкой, по правилам действующая только на ваши покупки. Знакомые просят покупать через вас.",
+        "scenarioEn": "You have a discount card that by the rules applies only to your own purchases. Acquaintances ask you to buy things through you.",
+        "options": [
+          {
+            "text": "Объясняю, что карта не для этого, и отказываюсь",
+            "textEn": "I explain the card is not for that and decline",
+            "scoring": {
+              "HON": 3
+            }
+          },
+          {
+            "text": "Изредка и только самым близким",
+            "textEn": "Occasionally, and only for the closest people",
+            "scoring": {
+              "HON": 1
+            }
+          },
+          {
+            "text": "Покупаю всем: правило формальное, никто не пострадает",
+            "textEn": "I buy for everyone: the rule is a formality, nobody is harmed",
+            "scoring": {}
+          },
+          {
+            "text": "Покупаю, но беру себе часть разницы за хлопоты",
+            "textEn": "I buy for them but keep part of the difference for the trouble",
+            "scoring": {}
+          }
+        ]
+      },
+      "originalKeys": [
+        {
+          "HON": 3
+        },
+        {
+          "HON": 1
+        },
+        {},
+        {}
+      ],
+      "defect": "Персональная скидка зависит от неоднозначных правил.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        7
+      ],
+      "newKey": [
+        3,
+        2,
+        1,
+        0
+      ],
+      "counterExample": "Социально желательный ответ и отсутствие возможностей поведения могут влиять на ответы.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "hh/HON",
+      "number": 8,
+      "before": {
+        "_facet": "Справедливость",
+        "scenario": "Вы вдвоём с двоюродным братом разбираете гараж покойного дяди. В хламе вам попадается вещь, которая заметно дороже, чем кажется.",
+        "scenarioEn": "You and your cousin are clearing out your late uncle's garage. Among the junk you come across an item worth noticeably more than it looks.",
+        "options": [
+          {
+            "text": "Сразу говорю брату, оцениваем и решаем вместе",
+            "textEn": "I tell my cousin right away; we get it valued and decide together",
+            "scoring": {
+              "HON": 3
+            }
+          },
+          {
+            "text": "Говорю, но напоминаю, что нашёл её всё-таки я",
+            "textEn": "I tell him, but point out that I was the one who found it",
+            "scoring": {
+              "HON": 1
+            }
+          },
+          {
+            "text": "Забираю себе: кто разбирал, тот и нашёл",
+            "textEn": "I keep it: whoever does the digging gets the find",
+            "scoring": {}
+          },
+          {
+            "text": "Предлагаю отдать тому, кому дядя был дороже",
+            "textEn": "I suggest giving it to whoever was closer to our uncle",
+            "scoring": {}
+          }
+        ]
+      },
+      "originalKeys": [
+        {
+          "HON": 3
+        },
+        {
+          "HON": 1
+        },
+        {},
+        {}
+      ],
+      "defect": "Условия наследования и близость к умершему не заданы.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        8
+      ],
+      "newKey": [
+        3,
+        2,
+        1,
+        0
+      ],
+      "counterExample": "Социально желательный ответ и отсутствие возможностей поведения могут влиять на ответы.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "hh/HON",
+      "number": 9,
+      "before": {
+        "_facet": "Нежадность",
+        "scenario": "Вам подняли зарплату на треть. Через полгода вы замечаете, что…",
+        "scenarioEn": "Your salary went up by a third. Six months later you notice that…",
+        "options": [
+          {
+            "text": "живу примерно как раньше, разница уходит в накопления",
+            "textEn": "I live roughly as before; the difference goes into savings",
+            "scoring": {
+              "HON": 3
+            }
+          },
+          {
+            "text": "сразу подтянул уровень: машина, район, рестораны",
+            "textEn": "I upgraded right away: car, neighbourhood, restaurants",
+            "scoring": {}
+          },
+          {
+            "text": "стал чаще звать друзей за свой счёт",
+            "textEn": "I treat friends more often now",
+            "scoring": {}
+          },
+          {
+            "text": "трачу больше, но не могу вспомнить на что",
+            "textEn": "I spend more but cannot recall on what",
+            "scoring": {
+              "HON": 1
+            }
+          }
+        ]
+      },
+      "originalKeys": [
+        {
+          "HON": 3
+        },
+        {},
+        {},
+        {
+          "HON": 1
+        }
+      ],
+      "defect": "Накопления и траты не показывают статусную мотивацию.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        9
+      ],
+      "newKey": [
+        3,
+        2,
+        1,
+        0
+      ],
+      "counterExample": "Социально желательный ответ и отсутствие возможностей поведения могут влиять на ответы.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "hh/HON",
+      "number": 10,
+      "before": {
+        "_facet": "Нежадность",
+        "_reverse": true,
+        "scenario": "Вы выбираете жильё. Один вариант — престижный район на пределе бюджета, другой — проще, но с запасом денег каждый месяц.",
+        "scenarioEn": "You are choosing where to live. One option is a prestigious area at the edge of your budget, the other is plainer but leaves money to spare each month.",
+        "options": [
+          {
+            "text": "Беру то, что проще: запас важнее адреса",
+            "textEn": "I take the plainer one: the cushion matters more than the address",
+            "scoring": {
+              "HON": 3
+            }
+          },
+          {
+            "text": "Беру престижный: такие вложения себя оправдывают",
+            "textEn": "I take the prestigious one: that kind of investment pays off",
+            "scoring": {}
+          },
+          {
+            "text": "Беру престижный — вокруг будут люди другого уровня",
+            "textEn": "I take the prestigious one — the people around will be of a different calibre",
+            "scoring": {}
+          },
+          {
+            "text": "Смотрю только на дорогу до работы, остальное неважно",
+            "textEn": "I look only at the commute; the rest does not matter",
+            "scoring": {}
+          }
+        ]
+      },
+      "originalKeys": [
+        {
+          "HON": 3
+        },
+        {},
+        {},
+        {}
+      ],
+      "defect": "Район зависит от транспорта и доступности жилья.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        10
+      ],
+      "newKey": [
+        3,
+        2,
+        1,
+        0
+      ],
+      "counterExample": "Социально желательный ответ и отсутствие возможностей поведения могут влиять на ответы.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "hh/HON",
+      "number": 11,
+      "before": {
+        "_facet": "Нежадность",
+        "scenario": "Планируете поездку. За те же дни можно жить в обычном месте или в дорогом, о котором потом будете рассказывать.",
+        "scenarioEn": "You are planning a trip. For the same days you can stay somewhere ordinary or somewhere expensive that you will be telling people about afterwards.",
+        "options": [
+          {
+            "text": "Обычное: деньги лучше потратить на саму поездку",
+            "textEn": "The ordinary one: the money is better spent on the trip itself",
+            "scoring": {
+              "HON": 3
+            }
+          },
+          {
+            "text": "Дорогое: раз в год можно себе позволить лучшее",
+            "textEn": "The expensive one: once a year you can afford the best",
+            "scoring": {}
+          },
+          {
+            "text": "Дорогое: с него и фотографии другие",
+            "textEn": "The expensive one: the photos from there are different too",
+            "scoring": {}
+          },
+          {
+            "text": "Возьму обычное, но буду жалеть, что не дорогое",
+            "textEn": "I will take the ordinary one but regret not choosing the expensive one",
+            "scoring": {
+              "HON": 1
+            }
+          }
+        ]
+      },
+      "originalKeys": [
+        {
+          "HON": 3
+        },
+        {},
+        {},
+        {
+          "HON": 1
+        }
+      ],
+      "defect": "Стоимость отдыха может отражать удобство и доступность.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        11
+      ],
+      "newKey": [
+        3,
+        2,
+        1,
+        0
+      ],
+      "counterExample": "Социально желательный ответ и отсутствие возможностей поведения могут влиять на ответы.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "hh/HON",
+      "number": 12,
+      "before": {
+        "_facet": "Нежадность",
+        "_reverse": true,
+        "scenario": "Вам предлагают дело, где доход заметно выше нынешнего, но свободного времени почти не останется.",
+        "scenarioEn": "You are offered work where the income is noticeably higher than now, but you will have almost no free time left.",
+        "options": [
+          {
+            "text": "Отказываюсь: мне хватает того, что есть",
+            "textEn": "I decline: what I have is enough for me",
+            "scoring": {
+              "HON": 3
+            }
+          },
+          {
+            "text": "Соглашаюсь: от таких денег не отказываются",
+            "textEn": "I accept: you do not turn down that kind of money",
+            "scoring": {}
+          },
+          {
+            "text": "Соглашаюсь на пару лет, а потом посмотрю",
+            "textEn": "I accept for a couple of years and see after that",
+            "scoring": {}
+          },
+          {
+            "text": "Торгуюсь, чтобы и доход был, и время осталось",
+            "textEn": "I negotiate for both the income and the time",
+            "scoring": {
+              "HON": 1
+            }
+          }
+        ]
+      },
+      "originalKeys": [
+        {
+          "HON": 3
+        },
+        {},
+        {},
+        {
+          "HON": 1
+        }
+      ],
+      "defect": "Выбор дохода зависит от нужды и обязательств.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        12
+      ],
+      "newKey": [
+        3,
+        2,
+        1,
+        0
+      ],
+      "counterExample": "Социально желательный ответ и отсутствие возможностей поведения могут влиять на ответы.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "hh/HON",
+      "number": 13,
+      "before": {
+        "_facet": "Скромность",
+        "_reverse": true,
+        "scenario": "Вы много лет занимаетесь своим делом. Новый знакомый, не зная этого, с жаром объясняет вам его основы.",
+        "scenarioEn": "You have been doing your craft for years. A new acquaintance, unaware of that, enthusiastically explains its basics to you.",
+        "options": [
+          {
+            "text": "Слушаю, не обозначая свой уровень",
+            "textEn": "I listen without flagging my level",
+            "scoring": {
+              "HON": 3
+            }
+          },
+          {
+            "text": "Мягко даю понять, что в теме, — иначе неловко нам обоим",
+            "textEn": "I gently make it clear that I know the field — otherwise it gets awkward for both of us",
+            "scoring": {
+              "HON": 1
+            }
+          },
+          {
+            "text": "Сразу говорю, сколько лет этим занимаюсь",
+            "textEn": "I say straight away how many years I have been at it",
+            "scoring": {}
+          },
+          {
+            "text": "Задаю вопрос, после которого станет ясно, кто здесь кто",
+            "textEn": "I ask a question that will make clear who is who here",
+            "scoring": {}
+          }
+        ]
+      },
+      "originalKeys": [
+        {
+          "HON": 3
+        },
+        {
+          "HON": 1
+        },
+        {},
+        {}
+      ],
+      "defect": "Молчание о компетентности не равно скромности.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        13
+      ],
+      "newKey": [
+        3,
+        2,
+        1,
+        0
+      ],
+      "counterExample": "Социально желательный ответ и отсутствие возможностей поведения могут влиять на ответы.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "hh/HON",
+      "number": 14,
+      "before": {
+        "_facet": "Скромность",
+        "scenario": "Детскую площадку во дворе делали втроём. Соседи благодарят при всех вас одного.",
+        "scenarioEn": "Three of you built the playground in the courtyard. In front of everyone the neighbours thank you alone.",
+        "options": [
+          {
+            "text": "Тут же называю остальных двоих",
+            "textEn": "I name the other two right there",
+            "scoring": {
+              "HON": 3
+            }
+          },
+          {
+            "text": "Говорю «делали вместе», без имён",
+            "textEn": "I say \"we did it together\", without names",
+            "scoring": {
+              "HON": 1
+            }
+          },
+          {
+            "text": "Принимаю благодарность: я и правда вложился больше всех",
+            "textEn": "I accept the thanks: I did put in the most",
+            "scoring": {}
+          },
+          {
+            "text": "Отшучиваюсь и перевожу тему",
+            "textEn": "I make a joke of it and change the subject",
+            "scoring": {}
+          }
+        ]
+      },
+      "originalKeys": [
+        {
+          "HON": 3
+        },
+        {
+          "HON": 1
+        },
+        {},
+        {}
+      ],
+      "defect": "Короткая общая благодарность не равна присвоению заслуг.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        14
+      ],
+      "newKey": [
+        3,
+        2,
+        1,
+        0
+      ],
+      "counterExample": "Социально желательный ответ и отсутствие возможностей поведения могут влиять на ответы.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "hh/HON",
+      "number": 15,
+      "before": {
+        "_facet": "Скромность",
+        "_reverse": true,
+        "scenario": "Близкому человеку предстоит отбор, где всё решает общий порядок. У вас есть знакомство, через которое «вопрос решается».",
+        "scenarioEn": "Someone close to you faces a selection decided by the standard procedure. You have a connection through which \"the matter can be handled\".",
+        "options": [
+          {
+            "text": "Не пользуюсь: пусть проходит общим путём",
+            "textEn": "I do not use it: let them go through the standard route",
+            "scoring": {
+              "HON": 3
+            }
+          },
+          {
+            "text": "Позвоню — на его месте так поступил бы любой",
+            "textEn": "I will make the call — anyone in my position would",
+            "scoring": {}
+          },
+          {
+            "text": "Не прошу решить, но упомяну, что это мой человек",
+            "textEn": "I will not ask for a fix, but I will mention that this is my person",
+            "scoring": {}
+          },
+          {
+            "text": "Спрошу у него самого, хочет ли он так",
+            "textEn": "I will ask them whether they want it that way",
+            "scoring": {
+              "HON": 1
+            }
+          }
+        ]
+      },
+      "originalKeys": [
+        {
+          "HON": 3
+        },
+        {},
+        {},
+        {
+          "HON": 1
+        }
+      ],
+      "defect": "Помощь с отбором смешивает процедурную справедливость и привилегии.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        15
+      ],
+      "newKey": [
+        3,
+        2,
+        1,
+        0
+      ],
+      "counterExample": "Социально желательный ответ и отсутствие возможностей поведения могут влиять на ответы.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "rare/SAD",
+      "number": 1,
+      "before": {
+        "scenario": "Коллега, который вечно всех поучает, при всех перепутал простой факт и покраснел.",
+        "scenarioEn": "A colleague who's always lecturing everyone gets a simple fact wrong in front of the team and goes red.",
+        "options": [
+          {
+            "text": "Смакую момент — и не спешу выручать",
+            "textEn": "I savour the moment — and take my time coming to the rescue",
+            "scoring": {
+              "SAD": 3,
+              "NAR": 1
+            }
+          },
+          {
+            "text": "Тихо подскажу верный ответ, чтобы замять",
+            "textEn": "I quietly offer the right answer to smooth it over",
+            "scoring": {
+              "HUM": 2
+            }
+          },
+          {
+            "text": "Поправлю вслух: факты важнее неловкости",
+            "textEn": "I correct it out loud: facts matter more than awkwardness",
+            "scoring": {
+              "DIR": 2,
+              "OBC": 1
+            }
+          },
+          {
+            "text": "Отмечу про себя «так ему и надо», но вида не подам",
+            "textEn": "I think \"serves them right\", but I don't let it show",
+            "scoring": {
+              "SAD": 1,
+              "PAG": 2
+            }
+          }
+        ]
+      },
+      "originalKeys": [
+        {
+          "SAD": 3,
+          "NAR": 1
+        },
+        {
+          "HUM": 2
+        },
+        {
+          "DIR": 2,
+          "OBC": 1
+        },
+        {
+          "SAD": 1,
+          "PAG": 2
+        }
+      ],
+      "defect": "Обида на поучения смешана с удовольствием от унижения.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        1
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Условия, здоровье, привычки и настроение могут влиять на частоту; отдельный ответ не устанавливает причину.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "rare/SAD",
+      "number": 2,
+      "before": {
+        "_reverse": true,
+        "scenario": "Вы учите новичка, и он в пятый раз ошибается в одном и том же.",
+        "scenarioEn": "You're training a newcomer, and they make the same mistake for the fifth time.",
+        "options": [
+          {
+            "text": "Объясняю ещё раз, другими словами",
+            "textEn": "I explain it again, in different words",
+            "scoring": {
+              "HUM": 1,
+              "KAN": 1
+            }
+          },
+          {
+            "text": "Говорю «ничего страшного», а сам(а) чуть растягиваю паузу, глядя, как он мучается",
+            "textEn": "I say \"no problem\", but I let the pause drag on a little, watching them squirm",
+            "scoring": {
+              "SAD": 3
+            }
+          },
+          {
+            "text": "Проще сделать самому (самой)",
+            "textEn": "It's easier to do it myself",
+            "scoring": {
+              "NAR": 1,
+              "OBC": 1
+            }
+          },
+          {
+            "text": "Жёстко отчитываю: пусть запомнит",
+            "textEn": "I give them a hard telling-off so it sticks",
+            "scoring": {
+              "ANT": 1,
+              "SAD": 1
+            }
+          }
+        ]
+      },
+      "originalKeys": [
+        {
+          "HUM": 1,
+          "KAN": 1
+        },
+        {
+          "SAD": 3
+        },
+        {
+          "NAR": 1,
+          "OBC": 1
+        },
+        {
+          "ANT": 1,
+          "SAD": 1
+        }
+      ],
+      "defect": "Усталость наставника отделена от намеренного продления страдания.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        2
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Условия, здоровье, привычки и настроение могут влиять на частоту; отдельный ответ не устанавливает причину.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "rare/SAD",
+      "number": 3,
+      "before": {
+        "scenario": "Друг до ужаса боится пауков. На даче вы находите огромного паука.",
+        "scenarioEn": "A friend of yours is terrified of spiders. At the weekend cabin you find a huge one.",
+        "options": [
+          {
+            "text": "Позову друга «посмотреть кое-что интересное» — его реакция будет бесценна",
+            "textEn": "I'll call my friend over to \"see something cool\" — their reaction will be priceless",
+            "scoring": {
+              "SAD": 3,
+              "HIS": 1
+            }
+          },
+          {
+            "text": "Выношу паука подальше, пока друг не увидел",
+            "textEn": "I carry the spider far away before my friend sees it",
+            "scoring": {
+              "HUM": 2
+            }
+          },
+          {
+            "text": "Фотографирую: паук правда интересный",
+            "textEn": "I take a photo: the spider really is fascinating",
+            "scoring": {
+              "SZT": 1,
+              "ASD": 1
+            }
+          },
+          {
+            "text": "Предупреждаю друга, чтобы обходил это место",
+            "textEn": "I warn my friend to steer clear of that spot",
+            "scoring": {
+              "KAN": 1,
+              "HUM": 1
+            }
+          }
+        ]
+      },
+      "originalKeys": [
+        {
+          "SAD": 3,
+          "HIS": 1
+        },
+        {
+          "HUM": 2
+        },
+        {
+          "SZT": 1,
+          "ASD": 1
+        },
+        {
+          "KAN": 1,
+          "HUM": 1
+        }
+      ],
+      "defect": "Интерес к пауку и фотография не подтверждают другие шкалы.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        3
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Условия, здоровье, привычки и настроение могут влиять на частоту; отдельный ответ не устанавливает причину.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "rare/SAD",
+      "number": 4,
+      "before": {
+        "scenario": "На переговорах вы видите, что человек напротив загнан в угол и нервничает.",
+        "scenarioEn": "In a negotiation you can see that the person across the table is cornered and nervous.",
+        "options": [
+          {
+            "text": "Дожимаю медленно, без спешки: мне нравится этот момент",
+            "textEn": "I press slowly, without hurrying: I enjoy this moment",
+            "scoring": {
+              "SAD": 3,
+              "MAC": 1
+            }
+          },
+          {
+            "text": "Беру своё и даю ему сохранить лицо",
+            "textEn": "I get what I need and let them save face",
+            "scoring": {
+              "MAC": 1,
+              "HUM": 1
+            }
+          },
+          {
+            "text": "Иду навстречу: давить на слабого неприятно",
+            "textEn": "I meet them halfway: pushing someone who's weak feels wrong",
+            "scoring": {
+              "HUM": 2
+            }
+          },
+          {
+            "text": "Фиксирую условия письменно — эмоции меня не касаются",
+            "textEn": "I put the terms in writing — emotions aren't my concern",
+            "scoring": {
+              "OBC": 2
+            }
+          }
+        ]
+      },
+      "originalKeys": [
+        {
+          "SAD": 3,
+          "MAC": 1
+        },
+        {
+          "MAC": 1,
+          "HUM": 1
+        },
+        {
+          "HUM": 2
+        },
+        {
+          "OBC": 2
+        }
+      ],
+      "defect": "Деловое давление отделено от удовольствия от беспомощности.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        4
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Условия, здоровье, привычки и настроение могут влиять на частоту; отдельный ответ не устанавливает причину.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "rare/SAD",
+      "number": 5,
+      "before": {
+        "scenario": "Человек в очереди громко скандалит и явно выставляет себя на посмешище.",
+        "scenarioEn": "Someone in a queue is loudly making a scene and clearly making a fool of themselves.",
+        "options": [
+          {
+            "text": "Снимаю на телефон — выложу, пусть посмеются все",
+            "textEn": "I film it on my phone — I'll post it so everyone can laugh",
+            "scoring": {
+              "SAD": 3,
+              "ANT": 1
+            }
+          },
+          {
+            "text": "Отворачиваюсь: неловко за человека",
+            "textEn": "I look away: I feel embarrassed for them",
+            "scoring": {
+              "HUM": 1,
+              "AVD": 1
+            }
+          },
+          {
+            "text": "Пытаюсь его успокоить",
+            "textEn": "I try to calm them down",
+            "scoring": {
+              "HUM": 2
+            }
+          },
+          {
+            "text": "Раздражаюсь: зачем устраивать шоу",
+            "textEn": "I get irritated: why put on a show",
+            "scoring": {
+              "PAG": 1,
+              "OBC": 1
+            }
+          }
+        ]
+      },
+      "originalKeys": [
+        {
+          "SAD": 3,
+          "ANT": 1
+        },
+        {
+          "HUM": 1,
+          "AVD": 1
+        },
+        {
+          "HUM": 2
+        },
+        {
+          "PAG": 1,
+          "OBC": 1
+        }
+      ],
+      "defect": "Запись конфликта может быть доказательством; уточнена цель унижения.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        5
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Условия, здоровье, привычки и настроение могут влиять на частоту; отдельный ответ не устанавливает причину.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "rare/SAD",
+      "number": 6,
+      "before": {
+        "_reverse": true,
+        "scenario": "Бывший партнёр, расставшийся с вами некрасиво, пишет, что у него(неё) всё рушится.",
+        "scenarioEn": "An ex who ended things with you badly writes that their life is falling apart.",
+        "options": [
+          {
+            "text": "Отвечаю вежливо и сухо, а внутри — тихое удовольствие от каждой подробности",
+            "textEn": "I reply politely and briefly, but inside I quietly enjoy every detail",
+            "scoring": {
+              "SAD": 3
+            }
+          },
+          {
+            "text": "Сочувствую искренне: прошлое прошло",
+            "textEn": "I'm genuinely sympathetic: the past is the past",
+            "scoring": {
+              "HUM": 2,
+              "FAI": 1
+            }
+          },
+          {
+            "text": "Не отвечаю: это больше не моя история",
+            "textEn": "I don't reply: it's not my story any more",
+            "scoring": {
+              "SZD": 1,
+              "AVD": 1
+            }
+          },
+          {
+            "text": "Отвечаю колко: сам(а) виноват(а)",
+            "textEn": "I reply with a jab: they brought it on themselves",
+            "scoring": {
+              "PAG": 2,
+              "SAD": 1
+            }
+          }
+        ]
+      },
+      "originalKeys": [
+        {
+          "SAD": 3
+        },
+        {
+          "HUM": 2,
+          "FAI": 1
+        },
+        {
+          "SZD": 1,
+          "AVD": 1
+        },
+        {
+          "PAG": 2,
+          "SAD": 1
+        }
+      ],
+      "defect": "Месть бывшему не представляет весь конструкт.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        6
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Условия, здоровье, привычки и настроение могут влиять на частоту; отдельный ответ не устанавливает причину.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "rare/SAD",
+      "number": 7,
+      "before": {
+        "scenario": "Настольная игра с друзьями. Один из них очень переживает, когда проигрывает.",
+        "scenarioEn": "A board game with friends. One of them gets really upset when they lose.",
+        "options": [
+          {
+            "text": "Играю против него особенно жёстко: его досада — лучшая часть вечера",
+            "textEn": "I play especially hard against them: their frustration is the best part of the evening",
+            "scoring": {
+              "SAD": 3
+            }
+          },
+          {
+            "text": "Иногда подыгрываю, чтобы всем было весело",
+            "textEn": "Sometimes I go easy so everyone has fun",
+            "scoring": {
+              "HUM": 2
+            }
+          },
+          {
+            "text": "Играю как обычно: игра есть игра",
+            "textEn": "I play as usual: a game is a game",
+            "scoring": {
+              "KAN": 1
+            }
+          },
+          {
+            "text": "Предлагаю командный режим — без проигравших",
+            "textEn": "I suggest playing in teams — no losers",
+            "scoring": {
+              "HUM": 1,
+              "FAI": 1
+            }
+          }
+        ]
+      },
+      "originalKeys": [
+        {
+          "SAD": 3
+        },
+        {
+          "HUM": 2
+        },
+        {
+          "KAN": 1
+        },
+        {
+          "HUM": 1,
+          "FAI": 1
+        }
+      ],
+      "defect": "Соревновательность отделена от удовольствия от огорчения.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        7
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Условия, здоровье, привычки и настроение могут влиять на частоту; отдельный ответ не устанавливает причину.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "rare/SAD",
+      "number": 8,
+      "before": {
+        "_reverse": true,
+        "scenario": "Знакомый просит отзыв на свой рассказ — рассказ откровенно слабый.",
+        "scenarioEn": "An acquaintance asks for feedback on their short story — and it's frankly weak.",
+        "options": [
+          {
+            "text": "Пишу подробный и безжалостный разбор — это же честная обратная связь",
+            "textEn": "I write a detailed, merciless critique — that's honest feedback, after all",
+            "scoring": {
+              "SAD": 3,
+              "DIR": 1
+            }
+          },
+          {
+            "text": "Отмечаю сильные стороны и пару главных точек роста",
+            "textEn": "I point out the strengths and a couple of key things to work on",
+            "scoring": {
+              "HUM": 2
+            }
+          },
+          {
+            "text": "Говорю, что всё отлично: не хочу расстраивать",
+            "textEn": "I say it's great: I don't want to upset them",
+            "scoring": {
+              "DEP": 1,
+              "AVD": 1
+            }
+          },
+          {
+            "text": "Пишу коротко и по делу",
+            "textEn": "I keep it short and to the point",
+            "scoring": {
+              "DIR": 2
+            }
+          }
+        ]
+      },
+      "originalKeys": [
+        {
+          "SAD": 3,
+          "DIR": 1
+        },
+        {
+          "HUM": 2
+        },
+        {
+          "DEP": 1,
+          "AVD": 1
+        },
+        {
+          "DIR": 2
+        }
+      ],
+      "defect": "Безжалостный честный отзыв сам по себе не доказывает садизм.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        8
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Условия, здоровье, привычки и настроение могут влиять на частоту; отдельный ответ не устанавливает причину.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "rare/SAD",
+      "number": 9,
+      "before": {
+        "scenario": "Вы видите, как кто-то неловко пытается познакомиться и получает отказ.",
+        "scenarioEn": "You watch someone awkwardly try to chat someone up and get turned down.",
+        "options": [
+          {
+            "text": "Смотрю с удовольствием: чужой провал — лучшее кино",
+            "textEn": "I watch with pleasure: someone else's flop is the best show",
+            "scoring": {
+              "SAD": 3
+            }
+          },
+          {
+            "text": "Сочувствую: сам(а) бывал(а) в такой ситуации",
+            "textEn": "I feel for them: I've been there myself",
+            "scoring": {
+              "HUM": 2
+            }
+          },
+          {
+            "text": "Отвожу взгляд, чтобы не смущать",
+            "textEn": "I look away so as not to embarrass them",
+            "scoring": {
+              "HUM": 1,
+              "AVD": 1
+            }
+          },
+          {
+            "text": "Мысленно разбираю, что он(а) сделал(а) не так",
+            "textEn": "In my head I go over what they did wrong",
+            "scoring": {
+              "MAC": 1
+            }
+          }
+        ]
+      },
+      "originalKeys": [
+        {
+          "SAD": 3
+        },
+        {
+          "HUM": 2
+        },
+        {
+          "HUM": 1,
+          "AVD": 1
+        },
+        {
+          "MAC": 1
+        }
+      ],
+      "defect": "Наблюдение и анализ отделены от удовольствия от чужого отказа.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        9
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Условия, здоровье, привычки и настроение могут влиять на частоту; отдельный ответ не устанавливает причину.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "rare/ASD",
+      "number": 1,
+      "before": {
+        "scenario": "Друг просит «заскочить ненадолго».",
+        "scenarioEn": "A friend asks you to \"drop by for a bit\".",
+        "options": [
+          {
+            "text": "Уточняю: «ненадолго» — это сколько минут?",
+            "textEn": "I check: \"a bit\" — how many minutes is that?",
+            "scoring": {
+              "ASD": 3,
+              "OBC": 1
+            }
+          },
+          {
+            "text": "Заезжаю, как получится",
+            "textEn": "I drop by whenever it works out",
+            "scoring": {
+              "HIS": 1
+            }
+          },
+          {
+            "text": "Понятно, минут на двадцать — так обычно и бывает",
+            "textEn": "Fine — twenty minutes or so, that's how it usually goes",
+            "scoring": {
+              "FAI": 1
+            }
+          },
+          {
+            "text": "Соглашаюсь, но планирую уйти через час",
+            "textEn": "I agree, but plan to leave after an hour",
+            "scoring": {
+              "OBC": 1
+            }
+          }
+        ]
+      },
+      "originalKeys": [
+        {
+          "ASD": 3,
+          "OBC": 1
+        },
+        {
+          "HIS": 1
+        },
+        {
+          "FAI": 1
+        },
+        {
+          "OBC": 1
+        }
+      ],
+      "defect": "Уточнение времени нормально и не доказывает спектральную особенность.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        1
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Условия, здоровье, привычки и настроение могут влиять на частоту; отдельный ответ не устанавливает причину.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "rare/ASD",
+      "number": 2,
+      "before": {
+        "scenario": "В любимом кафе сменили меню и расставили столы по-новому.",
+        "scenarioEn": "Your favourite café has changed its menu and rearranged the tables.",
+        "options": [
+          {
+            "text": "Выбит(а) из колеи: теперь это будто чужое место",
+            "textEn": "I'm thrown: now it feels like somebody else's place",
+            "scoring": {
+              "ASD": 3,
+              "AVD": 1
+            }
+          },
+          {
+            "text": "Интересно — попробую новое",
+            "textEn": "Interesting — I'll try something new",
+            "scoring": {
+              "HIS": 1,
+              "FAI": 1
+            }
+          },
+          {
+            "text": "Замечаю, но мне всё равно",
+            "textEn": "I notice, but I don't care",
+            "scoring": {
+              "SZD": 1
+            }
+          },
+          {
+            "text": "Пишу отзыв: раньше было лучше",
+            "textEn": "I write a review: it used to be better",
+            "scoring": {
+              "PAG": 1,
+              "OBC": 1
+            }
+          }
+        ]
+      },
+      "originalKeys": [
+        {
+          "ASD": 3,
+          "AVD": 1
+        },
+        {
+          "HIS": 1,
+          "FAI": 1
+        },
+        {
+          "SZD": 1
+        },
+        {
+          "PAG": 1,
+          "OBC": 1
+        }
+      ],
+      "defect": "Предпочтение старого меню не показывает устойчивую трудность изменений.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        2
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Условия, здоровье, привычки и настроение могут влиять на частоту; отдельный ответ не устанавливает причину.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "rare/ASD",
+      "number": 3,
+      "before": {
+        "_reverse": true,
+        "scenario": "Небольшая компания, общий разговор легко перескакивает с темы на тему.",
+        "scenarioEn": "A small group; the conversation hops easily from one topic to the next.",
+        "options": [
+          {
+            "text": "Заранее держу в голове пару тем и фраз — без «сценария» теряюсь",
+            "textEn": "I keep a couple of topics and lines ready in advance — without a \"script\" I get lost",
+            "scoring": {
+              "ASD": 3
+            }
+          },
+          {
+            "text": "Подхватываю легко",
+            "textEn": "I pick it up easily",
+            "scoring": {
+              "HIS": 1
+            }
+          },
+          {
+            "text": "Молчу и слушаю",
+            "textEn": "I stay quiet and listen",
+            "scoring": {
+              "SZD": 1,
+              "AVD": 1
+            }
+          },
+          {
+            "text": "Жду повода заговорить о своей теме",
+            "textEn": "I wait for a chance to bring up my own topic",
+            "scoring": {
+              "ASD": 2,
+              "NAR": 1
+            }
+          }
+        ]
+      },
+      "originalKeys": [
+        {
+          "ASD": 3
+        },
+        {
+          "HIS": 1
+        },
+        {
+          "SZD": 1,
+          "AVD": 1
+        },
+        {
+          "ASD": 2,
+          "NAR": 1
+        }
+      ],
+      "defect": "Подготовка полезна; измеряем сохраняющуюся трудность без тревоги.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        3
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Условия, здоровье, привычки и настроение могут влиять на частоту; отдельный ответ не устанавливает причину.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "rare/ASD",
+      "number": 4,
+      "before": {
+        "scenario": "Вы собираете мебель по инструкции, а в ней явная ошибка в нумерации деталей.",
+        "scenarioEn": "You're assembling furniture from the instructions, and the part numbering has an obvious mistake.",
+        "options": [
+          {
+            "text": "Не успокоюсь, пока не найду, где именно ошибка, и не отмечу её в инструкции",
+            "textEn": "I can't let it go until I find exactly where the mistake is and mark it in the instructions",
+            "scoring": {
+              "ASD": 3,
+              "OBC": 1
+            }
+          },
+          {
+            "text": "Собираю по картинке — нумерация неважна",
+            "textEn": "I go by the pictures — the numbering doesn't matter",
+            "scoring": {}
+          },
+          {
+            "text": "Злюсь на производителя и пишу жалобу",
+            "textEn": "I get angry at the manufacturer and write a complaint",
+            "scoring": {
+              "PAG": 2
+            }
+          },
+          {
+            "text": "Прошу кого-нибудь помочь",
+            "textEn": "I ask someone to help",
+            "scoring": {
+              "DEP": 2
+            }
+          }
+        ]
+      },
+      "originalKeys": [
+        {
+          "ASD": 3,
+          "OBC": 1
+        },
+        {},
+        {
+          "PAG": 2
+        },
+        {
+          "DEP": 2
+        }
+      ],
+      "defect": "Исправление инструкции не доказывает особенность обработки деталей.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        4
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Условия, здоровье, привычки и настроение могут влиять на частоту; отдельный ответ не устанавливает причину.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "rare/ASD",
+      "number": 5,
+      "before": {
+        "_reverse": true,
+        "scenario": "Вечер пятницы. Друзья зовут в бар, где вы ещё не бывали.",
+        "scenarioEn": "Friday evening. Friends invite you to a bar you've never been to.",
+        "options": [
+          {
+            "text": "Соглашаюсь, но заранее смотрю фото зала, меню и как добираться — так спокойнее",
+            "textEn": "I say yes, but first I look up photos of the place, the menu and how to get there — it's calmer that way",
+            "scoring": {
+              "ASD": 3
+            }
+          },
+          {
+            "text": "Иду с удовольствием — люблю новые места",
+            "textEn": "I'm happy to go — I love new places",
+            "scoring": {
+              "HIS": 2
+            }
+          },
+          {
+            "text": "Не пойду: вечер пятницы — моё время",
+            "textEn": "I'm not going: Friday night is my time",
+            "scoring": {
+              "SZD": 2
+            }
+          },
+          {
+            "text": "Пойду, если там будет кто-то из близких",
+            "textEn": "I'll go if someone close to me will be there",
+            "scoring": {
+              "DEP": 1,
+              "AVD": 1
+            }
+          }
+        ]
+      },
+      "originalKeys": [
+        {
+          "ASD": 3
+        },
+        {
+          "HIS": 2
+        },
+        {
+          "SZD": 2
+        },
+        {
+          "DEP": 1,
+          "AVD": 1
+        }
+      ],
+      "defect": "Просмотр меню может обеспечивать доступность и безопасность.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        5
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Условия, здоровье, привычки и настроение могут влиять на частоту; отдельный ответ не устанавливает причину.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "rare/ASD",
+      "number": 6,
+      "before": {
+        "scenario": "Вас просят «сделать как обычно, только немного лучше».",
+        "scenarioEn": "You're asked to \"do it the usual way, just a bit better\".",
+        "options": [
+          {
+            "text": "Теряюсь: «лучше» — это по каким параметрам?",
+            "textEn": "I'm stuck: \"better\" by which measures?",
+            "scoring": {
+              "ASD": 3
+            }
+          },
+          {
+            "text": "Интуитивно понимаю, что имеется в виду, и делаю",
+            "textEn": "I intuitively get what they mean and do it",
+            "scoring": {}
+          },
+          {
+            "text": "Делаю по-своему — я лучше знаю",
+            "textEn": "I do it my way — I know best",
+            "scoring": {
+              "NAR": 2
+            }
+          },
+          {
+            "text": "Боюсь не угадать и переделываю несколько раз",
+            "textEn": "I'm afraid of getting it wrong and redo it several times",
+            "scoring": {
+              "DEP": 2
+            }
+          }
+        ]
+      },
+      "originalKeys": [
+        {
+          "ASD": 3
+        },
+        {},
+        {
+          "NAR": 2
+        },
+        {
+          "DEP": 2
+        }
+      ],
+      "defect": "Плохое задание затруднит ответ любому; уточнён знакомый контекст.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        6
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Условия, здоровье, привычки и настроение могут влиять на частоту; отдельный ответ не устанавливает причину.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "rare/ASD",
+      "number": 7,
+      "before": {
+        "scenario": "Вы долго объясняли собеседнику устройство интересной вам системы. Он зевнул.",
+        "scenarioEn": "You've spent a long time explaining to someone how a system you love works. They yawn.",
+        "options": [
+          {
+            "text": "Замечаю зевок задним числом — увлёкся(лась) и не следил(а) за реакцией",
+            "textEn": "I only notice the yawn afterwards — I got carried away and wasn't watching their reaction",
+            "scoring": {
+              "ASD": 3
+            }
+          },
+          {
+            "text": "Сразу сворачиваюсь: вижу, что неинтересно",
+            "textEn": "I wrap up at once: I can see they're not interested",
+            "scoring": {}
+          },
+          {
+            "text": "Обижаюсь: мог бы и послушать",
+            "textEn": "I'm offended: they could at least listen",
+            "scoring": {
+              "NAR": 1,
+              "PAG": 1
+            }
+          },
+          {
+            "text": "Упрощаю объяснение",
+            "textEn": "I simplify the explanation",
+            "scoring": {
+              "HUM": 1
+            }
+          }
+        ]
+      },
+      "originalKeys": [
+        {
+          "ASD": 3
+        },
+        {},
+        {
+          "NAR": 1,
+          "PAG": 1
+        },
+        {
+          "HUM": 1
+        }
+      ],
+      "defect": "Обида и упрощение не обосновывают NAR/PAG/HUM.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        7
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Условия, здоровье, привычки и настроение могут влиять на частоту; отдельный ответ не устанавливает причину.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "rare/ASD",
+      "number": 8,
+      "before": {
+        "_reverse": true,
+        "scenario": "Коллега пишет в чат: «Глянешь мой отчёт, когда будет минутка?»",
+        "scenarioEn": "A colleague messages: \"Could you look over my report when you've got a minute?\"",
+        "options": [
+          {
+            "text": "Отвечаю «гляну» и ставлю напоминание на конкретное время: «когда будет минутка» мне ничего не говорит",
+            "textEn": "I say \"will do\" and set a reminder for a specific time: \"when you've got a minute\" means nothing to me",
+            "scoring": {
+              "ASD": 3,
+              "OBC": 1
+            }
+          },
+          {
+            "text": "Посмотрю, когда освобожусь",
+            "textEn": "I'll look when I'm free",
+            "scoring": {}
+          },
+          {
+            "text": "Бросаю всё и смотрю: вдруг срочно",
+            "textEn": "I drop everything and look: what if it's urgent",
+            "scoring": {
+              "DEP": 1,
+              "AVD": 1
+            }
+          },
+          {
+            "text": "Уточняю, к какому сроку нужно",
+            "textEn": "I ask when they need it by",
+            "scoring": {
+              "OBC": 1
+            }
+          }
+        ]
+      },
+      "originalKeys": [
+        {
+          "ASD": 3,
+          "OBC": 1
+        },
+        {},
+        {
+          "DEP": 1,
+          "AVD": 1
+        },
+        {
+          "OBC": 1
+        }
+      ],
+      "defect": "Напоминание и уточнение срока не равны спектральной особенности.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        8
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Условия, здоровье, привычки и настроение могут влиять на частоту; отдельный ответ не устанавливает причину.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "rare/MAS",
+      "number": 1,
+      "before": {
+        "scenario": "Друзья зовут в поездку, а у вас скопилась работа, которую никто срочно не требует.",
+        "scenarioEn": "Friends invite you on a trip, but you've got a backlog of work that nobody needs urgently.",
+        "options": [
+          {
+            "text": "Остаюсь работать: отдых надо заслужить",
+            "textEn": "I stay and work: rest has to be earned",
+            "scoring": {
+              "MAS": 3,
+              "OBC": 1
+            }
+          },
+          {
+            "text": "Еду: работа подождёт",
+            "textEn": "I go: the work can wait",
+            "scoring": {
+              "HIS": 1
+            }
+          },
+          {
+            "text": "Беру ноутбук с собой",
+            "textEn": "I take my laptop along",
+            "scoring": {
+              "OBC": 2
+            }
+          },
+          {
+            "text": "Еду, но всю поездку себя грызу",
+            "textEn": "I go, but spend the whole trip beating myself up",
+            "scoring": {
+              "MAS": 2,
+              "DPR": 1
+            }
+          }
+        ]
+      },
+      "originalKeys": [
+        {
+          "MAS": 3,
+          "OBC": 1
+        },
+        {
+          "HIS": 1
+        },
+        {
+          "OBC": 2
+        },
+        {
+          "MAS": 2,
+          "DPR": 1
+        }
+      ],
+      "defect": "Незавершённая работа отделена от убеждения о незаслуженном отдыхе.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        1
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Условия, здоровье, привычки и настроение могут влиять на частоту; отдельный ответ не устанавливает причину.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "rare/MAS",
+      "number": 2,
+      "before": {
+        "_reverse": true,
+        "scenario": "Врач советует несколько дней полежать дома.",
+        "scenarioEn": "The doctor advises you to stay home in bed for a few days.",
+        "options": [
+          {
+            "text": "Соглашаюсь, но «лежу» с ноутбуком и отвечаю на всё — так ведь все делают",
+            "textEn": "I agree, but \"rest\" with my laptop and answer everything — everyone does that, right?",
+            "scoring": {
+              "MAS": 3
+            }
+          },
+          {
+            "text": "Честно отлёживаюсь",
+            "textEn": "I rest properly",
+            "scoring": {}
+          },
+          {
+            "text": "Выхожу на работу: без меня не справятся",
+            "textEn": "I go in to work: they can't manage without me",
+            "scoring": {
+              "NAR": 1,
+              "MAS": 1
+            }
+          },
+          {
+            "text": "Пользуюсь случаем досмотреть сериалы",
+            "textEn": "I use the chance to catch up on series",
+            "scoring": {
+              "HIS": 1
+            }
+          }
+        ]
+      },
+      "originalKeys": [
+        {
+          "MAS": 3
+        },
+        {},
+        {
+          "NAR": 1,
+          "MAS": 1
+        },
+        {
+          "HIS": 1
+        }
+      ],
+      "defect": "Работа во время болезни может быть вынужденной; уточнена возможность отдыха.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        2
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Условия, здоровье, привычки и настроение могут влиять на частоту; отдельный ответ не устанавливает причину.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "rare/MAS",
+      "number": 3,
+      "before": {
+        "scenario": "В гостях вам досталось самое неудобное место — табуретка у двери.",
+        "scenarioEn": "At a get-together you end up with the worst seat — a stool by the door.",
+        "options": [
+          {
+            "text": "Так и сижу весь вечер: мне нормально, не хочу никого двигать",
+            "textEn": "I sit there all evening: I'm fine, I don't want to make anyone move",
+            "scoring": {
+              "MAS": 3
+            }
+          },
+          {
+            "text": "Прошу подвинуться",
+            "textEn": "I ask people to shift up",
+            "scoring": {
+              "DIR": 1
+            }
+          },
+          {
+            "text": "Обижаюсь, что обо мне не подумали",
+            "textEn": "I'm hurt that nobody thought of me",
+            "scoring": {
+              "PAG": 1,
+              "NAR": 1
+            }
+          },
+          {
+            "text": "Весь вечер помогаю хозяевам",
+            "textEn": "I spend the evening helping the hosts",
+            "scoring": {
+              "HUM": 1,
+              "DEP": 1
+            }
+          }
+        ]
+      },
+      "originalKeys": [
+        {
+          "MAS": 3
+        },
+        {
+          "DIR": 1
+        },
+        {
+          "PAG": 1,
+          "NAR": 1
+        },
+        {
+          "HUM": 1,
+          "DEP": 1
+        }
+      ],
+      "defect": "Табуретка может устраивать; уточнено лишение себя нужного удобства.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        3
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Условия, здоровье, привычки и настроение могут влиять на частоту; отдельный ответ не устанавливает причину.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "rare/MAS",
+      "number": 4,
+      "before": {
+        "scenario": "Вам сделали дорогой подарок — лично для вас.",
+        "scenarioEn": "Someone gives you an expensive present, just for you.",
+        "options": [
+          {
+            "text": "Неловко до боли: я такого не стою",
+            "textEn": "It's painfully awkward: I'm not worth this",
+            "scoring": {
+              "MAS": 3,
+              "DEP": 1
+            }
+          },
+          {
+            "text": "Радуюсь от души",
+            "textEn": "I'm genuinely delighted",
+            "scoring": {
+              "HIS": 1
+            }
+          },
+          {
+            "text": "Прикидываю, чем отдарить равноценно",
+            "textEn": "I work out how to give back something of equal value",
+            "scoring": {
+              "OBC": 1,
+              "KAN": 1
+            }
+          },
+          {
+            "text": "Подозреваю, чего от меня теперь хотят",
+            "textEn": "I wonder what they want from me now",
+            "scoring": {
+              "PAR": 2
+            }
+          }
+        ]
+      },
+      "originalKeys": [
+        {
+          "MAS": 3,
+          "DEP": 1
+        },
+        {
+          "HIS": 1
+        },
+        {
+          "OBC": 1,
+          "KAN": 1
+        },
+        {
+          "PAR": 2
+        }
+      ],
+      "defect": "Дорогой подарок может создавать долг; исключены условия.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        4
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Условия, здоровье, привычки и настроение могут влиять на частоту; отдельный ответ не устанавливает причину.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "rare/MAS",
+      "number": 5,
+      "before": {
+        "_reverse": true,
+        "scenario": "Общий проект сдан, начальство хвалит команду. Больше всех тянули вы.",
+        "scenarioEn": "The team project is delivered and management praises the team. You carried more of it than anyone.",
+        "options": [
+          {
+            "text": "Молчу и отдаю заслуги другим — мне так спокойнее",
+            "textEn": "I stay quiet and let the others take the credit — it's easier for me that way",
+            "scoring": {
+              "MAS": 3
+            }
+          },
+          {
+            "text": "Говорю, какую часть сделал(а) я",
+            "textEn": "I say which part I did",
+            "scoring": {
+              "NAR": 1,
+              "DIR": 1
+            }
+          },
+          {
+            "text": "Радуюсь за всех вместе",
+            "textEn": "I'm happy for everyone together",
+            "scoring": {
+              "HUM": 1,
+              "FAI": 1
+            }
+          },
+          {
+            "text": "Про себя злюсь, что меня не заметили",
+            "textEn": "Inside I'm angry that nobody noticed me",
+            "scoring": {
+              "PAG": 2
+            }
+          }
+        ]
+      },
+      "originalKeys": [
+        {
+          "MAS": 3
+        },
+        {
+          "NAR": 1,
+          "DIR": 1
+        },
+        {
+          "HUM": 1,
+          "FAI": 1
+        },
+        {
+          "PAG": 2
+        }
+      ],
+      "defect": "Скромность и удовольствие от общей похвалы не равны самообесцениванию.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        5
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Условия, здоровье, привычки и настроение могут влиять на частоту; отдельный ответ не устанавливает причину.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "rare/MAS",
+      "number": 6,
+      "before": {
+        "scenario": "Вы очень устали, а друг просит завтра в семь утра помочь с переездом.",
+        "scenarioEn": "You're exhausted, and a friend asks you to help them move at seven tomorrow morning.",
+        "options": [
+          {
+            "text": "Соглашаюсь, хотя еле стою: отказать — хуже, чем надорваться",
+            "textEn": "I say yes, though I can barely stand: refusing is worse than wearing myself out",
+            "scoring": {
+              "MAS": 3,
+              "DEP": 1
+            }
+          },
+          {
+            "text": "Отказываю: мне нужен отдых",
+            "textEn": "I say no: I need rest",
+            "scoring": {}
+          },
+          {
+            "text": "Предлагаю помочь позже или по-другому",
+            "textEn": "I offer to help later or in some other way",
+            "scoring": {
+              "KAN": 1
+            }
+          },
+          {
+            "text": "Соглашаюсь и потом тихо злюсь",
+            "textEn": "I say yes and then quietly seethe",
+            "scoring": {
+              "PAG": 2
+            }
+          }
+        ]
+      },
+      "originalKeys": [
+        {
+          "MAS": 3,
+          "DEP": 1
+        },
+        {},
+        {
+          "KAN": 1
+        },
+        {
+          "PAG": 2
+        }
+      ],
+      "defect": "Помощь в экстренной ситуации не доказывает самоотрицания.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        6
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Условия, здоровье, привычки и настроение могут влиять на частоту; отдельный ответ не устанавливает причину.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "rare/MAS",
+      "number": 7,
+      "before": {
+        "_reverse": true,
+        "scenario": "Вы выбираете рабочее кресло на годы вперёд.",
+        "scenarioEn": "You're choosing an office chair to last you for years.",
+        "options": [
+          {
+            "text": "Беру самое простое — мне хватит, лучше потрачу на близких",
+            "textEn": "I take the most basic one — it'll do for me; better to spend on the people I love",
+            "scoring": {
+              "MAS": 3,
+              "HUM": 1
+            }
+          },
+          {
+            "text": "Беру лучшее, что могу себе позволить: спина одна",
+            "textEn": "I get the best I can afford: I've only got one back",
+            "scoring": {}
+          },
+          {
+            "text": "Долго сравниваю характеристики",
+            "textEn": "I spend ages comparing specs",
+            "scoring": {
+              "OBC": 2
+            }
+          },
+          {
+            "text": "Беру то, что посоветовали",
+            "textEn": "I take whatever was recommended",
+            "scoring": {
+              "DEP": 1
+            }
+          }
+        ]
+      },
+      "originalKeys": [
+        {
+          "MAS": 3,
+          "HUM": 1
+        },
+        {},
+        {
+          "OBC": 2
+        },
+        {
+          "DEP": 1
+        }
+      ],
+      "defect": "Дешёвое кресло может быть вынужденным или достаточным.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        7
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Условия, здоровье, привычки и настроение могут влиять на частоту; отдельный ответ не устанавливает причину.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "rare/ALX",
+      "number": 1,
+      "before": {
+        "scenario": "Друг спрашивает, почему вы вчера так резко ушли с вечеринки.",
+        "scenarioEn": "A friend asks why you left the party so abruptly yesterday.",
+        "options": [
+          {
+            "text": "Пытаюсь объяснить — и понимаю, что сам(а) не знаю: просто стало «как-то не так»",
+            "textEn": "I try to explain — and realise I don't know myself: it just felt \"off\" somehow",
+            "scoring": {
+              "ALX": 3
+            }
+          },
+          {
+            "text": "Честно говорю: меня задела одна фраза",
+            "textEn": "I say honestly that one remark got to me",
+            "scoring": {
+              "DIR": 1
+            }
+          },
+          {
+            "text": "Придумываю вежливую причину",
+            "textEn": "I make up a polite reason",
+            "scoring": {
+              "AVD": 1,
+              "MAC": 1
+            }
+          },
+          {
+            "text": "Говорю, что устал(а), и не углубляюсь",
+            "textEn": "I say I was tired and leave it there",
+            "scoring": {
+              "ALX": 1,
+              "SZD": 1
+            }
+          }
+        ]
+      },
+      "originalKeys": [
+        {
+          "ALX": 3
+        },
+        {
+          "DIR": 1
+        },
+        {
+          "AVD": 1,
+          "MAC": 1
+        },
+        {
+          "ALX": 1,
+          "SZD": 1
+        }
+      ],
+      "defect": "Нежелание говорить и непонимание переживания разделены.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        1
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Условия, здоровье, привычки и настроение могут влиять на частоту; отдельный ответ не устанавливает причину.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "rare/ALX",
+      "number": 2,
+      "before": {
+        "_reverse": true,
+        "scenario": "После тяжёлого разговора с начальником коллега спрашивает: «Ты как?»",
+        "scenarioEn": "After a tough conversation with your boss, a colleague asks: \"How are you doing?\"",
+        "options": [
+          {
+            "text": "Пересказываю по фактам: он сказал это, я ответил(а) то — разбирать разговор легче, чем чувства",
+            "textEn": "I recount the facts: they said this, I said that — analysing the conversation is easier than feelings",
+            "scoring": {
+              "ALX": 3
+            }
+          },
+          {
+            "text": "Говорю, что обидно и тревожно",
+            "textEn": "I say I feel hurt and anxious",
+            "scoring": {}
+          },
+          {
+            "text": "«Нормально» — и меняю тему",
+            "textEn": "\"Fine\" — and I change the subject",
+            "scoring": {
+              "ALX": 2,
+              "AVD": 1
+            }
+          },
+          {
+            "text": "Злюсь вслух на начальника",
+            "textEn": "I vent my anger at the boss",
+            "scoring": {
+              "PAG": 1,
+              "ANT": 1
+            }
+          }
+        ]
+      },
+      "originalKeys": [
+        {
+          "ALX": 3
+        },
+        {},
+        {
+          "ALX": 2,
+          "AVD": 1
+        },
+        {
+          "PAG": 1,
+          "ANT": 1
+        }
+      ],
+      "defect": "Рассказ о фактах и приватность не доказывают трудность называния.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        2
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Условия, здоровье, привычки и настроение могут влиять на частоту; отдельный ответ не устанавливает причину.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "rare/ALX",
+      "number": 3,
+      "before": {
+        "scenario": "У вас без видимой причины колотится сердце и сжимается желудок.",
+        "scenarioEn": "For no obvious reason your heart is pounding and your stomach is in a knot.",
+        "options": [
+          {
+            "text": "Думаю, что что-то с телом, — о чувствах вспоминаю в последнюю очередь",
+            "textEn": "I assume it's something physical — emotions are the last thing that occurs to me",
+            "scoring": {
+              "ALX": 3
+            }
+          },
+          {
+            "text": "Понимаю: волнуюсь из-за завтрашнего",
+            "textEn": "I realise I'm nervous about tomorrow",
+            "scoring": {}
+          },
+          {
+            "text": "Иду проверяться к врачу",
+            "textEn": "I go and get checked by a doctor",
+            "scoring": {
+              "OBC": 1,
+              "PAR": 1
+            }
+          },
+          {
+            "text": "Не обращаю внимания — пройдёт",
+            "textEn": "I ignore it — it'll pass",
+            "scoring": {
+              "MAS": 1,
+              "ALX": 1
+            }
+          }
+        ]
+      },
+      "originalKeys": [
+        {
+          "ALX": 3
+        },
+        {},
+        {
+          "OBC": 1,
+          "PAR": 1
+        },
+        {
+          "MAS": 1,
+          "ALX": 1
+        }
+      ],
+      "defect": "Обращение к врачу по телесным симптомам не означает PAR/OBC.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        3
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Условия, здоровье, привычки и настроение могут влиять на частоту; отдельный ответ не устанавливает причину.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "rare/ALX",
+      "number": 4,
+      "before": {
+        "scenario": "Нужно написать тёплое поздравление близкому человеку.",
+        "scenarioEn": "You need to write a warm message to someone close to you.",
+        "options": [
+          {
+            "text": "Сижу над пустым листом: нужных слов о чувствах просто нет",
+            "textEn": "I sit in front of a blank page: the words for feelings just aren't there",
+            "scoring": {
+              "ALX": 3
+            }
+          },
+          {
+            "text": "Пишу легко — слова приходят сами",
+            "textEn": "I write easily — the words just come",
+            "scoring": {
+              "HIS": 1
+            }
+          },
+          {
+            "text": "Беру готовое поздравление из интернета",
+            "textEn": "I copy a ready-made message from the internet",
+            "scoring": {
+              "SZD": 1,
+              "ALX": 1
+            }
+          },
+          {
+            "text": "Пишу коротко — и этого достаточно",
+            "textEn": "I keep it short — that's enough",
+            "scoring": {
+              "DIR": 1,
+              "SZD": 1
+            }
+          }
+        ]
+      },
+      "originalKeys": [
+        {
+          "ALX": 3
+        },
+        {
+          "HIS": 1
+        },
+        {
+          "SZD": 1,
+          "ALX": 1
+        },
+        {
+          "DIR": 1,
+          "SZD": 1
+        }
+      ],
+      "defect": "Готовое поздравление и краткость зависят от письма и привычек.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        4
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Условия, здоровье, привычки и настроение могут влиять на частоту; отдельный ответ не устанавливает причину.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "rare/ALX",
+      "number": 5,
+      "before": {
+        "_reverse": true,
+        "scenario": "Близкий человек говорит: «Ты сегодня какой-то не такой».",
+        "scenarioEn": "Someone close to you says: \"You don't seem yourself today.\"",
+        "options": [
+          {
+            "text": "«Да нет, всё как обычно» — и правда не замечаю в себе ничего особенного",
+            "textEn": "\"No, everything's normal\" — and I genuinely don't notice anything different in myself",
+            "scoring": {
+              "ALX": 3
+            }
+          },
+          {
+            "text": "Задумываюсь и понимаю, что с утра расстроен(а)",
+            "textEn": "I think about it and realise I've been upset since the morning",
+            "scoring": {}
+          },
+          {
+            "text": "Раздражаюсь, что лезут в душу",
+            "textEn": "I get annoyed that they're prying",
+            "scoring": {
+              "AVD": 1,
+              "PAG": 1
+            }
+          },
+          {
+            "text": "Спрашиваю, что именно заметили",
+            "textEn": "I ask what exactly they noticed",
+            "scoring": {
+              "DEP": 1
+            }
+          }
+        ]
+      },
+      "originalKeys": [
+        {
+          "ALX": 3
+        },
+        {},
+        {
+          "AVD": 1,
+          "PAG": 1
+        },
+        {
+          "DEP": 1
+        }
+      ],
+      "defect": "Несогласие с чужой оценкой не доказывает непонимание своих чувств.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        5
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Условия, здоровье, привычки и настроение могут влиять на частоту; отдельный ответ не устанавливает причину.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    },
+    {
+      "source": "rare/ALX",
+      "number": 6,
+      "before": {
+        "scenario": "Вы разбираете старые семейные фотографии.",
+        "scenarioEn": "You're sorting through old family photos.",
+        "options": [
+          {
+            "text": "Узнаю людей и места, но внутри почти ничего не шевелится",
+            "textEn": "I recognise the people and places, but inside hardly anything stirs",
+            "scoring": {
+              "ALX": 3,
+              "SZD": 1
+            }
+          },
+          {
+            "text": "Накатывает ностальгия, иногда до слёз",
+            "textEn": "Nostalgia washes over me, sometimes to the point of tears",
+            "scoring": {
+              "HIS": 1
+            }
+          },
+          {
+            "text": "Раскладываю их по годам и подписываю",
+            "textEn": "I sort them by year and label them",
+            "scoring": {
+              "OBC": 2,
+              "ASD": 1
+            }
+          },
+          {
+            "text": "Становится грустно, и я их убираю",
+            "textEn": "I feel sad and put them away",
+            "scoring": {
+              "AVD": 1,
+              "DPR": 1
+            }
+          }
+        ]
+      },
+      "originalKeys": [
+        {
+          "ALX": 3,
+          "SZD": 1
+        },
+        {
+          "HIS": 1
+        },
+        {
+          "OBC": 2,
+          "ASD": 1
+        },
+        {
+          "AVD": 1,
+          "DPR": 1
+        }
+      ],
+      "defect": "Слабая ностальгия не равна алекситимии; заменено на внимание к переживанию.",
+      "verdict": "Переработан для пилота",
+      "afterNumbers": [
+        6
+      ],
+      "newKey": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "counterExample": "Условия, здоровье, привычки и настроение могут влиять на частоту; отдельный ответ не устанавливает причину.",
+      "check": "Когнитивное интервью: пересказать признак и период, вспомнить случай, объяснить границу между редкостью и частотой; затем проверить структуру и связи на реальных данных."
+    }
+  ],
+  "added": [
+    {
+      "code": "INA",
+      "numbers": [
+        3,
+        6
+      ],
+      "reason": "Отдельные области слушания и избегания длительного умственного усилия."
+    },
+    {
+      "code": "HYI",
+      "numbers": [
+        4,
+        6
+      ],
+      "reason": "Отдельные области тихого досуга и чрезмерной речи."
+    }
+  ],
+  "originalBankSha256": "67afa067959b8b7b026189aeecc81f47e956659c551d05aed6495609133a9d2b",
+  "productDecision": {
+    "date": "2026-10-16",
+    "by": "Kami",
+    "placement": "general-profile",
+    "betaLabel": false,
+    "coreScaleCount": 27,
+    "experimentalScaleCount": 3
+  }
+}

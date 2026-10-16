@@ -3,8 +3,11 @@ import { createHash } from 'node:crypto'
 import { readFileSync } from 'node:fs'
 
 // Проверка одноразового редакторского аудита; не меняет файлы и не обращается к БД.
-const bank = JSON.parse(readFileSync(new URL('../prisma/questions-dump.json', import.meta.url), 'utf8'))
+const currentBank = JSON.parse(readFileSync(new URL('../prisma/questions-dump.json', import.meta.url), 'utf8'))
 const report = JSON.parse(readFileSync(new URL('../docs/question-review/literary-audit-2026-10-16.json', import.meta.url), 'utf8'))
+// Исторический аудит относится к исходным вопросам. Новые пакеты имеют свой журнал;
+// дописывание не должно превращать старую проверку в утверждение о ревью новых пунктов.
+const bank = currentBank.slice(0, report.totalQuestions)
 const byId = new Map(bank.map((question) => [question.id, question]))
 assert.equal(bank.length, report.totalQuestions, 'Состав банка изменился после аудита')
 
@@ -59,3 +62,6 @@ if (process.argv.includes('--require-complete') || report.status === 'complete')
 }
 
 console.log(`Аудит ${report.status}: ${reviewed.size}/${bank.length} вопросов, ${report.changes.length} правок. Баллы, порядок и EN сохранены.`)
+if (currentBank.length > bank.length) {
+  console.log(`За пределами исторического аудита: ${currentBank.length - bank.length} новых вопросов; проверяются отдельным журналом.`)
+}

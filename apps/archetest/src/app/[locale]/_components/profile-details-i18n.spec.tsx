@@ -18,12 +18,12 @@ const scores = { ...fill(10), PAR: 80, OBC: 70, SZD: 60, PAG: 45 }
 const confidence: Record<PersonalityTypeCode, ScaleConfidence> = { ...fill<ScaleConfidence>('high'), SZD: 'low' }
 const relevantCounts = fill(60)
 
-function renderIn(locale: 'ru' | 'en') {
+function renderIn(locale: 'ru' | 'en', values = scores, counts = relevantCounts) {
   const onError = vi.fn()
   const view = render(
     <ChakraProvider value={defaultSystem}>
       <NextIntlClientProvider locale={locale} messages={locale === 'ru' ? ruMessages : enMessages} onError={onError}>
-        <ProfileDetails scores={scores} confidence={confidence} relevantCounts={relevantCounts} />
+        <ProfileDetails scores={values} confidence={confidence} relevantCounts={counts} />
       </NextIntlClientProvider>
     </ChakraProvider>,
   )
@@ -31,6 +31,22 @@ function renderIn(locale: 'ru' | 'en') {
 }
 
 describe('ProfileDetails + DevelopmentalProfileCard: строки из messages', () => {
+  it.each(['INA', 'HYI', 'AAX', 'AAV', 'HON'] as const)(
+    '%s: обычная ведущая черта с практиками без беты на обоих языках',
+    (code) => {
+      for (const locale of ['ru', 'en'] as const) {
+        const values = { ...fill(0), [code]: 100 }
+        const counts = { ...fill(0), [code]: code === 'HON' ? 15 : 9 }
+        const { container, onError, unmount } = renderIn(locale, values, counts)
+        const type = getPersonalityType(code)
+        expect(container.textContent).toContain(locale === 'ru' ? type.archetype : type.archetypeEn)
+        expect(container.textContent).toContain(locale === 'ru' ? 'Практики' : 'Practices')
+        expect(container.textContent).not.toMatch(/β|бета|beta/)
+        expect(onError).not.toHaveBeenCalled()
+        unmount()
+      }
+    },
+  )
   it.each(['ru', 'en'] as const)('%s: без MISSING_MESSAGE и сырых ключей', (locale) => {
     const { onError, container } = renderIn(locale)
     expect(onError).not.toHaveBeenCalled()

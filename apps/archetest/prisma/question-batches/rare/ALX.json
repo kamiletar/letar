@@ -1,212 +1,210 @@
 [
   {
-    "scenario": "Друг спрашивает, почему вы вчера так резко ушли с вечеринки.",
-    "scenarioEn": "A friend asks why you left the party so abruptly yesterday.",
+    "_facet": "Определение чувства",
+    "_reverse": false,
+    "_reviewVersion": 2,
+    "scenario": "За последние шесть месяцев как часто замечая эмоционально важную для вас реакцию, вы не можете понять, какое именно чувство испытываете? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often when noticing an emotionally important reaction in yourself you cannot identify which feeling you are experiencing? If you have not experienced such situations or cannot answer, skip this question.",
     "options": [
       {
-        "text": "Пытаюсь объяснить — и понимаю, что сам(а) не знаю: просто стало «как-то не так»",
-        "textEn": "I try to explain — and realise I don't know myself: it just felt \"off\" somehow",
-        "scoring": {
-          "ALX": 3
-        }
-      },
-      {
-        "text": "Честно говорю: меня задела одна фраза",
-        "textEn": "I say honestly that one remark got to me",
-        "scoring": {
-          "DIR": 1
-        }
-      },
-      {
-        "text": "Придумываю вежливую причину",
-        "textEn": "I make up a polite reason",
-        "scoring": {
-          "AVD": 1,
-          "MAC": 1
-        }
-      },
-      {
-        "text": "Говорю, что устал(а), и не углубляюсь",
-        "textEn": "I say I was tired and leave it there",
-        "scoring": {
-          "ALX": 1,
-          "SZD": 1
-        }
-      }
-    ]
-  },
-  {
-    "_reverse": true,
-    "scenario": "После тяжёлого разговора с начальником коллега спрашивает: «Ты как?»",
-    "scenarioEn": "After a tough conversation with your boss, a colleague asks: \"How are you doing?\"",
-    "options": [
-      {
-        "text": "Пересказываю по фактам: он сказал это, я ответил(а) то — разбирать разговор легче, чем чувства",
-        "textEn": "I recount the facts: they said this, I said that — analysing the conversation is easier than feelings",
-        "scoring": {
-          "ALX": 3
-        }
-      },
-      {
-        "text": "Говорю, что обидно и тревожно",
-        "textEn": "I say I feel hurt and anxious",
+        "text": "Никогда или почти никогда",
+        "textEn": "Never or almost never",
         "scoring": {}
       },
       {
-        "text": "«Нормально» — и меняю тему",
-        "textEn": "\"Fine\" — and I change the subject",
+        "text": "Редко",
+        "textEn": "Rarely",
         "scoring": {
-          "ALX": 2,
-          "AVD": 1
-        }
-      },
-      {
-        "text": "Злюсь вслух на начальника",
-        "textEn": "I vent my anger at the boss",
-        "scoring": {
-          "PAG": 1,
-          "ANT": 1
-        }
-      }
-    ]
-  },
-  {
-    "scenario": "У вас без видимой причины колотится сердце и сжимается желудок.",
-    "scenarioEn": "For no obvious reason your heart is pounding and your stomach is in a knot.",
-    "options": [
-      {
-        "text": "Думаю, что что-то с телом, — о чувствах вспоминаю в последнюю очередь",
-        "textEn": "I assume it's something physical — emotions are the last thing that occurs to me",
-        "scoring": {
-          "ALX": 3
-        }
-      },
-      {
-        "text": "Понимаю: волнуюсь из-за завтрашнего",
-        "textEn": "I realise I'm nervous about tomorrow",
-        "scoring": {}
-      },
-      {
-        "text": "Иду проверяться к врачу",
-        "textEn": "I go and get checked by a doctor",
-        "scoring": {
-          "OBC": 1,
-          "PAR": 1
-        }
-      },
-      {
-        "text": "Не обращаю внимания — пройдёт",
-        "textEn": "I ignore it — it'll pass",
-        "scoring": {
-          "MAS": 1,
-          "ALX": 1
-        }
-      }
-    ]
-  },
-  {
-    "scenario": "Нужно написать тёплое поздравление близкому человеку.",
-    "scenarioEn": "You need to write a warm message to someone close to you.",
-    "options": [
-      {
-        "text": "Сижу над пустым листом: нужных слов о чувствах просто нет",
-        "textEn": "I sit in front of a blank page: the words for feelings just aren't there",
-        "scoring": {
-          "ALX": 3
-        }
-      },
-      {
-        "text": "Пишу легко — слова приходят сами",
-        "textEn": "I write easily — the words just come",
-        "scoring": {
-          "HIS": 1
-        }
-      },
-      {
-        "text": "Беру готовое поздравление из интернета",
-        "textEn": "I copy a ready-made message from the internet",
-        "scoring": {
-          "SZD": 1,
           "ALX": 1
         }
       },
       {
-        "text": "Пишу коротко — и этого достаточно",
-        "textEn": "I keep it short — that's enough",
+        "text": "Часто",
+        "textEn": "Often",
         "scoring": {
-          "DIR": 1,
-          "SZD": 1
+          "ALX": 2
         }
-      }
-    ]
-  },
-  {
-    "_reverse": true,
-    "scenario": "Близкий человек говорит: «Ты сегодня какой-то не такой».",
-    "scenarioEn": "Someone close to you says: \"You don't seem yourself today.\"",
-    "options": [
+      },
       {
-        "text": "«Да нет, всё как обычно» — и правда не замечаю в себе ничего особенного",
-        "textEn": "\"No, everything's normal\" — and I genuinely don't notice anything different in myself",
+        "text": "Почти каждый раз",
+        "textEn": "Almost every time",
         "scoring": {
           "ALX": 3
         }
-      },
+      }
+    ]
+  },
+  {
+    "_facet": "Описание чувства",
+    "_reverse": false,
+    "_reviewVersion": 2,
+    "scenario": "За последние шесть месяцев как часто желая рассказать близкому человеку о своём переживании, вы не находите слов для самого чувства, хотя события описать можете? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often when wanting to tell someone close about an experience you cannot find words for the feeling itself even though you can describe the events? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": [
       {
-        "text": "Задумываюсь и понимаю, что с утра расстроен(а)",
-        "textEn": "I think about it and realise I've been upset since the morning",
+        "text": "Никогда или почти никогда",
+        "textEn": "Never or almost never",
         "scoring": {}
       },
       {
-        "text": "Раздражаюсь, что лезут в душу",
-        "textEn": "I get annoyed that they're prying",
+        "text": "Редко",
+        "textEn": "Rarely",
         "scoring": {
-          "AVD": 1,
-          "PAG": 1
+          "ALX": 1
         }
       },
       {
-        "text": "Спрашиваю, что именно заметили",
-        "textEn": "I ask what exactly they noticed",
+        "text": "Часто",
+        "textEn": "Often",
         "scoring": {
-          "DEP": 1
+          "ALX": 2
+        }
+      },
+      {
+        "text": "Почти каждый раз",
+        "textEn": "Almost every time",
+        "scoring": {
+          "ALX": 3
         }
       }
     ]
   },
   {
-    "scenario": "Вы разбираете старые семейные фотографии.",
-    "scenarioEn": "You're sorting through old family photos.",
+    "_facet": "Различение переживаний",
+    "_reverse": false,
+    "_reviewVersion": 2,
+    "scenario": "За последние шесть месяцев как часто после напряжённого события вам трудно различить, что вы чувствуете: например, злость, страх или огорчение? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often after a tense event you find it difficult to distinguish what you feel such as anger fear or sadness? If you have not experienced such situations or cannot answer, skip this question.",
     "options": [
       {
-        "text": "Узнаю людей и места, но внутри почти ничего не шевелится",
-        "textEn": "I recognise the people and places, but inside hardly anything stirs",
+        "text": "Никогда или почти никогда",
+        "textEn": "Never or almost never",
+        "scoring": {}
+      },
+      {
+        "text": "Редко",
+        "textEn": "Rarely",
         "scoring": {
-          "ALX": 3,
-          "SZD": 1
+          "ALX": 1
         }
       },
       {
-        "text": "Накатывает ностальгия, иногда до слёз",
-        "textEn": "Nostalgia washes over me, sometimes to the point of tears",
+        "text": "Часто",
+        "textEn": "Often",
         "scoring": {
-          "HIS": 1
+          "ALX": 2
         }
       },
       {
-        "text": "Раскладываю их по годам и подписываю",
-        "textEn": "I sort them by year and label them",
+        "text": "Почти каждый раз",
+        "textEn": "Almost every time",
         "scoring": {
-          "OBC": 2,
-          "ASD": 1
+          "ALX": 3
+        }
+      }
+    ]
+  },
+  {
+    "_facet": "Слова о тёплых чувствах",
+    "_reverse": false,
+    "_reviewVersion": 2,
+    "scenario": "За последние шесть месяцев как часто испытывая тёплое чувство к близкому человеку и желая его выразить, вы затрудняетесь назвать это чувство своими словами? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often when feeling affection for someone close and wanting to express it you struggle to name the feeling in your own words? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": [
+      {
+        "text": "Никогда или почти никогда",
+        "textEn": "Never or almost never",
+        "scoring": {}
+      },
+      {
+        "text": "Редко",
+        "textEn": "Rarely",
+        "scoring": {
+          "ALX": 1
         }
       },
       {
-        "text": "Становится грустно, и я их убираю",
-        "textEn": "I feel sad and put them away",
+        "text": "Часто",
+        "textEn": "Often",
         "scoring": {
-          "AVD": 1,
-          "DPR": 1
+          "ALX": 2
+        }
+      },
+      {
+        "text": "Почти каждый раз",
+        "textEn": "Almost every time",
+        "scoring": {
+          "ALX": 3
+        }
+      }
+    ]
+  },
+  {
+    "_facet": "Замечание изменения состояния",
+    "_reverse": false,
+    "_reviewVersion": 2,
+    "scenario": "За последние шесть месяцев как часто вы замечаете, что ваше эмоциональное состояние изменилось, но даже после размышления не можете понять, что именно чувствуете? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often you notice a change in your emotional state but even after reflection cannot identify what you are feeling? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": [
+      {
+        "text": "Никогда или почти никогда",
+        "textEn": "Never or almost never",
+        "scoring": {}
+      },
+      {
+        "text": "Редко",
+        "textEn": "Rarely",
+        "scoring": {
+          "ALX": 1
+        }
+      },
+      {
+        "text": "Часто",
+        "textEn": "Often",
+        "scoring": {
+          "ALX": 2
+        }
+      },
+      {
+        "text": "Почти каждый раз",
+        "textEn": "Almost every time",
+        "scoring": {
+          "ALX": 3
+        }
+      }
+    ]
+  },
+  {
+    "_facet": "Внимание к переживанию",
+    "_reverse": false,
+    "_reviewVersion": 2,
+    "scenario": "За последние шесть месяцев как часто обдумывая значимое событие, вы возвращаетесь только к внешним фактам, потому что собственные переживания трудно удержать в поле внимания? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often when reflecting on an important event you return only to external facts because you find it difficult to keep your own feelings in focus? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": [
+      {
+        "text": "Никогда или почти никогда",
+        "textEn": "Never or almost never",
+        "scoring": {}
+      },
+      {
+        "text": "Редко",
+        "textEn": "Rarely",
+        "scoring": {
+          "ALX": 1
+        }
+      },
+      {
+        "text": "Часто",
+        "textEn": "Often",
+        "scoring": {
+          "ALX": 2
+        }
+      },
+      {
+        "text": "Почти каждый раз",
+        "textEn": "Almost every time",
+        "scoring": {
+          "ALX": 3
         }
       }
     ]

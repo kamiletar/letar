@@ -36,7 +36,7 @@ export interface GrowthProfile {
 }
 
 /**
- * Практики для всех 22 шкал ядра — блок «Практики» developmental-фрейма (этап 5.6.1).
+ * Практики для всех 27 шкал ядра — блок «Практики» developmental-фрейма (этап 5.6.1).
  * Опора на доказательные техники (схема-терапия, DBT, КПТ); формулировки — авторские,
  * без заимствования пунктов валидированных опросников (принцип лицензионной чистоты 5.6.2).
  * Каждая практика — конкретное действие, а не абстрактный совет.
@@ -488,6 +488,86 @@ export const GROWTH_PROFILES: GrowthProfile[] = [
         method: 'general',
       },
     ],
+  },
+  {
+    code: 'INA',
+    practices: [{
+      text:
+        'Выберите одно повседневное дело и запишите только ближайший выполнимый шаг. После него решите, что делать дальше.',
+      textEn:
+        'Choose one everyday task and write down only the next manageable step. Decide what comes next after completing it.',
+      method: 'general',
+    }, {
+      text:
+        'В течение недели отмечайте, когда привычные напоминания и спокойная обстановка помогают, а когда трудности сохраняются. Используйте эти примеры для подбора поддержки.',
+      textEn:
+        'For a week, note when your usual reminders and a quiet setting help and when difficulties remain. Use these examples to choose useful support.',
+      method: 'general',
+    }],
+  },
+  {
+    code: 'HYI',
+    practices: [{
+      text:
+        'Перед разговором выберите удобный способ дождаться своей очереди: например, кратко записать мысль, пока собеседник заканчивает. Проверьте, помогает ли это именно вам.',
+      textEn:
+        'Before a conversation, choose a comfortable way to wait for your turn, such as briefly writing down your thought while the other person finishes. Check whether it helps you.',
+      method: 'general',
+    }, {
+      text:
+        'Планируйте короткие перерывы с движением в занятиях, где приходится долго сидеть. Подбирайте ритм по самочувствию и условиям задачи.',
+      textEn:
+        'Plan short movement breaks during activities that require extended sitting. Choose a rhythm that suits how you feel and the task.',
+      method: 'general',
+    }],
+  },
+  {
+    code: 'AAX',
+    practices: [{
+      text:
+        'Если привычный контакт изменился, отдельно запишите наблюдаемый факт и своё объяснение. Подумайте, что можно спокойно уточнить у близкого человека.',
+      textEn:
+        'If familiar contact changes, write down the observable fact separately from your explanation. Consider what you can calmly clarify with the other person.',
+      method: 'general',
+    }, {
+      text:
+        'В безопасных отношениях обсудите удобную обоим частоту связи и способ сообщать о занятости. Договорённость должна учитывать потребности обоих.',
+      textEn:
+        'In a safe relationship, discuss a frequency of contact that works for both of you and a way to communicate being busy. The agreement should consider both people’s needs.',
+      method: 'general',
+    }],
+  },
+  {
+    code: 'AAV',
+    practices: [{
+      text:
+        'Если хотите поделиться переживанием в безопасных отношениях, начните с одной посильной детали и скажите, нужна ли вам поддержка, совет или просто внимание.',
+      textEn:
+        'If you want to share an experience in a safe relationship, start with one manageable detail and say whether you need support, advice or simply attention.',
+      method: 'general',
+    }, {
+      text:
+        'Обсудите конкретно, какое время вместе и отдельно подходит вам обоим. Отличайте нужный отдых от ухода от разговора, который вы сами хотели бы провести.',
+      textEn:
+        'Discuss the amount of shared and separate time that suits both of you. Distinguish needed rest from avoiding a conversation you would like to have.',
+      method: 'general',
+    }],
+  },
+  {
+    code: 'HON',
+    practices: [{
+      text:
+        'В ближайшей совместной задаче заранее договоритесь, как распределяются расходы, работа и признание вклада. Проверьте, одинаково ли все поняли договорённость.',
+      textEn:
+        'In your next shared task, agree in advance on the division of expenses, work and recognition. Check whether everyone understands the agreement in the same way.',
+      method: 'general',
+    }, {
+      text:
+        'Перед важной покупкой отделите полезные для вас свойства вещи от желания произвести впечатление. Оба мотива можно заметить без самоосуждения.',
+      textEn:
+        'Before an important purchase, separate the features useful to you from the wish to make an impression. You can notice both motives without judging yourself.',
+      method: 'general',
+    }],
   },
 ]
 

@@ -19132,5 +19132,752 @@
     "active": true,
     "sortOrder": 2125,
     "createdAt": "2026-07-09T14:06:38.885"
+  },
+  {
+    "id": "eb585c75890691496fc9be21b",
+    "scenario": "За последние шесть месяцев как часто в обычных условиях, с привычной помощью и лечением, если они есть, в знакомых повседневных заданиях вы пропускаете важную деталь, хотя знаете, как выполнить задание? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often in your usual circumstances, with any support or treatment you normally use, you miss an important detail in a familiar everyday task even though you know how to do it? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"INA\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"INA\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"INA\":3}}]",
+    "active": true,
+    "sortOrder": 2126,
+    "createdAt": "2026-10-16T13:09:35.782"
+  },
+  {
+    "id": "f9f7db12d810dedd4ee05d719",
+    "scenario": "За последние шесть месяцев как часто в обычных условиях, с привычной помощью и лечением, если они есть, во время необходимого, но однообразного дела ваше внимание уходит от задачи? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often in your usual circumstances, with any support or treatment you normally use, your attention drifts away during a necessary but repetitive task? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"INA\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"INA\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"INA\":3}}]",
+    "active": true,
+    "sortOrder": 2127,
+    "createdAt": "2026-10-16T13:09:35.782"
+  },
+  {
+    "id": "97f94aeda0c299552d99394ae",
+    "scenario": "За последние шесть месяцев как часто в обычных условиях, с привычной помощью и лечением, если они есть, в разговоре один на один вы обнаруживаете, что пропустили часть сказанного, хотя хотели слушать? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often in your usual circumstances, with any support or treatment you normally use, in a one-to-one conversation you realize you missed part of what was said even though you wanted to listen? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"INA\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"INA\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"INA\":3}}]",
+    "active": true,
+    "sortOrder": 2128,
+    "createdAt": "2026-10-16T13:09:35.782"
+  },
+  {
+    "id": "0331d51e6569e0815c514b3fa",
+    "scenario": "За последние шесть месяцев как часто в обычных условиях, с привычной помощью и лечением, если они есть, вы оставляете необходимое дело незавершённым, переключившись на другое, хотя решили его закончить? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often in your usual circumstances, with any support or treatment you normally use, you leave a necessary task unfinished after switching to something else even though you intended to finish it? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"INA\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"INA\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"INA\":3}}]",
+    "active": true,
+    "sortOrder": 2129,
+    "createdAt": "2026-10-16T13:09:35.782"
+  },
+  {
+    "id": "6cdd6f420fb1e4310172f9393",
+    "scenario": "За последние шесть месяцев как часто в обычных условиях, с привычной помощью и лечением, если они есть, вам трудно выстроить порядок шагов в обычном деле, даже когда понятно, какой результат нужен? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often in your usual circumstances, with any support or treatment you normally use, you struggle to put the steps of an everyday task in order even when the desired outcome is clear? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"INA\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"INA\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"INA\":3}}]",
+    "active": true,
+    "sortOrder": 2130,
+    "createdAt": "2026-10-16T13:09:35.782"
+  },
+  {
+    "id": "9f9405a817055b945bf280c05",
+    "scenario": "За последние шесть месяцев как часто в обычных условиях, с привычной помощью и лечением, если они есть, вы откладываете посильную, но требующую длительного внимания задачу именно из-за трудности удерживать умственное усилие? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often in your usual circumstances, with any support or treatment you normally use, you put off a manageable task requiring sustained attention specifically because keeping up the mental effort feels difficult? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"INA\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"INA\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"INA\":3}}]",
+    "active": true,
+    "sortOrder": 2131,
+    "createdAt": "2026-10-16T13:09:35.782"
+  },
+  {
+    "id": "60379c1fc405fc06972a6b319",
+    "scenario": "За последние шесть месяцев как часто в обычных условиях, с привычной помощью и лечением, если они есть, вы не можете найти нужную для текущего дела вещь, потому что не помните, куда её положили? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often in your usual circumstances, with any support or treatment you normally use, you cannot find something needed for a task because you do not remember where you put it? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"INA\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"INA\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"INA\":3}}]",
+    "active": true,
+    "sortOrder": 2132,
+    "createdAt": "2026-10-16T13:09:35.782"
+  },
+  {
+    "id": "b98868e1635942f5c4c92ba3f",
+    "scenario": "За последние шесть месяцев как часто в обычных условиях, с привычной помощью и лечением, если они есть, посторонний звук или движение отвлекает вас от дела, и вам трудно вернуться к нему? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often in your usual circumstances, with any support or treatment you normally use, an unrelated sound or movement draws you away from a task and you find it hard to return to it? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"INA\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"INA\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"INA\":3}}]",
+    "active": true,
+    "sortOrder": 2133,
+    "createdAt": "2026-10-16T13:09:35.782"
+  },
+  {
+    "id": "cabdacb504f04b286ce63a477",
+    "scenario": "За последние шесть месяцев как часто в обычных условиях, с привычной помощью и лечением, если они есть, повседневная договорённость выпадает у вас из памяти, хотя вы собирались её выполнить? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often in your usual circumstances, with any support or treatment you normally use, you forget an everyday commitment even though you intended to follow through? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"INA\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"INA\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"INA\":3}}]",
+    "active": true,
+    "sortOrder": 2134,
+    "createdAt": "2026-10-16T13:09:35.782"
+  },
+  {
+    "id": "7aaf6417c6a42d6a405490a21",
+    "scenario": "За последние шесть месяцев как часто в обычных условиях, с привычной помощью и лечением, если они есть, в спокойной обстановке вы непроизвольно двигаете ногой или перебираете что-то руками, когда нужно сидеть? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often in your usual circumstances, with any support or treatment you normally use, in a calm setting you find yourself moving a leg or handling objects when you need to sit? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"HYI\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"HYI\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"HYI\":3}}]",
+    "active": true,
+    "sortOrder": 2135,
+    "createdAt": "2026-10-16T13:09:35.782"
+  },
+  {
+    "id": "ca1a8ec0c180d28cdd3a9c2d6",
+    "scenario": "За последние шесть месяцев как часто в обычных условиях, с привычной помощью и лечением, если они есть, на недолгой встрече вы встаёте и начинаете ходить, хотя сейчас предполагается оставаться на месте? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often in your usual circumstances, with any support or treatment you normally use, during a short meeting you get up and walk around even though you are expected to remain seated? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"HYI\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"HYI\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"HYI\":3}}]",
+    "active": true,
+    "sortOrder": 2136,
+    "createdAt": "2026-10-16T13:09:35.782"
+  },
+  {
+    "id": "5b864048b013566207e3d6216",
+    "scenario": "За последние шесть месяцев как часто в обычных условиях, с привычной помощью и лечением, если они есть, в обычное свободное время вы чувствуете внутреннюю потребность двигаться, даже когда спешить некуда? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often in your usual circumstances, with any support or treatment you normally use, during ordinary free time you feel an inner need to move even when there is no need to hurry? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"HYI\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"HYI\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"HYI\":3}}]",
+    "active": true,
+    "sortOrder": 2137,
+    "createdAt": "2026-10-16T13:09:35.782"
+  },
+  {
+    "id": "0eac13a9fd250f493a5de2f90",
+    "scenario": "За последние шесть месяцев как часто в обычных условиях, с привычной помощью и лечением, если они есть, во время спокойного совместного занятия вам трудно заниматься им тихо, без постоянных разговоров или шума? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often in your usual circumstances, with any support or treatment you normally use, during a quiet shared activity you find it difficult to take part without repeatedly talking or making noise? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"HYI\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"HYI\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"HYI\":3}}]",
+    "active": true,
+    "sortOrder": 2138,
+    "createdAt": "2026-10-16T13:09:35.782"
+  },
+  {
+    "id": "c7bb3343cbc8924f0c23285d5",
+    "scenario": "За последние шесть месяцев как часто в обычных условиях, с привычной помощью и лечением, если они есть, вы продолжаете переходить от одного занятия к другому, потому что вам трудно остановиться и спокойно отдохнуть? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often in your usual circumstances, with any support or treatment you normally use, you keep moving from one activity to another because you find it difficult to stop and rest quietly? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"HYI\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"HYI\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"HYI\":3}}]",
+    "active": true,
+    "sortOrder": 2139,
+    "createdAt": "2026-10-16T13:09:35.782"
+  },
+  {
+    "id": "47bc188b9cbebd12353cdfab9",
+    "scenario": "За последние шесть месяцев как часто в обычных условиях, с привычной помощью и лечением, если они есть, в беседе вы говорите так много, что собеседникам трудно вставить слово, хотя вы собирались дать им высказаться? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often in your usual circumstances, with any support or treatment you normally use, in a conversation you talk so much that others struggle to get a turn even though you intended to let them speak? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"HYI\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"HYI\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"HYI\":3}}]",
+    "active": true,
+    "sortOrder": 2140,
+    "createdAt": "2026-10-16T13:09:35.782"
+  },
+  {
+    "id": "fe69cf5c7865aa3b3d0c58ed7",
+    "scenario": "За последние шесть месяцев как часто в обычных условиях, с привычной помощью и лечением, если они есть, вы отвечаете вслух до того, как собеседник закончил вопрос, хотя собирались дослушать? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often in your usual circumstances, with any support or treatment you normally use, you answer aloud before someone has finished asking a question even though you intended to hear them out? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"HYI\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"HYI\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"HYI\":3}}]",
+    "active": true,
+    "sortOrder": 2141,
+    "createdAt": "2026-10-16T13:09:35.782"
+  },
+  {
+    "id": "bb05f59c3b6961cf0a25a0bba",
+    "scenario": "За последние шесть месяцев как часто в обычных условиях, с привычной помощью и лечением, если они есть, при обычном ожидании своей очереди вы начинаете действовать вне очереди, потому что трудно дождаться? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often in your usual circumstances, with any support or treatment you normally use, during an ordinary wait for your turn you act out of turn because you find waiting difficult? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"HYI\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"HYI\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"HYI\":3}}]",
+    "active": true,
+    "sortOrder": 2142,
+    "createdAt": "2026-10-16T13:09:35.782"
+  },
+  {
+    "id": "90eaaa7765a6ed0be96c7e224",
+    "scenario": "За последние шесть месяцев как часто в обычных условиях, с привычной помощью и лечением, если они есть, вы вмешиваетесь в чужой разговор или занятие без приглашения, а затем замечаете, что помешали? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often in your usual circumstances, with any support or treatment you normally use, you join someone else’s conversation or activity without an invitation and then realize you interrupted? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"HYI\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"HYI\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"HYI\":3}}]",
+    "active": true,
+    "sortOrder": 2143,
+    "createdAt": "2026-10-16T13:09:35.782"
+  },
+  {
+    "id": "97281b4f639932348e34b33c8",
+    "scenario": "Вспомните одни безопасные близкие отношения, в которых вы хотите сохранять связь, и отвечайте о них. За последние шесть месяцев как часто после непривычно короткого сообщения близкого человека вы долго тревожитесь, что его чувства к вам изменились? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Think of one safe close relationship you want to maintain and answer about that relationship. Over the past six months, how often after an unusually brief message from someone close you worry for a long time that their feelings for you have changed? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"AAX\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"AAX\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"AAX\":3}}]",
+    "active": true,
+    "sortOrder": 2144,
+    "createdAt": "2026-10-16T13:09:35.848"
+  },
+  {
+    "id": "7df6d89a61a065467665191e6",
+    "scenario": "Вспомните одни безопасные близкие отношения, в которых вы хотите сохранять связь, и отвечайте о них. За последние шесть месяцев как часто получив искреннее подтверждение тёплых чувств, вы вскоре снова нуждаетесь в нём, чтобы не сомневаться в отношениях? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Think of one safe close relationship you want to maintain and answer about that relationship. Over the past six months, how often soon after receiving sincere reassurance of affection you need it again to stop doubting the relationship? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"AAX\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"AAX\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"AAX\":3}}]",
+    "active": true,
+    "sortOrder": 2145,
+    "createdAt": "2026-10-16T13:09:35.848"
+  },
+  {
+    "id": "c4b683af26779f5f68a54f7b1",
+    "scenario": "Вспомните одни безопасные близкие отношения, в которых вы хотите сохранять связь, и отвечайте о них. За последние шесть месяцев как часто во время заранее согласованной разлуки вы тревожитесь именно о том, что близкий человек перестанет нуждаться в отношениях с вами? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Think of one safe close relationship you want to maintain and answer about that relationship. Over the past six months, how often during an agreed time apart you worry specifically that the person will stop wanting a relationship with you? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"AAX\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"AAX\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"AAX\":3}}]",
+    "active": true,
+    "sortOrder": 2146,
+    "createdAt": "2026-10-16T13:09:35.848"
+  },
+  {
+    "id": "c29b18b980d408fae2544b1da",
+    "scenario": "Вспомните одни безопасные близкие отношения, в которых вы хотите сохранять связь, и отвечайте о них. За последние шесть месяцев как часто пока близкий человек берёт согласованную паузу после спора, вы воспринимаете это как угрозу вашим отношениям? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Think of one safe close relationship you want to maintain and answer about that relationship. Over the past six months, how often while someone close takes an agreed break after a disagreement you experience it as a threat to your relationship? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"AAX\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"AAX\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"AAX\":3}}]",
+    "active": true,
+    "sortOrder": 2147,
+    "createdAt": "2026-10-16T13:09:35.848"
+  },
+  {
+    "id": "91561aec7e86c31fb19fd9273",
+    "scenario": "Вспомните одни безопасные близкие отношения, в которых вы хотите сохранять связь, и отвечайте о них. За последние шесть месяцев как часто если близкий человек забыл спросить о важном для вас событии, вы начинаете сомневаться, дороги ли вы ему? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Think of one safe close relationship you want to maintain and answer about that relationship. Over the past six months, how often when someone close forgets to ask about an event important to you you begin doubting whether you matter to them? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"AAX\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"AAX\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"AAX\":3}}]",
+    "active": true,
+    "sortOrder": 2148,
+    "createdAt": "2026-10-16T13:09:35.848"
+  },
+  {
+    "id": "57d1d31ddb7491e59f3974050",
+    "scenario": "Вспомните одни безопасные близкие отношения, в которых вы хотите сохранять связь, и отвечайте о них. За последние шесть месяцев как часто когда близкий человек занят своими делами, вы снова и снова проверяете его доступность, чтобы убедиться, что связь между вами сохраняется? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Think of one safe close relationship you want to maintain and answer about that relationship. Over the past six months, how often when someone close is busy with their own activities you repeatedly check their availability to reassure yourself that your bond remains? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"AAX\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"AAX\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"AAX\":3}}]",
+    "active": true,
+    "sortOrder": 2149,
+    "createdAt": "2026-10-16T13:09:35.848"
+  },
+  {
+    "id": "0c4ec37d2c38295cb1b59b166",
+    "scenario": "Вспомните одни безопасные близкие отношения, в которых вы хотите сохранять связь, и отвечайте о них. За последние шесть месяцев как часто просьба близкого человека провести время отдельно вызывает у вас страх, что он хочет закончить отношения? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Think of one safe close relationship you want to maintain and answer about that relationship. Over the past six months, how often a close person’s request for time apart makes you fear that they want to end the relationship? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"AAX\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"AAX\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"AAX\":3}}]",
+    "active": true,
+    "sortOrder": 2150,
+    "createdAt": "2026-10-16T13:09:35.848"
+  },
+  {
+    "id": "7e7e73c186163946de8c0e178",
+    "scenario": "Вспомните одни безопасные близкие отношения, в которых вы хотите сохранять связь, и отвечайте о них. За последние шесть месяцев как часто слыша о других дорогих близкому человеку людях, вы долго тревожитесь, что ваши отношения для него менее важны? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Think of one safe close relationship you want to maintain and answer about that relationship. Over the past six months, how often after hearing about other people important to someone close you worry for a long time that your relationship matters less? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"AAX\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"AAX\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"AAX\":3}}]",
+    "active": true,
+    "sortOrder": 2151,
+    "createdAt": "2026-10-16T13:09:35.848"
+  },
+  {
+    "id": "30a5b5b808656fd48a7fe1c58",
+    "scenario": "Вспомните одни безопасные близкие отношения, в которых вы хотите сохранять связь, и отвечайте о них. За последние шесть месяцев как часто в спокойный период отношений вы ищете признаки охлаждения, хотя конкретных поводов для этого не замечаете? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Think of one safe close relationship you want to maintain and answer about that relationship. Over the past six months, how often during a calm period in the relationship you look for signs of fading affection even though you see no specific reason to do so? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"AAX\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"AAX\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"AAX\":3}}]",
+    "active": true,
+    "sortOrder": 2152,
+    "createdAt": "2026-10-16T13:09:35.848"
+  },
+  {
+    "id": "87e79648d611f894bf397ec70",
+    "scenario": "Вспомните одни безопасные близкие отношения, в которых вы хотите сохранять связь, и отвечайте о них. За последние шесть месяцев как часто сдержанная благодарность близкого человека заставляет вас долго сомневаться в его расположении к вам? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Think of one safe close relationship you want to maintain and answer about that relationship. Over the past six months, how often a close person’s reserved expression of thanks leaves you doubting their affection for a long time? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"AAX\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"AAX\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"AAX\":3}}]",
+    "active": true,
+    "sortOrder": 2153,
+    "createdAt": "2026-10-16T13:09:35.848"
+  },
+  {
+    "id": "5c67615f715643d2549dd6a47",
+    "scenario": "Вспомните одни безопасные близкие отношения, в которых вы хотите сохранять связь, и отвечайте о них. За последние шесть месяцев как часто вам хочется поделиться важным переживанием с близким человеком, но вы закрываетесь именно потому, что откровенность делает вас слишком уязвимыми? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Think of one safe close relationship you want to maintain and answer about that relationship. Over the past six months, how often you want to share an important feeling with someone close but hold back specifically because openness makes you feel too vulnerable? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"AAV\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"AAV\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"AAV\":3}}]",
+    "active": true,
+    "sortOrder": 2154,
+    "createdAt": "2026-10-16T13:09:35.848"
+  },
+  {
+    "id": "ed195aeed11775de93326df2e",
+    "scenario": "Вспомните одни безопасные близкие отношения, в которых вы хотите сохранять связь, и отвечайте о них. За последние шесть месяцев как часто вы отказываетесь от нужной и удобной помощи близкого человека именно потому, что не хотите на него полагаться? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Think of one safe close relationship you want to maintain and answer about that relationship. Over the past six months, how often you turn down needed and practical help from someone close specifically because you do not want to rely on them? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"AAV\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"AAV\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"AAV\":3}}]",
+    "active": true,
+    "sortOrder": 2155,
+    "createdAt": "2026-10-16T13:09:35.848"
+  },
+  {
+    "id": "d9922a16051cf8222ab9c1e49",
+    "scenario": "Вспомните одни безопасные близкие отношения, в которых вы хотите сохранять связь, и отвечайте о них. За последние шесть месяцев как часто при желанном для обоих сближении вам хочется отдалиться именно из-за возрастающей эмоциональной близости? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Think of one safe close relationship you want to maintain and answer about that relationship. Over the past six months, how often during a move toward closeness that both of you want you feel an urge to withdraw specifically because emotional intimacy is increasing? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"AAV\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"AAV\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"AAV\":3}}]",
+    "active": true,
+    "sortOrder": 2156,
+    "createdAt": "2026-10-16T13:09:35.848"
+  },
+  {
+    "id": "5a9f49dde84c2357af4f259da",
+    "scenario": "Вспомните одни безопасные близкие отношения, в которых вы хотите сохранять связь, и отвечайте о них. За последние шесть месяцев как часто вы уходите от эмоционального разговора с близким человеком именно потому, что вам трудно выдерживать такую близость? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Think of one safe close relationship you want to maintain and answer about that relationship. Over the past six months, how often you withdraw from an emotional conversation with someone close specifically because that degree of intimacy feels uncomfortable? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"AAV\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"AAV\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"AAV\":3}}]",
+    "active": true,
+    "sortOrder": 2157,
+    "createdAt": "2026-10-16T13:09:35.848"
+  },
+  {
+    "id": "481e1695611f8dc1fc53d9356",
+    "scenario": "Вспомните одни безопасные близкие отношения, в которых вы хотите сохранять связь, и отвечайте о них. За последние шесть месяцев как часто даже при удобном для вас количестве совместного времени вы чувствуете желание отдалиться, когда общение становится особенно тёплым? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Think of one safe close relationship you want to maintain and answer about that relationship. Over the past six months, how often even with an amount of shared time that suits you you feel an urge to pull away when the interaction becomes especially affectionate? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"AAV\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"AAV\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"AAV\":3}}]",
+    "active": true,
+    "sortOrder": 2158,
+    "createdAt": "2026-10-16T13:09:35.848"
+  },
+  {
+    "id": "437672cdc48d3d33a70ea5121",
+    "scenario": "Вспомните одни безопасные близкие отношения, в которых вы хотите сохранять связь, и отвечайте о них. За последние шесть месяцев как часто вы избегаете разговора о желанных для вас обоих общих планах именно потому, что он усиливает ощущение близости? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Think of one safe close relationship you want to maintain and answer about that relationship. Over the past six months, how often you avoid discussing shared plans that both of you want specifically because the conversation increases your sense of intimacy? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"AAV\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"AAV\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"AAV\":3}}]",
+    "active": true,
+    "sortOrder": 2159,
+    "createdAt": "2026-10-16T13:09:35.848"
+  },
+  {
+    "id": "a8e48b5fc5ecfc184acd1a495",
+    "scenario": "Вспомните одни безопасные близкие отношения, в которых вы хотите сохранять связь, и отвечайте о них. За последние шесть месяцев как часто готовность близкого человека опираться на вас в разумных пределах вызывает желание уменьшить эмоциональную близость? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Think of one safe close relationship you want to maintain and answer about that relationship. Over the past six months, how often a close person’s willingness to rely on you within reasonable limits makes you want less emotional closeness? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"AAV\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"AAV\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"AAV\":3}}]",
+    "active": true,
+    "sortOrder": 2160,
+    "createdAt": "2026-10-16T13:09:35.848"
+  },
+  {
+    "id": "76581a479f0c1796690abbe46",
+    "scenario": "Вспомните одни безопасные близкие отношения, в которых вы хотите сохранять связь, и отвечайте о них. За последние шесть месяцев как часто вы откладываете безопасный и спокойный разговор об отношениях, потому что не хотите раскрывать близкому человеку свои чувства? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Think of one safe close relationship you want to maintain and answer about that relationship. Over the past six months, how often you put off a safe and calm conversation about the relationship because you do not want to reveal your feelings to the other person? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"AAV\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"AAV\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"AAV\":3}}]",
+    "active": true,
+    "sortOrder": 2161,
+    "createdAt": "2026-10-16T13:09:35.848"
+  },
+  {
+    "id": "055c231a6c9e49c7b2f720830",
+    "scenario": "Вспомните одни безопасные близкие отношения, в которых вы хотите сохранять связь, и отвечайте о них. За последние шесть месяцев как часто вы сдерживаете желанное для вас проявление нежности наедине, потому что ощущаете себя слишком открытыми перед близким человеком? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Think of one safe close relationship you want to maintain and answer about that relationship. Over the past six months, how often you hold back an affectionate gesture you want to make in private because it would leave you feeling too emotionally exposed? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"AAV\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"AAV\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"AAV\":3}}]",
+    "active": true,
+    "sortOrder": 2162,
+    "createdAt": "2026-10-16T13:09:35.848"
+  },
+  {
+    "id": "0a519fca4b8a9269d4e7ab6e1",
+    "scenario": "Вспомните одни безопасные близкие отношения, в которых вы хотите сохранять связь, и отвечайте о них. За последние шесть месяцев как часто вы скрываете от близкого человека переживания, которыми хотели бы поделиться, чтобы не оказаться эмоционально зависимыми? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Think of one safe close relationship you want to maintain and answer about that relationship. Over the past six months, how often you hide feelings you would like to share with someone close to avoid becoming emotionally dependent? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"AAV\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"AAV\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"AAV\":3}}]",
+    "active": true,
+    "sortOrder": 2163,
+    "createdAt": "2026-10-16T13:09:35.848"
+  },
+  {
+    "id": "0fee990578caab753000c55d7",
+    "scenario": "За последние шесть месяцев как часто обращаясь к человеку за услугой, вы изображаете больше личной симпатии, чем на самом деле чувствуете? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often when asking someone for a favor you show more personal liking than you actually feel? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{\"HON\":3}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"HON\":2}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"HON\":1}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{}}]",
+    "active": true,
+    "sortOrder": 2164,
+    "createdAt": "2026-10-16T13:09:35.909"
+  },
+  {
+    "id": "451fcc6ab15e6fd6e43728a54",
+    "scenario": "За последние шесть месяцев как часто рассказывая о своей ошибке, вы сознательно придумываете внешнюю причину, чтобы представить себя в более выгодном свете? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often when explaining your own mistake you knowingly invent an external cause to make yourself look better? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{\"HON\":3}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"HON\":2}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"HON\":1}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{}}]",
+    "active": true,
+    "sortOrder": 2165,
+    "createdAt": "2026-10-16T13:09:35.909"
+  },
+  {
+    "id": "f67391100cf2214047c26e7ed",
+    "scenario": "За последние шесть месяцев как часто ради расположения собеседника вы делаете вид, что разделяете его увлечение, хотя это не так? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often to win someone’s favor you pretend to share their interest when you do not? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{\"HON\":3}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"HON\":2}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"HON\":1}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{}}]",
+    "active": true,
+    "sortOrder": 2166,
+    "createdAt": "2026-10-16T13:09:35.909"
+  },
+  {
+    "id": "a79ee0c850ae9dccb8a091d50",
+    "scenario": "За последние шесть месяцев как часто представляя себя новым знакомым, вы приписываете себе достижения, которых у вас не было? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often when introducing yourself to new people you claim achievements you have not had? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{\"HON\":3}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"HON\":2}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"HON\":1}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{}}]",
+    "active": true,
+    "sortOrder": 2167,
+    "createdAt": "2026-10-16T13:09:35.909"
+  },
+  {
+    "id": "26528ef5e86cd4a7c63ab7834",
+    "scenario": "За последние шесть месяцев как часто при продаже своей вещи вы намеренно скрываете известный вам существенный недостаток, чтобы получить больше денег? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often when selling something you own you deliberately hide a significant defect you know about to get more money? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{\"HON\":3}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"HON\":2}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"HON\":1}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{}}]",
+    "active": true,
+    "sortOrder": 2168,
+    "createdAt": "2026-10-16T13:09:35.909"
+  },
+  {
+    "id": "f530de2ed1d0dc5464de164e6",
+    "scenario": "За последние шесть месяцев как часто при посильном общем расходе вы уклоняетесь от заранее согласованной доли, рассчитывая, что остальные оплатят её за вас? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often with a shared expense you can afford you avoid paying your agreed share expecting others to cover it? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{\"HON\":3}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"HON\":2}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"HON\":1}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{}}]",
+    "active": true,
+    "sortOrder": 2169,
+    "createdAt": "2026-10-16T13:09:35.909"
+  },
+  {
+    "id": "2e272f64981e3499f6e724f6b",
+    "scenario": "За последние шесть месяцев как часто вы используете ошибку в расчёте в свою пользу, хотя знаете, что из-за неё другой человек получит меньше положенного? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often you take advantage of a calculation error even though you know another person will receive less than their due? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{\"HON\":3}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"HON\":2}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"HON\":1}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{}}]",
+    "active": true,
+    "sortOrder": 2170,
+    "createdAt": "2026-10-16T13:09:35.909"
+  },
+  {
+    "id": "0c54778a8716fde3e5bae9f8c",
+    "scenario": "За последние шесть месяцев как часто деля общую находку, вы скрываете её известную вам ценность, чтобы получить большую долю? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often when dividing a shared find you conceal its value which you know in order to get a larger share? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{\"HON\":3}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"HON\":2}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"HON\":1}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{}}]",
+    "active": true,
+    "sortOrder": 2171,
+    "createdAt": "2026-10-16T13:09:35.909"
+  },
+  {
+    "id": "5c9d4be5000c56266f4847cfb",
+    "scenario": "За последние шесть месяцев как часто при выборе вещи для вас решающим становится то, подчеркнёт ли она ваш достаток, а не удобство или качество? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often when choosing an item the deciding factor is whether it displays your wealth rather than its usefulness or quality? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{\"HON\":3}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"HON\":2}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"HON\":1}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{}}]",
+    "active": true,
+    "sortOrder": 2172,
+    "createdAt": "2026-10-16T13:09:35.909"
+  },
+  {
+    "id": "6cf4e75c9b6180caddd145b96",
+    "scenario": "За последние шесть месяцев как часто вы хотите более престижную вещь именно ради того, чтобы окружающие считали вас обеспеченными? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often you want a more prestigious possession specifically so that others will see you as wealthy? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{\"HON\":3}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"HON\":2}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"HON\":1}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{}}]",
+    "active": true,
+    "sortOrder": 2173,
+    "createdAt": "2026-10-16T13:09:35.909"
+  },
+  {
+    "id": "a42884114166ce4a0cf750708",
+    "scenario": "За последние шесть месяцев как часто вам трудно довольствоваться удобной покупкой, если более дорогая версия сильнее подчёркивала бы ваш статус? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often you find it hard to be satisfied with a useful purchase if a more expensive version would better display your status? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{\"HON\":3}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"HON\":2}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"HON\":1}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{}}]",
+    "active": true,
+    "sortOrder": 2174,
+    "createdAt": "2026-10-16T13:09:35.909"
+  },
+  {
+    "id": "1e7963507b53d3069e78ec8d5",
+    "scenario": "За последние шесть месяцев как часто сравнивая свои вещи с более дорогими вещами знакомых, вы чувствуете потребность показать, что можете позволить себе не меньше? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often when comparing your possessions with more expensive ones owned by acquaintances you feel a need to show you can afford just as much? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{\"HON\":3}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"HON\":2}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"HON\":1}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{}}]",
+    "active": true,
+    "sortOrder": 2175,
+    "createdAt": "2026-10-16T13:09:35.909"
+  },
+  {
+    "id": "6bbde95ed3aff2aa74dbd3515",
+    "scenario": "За последние шесть месяцев как часто в общении вы ожидаете особого обращения именно потому, что считаете себя выше окружающих? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often in social interactions you expect special treatment specifically because you consider yourself superior to others? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{\"HON\":3}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"HON\":2}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"HON\":1}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{}}]",
+    "active": true,
+    "sortOrder": 2176,
+    "createdAt": "2026-10-16T13:09:35.909"
+  },
+  {
+    "id": "66ba529f5bb79f7073756e9f2",
+    "scenario": "За последние шесть месяцев как часто при общей благодарности вы намеренно умалчиваете о сопоставимом вкладе других, чтобы главная заслуга досталась вам? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often when receiving thanks for shared work you deliberately omit others’ comparable contributions to claim the main credit? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{\"HON\":3}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"HON\":2}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"HON\":1}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{}}]",
+    "active": true,
+    "sortOrder": 2177,
+    "createdAt": "2026-10-16T13:09:35.909"
+  },
+  {
+    "id": "4e10212df39d1662e9a322ca1",
+    "scenario": "За последние шесть месяцев как часто в ситуации с одинаковыми для всех правилами вы считаете, что именно вам положено исключение из-за вашего особого положения? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often in a situation with the same rules for everyone you believe you deserve an exception because of your special standing? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{\"HON\":3}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"HON\":2}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"HON\":1}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{}}]",
+    "active": true,
+    "sortOrder": 2178,
+    "createdAt": "2026-10-16T13:09:35.909"
+  },
+  {
+    "id": "d323e808b2275e8c9e475e815",
+    "scenario": "За последние шесть месяцев как часто чужая неловкость на глазах у других доставляет вам удовольствие именно потому, что человеку неприятно? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often someone else’s embarrassment in front of others gives you pleasure specifically because it is unpleasant for them? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"SAD\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"SAD\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"SAD\":3}}]",
+    "active": true,
+    "sortOrder": 2179,
+    "createdAt": "2026-10-16T13:09:35.972"
+  },
+  {
+    "id": "a390afce995f816a7552db817",
+    "scenario": "За последние шесть месяцев как часто вы намеренно затягиваете неприятный для другого человека момент, чтобы подольше наблюдать его растерянность? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often you deliberately prolong an unpleasant moment for another person to keep watching their distress? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"SAD\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"SAD\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"SAD\":3}}]",
+    "active": true,
+    "sortOrder": 2180,
+    "createdAt": "2026-10-16T13:09:35.972"
+  },
+  {
+    "id": "d12d0e6fd614c27c6fe2c67eb",
+    "scenario": "За последние шесть месяцев как часто вы намеренно пугаете человека тем, чего он боится, именно ради удовольствия от его испуга? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often you deliberately frighten someone with something they fear specifically for the pleasure of seeing their fear? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"SAD\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"SAD\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"SAD\":3}}]",
+    "active": true,
+    "sortOrder": 2181,
+    "createdAt": "2026-10-16T13:09:35.972"
+  },
+  {
+    "id": "81fc67d5975f14d45792123b0",
+    "scenario": "За последние шесть месяцев как часто добившись нужного решения в споре, вы продолжаете давить на человека, потому что вам приятно видеть его беспомощность? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often after obtaining the outcome you wanted in a disagreement you keep pressuring the person because you enjoy seeing their helplessness? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"SAD\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"SAD\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"SAD\":3}}]",
+    "active": true,
+    "sortOrder": 2182,
+    "createdAt": "2026-10-16T13:09:35.972"
+  },
+  {
+    "id": "540be0a8f3dbae65d6c35d5d6",
+    "scenario": "За последние шесть месяцев как часто вы делитесь чужой неловкой историей без согласия человека ради удовольствия от того, что над ним будут смеяться? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often you share someone’s embarrassing story without their consent for the pleasure of others laughing at them? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"SAD\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"SAD\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"SAD\":3}}]",
+    "active": true,
+    "sortOrder": 2183,
+    "createdAt": "2026-10-16T13:09:35.972"
+  },
+  {
+    "id": "529542198d0c8572874b66e04",
+    "scenario": "За последние шесть месяцев как часто вы расспрашиваете о чужих неприятностях именно потому, что чужое страдание доставляет вам удовольствие? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often you ask about another person’s troubles specifically because their suffering gives you pleasure? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"SAD\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"SAD\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"SAD\":3}}]",
+    "active": true,
+    "sortOrder": 2184,
+    "createdAt": "2026-10-16T13:09:35.972"
+  },
+  {
+    "id": "183f51d6a4155dc3fdcc14d73",
+    "scenario": "За последние шесть месяцев как часто в игре вы специально задеваете соперника, чтобы получить удовольствие от его огорчения, даже когда это не помогает победить? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often in a game you deliberately upset an opponent to enjoy their distress even when it does not help you win? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"SAD\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"SAD\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"SAD\":3}}]",
+    "active": true,
+    "sortOrder": 2185,
+    "createdAt": "2026-10-16T13:09:35.972"
+  },
+  {
+    "id": "ff5991ac170ab63dc9cebff2e",
+    "scenario": "За последние шесть месяцев как часто давая отзыв, вы намеренно выбираете обидные выражения ради удовольствия от того, что человеку станет больно? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often when giving feedback you deliberately choose hurtful wording for the pleasure of causing emotional pain? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"SAD\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"SAD\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"SAD\":3}}]",
+    "active": true,
+    "sortOrder": 2186,
+    "createdAt": "2026-10-16T13:09:35.972"
+  },
+  {
+    "id": "d8d637ce141565c6aed60042e",
+    "scenario": "За последние шесть месяцев как часто наблюдая, как человеку отказывают, вы хотите, чтобы неловкость продолжалась, потому что вам приятно на неё смотреть? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often watching someone being rejected you want the embarrassment to continue because you enjoy observing it? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"SAD\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"SAD\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"SAD\":3}}]",
+    "active": true,
+    "sortOrder": 2187,
+    "createdAt": "2026-10-16T13:09:35.972"
+  },
+  {
+    "id": "21a20c504f7125fa9c0898aa5",
+    "scenario": "За последние шесть месяцев как часто в обычной договорённости без точного времени вам трудно понять, когда от вас ожидают действия, даже если контекст знаком? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often in an everyday arrangement without a precise time you find it hard to understand when action is expected even in a familiar context? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"ASD\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"ASD\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"ASD\":3}}]",
+    "active": true,
+    "sortOrder": 2188,
+    "createdAt": "2026-10-16T13:09:35.972"
+  },
+  {
+    "id": "88e47c7bcbdd7dbb21b0c5bd1",
+    "scenario": "За последние шесть месяцев как часто небольшое неожиданное изменение привычной обстановки надолго затрудняет возвращение к обычным делам? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often a small unexpected change in familiar surroundings makes it difficult to return to ordinary activities for a long time? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"ASD\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"ASD\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"ASD\":3}}]",
+    "active": true,
+    "sortOrder": 2189,
+    "createdAt": "2026-10-16T13:09:35.972"
+  },
+  {
+    "id": "0a1a2c3396006d85cafd45ec1",
+    "scenario": "За последние шесть месяцев как часто в непринуждённом разговоре со знакомыми вам трудно следить за сменой тем, даже когда вы не волнуетесь? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often in a casual conversation with familiar people you find it hard to follow changes of topic even when you are not anxious? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"ASD\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"ASD\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"ASD\":3}}]",
+    "active": true,
+    "sortOrder": 2190,
+    "createdAt": "2026-10-16T13:09:35.972"
+  },
+  {
+    "id": "6d50b1ecc446922f4e5da0127",
+    "scenario": "За последние шесть месяцев как часто разбираясь с предметом или системой, вы застреваете на одной детали и с трудом возвращаетесь к общей задаче? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often when examining an object or system you get stuck on one detail and find it hard to return to the overall task? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"ASD\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"ASD\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"ASD\":3}}]",
+    "active": true,
+    "sortOrder": 2191,
+    "createdAt": "2026-10-16T13:09:35.972"
+  },
+  {
+    "id": "a4e5f17674c6cbeffc4c0c229",
+    "scenario": "За последние шесть месяцев как часто в новом, но безопасном и доступном месте вам трудно освоиться даже после того, как вы узнали необходимую практическую информацию? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often in a new but safe and accessible place you find it difficult to settle in even after obtaining the practical information you need? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"ASD\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"ASD\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"ASD\":3}}]",
+    "active": true,
+    "sortOrder": 2192,
+    "createdAt": "2026-10-16T13:09:35.972"
+  },
+  {
+    "id": "65dbf0a7257b297fef5b30c64",
+    "scenario": "За последние шесть месяцев как часто в знакомой ситуации вам трудно понять непрямую просьбу, хотя все необходимые слова вы знаете? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often in a familiar situation you find it difficult to understand an indirect request even though you know all the words used? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"ASD\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"ASD\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"ASD\":3}}]",
+    "active": true,
+    "sortOrder": 2193,
+    "createdAt": "2026-10-16T13:09:35.972"
+  },
+  {
+    "id": "8a288f2b21e9aec78ce5f8630",
+    "scenario": "За последние шесть месяцев как часто увлечённо рассказывая о своей теме, вы замечаете лишь позже, что собеседник уже пытался сменить тему? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often while talking enthusiastically about your topic you only notice afterwards that the other person had been trying to change the subject? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"ASD\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"ASD\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"ASD\":3}}]",
+    "active": true,
+    "sortOrder": 2194,
+    "createdAt": "2026-10-16T13:09:35.972"
+  },
+  {
+    "id": "4a8addb3b101bbf5293f54e8f",
+    "scenario": "За последние шесть месяцев как часто вам трудно перейти к изменённому порядку обычных дел, даже когда причины изменения понятны? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often you find it difficult to switch to a changed order of everyday activities even when you understand why it changed? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"ASD\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"ASD\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"ASD\":3}}]",
+    "active": true,
+    "sortOrder": 2195,
+    "createdAt": "2026-10-16T13:09:35.972"
+  },
+  {
+    "id": "8f08647718c636522a933f05f",
+    "scenario": "За последние шесть месяцев как часто вы отказываетесь от доступного и необходимого отдыха именно из-за мысли, что ещё не заслужили его? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often you deny yourself available and needed rest specifically because you feel you have not earned it yet? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"MAS\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"MAS\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"MAS\":3}}]",
+    "active": true,
+    "sortOrder": 2196,
+    "createdAt": "2026-10-16T13:09:35.972"
+  },
+  {
+    "id": "7e83206ef1a6f700aeee09045",
+    "scenario": "За последние шесть месяцев как часто имея возможность восстановиться без потери необходимого дохода, вы всё равно лишаете себя отдыха, потому что заботиться о себе кажется незаслуженным? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often despite being able to recover without losing essential income you still deny yourself rest because caring for yourself feels undeserved? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"MAS\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"MAS\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"MAS\":3}}]",
+    "active": true,
+    "sortOrder": 2197,
+    "createdAt": "2026-10-16T13:09:35.972"
+  },
+  {
+    "id": "0f47cdc4f5b61bde4c0c0c915",
+    "scenario": "За последние шесть месяцев как часто вы терпите устранимое бытовое неудобство именно потому, что считаете собственный комфорт не заслуживающим внимания? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often you tolerate an avoidable everyday discomfort specifically because you feel your own comfort does not deserve attention? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"MAS\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"MAS\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"MAS\":3}}]",
+    "active": true,
+    "sortOrder": 2198,
+    "createdAt": "2026-10-16T13:09:35.972"
+  },
+  {
+    "id": "bfb0defda571fb988f189ca92",
+    "scenario": "За последние шесть месяцев как часто получая желанный подарок без условий, вы не можете принять радость из-за мысли, что не заслуживаете такого отношения? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often on receiving a wanted gift with no strings attached you cannot enjoy it because you feel you do not deserve such kindness? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"MAS\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"MAS\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"MAS\":3}}]",
+    "active": true,
+    "sortOrder": 2199,
+    "createdAt": "2026-10-16T13:09:35.972"
+  },
+  {
+    "id": "bad82504fff69ee642b1d598c",
+    "scenario": "За последние шесть месяцев как часто когда ваш реальный вклад признают справедливо, вы отвергаете признание именно потому, что считаете себя его недостойными? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often when your actual contribution is fairly recognized you reject that recognition specifically because you feel unworthy of it? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"MAS\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"MAS\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"MAS\":3}}]",
+    "active": true,
+    "sortOrder": 2200,
+    "createdAt": "2026-10-16T13:09:35.972"
+  },
+  {
+    "id": "a310ab3b52c3920eef510aa6f",
+    "scenario": "За последние шесть месяцев как часто вы берёте на себя посильную для другого человека просьбу в ущерб собственному восстановлению, потому что свои потребности кажутся менее важными? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often you take on a request the other person could manage themselves at the expense of your own recovery because your needs seem less important? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"MAS\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"MAS\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"MAS\":3}}]",
+    "active": true,
+    "sortOrder": 2201,
+    "createdAt": "2026-10-16T13:09:35.972"
+  },
+  {
+    "id": "9d833ee8f54c6de0668cf8101",
+    "scenario": "За последние шесть месяцев как часто имея деньги на нужную вам удобную вещь без ущерба обязательным расходам, вы отказываетесь от неё именно потому, что не считаете себя достойными такого удобства? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often despite being able to afford a useful comfortable item without compromising essential expenses you deny yourself it specifically because you feel unworthy of that comfort? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"MAS\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"MAS\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"MAS\":3}}]",
+    "active": true,
+    "sortOrder": 2202,
+    "createdAt": "2026-10-16T13:09:35.972"
+  },
+  {
+    "id": "a60f752c2e56ca1e79cd217f7",
+    "scenario": "За последние шесть месяцев как часто замечая эмоционально важную для вас реакцию, вы не можете понять, какое именно чувство испытываете? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often when noticing an emotionally important reaction in yourself you cannot identify which feeling you are experiencing? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"ALX\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"ALX\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"ALX\":3}}]",
+    "active": true,
+    "sortOrder": 2203,
+    "createdAt": "2026-10-16T13:09:35.972"
+  },
+  {
+    "id": "2ff6ec6a06b4e62f37d329f07",
+    "scenario": "За последние шесть месяцев как часто желая рассказать близкому человеку о своём переживании, вы не находите слов для самого чувства, хотя события описать можете? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often when wanting to tell someone close about an experience you cannot find words for the feeling itself even though you can describe the events? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"ALX\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"ALX\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"ALX\":3}}]",
+    "active": true,
+    "sortOrder": 2204,
+    "createdAt": "2026-10-16T13:09:35.972"
+  },
+  {
+    "id": "de8b7f9de6e64fb3881920dfe",
+    "scenario": "За последние шесть месяцев как часто после напряжённого события вам трудно различить, что вы чувствуете: например, злость, страх или огорчение? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often after a tense event you find it difficult to distinguish what you feel such as anger fear or sadness? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"ALX\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"ALX\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"ALX\":3}}]",
+    "active": true,
+    "sortOrder": 2205,
+    "createdAt": "2026-10-16T13:09:35.972"
+  },
+  {
+    "id": "32e8a4db5be1677e32f69d47c",
+    "scenario": "За последние шесть месяцев как часто испытывая тёплое чувство к близкому человеку и желая его выразить, вы затрудняетесь назвать это чувство своими словами? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often when feeling affection for someone close and wanting to express it you struggle to name the feeling in your own words? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"ALX\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"ALX\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"ALX\":3}}]",
+    "active": true,
+    "sortOrder": 2206,
+    "createdAt": "2026-10-16T13:09:35.972"
+  },
+  {
+    "id": "34226a875c84b594a01c1cb69",
+    "scenario": "За последние шесть месяцев как часто вы замечаете, что ваше эмоциональное состояние изменилось, но даже после размышления не можете понять, что именно чувствуете? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often you notice a change in your emotional state but even after reflection cannot identify what you are feeling? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"ALX\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"ALX\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"ALX\":3}}]",
+    "active": true,
+    "sortOrder": 2207,
+    "createdAt": "2026-10-16T13:09:35.972"
+  },
+  {
+    "id": "0b64b9cb53def1d0cbd9e12dc",
+    "scenario": "За последние шесть месяцев как часто обдумывая значимое событие, вы возвращаетесь только к внешним фактам, потому что собственные переживания трудно удержать в поле внимания? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often when reflecting on an important event you return only to external facts because you find it difficult to keep your own feelings in focus? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": "[{\"text\":\"Никогда или почти никогда\",\"textEn\":\"Never or almost never\",\"scoring\":{}},{\"text\":\"Редко\",\"textEn\":\"Rarely\",\"scoring\":{\"ALX\":1}},{\"text\":\"Часто\",\"textEn\":\"Often\",\"scoring\":{\"ALX\":2}},{\"text\":\"Почти каждый раз\",\"textEn\":\"Almost every time\",\"scoring\":{\"ALX\":3}}]",
+    "active": true,
+    "sortOrder": 2208,
+    "createdAt": "2026-10-16T13:09:35.972"
   }
 ]

@@ -37,6 +37,8 @@ const allowedMatches = new Map([
     new Set([
       '#00A3C4',
       '#00B5D8',
+      '#276749',
+      '#2B6CB0',
       '#2C7A7B',
       '#3182CE',
       '#319795',
@@ -52,6 +54,7 @@ const allowedMatches = new Map([
       '#B794F4',
       '#B83280',
       '#C53030',
+      '#C05621',
       '#D53F8C',
       '#D69E2E',
       '#DD6B20',

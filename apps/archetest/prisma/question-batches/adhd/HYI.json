@@ -1,119 +1,33 @@
 [
   {
-    "_facet": "Двигательное беспокойство",
-    "scenario": "Двухчасовое совещание, сидеть нужно на месте.",
-    "scenarioEn": "A two-hour meeting where you have to stay in your seat.",
+    "_facet": "Мелкие движения",
+    "_reverse": false,
+    "_reviewVersion": 2,
+    "scenario": "За последние шесть месяцев как часто в обычных условиях, с привычной помощью и лечением, если они есть, в спокойной обстановке вы непроизвольно двигаете ногой или перебираете что-то руками, когда нужно сидеть? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often in your usual circumstances, with any support or treatment you normally use, in a calm setting you find yourself moving a leg or handling objects when you need to sit? If you have not experienced such situations or cannot answer, skip this question.",
     "options": [
       {
-        "text": "Сижу спокойно, если тема интересная",
-        "textEn": "I sit calmly if the topic is interesting",
+        "text": "Никогда или почти никогда",
+        "textEn": "Never or almost never",
         "scoring": {}
       },
       {
-        "text": "Кручу ручку, качаю ногой, выхожу «за водой» — сидеть без движения тяжело",
-        "textEn": "I twirl a pen, jiggle my leg, step out \"for water\" — sitting still is hard",
-        "scoring": {
-          "HYI": 3
-        }
-      },
-      {
-        "text": "Сижу, но мысленно уже на другой задаче",
-        "textEn": "I stay seated, but in my head I've moved on to another task",
-        "scoring": {}
-      },
-      {
-        "text": "Устаю, но это обычная усталость",
-        "textEn": "I get tired, but it's ordinary tiredness",
-        "scoring": {}
-      }
-    ]
-  },
-  {
-    "_facet": "Трудность ждать",
-    "scenario": "Очередь в поликлинике движется медленно, перед вами ещё человек десять.",
-    "scenarioEn": "The queue at the clinic is moving slowly; there are still about ten people ahead of you.",
-    "options": [
-      {
-        "text": "Достаю книгу или телефон и жду",
-        "textEn": "I take out a book or my phone and wait",
-        "scoring": {}
-      },
-      {
-        "text": "Разговариваю с соседями по очереди",
-        "textEn": "I chat with the people around me",
-        "scoring": {}
-      },
-      {
-        "text": "Ухожу и возвращаюсь позже, когда будет меньше народу",
-        "textEn": "I leave and come back later when it's less crowded",
+        "text": "Редко",
+        "textEn": "Rarely",
         "scoring": {
           "HYI": 1
         }
       },
       {
-        "text": "Через пять минут хожу туда-сюда и выясняю, кто за кем, — ждать для меня пытка",
-        "textEn": "Within five minutes I'm pacing and checking who's after whom — waiting is torture for me",
-        "scoring": {
-          "HYI": 3
-        }
-      }
-    ]
-  },
-  {
-    "_facet": "Перебивание",
-    "_reverse": true,
-    "scenario": "Близкий человек подробно рассказывает о своём дне, а вам уже понятно, к чему идёт рассказ.",
-    "scenarioEn": "Someone close to you is telling you about their day in detail, and you can already see where the story is going.",
-    "options": [
-      {
-        "text": "Дослушиваю — интересно, как расскажет",
-        "textEn": "I hear them out — I'm curious how they'll tell it",
-        "scoring": {}
-      },
-      {
-        "text": "Нарочно держу паузу и прикусываю язык — иначе закончу фразу за собеседника, я за собой это знаю",
-        "textEn": "I deliberately pause and bite my tongue — otherwise I'll finish their sentence for them; I know this about myself",
-        "scoring": {
-          "HYI": 3
-        }
-      },
-      {
-        "text": "Договариваю мысль сам(а), чтобы ускорить",
-        "textEn": "I finish the thought myself to speed things up",
+        "text": "Часто",
+        "textEn": "Often",
         "scoring": {
           "HYI": 2
         }
       },
       {
-        "text": "Киваю, но думаю о своём",
-        "textEn": "I nod, but I'm thinking about my own stuff",
-        "scoring": {}
-      }
-    ]
-  },
-  {
-    "_facet": "Импульсивные решения",
-    "scenario": "В интернете попадается распродажа вещи, о которой вы раньше не думали, но выглядит здорово.",
-    "scenarioEn": "Online you come across a sale on something you'd never thought about, but it looks great.",
-    "options": [
-      {
-        "text": "Кладу в корзину и возвращаюсь через день-два",
-        "textEn": "I put it in the basket and come back a day or two later",
-        "scoring": {}
-      },
-      {
-        "text": "Сравниваю цены на других сайтах",
-        "textEn": "I compare prices on other sites",
-        "scoring": {}
-      },
-      {
-        "text": "Закрываю вкладку: раз не думал(а) о ней раньше, значит, не нужна",
-        "textEn": "I close the tab: if I hadn't thought about it before, I don't need it",
-        "scoring": {}
-      },
-      {
-        "text": "Оформляю заказ за пару минут — я вообще быстро решаю, а разбираюсь потом",
-        "textEn": "I place the order in a couple of minutes — I generally decide fast and figure things out later",
+        "text": "Почти каждый раз",
+        "textEn": "Almost every time",
         "scoring": {
           "HYI": 3
         }
@@ -121,92 +35,279 @@
     ]
   },
   {
-    "_facet": "Внутренний двигатель",
-    "_reverse": true,
-    "scenario": "Впереди семь часов перелёта в кресле самолёта.",
-    "scenarioEn": "Seven hours of flying ahead of you, strapped into an aeroplane seat.",
+    "_facet": "Вставание",
+    "_reverse": false,
+    "_reviewVersion": 2,
+    "scenario": "За последние шесть месяцев как часто в обычных условиях, с привычной помощью и лечением, если они есть, на недолгой встрече вы встаёте и начинаете ходить, хотя сейчас предполагается оставаться на месте? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often in your usual circumstances, with any support or treatment you normally use, during a short meeting you get up and walk around even though you are expected to remain seated? If you have not experienced such situations or cannot answer, skip this question.",
     "options": [
       {
-        "text": "С удовольствием сплю или смотрю фильмы",
-        "textEn": "I'm happy to sleep or watch films",
+        "text": "Никогда или почти никогда",
+        "textEn": "Never or almost never",
         "scoring": {}
       },
       {
-        "text": "Заранее набираю занятий на все семь часов и встаю пройтись каждый час — иначе к концу полёта буду как на иголках",
-        "textEn": "I pack enough to keep me busy for all seven hours and get up to walk every hour — otherwise by the end I'll be on edge",
+        "text": "Редко",
+        "textEn": "Rarely",
         "scoring": {
-          "HYI": 3
+          "HYI": 1
         }
       },
       {
-        "text": "Читаю, иногда дремлю",
-        "textEn": "I read and doze off now and then",
-        "scoring": {}
-      },
-      {
-        "text": "Ёрзаю, то и дело встаю, листаю всё подряд — долго сидеть мне тяжело",
-        "textEn": "I fidget, keep getting up, flick through everything — sitting for long is hard for me",
-        "scoring": {
-          "HYI": 2
-        }
-      }
-    ]
-  },
-  {
-    "_facet": "Реплики на опережение",
-    "scenario": "На встрече с малознакомыми людьми разговор заходит о теме, в которой вы хорошо разбираетесь.",
-    "scenarioEn": "At a meeting with people you barely know, the conversation turns to a topic you know well.",
-    "options": [
-      {
-        "text": "Ответ вылетает раньше, чем договорят вопрос, — потом неловко, но удержаться трудно",
-        "textEn": "My answer comes out before they've finished the question — awkward afterwards, but hard to hold back",
-        "scoring": {
-          "HYI": 3
-        }
-      },
-      {
-        "text": "Жду паузы и тогда вступаю",
-        "textEn": "I wait for a pause and then join in",
-        "scoring": {}
-      },
-      {
-        "text": "Молчу, пока меня прямо не спросят",
-        "textEn": "I stay quiet until someone asks me directly",
-        "scoring": {}
-      },
-      {
-        "text": "Даю понять, что хочу сказать, и жду очереди",
-        "textEn": "I signal that I'd like to speak and wait my turn",
-        "scoring": {}
-      }
-    ]
-  },
-  {
-    "_facet": "Импульсивные реакции",
-    "_reverse": true,
-    "scenario": "Пришло сообщение, которое вас задело.",
-    "scenarioEn": "You get a message that stings.",
-    "options": [
-      {
-        "text": "Спокойно пишу ответ — эмоции не мешают",
-        "textEn": "I calmly write a reply — the emotions don't get in the way",
-        "scoring": {}
-      },
-      {
-        "text": "Не отвечаю вовсе",
-        "textEn": "I don't reply at all",
-        "scoring": {}
-      },
-      {
-        "text": "Отвечаю сразу, как чувствую",
-        "textEn": "I reply straight away, the way I feel",
+        "text": "Часто",
+        "textEn": "Often",
         "scoring": {
           "HYI": 2
         }
       },
       {
-        "text": "Выжидаю хотя бы час, прежде чем отвечать, — по опыту знаю, что с первого порыва наговорю лишнего",
-        "textEn": "I wait at least an hour before replying — I know from experience that in the first rush I'll say too much",
+        "text": "Почти каждый раз",
+        "textEn": "Almost every time",
+        "scoring": {
+          "HYI": 3
+        }
+      }
+    ]
+  },
+  {
+    "_facet": "Внутреннее беспокойство",
+    "_reverse": false,
+    "_reviewVersion": 2,
+    "scenario": "За последние шесть месяцев как часто в обычных условиях, с привычной помощью и лечением, если они есть, в обычное свободное время вы чувствуете внутреннюю потребность двигаться, даже когда спешить некуда? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often in your usual circumstances, with any support or treatment you normally use, during ordinary free time you feel an inner need to move even when there is no need to hurry? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": [
+      {
+        "text": "Никогда или почти никогда",
+        "textEn": "Never or almost never",
+        "scoring": {}
+      },
+      {
+        "text": "Редко",
+        "textEn": "Rarely",
+        "scoring": {
+          "HYI": 1
+        }
+      },
+      {
+        "text": "Часто",
+        "textEn": "Often",
+        "scoring": {
+          "HYI": 2
+        }
+      },
+      {
+        "text": "Почти каждый раз",
+        "textEn": "Almost every time",
+        "scoring": {
+          "HYI": 3
+        }
+      }
+    ]
+  },
+  {
+    "_facet": "Тихий досуг",
+    "_reverse": false,
+    "_reviewVersion": 2,
+    "scenario": "За последние шесть месяцев как часто в обычных условиях, с привычной помощью и лечением, если они есть, во время спокойного совместного занятия вам трудно заниматься им тихо, без постоянных разговоров или шума? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often in your usual circumstances, with any support or treatment you normally use, during a quiet shared activity you find it difficult to take part without repeatedly talking or making noise? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": [
+      {
+        "text": "Никогда или почти никогда",
+        "textEn": "Never or almost never",
+        "scoring": {}
+      },
+      {
+        "text": "Редко",
+        "textEn": "Rarely",
+        "scoring": {
+          "HYI": 1
+        }
+      },
+      {
+        "text": "Часто",
+        "textEn": "Often",
+        "scoring": {
+          "HYI": 2
+        }
+      },
+      {
+        "text": "Почти каждый раз",
+        "textEn": "Almost every time",
+        "scoring": {
+          "HYI": 3
+        }
+      }
+    ]
+  },
+  {
+    "_facet": "Постоянная активность",
+    "_reverse": false,
+    "_reviewVersion": 2,
+    "scenario": "За последние шесть месяцев как часто в обычных условиях, с привычной помощью и лечением, если они есть, вы продолжаете переходить от одного занятия к другому, потому что вам трудно остановиться и спокойно отдохнуть? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often in your usual circumstances, with any support or treatment you normally use, you keep moving from one activity to another because you find it difficult to stop and rest quietly? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": [
+      {
+        "text": "Никогда или почти никогда",
+        "textEn": "Never or almost never",
+        "scoring": {}
+      },
+      {
+        "text": "Редко",
+        "textEn": "Rarely",
+        "scoring": {
+          "HYI": 1
+        }
+      },
+      {
+        "text": "Часто",
+        "textEn": "Often",
+        "scoring": {
+          "HYI": 2
+        }
+      },
+      {
+        "text": "Почти каждый раз",
+        "textEn": "Almost every time",
+        "scoring": {
+          "HYI": 3
+        }
+      }
+    ]
+  },
+  {
+    "_facet": "Количество речи",
+    "_reverse": false,
+    "_reviewVersion": 2,
+    "scenario": "За последние шесть месяцев как часто в обычных условиях, с привычной помощью и лечением, если они есть, в беседе вы говорите так много, что собеседникам трудно вставить слово, хотя вы собирались дать им высказаться? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often in your usual circumstances, with any support or treatment you normally use, in a conversation you talk so much that others struggle to get a turn even though you intended to let them speak? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": [
+      {
+        "text": "Никогда или почти никогда",
+        "textEn": "Never or almost never",
+        "scoring": {}
+      },
+      {
+        "text": "Редко",
+        "textEn": "Rarely",
+        "scoring": {
+          "HYI": 1
+        }
+      },
+      {
+        "text": "Часто",
+        "textEn": "Often",
+        "scoring": {
+          "HYI": 2
+        }
+      },
+      {
+        "text": "Почти каждый раз",
+        "textEn": "Almost every time",
+        "scoring": {
+          "HYI": 3
+        }
+      }
+    ]
+  },
+  {
+    "_facet": "Ответ до конца вопроса",
+    "_reverse": false,
+    "_reviewVersion": 2,
+    "scenario": "За последние шесть месяцев как часто в обычных условиях, с привычной помощью и лечением, если они есть, вы отвечаете вслух до того, как собеседник закончил вопрос, хотя собирались дослушать? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often in your usual circumstances, with any support or treatment you normally use, you answer aloud before someone has finished asking a question even though you intended to hear them out? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": [
+      {
+        "text": "Никогда или почти никогда",
+        "textEn": "Never or almost never",
+        "scoring": {}
+      },
+      {
+        "text": "Редко",
+        "textEn": "Rarely",
+        "scoring": {
+          "HYI": 1
+        }
+      },
+      {
+        "text": "Часто",
+        "textEn": "Often",
+        "scoring": {
+          "HYI": 2
+        }
+      },
+      {
+        "text": "Почти каждый раз",
+        "textEn": "Almost every time",
+        "scoring": {
+          "HYI": 3
+        }
+      }
+    ]
+  },
+  {
+    "_facet": "Ожидание очереди",
+    "_reverse": false,
+    "_reviewVersion": 2,
+    "scenario": "За последние шесть месяцев как часто в обычных условиях, с привычной помощью и лечением, если они есть, при обычном ожидании своей очереди вы начинаете действовать вне очереди, потому что трудно дождаться? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often in your usual circumstances, with any support or treatment you normally use, during an ordinary wait for your turn you act out of turn because you find waiting difficult? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": [
+      {
+        "text": "Никогда или почти никогда",
+        "textEn": "Never or almost never",
+        "scoring": {}
+      },
+      {
+        "text": "Редко",
+        "textEn": "Rarely",
+        "scoring": {
+          "HYI": 1
+        }
+      },
+      {
+        "text": "Часто",
+        "textEn": "Often",
+        "scoring": {
+          "HYI": 2
+        }
+      },
+      {
+        "text": "Почти каждый раз",
+        "textEn": "Almost every time",
+        "scoring": {
+          "HYI": 3
+        }
+      }
+    ]
+  },
+  {
+    "_facet": "Вмешательство",
+    "_reverse": false,
+    "_reviewVersion": 2,
+    "scenario": "За последние шесть месяцев как часто в обычных условиях, с привычной помощью и лечением, если они есть, вы вмешиваетесь в чужой разговор или занятие без приглашения, а затем замечаете, что помешали? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often in your usual circumstances, with any support or treatment you normally use, you join someone else’s conversation or activity without an invitation and then realize you interrupted? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": [
+      {
+        "text": "Никогда или почти никогда",
+        "textEn": "Never or almost never",
+        "scoring": {}
+      },
+      {
+        "text": "Редко",
+        "textEn": "Rarely",
+        "scoring": {
+          "HYI": 1
+        }
+      },
+      {
+        "text": "Часто",
+        "textEn": "Often",
+        "scoring": {
+          "HYI": 2
+        }
+      },
+      {
+        "text": "Почти каждый раз",
+        "textEn": "Almost every time",
         "scoring": {
           "HYI": 3
         }

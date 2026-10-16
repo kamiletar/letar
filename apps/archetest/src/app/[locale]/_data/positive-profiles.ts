@@ -9,7 +9,7 @@ export interface PositiveProfile {
   textEn: string
 }
 
-/** Позитивные профили для всех 22 шкал ядра (13 исходных + 9 новых этапа 5.1) */
+/** Позитивные профили для всех 27 шкал ядра (13 исходных + 9 новых этапа 5.1) */
 export const POSITIVE_PROFILES: PositiveProfile[] = [
   {
     code: 'PAR',
@@ -165,6 +165,41 @@ export const POSITIVE_PROFILES: PositiveProfile[] = [
       'Вы — человек факта и действия там, где другие тонут в разговорах о чувствах. В кризисе, когда вокруг паника, вы сохраняете ясную голову и делаете то, что нужно. Эта способность не захлёбываться эмоциями, а действовать по существу — редкая и очень практичная сила, которая не раз спасала ситуации.\n\nВы опираетесь на логику, наблюдение и конкретику, и это делает вас надёжным в моменты, требующие холодной головы. Пока другие обсуждают, как они себя чувствуют, вы уже находите решение. В профессиях, где ставки высоки, а времени мало, ваш склад ума — на вес золота.\n\nВаши эмоции не отсутствуют — они просто говорят на другом языке: языке тела, усталости, напряжения. То, что вы не спешите их называть и демонстрировать, оберегает вас от эмоциональных бурь, в которых тонут более впечатлительные. Вы — устойчивый якорь для тех, кому нужна опора, а не сопереживание вслух.\n\nВаша сила станет полнее, когда вы начнёте учиться переводить сигналы тела в слова. Распознавать и называть чувства — навык, и он тренируется, как любой другой: словарь эмоций, внимание к телесным сигналам. Иногда трудность с чувствами — след опыта, где их обесценивали. Возвращая себе доступ к внутреннему языку, вы не теряете свою ясность, а лишь добавляете к ней новое измерение.',
     textEn:
       'You are a person of fact and action where others drown in talk about feelings. In a crisis, when everyone around panics, you keep a clear head and do what’s needed. This ability not to be swamped by emotion but to act to the point is a rare and very practical strength that has saved many a situation.\n\nYou rely on logic, observation, and specifics, and this makes you dependable in moments that demand a cool head. While others discuss how they feel, you’ve already found a solution. In professions where the stakes are high and time is short, your mindset is worth its weight in gold.\n\nYour emotions aren’t absent — they simply speak another language: the language of the body, fatigue, and tension. That you don’t rush to name and display them shields you from the emotional storms that overwhelm more impressionable people. You’re a steady anchor for those who need support rather than spoken sympathy.\n\nYour strength grows fuller when you start learning to translate the body’s signals into words. Recognizing and naming feelings is a skill, and it trains like any other: an emotion vocabulary, attention to bodily signals. Sometimes difficulty with feelings is the trace of an experience where they were dismissed. In regaining access to your inner language, you don’t lose your clarity — you only add a new dimension to it.',
+  },
+  {
+    code: 'INA',
+    text:
+      'Вы замечаете, что внимание зависит от задачи и условий. Это наблюдение помогает искать удобный способ работы: короткие этапы, ясный следующий шаг, внешние напоминания. Трудности сосредоточения не отменяют ваших знаний и способностей. Полезнее опираться на конкретные удачные условия, чем требовать от себя одинаковой собранности во всех ситуациях.',
+    textEn:
+      'You notice that attention depends on the task and the circumstances. This observation can help you find a workable approach: short stages, a clear next step and external reminders. Difficulty focusing does not erase your knowledge or abilities. It is more useful to build on conditions that work for you than to demand the same concentration in every situation.',
+  },
+  {
+    code: 'HYI',
+    text:
+      'Вы можете замечать в себе много движения и быстрых порывов. Само наблюдение за ними даёт возможность выбирать подходящий темп и условия общения. Энергия бывает полезна, когда у неё есть понятная задача и место для движения. При этом право на отдых и паузу не нужно заслуживать постоянной активностью.',
+    textEn:
+      'You may notice plenty of movement and quick impulses in yourself. Observing them gives you room to choose a suitable pace and setting for interaction. Energy can be useful when there is a clear task and room to move. You do not have to earn rest or a pause through constant activity.',
+  },
+  {
+    code: 'AAX',
+    text:
+      'Близкие отношения имеют для вас значение, и вы замечаете изменения в контакте. Эту чувствительность можно использовать для ясного разговора о потребностях и ожиданиях. Тревожная догадка остаётся догадкой, пока вы не уточнили, что происходит. Вы вправе просить о поддержке и одновременно оставлять другому человеку пространство для собственной жизни.',
+    textEn:
+      'Close relationships matter to you and you notice changes in contact. You can use this sensitivity to discuss needs and expectations clearly. An anxious guess remains a guess until you check what is happening. You can ask for support while also allowing the other person room for their own life.',
+  },
+  {
+    code: 'AAV',
+    text:
+      'Для вас может быть важно сохранять самостоятельность даже в тёплой связи. Личное пространство и близость могут сосуществовать: вам не обязательно выбирать только одно. Наблюдая, где дистанция помогает восстановиться, а где мешает желанному контакту, вы можете точнее обозначать свои границы. Откровенность остаётся вашим выбором и требует безопасности.',
+    textEn:
+      'Maintaining independence may matter to you even in an affectionate bond. Personal space and closeness can coexist; you do not have to choose just one. By noticing where distance helps you recover and where it blocks wanted contact, you can describe your boundaries more precisely. Openness remains your choice and requires safety.',
+  },
+  {
+    code: 'HON',
+    text:
+      'В ваших ответах может проявляться готовность обходиться без притворства ради выгоды и не требовать особых правил для себя. Это помогает делать совместные решения понятнее: открыто обозначать интересы, признавать вклад других и договариваться о справедливых условиях. Честность совместима с тактом и личными границами, а скромность не требует отрицать собственные достижения.',
+    textEn:
+      'Your answers may reflect a willingness to avoid pretense for gain and special rules for yourself. This can make shared decisions clearer: stating your interests openly, recognizing others’ contributions and agreeing on fair terms. Honesty can coexist with tact and personal boundaries, and humility does not require denying your achievements.',
   },
 ]
 

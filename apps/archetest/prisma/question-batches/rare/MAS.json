@@ -1,246 +1,245 @@
 [
   {
-    "scenario": "Друзья зовут в поездку, а у вас скопилась работа, которую никто срочно не требует.",
-    "scenarioEn": "Friends invite you on a trip, but you've got a backlog of work that nobody needs urgently.",
+    "_facet": "Право на отдых",
+    "_reverse": false,
+    "_reviewVersion": 2,
+    "scenario": "За последние шесть месяцев как часто вы отказываетесь от доступного и необходимого отдыха именно из-за мысли, что ещё не заслужили его? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often you deny yourself available and needed rest specifically because you feel you have not earned it yet? If you have not experienced such situations or cannot answer, skip this question.",
     "options": [
       {
-        "text": "Остаюсь работать: отдых надо заслужить",
-        "textEn": "I stay and work: rest has to be earned",
-        "scoring": {
-          "MAS": 3,
-          "OBC": 1
-        }
-      },
-      {
-        "text": "Еду: работа подождёт",
-        "textEn": "I go: the work can wait",
-        "scoring": {
-          "HIS": 1
-        }
-      },
-      {
-        "text": "Беру ноутбук с собой",
-        "textEn": "I take my laptop along",
-        "scoring": {
-          "OBC": 2
-        }
-      },
-      {
-        "text": "Еду, но всю поездку себя грызу",
-        "textEn": "I go, but spend the whole trip beating myself up",
-        "scoring": {
-          "MAS": 2,
-          "DPR": 1
-        }
-      }
-    ]
-  },
-  {
-    "_reverse": true,
-    "scenario": "Врач советует несколько дней полежать дома.",
-    "scenarioEn": "The doctor advises you to stay home in bed for a few days.",
-    "options": [
-      {
-        "text": "Соглашаюсь, но «лежу» с ноутбуком и отвечаю на всё — так ведь все делают",
-        "textEn": "I agree, but \"rest\" with my laptop and answer everything — everyone does that, right?",
-        "scoring": {
-          "MAS": 3
-        }
-      },
-      {
-        "text": "Честно отлёживаюсь",
-        "textEn": "I rest properly",
+        "text": "Никогда или почти никогда",
+        "textEn": "Never or almost never",
         "scoring": {}
       },
       {
-        "text": "Выхожу на работу: без меня не справятся",
-        "textEn": "I go in to work: they can't manage without me",
+        "text": "Редко",
+        "textEn": "Rarely",
         "scoring": {
-          "NAR": 1,
           "MAS": 1
         }
       },
       {
-        "text": "Пользуюсь случаем досмотреть сериалы",
-        "textEn": "I use the chance to catch up on series",
+        "text": "Часто",
+        "textEn": "Often",
         "scoring": {
-          "HIS": 1
+          "MAS": 2
         }
-      }
-    ]
-  },
-  {
-    "scenario": "В гостях вам досталось самое неудобное место — табуретка у двери.",
-    "scenarioEn": "At a get-together you end up with the worst seat — a stool by the door.",
-    "options": [
+      },
       {
-        "text": "Так и сижу весь вечер: мне нормально, не хочу никого двигать",
-        "textEn": "I sit there all evening: I'm fine, I don't want to make anyone move",
+        "text": "Почти каждый раз",
+        "textEn": "Almost every time",
         "scoring": {
           "MAS": 3
         }
-      },
-      {
-        "text": "Прошу подвинуться",
-        "textEn": "I ask people to shift up",
-        "scoring": {
-          "DIR": 1
-        }
-      },
-      {
-        "text": "Обижаюсь, что обо мне не подумали",
-        "textEn": "I'm hurt that nobody thought of me",
-        "scoring": {
-          "PAG": 1,
-          "NAR": 1
-        }
-      },
-      {
-        "text": "Весь вечер помогаю хозяевам",
-        "textEn": "I spend the evening helping the hosts",
-        "scoring": {
-          "HUM": 1,
-          "DEP": 1
-        }
       }
     ]
   },
   {
-    "scenario": "Вам сделали дорогой подарок — лично для вас.",
-    "scenarioEn": "Someone gives you an expensive present, just for you.",
+    "_facet": "Забота о здоровье",
+    "_reverse": false,
+    "_reviewVersion": 2,
+    "scenario": "За последние шесть месяцев как часто имея возможность восстановиться без потери необходимого дохода, вы всё равно лишаете себя отдыха, потому что заботиться о себе кажется незаслуженным? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often despite being able to recover without losing essential income you still deny yourself rest because caring for yourself feels undeserved? If you have not experienced such situations or cannot answer, skip this question.",
     "options": [
       {
-        "text": "Неловко до боли: я такого не стою",
-        "textEn": "It's painfully awkward: I'm not worth this",
+        "text": "Никогда или почти никогда",
+        "textEn": "Never or almost never",
+        "scoring": {}
+      },
+      {
+        "text": "Редко",
+        "textEn": "Rarely",
         "scoring": {
-          "MAS": 3,
-          "DEP": 1
+          "MAS": 1
         }
       },
       {
-        "text": "Радуюсь от души",
-        "textEn": "I'm genuinely delighted",
+        "text": "Часто",
+        "textEn": "Often",
         "scoring": {
-          "HIS": 1
+          "MAS": 2
         }
       },
       {
-        "text": "Прикидываю, чем отдарить равноценно",
-        "textEn": "I work out how to give back something of equal value",
-        "scoring": {
-          "OBC": 1,
-          "KAN": 1
-        }
-      },
-      {
-        "text": "Подозреваю, чего от меня теперь хотят",
-        "textEn": "I wonder what they want from me now",
-        "scoring": {
-          "PAR": 2
-        }
-      }
-    ]
-  },
-  {
-    "_reverse": true,
-    "scenario": "Общий проект сдан, начальство хвалит команду. Больше всех тянули вы.",
-    "scenarioEn": "The team project is delivered and management praises the team. You carried more of it than anyone.",
-    "options": [
-      {
-        "text": "Молчу и отдаю заслуги другим — мне так спокойнее",
-        "textEn": "I stay quiet and let the others take the credit — it's easier for me that way",
+        "text": "Почти каждый раз",
+        "textEn": "Almost every time",
         "scoring": {
           "MAS": 3
         }
+      }
+    ]
+  },
+  {
+    "_facet": "Право на удобство",
+    "_reverse": false,
+    "_reviewVersion": 2,
+    "scenario": "За последние шесть месяцев как часто вы терпите устранимое бытовое неудобство именно потому, что считаете собственный комфорт не заслуживающим внимания? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often you tolerate an avoidable everyday discomfort specifically because you feel your own comfort does not deserve attention? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": [
+      {
+        "text": "Никогда или почти никогда",
+        "textEn": "Never or almost never",
+        "scoring": {}
       },
       {
-        "text": "Говорю, какую часть сделал(а) я",
-        "textEn": "I say which part I did",
+        "text": "Редко",
+        "textEn": "Rarely",
         "scoring": {
-          "NAR": 1,
-          "DIR": 1
+          "MAS": 1
         }
       },
       {
-        "text": "Радуюсь за всех вместе",
-        "textEn": "I'm happy for everyone together",
+        "text": "Часто",
+        "textEn": "Often",
         "scoring": {
-          "HUM": 1,
-          "FAI": 1
+          "MAS": 2
         }
       },
       {
-        "text": "Про себя злюсь, что меня не заметили",
-        "textEn": "Inside I'm angry that nobody noticed me",
+        "text": "Почти каждый раз",
+        "textEn": "Almost every time",
         "scoring": {
-          "PAG": 2
+          "MAS": 3
         }
       }
     ]
   },
   {
-    "scenario": "Вы очень устали, а друг просит завтра в семь утра помочь с переездом.",
-    "scenarioEn": "You're exhausted, and a friend asks you to help them move at seven tomorrow morning.",
+    "_facet": "Принятие подарка",
+    "_reverse": false,
+    "_reviewVersion": 2,
+    "scenario": "За последние шесть месяцев как часто получая желанный подарок без условий, вы не можете принять радость из-за мысли, что не заслуживаете такого отношения? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often on receiving a wanted gift with no strings attached you cannot enjoy it because you feel you do not deserve such kindness? If you have not experienced such situations or cannot answer, skip this question.",
     "options": [
       {
-        "text": "Соглашаюсь, хотя еле стою: отказать — хуже, чем надорваться",
-        "textEn": "I say yes, though I can barely stand: refusing is worse than wearing myself out",
-        "scoring": {
-          "MAS": 3,
-          "DEP": 1
-        }
-      },
-      {
-        "text": "Отказываю: мне нужен отдых",
-        "textEn": "I say no: I need rest",
+        "text": "Никогда или почти никогда",
+        "textEn": "Never or almost never",
         "scoring": {}
       },
       {
-        "text": "Предлагаю помочь позже или по-другому",
-        "textEn": "I offer to help later or in some other way",
+        "text": "Редко",
+        "textEn": "Rarely",
         "scoring": {
-          "KAN": 1
+          "MAS": 1
         }
       },
       {
-        "text": "Соглашаюсь и потом тихо злюсь",
-        "textEn": "I say yes and then quietly seethe",
+        "text": "Часто",
+        "textEn": "Often",
         "scoring": {
-          "PAG": 2
+          "MAS": 2
+        }
+      },
+      {
+        "text": "Почти каждый раз",
+        "textEn": "Almost every time",
+        "scoring": {
+          "MAS": 3
         }
       }
     ]
   },
   {
-    "_reverse": true,
-    "scenario": "Вы выбираете рабочее кресло на годы вперёд.",
-    "scenarioEn": "You're choosing an office chair to last you for years.",
+    "_facet": "Признание вклада",
+    "_reverse": false,
+    "_reviewVersion": 2,
+    "scenario": "За последние шесть месяцев как часто когда ваш реальный вклад признают справедливо, вы отвергаете признание именно потому, что считаете себя его недостойными? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often when your actual contribution is fairly recognized you reject that recognition specifically because you feel unworthy of it? If you have not experienced such situations or cannot answer, skip this question.",
     "options": [
       {
-        "text": "Беру самое простое — мне хватит, лучше потрачу на близких",
-        "textEn": "I take the most basic one — it'll do for me; better to spend on the people I love",
-        "scoring": {
-          "MAS": 3,
-          "HUM": 1
-        }
-      },
-      {
-        "text": "Беру лучшее, что могу себе позволить: спина одна",
-        "textEn": "I get the best I can afford: I've only got one back",
+        "text": "Никогда или почти никогда",
+        "textEn": "Never or almost never",
         "scoring": {}
       },
       {
-        "text": "Долго сравниваю характеристики",
-        "textEn": "I spend ages comparing specs",
+        "text": "Редко",
+        "textEn": "Rarely",
         "scoring": {
-          "OBC": 2
+          "MAS": 1
         }
       },
       {
-        "text": "Беру то, что посоветовали",
-        "textEn": "I take whatever was recommended",
+        "text": "Часто",
+        "textEn": "Often",
         "scoring": {
-          "DEP": 1
+          "MAS": 2
+        }
+      },
+      {
+        "text": "Почти каждый раз",
+        "textEn": "Almost every time",
+        "scoring": {
+          "MAS": 3
+        }
+      }
+    ]
+  },
+  {
+    "_facet": "Границы помощи",
+    "_reverse": false,
+    "_reviewVersion": 2,
+    "scenario": "За последние шесть месяцев как часто вы берёте на себя посильную для другого человека просьбу в ущерб собственному восстановлению, потому что свои потребности кажутся менее важными? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often you take on a request the other person could manage themselves at the expense of your own recovery because your needs seem less important? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": [
+      {
+        "text": "Никогда или почти никогда",
+        "textEn": "Never or almost never",
+        "scoring": {}
+      },
+      {
+        "text": "Редко",
+        "textEn": "Rarely",
+        "scoring": {
+          "MAS": 1
+        }
+      },
+      {
+        "text": "Часто",
+        "textEn": "Often",
+        "scoring": {
+          "MAS": 2
+        }
+      },
+      {
+        "text": "Почти каждый раз",
+        "textEn": "Almost every time",
+        "scoring": {
+          "MAS": 3
+        }
+      }
+    ]
+  },
+  {
+    "_facet": "Доступное удобство",
+    "_reverse": false,
+    "_reviewVersion": 2,
+    "scenario": "За последние шесть месяцев как часто имея деньги на нужную вам удобную вещь без ущерба обязательным расходам, вы отказываетесь от неё именно потому, что не считаете себя достойными такого удобства? Если таких ситуаций не было или ответить трудно, пропустите вопрос.",
+    "scenarioEn": "Over the past six months, how often despite being able to afford a useful comfortable item without compromising essential expenses you deny yourself it specifically because you feel unworthy of that comfort? If you have not experienced such situations or cannot answer, skip this question.",
+    "options": [
+      {
+        "text": "Никогда или почти никогда",
+        "textEn": "Never or almost never",
+        "scoring": {}
+      },
+      {
+        "text": "Редко",
+        "textEn": "Rarely",
+        "scoring": {
+          "MAS": 1
+        }
+      },
+      {
+        "text": "Часто",
+        "textEn": "Often",
+        "scoring": {
+          "MAS": 2
+        }
+      },
+      {
+        "text": "Почти каждый раз",
+        "textEn": "Almost every time",
+        "scoring": {
+          "MAS": 3
         }
       }
     ]

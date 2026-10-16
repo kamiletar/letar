@@ -1,4 +1,4 @@
-/** Код шкалы: 13 исходных (10 DSM-5 + 3 дополнительные) + 9 новых (этап 5.1, ядро 22) */
+/** Код шкалы: 13 исходных (10 DSM-5 + 3 дополнительные) + 9 новых (этап 5.1, ядро 27) */
 export type PersonalityTypeCode =
   | 'PAR'
   | 'SZD'
@@ -22,15 +22,20 @@ export type PersonalityTypeCode =
   | 'ASD'
   | 'DIR'
   | 'ALX'
+  | 'INA'
+  | 'HYI'
+  | 'AAX'
+  | 'AAV'
+  | 'HON'
 
 /**
- * Код экспериментальной шкалы (этап 5.5): авторские/прототипные конструкты ВНЕ ядра 22.
+ * Код экспериментальной шкалы (этап 5.5): авторские/прототипные конструкты ВНЕ ядра 27.
  * В express и тизер не входят, в топ-черт и ipsative-ранжирование не участвуют,
  * отображаются ТОЛЬКО в кабинете психолога с обязательной пометкой «бета».
  */
 export type ExperimentalScaleCode = 'RES_PHYS' | 'RES_AFF' | 'SPEC_INT'
 
-/** Любой скоримый код шкалы: ядро 22 + экспериментальные */
+/** Любой скоримый код шкалы: ядро 27 + экспериментальные */
 export type ScaleCode = PersonalityTypeCode | ExperimentalScaleCode
 
 /** Кластер/группа шкалы */
@@ -73,6 +78,9 @@ export interface PersonalityType {
   cluster: PersonalityCluster
   /** Экспериментальный авторский конструкт — в UI всегда помечается «бета» */
   beta?: boolean
+  /** Конструктный ориентир авторского пакета; не переносит валидность инструмента */
+  prototype?: string
+  prototypeEn?: string
 }
 
 /** 13 типов личности (10 базовых DSM-5 + 3 дополнительных) */
@@ -505,9 +513,114 @@ export const PERSONALITY_TYPES: PersonalityType[] = [
     color: '#B794F4',
     cluster: 'spectrum',
   },
+  {
+    code: 'INA',
+    cluster: 'spectrum',
+    label: 'Переключающийся',
+    labelEn: 'Shifting',
+    clinical: 'Невнимательность',
+    clinicalEn: 'Inattention',
+    archetype: 'Искатель',
+    archetypeEn: 'Explorer',
+    description:
+      'Частота сообщённых трудностей с вниманием, организацией и памятью за последние шесть месяцев при привычной поддержке. Причины этих трудностей по ответам не устанавливаются.',
+    descriptionEn:
+      'Reported frequency of difficulties with attention, organization and memory over the past six months with usual support. These answers do not establish their causes.',
+    whenHigh:
+      'В ответах чаще встречаются трудности в этой области. Полезно заметить, в каких ситуациях они мешают, а какая поддержка помогает справляться.',
+    whenHighEn:
+      'Your answers report more frequent difficulties in this area. Notice which situations cause problems and which kinds of support help you manage them.',
+    color: '#2B6CB0',
+    prototype: 'Авторские пункты о симптомных областях; не ASRS и не диагностика СДВГ',
+    prototypeEn: 'Original items about symptom domains; not ASRS or an ADHD diagnosis',
+  },
+  {
+    code: 'HYI',
+    cluster: 'spectrum',
+    label: 'Подвижный',
+    labelEn: 'Active',
+    clinical: 'Гиперактивность/импульсивность',
+    clinicalEn: 'Hyperactivity/impulsivity',
+    archetype: 'Двигатель',
+    archetypeEn: 'Mover',
+    description:
+      'Частота сообщённых проявлений двигательного беспокойства, трудностей ожидания и вмешательства за последние шесть месяцев. Не определяет наличие или вариант СДВГ.',
+    descriptionEn:
+      'Reported frequency of restlessness, difficulty waiting and intruding over the past six months. Does not determine whether ADHD or any ADHD presentation is present.',
+    whenHigh:
+      'В ответах чаще встречаются трудности в этой области. Полезно заметить, в каких ситуациях они мешают, а какая поддержка помогает справляться.',
+    whenHighEn:
+      'Your answers report more frequent difficulties in this area. Notice which situations cause problems and which kinds of support help you manage them.',
+    color: '#C05621',
+    prototype: 'Авторские пункты о симптомных областях; не ASRS и не диагностика СДВГ',
+    prototypeEn: 'Original items about symptom domains; not ASRS or an ADHD diagnosis',
+  },
+  {
+    code: 'AAX',
+    cluster: 'additional',
+    label: 'Чуткий к связи',
+    labelEn: 'Attuned to connection',
+    clinical: 'Тревога в близких отношениях',
+    clinicalEn: 'Anxiety in close relationships',
+    archetype: 'Связной',
+    archetypeEn: 'Connector',
+    description:
+      'Частота тревоги о сохранности одной выбранной безопасной близкой связи за последние шесть месяцев. Балл относится к описанным отношениям и не определяет стиль привязанности.',
+    descriptionEn:
+      'Frequency of worries about one selected safe close bond over the past six months. The score concerns that relationship and does not determine an attachment style.',
+    whenHigh:
+      'В выбранных отношениях такие переживания возникают часто. Обсудите, какие ожидания, границы и способы поддержки помогают вам сохранять комфортную близость.',
+    whenHighEn:
+      'These experiences occur frequently in the selected relationship. Consider which expectations, boundaries and forms of support help you maintain comfortable closeness.',
+    color: '#805AD5',
+    prototype: 'Авторские пункты о тревоге привязанности; не ECR-R/ECR-RS',
+    prototypeEn: 'Original items about attachment anxiety; not ECR-R/ECR-RS',
+  },
+  {
+    code: 'AAV',
+    cluster: 'additional',
+    label: 'Независимый в близости',
+    labelEn: 'Independent in closeness',
+    clinical: 'Избегание эмоциональной близости',
+    clinicalEn: 'Avoidance of emotional closeness',
+    archetype: 'Остров',
+    archetypeEn: 'Island',
+    description:
+      'Частота отдаления именно из-за эмоциональной близости в одной выбранной безопасной связи за последние шесть месяцев. Личные границы и нежеланный контакт сами по себе не оцениваются как избегание.',
+    descriptionEn:
+      'Frequency of withdrawing specifically because of emotional intimacy within one selected safe close bond over the past six months. Personal boundaries and unwanted contact are not themselves scored as avoidance.',
+    whenHigh:
+      'В выбранных отношениях такие переживания возникают часто. Обсудите, какие ожидания, границы и способы поддержки помогают вам сохранять комфортную близость.',
+    whenHighEn:
+      'These experiences occur frequently in the selected relationship. Consider which expectations, boundaries and forms of support help you maintain comfortable closeness.',
+    color: '#319795',
+    prototype: 'Авторские пункты об избегании близости; не ECR-R/ECR-RS',
+    prototypeEn: 'Original items about intimacy avoidance; not ECR-R/ECR-RS',
+  },
+  {
+    code: 'HON',
+    cluster: 'additional',
+    label: 'Беспристрастный',
+    labelEn: 'Fair-minded',
+    clinical: 'Искренность, справедливость, нежадность, скромность',
+    clinicalEn: 'Sincerity, fairness, greed avoidance, modesty',
+    archetype: 'Весы',
+    archetypeEn: 'Scales',
+    description:
+      'Авторские вопросы о четырёх гранях честности и скромности за последние шесть месяцев. Более высокий балл отражает более редкие сообщения о противоположных проявлениях. Это не оценка нравственной ценности человека.',
+    descriptionEn:
+      'Original questions about four facets of honesty and humility over the past six months. Higher scores reflect less frequent reports of opposing behaviors. This is not a judgment of a person’s moral worth.',
+    whenHigh:
+      'Вы реже сообщаете о притворстве ради выгоды, несправедливом преимуществе и стремлении подчеркнуть статус. Этот результат описывает ответы, а не определяет нравственную ценность человека.',
+    whenHighEn:
+      'You report less frequent pretense for gain, unfair advantage and attempts to display status. This describes your answers rather than determining your moral worth.',
+    color: '#276749',
+    prototype: 'Конструктный ориентир — HEXACO Honesty-Humility; не Agreeableness и не HEXACO-PI-R',
+    prototypeEn: 'Conceptual reference: HEXACO Honesty-Humility; not Agreeableness or HEXACO-PI-R',
+  },
 ]
 
-/** Все коды шкал ядра (22 шт. = 13 исходных + 9 новых) */
+/** Все коды шкал ядра (27 шт. = 13 исходных + 9 этапа 5.1 + 5 новых) */
 export const ALL_SCALE_CODES: PersonalityTypeCode[] = [
   'PAR',
   'SZD',
@@ -531,6 +644,11 @@ export const ALL_SCALE_CODES: PersonalityTypeCode[] = [
   'ASD',
   'DIR',
   'ALX',
+  'INA',
+  'HYI',
+  'AAX',
+  'AAV',
+  'HON',
 ]
 
 /**
@@ -605,7 +723,7 @@ export function getScaleDisplayCode(code: PersonalityTypeCode, options: { triadA
 export const HEXAGRAM_SCALE_CODES: PersonalityTypeCode[] = [...LIGHT_TRIAD_CODES, ...DARK_TRIAD_CODES, 'SAD', 'MAS']
 
 /**
- * Оставшиеся 12 шкал ядра вне гексаграммы и вне «Состояний» (этап 5.7): тизер
+ * Оставшиеся 17 шкал ядра вне гексаграммы и вне «Состояний» (этап 5.7): тизер
  * под гексаграммой в результатах экспресса — заблокированный список, который
  * раскрывает полный тест. BAR/DPR (STATE_CODES) исключены — упомянуты отдельно.
  */
@@ -614,7 +732,7 @@ export const TEASER_SCALE_CODES: PersonalityTypeCode[] = ALL_SCALE_CODES.filter(
 )
 
 /**
- * Экспериментальная шкала (этап 5.5): вне ядра 22 — отдельный интерфейс, а не запись
+ * Экспериментальная шкала (этап 5.5): вне ядра 27 — отдельный интерфейс, а не запись
  * PERSONALITY_TYPES, чтобы ядро (тизер, express, ipsative, топ-черт, полнота
  * growth-practices/positive-profiles) структурно не могло затянуть эти коды.
  * Вопросы экспериментальных шкал скорят ТОЛЬКО экспериментальные коды — actual_max
@@ -708,11 +826,11 @@ export const EXPERIMENTAL_SCALES: ExperimentalScale[] = [
   },
 ]
 
-/** Коды экспериментальных шкал (этап 5.5) */
-export const EXPERIMENTAL_SCALE_CODES: ExperimentalScaleCode[] = ['RES_PHYS', 'RES_AFF', 'SPEC_INT']
+/** Экспериментальные коды; состав выводится из описаний, чтобы не расходились */
+export const EXPERIMENTAL_SCALE_CODES: ExperimentalScaleCode[] = EXPERIMENTAL_SCALES.map((scale) => scale.code)
 
 /**
- * Все скоримые шкалы: ядро 22 + экспериментальные. По этому списку идут скоринг
+ * Все скоримые шкалы: ядро 27 + экспериментальные. По этому списку идут скоринг
  * (raw/normalized/confidence/relevantCounts) и стратификация выборки вопросов.
  * Интерпретация (топ-черт, ipsative, тизер, express, ачивки) — только по ALL_SCALE_CODES.
  */
@@ -814,7 +932,7 @@ export function replaceTypeCodes(text: string, isRu: boolean, isAdmin?: boolean)
 }
 
 /**
- * Максимально возможные сырые баллы по каждой шкале (2090 вопросов).
+ * Максимально возможные сырые баллы по каждой шкале; исходная база и добавленные пакеты.
  * База: v2 психолога 19.03.2026 (1955 вопросов) + дельта 135 вопросов этапа 5.1
  * (пересчитано merge-question-batch.ts, 2026-07-04).
  */
@@ -836,9 +954,14 @@ export const GLOBAL_MAX_SCORES: Record<PersonalityTypeCode, number> = {
   HUM: 135,
   KAN: 108,
   FAI: 74,
-  SAD: 47,
-  MAS: 51,
-  ASD: 51,
+  SAD: 74,
+  MAS: 72,
+  ASD: 75,
   DIR: 101,
-  ALX: 56,
+  ALX: 74,
+  INA: 27,
+  HYI: 27,
+  AAX: 30,
+  AAV: 30,
+  HON: 45,
 }

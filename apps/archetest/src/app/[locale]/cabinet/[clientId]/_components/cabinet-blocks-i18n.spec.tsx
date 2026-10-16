@@ -84,6 +84,22 @@ describe('кабинет: строки блоков из messages', () => {
     expect(screen.getByText(new RegExp(`вне ядра из ${CORE_SCALE_COUNT} шкал`))).toBeTruthy()
   })
 
+  it.each(['ru', 'en'] as const)('%s: новый пакет различает честный ноль и отсутствие ответов', (locale) => {
+    const { container, onError } = renderIn(
+      locale,
+      <ExperimentalScalesBlock
+        scores={{ RES_PHYS: 0, RES_AFF: 100 } as Record<ScaleCode, number>}
+        relevantCounts={{ RES_PHYS: 10, RES_AFF: 0 }}
+      />,
+    )
+    expect(onError).not.toHaveBeenCalled()
+    const text = container.textContent!
+    expect(text).toContain('0%')
+    expect(text).toContain(locale === 'ru' ? 'Нет данных' : 'No data')
+    expect(text).toContain(locale === 'ru' ? 'Ответов: 10' : 'Answers: 10')
+    expect(text).not.toContain('100%')
+  })
+
   it.each(['ru', 'en'] as const)(
     '%s: карта стабильности — меняющаяся шкала, plural недостающих, разбивка по настроению',
     (locale) => {

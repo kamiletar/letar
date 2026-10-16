@@ -51,16 +51,16 @@
     },
     "privacyNote": "Express is a guest mode: your result is stored only in this browser and is not sent anywhere. It is a self-discovery tool, not a diagnosis or a substitute for professional consultation. To keep the result in an account, link it on the results screen.",
     "resultsTitle": "Your Hexagram",
-    "resultsSubtitle": "The overlay of the Light and Dark triads. The full 22-scale portrait is in the complete test.",
+    "resultsSubtitle": "The overlay of the Light and Dark triads. The full 27-scale portrait is in the complete test.",
     "hexagramTitle": "Personality Architecture",
     "groupLight": "Light Triad",
     "groupDark": "Dark Triad",
     "groupAura": "Destructive Patterns",
     "teaserTitle": "There's more",
-    "teaserSubtitle": "The full test reveals 12 additional personality scales",
+    "teaserSubtitle": "The full test reveals 17 additional personality scales",
     "teaserStatesNote": "Plus a separate “States” block — episodic mood shifts, not personality traits",
-    "fullTestTitle": "Discover all 22 scales",
-    "fullTestDescription": "Express covers 8 scales. The full test has 22 scales, a cumulative profile, and dynamics. Point your camera at the QR code or open it on this device.",
+    "fullTestTitle": "Discover all 27 scales",
+    "fullTestDescription": "Express covers 8 scales. The full test has 27 scales, a cumulative profile, and dynamics. Point your camera at the QR code or open it on this device.",
     "fullTestCta": "Open the full test",
     "linkAuthenticated": "Save result to account",
     "linkGuest": "Link result to account",
@@ -97,7 +97,7 @@
     "progress": "Question {current} of {total}",
     "answered": "Answered: {count}",
     "questionLabel": "Question {number}",
-    "shareText": "I took the archetype test and discovered my 22-scale personality profile. Check yourself:",
+    "shareText": "I took the archetype test and discovered my 27-scale personality profile. Check yourself:",
     "finish": "Finish Test",
     "prev": "Back",
     "next": "Next",
@@ -271,7 +271,10 @@
       "beta": "beta",
       "title": "Experimental scales",
       "intro": "Author / prototype constructs outside the {coreScales}-scale core. Not shown to the client, excluded from the express test and “leading traits”. Interpret cautiously — validation is not complete.",
-      "armorRadar": "Armor & Radar index: "
+      "armorRadar": "Armor & Radar index: ",
+      "noData": "No data",
+      "answered": "Answers: {count}",
+      "notInterpreted": "No answers for this scale yet. No interpretation is provided."
     },
     "dynamicsChart": {
       "title": "Results Dynamics",
@@ -414,9 +417,9 @@
       "title": "Scales"
     },
     "portions": {
-      "p3": "Early completion of a batch is not possible — the client answers all 50 questions (or skips them), then receives an updated profile. This guarantees that each batch contributes a balanced improvement to the reliability of all scales.",
+      "p3": "The client answers or skips the items in a portion and then receives an updated profile. A skipped item is not counted as a zero response. Data coverage depends on how many relevant items remain and how many the person answers.",
       "p2": "Stratification is particularly important for supplementary scales (BAR, PAG, DPR), which have a smaller question pool. Without stratification, early batches could contain no BAR items, delaying BOR/BAR differential diagnosis until later stages of completion.",
-      "p1": "The test is completed in batches of 50 questions. Each batch is formed using stratified sampling: questions are distributed proportionally across all {coreScales} scales with a guarantee of at least one question per scale. This ensures uniform growth in profile reliability across all axes after each batch.",
+      "p1": "The test is taken in portions of 50 items. Two places are reserved for validity checks; the rest are distributed across scales, with at least one item for each available scale. Once its items are exhausted, later portions do not repeat them: accumulated answers remain, but that scale receives no further new information. INA and HYI currently have nine items each, covering the first nine portions.",
       "title": "Portioned Completion and Stratification"
     },
     "domains": {
@@ -440,17 +443,17 @@
     },
     "methodology": {
       "triads": "The Light and Dark triads are not opposite ends of a single axis: per Kaufman et al. (2019), the correlation between them is moderate (r ≈ −.48), not absolute. Elevated scores on both triads simultaneously are a normal data pattern, not a paradox or a filling error.",
-      "experimental": "Beyond the {coreScales}-scale core there are three further experimental scales, available only in the clinician’s dashboard and never shown to the client: “Physical Armor” (RES_PHYS, an original construct with no validated prototype), “Affective Resonance” (RES_AFF, prototypes — IRI Personal Distress and the Highly Sensitive Person scale, HSP/SPS) and “Special Interests” (SPEC_INT). The “Armor & Radar” cross-index is built from them. All three are marked “beta”, are excluded from the express test and from “leading traits”, and do not affect core scoring: their items award points to experimental scales only.",
-      "core": "The validated core covers {validatedScales} of the {coreScales} current scales (table above). Separately, there are original/experimental constructs without a direct validated prototype: within the core this is the MAS scale (\"Self-Sacrificing\", an original masochistic-pattern construct). Such scales are always marked \"beta\" in the UI and should be interpreted with caution, apart from the core.",
+      "experimental": "Three experimental measures remain outside the general profile of {coreScales} scales: physical armor, affective resonance and special interests. They are available only in the clinician’s dashboard. The Armor & Radar index uses RES_PHYS and RES_AFF.",
+      "core": "The general profile contains {coreScales} scales with original wording. Reference to an established construct or validated instrument does not transfer its measurement properties. New INA/HYI describe attention and activity, AAX/AAV experiences within a selected close bond, and HON honesty and humility. They are not ASRS, ECR-R or HEXACO-PI-R. HON is not an Agreeableness scale and does not resolve the debate about D and antagonism. Results support self-observation and discussion, not diagnosis.",
       "colSource": "Source",
-      "colPrototype": "Validated prototype",
+      "colPrototype": "Conceptual reference",
       "colScale": "Archetest scale",
       "intro": "The test does not invent scales from scratch. Most scales are grounded in validated instruments — at the construct level, never by borrowing items: every archetest question is an original, situational formulation. This preserves licensing cleanliness (some prototypes, e.g. TAS-20, are commercial; others are research-only) while keeping the test connected to the accumulated evidence base and norms.",
       "title": "Methodology"
     },
     "about": {
       "p2": "The test is not a diagnostic instrument and does not replace a clinical interview. Its purpose is to provide you and your client with a structured starting point for discussion.",
-      "p1": "A multi-scale screening questionnaire for personality traits and affective patterns. {totalQuestions} items, {coreScales} scales, situational format (each item presents a life situation with four response options). The result is a normalized trait prominence profile from 0 to 100% on each scale.",
+      "p1": "A questionnaire for self-observation of personality traits and everyday difficulties. {totalQuestions} items, {coreScales} scales. Questions describe life situations and the frequency of experiences, each with four response options. Results show a percentage of the maximum score for answered items on each scale, from 0 to 100%.",
       "title": "About the Test"
     },
     "heading": "For Clinicians",

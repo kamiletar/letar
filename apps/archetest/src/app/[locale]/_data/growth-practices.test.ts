@@ -6,7 +6,7 @@ import { getPositiveProfile, POSITIVE_PROFILES } from './positive-profiles'
 const VALID_METHODS: PracticeMethod[] = ['cbt', 'dbt', 'schema', 'general']
 
 describe('growth-practices (5.6.1)', () => {
-  it('покрывает все 22 шкалы ядра 1:1, без дублей', () => {
+  it('покрывает все 27 шкалы ядра 1:1, без дублей', () => {
     const codes = GROWTH_PROFILES.map((p) => p.code)
     expect(new Set(codes).size).toBe(codes.length)
     expect(codes).toHaveLength(ALL_SCALE_CODES.length)
@@ -40,8 +40,8 @@ describe('growth-practices (5.6.1)', () => {
   })
 })
 
-describe('positive-profiles расширены до 22 шкал (5.6.1)', () => {
-  it('POSITIVE_PROFILES покрывает все 22 шкалы, без дублей', () => {
+describe('positive-profiles расширены до 27 шкал (5.6.1)', () => {
+  it('POSITIVE_PROFILES покрывает все 27 шкалы, без дублей', () => {
     const codes = POSITIVE_PROFILES.map((p) => p.code)
     expect(new Set(codes).size).toBe(codes.length)
     expect(codes).toHaveLength(ALL_SCALE_CODES.length)
