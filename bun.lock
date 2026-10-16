@@ -551,7 +551,7 @@
     },
     "apps/auth-hub": {
       "name": "auth-hub",
-      "version": "0.8.1",
+      "version": "0.8.2",
       "dependencies": {
         "@letar/api-server": "workspace:*",
         "@letar/auth": "workspace:*",
@@ -1148,7 +1148,7 @@
     },
     "libs/auth": {
       "name": "@letar/auth",
-      "version": "0.17.0",
+      "version": "0.17.1",
       "dependencies": {
         "@better-auth/utils": "^0.5.0",
         "@letar/pin-auth": "workspace:*",

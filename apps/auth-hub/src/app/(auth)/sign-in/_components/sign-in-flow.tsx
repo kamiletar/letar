@@ -61,7 +61,13 @@ export function SignInFlow({ otherProviders, hasTelegram }: SignInFlowProps) {
 
       {step === 'methods'
         ? (
-          <Stack gap={3}>
+          <Stack
+            gap={3}
+            css={{
+              '& button': { justifyContent: 'flex-start', textAlign: 'start', paddingInline: '20px', gap: '12px' },
+              '& button > svg': { width: '20px', height: '20px', flexShrink: 0 },
+            }}
+          >
             <Button ref={emailButtonRef} variant="outline" minH="48px" onClick={() => setStep('email')}>
               <LuMail aria-hidden="true" /> Продолжить с почтой
             </Button>
