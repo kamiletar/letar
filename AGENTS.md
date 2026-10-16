@@ -6,6 +6,8 @@
 
 ## Документация
 
+- [archetest: литературный аудит банка](/apps/archetest/docs/question-review/literary-audit-2026-10-16.md) — покрытие вопросов, журнал редакторских правок и проверка неизменности скоринга.
+
 - [archetest: восстановление теста](/apps/archetest/docs/quiz-progress-recovery.md) — локальный черновик отдельно от очереди отправки, исходная выборка и изоляция аккаунтов.
 
 - [Гонки взаимных post-update политик](/.claude/docs/zenstack-cross-table-post-update-write-skew.md) — общая блокировка связанных строк, прямой ORM и проверка на двух соединениях.
