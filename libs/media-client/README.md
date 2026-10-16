@@ -1,5 +1,21 @@
 # @letar/media-client
 
+## Закрытое аудио
+
+`createAudioClient({ appId })` использует MEDIA_SERVER_URL/MEDIA_API_KEY только на сервере.
+Методы: `requestUpload(audioId, size)`, `getStatus(audioId)`, `getPlayback(audioId)`,
+`deleteAudio(audioId)`. Приложение проверяет права перед каждым вызовом. Краткую ссылку из
+getPlayback оставляют на сервере и передают поток в ответ с Range: ссылка не заменяет проверку
+прав и не должна уходить в браузер для закрытых данных.
+
+`uploadAudioFile` из `@letar/media-client/browser` передаёт File чанками 2 МиБ, принимает
+audioId/tusUrl/uploadToken, AbortSignal и onProgress. Повторный вызов делает HEAD и продолжает
+со смещения сервера. Сохранение id/отпечатка файла между посещениями — ответственность приложения.
+После полного закрытия страницы пользователь заново выбирает тот же локальный файл.
+
+Серверный лимит — 100 МиБ/30 минут; квоты владельца и связь с сущностью контролирует приложение.
+Общий контракт и требования доступа — [media-server](../../.claude/docs/media-server.md).
+
 media-client — shared-библиотека монорепо letar
 
 ## Установка
