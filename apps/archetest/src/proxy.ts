@@ -28,8 +28,9 @@ export default proxy
 // умеет разворачивать: "Unsupported node type "CallExpression" at "config.matcher"", билд падает
 // на "Invalid segment configuration export detected" (см. .claude/docs/nextjs-standalone-tracing.md
 // или commit 6655f165, тот же фикс в apps/kami/src/proxy.ts).
-// Значение сгенерировано buildIntlMatcher({ excludePrefixes: ['api', '_next', '_vercel'],
+// /sign-in расположен вне [locale] и должен миновать языковое перенаправление.
+// Значение сгенерировано buildIntlMatcher({ excludePrefixes: ['api', '_next', '_vercel', 'sign-in'],
 // metadataRoutes: ['icon', 'apple-icon'] }) — дрейф литерала от опций ловит proxy.spec.ts.
 export const config = {
-  matcher: ['/((?!api|_next|_vercel|icon|apple-icon|.*\\..*).*)', '/'],
+  matcher: ['/((?!api|_next|_vercel|sign-in|icon|apple-icon|.*\\..*).*)', '/'],
 }

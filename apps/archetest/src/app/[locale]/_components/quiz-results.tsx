@@ -1,9 +1,9 @@
 'use client'
 
 import { useShowClinicalNames } from '@/app/_hooks/use-psychologist'
-import { Link } from '@/i18n/navigation'
 import { Alert, Box, Button, Container, Heading, HStack, Progress, SimpleGrid, Text, VStack } from '@chakra-ui/react'
 import { useLocale, useTranslations } from 'next-intl'
+import Link from 'next/link'
 import { useMemo } from 'react'
 import { LuArrowRight, LuTriangleAlert } from 'react-icons/lu'
 import type { PersonalityTypeCode } from '../_data/personality-types'
@@ -103,6 +103,8 @@ export function QuizResults({
   const t = useTranslations('quiz')
   const locale = useLocale()
   const isRu = locale === 'ru'
+  // Вход находится вне [locale]; язык сохраняем в адресе возврата после авторизации.
+  const signInHref = `/sign-in?callbackURL=${encodeURIComponent(isRu ? '/' : '/en')}`
   const showClinical = useShowClinicalNames()
   // Данные для радарного чарта — формат «Бдительный Страж»
   const chartData = useMemo(
@@ -311,10 +313,10 @@ export function QuizResults({
             </SimpleGrid>
             <HStack gap={3}>
               <Button asChild size="md" colorPalette="brand">
-                <Link href="/sign-in">{t('guestBanner.signIn')}</Link>
+                <Link href={signInHref}>{t('guestBanner.signIn')}</Link>
               </Button>
               <Button asChild size="md" variant="outline">
-                <Link href="/sign-in">{t('guestBanner.signUp')}</Link>
+                <Link href={signInHref}>{t('guestBanner.signUp')}</Link>
               </Button>
             </HStack>
           </Box>

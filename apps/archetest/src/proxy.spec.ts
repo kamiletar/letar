@@ -25,7 +25,7 @@ describe('proxy matcher', () => {
     const actualPattern = match[1].replaceAll('\\\\', '\\')
 
     const [expectedPattern] = buildIntlMatcher({
-      excludePrefixes: ['api', '_next', '_vercel'],
+      excludePrefixes: ['api', '_next', '_vercel', 'sign-in'],
       metadataRoutes: ['icon', 'apple-icon'],
     })
 

@@ -6,6 +6,8 @@
 
 ## Документация
 
+- [Локализованные и общие ссылки Next.js](/.claude/docs/nextjs-intl-plain-link-drops-locale-prefix.md) — выбор Link для `[locale]` и общего `/sign-in`, исключения intl proxy и язык возврата.
+
 - [archetest: протокол содержательного ревью](/apps/archetest/docs/question-review/REVIEW_PROTOCOL.md) — конструкт, покрытие, ключи, компенсации, когнитивные интервью и границы интерпретации.
 - [archetest: ревью пакета INA/HYI](/apps/archetest/docs/question-review/adhd-review-2026-10-16.md) — разбор всех 14 вопросов, исходные хеши, дефекты ключей и направления переработки.
 

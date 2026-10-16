@@ -1,6 +1,6 @@
 import { ChakraProvider, defaultSystem } from '@chakra-ui/react'
 import { render, screen } from '@testing-library/react'
-import { NextIntlClientProvider } from 'next-intl'
+import { NextIntlClientProvider, useLocale } from 'next-intl'
 import type { ReactNode } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 import enMessages from '../../../../messages/en.json'
@@ -12,8 +12,12 @@ import { QuizResults } from './quiz-results'
 const clinical = vi.hoisted(() => ({ value: false }))
 
 vi.mock('@/app/_hooks/use-psychologist', () => ({ useShowClinicalNames: () => clinical.value }))
+// Обёртка next-intl добавляет префикс для EN; простой <a href={href}> скрывал эту регрессию.
 vi.mock('@/i18n/navigation', () => ({
-  Link: ({ children, href }: { children: ReactNode; href: string }) => <a href={href}>{children}</a>,
+  Link: ({ children, href }: { children: ReactNode; href: string }) => {
+    const locale = useLocale()
+    return <a href={locale === 'en' ? `/en${href}` : href}>{children}</a>
+  },
 }))
 // Тяжёлые дочерние блоки не относятся к проверяемым строкам
 vi.mock('./personality-radar-chart', () => ({ PersonalityRadarChart: () => null }))
@@ -48,6 +52,18 @@ function renderResults(locale: 'ru' | 'en', props: Partial<Parameters<typeof Qui
 }
 
 describe('QuizResults: строки интерфейса из messages', () => {
+  it.each(['ru', 'en'] as const)('%s: вход и создание аккаунта ведут на общий маршрут авторизации', (locale) => {
+    renderResults(locale, { isAuthenticated: false })
+
+    for (const name of locale === 'ru' ? ['Войти', 'Создать аккаунт'] : ['Sign In', 'Create Account']) {
+      const link = screen.getByRole('link', { name, exact: true })
+      const url = new URL(link.getAttribute('href')!, 'https://archetest.letar.best')
+
+      expect(url.pathname).toBe('/sign-in')
+      expect(url.searchParams.get('callbackURL')).toBe(locale === 'ru' ? '/' : '/en')
+    }
+  })
+
   it('RU: прогресс, кнопки, дисклеймер', () => {
     renderResults('ru')
     expect(screen.getByText('Пройдено: 630 из 2096 вопросов')).toBeTruthy()
