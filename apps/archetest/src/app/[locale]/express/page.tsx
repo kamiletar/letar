@@ -33,7 +33,12 @@ export default async function ExpressPage({ params }: Props) {
 
   return (
     <>
-      <ExpressContainer questions={questions} isAuthenticated={!!session} />
+      <ExpressContainer
+        key={session?.user.id ?? 'guest'}
+        userId={session?.user.id ?? null}
+        questions={questions}
+        isAuthenticated={!!session}
+      />
       {/* Offline-first (5.7): SW только по согласию, баннер предлагает включить */}
       <ServiceWorkerRegistration
         consentKey="archetest-offline-consent"

@@ -10,7 +10,9 @@ import { LuHexagon, LuTimer } from 'react-icons/lu'
 import type { QuizQuestionDTO } from '../_actions/quiz.action'
 import { DISCLAIMER_CONSENT_KEY } from '../_data/disclaimer'
 import type { PersonalityTypeCode } from '../_data/personality-types'
+import { QUESTION_BANK_VERSION } from '../_data/question-bank-version'
 import { computeClientScores } from '../_lib/client-scoring'
+import { clearQuizDraft, type QuizDraft, restoreQuizDraft, saveQuizDraft } from '../_lib/quiz-draft'
 import { shuffleWithSeed } from '../_lib/seeded-shuffle'
 import { EXPRESS_RESULT_KEY } from '../_lib/storage-keys'
 import { DisclaimerConsentCheckbox, DisclaimerSummary } from './disclaimer-consent'
@@ -25,6 +27,7 @@ type ExpressState = 'intro' | 'quiz' | 'results'
 interface ExpressContainerProps {
   questions: QuizQuestionDTO[]
   isAuthenticated: boolean
+  userId?: string | null
 }
 
 /** Формат гостевого результата в localStorage */
@@ -40,7 +43,7 @@ interface StoredExpressResult {
  * тест без регистрации. Результат считается на клиенте и сохраняется в localStorage
  * — на сервер ничего не отправляется до явной привязки к аккаунту.
  */
-export function ExpressContainer({ questions, isAuthenticated }: ExpressContainerProps) {
+export function ExpressContainer({ questions, isAuthenticated, userId = null }: ExpressContainerProps) {
   const t = useTranslations('express')
   const te = useTranslations('express.container')
   const locale = useLocale()
@@ -52,9 +55,24 @@ export function ExpressContainer({ questions, isAuthenticated }: ExpressContaine
   const [seed, setSeed] = useState(0)
   const [currentIndex, setCurrentIndex] = useState(0)
   const [answers, setAnswers] = useState<Map<string, number>>(new Map())
+  const [currentQuestions, setCurrentQuestions] = useState(questions)
   const [scores, setScores] = useState<Record<PersonalityTypeCode, number> | null>(null)
   /** Ответы завершённой сессии (для привязки к аккаунту) */
   const [finalAnswers, setFinalAnswers] = useState<ExpressAnswer[]>([])
+
+  const persistDraft = useCallback((changes: Partial<QuizDraft> = {}) => {
+    saveQuizDraft('express', userId, {
+      bankVersion: QUESTION_BANK_VERSION,
+      seed,
+      phase: 'quiz',
+      questions: currentQuestions,
+      currentIndex,
+      answers: Array.from(answers),
+      skipped: [],
+      mood: null,
+      ...changes,
+    })
+  }, [userId, seed, currentQuestions, currentIndex, answers])
 
   // Восстанавливаем гостевой результат из localStorage при монтировании
   const hydrated = useRef(false)
@@ -63,6 +81,17 @@ export function ExpressContainer({ questions, isAuthenticated }: ExpressContaine
       return
     }
     hydrated.current = true
+    const draft = restoreQuizDraft('express', userId)
+    if (draft) {
+      // oxlint-disable-next-line react/set-state-in-effect -- восстановление внешнего состояния после гидратации
+      setCurrentQuestions(draft.questions)
+      setSeed(draft.seed)
+      setCurrentIndex(draft.currentIndex)
+      setAnswers(new Map(draft.answers))
+      setDisclaimerAccepted(true)
+      setState('quiz')
+      return
+    }
     try {
       // Ранее данное согласие (общий ключ с полным квизом) — читаем после
       // монтирования (localStorage недоступен на сервере, hydration-safe паттерн)
@@ -84,15 +113,15 @@ export function ExpressContainer({ questions, isAuthenticated }: ExpressContaine
     } catch {
       /* повреждённый localStorage — игнорируем, покажем интро */
     }
-  }, [])
+  }, [userId])
 
   // Перемешанные вопросы (детерминированно по seed)
   const shuffledQuestions = useMemo(() => {
     if (seed === 0) {
       return []
     }
-    return shuffleWithSeed(questions, seed)
-  }, [seed, questions])
+    return shuffleWithSeed(currentQuestions, seed)
+  }, [seed, currentQuestions])
 
   const currentQuestion = shuffledQuestions[currentIndex]
 
@@ -122,51 +151,54 @@ export function ExpressContainer({ questions, isAuthenticated }: ExpressContaine
   }, [])
 
   const handleStart = useCallback(() => {
-    setSeed(Date.now() % 2_000_000_000)
+    const newSeed = Date.now() % 2_000_000_000 || 1
+    clearQuizDraft('express', userId)
+    persistDraft({ seed: newSeed, currentIndex: 0, answers: [] })
+    setSeed(newSeed)
     setCurrentIndex(0)
     setAnswers(new Map())
     setScores(null)
     setState('quiz')
-  }, [])
+  }, [persistDraft, userId])
 
   const handleAnswer = useCallback(
     (originalOptionIndex: number) => {
       if (!currentQuestion) {
         return
       }
-      setAnswers((prev) => {
-        const next = new Map(prev)
-        next.set(currentQuestion.id, originalOptionIndex)
-        return next
-      })
+      const next = new Map(answers)
+      next.set(currentQuestion.id, originalOptionIndex)
+      persistDraft({ answers: Array.from(next) })
+      setAnswers(next)
     },
-    [currentQuestion],
+    [currentQuestion, answers, persistDraft],
   )
 
   const handleSkip = useCallback(() => {
     if (!currentQuestion) {
       return
     }
-    setAnswers((prev) => {
-      const next = new Map(prev)
-      next.delete(currentQuestion.id)
-      return next
-    })
-  }, [currentQuestion])
+    const next = new Map(answers)
+    next.delete(currentQuestion.id)
+    persistDraft({ answers: Array.from(next) })
+    setAnswers(next)
+  }, [currentQuestion, answers, persistDraft])
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   const handleFinishRef = useRef<() => void>(() => {})
 
   const handleNext = useCallback(() => {
     if (currentIndex < shuffledQuestions.length - 1) {
-      setCurrentIndex((i) => i + 1)
+      persistDraft({ currentIndex: currentIndex + 1 })
+      setCurrentIndex(currentIndex + 1)
     } else {
       handleFinishRef.current()
     }
-  }, [currentIndex, shuffledQuestions.length])
+  }, [currentIndex, shuffledQuestions.length, persistDraft])
 
   const handleFinish = useCallback(() => {
     if (answers.size === 0) {
+      clearQuizDraft('express', userId)
       toaster.error({
         title: te('noAnswersTitle'),
         description: te('noAnswersText'),
@@ -175,7 +207,7 @@ export function ExpressContainer({ questions, isAuthenticated }: ExpressContaine
       return
     }
 
-    const computed = computeClientScores(answers, questions)
+    const computed = computeClientScores(answers, currentQuestions)
     const answersArray: ExpressAnswer[] = Array.from(answers.entries()).map(([questionId, selectedOption]) => ({
       questionId,
       selectedOption,
@@ -190,6 +222,7 @@ export function ExpressContainer({ questions, isAuthenticated }: ExpressContaine
         completedAt: new Date().toISOString(),
       }
       localStorage.setItem(EXPRESS_RESULT_KEY, JSON.stringify(stored))
+      clearQuizDraft('express', userId)
     } catch {
       /* localStorage недоступен — результат покажем из состояния */
     }
@@ -197,7 +230,7 @@ export function ExpressContainer({ questions, isAuthenticated }: ExpressContaine
     setScores(computed)
     setFinalAnswers(answersArray)
     setState('results')
-  }, [answers, questions, seed, isRu])
+  }, [answers, currentQuestions, seed, userId, te])
 
   // Обновляем ref вне рендера — чтение/запись ref.current в теле компонента
   // не отслеживается React (react/refs), нужен эффект
@@ -206,6 +239,7 @@ export function ExpressContainer({ questions, isAuthenticated }: ExpressContaine
   }, [handleFinish])
 
   const handleRetake = useCallback(() => {
+    clearQuizDraft('express', userId)
     try {
       localStorage.removeItem(EXPRESS_RESULT_KEY)
     } catch {
@@ -216,7 +250,7 @@ export function ExpressContainer({ questions, isAuthenticated }: ExpressContaine
     setAnswers(new Map())
     setCurrentIndex(0)
     setState('intro')
-  }, [])
+  }, [userId])
 
   // INTRO
   if (state === 'intro') {
@@ -297,6 +331,7 @@ export function ExpressContainer({ questions, isAuthenticated }: ExpressContaine
             options={shuffledOptions}
             questionNumber={currentIndex + 1}
             selectedOption={answers.get(currentQuestion.id)}
+            isLastQuestion={currentIndex === shuffledQuestions.length - 1}
             onAnswer={handleAnswer}
             onNext={handleNext}
             onSkip={handleSkip}

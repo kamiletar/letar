@@ -13,6 +13,9 @@ interface QuizQuestionCardProps {
   questionNumber: number
   /** Уже выбранный ответ (originalIndex) или undefined */
   selectedOption?: number
+  /** После восстановления пропущенного вопроса доступен явный переход дальше. */
+  canContinue?: boolean
+  isLastQuestion?: boolean
   /** Колбэк при выборе ответа */
   onAnswer: (originalIndex: number) => void
   /** Переход к следующему вопросу */
@@ -26,6 +29,8 @@ export function QuizQuestionCard({
   options,
   questionNumber,
   selectedOption,
+  canContinue = false,
+  isLastQuestion = false,
   onAnswer,
   onNext,
   onSkip,
@@ -113,6 +118,11 @@ export function QuizQuestionCard({
           {t('skipQuestion')}
         </Button>
       </SimpleGrid>
+      {!justAnswered && (selectedOption !== undefined || canContinue) && (
+        <Button size="lg" colorPalette="brand" onClick={onNext}>
+          {t(isLastQuestion ? 'finish' : 'next')}
+        </Button>
+      )}
     </VStack>
   )
 }

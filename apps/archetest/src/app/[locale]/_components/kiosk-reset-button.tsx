@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from 'react'
 import { LuRotateCcw } from 'react-icons/lu'
 
 import { DISCLAIMER_CONSENT_KEY } from '../_data/disclaimer'
+import { QUIZ_DRAFT_PREFIX } from '../_lib/quiz-draft'
 import { EXPRESS_RESULT_KEY, PENDING_QUIZ_KEY } from '../_lib/storage-keys'
 
 /**
@@ -54,6 +55,9 @@ export function KioskResetButton() {
     }
     // Подтверждено: чистим следы посетителя и перезагружаем страницу
     try {
+      // На общем устройстве очищаем черновики всех режимов и владельцев.
+      const draftKeys = Object.keys(localStorage).filter((key) => key.startsWith(QUIZ_DRAFT_PREFIX))
+      for (const key of draftKeys) { localStorage.removeItem(key) }
       localStorage.removeItem(EXPRESS_RESULT_KEY)
       localStorage.removeItem(DISCLAIMER_CONSENT_KEY)
       sessionStorage.removeItem(PENDING_QUIZ_KEY)

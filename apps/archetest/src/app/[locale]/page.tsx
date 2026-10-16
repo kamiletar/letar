@@ -36,6 +36,8 @@ export default async function HomePage({ params }: Props) {
 
   return (
     <QuizContainer
+      key={session?.user.id ?? 'guest'}
+      userId={session?.user.id ?? null}
       questions={questions}
       isAuthenticated={isAuthenticated}
       initialProgress={progress}
