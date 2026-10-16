@@ -6,6 +6,9 @@
 
 ## Документация
 
+- [archetest: протокол содержательного ревью](/apps/archetest/docs/question-review/REVIEW_PROTOCOL.md) — конструкт, покрытие, ключи, компенсации, когнитивные интервью и границы интерпретации.
+- [archetest: ревью пакета INA/HYI](/apps/archetest/docs/question-review/adhd-review-2026-10-16.md) — разбор всех 14 вопросов, исходные хеши, дефекты ключей и направления переработки.
+
 - [archetest: литературный аудит банка](/apps/archetest/docs/question-review/literary-audit-2026-10-16.md) — покрытие вопросов, журнал редакторских правок и проверка неизменности скоринга.
 
 - [archetest: восстановление теста](/apps/archetest/docs/quiz-progress-recovery.md) — локальный черновик отдельно от очереди отправки, исходная выборка и изоляция аккаунтов.
