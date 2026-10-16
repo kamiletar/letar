@@ -70,7 +70,7 @@ const CHECKS: Array<{ scenario: string; scenarioEn: string; options: string }> =
     ]),
   },
   {
-    scenario: 'Выберите вариант, противоположный слову «день».',
+    scenario: 'Выберите слово, противоположное по значению слову «день».',
     scenarioEn: 'Select the option that is the opposite of the word "day".',
     options: opts([
       ['Утро', 'Morning'],
