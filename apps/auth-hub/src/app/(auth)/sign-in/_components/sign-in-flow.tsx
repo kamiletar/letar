@@ -41,8 +41,8 @@ export function SignInFlow({ otherProviders, hasTelegram }: SignInFlowProps) {
     <Stack gap={6}>
       <Stack gap={2}>
         <Text color="fg.muted" fontSize="sm" fontWeight="medium">LETAR · ЕДИНЫЙ АККАУНТ</Text>
-        <Heading as="h1" ref={titleRef} tabIndex={-1} size="2xl" outline="none">
-          {step === 'methods' ? 'Вход в Letar' : 'Вход по почте'}
+        <Heading asChild size="2xl" outline="none">
+          <h1 ref={titleRef} tabIndex={-1}>{step === 'methods' ? 'Вход в Letar' : 'Вход по почте'}</h1>
         </Heading>
         <Text color="fg.muted" fontSize="sm">
           {step === 'methods'

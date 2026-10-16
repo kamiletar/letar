@@ -23,8 +23,8 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           На главную
         </NextLink>
       </ChakraLink>
-      <Box as="main" flex={1} minW={0} display="flex" alignItems="center" justifyContent="center" w="full" pb={12}>
-        {children}
+      <Box asChild flex={1} minW={0} display="flex" alignItems="center" justifyContent="center" w="full" pb={12}>
+        <main>{children}</main>
       </Box>
     </VStack>
   )
