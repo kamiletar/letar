@@ -72,12 +72,19 @@ test.describe('Единый вход', () => {
     )
   })
 
-  test('дополнительные провайдеры скрыты до запроса и учитывают географию', async ({ page }) => {
-    await page.setExtraHTTPHeaders({ 'x-forwarded-for': '77.88.8.8' })
+  test('дополнительные способы скрыты до запроса и раскрываются по кнопке', async ({ page }) => {
     await page.goto('/sign-in')
+    const passkey = page.getByRole('button', { name: /Face ID.*Ключ доступа/ })
+    await expect(passkey).not.toBeVisible()
+    for (const provider of ['Google', 'GitHub', 'Facebook']) {
+      await expect(page.getByRole('button', { name: `Продолжить с ${provider}` })).not.toBeVisible()
+    }
     await page.getByRole('button', { name: 'Другие способы' }).click()
-    await expect(page.getByRole('button', { name: 'Продолжить с Google' })).toHaveCount(0)
+    await expect(passkey).toBeVisible()
     await expect(page.getByRole('button', { name: 'Продолжить с ВКонтакте' })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Продолжить с Яндекс' })).toBeVisible()
+    await page.getByRole('button', { name: 'Другие способы' }).click()
+    await expect(passkey).not.toBeVisible()
   })
 
   test('на узком экране формы доступны без горизонтальной прокрутки', async ({ page }) => {

@@ -5,6 +5,7 @@ import { defineConfig } from 'vitest/config'
 export default defineConfig({
   cacheDir: '../../node_modules/.vitest/auth-hub',
   root: import.meta.dirname,
+  oxc: { jsx: { runtime: 'automatic' } },
   test: {
     name: 'auth-hub',
     environment: 'node',
