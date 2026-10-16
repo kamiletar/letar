@@ -119,11 +119,13 @@ export const auth = createAuth({
           select: { name: true },
         })
 
-        await sendMagicLinkEmail({
+        const delivery = await sendMagicLinkEmail({
           to: email,
           userName: user?.name ?? undefined,
           magicLinkUrl: url,
         })
+        // Почтовый провайдер возвращает результат вместо исключения: нельзя обещать письмо при сбое.
+        if (!delivery.success) { throw new Error('Magic link delivery failed') }
       },
       expiresIn: 900, // 15 минут
       disableSignUp: false,

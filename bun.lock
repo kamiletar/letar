@@ -551,7 +551,7 @@
     },
     "apps/auth-hub": {
       "name": "auth-hub",
-      "version": "0.7.25",
+      "version": "0.8.0",
       "dependencies": {
         "@letar/api-server": "workspace:*",
         "@letar/auth": "workspace:*",

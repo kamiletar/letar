@@ -8,11 +8,14 @@ import { defineConfig, devices } from '@playwright/test'
 // НЕ путать с портом 3010 из docker-compose.production.yml healthcheck (внутренний bind контейнера,
 // не проброшен наружу в rollout-профиле).
 const baseURL = process.env['BASE_URL'] || 'http://localhost:3014'
+// Публичный UX-прогон не создаёт сессию администратора и не требует БД.
+const publicOnly = process.env['AUTH_HUB_PUBLIC_ONLY'] === '1'
 
 export default defineConfig({
   ...nxE2EPreset(__filename, { testDir: './src' }),
 
-  globalSetup: resolve(__dirname, './src/global-setup.ts'),
+  globalSetup: publicOnly ? undefined : resolve(__dirname, './src/global-setup.ts'),
+  ...(publicOnly && { testMatch: '01-public.spec.ts' }),
 
   timeout: 30_000,
   expect: { timeout: 10_000 },

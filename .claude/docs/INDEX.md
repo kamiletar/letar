@@ -340,6 +340,8 @@
 
 ## Auth, профиль, админка
 
+- [auth-hub-unified-entry-ux](/.claude/docs/auth-hub-unified-entry-ux.md) — единый вход/регистрация: источники UX, три основных способа, почтовые вкладки, ссылка vs код, сохранение SSO и протокол пользовательского исследования.
+
 - [auth](/.claude/docs/auth.md)
 - [admin](/.claude/docs/admin.md)
 - [user-profile](/.claude/docs/user-profile.md)

@@ -13,6 +13,8 @@ import { useEffect, useState } from 'react'
 interface PasskeySignInButtonProps {
   /** URL для редиректа после успешного входа */
   callbackUrl?: string
+  /** Явный выбор ключа в дополнительных способах, даже при наличии автозаполнения. */
+  alwaysVisible?: boolean
 }
 
 /**
@@ -20,7 +22,9 @@ interface PasskeySignInButtonProps {
  * Скрыта когда доступен Conditional UI (autofill дропдаун в поле email).
  * Показывается только в браузерах без поддержки Conditional UI.
  */
-export function PasskeySignInButton({ callbackUrl = '/auth/post-login' }: PasskeySignInButtonProps) {
+export function PasskeySignInButton(
+  { callbackUrl = '/auth/post-login', alwaysVisible = false }: PasskeySignInButtonProps,
+) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -34,11 +38,16 @@ export function PasskeySignInButton({ callbackUrl = '/auth/post-login' }: Passke
       setShowFallback(false)
       return
     }
+    if (alwaysVisible) {
+      // oxlint-disable-next-line react/set-state-in-effect
+      setShowFallback(true)
+      return
+    }
     // Если Conditional UI доступен — прячем кнопку (autofill сам покажет passkeys)
     browserSupportsWebAuthnAutofill()
       .then((supported) => setShowFallback(!supported))
       .catch(() => setShowFallback(true))
-  }, [])
+  }, [alwaysVisible])
 
   if (showFallback !== true) {
     return null

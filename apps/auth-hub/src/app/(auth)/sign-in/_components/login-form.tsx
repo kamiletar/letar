@@ -14,9 +14,11 @@ import { usePasskeyConditionalAuth } from '../_hooks/use-passkey-conditional-aut
 
 /**
  * Форма входа по email/password
- * Автоматически создаёт аккаунт, если пользователь не найден
+ * Новый аккаунт создаётся через подтверждение почты по ссылке, не по ошибке пароля.
  */
-export function LoginForm() {
+export function LoginForm(
+  { initialEmail = '', onEmailChange }: { initialEmail?: string; onEmailChange?: (email: string) => void },
+) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const query = searchParams.toString()
@@ -38,7 +40,13 @@ export function LoginForm() {
     setInfo(null)
     setPendingEmail(null)
 
-    const result = await loginUser({ ...data, callbackUrl })
+    let result: Awaited<ReturnType<typeof loginUser>>
+    try {
+      result = await loginUser({ ...data, callbackUrl })
+    } catch {
+      setError('Не удалось связаться с сервером. Проверьте соединение и попробуйте ещё раз.')
+      return
+    }
 
     if (result.success) {
       router.push(result.redirectTo || '/')
@@ -53,11 +61,14 @@ export function LoginForm() {
   }
 
   return (
-    <AuthHubForm schema={LoginSchema} initialValue={{ email: '', password: '' }} onSubmit={handleSubmit}>
+    <AuthHubForm schema={LoginSchema} initialValue={{ email: initialEmail, password: '' }} onSubmit={handleSubmit}>
       <Stack gap={4}>
+        <AuthHubForm.Watch field="email" onChange={(value) => onEmailChange?.(String(value ?? ''))} />
         <AuthHubForm.Field.String
           name="email"
-          label="Email"
+          label="Почта"
+          type="email"
+          inputMode="email"
           autoComplete="username webauthn"
           placeholder="you@example.com"
         />
@@ -67,6 +78,7 @@ export function LoginForm() {
           label="Пароль"
           autoComplete="current-password"
           placeholder="••••••••"
+          helperText=""
         />
 
         <Box asChild alignSelf="flex-end" fontSize="sm" color="colorPalette.fg" fontWeight="medium">
@@ -74,13 +86,13 @@ export function LoginForm() {
         </Box>
 
         {error && (
-          <Text color="fg.error" fontSize="sm">
+          <Text role="alert" color="fg.error" fontSize="sm">
             {error}
           </Text>
         )}
 
         {info && (
-          <Text color="fg.info" fontSize="sm">
+          <Text role="status" color="fg.info" fontSize="sm">
             {info}
           </Text>
         )}
@@ -98,12 +110,12 @@ export function LoginForm() {
           />
         )}
 
-        <AuthHubForm.Button.Submit colorPalette="brand" width="full">
+        <AuthHubForm.Button.Submit colorPalette="brand" width="full" size="lg">
           Войти
         </AuthHubForm.Button.Submit>
 
-        <Text fontSize="xs" color="fg.subtle" textAlign="center">
-          Если аккаунта с таким email ещё нет — он будет создан автоматически
+        <Text fontSize="sm" color="fg.muted">
+          Ещё не задавали пароль? Выберите «По ссылке» — пароль не понадобится.
         </Text>
       </Stack>
     </AuthHubForm>

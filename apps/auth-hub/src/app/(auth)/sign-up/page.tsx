@@ -1,55 +1,14 @@
-import { Box, Card, Heading, HStack, Separator, Stack, Text } from '@chakra-ui/react'
-import type { Metadata } from 'next'
-import NextLink from 'next/link'
-import { Suspense } from 'react'
-import { AuthOAuthButtons } from '../sign-in/_components/oauth-buttons'
-import { RegisterForm } from './_components/register-form'
+import { redirect } from 'next/navigation'
 
-export const metadata: Metadata = {
-  title: 'Регистрация',
-}
-
-/**
- * Страница регистрации
- */
-export default async function SignUpPage({ searchParams }: { searchParams: Promise<Record<string, string>> }) {
+/** Старые ссылки регистрации продолжают единый вход вместе с исходными OIDC-параметрами. */
+export default async function SignUpPage(
+  { searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> },
+) {
   const params = await searchParams
-  const query = new URLSearchParams(params).toString()
-  const signInHref = query ? `/sign-in?${query}` : '/sign-in'
-
-  return (
-    <Card.Root maxW="4xl" w="full" mx={4}>
-      <Card.Body>
-        <HStack gap={8} align="stretch" flexDir={{ base: 'column', md: 'row' }}>
-          {/* Левая колонка — быстрая регистрация через соцсети */}
-          <Stack flex={1} gap={4}>
-            <Heading size="lg">Регистрация</Heading>
-            <Text color="fg.muted" fontSize="sm">
-              Единый аккаунт для всех сервисов Letar
-            </Text>
-            <Suspense>
-              <AuthOAuthButtons />
-            </Suspense>
-          </Stack>
-
-          <Separator orientation="vertical" display={{ base: 'none', md: 'block' }} />
-          <Separator display={{ base: 'block', md: 'none' }} />
-
-          {/* Правая колонка — регистрация по email */}
-          <Stack flex={1} gap={4}>
-            <Heading size="md">Регистрация по email</Heading>
-            <RegisterForm />
-          </Stack>
-        </HStack>
-      </Card.Body>
-      <Card.Footer justifyContent="center">
-        <Text fontSize="sm" color="fg.muted">
-          Уже есть аккаунт?{' '}
-          <Box asChild color="colorPalette.fg" fontWeight="medium">
-            <NextLink href={signInHref}>Войти</NextLink>
-          </Box>
-        </Text>
-      </Card.Footer>
-    </Card.Root>
-  )
+  const query = new URLSearchParams()
+  for (const [key, value] of Object.entries(params)) {
+    if (Array.isArray(value)) { value.forEach((item) => query.append(key, item)) }
+    else if (value !== undefined) { query.set(key, value) }
+  }
+  redirect(`/sign-in${query.size ? `?${query}` : ''}`)
 }

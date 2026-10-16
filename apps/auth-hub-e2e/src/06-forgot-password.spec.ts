@@ -33,6 +33,8 @@ test.describe('/forgot-password', () => {
 
   test('ссылка «Забыли пароль?» на /sign-in ведёт на /forgot-password', async ({ page }) => {
     await page.goto('/sign-in', { waitUntil: 'domcontentloaded' })
+    await page.getByRole('button', { name: 'Продолжить с почтой' }).click()
+    await page.getByRole('tab', { name: 'С паролем' }).click()
     await page.getByRole('link', { name: 'Забыли пароль?' }).click()
     await expect(page).toHaveURL(/\/forgot-password/)
   })

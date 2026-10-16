@@ -7,7 +7,7 @@ import { LuArrowLeft } from 'react-icons/lu'
  */
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
-    <VStack minH="100vh" bg="bg.subtle" display="flex" alignItems="center" justifyContent="center">
+    <VStack minH="100dvh" bg="bg.subtle" display="flex" alignItems="center" justifyContent="center">
       <ChakraLink
         asChild
         colorPalette="brand"
@@ -23,7 +23,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           На главную
         </NextLink>
       </ChakraLink>
-      <Box flex={1} display="flex" alignItems="center" justifyContent="center" w="full">
+      <Box as="main" flex={1} minW={0} display="flex" alignItems="center" justifyContent="center" w="full" pb={12}>
         {children}
       </Box>
     </VStack>

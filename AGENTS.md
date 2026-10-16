@@ -6,6 +6,8 @@
 
 ## Документация
 
+- [auth-hub: единый вход и регистрация](/.claude/docs/auth-hub-unified-entry-ux.md) — UX-исследование, выбор способов, ссылка/код/пароль и план проверки с пользователями.
+
 - [Локализованные и общие ссылки Next.js](/.claude/docs/nextjs-intl-plain-link-drops-locale-prefix.md) — выбор Link для `[locale]` и общего `/sign-in`, исключения intl proxy и язык возврата.
 
 - [archetest: протокол содержательного ревью](/apps/archetest/docs/question-review/REVIEW_PROTOCOL.md) — конструкт, покрытие, ключи, компенсации, когнитивные интервью и границы интерпретации.

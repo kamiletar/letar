@@ -1,51 +1,95 @@
-/**
- * Публичные страницы — доступны без авторизации.
- * `storageState: undefined` — явно без cookies (иначе браузер унаследует storageState
- * первого проекта Playwright, см. e2e-testing.md "Тесты на неавторизованный редирект").
- */
-
 import { expect, test } from './fixtures/base-test'
 
-test.describe('Sign-in', () => {
+test.describe('Единый вход', () => {
   test.use({ storageState: undefined })
 
-  test('форма email/password видна', async ({ page }) => {
+  test('первый экран предлагает способы входа без форм и отдельной регистрации', async ({ page }) => {
     await page.goto('/sign-in')
-    await expect(page.getByRole('heading', { name: 'Войти' })).toBeVisible()
-    // @letar/forms не выставляет нативный HTML `name` (headless TanStack Form state) —
-    // общий для монорепо локатор поля через `data-field-name` (см. domwellbes-e2e).
-    // Уточняем autoComplete: на /sign-in два поля с data-field-name="email" — своё у
-    // LoginForm (autoComplete="username webauthn", ниже) и у MagicLinkForm (autoComplete="email").
-    await expect(page.locator('input[data-field-name="email"][autocomplete="username webauthn"]')).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Вход в Letar' })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Продолжить с ВКонтакте' })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Продолжить с Яндекс' })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Продолжить с почтой' })).toBeVisible()
+    await expect(page.locator('input')).toHaveCount(0)
+    await expect(page.getByRole('link', { name: 'Зарегистрироваться' })).toHaveCount(0)
+    await page.screenshot({ path: '.claude/artifacts/auth-hub-methods-desktop.png', fullPage: true })
+  })
+
+  test('почта сохраняется при переключении способа и возврате назад', async ({ page }) => {
+    await page.goto('/sign-in')
+    await page.getByRole('button', { name: 'Продолжить с почтой' }).click()
+    await expect(page.getByRole('heading', { name: 'Вход по почте' })).toBeFocused()
+    await expect(page.getByRole('tab', { name: 'По ссылке' })).toHaveAttribute('aria-selected', 'true')
+    await expect(page.locator('input[data-field-name="password"]')).toHaveCount(0)
+    await page.getByRole('textbox', { name: 'Почта' }).fill('person@example.com')
+    await page.getByRole('tab', { name: 'С паролем' }).click()
+    await expect(page.getByRole('textbox', { name: 'Почта' })).toHaveValue('person@example.com')
+    await expect(page.locator('input[data-field-name="password"]')).toHaveAttribute('autocomplete', 'current-password')
+    await page.getByRole('button', { name: 'Все способы входа' }).click()
+    await expect(page.getByRole('button', { name: 'Продолжить с почтой' })).toBeFocused()
+    await page.getByRole('button', { name: 'Продолжить с почтой' }).click()
+    await expect(page.getByRole('textbox', { name: 'Почта' })).toHaveValue('person@example.com')
+    await page.getByRole('tab', { name: 'По ссылке' }).click()
+    await expect(page.getByRole('textbox', { name: 'Почта' })).toHaveValue('person@example.com')
+    await expect(page.getByRole('textbox')).toHaveCount(1)
+    await page.screenshot({ path: '.claude/artifacts/auth-hub-email-desktop.png', fullPage: true })
+  })
+
+  test('вкладки доступны с клавиатуры', async ({ page }) => {
+    await page.goto('/sign-in')
+    await page.getByRole('button', { name: 'Продолжить с почтой' }).click()
+    await page.getByRole('tab', { name: 'По ссылке' }).focus()
+    await page.keyboard.press('ArrowRight')
+    await expect(page.getByRole('tab', { name: 'С паролем' })).toBeFocused()
+    await page.keyboard.press('Enter')
     await expect(page.locator('input[data-field-name="password"]')).toBeVisible()
-    await expect(page.getByRole('button', { name: 'Войти' })).toBeVisible()
   })
 
-  test('форма magic link видна', async ({ page }) => {
+  test('старый адрес регистрации сохраняет параметры продолжения', async ({ page }) => {
+    const query = new URLSearchParams({
+      callbackUrl: '/profile',
+      state: 'original-state',
+      code_challenge: 'original-pkce',
+    })
+    await page.goto(`/sign-up?${query}`)
+    await expect(page).toHaveURL(`/sign-in?${query}`)
+    await expect(page.getByRole('heading', { name: 'Вход в Letar' })).toBeVisible()
+  })
+
+  test('ошибка использованной ссылки видна, а её технический текст не выводится', async ({ page }) => {
+    await page.goto('/sign-in?error=INVALID_TOKEN')
+    const error = page.getByRole('main').getByRole('alert')
+    await expect(error).toContainText('Ссылка могла устареть')
+    await expect(error).not.toContainText('INVALID_TOKEN')
+  })
+
+  test('переход к восстановлению пароля сохраняет контекст', async ({ page }) => {
+    await page.goto('/sign-in?callbackUrl=%2Fprofile')
+    await page.getByRole('button', { name: 'Продолжить с почтой' }).click()
+    await page.getByRole('tab', { name: 'С паролем' }).click()
+    await expect(page.getByRole('link', { name: 'Забыли пароль?' })).toHaveAttribute(
+      'href',
+      '/forgot-password?callbackUrl=%2Fprofile',
+    )
+  })
+
+  test('дополнительные провайдеры скрыты до запроса и учитывают географию', async ({ page }) => {
+    await page.setExtraHTTPHeaders({ 'x-forwarded-for': '77.88.8.8' })
     await page.goto('/sign-in')
-    await expect(page.getByRole('button', { name: 'Отправить ссылку для входа' })).toBeVisible()
+    await page.getByRole('button', { name: 'Другие способы' }).click()
+    await expect(page.getByRole('button', { name: 'Продолжить с Google' })).toHaveCount(0)
+    await expect(page.getByRole('button', { name: 'Продолжить с ВКонтакте' })).toBeVisible()
   })
 
-  test('OAuth-кнопки видны', async ({ page }) => {
+  test('на узком экране формы доступны без горизонтальной прокрутки', async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 740 })
     await page.goto('/sign-in')
-    // В dev/на staging без x-forwarded-for гео-фильтр отключён (isRussianIp === false) —
-    // видны все провайдеры (google/github/facebook/vk/yandex), см. sign-in/page.tsx.
-    // OAuthButtons рендерит <Button> с текстом "Продолжить с {Provider}" (не <a>), см.
-    // libs/auth/src/client/oauth-buttons.tsx.
-    await expect(page.getByRole('button', { name: /Продолжить с Google/i })).toBeVisible()
-    await expect(page.getByRole('button', { name: /Продолжить с Яндекс/i })).toBeVisible()
-  })
-})
-
-test.describe('Sign-up', () => {
-  test.use({ storageState: undefined })
-
-  test('форма регистрации видна', async ({ page }) => {
-    await page.goto('/sign-up')
-    // register-form.tsx переведён на @letar/forms (PLAN_EMAIL_CODE.md A.2) — нативного `name`
-    // нет, локатор через data-field-name, как на /sign-in (см. выше).
-    await expect(page.locator('input[data-field-name="email"]')).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Продолжить с почтой' })).toBeInViewport()
+    await page.screenshot({ path: '.claude/artifacts/auth-hub-methods-mobile.png', fullPage: true })
+    await page.getByRole('button', { name: 'Продолжить с почтой' }).click()
+    await page.getByRole('tab', { name: 'С паролем' }).click()
     await expect(page.locator('input[data-field-name="password"]')).toBeVisible()
-    await expect(page.getByRole('button', { name: 'Зарегистрироваться' })).toBeVisible()
+    const fitsViewport = await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)
+    expect(fitsViewport).toBe(true)
+    await page.screenshot({ path: '.claude/artifacts/auth-hub-password-mobile.png', fullPage: true })
   })
 })

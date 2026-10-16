@@ -3,35 +3,44 @@
 import { auth } from '@/lib/auth'
 import { resolveLoginEmail } from '@/lib/resolve-login-email'
 import { headers } from 'next/headers'
+import { z } from 'zod/v4'
 
 interface MagicLinkResult {
   success: boolean
   error?: string
 }
 
-/**
- * Server Action для отправки magic link
- */
-export async function sendMagicLinkAction(email: string, callbackUrl?: string): Promise<MagicLinkResult> {
-  try {
-    // Вход по linked-email (Этап 8.5): резолвим в основной адрес ДО Better Auth.
-    // Без резолва magic link с disableSignUp:false молча создал бы дубль-аккаунт
-    // с linked-адресом. Побочный эффект: письмо уходит на ОСНОВНОЙ адрес владельца
-    // (оба адреса принадлежат одному пользователю, оба подтверждены).
-    const { email: loginEmail } = await resolveLoginEmail(email)
+interface MagicLinkApi {
+  signInMagicLink(input: {
+    body: { email: string; callbackURL: string; newUserCallbackURL: string; errorCallbackURL?: string }
+    headers: Headers
+  }): Promise<unknown>
+}
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Better Auth magic link API
-    await (auth.api as any).signInMagicLink({
+/** Сбой доставки одинаков для новых и существующих адресов и не выдаёт их наличие. */
+export async function sendMagicLinkAction(
+  email: string,
+  callbackUrl = '/',
+  errorCallbackUrl?: string,
+): Promise<MagicLinkResult> {
+  if (!z.email().safeParse(email).success) { return { success: false, error: 'Проверьте адрес почты.' } }
+  try {
+    const { email: loginEmail } = await resolveLoginEmail(email)
+    // Фабрика hub-provider не сохраняет литеральные типы дополнительных плагинов.
+    await (auth.api as unknown as MagicLinkApi).signInMagicLink({
       body: {
         email: loginEmail,
-        callbackURL: callbackUrl || '/',
+        callbackURL: callbackUrl,
+        newUserCallbackURL: callbackUrl,
+        errorCallbackURL: errorCallbackUrl,
       },
       headers: await headers(),
     })
-
     return { success: true }
   } catch {
-    // Не раскрываем, существует ли пользователь (безопасность)
-    return { success: true }
+    return {
+      success: false,
+      error: 'Не удалось отправить письмо. Попробуйте ещё раз позже или войдите другим способом.',
+    }
   }
 }

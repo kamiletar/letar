@@ -67,6 +67,9 @@ test.describe('Вход по linked-email → сессия primary-аккаун�
   test('вход по linked-адресу авторизует под primary-аккаунтом', async ({ page }) => {
     await page.goto('/sign-in', { waitUntil: 'domcontentloaded' })
 
+    await page.getByRole('button', { name: 'Продолжить с почтой' }).click()
+    await page.getByRole('tab', { name: 'С паролем' }).click()
+
     // @letar/forms не выставляет нативный `name` — локатор через data-field-name (см. 01-public.spec.ts).
     await page.locator('input[data-field-name="email"][autocomplete="username webauthn"]').fill(LINKED_EMAIL)
     await page.locator('input[data-field-name="password"]').fill(PRIMARY_PASSWORD)
@@ -80,17 +83,19 @@ test.describe('Вход по linked-email → сессия primary-аккаун�
     await expect(page.getByText(LINKED_EMAIL, { exact: true })).toHaveCount(0)
   })
 
-  test('неверный пароль по linked-адресу — «Неверный пароль», без дубль-регистрации', async ({ page }) => {
+  test('неверный пароль по linked-адресу — общая ошибка, без дубль-регистрации', async ({ page }) => {
     await page.goto('/sign-in', { waitUntil: 'domcontentloaded' })
+
+    await page.getByRole('button', { name: 'Продолжить с почтой' }).click()
+    await page.getByRole('tab', { name: 'С паролем' }).click()
 
     await page.locator('input[data-field-name="email"][autocomplete="username webauthn"]').fill(LINKED_EMAIL)
     await page.locator('input[data-field-name="password"]').fill('definitely-wrong-password')
     await page.getByRole('button', { name: 'Войти' }).click()
 
-    await expect(page.getByText('Неверный пароль')).toBeVisible()
+    await expect(page.getByRole('main').getByRole('alert')).toContainText('Проверьте почту и пароль')
 
-    // resolved=true в loginUser() должен блокировать trySignUp — дубль-аккаунт с linked-адресом
-    // как основным email не должен появиться (см. login.action.ts, Этап 8.5).
+    // Вход с паролем не запускает регистрацию — связанный адрес не создаёт дубль.
     const duplicate = await findUserByEmail(LINKED_EMAIL)
     expect(duplicate).toBeNull()
   })
