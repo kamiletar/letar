@@ -1,4 +1,7 @@
 import { Worker } from 'bullmq'
+import { sweepAudioUploads } from './audio-sweep.ts'
+import { transcodeAudio } from './audio-transcode.ts'
+import type { AudioJob } from './audio.ts'
 import { config } from './config.ts'
 import type { TranscodeJob } from './queue.ts'
 import { ensureDir, processedDir, rawDir, removeDir, videoUrls } from './storage.ts'
@@ -43,3 +46,14 @@ worker.on('failed', (job, err) => {
 })
 
 console.log(`[worker] ready — concurrency=${config.workerConcurrency}`)
+
+const audioWorker = new Worker<AudioJob>('audio', (job) => transcodeAudio(job.data, config.dataPath), {
+  connection: { url: config.redisUrl },
+  concurrency: config.workerConcurrency,
+})
+audioWorker.on('failed', (job, error) => console.error(`[audio] job ${job?.id} failed:`, error.message))
+const sweepAudio = () => sweepAudioUploads(config.dataPath).catch((error) => console.error('[audio-sweep]', error))
+setInterval(() => {
+  void sweepAudio()
+}, 3600 * 1000).unref()
+void sweepAudio()

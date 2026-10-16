@@ -5,9 +5,10 @@ import Fastify from 'fastify'
 import { createWriteStream } from 'node:fs'
 import { extname } from 'node:path'
 import { pipeline } from 'node:stream/promises'
+import { registerAudioRoutes } from './audio.ts'
 import { config, validateApiKey } from './config.ts'
 import { spawnFfmpeg } from './ffmpeg.ts'
-import { getJobStatus, transcodeQueue } from './queue.ts'
+import { audioQueue, getJobStatus, transcodeQueue } from './queue.ts'
 import { ensureDir, processedDir, rawDir, removeDir, sourcePath } from './storage.ts'
 import { consumeUploadToken, createUploadToken } from './tokens.ts'
 import { registerTusRoutes } from './tus.ts'
@@ -17,7 +18,13 @@ const app = Fastify({ logger: true, bodyLimit: 20 * 1024 * 1024 * 1024 })
 await app.register(cors, {
   origin: (origin, cb) => {
     // Разрешаем запросы от letar-приложений и локальной разработки
-    const allowed = [/\.letar\.best$/, /svoichuzhie\.ru$/, /localhost/, /127\.0\.0\.1/]
+    const allowed = [
+      /\.letar\.best$/,
+      /svoichuzhie\.ru$/,
+      /^https:\/\/([a-z0-9-]+\.)*mugcup\.ru$/,
+      /localhost/,
+      /127\.0\.0\.1/,
+    ]
     if (!origin || allowed.some((r) => r.test(origin))) {
       cb(null, true)
     } else {
@@ -60,6 +67,9 @@ app.addHook('onRequest', async (req, reply) => {
 
   const appId = (req.params as Record<string, string>).appId
   if (!appId) { return }
+
+  // Аудио проверяет серверный ключ либо подпись конкретного файла в собственных обработчиках.
+  if (req.routeOptions.url?.startsWith('/api/v1/:appId/audio/')) { return }
 
   // TUS роуты: /video/tus — авторизация внутри роут-хендлеров
   if (req.url.includes('/video/tus')) { return }
@@ -169,5 +179,17 @@ app.post<{ Params: { appId: string; videoId: string } }>('/api/v1/:appId/video/:
 })
 
 registerTusRoutes(app)
+registerAudioRoutes(app, {
+  dataPath: config.dataPath,
+  publicUrl: config.publicUrl,
+  getSecret: (appId) => config.apiKeys.get(appId),
+  enqueue: async (job) => {
+    await audioQueue.add('audio', job, {
+      jobId: `${job.appId}-${job.audioId}`,
+      removeOnComplete: 1000,
+      removeOnFail: 1000,
+    })
+  },
+})
 
 await app.listen({ port: config.port, host: '0.0.0.0' })

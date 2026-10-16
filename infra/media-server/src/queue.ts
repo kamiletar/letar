@@ -1,4 +1,5 @@
 import { type ConnectionOptions, Queue } from 'bullmq'
+import type { AudioJob } from './audio.ts'
 import { config } from './config.ts'
 
 export interface TranscodeJob {
@@ -13,6 +14,7 @@ export type JobStatus = 'queued' | 'processing' | 'ready' | 'error' | 'unknown'
 const connection: ConnectionOptions = { url: config.redisUrl }
 
 export const transcodeQueue = new Queue<TranscodeJob>('transcode', { connection })
+export const audioQueue = new Queue<AudioJob>('audio', { connection })
 
 export async function getJobStatus(jobId: string): Promise<JobStatus> {
   const job = await transcodeQueue.getJob(jobId)

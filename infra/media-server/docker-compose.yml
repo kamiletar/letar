@@ -36,6 +36,7 @@ services:
       MEDIA_KEY_SVOICHUZHIE: ${MEDIA_KEY_SVOICHUZHIE}
       MEDIA_KEY_ANIMATRONA: ${MEDIA_KEY_ANIMATRONA}
       MEDIA_KEY_DOMWELLBES: ${MEDIA_KEY_DOMWELLBES}
+      MEDIA_KEY_MUGCUP: ${MEDIA_KEY_MUGCUP:-}
     volumes:
       - /data:/data
     depends_on:
