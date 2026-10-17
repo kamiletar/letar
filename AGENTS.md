@@ -6,6 +6,8 @@
 
 ## Документация
 
+- [UX авторского редактора](/.claude/docs/authoring-save-and-media-ux.md) — сохранение без потери контекста, аудитория, авторские переходы и единая загрузка медиа.
+
 - [E2E тестирование](/.claude/docs/e2e-testing.md) — полный staging gate, изолированные fixtures и секреты вне Playwright trace.
 
 - [Media server: видео и закрытое аудио](/.claude/docs/media-server.md) — докачка, приватное хранение, Range, проверка доступа и защита ffmpeg от плейлистов.
