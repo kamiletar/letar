@@ -932,7 +932,7 @@
     },
     "apps/mugcup": {
       "name": "@letar/mugcup",
-      "version": "0.36.0",
+      "version": "0.36.1",
       "dependencies": {
         "@letar/consent": "workspace:*",
         "@letar/email": "workspace:*",
@@ -942,6 +942,13 @@
         "@letar/media-client": "workspace:*",
         "@letar/pg-url": "workspace:*",
         "@letar/seed-utils": "workspace:*",
+      },
+    },
+    "apps/mugcup-e2e": {
+      "name": "@letar/mugcup-e2e",
+      "version": "0.1.0",
+      "dependencies": {
+        "@letar/e2e-testing": "workspace:*",
       },
     },
     "apps/notebook": {
@@ -2965,6 +2972,8 @@
     "@letar/media-client": ["@letar/media-client@workspace:libs/media-client"],
 
     "@letar/mugcup": ["@letar/mugcup@workspace:apps/mugcup"],
+
+    "@letar/mugcup-e2e": ["@letar/mugcup-e2e@workspace:apps/mugcup-e2e"],
 
     "@letar/notebook": ["@letar/notebook@workspace:apps/notebook"],
 

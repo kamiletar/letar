@@ -49,3 +49,6 @@
 [submodule "apps/flora-e2e"]
 	path = apps/flora-e2e
 	url = git@github.com:kamiletar/letar-private-flora-e2e.git
+[submodule "apps/mugcup-e2e"]
+	path = apps/mugcup-e2e
+	url = git@github.com:kamiletar/letar-private-mugcup-e2e.git

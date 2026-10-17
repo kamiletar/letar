@@ -6,6 +6,8 @@
 
 ## Документация
 
+- [E2E тестирование](/.claude/docs/e2e-testing.md) — полный staging gate, изолированные fixtures и секреты вне Playwright trace.
+
 - [Media server: видео и закрытое аудио](/.claude/docs/media-server.md) — докачка, приватное хранение, Range, проверка доступа и защита ffmpeg от плейлистов.
 
 - [Печать результатов в PDF](/.claude/docs/print-to-pdf-dark-theme-pattern.md) — полный отчёт Archetest, изоляция портала, честный ноль, тёмная тема и повторная печать.
