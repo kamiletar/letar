@@ -932,12 +932,14 @@
     },
     "apps/mugcup": {
       "name": "@letar/mugcup",
-      "version": "0.29.4",
+      "version": "0.36.0",
       "dependencies": {
         "@letar/consent": "workspace:*",
         "@letar/email": "workspace:*",
         "@letar/env-load": "workspace:*",
         "@letar/format-utils": "workspace:*",
+        "@letar/jobs": "workspace:*",
+        "@letar/media-client": "workspace:*",
         "@letar/pg-url": "workspace:*",
         "@letar/seed-utils": "workspace:*",
       },
