@@ -78,6 +78,7 @@ export default function OfflinePage() {
       <Form
         schema={Schema}
         initialValue={{ title: '', location: '', notes: '', priority: 'medium' }}
+        persistence={{ key: 'showcase-inspection-draft', debounceMs: 500 }}
         onSubmit={async (data) => {
           if (simulateOffline) {
             await addAction({ type: ACTION_TYPE, payload: data })
@@ -96,6 +97,11 @@ export default function OfflinePage() {
           <Form.Button.Submit>{effectivelyOffline ? 'Save Offline' : 'Submit'}</Form.Button.Submit>
         </Stack>
       </Form>
+
+      <Text fontSize="sm" color="fg.muted">
+        Unsubmitted edits stay in this browser. Refresh, restore, and refresh again: the draft remains available until
+        successful submission or explicit discard. File contents are not stored.
+      </Text>
 
       {lastResult && (
         <Text fontSize="sm" color="fg.muted">
