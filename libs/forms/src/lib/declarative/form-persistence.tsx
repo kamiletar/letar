@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, CloseButton, Dialog, Portal, Text } from '@chakra-ui/react'
+import { Button, Dialog, Portal, Text } from '@chakra-ui/react'
 import { resolveStaticFormText } from '@letar/forms-core/i18n'
 import { useFormI18n } from '@letar/forms-react'
 import { type ReactElement, useCallback, useEffect, useRef, useState } from 'react'
@@ -252,6 +252,39 @@ export function useFormPersistence<TData extends object>(config: FormPersistence
 
   // Refs for debounce
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const restoreButtonRef = useRef<HTMLButtonElement | null>(null)
+  // Снимок сериализуется до ожидания: последующие мутации значений не меняют уже принятую копию.
+  const pendingRef = useRef<{ key: string; json: string } | null>(null)
+
+  const flushPending = useCallback((updateState = true) => {
+    if (debounceTimerRef.current !== null) {
+      clearTimeout(debounceTimerRef.current)
+      debounceTimerRef.current = null
+    }
+    const pending = pendingRef.current
+    if (!pending) { return }
+    try {
+      const now = Date.now()
+      localStorage.setItem(pending.key, `{"data":${pending.json},"savedAt":${now},"version":1}`)
+      pendingRef.current = null
+      if (updateState) {
+        setSavedAt(now)
+        setHasSavedData(true)
+      }
+    } catch {
+      // Недоступное хранилище не ломает ввод; при уходе со страницы повторяем попытку.
+    }
+  }, [])
+
+  useEffect(() => {
+    const onPageHide = () => flushPending()
+    window.addEventListener('pagehide', onPageHide)
+    return () => {
+      window.removeEventListener('pagehide', onPageHide)
+      // В том числе при смене ключа: pending хранит собственный ключ предыдущей формы.
+      flushPending(false)
+    }
+  }, [storageKey, flushPending])
 
   // Load saved data on mount
   useEffect(() => {
@@ -259,6 +292,13 @@ export function useFormPersistence<TData extends object>(config: FormPersistence
       return
     }
 
+    // Новый ключ относится к другой форме/автору и не наследует состояние предыдущего.
+    // oxlint-disable-next-line react/set-state-in-effect
+    setSavedData(null)
+    setSavedAt(null)
+    setHasSavedData(false)
+    setIsDialogOpen(false)
+    setShouldRestore(false)
     try {
       const stored = localStorage.getItem(storageKey)
       if (stored) {
@@ -299,8 +339,12 @@ export function useFormPersistence<TData extends object>(config: FormPersistence
         setIsDialogOpen(true)
       }
     } catch {
-      // Invalid JSON or localStorage error — ignore
-      localStorage.removeItem(storageKey)
+      // localStorage может быть запрещён целиком, включая удаление повреждённой записи.
+      try {
+        localStorage.removeItem(storageKey)
+      } catch {
+        // Недоступное хранилище не блокирует ввод.
+      }
     }
   }, [storageKey, ttl])
 
@@ -308,45 +352,33 @@ export function useFormPersistence<TData extends object>(config: FormPersistence
   const saveValues = useCallback(
     (values: TData) => {
       // Don't save while restore dialog is still showing
-      if (isDialogOpen) {
+      if (isDialogOpen || shouldRestore) {
         return
       }
 
-      // Clear previous timer
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current)
+      try {
+        // Чувствительные поля исключаются до записи pending, включая аварийный flush.
+        const safeValues = excludeFields?.length
+          ? Object.fromEntries(Object.entries(values).filter(([fieldKey]) => !excludeFields.includes(fieldKey)))
+          : values
+        pendingRef.current = { key: storageKey, json: JSON.stringify(safeValues) }
+      } catch {
+        // Несериализуемые значения не должны ломать форму.
+        return
       }
-
-      // Set new deferred save
-      debounceTimerRef.current = setTimeout(() => {
-        try {
-          const now = Date.now()
-          // Чувствительные поля (пароль, номер карты, CVV и т.п.) никогда не попадают в снимок
-          const dataToStore = excludeFields?.length
-            ? (Object.fromEntries(
-              Object.entries(values).filter(([fieldKey]) => !excludeFields.includes(fieldKey)),
-            ) as TData)
-            : values
-          const storedData: StoredData<TData> = {
-            data: dataToStore,
-            savedAt: now,
-            version: 1,
-          }
-          localStorage.setItem(storageKey, JSON.stringify(storedData))
-          setSavedAt(now)
-          setHasSavedData(true)
-        } catch {
-          // localStorage may be full or disabled
-        }
-      }, debounceMs)
+      if (debounceTimerRef.current !== null) { clearTimeout(debounceTimerRef.current) }
+      if (debounceMs <= 0) { flushPending() }
+      else { debounceTimerRef.current = setTimeout(() => flushPending(), debounceMs) }
     },
-    [storageKey, debounceMs, isDialogOpen, excludeFields],
+    [storageKey, debounceMs, isDialogOpen, shouldRestore, excludeFields, flushPending],
   )
 
   // Clear saved data
   const clearSavedData = useCallback(() => {
-    if (debounceTimerRef.current) {
+    pendingRef.current = null
+    if (debounceTimerRef.current !== null) {
       clearTimeout(debounceTimerRef.current)
+      debounceTimerRef.current = null
     }
     try {
       localStorage.removeItem(storageKey)
@@ -369,8 +401,8 @@ export function useFormPersistence<TData extends object>(config: FormPersistence
   // Mark restore as complete (called after form.reset)
   const markRestoreComplete = useCallback(() => {
     setShouldRestore(false)
-    clearSavedData()
-  }, [clearSavedData])
+    // Восстановление ещё не означает успешное сохранение на сервере.
+  }, [])
 
   // Reject restore
   const rejectRestore = useCallback(() => {
@@ -392,11 +424,9 @@ export function useFormPersistence<TData extends object>(config: FormPersistence
     return (
       <Dialog.Root
         open={isDialogOpen}
-        onOpenChange={(details) => {
-          if (!details.open) {
-            closeDialog()
-          }
-        }}
+        initialFocusEl={() => restoreButtonRef.current}
+        closeOnEscape={false}
+        closeOnInteractOutside={false}
       >
         <Portal>
           <Dialog.Backdrop />
@@ -409,16 +439,13 @@ export function useFormPersistence<TData extends object>(config: FormPersistence
                 <Text>{resolvedDialogDescription}</Text>
               </Dialog.Body>
               <Dialog.Footer gap={3}>
-                <Button variant="outline" onClick={rejectRestore}>
+                <Button type="button" variant="outline" onClick={rejectRestore}>
                   {resolvedDiscardButtonText}
                 </Button>
-                <Button colorPalette="blue" onClick={() => acceptRestore()}>
+                <Button ref={restoreButtonRef} type="button" colorPalette="blue" onClick={() => acceptRestore()}>
                   {resolvedRestoreButtonText}
                 </Button>
               </Dialog.Footer>
-              <Dialog.CloseTrigger asChild>
-                <CloseButton size="sm" onClick={rejectRestore} />
-              </Dialog.CloseTrigger>
             </Dialog.Content>
           </Dialog.Positioner>
         </Portal>
@@ -431,7 +458,6 @@ export function useFormPersistence<TData extends object>(config: FormPersistence
     resolvedDialogDescription,
     resolvedRestoreButtonText,
     resolvedDiscardButtonText,
-    closeDialog,
     rejectRestore,
     acceptRestore,
   ])
@@ -444,20 +470,11 @@ export function useFormPersistence<TData extends object>(config: FormPersistence
     }
 
     return (
-      <Button variant="ghost" size="sm" colorPalette="red" onClick={clearSavedData}>
+      <Button type="button" variant="ghost" size="sm" colorPalette="red" onClick={clearSavedData}>
         {resolvedClearDraftButtonText}
       </Button>
     )
   }, [hasSavedData, isDialogOpen, clearSavedData, resolvedClearDraftButtonText])
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current)
-      }
-    }
-  }, [])
 
   return {
     hasSavedData,

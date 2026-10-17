@@ -304,7 +304,7 @@ describe('useFormPersistence', () => {
   })
 
   describe('markRestoreComplete', () => {
-    it('сбрасывает shouldRestore и очищает данные', () => {
+    it('сбрасывает shouldRestore, сохраняя копию до успешной отправки', () => {
       localStorage.setItem(STORAGE_KEY, JSON.stringify({ name: 'Test', email: 'test@test.com' }))
 
       const { result } = renderHook(() => useFormPersistence<TestFormData>({ key: TEST_KEY }), {
@@ -324,7 +324,8 @@ describe('useFormPersistence', () => {
       })
 
       expect(result.current.shouldRestore).toBe(false)
-      expect(result.current.hasSavedData).toBe(false)
+      expect(result.current.hasSavedData).toBe(true)
+      expect(localStorage.getItem(STORAGE_KEY)).not.toBeNull()
     })
   })
 

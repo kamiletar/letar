@@ -87,6 +87,8 @@ export function useFormFeatures<TData extends object>({
   // замыкании подписки: эффект подписки перезапускается при смене `features`, и снимок,
   // взятый заново, оказался бы уже правленными значениями
   const baselineSnapshotRef = useRef<string | null>(null)
+  const restoreInProgressRef = useRef(false)
+  const scheduledDraftRef = useRef(false)
   const excludeFields = persistence?.excludeFields
 
   // Hook persistence (if не вkeyён — используем disabled key)
@@ -113,6 +115,10 @@ export function useFormFeatures<TData extends object>({
       shouldRestore: persistenceResult.shouldRestore,
     }
   }, [persistenceResult.hasSavedData, persistenceResult.isDialogOpen, persistenceResult.shouldRestore])
+
+  useEffect(() => {
+    if (!persistenceResult.shouldRestore) { restoreInProgressRef.current = false }
+  }, [persistenceResult.shouldRestore])
 
   // Черновик, равный исходным значениям формы, — не черновик (правку вернули как было, а старая
   // запись после неудачного сабмита осталась). Удаляем молча, диалог не открываем.
@@ -239,12 +245,15 @@ export function useFormFeatures<TData extends object>({
           // данные, равные исходным. Пока диалог восстановления открыт, черновик ещё не принят
           // пользователем и шум стора его удалять не вправе
           const draft = draftStateRef.current
-          if (draft.hasSavedData && !draft.isDialogOpen && !draft.shouldRestore) {
+          if ((draft.hasSavedData || scheduledDraftRef.current) && !draft.isDialogOpen && !draft.shouldRestore) {
+            scheduledDraftRef.current = false
             persistenceResult.clearSavedData()
           }
           return
         }
 
+        const draft = draftStateRef.current
+        if (!draft.isDialogOpen && !draft.shouldRestore) { scheduledDraftRef.current = true }
         persistenceResult.saveValues(safeValues)
       })
 
@@ -261,9 +270,14 @@ export function useFormFeatures<TData extends object>({
   const restoreFormData = useCallback(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (form: { setFieldValue: (key: string, value: any) => void }) => {
-      if (!isPersistenceEnabled || !persistenceResult.shouldRestore || !persistenceResult.savedData) {
+      if (
+        !isPersistenceEnabled || !persistenceResult.shouldRestore || !persistenceResult.savedData
+        || restoreInProgressRef.current
+      ) {
         return
       }
+      // Уведомления стора во время применения полей могут синхронно перезапустить эффект.
+      restoreInProgressRef.current = true
 
       // Применяем сохранённые значения
       const dataToRestore = persistenceResult.savedData as Record<string, unknown>
@@ -271,10 +285,7 @@ export function useFormFeatures<TData extends object>({
         form.setFieldValue(key, value)
       }
 
-      // Отмечаем восстановление как завершённое after тика
-      setTimeout(() => {
-        persistenceResult.markRestoreComplete()
-      }, 0)
+      persistenceResult.markRestoreComplete()
     },
     [isPersistenceEnabled, persistenceResult],
   )

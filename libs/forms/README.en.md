@@ -59,6 +59,15 @@ function MyForm() {
 
 ## Features
 
+### Recoverable drafts
+
+Use `<Form persistence={{ key: 'author-record-id', excludeFields: ['password'] }}>` for local
+JSON drafts. Since v2.40.1, restoring keeps the copy for another reload until successful submission,
+explicit discard, reverting to initial values, or TTL expiry. Pending writes flush on page exit and
+unmount; `debounceMs: 0` writes synchronously. The restore dialog focuses Restore and requires an
+explicit choice. Include author and record IDs in editor keys. File contents and unavailable
+localStorage are outside this recovery mechanism.
+
 ### 40+ Field Components
 
 ```tsx
