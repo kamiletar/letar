@@ -972,15 +972,14 @@ for app in $AFFECTED_APPS; do
   # расшифрованном $ENV_FILE_NAME планировщик поднимется, но не будет тикать по расписанию
   # (autoSchedule=false, дефолт для безопасности dev). На проде это молчаливая деградация —
   # именно так и произошло с studio 2026-08-13 (сутки без единого прогона, никто не заметил).
-  # Блокируем деплой заранее, а не полагаемся на то, что кто-то вспомнит проверить вручную.
+  # Блокируем отсутствие флага; явное отключение допускается только с указанной причиной.
   # Только для прода: .env.staging.enc пока не заведён под этот флаг ни у одного приложения
   # (studio — единственный staging-пример с src/jobs/, и там JOBS_ENABLED в staging нет) —
   # включать гейт и для staging было бы расширением сверх того, что реально настроено.
   if [ "$STAGING" != true ] && [ -d "$APP_DIR/src/jobs" ]; then
-    if ! grep -q '^JOBS_ENABLED=true$' "$APP_DIR/$ENV_FILE_NAME" 2>/dev/null; then
-      echo -e "${RED}❌ Деплой остановлен: у apps/${app} есть src/jobs/, но JOBS_ENABLED не задан в${NC}"
-      echo -e "${RED}   $ENV_FILE_NAME — задачи молча не будут тикать по расписанию (PLAN-INFRA-4.md §75,${NC}"
-      echo -e "${RED}   инцидент studio 2026-08-13). Добавь: scripts/sops-env-set.sh ${app} docker JOBS_ENABLED true${NC}"
+    source "$SCRIPT_DIR/scripts/lib/check-jobs-env.sh"
+    if ! check_jobs_env "$APP_DIR/$ENV_FILE_NAME"; then
+      echo -e "${RED}❌ Деплой apps/${app} остановлен: проверь JOBS_ENABLED в $ENV_FILE_NAME${NC}"
       cd "$WORKSPACE_ROOT"
       FAILED_APPS+=("$app")
       echo ""
