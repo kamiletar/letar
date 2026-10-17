@@ -23,7 +23,7 @@ nx e2e form-develop-app-e2e -- --grep="Schedule"     # По названию
 | `example.spec.ts`                     | Навигация, заголовки страниц                                                            |
 | `form-submit.spec.ts`                 | CRUD операции с рецептами                                                               |
 | `fields-demo.spec.ts`                 | Все типы полей (String, Number, Date, Select, Combobox, Schedule…)                      |
-| `persistence-demo.spec.ts`            | localStorage сохранение черновиков                                                      |
+| `persistence-demo.spec.ts`            | localStorage сохранение черновиков; вручную: restore → reload → restore, явный отказ    |
 | `pin-input-demo.spec.ts`              | PinInput компонент                                                                      |
 | `slider-demo.spec.ts`                 | Slider компонент                                                                        |
 | `rating-demo.spec.ts`                 | Rating компонент                                                                        |

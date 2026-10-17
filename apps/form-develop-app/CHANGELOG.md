@@ -2,6 +2,10 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## Unreleased
+
+- Сценарий `/persistence-demo`: повторный reload после восстановления и явный выбор в диалоге (FM-027).
+
 ## [0.1.27] - 2026-10-13
 
 ### Added

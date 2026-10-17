@@ -103,9 +103,10 @@ export default function PersistenceDemoPage() {
           <Text>1. Fill in some fields in the form above</Text>
           <Text>2. Refresh the page (F5 or Ctrl+R)</Text>
           <Text>3. A dialog will appear asking to restore your data</Text>
-          <Text>4. Click "Restore" to continue where you left off</Text>
+          <Text>4. Click "Restore", then refresh again: the draft is still available until successful submit</Text>
           <Text>5. Click "Start fresh" to discard saved data</Text>
           <Text>6. On successful submit, saved data is automatically cleared</Text>
+          <Text>Pending changes are also saved when leaving the page. The dialog requires an explicit choice.</Text>
         </VStack>
       </Box>
     </DemoPageLayout>
