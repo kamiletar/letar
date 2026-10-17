@@ -42,6 +42,13 @@ The complete sandbox example, read directly from the `form-develop-app` source a
 
 ## Configuration
 
+With the Chakra skin v2.40.1, restoring keeps the local copy until successful submission, explicit
+discard, reverting to initial values, or TTL expiry. Restore and reload again to verify it.
+The dialog requires an explicit choice; Escape and outside clicks do not discard data. Pending
+changes flush on `pagehide`/unmount; `debounceMs: 0` writes synchronously. Editor keys must include
+the author and record IDs. JSON drafts do not preserve file contents; unavailable localStorage
+cannot provide recovery.
+
 ```tsx
 persistence={{
   key: 'my-form',              // localStorage key (required)

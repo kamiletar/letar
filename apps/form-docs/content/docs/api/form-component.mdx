@@ -57,6 +57,10 @@ See [Field Watchers](/docs/guides/field-watchers) for patterns.
 
 ### persistence
 
+Chakra v2.40.1 keeps restored copies until successful submission or explicit discard (also clears
+on reverting to initial values or TTL expiry). Pending writes flush on `pagehide`/unmount;
+`debounceMs: 0` writes synchronously. Use author/record-scoped keys for editors.
+
 ```tsx
 <Form
   schema={Schema}
