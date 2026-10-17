@@ -946,7 +946,7 @@
     },
     "apps/mugcup-e2e": {
       "name": "@letar/mugcup-e2e",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@letar/e2e-testing": "workspace:*",
       },
@@ -1246,7 +1246,7 @@
     },
     "libs/e2e-testing": {
       "name": "@letar/e2e-testing",
-      "version": "0.2.0",
+      "version": "0.2.1",
     },
     "libs/eager-jsx-check": {
       "name": "@letar/eager-jsx-check",

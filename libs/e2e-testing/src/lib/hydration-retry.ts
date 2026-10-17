@@ -55,9 +55,11 @@ export async function fillWithHydrationRetry(
   value: string,
   timeoutMs = 10_000,
 ): Promise<void> {
+  // Вложенные ожидания должны оставлять общий бюджет для повторного fill.
+  const attemptTimeoutMs = Math.min(1_000, timeoutMs / 4)
   await expect(async () => {
-    await locator.fill(value)
-    await expect(locator).toHaveValue(value)
+    await locator.fill(value, { timeout: attemptTimeoutMs })
+    await expect(locator).toHaveValue(value, { timeout: attemptTimeoutMs })
   }).toPass({ timeout: timeoutMs })
 }
 
