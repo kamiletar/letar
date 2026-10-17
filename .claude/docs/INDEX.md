@@ -106,6 +106,8 @@
 
 ## Формы, UI, компоненты
 
+- [authoring-save-and-media-ux](/.claude/docs/authoring-save-and-media-ux.md) — при создании редактора: продолжение после сохранения, аудитория, авторские переходы, общий Dropzone для обложки/аудио и сохранность текущих правок
+
 - [forms](/.claude/docs/forms.md) ⭐
 - [react-duplicate-responsive-dom](/.claude/docs/react-duplicate-responsive-dom.md) ⚠️ два JSX-блока на `display={{ base:/md: }}` с одинаковым интерактивным контентом — дубль в DOM, не адаптивность
 - [chakra-flexwrap-column-direction-overflow](/.claude/docs/chakra-flexwrap-column-direction-overflow.md) ⚠️ `flexWrap="wrap"` безусловный рядом с `direction={{ base: 'column', sm: 'row' }}` — на mobile `wrap` идёт по cross-axis, при `column` это горизонталь, лишние элементы уезжают вбок, а не вниз; фикс — `flexWrap={{ base: 'nowrap', sm: 'wrap' }}`
