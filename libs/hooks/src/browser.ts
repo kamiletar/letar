@@ -1,3 +1,4 @@
+export { createBlobStore, shrinkImage, withBlobAttachments } from './lib/browser/offline-images'
 export { prefersReducedMotion } from './lib/browser/prefers-reduced-motion'
 export { scrollIntoViewSafe } from './lib/browser/scroll-into-view-safe'
 export { useClientOrigin } from './lib/browser/use-client-origin'
