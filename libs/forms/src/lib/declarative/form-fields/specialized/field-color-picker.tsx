@@ -3,8 +3,7 @@
 import { ColorPicker, Field, HStack, parseColor, Portal } from '@chakra-ui/react'
 import type { ReactElement } from 'react'
 import type { BaseFieldProps, FieldTooltipMeta } from '../../types'
-import { createField, FieldError } from '../base'
-import { FieldTooltip } from '../base/field-tooltip'
+import { createField, FieldError, SelectionFieldLabel } from '../base'
 
 /**
  * Props for ColorPicker field
@@ -122,17 +121,7 @@ export const FieldColorPicker = createField<ColorPickerFieldProps, string>({
 
           {resolved.label && (
             <ColorPicker.Label>
-              {resolved.tooltip
-                ? (
-                  <HStack gap={1}>
-                    <span>{resolved.label}</span>
-                    <FieldTooltip {...resolved.tooltip} />
-                  </HStack>
-                )
-                : (
-                  resolved.label
-                )}
-              {resolved.required && <Field.RequiredIndicator />}
+              <SelectionFieldLabel label={resolved.label} tooltip={resolved.tooltip} required={resolved.required} />
             </ColorPicker.Label>
           )}
 

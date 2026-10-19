@@ -89,4 +89,21 @@ describe('FieldRating', () => {
       expect(group).toHaveAttribute('data-readonly', '')
     })
   })
+
+  describe('layout', () => {
+    it('подпись над звёздами в колонке, размером и весом как у остальных подписей', () => {
+      render(
+        <TestWrapper>
+          <Form initialValue={{ rating: 3 }} onSubmit={vi.fn()}>
+            <Form.Field.Rating name="rating" label="Рейтинг" />
+          </Form>
+        </TestWrapper>,
+      )
+
+      const label = screen.getByText('Рейтинг')
+      expect(getComputedStyle(label.parentElement as HTMLElement).flexDirection).toBe('column')
+      expect(label.className).toContain('chakra-rating-group__label')
+      expect(getComputedStyle(label).fontWeight).toBe('var(--chakra-font-weights-medium)')
+    })
+  })
 })

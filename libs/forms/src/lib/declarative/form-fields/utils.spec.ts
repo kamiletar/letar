@@ -19,4 +19,9 @@ describe('camelCaseToLabel', () => {
   it('должен обработать пустую строку', () => {
     expect(camelCaseToLabel('')).toBe('')
   })
+
+  it('значение enum SCREAMING_SNAKE не рассыпается по буквам («D R A F T»)', () => {
+    expect(camelCaseToLabel('DRAFT')).toBe('Draft')
+    expect(camelCaseToLabel('IN_PROGRESS')).toBe('In Progress')
+  })
 })

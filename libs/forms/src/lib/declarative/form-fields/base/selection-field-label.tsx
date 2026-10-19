@@ -1,6 +1,6 @@
 'use client'
 
-import { Field, HStack } from '@chakra-ui/react'
+import { Field, Flex } from '@chakra-ui/react'
 import type { ReactElement, ReactNode } from 'react'
 import type { FieldTooltipMeta } from '../../types'
 import { FieldTooltip } from './field-tooltip'
@@ -33,17 +33,21 @@ export interface SelectionFieldLabelProps {
  * ```
  */
 export function SelectionFieldLabel({ label, tooltip, required }: SelectionFieldLabelProps): ReactElement {
+  // Собственный inline-flex с gap: у Select/Combobox/Tags/ColorPicker Label — block (у Field.Label — flex с gap),
+  // а у Field.Select внешняя подпись уже flex. Отступ внутри обёртки не зависит от родителя и не удваивается.
   return (
-    <>
-      {tooltip
-        ? (
-          <HStack gap={1}>
-            <span>{label}</span>
-            <FieldTooltip {...tooltip} />
-          </HStack>
-        )
-        : label}
-      {required && <Field.RequiredIndicator />}
-    </>
+    <Flex asChild display="inline-flex" alignItems="center" gap={1}>
+      <span>
+        {tooltip
+          ? (
+            <>
+              <span>{label}</span>
+              <FieldTooltip {...tooltip} />
+            </>
+          )
+          : label}
+        {required && <Field.RequiredIndicator />}
+      </span>
+    </Flex>
   )
 }

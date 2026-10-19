@@ -1,5 +1,6 @@
 'use client'
 
+import { camelCaseToLabel as camelCaseToLabelCore } from '@letar/forms-core/utils'
 import type { ReactElement } from 'react'
 import { useFormGroup } from '../../../form-group'
 import { resolveConventionalRegistryType } from '../../conventional-registry-type'
@@ -180,12 +181,10 @@ function getSchemaAtPath(schema: any, path: string): any {
  * Convert camelCase to readable label
  * @example "firstName" → "First Name"
  * @example "createdAt" → "Created At"
+ * @example "DRAFT" → "Draft" (значение enum), "IN_PROGRESS" → "In Progress"
  */
 export function camelCaseToLabel(str: string): string {
-  return str
-    .replace(/([A-Z])/g, ' $1') // Add space before capitals
-    .replace(/^./, (s) => s.toUpperCase()) // Capitalize first letter
-    .trim()
+  return camelCaseToLabelCore(str)
 }
 
 /**

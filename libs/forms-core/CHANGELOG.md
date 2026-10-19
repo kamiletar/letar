@@ -4,6 +4,14 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.31.0] - 2026-10-19
+
+### Добавлено
+
+- `camelCaseToLabel` в `@letar/forms-core/utils` — подпись из идентификатора. Понимает `camelCase`,
+  `SCREAMING_SNAKE` (значения enum: `DRAFT` → «Draft», `IN_PROGRESS` → «In Progress»), `snake_case` и `kebab-case`;
+  аббревиатура внутри camelCase остаётся целой (`userID` → «User ID»).
+
 ## [0.30.1] - 2026-10-19
 
 ### Изменено

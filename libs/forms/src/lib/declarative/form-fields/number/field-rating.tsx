@@ -83,12 +83,16 @@ export const FieldRating = createField<RatingFieldProps, number>({
           allowHalf={allowHalf}
           size={size}
           colorPalette={colorPalette}
+          // По умолчанию Root — строка (подпись и звёзды рядом); поле формы — колонка, как у Slider
+          flexDirection="column"
+          alignItems="flex-start"
+          gap={1.5}
           disabled={resolved.disabled}
           readOnly={resolved.readOnly}
           data-field-name={fullPath}
         >
           {resolved.label && (
-            <RatingGroup.Label>
+            <RatingGroup.Label textStyle="sm" fontWeight="medium">
               {resolved.tooltip
                 ? (
                   <HStack gap={1}>
