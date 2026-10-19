@@ -164,7 +164,9 @@ function main() {
   if (process.env.GITHUB_OUTPUT) {
     fs.appendFileSync(
       process.env.GITHUB_OUTPUT,
-      `dist=${pkg.dir}/dist\nname=${built.name}\nversion=${built.version}\ntag=${tag}\n`,
+      `dist=${pkg.dir}/dist\nname=${built.name}\nversion=${built.version}\ntag=${tag}\ndisttag=${
+        built.publishConfig?.tag ?? 'latest'
+      }\n`,
     )
   }
 }
