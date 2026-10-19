@@ -157,7 +157,8 @@
           "node ../../scripts/write-publish-package-json.mjs",
           "cp README.md dist/README.md",
           "cp README.ru.md dist/README.ru.md",
-          "cp CHANGELOG.md dist/ 2>/dev/null || true"
+          "cp CHANGELOG.md dist/ 2>/dev/null || true",
+          "cp LICENSE dist/"
         ],
         "cwd": "libs/form-mcp",
         "parallel": false

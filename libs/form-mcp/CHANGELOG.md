@@ -1,5 +1,12 @@
 # Changelog — @letar/form-mcp
 
+## 2.5.4 (2026-10-19)
+
+### Changed
+
+- Пакет — только CLI (`form-mcp`): из `package.json` убраны `main`, `types` и `exports["."]`, указывавшие на
+  несуществующий `index.js`. В tarball добавлен `LICENSE`. `publishConfig.tag` — `next`.
+
 ## 2.5.3 (2026-10-13)
 
 ### Added
