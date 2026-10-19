@@ -26,11 +26,11 @@ describe('Form.DebugValues — редакция чувствительных п�
     )
 
     await waitFor(() => {
-      expect(screen.getByText('Иван')).toBeInTheDocument()
+      expect(screen.getByText(/Иван/)).toBeInTheDocument()
     })
 
-    expect(screen.queryByText('sk-real-secret')).not.toBeInTheDocument()
-    expect(screen.getByText('••••••••')).toBeInTheDocument()
+    expect(screen.queryByText(/sk-real-secret/)).not.toBeInTheDocument()
+    expect(screen.getByText(/••••••••/)).toBeInTheDocument()
   })
 
   it('sensitive: false — значение видно в дебаг-инспекторе как есть', async () => {
@@ -49,7 +49,40 @@ describe('Form.DebugValues — редакция чувствительных п�
     )
 
     await waitFor(() => {
-      expect(screen.getByText('not-actually-secret')).toBeInTheDocument()
+      expect(screen.getByText(/not-actually-secret/)).toBeInTheDocument()
     })
+  })
+
+  it('простой вариант — это <pre> с JSON значений, `collapsed` не ломает', async () => {
+    const { container } = render(
+      <TestWrapper>
+        <Form initialValue={{ name: 'Иван', tags: ['a', 'b'] }} onSubmit={vi.fn()}>
+          <Form.Field.String name="name" label="Имя" />
+          <Form.DebugValues showInProduction collapsed={0} title="Значения" />
+        </Form>
+      </TestWrapper>,
+    )
+
+    await waitFor(() => {
+      expect(container.querySelector('pre')).not.toBeNull()
+    })
+    const pre = container.querySelector('pre') as HTMLElement
+    expect(JSON.parse(pre.textContent ?? '')).toEqual({ name: 'Иван', tags: ['a', 'b'] })
+    expect(screen.getByText('Значения')).toBeInTheDocument()
+  })
+
+  it('проп debug у формы тоже рисует простой <pre>, без просмотрщика JSON', async () => {
+    const { container } = render(
+      <TestWrapper>
+        <Form initialValue={{ name: 'Иван' }} onSubmit={vi.fn()} debug="force">
+          <Form.Field.String name="name" label="Имя" />
+        </Form>
+      </TestWrapper>,
+    )
+
+    await waitFor(() => {
+      expect(container.querySelector('pre')).not.toBeNull()
+    })
+    expect(container.querySelector('pre')?.textContent).toContain('"name": "Иван"')
   })
 })

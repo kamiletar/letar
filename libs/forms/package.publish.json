@@ -41,6 +41,26 @@
       "types": "./fields/specialized.d.ts",
       "import": "./fields/specialized.js"
     },
+    "./rich-text": {
+      "types": "./rich-text.d.ts",
+      "import": "./rich-text.js"
+    },
+    "./data-grid": {
+      "types": "./data-grid.d.ts",
+      "import": "./data-grid.js"
+    },
+    "./table-editor": {
+      "types": "./table-editor.d.ts",
+      "import": "./table-editor.js"
+    },
+    "./sortable": {
+      "types": "./sortable.d.ts",
+      "import": "./sortable.js"
+    },
+    "./debug": {
+      "types": "./debug.d.ts",
+      "import": "./debug.js"
+    },
     "./server-errors": {
       "types": "./server-errors.d.ts",
       "import": "./server-errors.js"

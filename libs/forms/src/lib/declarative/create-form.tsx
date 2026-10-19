@@ -92,7 +92,7 @@ interface CreateFormOptions<
   TLazySelects extends LazyRecord = LazyRecord,
   TLazyComboboxes extends LazyRecord = LazyRecord,
   TLazyListboxes extends LazyRecord = LazyRecord,
-  TExtraFields extends ComponentRecord = {},
+  TExtraFields extends ComponentRecord = Record<never, never>,
 > {
   /**
    * Дополнительные поля в `Form.Field`: свои компоненты приложения и подключаемые поля библиотеки, которые ядро
@@ -300,7 +300,7 @@ export interface ExtendedForm<
   TSelectKey extends string = string,
   TComboboxKey extends string = string,
   TListboxKey extends string = string,
-  TExtraFields extends ComponentRecord = {},
+  TExtraFields extends ComponentRecord = Record<never, never>,
 > {
   <TData extends object>(props: FormPropsWithApi<TData>): ReactElement
   Group: ExtendedFormGroup
@@ -384,7 +384,7 @@ export function createForm<
   TLazySelects extends LazyRecord = LazyRecord,
   TLazyComboboxes extends LazyRecord = LazyRecord,
   TLazyListboxes extends LazyRecord = LazyRecord,
-  TExtraFields extends ComponentRecord = {},
+  TExtraFields extends ComponentRecord = Record<never, never>,
 >(
   options: CreateFormOptions<
     TExtraSelects,
