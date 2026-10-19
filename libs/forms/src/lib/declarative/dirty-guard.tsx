@@ -2,7 +2,6 @@
 
 import { resolveStaticFormText } from '@letar/forms-core/i18n'
 import { useFormI18n, useFormPendingRegistry } from '@letar/forms-react'
-import { useRouter } from 'next/navigation'
 import {
   createContext,
   type ReactElement,
@@ -181,9 +180,13 @@ function DirtyGuardCore({
   const dialogDescription = resolveText('dialogDescription', dialogDescriptionProp)
   const confirmText = resolveText('confirmText', confirmTextProp)
   const cancelText = resolveText('cancelText', cancelTextProp)
-  const router = useRouter()
   const [showDialog, setShowDialog] = useState(false)
+  // Перехваченная ссылка и её href: после подтверждения клик по ней повторяется (мягкую навигацию
+  // выполнит сам `<Link>` фреймворка, обычный `<a>` — браузер), поэтому защита не зависит от роутера.
+  const pendingAnchor = useRef<HTMLAnchorElement | null>(null)
   const pendingHref = useRef<string | null>(null)
+  // Повторный клик после подтверждения должен пройти мимо перехватчика, иначе диалог откроется снова
+  const bypassNext = useRef(false)
 
   // Оптимистичное действие поля, ждущее сервера, — тоже несохранённое изменение (§16.7): выбор ещё не в форме
   const pendingRegistry = useFormPendingRegistry()
@@ -225,6 +228,12 @@ function DirtyGuardCore({
     }
 
     const handleClick = (event: MouseEvent) => {
+      // Повторный клик после подтверждения — пропускаем
+      if (bypassNext.current) {
+        bypassNext.current = false
+        return
+      }
+
       // Check if form is dirty
       if (!checkIsDirty()) {
         return
@@ -273,6 +282,7 @@ function DirtyGuardCore({
       // Prevent navigation and show dialog
       event.preventDefault()
       event.stopPropagation()
+      pendingAnchor.current = anchor
       pendingHref.current = href
       setShowDialog(true)
     }
@@ -285,17 +295,30 @@ function DirtyGuardCore({
   // Confirm navigation
   const handleConfirm = useCallback(() => {
     setShowDialog(false)
-    if (pendingHref.current) {
-      // Reset dirty state before navigation to avoid re-triggering
-      form.reset()
-      router.push(pendingHref.current)
-      pendingHref.current = null
+    const anchor = pendingAnchor.current
+    const href = pendingHref.current
+    pendingAnchor.current = null
+    pendingHref.current = null
+    if (!href) {
+      return
     }
-  }, [form, router])
+    // Reset dirty state before navigation to avoid re-triggering
+    form.reset()
+    if (anchor?.isConnected) {
+      bypassNext.current = true
+      anchor.click()
+      // Обработчик сбрасывает флаг сам; если клик до него не дошёл — не оставляем флаг висеть
+      bypassNext.current = false
+    } else {
+      // Ссылка успела исчезнуть из DOM (перерисовка) — обычный переход по сохранённому адресу
+      window.location.assign(href)
+    }
+  }, [form])
 
   // Cancel navigation
   const handleCancel = useCallback(() => {
     setShowDialog(false)
+    pendingAnchor.current = null
     pendingHref.current = null
   }, [])
 

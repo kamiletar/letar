@@ -6,10 +6,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { createForm } from './create-form'
 import { resolveDirtyGuardConfig } from './dirty-guard'
 
-vi.mock('next/navigation', () => ({
-  useRouter: () => ({ push: vi.fn() }),
-}))
-
 const Wrapper = ({ children }: { children: ReactNode }) => (
   <ChakraProvider value={defaultSystem}>{children}</ChakraProvider>
 )

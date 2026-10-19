@@ -81,8 +81,6 @@ const common: Options = {
     // DataGrid (optional)
     '@tanstack/react-table',
     '@tanstack/react-virtual',
-    // Next.js
-    'next/navigation',
   ],
   jsx: 'automatic',
   target: 'es2022',

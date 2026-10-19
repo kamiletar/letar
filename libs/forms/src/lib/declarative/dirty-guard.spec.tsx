@@ -5,18 +5,10 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { ReactNode } from 'react'
 import { createElement } from 'react'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { DirtyGuard } from './dirty-guard'
 import { DeclarativeFormContext } from './form-context'
 import type { DeclarativeFormContextValue } from './types'
-
-// Мок Next.js router
-const mockPush = vi.fn()
-vi.mock('next/navigation', () => ({
-  useRouter: () => ({
-    push: mockPush,
-  }),
-}))
 
 // Обёртка для тестов с Chakra UI
 const TestWrapper = ({ children }: { children: ReactNode }) => (
@@ -40,9 +32,21 @@ function createContextWrapper(context: DeclarativeFormContextValue) {
     createElement(TestWrapper, null, createElement(DeclarativeFormContext.Provider, { value: context }, children))
 }
 
+// jsdom не умеет переходить по адресам: подменяем window.location, чтобы поймать assign
+const locationAssign = vi.fn()
+const originalLocation = window.location
+
 describe('DirtyGuard', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    Object.defineProperty(window, 'location', {
+      configurable: true,
+      value: { ...originalLocation, assign: locationAssign },
+    })
+  })
+
+  afterEach(() => {
+    Object.defineProperty(window, 'location', { configurable: true, value: originalLocation })
   })
 
   describe('rendering', () => {
@@ -206,6 +210,7 @@ describe('DirtyGuard', () => {
     it('закрывает диалог при нажатии "Stay"', async () => {
       const context = createMockFormContext(true)
       const wrapper = createContextWrapper(context)
+      let linkClicks = 0
 
       render(
         <div>
@@ -214,6 +219,12 @@ describe('DirtyGuard', () => {
         </div>,
         { wrapper },
       )
+
+      // Клик, дошедший до самой ссылки (не перехваченный охранником), считаем и гасим переход
+      screen.getByText('Go to other page').addEventListener('click', (event) => {
+        linkClicks += 1
+        event.preventDefault()
+      })
 
       // Кликаем на ссылку чтобы показать диалог
       await userEvent.click(screen.getByText('Go to other page'))
@@ -230,11 +241,48 @@ describe('DirtyGuard', () => {
         expect(screen.queryByText('Unsaved changes')).not.toBeInTheDocument()
       })
 
-      // Навигация не должна произойти
-      expect(mockPush).not.toHaveBeenCalled()
+      // Повторного клика по ссылке (навигации) не должно быть
+      expect(linkClicks).toBe(0)
     })
 
-    it('выполняет навигацию при нажатии "Leave"', async () => {
+    it('повторяет клик по ссылке при нажатии "Leave" и не открывает диалог снова', async () => {
+      const context = createMockFormContext(true)
+      const wrapper = createContextWrapper(context)
+      let linkClicks = 0
+
+      render(
+        <div>
+          <DirtyGuard />
+          <a href="/other-page">Go to other page</a>
+        </div>,
+        { wrapper },
+      )
+
+      // Клик, дошедший до самой ссылки (не перехваченный охранником), считаем и гасим переход
+      const link = screen.getByText('Go to other page')
+      link.addEventListener('click', (event) => {
+        linkClicks += 1
+        event.preventDefault()
+      })
+
+      // Первый клик перехвачен: до ссылки не дошёл, диалог открыт
+      await userEvent.click(link)
+      await waitFor(() => {
+        expect(screen.getByText('Unsaved changes')).toBeInTheDocument()
+      })
+      expect(linkClicks).toBe(0)
+
+      // "Leave": клик по ссылке повторён ровно один раз, диалог закрыт и не открывается снова
+      await userEvent.click(screen.getByText('Leave'))
+      await waitFor(() => {
+        expect(screen.queryByText('Unsaved changes')).not.toBeInTheDocument()
+      })
+      expect(linkClicks).toBe(1)
+      expect(context.form.reset).toHaveBeenCalledTimes(1)
+      expect(locationAssign).not.toHaveBeenCalled()
+    })
+
+    it('ссылка пропала из DOM — переход через window.location.assign по сохранённому href', async () => {
       const context = createMockFormContext(true)
       const wrapper = createContextWrapper(context)
 
@@ -246,18 +294,19 @@ describe('DirtyGuard', () => {
         { wrapper },
       )
 
-      // Кликаем на ссылку
-      await userEvent.click(screen.getByText('Go to other page'))
-
+      const link = screen.getByText('Go to other page')
+      await userEvent.click(link)
       await waitFor(() => {
         expect(screen.getByText('Unsaved changes')).toBeInTheDocument()
       })
 
-      // Кликаем "Leave"
+      // Ссылку убрали из DOM, пока висел диалог
+      link.remove()
+
       await userEvent.click(screen.getByText('Leave'))
 
-      // Навигация должна произойти
-      expect(mockPush).toHaveBeenCalledWith('/other-page')
+      expect(locationAssign).toHaveBeenCalledTimes(1)
+      expect(locationAssign).toHaveBeenCalledWith('/other-page')
     })
   })
 
