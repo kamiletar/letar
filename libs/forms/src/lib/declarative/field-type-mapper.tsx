@@ -54,6 +54,7 @@ import { FieldMaskedInput } from './form-fields/text/field-masked-input'
 
 import { useConventionalRegistryType } from './conventional-registry-type'
 import { camelCaseToLabel } from './form-fields/auto/field-auto'
+import { type FormRegistry, useFormRegistry } from './form-registry-context'
 import { RegistryField } from './registry-field'
 import { type RelationOption, useRelationFieldContext } from './relation-field-provider'
 
@@ -103,6 +104,11 @@ export interface FieldRenderProps {
    * Set automatically via SchemaFieldWithRelations
    */
   relationOptions?: RelationOption[]
+  /**
+   * Реестр `createForm` текущей формы (`useFormRegistry()` вызывающего компонента). Через него mapper находит
+   * подключаемые поля вроде `Field.RichText`; `null`/`undefined` — форма не из `createForm`, работает встроенное поле.
+   */
+  registry?: FormRegistry | null
 }
 
 /**
@@ -286,6 +292,7 @@ export function renderFieldByType(type: FieldComponentType, props: FieldRenderPr
     constraints,
     fieldProps: rawFieldProps = {},
     relationOptions,
+    registry,
   } = props
 
   // `relation` — служебная конфигурация привязки к справочнику, а не проп поля: в поле не передаётся
@@ -335,8 +342,11 @@ export function renderFieldByType(type: FieldComponentType, props: FieldRenderPr
       return <FieldPasswordStrength key={name} {...baseProps} {...fieldProps} />
     case 'editable':
       return <FieldEditable key={name} {...baseProps} {...fieldProps} />
-    case 'richText':
-      return <FieldRichText key={name} {...baseProps} {...fieldProps} />
+    case 'richText': {
+      // Поле из `extraFields` createForm приоритетнее встроенного; встроенный запасной вариант уйдёт в 3.0.0
+      const RichText = registry?.Field?.RichText ?? FieldRichText
+      return <RichText key={name} {...baseProps} {...fieldProps} />
+    }
 
     // Number fields
     case 'number':
@@ -532,6 +542,8 @@ export function renderSchemaField(
   relationFieldProps?: Record<string, unknown>,
   /** Ключ реестра, подобранный по имени модели/enum (§17.9): вместо типа по Zod-схеме */
   conventionalType?: FieldComponentType,
+  /** Реестр `createForm`: для подключаемых полей (`Field.RichText`) */
+  registry?: FormRegistry | null,
 ): ReactElement {
   const fieldType = conventionalType ?? resolveFieldType(field)
 
@@ -546,6 +558,7 @@ export function renderSchemaField(
     // Свои `fieldProps` поля сильнее общих из `RelationConfig.fieldProps`
     fieldProps: relationFieldProps ? { ...relationFieldProps, ...field.ui?.fieldProps } : field.ui?.fieldProps,
     relationOptions,
+    registry,
   })
 }
 
@@ -584,6 +597,7 @@ export function SchemaFieldWithRelations({ field }: { field: SchemaFieldInfo }):
   const relationContext = useRelationFieldContext()
   // Автоподбор `Select.<Модель|Enum>` из реестра createForm (§17.9); нет компонента — прежний путь
   const conventionalType = useConventionalRegistryType(field.ui)
+  const registry = useFormRegistry()
 
   // Check if relation config exists in fieldProps
   const relationConfig = field.ui?.fieldProps?.relation as RelationFieldConfig | undefined
@@ -599,5 +613,5 @@ export function SchemaFieldWithRelations({ field }: { field: SchemaFieldInfo }):
     relationFieldProps = relationContext.getFieldProps(relationConfig.model)
   }
 
-  return renderSchemaField(field, relationOptions, relationFieldProps, conventionalType)
+  return renderSchemaField(field, relationOptions, relationFieldProps, conventionalType, registry)
 }

@@ -56,4 +56,21 @@ describe('generic createForm и FormRegistryCheck (E8)', () => {
     const check: FormRegistryCheck<typeof erased, never> = true
     expect(check).toBe(true)
   })
+
+  it('extraFields: ключ и пропсы поля выводятся из значения', () => {
+    const Rich: ComponentType<{ name: string; toolbar?: boolean }> = () => null
+    const WithRich = createForm({ extraFields: { RichText: Rich } })
+
+    expectTypeOf(WithRich.Field).toHaveProperty('RichText')
+    // Базовые поля на месте
+    expectTypeOf(WithRich.Field).toHaveProperty('String')
+    expectTypeOf(AppForm.Field).toHaveProperty('String')
+
+    // Пропсы подключённого поля — свои (`toolbar` нет у `RichTextFieldProps` ядра), а неверный тип пропса — ошибка.
+    // ⚠️ Фаза A: индексная сигнатура базового набора остаётся, поэтому лишний проп у ключа, которого нет в ядре,
+    // пока не ловится; строгость придёт в 3.0.0
+    void (<WithRich.Field.RichText name="body" toolbar />)
+    // @ts-expect-error — `name` должен быть строкой
+    void <WithRich.Field.RichText name={1} />
+  })
 })
