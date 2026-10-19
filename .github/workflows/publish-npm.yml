@@ -178,6 +178,28 @@ jobs:
           name: npm-dist
           path: publish-dist
 
+      # Публикующий job исполняет только `npm publish`: перед ним сверяем присланный dist с тем, что проверил build.
+      # Скрипты жизненного цикла в манифесте запрещены, а `--ignore-scripts` ниже отключает их и на случай подмены.
+      - name: Проверить манифест dist
+        env:
+          EXPECTED_NAME: ${{ needs.build.outputs.name }}
+          EXPECTED_VERSION: ${{ needs.build.outputs.version }}
+          DIST_TAG: ${{ needs.build.outputs.disttag }}
+        run: |
+          node - <<'JS'
+          const pj = JSON.parse(require('fs').readFileSync('publish-dist/package.json', 'utf8'))
+          const bad = []
+          if (pj.name !== process.env.EXPECTED_NAME || !/^@letar\/[a-z0-9-]+$/.test(pj.name)) bad.push('имя ' + pj.name)
+          if (pj.version !== process.env.EXPECTED_VERSION) bad.push('версия ' + pj.version)
+          if (pj.scripts && Object.keys(pj.scripts).length > 0) bad.push('scripts в манифесте')
+          if (!/^[a-z][a-z0-9-]*$/.test(process.env.DIST_TAG)) bad.push('dist-tag ' + process.env.DIST_TAG)
+          if (bad.length) {
+            console.error('✖ dist не прошёл проверку: ' + bad.join('; '))
+            process.exit(1)
+          }
+          console.log('✔ ' + pj.name + '@' + pj.version + ' → ' + process.env.DIST_TAG)
+          JS
+
       # dist-tag передаём явно: npm 11.6 не применяет publishConfig.tag из package.json (в dry-run пишет «with tag latest»),
       # и без --tag первая версия ушла бы в latest, а не в next.
       - name: Публикация (dry-run)
@@ -185,14 +207,14 @@ jobs:
         working-directory: publish-dist
         env:
           DIST_TAG: ${{ needs.build.outputs.disttag }}
-        run: npm publish --provenance --tag "$DIST_TAG" --dry-run
+        run: npm publish --ignore-scripts --provenance --tag "$DIST_TAG" --dry-run
 
       - name: Публикация в npm
         if: needs.build.outputs.dry_run != 'true'
         working-directory: publish-dist
         env:
           DIST_TAG: ${{ needs.build.outputs.disttag }}
-        run: npm publish --provenance --tag "$DIST_TAG"
+        run: npm publish --ignore-scripts --provenance --tag "$DIST_TAG"
 
       - name: GitHub release
         if: needs.build.outputs.release == 'true'
