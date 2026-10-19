@@ -171,7 +171,7 @@
         ]
       },
       "options": {
-        "command": "npm publish --access public --tag beta",
+        "command": "npm publish --access public",
         "cwd": "libs/forms-core/dist"
       }
     }

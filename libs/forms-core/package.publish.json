@@ -113,13 +113,13 @@
   },
   "publishConfig": {
     "access": "public",
-    "tag": "beta"
+    "tag": "next"
   },
   "dependencies": {
     "@tanstack/table-core": "^9.1.2"
   },
   "peerDependencies": {
-    "zod": ">=4.0.0",
+    "zod": "^4.0.0",
     "idb-keyval": ">=6.0.0"
   },
   "peerDependenciesMeta": {
