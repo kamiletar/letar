@@ -262,7 +262,7 @@
 
 ## Тесты и форматирование
 
-- [e2e-testing](/.claude/docs/e2e-testing.md)
+- [e2e-testing](/.claude/docs/e2e-testing.md) — staging gate, fixtures и секреты; проверка BASE_URL в globalSetup без поломки общего графа Nx.
 - [e2e-testing § unscoped Playwright assertions + Zag.js Select scoping](/.claude/docs/e2e-testing.md#unscopedтривиальный-assertion--ловит-не-то-под-параллельной-нагрузкой) ⚠️ `getByText`/`getByRole('row')`/`.first()` без скоупа матчит чужой похожий виджет на странице под параллельной нагрузкой (`--workers=12`) — фикс через `aria-controls` триггера для Zag.js Select (Chakra UI v3), готовый хелпер `selectFirstChakraOption` в domwellbes-e2e
 - [persistent-e2e-user-resource-exhaustion](/.claude/docs/persistent-e2e-user-resource-exhaustion.md) ⚠️ фиксированная identity e2e-теста против персистентной staging-БД со временем исчерпывает любой конечный per-identity ресурс (не только вопросы квиза) — симптом неотличим от настоящей регрессии, лечится либо свежей identity на прогон, либо сбросом состояния через существующую self-service-функцию приложения
 - [playwright-testmatch-absolute-path-regex-anchor](/.claude/docs/playwright-testmatch-absolute-path-regex-anchor.md) ⚠️ якорный `RegExp` (`^`) в `testMatch`/`testIgnore` матчится против абсолютного пути файла, не относительно `testDir` — никогда не совпадает, чинится glob-строкой
