@@ -8,12 +8,16 @@
 
 ### Исправлено
 
-- **Сборка проекта без `@dnd-kit/*` и `@uiw/react-json-view` падала с «Module not found» (Next.js, Vite).** Эти четыре
-  пакета были объявлены необязательными peer-зависимостями, но главная точка входа импортирует их статически
-  (`Form.Group.List` с перетаскиванием, `FormDebugValues`), поэтому без установки пакет не собирался. Теперь они
-  обычные peer-зависимости: npm ставит их сам. Лениво загружаемые (`import()`) `@tiptap/*`, `@tanstack/react-table`,
-  `@tanstack/react-virtual` и `@marsidev/react-turnstile` остаются необязательными. Нашла проверка
-  `scripts/check-npm-package-integrity.mjs` и smoke-проект `scripts/npm-smoke.mjs`.
+- **Проект без `@dnd-kit/*`, `@tiptap/*`, `@tanstack/react-table`, `@tanstack/react-virtual`, `@marsidev/react-turnstile` и
+  `@uiw/react-json-view` не собирался: «Module not found» (Next.js/Turbopack), `MISSING_EXPORT` (Vite).** Все они
+  были объявлены необязательными peer-зависимостями, но бандлер разрешает импорты всех файлов пакета, включая
+  лениво подгружаемые чанки (`RichText`, `DataGrid`), а главная точка входа импортирует `@dnd-kit/*` и
+  `@uiw/react-json-view` статически. npm необязательные peer не ставит, поэтому сборка падала у любого потребителя,
+  который их не добавил сам. Теперь это обычные peer-зависимости: npm ставит их сам. Необязательными остаются только
+  `next-intl` (только типы) и `idb-keyval` (встроен в бандл `@letar/forms-core`).
+- Диапазон peer `@uiw/react-json-view` — `>=2.0.0-alpha.0`: стабильной 2.x у пакета нет, `>=2.0.0` не находил ни одной
+  версии, и установка падала с `ETARGET`.
+- Нашла проверка `scripts/check-npm-package-integrity.mjs` и smoke-проект `scripts/npm-smoke.mjs`.
 
 ## [2.41.1] - 2026-10-19
 
