@@ -44,7 +44,9 @@ function run(cmd, args, { inherit = false } = {}) {
 /** `npm view <name>@<range> version` — версии, подходящие под диапазон; пусто — такой версии в реестре нет. */
 function registryVersions(name, range) {
   const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm'
-  const res = spawnSync(npm, ['view', `${name}@${range}`, 'version', '--json'], {
+  // На Windows команда идёт через shell: диапазон вида `>=3.0.0` без кавычек стал бы перенаправлением вывода в файл
+  const spec = `${name}@${range}`
+  const res = spawnSync(npm, ['view', process.platform === 'win32' ? `"${spec}"` : spec, 'version', '--json'], {
     cwd: REPO_ROOT,
     encoding: 'utf8',
     shell: process.platform === 'win32',
