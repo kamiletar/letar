@@ -514,9 +514,13 @@ function run(cmd, args, label) {
     env: { ...process.env, NO_COLOR: '1', FORCE_COLOR: '0' },
   })
   // eslint-disable-next-line no-control-regex
-  const out = stripAnsi(`${res.stdout ?? ''}${res.stderr ?? ''}`)
+  const out = stripAnsi(`${res.stdout ?? ''}${res.stderr ?? ''}${res.error ? `\n${res.error.message}` : ''}`)
   return { ok: res.status === 0, out, label }
 }
+
+// Локально nx глобальный (AGENTS.md), в CI его нет — там nx запускают через bunx, как в ci.yml.
+// Без этого в GitHub Actions spawn падал ENOENT мгновенно и молча («build:npm упал» без вывода).
+const NX = process.env.CI ? { cmd: 'bunx', prefix: ['nx'] } : { cmd: 'nx', prefix: [] }
 
 function main() {
   const args = process.argv.slice(2)
@@ -543,7 +547,11 @@ function main() {
   if (wantBuild) {
     const projects = packages.map((p) => readPackageJson(p.dir).name).join(',')
     console.log(`сборка: nx run-many -t build:npm --projects=${projects} --skip-nx-cache`)
-    const res = run('nx', ['run-many', '-t', 'build:npm', `--projects=${projects}`, '--skip-nx-cache'], 'build')
+    const res = run(
+      NX.cmd,
+      [...NX.prefix, 'run-many', '-t', 'build:npm', `--projects=${projects}`, '--skip-nx-cache'],
+      'build',
+    )
     if (!res.ok) {
       console.error(res.out)
       console.error('✖ build:npm упал')

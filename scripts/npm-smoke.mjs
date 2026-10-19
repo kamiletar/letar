@@ -38,7 +38,7 @@ const FIXTURE_DIR = { next: 'next-app', vite: 'vite-app', zenstack: 'zenstack-ap
 
 class SmokeError extends Error {}
 
-const quote = (a) => (/[s"&|<>^]/.test(a) ? `"${a.replace(/"/g, '\\"')}"` : a)
+const quote = (a) => (/[\s"&|<>^]/.test(a) ? `"${a.replace(/"/g, '\\"')}"` : a)
 
 /** spawnSync: на Windows npm/npx/nx — .cmd-шимы, им нужен shell; команда одной строкой (без DEP0190). */
 function spawnSyncShell(cmd, args, options) {
@@ -281,7 +281,9 @@ async function main() {
       .map((p) => JSON.parse(fs.readFileSync(path.join(REPO_ROOT, p.dir, 'package.json'), 'utf8')).name)
       .join(',')
     console.log(`сборка: nx run-many -t build:npm --projects=${projects} --skip-nx-cache`)
-    run('nx', ['run-many', '-t', 'build:npm', `--projects=${projects}`, '--skip-nx-cache'], {
+    // Локально nx глобальный (AGENTS.md), в CI — через bunx, как в ci.yml
+    const [nxCmd, ...nxPrefix] = process.env.CI ? ['bunx', 'nx'] : ['nx']
+    run(nxCmd, [...nxPrefix, 'run-many', '-t', 'build:npm', `--projects=${projects}`, '--skip-nx-cache'], {
       cwd: REPO_ROOT,
       label: 'build:npm',
     })
