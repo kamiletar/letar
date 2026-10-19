@@ -123,7 +123,7 @@ tsconfig приватных приложений. Раннер печатает 
 
 ### Релиз npm-пакетов
 
-Локально: `nx release` (bump + changelog + commit + tag + GitHub release) → `git push --follow-tags`. CI на тег (`forms-v*`, `form-mcp-v*`, `zenstack-form-plugin-v*`) запускает [publish-npm.yml](/.github/workflows/publish-npm.yml) — npm publish напрямую из letar.
+Выпуск — вручную по тегу, не через `nx release`: поднять версию и `CHANGELOG.md`, коммит, push (только с одобрения владельца), тег `<пакет>-v<версия>` по порядку из `scripts/data/npm-published-packages.json` (`forms-core` → `forms-react` → `forms`, `forms-query`, `zenstack-form-plugin`, `form-mcp`). CI на тег запускает [publish-npm.yml](/.github/workflows/publish-npm.yml): сборка и проверки без прав на публикацию, затем `npm publish --provenance` по OIDC (токена npm нет), dist-tag `next`. PR проверяет [npm-packages.yml](/.github/workflows/npm-packages.yml). Процедура, разовые шаги владельца и найденные ловушки — [npm-publish-from-monorepo](/.claude/docs/npm-publish-from-monorepo.md).
 
 ### Технологический стек
 
