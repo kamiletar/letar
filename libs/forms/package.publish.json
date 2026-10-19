@@ -136,7 +136,6 @@
     "@uiw/react-json-view": ">=2.0.0-alpha.0",
     "@tanstack/react-table": ">=8.0.0",
     "@tanstack/react-virtual": ">=3.0.0",
-    "@marsidev/react-turnstile": ">=1.0.0",
     "idb-keyval": ">=6.0.0",
     "@tiptap/react": ">=3.0.0",
     "@tiptap/starter-kit": ">=3.0.0",
