@@ -54,7 +54,8 @@
           "node ../../scripts/write-publish-package-json.mjs",
           "cp README.en.md dist/README.md",
           "cp README.md dist/README.ru.md",
-          "cp CHANGELOG.md dist/"
+          "cp CHANGELOG.md dist/",
+          "cp LICENSE dist/"
         ],
         "cwd": "libs/zenstack-form-plugin",
         "parallel": false
@@ -167,6 +168,23 @@
       "options": {
         "command": "tsgo --build tsconfig.lib.json --emitDeclarationOnly",
         "cwd": "libs/zenstack-form-plugin"
+      }
+    },
+    "publish:npm": {
+      "executor": "nx:run-commands",
+      "dependsOn": [
+        "build:npm"
+      ],
+      "cache": false,
+      "metadata": {
+        "description": "Публикация @letar/zenstack-form-plugin на npmjs.com",
+        "technologies": [
+          "npm"
+        ]
+      },
+      "options": {
+        "command": "npm publish --access public",
+        "cwd": "libs/zenstack-form-plugin/dist"
       }
     }
   }

@@ -1,7 +1,15 @@
 {
   "name": "@letar/zenstack-form-plugin",
   "description": "ZenStack plugin for generating Zod v4 schemas with UI metadata from schema.zmodel — works with @letar/forms",
-  "keywords": ["zenstack", "prisma", "zod", "form", "schema", "codegen", "ui-metadata"],
+  "keywords": [
+    "zenstack",
+    "prisma",
+    "zod",
+    "form",
+    "schema",
+    "codegen",
+    "ui-metadata"
+  ],
   "homepage": "https://forms.letar.best/docs/guides/zenstack-plugin",
   "repository": {
     "type": "git",
@@ -23,9 +31,16 @@
     }
   },
   "peerDependencies": {
-    "@zenstackhq/sdk": ">=3.0.0"
+    "@zenstackhq/sdk": ">=3.0.0",
+    "@zenstackhq/language": ">=3.0.0",
+    "@zenstackhq/zod": ">=3.0.0",
+    "zod": "^4.0.0"
   },
   "engines": {
     "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public",
+    "tag": "next"
   }
 }
