@@ -13,23 +13,140 @@
 grep -l '"build:npm"' libs/*/project.json apps/*/project.json
 ```
 
-<!-- doc-count: {"cmd": "grep -l '\"build:npm\"' libs/*/project.json apps/*/project.json | wc -l", "expect": 4} -->
+<!-- doc-count: {"cmd": "grep -l '\"build:npm\"' libs/*/project.json apps/*/project.json | wc -l", "expect": 19} -->
 
-Отдельно: наличие `build:npm` ≠ пакет опубликован. Что реально уходит на npm, задаёт список тегов
-в [publish-npm.yml](/.github/workflows/publish-npm.yml) (`forms-v*`, `form-mcp-v*`,
-`zenstack-form-plugin-v*`) — `forms-shadcn` там на 2026-09-03 нет. У `form-mcp` до 2026-09-26 в
-`package.json` стояло `"private": true` (наследие первого коммита; на публикацию не влияло — на npm уходит
-`dist/package.json`, собранный из `package.publish.json`). Владелец решил публиковать: флаг убран. На npm
-при этом лежат только `1.0.0`/`1.0.1` (2026-03-31), версии `2.x` не выходили; тегов `form-mcp-v*` в репо нет.
+Отдельно: наличие `build:npm` ≠ пакет опубликован. Что реально уходит на npm, задаёт реестр
+[scripts/data/npm-published-packages.json](/scripts/data/npm-published-packages.json) — шесть пакетов
+волны 1 (решение владельца, 2026-10-18), порядок в файле — порядок публикации:
 
-## Волна 1 (2026-09-30): 16 библиотек к beta-публикации
+| Пакет (тег)            | Зависит от (опубликованного) | Что проверяет smoke |
+| ---------------------- | ---------------------------- | ------------------- |
+| `forms-core`           | —                            | Next, Vite          |
+| `forms-react`          | `forms-core`                 | Next, Vite          |
+| `forms`                | `forms-core`, `forms-react`  | Next, Vite          |
+| `forms-query`          | `forms-core`                 | Vite                |
+| `zenstack-form-plugin` | —                            | ZenStack-генерация  |
+| `form-mcp`             | —                            | MCP по stdio        |
+
+Остальные библиотеки с `build:npm` (скины shadcn/Vue/Angular, `number-words` и др.) в волну не входят:
+тегов у них нет, публиковать их пока нельзя. Список тегов в [publish-npm.yml](/.github/workflows/publish-npm.yml)
+обязан совпадать с реестром — это проверяет gate `npm-package-integrity` (`bun scripts/check-all.mjs --only=npm-package-integrity`).
+
+У `form-mcp` до 2026-09-26 в `package.json` стояло `"private": true` (наследие первого коммита; на публикацию
+не влияло — на npm уходит `dist/package.json`, собранный из `package.publish.json`). Владелец решил публиковать:
+флаг убран. На npm при этом лежат только `1.0.0`/`1.0.1` (2026-03-31), версии `2.x` не выходили.
+
+## Как выпустить версию
+
+Публикует только CI по тегу, из `libs/<пакет>/dist` — по OIDC, без токена npm. Тег ставит владелец
+(решение D5): агент до push и тега не доходит.
+
+1. **Версия и журнал.** Поднять `version` в `libs/<пакет>/package.json`, добавить запись в `libs/<пакет>/CHANGELOG.md`.
+   Версия растёт и в `bun.lock` — `bun scripts/check-lock-workspace-versions.mjs --index`, при расхождении
+   `bun install --lockfile-only` отдельным коммитом (иначе `--frozen-lockfile` на сервере роняет деплой всех приложений).
+2. **Проверка локально** (не обязательна, но дёшево — CI повторит то же самое):
+
+   ```bash
+   node scripts/npm-release-preflight.mjs --project <тег-пакета> --skip-registry
+   node scripts/npm-smoke.mjs --only=next,vite     # части: next, vite, zenstack, mcp
+   ```
+
+3. **Коммит и push** в `main` (только по решению владельца).
+4. **Тег `<тег-пакета>-v<версия>`** — ровно версия из `package.json`:
+
+   ```bash
+   git tag forms-core-v0.31.0 && git push origin forms-core-v0.31.0
+   ```
+
+   Порядок тегов — по таблице выше: зависимость должна быть уже в npm, иначе preflight откажет с текстом
+   «сначала опубликуй @letar/forms-core …». Для `forms` порядок такой: `forms-core` → `forms-react` → `forms`.
+5. **CI** (`publish-npm.yml`, два job): `build` без прав на публикацию — сборка, `check-npm-package-integrity
+   --build --publint`, проверка реестра npm, smoke в чистых проектах; `publish` получает только готовый dist,
+   сверяет манифест и делает `npm publish --provenance --tag next`, затем GitHub release.
+6. **Проверить** страницу пакета на npmjs.com: значок provenance, dist-tag `next`.
+
+**Канал `next`.** Все версии волны 1 выходят в dist-tag `next` (решение D3). Перевод в стабильный канал — вручную:
+
+```bash
+npm dist-tag add @letar/forms-core@0.31.0 latest
+```
+
+⚠️ Тег передаётся в `npm publish --tag` явно: npm 11.6 **не применяет** `publishConfig.tag` из `package.json`
+(в `--dry-run` пишет «with tag latest»). Без явного `--tag` первая публикация ушла бы в `latest`.
+
+**Ручной запуск** (`workflow_dispatch`, поля `project` и `dry_run`). По умолчанию `dry_run: true`: сборка, проверки,
+smoke и `npm publish --dry-run`; реестр npm в этом режиме не опрашивается (зависимости могут быть не опубликованы).
+Реальную публикацию делает только тег.
+
+**Проверки на PR** — workflow `npm-packages.yml` (пути шести пакетов и скриптов выпуска): целостность + smoke,
+ничего не публикует и не имеет `id-token`.
+
+## Один раз руками (владелец)
+
+Автоматикой это сделать нельзя: нужны аккаунт и двухфакторный вход.
+
+1. **Три новых имени на npm** — `@letar/forms-core`, `@letar/forms-react`, `@letar/forms-query`. Trusted Publisher
+   настраивается только у существующего пакета, поэтому первую версию публикуют руками:
+
+   ```bash
+   npm login                       # 2FA
+   cd libs/forms-core/dist && npm publish --access public --tag next
+   ```
+
+   (то же для `forms-react`, `forms-query`; dist собирается `nx run @letar/<pkg>:build:npm`). Публикуй
+   по порядку из таблицы. Версии уже совпадают с `package.json`, повторно тегом их публиковать не надо.
+2. **Trusted Publisher для всех шести пакетов.** npmjs.com → пакет → Settings → Trusted Publisher → GitHub Actions:
+   owner `kamiletar`, repository `letar`, workflow `publish-npm.yml`, environment — пусто.
+3. **Удалить секрет `NPM_TOKEN`** в настройках репозитория GitHub: новый workflow им не пользуется.
+4. **Первый настоящий выпуск** — тегом по порядку; перед ним — `workflow_dispatch` с `dry_run: true` по каждому пакету.
+
+## Что проверяют `check-npm-package-integrity` и smoke
+
+`node scripts/check-npm-package-integrity.mjs [--build] [--only=<тег>] [--publint]` — по собранному `dist`:
+каждый импорт объявлен в `dependencies`/`peerDependencies`; манифест (без `workspace:`, `tag: next`, `access: public`,
+версия из `package.json`, LICENSE/README); все точки входа существуют; `'use client'` в клиентских файлах (и нет
+в нейтральных — список в реестре); в пакете нет имён приватных приложений; **optional peer не достижим из корневого
+entry** (см. ниже); `publint` и `@arethetypeswrong/cli` (версии закреплены в скрипте, ставятся через `bunx`, в
+`devDependencies` корня их нет).
+
+`node scripts/npm-smoke.mjs [--build] [--only=next,vite,zenstack,mcp] [--keep]` — собирает tarball'ы (`npm pack`),
+ставит их в чистые проекты из [scripts/npm-smoke](/scripts/npm-smoke) вне монорепо (временный каталог, свой
+`node_modules`), собирает/запускает:
+
+- **Next.js** — `next build` с серверным `page.tsx`, который импортирует `<Form>`: директива `'use client'` дошла до пакета;
+- **Vite** — сборка + проверка, что в дереве одна копия `forms-core`/`forms-react` (две копии = два контекста форм);
+- **ZenStack** — `zenstack generate` с плагином из tarball (схема с `@meta("form.title", …)`) и `tsc --noEmit` по сгенерированным схемам;
+- **MCP** — запуск `form-mcp` по stdio, `initialize` + `tools/list` + `list_fields`.
+
+Плюс `tsc` на потребителе: положительный контроль и **негативный** (`name={42}` обязан дать ошибку, иначе типы стали `any`).
+
+### Находки, ради которых проверки написаны именно так
+
+- **Optional peer ≠ необязательный для сборки.** Turbopack и webpack разрешают **все** импорты собираемых файлов,
+  включая лениво подгружаемые чанки (`import('./chunk.js')`) и даже внешний `import('pkg')`; Vite/rolldown падает
+  на статическом импорте. Поэтому `@dnd-kit/*`, `@tiptap/*`, `@tanstack/react-table`, `@tanstack/react-virtual`,
+  `@uiw/react-json-view` и `@marsidev/react-turnstile` в `@letar/forms` — обычные peer, а optional остались только
+  `next-intl` и `idb-keyval` (проверка не нашла их импортов, достижимых из корневого entry). Легально держать optional только то, что
+  лежит в **отдельном subpath-entry** (`@letar/forms-query/zenstack`), не достижимом из корневого: проверка
+  считает достижимость от корневых entry. Следствие: `.d.ts` forms ссылается на `@tiptap/react`, значит без него
+  `tsc` с `skipLibCheck: false` падает; долгосрочно тяжёлые поля лучше вынести в subpath-entry.
+- **RSC и составные компоненты.** Из серверного компонента нельзя «входить» в клиентский модуль:
+  `<Form.Field.String />` в серверном `page.tsx` даёт `undefined` (dot-into client module). Серверный
+  `page.tsx` может отрендерить `<Form>`, а поля лежат в клиентском файле — так устроена фикстура Next.
+- **`@uiw/react-json-view`** имеет только `2.0.0-alpha.*` — peer `>=2.0.0` не удовлетворялся ни одной версией (ETARGET);
+  диапазон `>=2.0.0-alpha.0`. Preflight ловит такие случаи: `npm view <пакет>@<диапазон>` для каждой зависимости.
+- **TypeScript 6**: `types` по умолчанию пустой — фикстуры задают `"types": ["node"]`; `skipLibCheck: true`, а строгий
+  проход (`skipLibCheck: false`) идёт отдельно и только информационно: шум в `@chakra-ui`/`zag-js` не наш.
+- **Windows**: диапазон `>=3.0.0` в аргументе команды через shell становится перенаправлением вывода в файл —
+  в скриптах версию в кавычки (так был найден и исправлен `npm-release-preflight`).
+
+## Волна 1 (2026-09-30): 16 библиотек (исторический набор)
 
 Конвейер `build:npm` заведён у 16 библиотек: `forms-core`, `forms-react`, `forms-vue`, `forms-angular`,
 `forms-shadcn`, `forms-vue-shadcn`, `forms-query`, `number-words`, `semver-compare`, `pg-url`, `sse`,
-`url-query-state`, `fuzzy-search`, `slug-resolver`, `idempotency-key`, `upload-validation`. Теги релизов
-в [publish-npm.yml](/.github/workflows/publish-npm.yml) пока не заведены (решение владельца — позже).
+`url-query-state`, `fuzzy-search`, `slug-resolver`, `idempotency-key`, `upload-validation`. Теги релизов заведены только для шести пакетов (см. выше); остальные из этого набора не публикуются.
 
-- `publishConfig: { access: 'public', tag: 'beta' }` лежит в `package.publish.json`; `publish:npm` идёт с `--tag beta`.
+- `publishConfig: { access: 'public', tag: 'beta' }` лежит в `package.publish.json` (так генерирует `npm-publish`); у шести публикуемых пакетов (см. выше) тег — `next`, CI передаёт его в `npm publish --tag` явно.
 - Слои forms — **опубликованные peer-зависимости**, не инлайн: `@letar/forms-core` (`>=0.28.0 <1`) у всех,
   `@letar/forms-react` у `forms-shadcn`, `@letar/forms-vue` у `forms-vue-shadcn`. В рабочем `package.json`
   они лежат в `devDependencies` (`workspace:*`). Порядок публикации: `forms-core` → `forms-react`/`forms-vue` →
