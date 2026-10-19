@@ -1326,7 +1326,7 @@
     },
     "libs/form-mcp": {
       "name": "@letar/form-mcp",
-      "version": "2.5.3",
+      "version": "2.5.4",
       "dependencies": {
         "@modelcontextprotocol/server": "2.0.0",
         "zod": "4.6.5",
@@ -1394,14 +1394,14 @@
     },
     "libs/forms-core": {
       "name": "@letar/forms-core",
-      "version": "0.30.0",
+      "version": "0.30.1",
       "dependencies": {
         "@tanstack/table-core": "^9.1.2",
       },
     },
     "libs/forms-query": {
       "name": "@letar/forms-query",
-      "version": "0.4.0",
+      "version": "0.4.1",
       "devDependencies": {
         "@letar/forms": "workspace:*",
         "@letar/forms-core": "workspace:*",
@@ -1418,7 +1418,7 @@
     },
     "libs/forms-react": {
       "name": "@letar/forms-react",
-      "version": "0.26.1",
+      "version": "0.26.2",
       "devDependencies": {
         "@letar/eager-jsx-check": "workspace:*",
         "@letar/forms-core": "workspace:*",
@@ -1844,7 +1844,7 @@
     },
     "libs/zenstack-form-plugin": {
       "name": "@letar/zenstack-form-plugin",
-      "version": "4.4.4",
+      "version": "4.4.5",
       "peerDependencies": {
         "@zenstackhq/sdk": ">=3.0.0",
         "@zenstackhq/zod": ">=3.0.0",
