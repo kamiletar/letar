@@ -1,6 +1,7 @@
 'use client'
 
 import { createDataGridTableFeatures } from '@letar/forms-core/table'
+import { camelCaseToLabel as coreCamelCaseToLabel } from '@letar/forms-core/utils'
 import { useDeclarativeForm, useFormGroup } from '@letar/forms-react'
 import { cn } from '@letar/tailwind-utils'
 import { useField } from '@tanstack/react-form'
@@ -20,7 +21,7 @@ import type { DataGridColumnDef, DataGridFieldProps } from './field-data-grid-ty
 const fieldDataGridFeatures = createDataGridTableFeatures()
 
 function camelToTitle(str: string): string {
-  return str.replace(/([A-Z])/g, ' $1').replace(/^./, (s) => s.toUpperCase()).trim()
+  return coreCamelCaseToLabel(str)
 }
 
 function inferFieldType(value: unknown): 'number' | 'string' {

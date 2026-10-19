@@ -2,6 +2,7 @@
 
 import type { SchemaFieldInfo } from '@letar/forms-core/schema'
 import { traverseSchema } from '@letar/forms-core/schema'
+import { camelCaseToLabel as coreCamelCaseToLabel } from '@letar/forms-core/utils'
 import { useDeclarativeForm, useFormGroup } from '@letar/forms-react'
 import type { ReactElement } from 'react'
 import { FieldCheckbox } from './field-checkbox'
@@ -51,7 +52,7 @@ function findFieldByPath(fields: SchemaFieldInfo[], path: string): SchemaFieldIn
 
 /** camelCase → "Читаемая метка". */
 export function camelCaseToLabel(str: string): string {
-  return str.replace(/([A-Z])/g, ' $1').replace(/^./, (s) => s.toUpperCase()).trim()
+  return coreCamelCaseToLabel(str)
 }
 
 /**
