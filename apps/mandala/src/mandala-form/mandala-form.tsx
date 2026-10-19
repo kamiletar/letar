@@ -19,13 +19,13 @@
  * ```
  */
 
-import { createForm, type ExtendedForm } from '@letar/forms'
+import { createForm } from '@letar/forms'
 import { FieldRichText } from '@letar/forms/rich-text'
 
 // Select компоненты для ENUM'ов
 import { SelectDefaultEffect, SelectImageCategory, SelectOrderStatus, SelectUserRole } from './selects'
 
-export const MandalaForm: ExtendedForm = createForm({
+export const MandalaForm = createForm({
   extraSelects: {
     // Роли пользователей
     UserRole: SelectUserRole,
