@@ -1,0 +1,78 @@
+# Проверка публикуемых npm-пакетов на PR и в main: собирает dist, проверяет манифест, точки входа, peer,
+# 'use client', publint/attw и ставит собранные tarball'ы в чистые проекты (Next.js, Vite, ZenStack, MCP).
+# Ничего не публикует и не получает id-token: публикация — только publish-npm.yml по тегу.
+# Описание проверок и процедура выпуска — .claude/docs/npm-publish-from-monorepo.md.
+
+name: npm packages
+
+on:
+  pull_request:
+    paths:
+      - 'libs/forms-core/**'
+      - 'libs/forms-react/**'
+      - 'libs/forms/**'
+      - 'libs/forms-query/**'
+      - 'libs/zenstack-form-plugin/**'
+      - 'libs/form-mcp/**'
+      - 'libs/format-utils/**'
+      - 'scripts/write-publish-package-json.mjs'
+      - 'scripts/check-npm-package-integrity.mjs'
+      - 'scripts/npm-*'
+      - 'scripts/npm-smoke/**'
+      - 'scripts/data/npm-published-packages.json'
+      - '.github/workflows/npm-packages.yml'
+      - '.github/workflows/publish-npm.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'libs/forms-core/**'
+      - 'libs/forms-react/**'
+      - 'libs/forms/**'
+      - 'libs/forms-query/**'
+      - 'libs/zenstack-form-plugin/**'
+      - 'libs/form-mcp/**'
+      - 'libs/format-utils/**'
+      - 'scripts/write-publish-package-json.mjs'
+      - 'scripts/check-npm-package-integrity.mjs'
+      - 'scripts/npm-*'
+      - 'scripts/npm-smoke/**'
+      - 'scripts/data/npm-published-packages.json'
+      - '.github/workflows/npm-packages.yml'
+      - '.github/workflows/publish-npm.yml'
+
+concurrency:
+  group: npm-packages-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      # Приватные submodule не нужны: публикуемые пакеты лежат в публичной части letar.
+      - name: Checkout letar
+        uses: actions/checkout@v4
+        with:
+          submodules: false
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      # Без --frozen-lockfile, как в ci.yml: приватные submodule в CI не выкачиваются.
+      - name: Install dependencies
+        run: bun install
+
+      - name: Целостность пакетов (сборка, манифест, publint, attw)
+        run: node scripts/check-npm-package-integrity.mjs --build --publint
+
+      - name: Smoke-проверка в чистых проектах
+        run: node scripts/npm-smoke.mjs
