@@ -433,6 +433,8 @@ export default [
       'libs/*/src/server/create-auth/index.ts',
       'src/lib/declarative/form-debug-values.tsx',
       'libs/*/src/lib/declarative/form-debug-values.tsx',
+      'src/lib/declarative/form-debug-json-view.tsx',
+      'libs/*/src/lib/declarative/form-debug-json-view.tsx',
       'src/lib/declarative/form-fields/utility/use-computed-value.ts',
       'libs/*/src/lib/declarative/form-fields/utility/use-computed-value.ts',
       'src/lib/fields/use-computed-value.ts',
