@@ -196,6 +196,7 @@
       },
       "options": {
         "commands": [
+          "rm -rf dist",
           "tsup",
           "node ../../scripts/write-publish-package-json.mjs",
           "cp README.en.md dist/README.md",
