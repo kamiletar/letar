@@ -12,7 +12,7 @@ import type { AsyncQueryFn, AsyncQueryResult } from './use-async-search'
  * (`useQuery={(search) => useFindManyUser(...)}`), эта обёртка им не нужна. Она нужна только
  * когда источник данных — плоская async-функция без собственного хука: без неё пару
  * `useState`+`useEffect`+cancel-флаг устаревшего запроса приходится копипастить вручную на
- * каждый новый combobox (см. `useClientSearchOptions` в domwellbes — тот же скелет был написан
+ * каждый новый combobox (см. `useClientSearchOptions` в приложении-потребителе — тот же скелет был написан
  * трижды подряд под разные источники, прежде чем стать общим хелпером здесь).
  *
  * @param search - Текущая (уже задебаунсенная) поисковая строка — приходит от `useAsyncSearch`
@@ -47,7 +47,7 @@ export function useAsyncActionQuery<TData = unknown>(
   // эффекта (`react(set-state-in-effect)` у oxlint не пропускает даже привычное «выставить
   // isLoading перед стартом fetch» — обе мутации состояния случаются только внутри
   // `.then()`/`.catch()`, то есть уже после асинхронного разрыва, а не синхронно при выполнении
-  // эффекта). Тот же приём, что в `useClientSearchOptions` (domwellbes).
+  // эффекта). Тот же приём, что в `useClientSearchOptions` приложения-потребителя.
   const [completedSearch, setCompletedSearch] = useState<string>()
 
   useEffect(() => {

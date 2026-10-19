@@ -14,7 +14,7 @@ import type { AppFormApi } from '../types'
 /**
  * Минимальный контракт toaster-инстанса, нужный этому хуку — совпадает с тем, что отдаёт
  * `createAppToaster()` из `@letar/ui` (`toaster.create({ type, title })`), но не завязан на
- * конкретный импорт. Тот же приём уже был в самопальном `useServerActionForm` (domwellbes),
+ * конкретный импорт. Тот же приём уже был в самопальном `useServerActionForm` приложения-потребителя,
  * который этот хук заменяет.
  */
 export interface FormServerActionToaster {
@@ -65,7 +65,7 @@ export interface UseFormServerActionResult<_TResult> {
    * `catchActionFailure` (`TData = T | ActionFailure`), `onSuccess` и резолв `run` получают
    * только `T` — рантайм уже отсёк отказ (бросил выше), тип должен отражать то же самое, без
    * ручного `as`/type guard на стороне вызывающего кода. Для `TData` без пересечения с
-   * `ActionFailure` (например четыре формы входа `aboi` на Better Auth) `Exclude` — тождество,
+   * `ActionFailure` (например формы входа на Better Auth) `Exclude` — тождество,
    * старые вызовы не меняются. `TData`, структурно совпадающий с `ActionFailure` целиком
    * (`{ success: false; error: string }` без `field` — `field` в `ActionFailure` опционален),
    * тоже исключается: он неотличим от настоящего отказа.

@@ -37,7 +37,7 @@ test('TData = T | ActionFailure — onSuccess получает T, отказ и�
   expectTypeOf<ResolvedResult>().not.toEqualTypeOf<CreatedPost | ActionFailure>()
 })
 
-test('TData без ActionFailure (старые вызовы, 4 формы входа aboi) — тип не меняется', () => {
+test('TData без ActionFailure (старые вызовы, формы входа) — тип не меняется', () => {
   interface SignInResult {
     redirectTo: string
   }
