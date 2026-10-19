@@ -247,9 +247,10 @@ export function extractExternalImports(src) {
 }
 
 /**
- * Optional peer, который статически достижим из entry, — не optional: пользователь без него получает
- * «Module not found» при сборке (Next/Vite), хотя npm его не ставил. Лениво грузимые (`import()`) peer'ы
- * не считаются: они нужны только при использовании поля.
+ * Optional peer, который импортирует файл, достижимый из entry, — не optional: бандлер (Next/Turbopack, Vite)
+ * разрешает ВСЕ импорты собираемых файлов, в том числе чанки, подгружаемые через `import('./chunk.js')`, и без
+ * пакета падает с «Module not found», хотя npm его не ставил. Внешний `import('pkg')` — тоже: Turbopack и webpack
+ * разрешают его при сборке, а Vite — нет (поэтому только Next-проект это и показывает).
  * @returns {string[]} ошибки
  */
 export function checkOptionalPeers(dist, pj) {
@@ -274,8 +275,8 @@ export function checkOptionalPeers(dist, pj) {
         continue
       }
       visited.add(file)
-      const { staticSpecs } = extractImportSpecs(fs.readFileSync(file, 'utf8'))
-      for (const spec of staticSpecs) {
+      const { staticSpecs, dynamicSpecs } = extractImportSpecs(fs.readFileSync(file, 'utf8'))
+      for (const spec of [...dynamicSpecs, ...staticSpecs]) {
         if (spec.startsWith('.')) {
           const target = path.resolve(path.dirname(file), spec)
           if (fs.existsSync(target) && fs.statSync(target).isFile()) {
@@ -295,7 +296,7 @@ export function checkOptionalPeers(dist, pj) {
   }
   return [...offenders].map(
     ([base, { file, entry }]) =>
-      `optional peer ${base} импортируется статически (${file}, достижим из ${entry}) — объяви его обычным peer или грузи лениво через import()`,
+      `optional peer ${base} импортирует ${file} (достижим из ${entry}, в том числе через чанк) — бандлер разрешит его при сборке; объяви обычным peer или вынеси в отдельный subpath-entry`,
   )
 }
 

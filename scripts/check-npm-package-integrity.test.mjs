@@ -177,38 +177,55 @@ describe('checkDist', () => {
 
 describe('checkOptionalPeers', () => {
   const optionalMeta = { 'heavy-lib': { optional: true } }
+  const peers = { react: '>=18', 'heavy-lib': '>=1' }
+  const run = (dist) => checkOptionalPeers(dist, JSON.parse(readFileSync(join(dist, 'package.json'), 'utf8')))
 
   test('optional peer, статически достижимый через чанк из entry, — ошибка', () => {
     const dist = makeDist({
-      pkg: { peerDependencies: { react: '>=18', 'heavy-lib': '>=1' }, peerDependenciesMeta: optionalMeta },
+      pkg: { peerDependencies: peers, peerDependenciesMeta: optionalMeta },
       files: {
         'index.js': "import { a } from './chunk-1.js'\nexport { a }\n",
         'chunk-1.js': "import { h } from 'heavy-lib'\nexport const a = h\n",
       },
     })
-    const errors = checkOptionalPeers(dist, JSON.parse(readFileSync(join(dist, 'package.json'), 'utf8')))
+    const errors = run(dist)
     expect(errors.length).toBe(1)
     expect(errors[0]).toContain('heavy-lib')
     expect(errors[0]).toContain('chunk-1.js')
   })
 
-  test('optional peer только через динамический import() — не ошибка', () => {
+  test("optional peer в чанке, подгружаемом через import('./lazy.js'), — ошибка: бандлер его разрешит", () => {
     const dist = makeDist({
-      pkg: { peerDependencies: { react: '>=18', 'heavy-lib': '>=1' }, peerDependenciesMeta: optionalMeta },
+      pkg: { peerDependencies: peers, peerDependenciesMeta: optionalMeta },
       files: {
         'index.js': "export const load = () => import('./lazy.js')\n",
         'lazy.js': "import { h } from 'heavy-lib'\nexport const a = h\n",
       },
     })
-    expect(checkOptionalPeers(dist, JSON.parse(readFileSync(join(dist, 'package.json'), 'utf8')))).toEqual([])
+    const errors = run(dist)
+    expect(errors.length).toBe(1)
+    expect(errors[0]).toContain('lazy.js')
+  })
+
+  test("внешний import('heavy-lib') optional peer — тоже ошибка: Turbopack/webpack разрешают его при сборке", () => {
+    const dist = makeDist({
+      pkg: { peerDependencies: peers, peerDependenciesMeta: optionalMeta },
+      files: { 'index.js': "export const load = () => import('heavy-lib')\n" },
+    })
+    expect(run(dist).length).toBe(1)
+  })
+
+  test('optional peer, который entry не импортирует вовсе, — не ошибка', () => {
+    const dist = makeDist({ pkg: { peerDependencies: peers, peerDependenciesMeta: optionalMeta } })
+    expect(run(dist)).toEqual([])
   })
 
   test('обычный (не optional) peer со статическим импортом — не ошибка', () => {
     const dist = makeDist({
-      pkg: { peerDependencies: { react: '>=18', 'heavy-lib': '>=1' } },
+      pkg: { peerDependencies: peers },
       files: { 'index.js': "import { h } from 'heavy-lib'\nexport const a = h\n" },
     })
-    expect(checkOptionalPeers(dist, JSON.parse(readFileSync(join(dist, 'package.json'), 'utf8')))).toEqual([])
+    expect(run(dist)).toEqual([])
   })
 })
 
