@@ -10,7 +10,7 @@ owner: forms-dev-npm-build
 stage: ""
 source: libs/forms/PLAN.md Backlog 2026-09-27 «Публикация в npm и теги»
 created: 2026-10-12
-updated: 2026-10-19
+updated: 2026-10-20
 ---
 
 ## Что и зачем
@@ -31,11 +31,14 @@ updated: 2026-10-19
 - [x] Этап 2 — scripts/check-npm-package-integrity.mjs + реестр scripts/data/npm-published-packages.json, gate в check-all (2026-10-19)
 - [x] Этап 3 — scripts/npm-smoke (Next, Vite, ZenStack, form-mcp) из tarball вне монорепо (2026-10-19)
 - [x] Этап 4 — publish-npm.yml по тегу через OIDC + preflight, npm-packages.yml на PR; запушено 2026-10-20 (958eaf55d)
+- [ ] Этап 4а — проверка «установка — подмножество bun.lock» в трёх workflow вместо --frozen-lockfile (задание forms-npm-03-lock-subset.md)
+- [ ] Этап 4б — лёгкое ядро: тяжёлые поля в подпути rich-text, data-grid, table-editor, sortable, debug; 6 обязательных peer; forms 3.0.0 (задание forms-npm-04-pluggable-fields.md: фаза A совместимая → письма aboi/mandala → фаза C ломающая)
 - [ ] Этап 5 — публикация под next (новые имена — владелец вручную)
 - [ ] Этап 6 — перевод в latest
 
 ## Журнал
 
+- 2026-10-20: решение по открытым вопросам принято владельцем (страница https://claude.ai/artifact/EhJP4DFuTUYunpwgbLd6hC). Peer: тяжёлые поля подключаются через extraFields из подпутей, первой публичной версией forms станет 3.0.0. Lockfile: скрипт check-lock-subset после bun install разрешает только удаление записей; токен для приватных submodule в CI отклонён. Задания этапов 4а и 4б — в .claude/artifacts/tasks.
 - 2026-10-20: этапы 2–4 приняты и запушены. Первый прогон npm-packages.yml упал: скрипты звали голый nx, в CI его нет — исправлено (bunx nx при CI). Открыто: (1) 19 обязательных peer у @letar/forms (dnd-kit, tiptap, react-table и др. стали обязательными, т.к. бандлеры разрешают и ленивые импорты) — вынести тяжёлые поля в subpath-entry и вернуть их в optional; (2) bun install без --frozen-lockfile в publish-npm.yml (приватные submodule в CI не выкачаны); (3) ручные шаги владельца — первая публикация forms-core/forms-react/forms-query с --tag next, Trusted Publisher для шести пакетов, удаление NPM_TOKEN.
 
 - 2026-10-19: этап 1 принят. Отклонения: treeshake: false в forms/forms-react (иначе rollup выбрасывает 'use client'), чистка имён приватных приложений и в комментариях forms-core/forms-react, тест скрипта на bun:test. DirtyGuard больше не импортирует next/navigation (forms 2.41.0).
