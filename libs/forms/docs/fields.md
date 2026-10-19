@@ -594,6 +594,8 @@ function CategoryCombobox({ name, ...rest }: CategoryComboboxProps) {
 
 ## Form.Field.RichText — WYSIWYG редактор (v0.51.0+)
 
+> **С 2.42.0** поле подключается в `createForm`: `extraFields: { RichText: FieldRichText }`, импорт из `@letar/forms/rich-text` (нужны `@tiptap/*`). Ключ совпадает с именем поля. Без регистрации в 2.x работает встроенное поле.
+
 WYSIWYG редактор на базе Tiptap с опциональной загрузкой изображений:
 
 ```tsx
@@ -837,6 +839,8 @@ const Schema = z.object({
 
 ## Form.Field.TableEditor — Табличный редактор (v0.68.0+)
 
+> **С 2.42.0** поле подключается в `createForm`: `extraFields: { TableEditor: FieldTableEditor }`, импорт из `@letar/forms/table-editor` (нужны `@dnd-kit/*`). Ключ совпадает с именем поля.
+
 Инлайн-редактируемая таблица для массивов:
 
 ```tsx
@@ -859,6 +863,8 @@ const Schema = z.object({
 ---
 
 ## Form.Field.DataGrid — TanStack Table (v0.75.0+)
+
+> **С 2.42.0** поле подключается в `createForm`: `extraFields: { DataGrid: FieldDataGrid }`, импорт из `@letar/forms/data-grid` (нужны `@tanstack/react-table`, `@tanstack/react-virtual`). Ключ совпадает с именем поля.
 
 Большие таблицы с пагинацией, сортировкой, фильтрами:
 

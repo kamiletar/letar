@@ -435,15 +435,45 @@ applyServerErrors(form, mapped)
 import { Form } from '@letar/forms'
 ```
 
+### Подключаемые поля (с 2.42.0)
+
+Тяжёлые поля вынесены в отдельные точки входа и подключаются в `createForm` через `extraFields`.
+⚠️ Ключ обязан совпадать с именем поля: по нему `AppForm.Field.<Имя>` и автоформа (`fieldType: 'richText'`)
+находят компонент.
+
+```tsx
+import { createForm } from '@letar/forms'
+import { FieldDataGrid } from '@letar/forms/data-grid'
+import { FieldRichText } from '@letar/forms/rich-text'
+import { FieldTableEditor } from '@letar/forms/table-editor'
+
+export const AppForm = createForm({
+  extraFields: { RichText: FieldRichText, DataGrid: FieldDataGrid, TableEditor: FieldTableEditor },
+})
+```
+
+| Подпуть                     | Что даёт                                                           | Нужны пакеты                             |
+| --------------------------- | ------------------------------------------------------------------ | ---------------------------------------- |
+| `@letar/forms/rich-text`    | `FieldRichText` — WYSIWYG                                          | `@tiptap/*`                              |
+| `@letar/forms/data-grid`    | `FieldDataGrid` — таблица с виртуализацией                         | `@tanstack/react-table`, `react-virtual` |
+| `@letar/forms/table-editor` | `FieldTableEditor` — редактируемая таблица                         | `@dnd-kit/*`                             |
+| `@letar/forms/sortable`     | `SortableGroupList` — список с перетаскиванием (вместо `sortable`) | `@dnd-kit/*`                             |
+| `@letar/forms/debug`        | `FormDebugJsonView` — интерактивное дерево значений                | `@uiw/react-json-view`                   |
+
+`Form.DebugValues` и проп `debug` в ядре рисуют простой `<pre>` с JSON (проп `collapsed` в нём игнорируется).
+В 2.x старые способы (`Form.Field.RichText` без регистрации, `sortable` у `Form.Group.List`) работают как раньше;
+в 3.0.0 тяжёлое уйдёт из ядра.
+
 ### Опциональные зависимости (npm)
 
-| Пакет                       | Для чего                          |
-| --------------------------- | --------------------------------- |
-| `@dnd-kit/*`                | Drag & drop сортировка в массивах |
-| `@tiptap/*`                 | RichText редактор                 |
-| `@uiw/react-json-view`      | Form.DebugValues (JSON инспектор) |
-| `next-intl`                 | i18n интеграция                   |
-| `@marsidev/react-turnstile` | CAPTCHA (Cloudflare Turnstile)    |
+| Пакет                  | Для чего                                 |
+| ---------------------- | ---------------------------------------- |
+| `@dnd-kit/*`           | `@letar/forms/sortable`, `/table-editor` |
+| `@tiptap/*`            | `@letar/forms/rich-text`                 |
+| `@uiw/react-json-view` | `@letar/forms/debug`                     |
+| `next-intl`            | i18n интеграция                          |
+
+CAPTCHA Cloudflare Turnstile грузит свой скрипт сам, сторонний пакет не нужен.
 
 ---
 

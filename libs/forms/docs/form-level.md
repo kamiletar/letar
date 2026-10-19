@@ -532,8 +532,17 @@ const AppForm = createForm({ dirtyGuard: true })
 | `collapsed`        | `number`  | `2`           | Глубина раскрытия дерева              |
 | `showInProduction` | `boolean` | `false`       | Показывать в production (для отладки) |
 
-Использует `@uiw/react-json-view` для рендеринга. Обновляется в реальном времени при вводе.
-Автоматически переключается между тёмной и светлой темой вместе с color mode приложения.
+С 2.42.0 рисует простой `<pre>` с JSON (без сторонних пакетов); `collapsed` в нём игнорируется. Обновляется
+в реальном времени при вводе.
+
+Интерактивное дерево с раскрытием и автоматическим переключением тёмной и светлой темы — `FormDebugJsonView`
+из `@letar/forms/debug` (нужен `@uiw/react-json-view`), пропсы те же:
+
+```tsx
+import { FormDebugJsonView } from '@letar/forms/debug'
+
+<FormDebugJsonView title="Values" collapsed={3} />
+```
 
 ### Проп `debug` на Form (v0.56.0+)
 
