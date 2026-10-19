@@ -196,35 +196,107 @@ export function packageBase(spec) {
   return spec.startsWith('@') ? spec.split('/').slice(0, 2).join('/') : spec.split('/')[0]
 }
 
-/** Внешние пакеты, которые импортирует исходник (JS или .d.ts); относительные и встроенные модули Node не считаются. */
-export function extractExternalImports(src) {
+/**
+ * Спецификаторы модулей, которые импортирует исходник (JS или .d.ts): статические (`import … from`, `export … from`,
+ * `require`) и динамические (`import('m')`) отдельно — первые грузятся вместе с модулем, вторые лениво.
+ */
+export function extractImportSpecs(src) {
   const code = stripCommentsAndTemplates(src)
-  const specs = new Set()
-  const patterns = [
+  const staticSpecs = new Set()
+  const dynamicSpecs = new Set()
+  const staticPatterns = [
     // import x from 'm' / import { a } from 'm' / import * as x from 'm' / import type … from 'm' / import 'm'
     /(?:^|[\s;{}])import\s+(?:type\s+)?(?:[^'"`;]*?\sfrom\s*)?['"]([^'"]+)['"]/g,
     // export … from 'm'
     /(?:^|[\s;{}])export\s+(?:type\s+)?[^'"`;]*?\sfrom\s*['"]([^'"]+)['"]/g,
-    // import('m') — и в .d.ts: import('m').Type
-    /\bimport\s*\(\s*['"]([^'"]+)['"]\s*\)/g,
     // import x = require('m')
     /\brequire\s*\(\s*['"]([^'"]+)['"]\s*\)/g,
   ]
-  for (const re of patterns) {
-    for (const m of code.matchAll(re)) { specs.add(m[1]) }
+  for (const re of staticPatterns) {
+    for (const m of code.matchAll(re)) {
+      staticSpecs.add(m[1])
+    }
   }
+  // import('m') — и в .d.ts: import('m').Type
+  for (const m of code.matchAll(/\bimport\s*\(\s*['"]([^'"]+)['"]\s*\)/g)) {
+    dynamicSpecs.add(m[1])
+  }
+  return { staticSpecs, dynamicSpecs }
+}
+
+/** Базовое имя внешнего пакета из спецификатора; относительные пути и встроенные модули Node — `null`. */
+function externalBase(spec) {
+  if (spec.startsWith('.') || spec.startsWith('/') || spec.startsWith('node:') || spec.startsWith('data:')) {
+    return null
+  }
+  const base = packageBase(spec)
+  return NODE_BUILTINS.has(base) ? null : base
+}
+
+/** Внешние пакеты, которые импортирует исходник (JS или .d.ts); относительные и встроенные модули Node не считаются. */
+export function extractExternalImports(src) {
+  const { staticSpecs, dynamicSpecs } = extractImportSpecs(src)
   const bases = new Set()
-  for (const spec of specs) {
-    if (spec.startsWith('.') || spec.startsWith('/') || spec.startsWith('node:') || spec.startsWith('data:')) {
-      continue
+  for (const spec of [...staticSpecs, ...dynamicSpecs]) {
+    const base = externalBase(spec)
+    if (base) {
+      bases.add(base)
     }
-    const base = packageBase(spec)
-    if (NODE_BUILTINS.has(base)) {
-      continue
-    }
-    bases.add(base)
   }
   return bases
+}
+
+/**
+ * Optional peer, который статически достижим из entry, — не optional: пользователь без него получает
+ * «Module not found» при сборке (Next/Vite), хотя npm его не ставил. Лениво грузимые (`import()`) peer'ы
+ * не считаются: они нужны только при использовании поля.
+ * @returns {string[]} ошибки
+ */
+export function checkOptionalPeers(dist, pj) {
+  const optional = new Set(
+    Object.entries(pj.peerDependenciesMeta ?? {})
+      .filter(([, meta]) => meta?.optional)
+      .map(([name]) => name),
+  )
+  if (optional.size === 0) {
+    return []
+  }
+  const entries = collectEntryPaths(pj)
+    .map(({ file }) => path.join(dist, file))
+    .filter((file) => /\.(js|mjs|cjs)$/.test(file) && fs.existsSync(file))
+  const visited = new Set()
+  const offenders = new Map() // peer → { file, entry }
+  for (const entry of new Set(entries)) {
+    const queue = [entry]
+    while (queue.length > 0) {
+      const file = queue.pop()
+      if (visited.has(file)) {
+        continue
+      }
+      visited.add(file)
+      const { staticSpecs } = extractImportSpecs(fs.readFileSync(file, 'utf8'))
+      for (const spec of staticSpecs) {
+        if (spec.startsWith('.')) {
+          const target = path.resolve(path.dirname(file), spec)
+          if (fs.existsSync(target) && fs.statSync(target).isFile()) {
+            queue.push(target)
+          }
+          continue
+        }
+        const base = externalBase(spec)
+        if (base && optional.has(base) && !offenders.has(base)) {
+          offenders.set(base, {
+            file: path.relative(dist, file).split(path.sep).join('/'),
+            entry: path.relative(dist, entry).split(path.sep).join('/'),
+          })
+        }
+      }
+    }
+  }
+  return [...offenders].map(
+    ([base, { file, entry }]) =>
+      `optional peer ${base} импортируется статически (${file}, достижим из ${entry}) — объяви его обычным peer или грузи лениво через import()`,
+  )
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -360,6 +432,9 @@ export function checkDist({ dist, srcVersion, useClient, privateNames, privateAl
       if (!files.some((f) => f.rel === rel)) { errors.push(`нейтральный entry ${rel} из реестра не найден в dist`) }
     }
   }
+
+  // 7. Optional peer, достижимый статически из entry
+  errors.push(...checkOptionalPeers(dist, pj))
 
   // 5. Имена приватных приложений (целое слово, с учётом регистра, во всех текстовых файлах)
   const allow = new Set(privateAllow)

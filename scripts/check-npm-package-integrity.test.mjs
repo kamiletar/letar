@@ -3,11 +3,12 @@
 // настоящий необъявленный — ошибка, workspace:, 'use client', приватные имена, рассинхрон с workflow.
 
 import { afterEach, describe, expect, test } from 'bun:test'
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import {
   checkDist,
+  checkOptionalPeers,
   checkWorkflowSync,
   extractExternalImports,
   privateNamesFromGitmodules,
@@ -171,6 +172,43 @@ describe('checkDist', () => {
     const dist = makeDist({ files: { 'README.md': 'run db:studio' } })
     expect(check(dist).length).toBe(1)
     expect(check(dist, { privateAllow: ['studio'] })).toEqual([])
+  })
+})
+
+describe('checkOptionalPeers', () => {
+  const optionalMeta = { 'heavy-lib': { optional: true } }
+
+  test('optional peer, статически достижимый через чанк из entry, — ошибка', () => {
+    const dist = makeDist({
+      pkg: { peerDependencies: { react: '>=18', 'heavy-lib': '>=1' }, peerDependenciesMeta: optionalMeta },
+      files: {
+        'index.js': "import { a } from './chunk-1.js'\nexport { a }\n",
+        'chunk-1.js': "import { h } from 'heavy-lib'\nexport const a = h\n",
+      },
+    })
+    const errors = checkOptionalPeers(dist, JSON.parse(readFileSync(join(dist, 'package.json'), 'utf8')))
+    expect(errors.length).toBe(1)
+    expect(errors[0]).toContain('heavy-lib')
+    expect(errors[0]).toContain('chunk-1.js')
+  })
+
+  test('optional peer только через динамический import() — не ошибка', () => {
+    const dist = makeDist({
+      pkg: { peerDependencies: { react: '>=18', 'heavy-lib': '>=1' }, peerDependenciesMeta: optionalMeta },
+      files: {
+        'index.js': "export const load = () => import('./lazy.js')\n",
+        'lazy.js': "import { h } from 'heavy-lib'\nexport const a = h\n",
+      },
+    })
+    expect(checkOptionalPeers(dist, JSON.parse(readFileSync(join(dist, 'package.json'), 'utf8')))).toEqual([])
+  })
+
+  test('обычный (не optional) peer со статическим импортом — не ошибка', () => {
+    const dist = makeDist({
+      pkg: { peerDependencies: { react: '>=18', 'heavy-lib': '>=1' } },
+      files: { 'index.js': "import { h } from 'heavy-lib'\nexport const a = h\n" },
+    })
+    expect(checkOptionalPeers(dist, JSON.parse(readFileSync(join(dist, 'package.json'), 'utf8')))).toEqual([])
   })
 })
 
