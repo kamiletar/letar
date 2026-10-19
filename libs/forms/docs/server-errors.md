@@ -160,7 +160,7 @@ function MaterialForm() {
   }
 
   return (
-    <DomWellbesForm
+    <AppForm
       schema={MaterialSchema}
       initialValue={initialValue}
       onSubmit={handleSubmit}
@@ -176,10 +176,10 @@ function MaterialForm() {
         },
       }}
     >
-      <DomWellbesForm.Errors />
-      <DomWellbesForm.Field.String name="sku" />
-      <DomWellbesForm.Button.Submit>Сохранить</DomWellbesForm.Button.Submit>
-    </DomWellbesForm>
+      <AppForm.Errors />
+      <AppForm.Field.String name="sku" />
+      <AppForm.Button.Submit>Сохранить</AppForm.Button.Submit>
+    </AppForm>
   )
 }
 ```
@@ -189,7 +189,7 @@ function MaterialForm() {
 - `formRef` передаётся в `<Form>` **и** используется внутри `middleware.onError` — без него `applyServerErrors` некуда применять ошибки.
 - Server Action, вызываемый из `onSubmit`, не должен ловить и оборачивать ошибку сам — `mapServerErrors` умеет разбирать «сырые» Prisma/ZenStack/Zod исключения; лишний try/catch в самом Server Action только всё усложнит.
 - Не забудь `<Form.Errors />` в JSX — иначе `formErrors` (например `P2025`/`rejected-by-policy`) будут применены к форме, но нигде не отрисуются.
-- Рабочий пример — `apps/domwellbes/src/app/(admin)/admin/materials/_components/material-form.tsx`.
+- Рабочий пример — форма материала в админке приложения-потребителя.
 
 ## useFormServerAction — та же связка в один вызов
 
@@ -215,11 +215,11 @@ function MaterialForm() {
   }
 
   return (
-    <DomWellbesForm schema={MaterialSchema} initialValue={initialValue} onSubmit={handleSubmit} formRef={formRef}>
-      <DomWellbesForm.Errors />
-      <DomWellbesForm.Field.String name="sku" />
-      <DomWellbesForm.Button.Submit loading={pending} />
-    </DomWellbesForm>
+    <AppForm schema={MaterialSchema} initialValue={initialValue} onSubmit={handleSubmit} formRef={formRef}>
+      <AppForm.Errors />
+      <AppForm.Field.String name="sku" />
+      <AppForm.Button.Submit loading={pending} />
+    </AppForm>
   )
 }
 ```
