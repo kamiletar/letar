@@ -1,6 +1,6 @@
 {
   "name": "@letar/forms-vue",
-  "version": "0.25.0",
+  "version": "0.25.1",
   "description": "Headless Vue-слой @letar/forms поверх @tanstack/vue-form — полный паритет с React-скином, 61/61 поле",
   "type": "module",
   "main": "./src/index.ts",

@@ -1,5 +1,9 @@
 # Changelog @letar/forms-vue
 
+## 0.25.1 (2026-10-19)
+
+- **Fix:** `camelCaseToLabel` делегирует общей реализации из `@letar/forms-core/utils` (≥ 0.31.0): значение enum `DRAFT` больше не превращается в «D R A F T», `IN_PROGRESS` → «In Progress», `userID` → «User ID». Публичный экспорт сохранён.
+
 ## 0.25.0 (2026-09-27)
 
 - **Feature:** паритет Select/Combobox — три новых
