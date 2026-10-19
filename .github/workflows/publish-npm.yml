@@ -96,7 +96,7 @@ jobs:
             echo "release=true" >> "$GITHUB_OUTPUT"
           fi
 
-      # Версия закреплена (в ci.yml — latest): выпуск не должен меняться от выхода новой версии bun.
+      # Версия закреплена (как в ci.yml и npm-packages.yml): выпуск не должен меняться от выхода новой версии bun.
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
@@ -109,9 +109,13 @@ jobs:
 
       # Без --frozen-lockfile, как в ci.yml: приватные submodule в CI не выкачиваются, и bun с замороженным
       # lockfile падает на «lockfile had changes» (см. комментарий у шага Install dependencies в ci.yml).
-      # Риск дрейфа версий компенсирует проверка пакета и smoke-установка ниже, а сам job не имеет прав публикации.
+      # Дрейф версий ловит шаг check-lock-subset ниже (установка может только удалять записи bun.lock),
+      # дальше проверка пакета и smoke-установка; сам job не имеет прав публикации.
       - name: Install dependencies
         run: bun install
+
+      - name: Lockfile — подмножество закоммиченного
+        run: node scripts/check-lock-subset.mjs
 
       # Проверка пакета + сборка + порядок публикации (зависимости уже в реестре npm).
       # При ручном dry-run реестр не опрашивается: первые публикации нужных зависимостей могут ещё не состояться.
