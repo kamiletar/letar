@@ -27,7 +27,7 @@ updated: 2026-10-19
 
 Страница плана: https://claude.ai/artifact/EtYAj9WrF6brEH4AX46cVv. Решения: D1 слои forms-core/forms-react отдельными пакетами в dependencies; D2 волна 1 — forms-core, forms-react, forms, forms-query, zenstack-form-plugin, form-mcp; D3 текущие версии, dist-tag next; D4 trusted publishing (OIDC); D5 теги ставит только владелец.
 
-- [ ] Этап 1 — починить build:npm шести пакетов (задание forms-npm-01-build.md в .claude/artifacts/tasks, исполнитель forms-dev-npm-build)
+- [x] Этап 1 — build:npm шести пакетов починен (2026-10-19, коммиты 94b3b8452…d84abd115, отчёт forms-npm-01-report.md в .claude/artifacts/tasks; принято сеньором: check exit 0, tarball forms 671 КБ)
 - [ ] Этап 2 — постоянная проверка npm-package-integrity в check-all
 - [ ] Этап 3 — установка tarball в чистые Next.js и Vite проекты
 - [ ] Этап 4 — CI: releaseTagPattern, OIDC, provenance, dry-run
@@ -35,5 +35,7 @@ updated: 2026-10-19
 - [ ] Этап 6 — перевод в latest
 
 ## Журнал
+
+- 2026-10-19: этап 1 принят. Отклонения: treeshake: false в forms/forms-react (иначе rollup выбрасывает 'use client'), чистка имён приватных приложений и в комментариях forms-core/forms-react, тест скрипта на bun:test. DirtyGuard больше не импортирует next/navigation (forms 2.41.0).
 
 ## Итог
