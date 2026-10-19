@@ -2,6 +2,12 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.40.40] - 2026-10-20
+
+### Changed
+
+- `MandalaForm`: поле `RichText` подключено через `extraFields` из подпути `@letar/forms/rich-text` — подготовка к `@letar/forms` 3.0, где его не будет в ядре. `content-page-form` работает без изменений.
+
 ## [0.40.39] - 2026-10-08
 
 ### Changed
