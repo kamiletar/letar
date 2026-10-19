@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.1
+
+- Подготовка к публикации в npm: `publishConfig.tag` — `next`. Код пакета не менялся.
+
 ## 0.4.0
 
 - `useZenStackRelations(schema, formSchema, { overrides?, exclude?, clientOptions? })` в `@letar/forms-query/zenstack` —
