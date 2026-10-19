@@ -262,7 +262,10 @@ export function checkOptionalPeers(dist, pj) {
   if (optional.size === 0) {
     return []
   }
+  // Subpath-entry (`exports['./zenstack']`) — штатное место для optional peer: бандлер разрешит его, только если
+  // потребитель сам импортирует этот subpath. Поэтому достижимость считаем от корневых entry (`.`, main, bin).
   const entries = collectEntryPaths(pj)
+    .filter(({ where }) => !where.startsWith('exports../'))
     .map(({ file }) => path.join(dist, file))
     .filter((file) => /\.(js|mjs|cjs)$/.test(file) && fs.existsSync(file))
   const visited = new Set()
@@ -296,7 +299,7 @@ export function checkOptionalPeers(dist, pj) {
   }
   return [...offenders].map(
     ([base, { file, entry }]) =>
-      `optional peer ${base} импортирует ${file} (достижим из ${entry}, в том числе через чанк) — бандлер разрешит его при сборке; объяви обычным peer или вынеси в отдельный subpath-entry`,
+      `optional peer ${base} импортирует ${file} (достижим из ${entry}, в том числе через чанк) — бандлер разрешит его при сборке; объяви обычным peer или вынеси в отдельный subpath-entry (не достижимый из корневого)`,
   )
 }
 

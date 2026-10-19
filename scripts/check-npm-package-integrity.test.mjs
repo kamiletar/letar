@@ -220,6 +220,37 @@ describe('checkOptionalPeers', () => {
     expect(run(dist)).toEqual([])
   })
 
+  test('optional peer только в отдельном subpath-entry — не ошибка', () => {
+    const dist = makeDist({
+      pkg: {
+        peerDependencies: peers,
+        peerDependenciesMeta: optionalMeta,
+        exports: { '.': { import: './index.js' }, './heavy': { import: './heavy.js' } },
+      },
+      files: {
+        'index.js': 'export const a = 1\n',
+        'heavy.js': "import { h } from 'heavy-lib'\nexport const b = h\n",
+      },
+    })
+    expect(run(dist)).toEqual([])
+  })
+
+  test('optional peer в чанке, общем для корневого и subpath-entry, — ошибка', () => {
+    const dist = makeDist({
+      pkg: {
+        peerDependencies: peers,
+        peerDependenciesMeta: optionalMeta,
+        exports: { '.': { import: './index.js' }, './heavy': { import: './heavy.js' } },
+      },
+      files: {
+        'index.js': "export { a } from './shared.js'\n",
+        'heavy.js': "export { a } from './shared.js'\n",
+        'shared.js': "import { h } from 'heavy-lib'\nexport const a = h\n",
+      },
+    })
+    expect(run(dist).length).toBe(1)
+  })
+
   test('обычный (не optional) peer со статическим импортом — не ошибка', () => {
     const dist = makeDist({
       pkg: { peerDependencies: peers },
