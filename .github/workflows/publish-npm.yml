@@ -5,6 +5,9 @@
 # Пакеты зависят друг от друга: теги ставят по порядку из scripts/data/npm-published-packages.json
 # (forms-core, forms-react → forms → forms-query; zenstack-form-plugin и form-mcp — отдельно).
 #
+# Два job: `build` собирает и проверяет пакет БЕЗ прав на публикацию (там исполняется `bun install` и код
+# из зависимостей), `publish` получает только готовый dist через artifact и держит id-token/contents:write.
+#
 # Токена npm здесь нет: публикует OIDC-идентичность этого workflow (Trusted Publisher, настраивается на
 # npmjs.com для каждого пакета: репозиторий kamiletar/letar, workflow publish-npm.yml).
 # `--provenance` прикладывает подписанное происхождение сборки. Секрет NPM_TOKEN не нужен и не используется.
@@ -51,12 +54,12 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  publish:
+  build:
     runs-on: ubuntu-latest
 
+    # Права минимальные: id-token и запись здесь не нужны, зависимости ставятся из реестра и исполняют код.
     permissions:
-      contents: write # GitHub release по тегу
-      id-token: write # OIDC для trusted publishing и provenance
+      contents: read
 
     env:
       # Значения из inputs и ref передаём через env, а не интерполяцией в run: так их нельзя использовать для инъекции.
@@ -64,6 +67,14 @@ jobs:
       REF_NAME: ${{ github.ref_name }}
       INPUT_PROJECT: ${{ github.event.inputs.project }}
       INPUT_DRY_RUN: ${{ github.event.inputs.dry_run }}
+
+    outputs:
+      dist: ${{ steps.preflight.outputs.dist }}
+      name: ${{ steps.preflight.outputs.name }}
+      version: ${{ steps.preflight.outputs.version }}
+      disttag: ${{ steps.preflight.outputs.disttag }}
+      dry_run: ${{ steps.target.outputs.dry_run }}
+      release: ${{ steps.target.outputs.release }}
 
     steps:
       # Приватные submodule не нужны: публикуемые пакеты лежат в публичной части letar.
@@ -85,23 +96,20 @@ jobs:
             echo "release=true" >> "$GITHUB_OUTPUT"
           fi
 
+      # Версия закреплена (в ci.yml — latest): выпуск не должен меняться от выхода новой версии bun.
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
-          bun-version: latest
+          bun-version: 1.4.3
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 24
-          registry-url: 'https://registry.npmjs.org'
-
-      # Trusted publishing требует npm не старше 11.5.1; версия закреплена, чтобы выпуск не менялся сам по себе.
-      - name: Обновить npm до версии с trusted publishing
-        run: npm install -g npm@11.6.2
 
       # Без --frozen-lockfile, как в ci.yml: приватные submodule в CI не выкачиваются, и bun с замороженным
       # lockfile падает на «lockfile had changes» (см. комментарий у шага Install dependencies в ci.yml).
+      # Риск дрейфа версий компенсирует проверка пакета и smoke-установка ниже, а сам job не имеет прав публикации.
       - name: Install dependencies
         run: bun install
 
@@ -134,21 +142,63 @@ jobs:
           esac
           node scripts/npm-smoke.mjs --only="$PARTS"
 
+      - name: Сохранить dist для публикации
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-dist
+          path: ${{ steps.preflight.outputs.dist }}
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write # GitHub release по тегу
+      id-token: write # OIDC для trusted publishing и provenance
+
+    env:
+      REF_NAME: ${{ github.ref_name }}
+
+    steps:
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: 'https://registry.npmjs.org'
+
+      # Trusted publishing требует npm не старше 11.5.1; версия закреплена, чтобы выпуск не менялся сам по себе.
+      - name: Обновить npm до версии с trusted publishing
+        run: npm install -g npm@11.6.2
+
+      - name: Получить собранный dist
+        uses: actions/download-artifact@v4
+        with:
+          name: npm-dist
+          path: publish-dist
+
+      # dist-tag передаём явно: npm 11.6 не применяет publishConfig.tag из package.json (в dry-run пишет «with tag latest»),
+      # и без --tag первая версия ушла бы в latest, а не в next.
       - name: Публикация (dry-run)
-        if: steps.target.outputs.dry_run == 'true'
-        working-directory: ${{ steps.preflight.outputs.dist }}
-        run: npm publish --provenance --dry-run
+        if: needs.build.outputs.dry_run == 'true'
+        working-directory: publish-dist
+        env:
+          DIST_TAG: ${{ needs.build.outputs.disttag }}
+        run: npm publish --provenance --tag "$DIST_TAG" --dry-run
 
       - name: Публикация в npm
-        if: steps.target.outputs.dry_run != 'true'
-        working-directory: ${{ steps.preflight.outputs.dist }}
-        run: npm publish --provenance
+        if: needs.build.outputs.dry_run != 'true'
+        working-directory: publish-dist
+        env:
+          DIST_TAG: ${{ needs.build.outputs.disttag }}
+        run: npm publish --provenance --tag "$DIST_TAG"
 
       - name: GitHub release
-        if: steps.target.outputs.release == 'true'
+        if: needs.build.outputs.release == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PKG_NAME: ${{ steps.preflight.outputs.name }}
-          PKG_VERSION: ${{ steps.preflight.outputs.version }}
+          PKG_NAME: ${{ needs.build.outputs.name }}
+          PKG_VERSION: ${{ needs.build.outputs.version }}
         run: |
-          gh release create "$REF_NAME" --title "$PKG_NAME $PKG_VERSION" --generate-notes --verify-tag || echo "release уже существует"
+          gh release create "$REF_NAME" --repo "$GITHUB_REPOSITORY" --title "$PKG_NAME $PKG_VERSION" --generate-notes --verify-tag || echo "release уже существует"
