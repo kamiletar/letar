@@ -4,6 +4,33 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.42.0] - 2026-10-20
+
+Подготовка к лёгкому ядру: тяжёлые поля получают отдельные точки входа и подключаются в `createForm`. Всё старое
+работает как раньше, меняются только `Form.DebugValues` и Turnstile. Тяжёлое уйдёт из ядра в 3.0.0.
+
+### Добавлено
+
+- **Подпути для тяжёлых полей и инструментов:** `@letar/forms/rich-text` (`FieldRichText`), `@letar/forms/data-grid`
+  (`FieldDataGrid`), `@letar/forms/table-editor` (`FieldTableEditor`, `TableEditorContext`, `useTableEditorContext`),
+  `@letar/forms/sortable` (`SortableGroupList`), `@letar/forms/debug` (`FormDebugJsonView`). Каждому нужны свои
+  пакеты (`@tiptap/*`, `@tanstack/react-table`, `@dnd-kit/*`, `@uiw/react-json-view`).
+- **`Field` в реестре `createForm`.** Автоформа (`fieldType: 'richText'`) берёт поле из `extraFields` по ключу
+  `RichText`; без регистрации работает встроенное. Ключ в `extraFields` обязан совпадать с именем поля:
+  `createForm({ extraFields: { RichText: FieldRichText } })`.
+- **`createForm` типизирует `extraFields`:** новый дженерик `TExtraFields`, `AppForm.Field.RichText` получает пропсы
+  зарегистрированного компонента. Индексная сигнатура `AppForm.Field.<любое имя>` пока остаётся (уйдёт в 3.0.0).
+- **`SortableGroupList`** — `Form.Group.List` с перетаскиванием без пропа `sortable`. Внутри — `Button.Add`, `Button.Remove`,
+  `Button.DragHandle`.
+
+### Изменено
+
+- **`Form.DebugValues` и проп `debug` рисуют простой `<pre>` с JSON** вместо дерева `@uiw/react-json-view`. Проп
+  `collapsed` в нём игнорируется. Интерактивное дерево осталось как `FormDebugJsonView` в `@letar/forms/debug`.
+- **Turnstile не нужен `@marsidev/react-turnstile`:** провайдер сам грузит `challenges.cloudflare.com/turnstile/v0/api.js`
+  (один раз на страницу) и рисует виджет через `window.turnstile.render`. Пропсы `TurnstileProvider` те же. Peer
+  `@marsidev/react-turnstile` убран.
+
 ## [2.41.2] - 2026-10-19
 
 ### Исправлено
