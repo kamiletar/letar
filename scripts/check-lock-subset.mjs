@@ -74,7 +74,7 @@ export function compareLockSubset(baseLock, newLock) {
     const found = entry.length === 1 ? baseIdents.has(ident) : baseFull.has(`${ident}\u0000${entry[3] ?? ''}`)
     if (found) { continue }
     const same = baseByName.get(pkgName(ident))
-    const hint = same ? ` (в lock: ${same.join(', ')})` : ''
+    const hint = same ? ` (в lock: ${[...new Set(same)].join(', ')})` : ''
     const why = same && same.includes(ident) ? ' — другой integrity' : ''
     violations.push(`+ ${key}: ${ident}${why}${hint}`)
   }
