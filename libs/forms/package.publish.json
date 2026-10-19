@@ -95,6 +95,10 @@
   "bugs": {
     "url": "https://github.com/kamiletar/letar/issues"
   },
+  "dependencies": {
+    "@letar/forms-core": "workspace:^",
+    "@letar/forms-react": "workspace:^"
+  },
   "peerDependencies": {
     "@chakra-ui/react": ">=3.0.0",
     "@dnd-kit/core": ">=6.0.0",

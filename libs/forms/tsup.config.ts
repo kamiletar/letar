@@ -19,28 +19,26 @@ export default defineConfig({
     'validators/ru': 'src/lib/validators/ru/index.ts',
   },
   format: ['esm'],
-  // `noExternal` ниже действует только на JS-бандл — декларации собирает отдельный проход
-  // (rollup-plugin-dts), и ему нужно своё разрешение инлайнить внутренние `@letar/*`.
+  // Слои `@letar/forms-core` и `@letar/forms-react` — отдельные npm-пакеты (решение D1) и
+  // остаются внешними как в JS-бандле, так и в декларациях. Вшивается только
+  // `@letar/format-utils` (его нет в npm), поэтому `resolve` у dts-прохода ограничен им.
   //
-  // ⚠️ Одного этого флага мало, и «не сработало» здесь выглядит как «опция не действует».
-  // tsup строит `external` для dts-прохода как `dependencies + peerDependencies` из
-  // `package.json`; всё оттуда rollup помечает внешним ДО плагинов, поэтому резолвер даже не
-  // вызывается (видно в `DEBUG=tsup:ts-resolve` — bare-пакетов в логе нет вовсе). Пока
-  // `@letar/forms-core`/`forms-react` лежали в `dependencies`, `resolve` ниже был мёртвой
-  // опцией. Их место — `devDependencies`: это внутренние слои, а не npm-пакеты, потребитель
-  // их не устанавливает. Не возвращай их обратно в `dependencies` — сборка останется зелёной,
-  // сломается только установка опубликованного пакета.
-  dts: { resolve: [/^@letar\//] },
+  // ⚠️ Слои лежат в `devDependencies` рабочего package.json: tsup строит `external` dts-прохода
+  // из `dependencies + peerDependencies`, и без явного `external` ниже rollup мог бы
+  // инлайнить их типы через `paths` из tsconfig.publish.json. Зависимость в готовом пакете
+  // появляется из package.publish.json (`workspace:^` → `^версия`, см.
+  // scripts/write-publish-package-json.mjs).
+  dts: { resolve: [/^@letar\/format-utils/] },
   tsconfig: 'tsconfig.publish.json',
   splitting: true,
   treeshake: true,
   clean: true,
   outDir: 'dist',
-  // Все зависимости — external (потребитель устанавливает сам).
-  // @letar/forms-core (Фаза 7.1) и @letar/forms-react (Фаза 7.3) — не npm-пакеты,
-  // внутренние слои @letar/forms — вбандливаются внутрь.
-  noExternal: ['@letar/forms-core', '@letar/forms-react'],
+  // Все зависимости — external (потребитель устанавливает сам), кроме format-utils (в npm его нет).
+  noExternal: ['@letar/format-utils'],
   external: [
+    // Слои формы — отдельные npm-пакеты (dependencies в package.publish.json)
+    /^@letar\/forms-(core|react)(\/|$)/,
     // React
     'react',
     'react-dom',
