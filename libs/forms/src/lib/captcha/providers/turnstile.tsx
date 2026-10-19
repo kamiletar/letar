@@ -86,7 +86,9 @@ export function TurnstileProvider({
 
   // Колбэки в ref: новая функция на каждый рендер родителя не должна пересоздавать виджет
   const callbacksRef = useRef({ onSuccess, onError, onExpire })
-  callbacksRef.current = { onSuccess, onError, onExpire }
+  useEffect(() => {
+    callbacksRef.current = { onSuccess, onError, onExpire }
+  })
 
   useEffect(() => {
     const container = containerRef.current
