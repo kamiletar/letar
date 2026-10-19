@@ -28,13 +28,15 @@ updated: 2026-10-19
 Страница плана: https://claude.ai/artifact/EtYAj9WrF6brEH4AX46cVv. Решения: D1 слои forms-core/forms-react отдельными пакетами в dependencies; D2 волна 1 — forms-core, forms-react, forms, forms-query, zenstack-form-plugin, form-mcp; D3 текущие версии, dist-tag next; D4 trusted publishing (OIDC); D5 теги ставит только владелец.
 
 - [x] Этап 1 — build:npm шести пакетов починен (2026-10-19, коммиты 94b3b8452…d84abd115, отчёт forms-npm-01-report.md в .claude/artifacts/tasks; принято сеньором: check exit 0, tarball forms 671 КБ)
-- [ ] Этап 2 — постоянная проверка npm-package-integrity в check-all
-- [ ] Этап 3 — установка tarball в чистые Next.js и Vite проекты
-- [ ] Этап 4 — CI: releaseTagPattern, OIDC, provenance, dry-run
+- [x] Этап 2 — scripts/check-npm-package-integrity.mjs + реестр scripts/data/npm-published-packages.json, gate в check-all (2026-10-19)
+- [x] Этап 3 — scripts/npm-smoke (Next, Vite, ZenStack, form-mcp) из tarball вне монорепо (2026-10-19)
+- [x] Этап 4 — publish-npm.yml по тегу через OIDC + preflight, npm-packages.yml на PR; запушено 2026-10-20 (958eaf55d)
 - [ ] Этап 5 — публикация под next (новые имена — владелец вручную)
 - [ ] Этап 6 — перевод в latest
 
 ## Журнал
+
+- 2026-10-20: этапы 2–4 приняты и запушены. Первый прогон npm-packages.yml упал: скрипты звали голый nx, в CI его нет — исправлено (bunx nx при CI). Открыто: (1) 19 обязательных peer у @letar/forms (dnd-kit, tiptap, react-table и др. стали обязательными, т.к. бандлеры разрешают и ленивые импорты) — вынести тяжёлые поля в subpath-entry и вернуть их в optional; (2) bun install без --frozen-lockfile в publish-npm.yml (приватные submodule в CI не выкачаны); (3) ручные шаги владельца — первая публикация forms-core/forms-react/forms-query с --tag next, Trusted Publisher для шести пакетов, удаление NPM_TOKEN.
 
 - 2026-10-19: этап 1 принят. Отклонения: treeshake: false в forms/forms-react (иначе rollup выбрасывает 'use client'), чистка имён приватных приложений и в комментариях forms-core/forms-react, тест скрипта на bun:test. DirtyGuard больше не импортирует next/navigation (forms 2.41.0).
 
