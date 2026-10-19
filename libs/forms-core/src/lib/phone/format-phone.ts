@@ -3,7 +3,7 @@
  *
  * Причина: `use-mask-input` (imask) мутирует DOM-элемент напрямую в обход React —
  * это конфликтует с controlled `value` при быстром посимвольном вводе в WebKit
- * (Playwright `pressSequentially`), тесты `dsperevod-e2e` падали только там.
+ * (Playwright `pressSequentially`), e2e-тесты приложения-потребителя падали только там.
  * Тот же паттерн (форматирование на каждый onChange без DOM-мутаций) уже используется
  * в `credit-card-field.tsx` и работает во всех браузерах.
  *

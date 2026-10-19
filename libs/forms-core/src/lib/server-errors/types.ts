@@ -59,7 +59,7 @@ export interface ZenStackError {
   dbErrorMessage?: string
 }
 
-/** ActionResult (driving-school паттерн) */
+/** ActionResult (паттерн приложения-потребителя) */
 export interface ActionResultError {
   success: false
   error: string | { formErrors?: string[]; fieldErrors?: Record<string, string[]> }

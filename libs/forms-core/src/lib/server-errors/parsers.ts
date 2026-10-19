@@ -227,7 +227,7 @@ export function parseZodFlatError(error: unknown): MappedServerErrors | null {
 }
 
 /**
- * Парсер ActionResult формата (driving-school паттерн).
+ * Парсер ActionResult формата (паттерн приложения-потребителя).
  * { success: false, error: string | { fieldErrors, formErrors } }
  */
 export function parseActionResultError(error: unknown): MappedServerErrors | null {
