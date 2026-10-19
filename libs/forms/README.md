@@ -319,6 +319,8 @@ import { ProductCreateFormSchema } from '@/generated/form-schemas'
 
 ### Testing Utilities (v0.85.0)
 
+> Только внутри монорепо, в npm-пакет не входит.
+
 ```tsx
 import { expectFieldError, fillField, renderForm, submitForm } from '@letar/forms/testing'
 
