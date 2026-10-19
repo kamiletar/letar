@@ -1,7 +1,7 @@
 'use client'
 
+import { DevelopAppForm } from '@/develop-app-form/develop-app-form'
 import { Box, Heading, Text, VStack } from '@chakra-ui/react'
-import { Form } from '@letar/forms'
 import { useState } from 'react'
 import { DemoPageLayout, SubmittedDataPreview } from '../_components'
 
@@ -32,12 +32,12 @@ export default function DataGridDemoPage() {
           <Text fontSize="sm" color="fg.muted" mb={4}>
             Клик по ячейке → редактирование. Заголовок → сортировка. Фильтры сверху. Пагинация по 10 записей.
           </Text>
-          <Form
+          <DevelopAppForm
             debug
             initialValue={{ employees: generateEmployees(100) }}
             onSubmit={(data) => setSubmittedData(data as Record<string, unknown>)}
           >
-            <Form.Field.DataGrid
+            <DevelopAppForm.Field.DataGrid
               name="employees"
               label="Сотрудники"
               columns={[
@@ -50,8 +50,8 @@ export default function DataGridDemoPage() {
               rowSelection
               helperText="Клик по ячейке для редактирования, Enter для сохранения"
             />
-            <Form.Button.Submit>Сохранить все изменения</Form.Button.Submit>
-          </Form>
+            <DevelopAppForm.Button.Submit>Сохранить все изменения</DevelopAppForm.Button.Submit>
+          </DevelopAppForm>
         </Box>
 
         <SubmittedDataPreview data={submittedData} />

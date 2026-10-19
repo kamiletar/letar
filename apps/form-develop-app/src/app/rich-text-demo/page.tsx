@@ -1,7 +1,7 @@
 'use client'
 
+import { DevelopAppForm } from '@/develop-app-form/develop-app-form'
 import { Box, Code, Heading, Text, VStack } from '@chakra-ui/react'
-import { Form } from '@letar/forms'
 import { useState } from 'react'
 import { z } from 'zod/v4'
 import { DemoPageLayout } from '../_components'
@@ -50,16 +50,16 @@ export default function RichTextDemoPage() {
       description="Form.Field.RichText - WYSIWYG rich text editor based on Tiptap"
       maxW="800px"
     >
-      <Form initialValue={initialValues} schema={RichTextSchema} onSubmit={handleSubmit}>
+      <DevelopAppForm initialValue={initialValues} schema={RichTextSchema} onSubmit={handleSubmit}>
         <VStack gap={6} align="stretch">
           {/* Full-featured editor */}
           <Box>
-            <Form.Field.RichText name="content" minHeight="200px" />
+            <DevelopAppForm.Field.RichText name="content" minHeight="200px" />
           </Box>
 
           {/* Simple comment editor with limited toolbar */}
           <Box>
-            <Form.Field.RichText
+            <DevelopAppForm.Field.RichText
               name="comment"
               minHeight="100px"
               toolbarButtons={['bold', 'italic', 'underline', 'link']}
@@ -68,12 +68,12 @@ export default function RichTextDemoPage() {
 
           {/* JSON output format */}
           <Box>
-            <Form.Field.RichText name="jsonContent" minHeight="150px" maxHeight="300px" outputFormat="json" />
+            <DevelopAppForm.Field.RichText name="jsonContent" minHeight="150px" maxHeight="300px" outputFormat="json" />
           </Box>
 
           {/* Read-only example */}
           <Box>
-            <Form.Field.RichText
+            <DevelopAppForm.Field.RichText
               name="content"
               label="Read-only preview"
               readOnly
@@ -82,9 +82,9 @@ export default function RichTextDemoPage() {
             />
           </Box>
 
-          <Form.Button.Submit>Submit Content</Form.Button.Submit>
+          <DevelopAppForm.Button.Submit>Submit Content</DevelopAppForm.Button.Submit>
         </VStack>
-      </Form>
+      </DevelopAppForm>
 
       {submittedData && (
         <Box
