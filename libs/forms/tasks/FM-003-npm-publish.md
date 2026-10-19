@@ -1,17 +1,16 @@
 ---
 id: FM-003
 title: Публикация forms-* и form-mcp в npm и теги релизов
-status: blocked
+status: doing
 size: L
 area: release
 priority: 3
-blocked_by:
-  - "kami: слово о публикации после обкатки"
-owner: ""
+blocked_by: []
+owner: forms-dev-npm-build
 stage: ""
 source: libs/forms/PLAN.md Backlog 2026-09-27 «Публикация в npm и теги»
 created: 2026-10-12
-updated: 2026-10-12
+updated: 2026-10-19
 ---
 
 ## Что и зачем
@@ -20,11 +19,20 @@ updated: 2026-10-12
 
 ## Приёмка
 
-- [ ] Слово владельца получено
-- [ ] Паритет Vue и Angular закрыт (FM-004) или решено публиковать без него
+- [x] Слово владельца получено (2026-10-19: «давай готовиться к публикации», решения D1–D5 приняты)
+- [x] Паритет Vue и Angular закрыт (FM-004) или решено публиковать без него — D2: первая волна без Vue/Angular/shadcn
 - [ ] Чек-лист публикации пройден, пакеты на npm
 
 ## План
+
+Страница плана: https://claude.ai/artifact/EtYAj9WrF6brEH4AX46cVv. Решения: D1 слои forms-core/forms-react отдельными пакетами в dependencies; D2 волна 1 — forms-core, forms-react, forms, forms-query, zenstack-form-plugin, form-mcp; D3 текущие версии, dist-tag next; D4 trusted publishing (OIDC); D5 теги ставит только владелец.
+
+- [ ] Этап 1 — починить build:npm шести пакетов (задание forms-npm-01-build.md в .claude/artifacts/tasks, исполнитель forms-dev-npm-build)
+- [ ] Этап 2 — постоянная проверка npm-package-integrity в check-all
+- [ ] Этап 3 — установка tarball в чистые Next.js и Vite проекты
+- [ ] Этап 4 — CI: releaseTagPattern, OIDC, provenance, dry-run
+- [ ] Этап 5 — публикация под next (новые имена — владелец вручную)
+- [ ] Этап 6 — перевод в latest
 
 ## Журнал
 
