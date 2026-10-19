@@ -159,7 +159,7 @@
 - **`@meta("form.tooltip.<title|description|impact|example>", "…")` — подсказка поля.**
   Плоские ключи собираются в `.meta({ ui: { tooltip: { … } } })` — то же `ui.tooltip`
   (`FieldTooltipMeta` из `@letar/forms-core`), которое поля читают сегодня. Запросил
-  domwellbes-dev: ~50 ручных `_schemas/*.schema.ts` держат `tooltip` («на что влияет») у каждого
+  разработчик приложения-потребителя: ~50 ручных `_schemas/*.schema.ts` держат `tooltip` («на что влияет») у каждого
   поля, без директивы переход на схемы из `schema.zmodel` терял подсказку или ужимал её до
   `form.description`.
   - `description` обязателен (как в `FieldTooltipMeta`): без него подсказка не генерируется,
@@ -177,7 +177,7 @@
 ### Docs
 
 - **README — почему `extractEnumLabel` (`///` на значении enum) остался на doc-comment, а не
-  переехал на `@meta`.** Вопрос от studio-dev/владельца: единственный синтаксис директив с
+  переехал на `@meta`.** Вопрос от приложения-потребителя или владельца: единственный синтаксис директив с
   Фазы 4 — `@meta("form.*", value)`, legacy `/// @form.*`-парсер убран целиком, почему тогда
   label enum-значений всё ещё через комментарий. Ответ — не тот же механизм и не входил в
   миграцию: `extractEnumLabel` существовала всегда отдельно, синтаксического запрета на `@meta`
@@ -201,7 +201,7 @@
   (миксин может сам иметь `mixins` — миксин от миксина) и собирает плоский список полей в том же
   порядке, что попадает в сгенерированный `schema.prisma` (поля миксинов, затем собственные поля
   модели). `extractModelInfo` теперь итерирует его вместо `model.fields`.
-- Регресс сообщил `animatrona-ipfs-player-dev` (msg 1329, тред `form-plugin-mixin-fields-lost`) —
+- Регресс сообщил `animatrona-ipfs-player-dev` (msg 1329) —
   контрольный опыт с моделью `Tracker`/`TrackerFields` воспроизведён двумя новыми тестами в
   `model-generator.spec.ts`.
 
@@ -215,8 +215,8 @@
   `extractModelInfo` больше не читает `field.comments` для UI-метаданных формы — только
   `field.attributes` через `parseMetaAttributes`.
 - Миграция всех потребителей монорепо на `@meta` завершена до удаления (Фаза 3→4,
-  `scripts/codemods/codemod-form-directives.mjs`): `mandala`, `svoichuzhie`, `driving-school`,
-  `aboi`, `animatrona`, `grandslamcup`, `animatrona-tracker` — 590+ директив сконвертировано.
+  `scripts/codemods/codemod-form-directives.mjs`): `mandala`, три приложения-потребителя,
+  `animatrona`, `grandslamcup`, `animatrona-tracker` — 590+ директив сконвертировано.
   4 поля с `options`-массивом объектов (`torrentBackend`, `Content.category`, `Content.quality`,
   `Report.reason`), не выражаемые плоским `@meta` (upstream не компилирует `ObjectExpr`),
   переведены на настоящий ZModel `enum` вместо `String` — не единственный, но архитектурно
@@ -225,7 +225,7 @@
   `@meta`) как историческую иллюстрацию миграции — её собственная генерация форм этого поля не
   требует парсера, полагается на статичный образец кода в MDX.
 - Два бага найдены и исправлены в `codemod-form-directives.mjs` по ходу миграции: CRLF-файлы
-  (`driving-school`) давали 0 конвертаций (`split('\n')` оставлял висячий `\r`, ломавший
+  (одно из приложений-потребителей) давали 0 конвертаций (`split('\n')` оставлял висячий `\r`, ломавший
   `isCommentLine`-regex); массив объектов в `options` (`@form.props({ options: [{value,label}]})`)
   флаттенился в невалидный `@meta(key, [{...}])` и ронял `zenstack generate` для всей схемы —
   теперь такой случай явно уходит в «ТРЕБУЕТ РУЧНОЙ ПРОВЕРКИ» вместо тихой порчи вывода.
