@@ -7,6 +7,9 @@ export default defineConfig({
   },
   format: ['esm'],
   dts: true,
+  // Хуки и контекст формы работают только на клиенте: без директивы серверный компонент Next.js не отрендерит поле.
+  // ⚠️ Директива не доходит до dist при `treeshake: true` (rollup выбрасывает её), см. libs/forms/tsup.config.ts.
+  banner: { js: "'use client'" },
   tsconfig: 'tsconfig.publish.json',
   splitting: true,
   treeshake: true,
