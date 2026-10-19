@@ -23,6 +23,8 @@ export default defineConfig({
   },
   resolve: {
     alias: {
+      // Next.js предоставляет этот маркер через встроенный alias, вне Next он не резолвится.
+      'server-only': resolve(import.meta.dirname, '../../node_modules/next/dist/compiled/server-only/empty.js'),
       '@': resolve(import.meta.dirname, './src'),
       // Подпуть объявляем раньше корня: иначе '@letar/image-upload' совпадёт первым
       // и '/server' приклеится к пути основной точки входа.

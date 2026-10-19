@@ -1,11 +1,11 @@
+import { keystaticConfig } from '@/lib/keystatic-config'
 import { makeRouteHandler } from '@keystatic/next/route-handler'
-import config from '../../../../../keystatic.config'
 
 // force-dynamic: route handler зависит от env-переменных Keystatic,
 // которые доступны только на проде — не рендерить при build
 export const dynamic = 'force-dynamic'
 
-const baseHandler = makeRouteHandler({ config })
+const baseHandler = makeRouteHandler({ config: keystaticConfig })
 
 /**
  * В Docker standalone за reverse proxy Next.js строит req.url с внутренним хостом (0.0.0.0:3005).

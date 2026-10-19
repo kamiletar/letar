@@ -5,6 +5,12 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 проект придерживается [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.35.8] - 2026-10-19
+
+### Fixed
+
+- Коллекция статей Keystatic получала `Not Found` вместо JSON: режим хранилища теперь выбирает сервер и передаёт в браузер. Интерфейс и API используют одинаковые пути контента в GitHub и local.
+
 ## [0.35.7] - 2026-10-01
 
 ### Fixed

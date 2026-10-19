@@ -1,6 +1,6 @@
 import { createReader } from '@keystatic/core/reader'
 import { createGitHubReader } from '@keystatic/core/reader/github'
-import keystaticConfig from '../../keystatic.config'
+import { keystaticConfig } from './keystatic-config'
 
 // Тот же баг, что был в keystatic.config.ts (PLAN-INFRA.md §18.7 M2): NODE_ENV === 'production'
 // не отличает стейдж от прода — на стейдже GITHUB_PAT/KEYSTATIC_GITHUB_CLIENT_ID сознательно не

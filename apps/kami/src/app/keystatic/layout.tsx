@@ -1,4 +1,8 @@
-import KeystaticApp from './keystatic'
+import { keystaticStorageKind } from '@/lib/keystatic-config'
+import { KeystaticApp } from './keystatic'
+
+// Выбираем режим по runtime-окружению сервера, включая staging.
+export const dynamic = 'force-dynamic'
 
 /**
  * Root layout для Keystatic CMS
@@ -11,7 +15,7 @@ export default function KeystaticLayout() {
         <title>Keystatic CMS | Kami</title>
       </head>
       <body>
-        <KeystaticApp />
+        <KeystaticApp storageKind={keystaticStorageKind} />
       </body>
     </html>
   )

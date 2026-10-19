@@ -6,6 +6,8 @@
 
 ## Документация
 
+- [Сигналы окружения и Keystatic](/.claude/docs/node-env-not-production-signal.md) — staging, приватные env и согласование хранилища между сервером и браузером.
+
 - [UX авторского редактора](/.claude/docs/authoring-save-and-media-ux.md) — сохранение без потери контекста, аудитория, авторские переходы и единая загрузка медиа.
 
 - [E2E тестирование](/.claude/docs/e2e-testing.md) — полный staging gate, изолированные fixtures и секреты вне Playwright trace.
