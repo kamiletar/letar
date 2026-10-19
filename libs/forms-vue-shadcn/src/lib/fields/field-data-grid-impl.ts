@@ -1,3 +1,4 @@
+import { camelCaseToLabel as coreCamelCaseToLabel } from '@letar/forms-core/utils'
 import {
   type DataGridColumnDef,
   type DataGridFieldProps,
@@ -27,7 +28,7 @@ function flexRender(renderable: unknown, props: unknown) {
 
 /** camelCase → «Title Case» — тот же формат заголовка по умолчанию, что и в headless-версии. */
 function camelToTitle(str: string): string {
-  return str.replace(/([A-Z])/g, ' $1').replace(/^./, (s) => s.toUpperCase()).trim()
+  return coreCamelCaseToLabel(str)
 }
 
 /** Координата редактируемой ячейки. */

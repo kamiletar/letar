@@ -1,5 +1,6 @@
 import type { SchemaFieldInfo } from '@letar/forms-core/schema'
 import { traverseSchema } from '@letar/forms-core/schema'
+import { camelCaseToLabel as coreCamelCaseToLabel } from '@letar/forms-core/utils'
 import { useAppFormContext, useFormGroup } from '@letar/forms-vue/core'
 import { defineComponent, h, type PropType } from 'vue'
 import { FieldCheckbox } from './field-checkbox'
@@ -28,7 +29,7 @@ function findFieldByPath(fields: SchemaFieldInfo[], path: string): SchemaFieldIn
 
 /** camelCase → "Читаемая метка". */
 export function camelCaseToLabel(str: string): string {
-  return str.replace(/([A-Z])/g, ' $1').replace(/^./, (s) => s.toUpperCase()).trim()
+  return coreCamelCaseToLabel(str)
 }
 
 /**
