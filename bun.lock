@@ -932,7 +932,7 @@
     },
     "apps/mugcup": {
       "name": "@letar/mugcup",
-      "version": "0.37.2",
+      "version": "0.37.3",
       "dependencies": {
         "@letar/consent": "workspace:*",
         "@letar/email": "workspace:*",
@@ -946,7 +946,7 @@
     },
     "apps/mugcup-e2e": {
       "name": "@letar/mugcup-e2e",
-      "version": "0.2.4",
+      "version": "0.2.5",
       "dependencies": {
         "@letar/e2e-testing": "workspace:*",
       },
