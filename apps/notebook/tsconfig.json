@@ -188,6 +188,7 @@
       "@letar/forms/offline": [
         "../../libs/forms/src/lib/offline/index.ts"
       ],
+      "@letar/forms/rich-text": ["../../libs/forms/src/entries/rich-text.ts"],
       "@letar/forms/i18n": [
         "../../libs/forms/src/lib/i18n/index.ts"
       ],
@@ -197,12 +198,16 @@
       "@letar/forms/server-errors": [
         "../../libs/forms/src/server/server-errors/index.ts"
       ],
+      "@letar/forms/sortable": ["../../libs/forms/src/entries/sortable.ts"],
+      "@letar/forms/table-editor": ["../../libs/forms/src/entries/table-editor.ts"],
       "@letar/forms/captcha/server": [
         "../../libs/forms/src/server/captcha/verify.ts"
       ],
       "@letar/forms/analytics": [
         "../../libs/forms/src/lib/analytics/index.ts"
       ],
+      "@letar/forms/data-grid": ["../../libs/forms/src/entries/data-grid.ts"],
+      "@letar/forms/debug": ["../../libs/forms/src/entries/debug.ts"],
       "@letar/forms/testing": [
         "../../libs/forms/src/lib/testing/index.ts"
       ],
