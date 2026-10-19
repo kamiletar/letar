@@ -33,8 +33,7 @@ export interface FormUrlSyncOptions<TData extends object> {
    *
    * @example
    * ```tsx
-   * import { useRouter } from 'next/navigation'
-   * const router = useRouter()
+   * const router = useRouter() // useRouter из next/navigation
    * useFormUrlSync({ ..., router })
    * ```
    */

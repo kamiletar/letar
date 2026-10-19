@@ -18,7 +18,8 @@
   из DOM, используется `window.location.assign`. Пакет больше не требует Next.js и работает во Vite.
 - В `peerDependencies` (опционально) добавлены `idb-keyval` и `@tiptap/*` (`>=3.0.0`) — для офлайн-режима и
   `Field.RichText`. `zod` теперь `^4.0.0` (код импортирует `zod/v4`).
-- Клиентские точки входа и серверные (`server-errors`, `captcha/server`, `validators/ru`) собираются раздельно.
+- В клиентских бандлах сохраняется директива `'use client'` (серверный компонент Next.js App Router теперь может
+  отрендерить поле); серверные точки входа (`server-errors`, `captcha/server`, `validators/ru`) собираются без неё.
 
 ### Добавлено
 

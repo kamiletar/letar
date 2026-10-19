@@ -42,7 +42,10 @@ const common: Options = {
   dts: { resolve: [/^@letar\/format-utils/] },
   tsconfig: 'tsconfig.publish.json',
   splitting: true,
-  treeshake: true,
+  // ⚠️ Только `false`: при `true` tsup пропускает бандл через rollup, а тот выбрасывает директиву
+  // `'use client'` из banner (предупреждение «Module level directives cause errors when bundled»).
+  // Tree-shaking потребителя это не затрагивает: бандл остаётся ESM со `splitting`.
+  treeshake: false,
   clean: false,
   outDir: 'dist',
   // Все зависимости — external (потребитель устанавливает сам), кроме format-utils (в npm его нет).
@@ -87,10 +90,6 @@ const common: Options = {
   sourcemap: true,
 }
 
-// ⚠️ НЕ РАБОТАЕТ при `treeshake: true`: tsup пропускает результат через rollup, а тот выбрасывает
-// директивы модуля («Module level directives cause errors when bundled ... was ignored»), так что
-// banner в dist не попадает. При `treeshake: false` директива на месте (проверено 2026-10-19).
-// Решение по этому пункту ждёт сеньора, см. отчёт forms-npm-01-report.md.
 export default defineConfig([
   { ...common, entry: clientEntry, banner: { js: "'use client'" } },
   { ...common, entry: neutralEntry },
