@@ -1,0 +1,16 @@
+{
+  "packages": [
+    { "dir": "libs/forms-core", "tag": "forms-core" },
+    { "dir": "libs/forms-react", "tag": "forms-react", "useClient": { "neutral": [] } },
+    {
+      "dir": "libs/forms",
+      "tag": "forms",
+      "useClient": { "neutral": ["server-errors.js", "captcha/server.js", "validators/ru.js"] }
+    },
+    { "dir": "libs/forms-query", "tag": "forms-query" },
+    { "dir": "libs/zenstack-form-plugin", "tag": "zenstack-form-plugin" },
+    { "dir": "libs/form-mcp", "tag": "form-mcp" }
+  ],
+  "privateNamesExtra": ["premium-rosstil", "imot"],
+  "privateNamesAllow": []
+}

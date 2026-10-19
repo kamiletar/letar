@@ -303,6 +303,21 @@ const CHECKS = [
     doc: '.claude/docs/staging-compose-mount-parity.md',
   },
   {
+    id: 'npm-package-integrity',
+    group: 'npm',
+    title: 'собранные dist npm-пакетов: импорты объявлены, манифест, точки входа, use client, приватные имена',
+    run: ['bun', ['scripts/check-npm-package-integrity.mjs']],
+    // gate: поломка пакета видна только внешнему пользователю после установки — ни typecheck, ни lint,
+    // ни зелёный build:npm её не показывают (нехватка зависимости, workspace: в манифесте, потерянный
+    // 'use client', имя приватного приложения в sourcemap). Нужен собранный dist: локально —
+    // `bun scripts/check-npm-package-integrity.mjs --build`, при пустом dist проверка падает с подсказкой.
+    severity: 'gate',
+    // В общем CI-прогоне dist нет — проверку там запускает отдельный workflow npm-packages.yml.
+    ci: 'no',
+    ciNote: 'в общем CI нет dist; проверка идёт в .github/workflows/npm-packages.yml',
+    doc: '.claude/docs/npm-publish-from-monorepo.md',
+  },
+  {
     id: 'submodule-gitignore',
     group: 'submodule',
     title: 'шаблоны .gitignore во всех submodule',
