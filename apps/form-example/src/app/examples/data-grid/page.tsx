@@ -2,8 +2,12 @@
 
 import { PageH1 } from '@/components/page-h1'
 import { Code, Stack, Text } from '@chakra-ui/react'
-import { Form } from '@letar/forms'
+import { createForm } from '@letar/forms'
+import { FieldDataGrid } from '@letar/forms/data-grid'
 import { useState } from 'react'
+
+// Тяжёлое поле подключается подпутём @letar/forms/data-grid, ключ совпадает с именем поля
+const GridForm = createForm({ extraFields: { DataGrid: FieldDataGrid } })
 
 const sampleData = Array.from({ length: 50 }, (_, i) => ({
   product: `Product ${i + 1}`,
@@ -24,8 +28,8 @@ export default function DataGridExamplePage() {
         </Text>
       </Stack>
 
-      <Form initialValue={{ products: sampleData }} onSubmit={(data) => setResult(JSON.stringify(data, null, 2))}>
-        <Form.Field.DataGrid
+      <GridForm initialValue={{ products: sampleData }} onSubmit={(data) => setResult(JSON.stringify(data, null, 2))}>
+        <GridForm.Field.DataGrid
           name="products"
           label="Products"
           columns={[
@@ -37,8 +41,8 @@ export default function DataGridExamplePage() {
           pageSize={10}
           rowSelection
         />
-        <Form.Button.Submit>Save Changes</Form.Button.Submit>
-      </Form>
+        <GridForm.Button.Submit>Save Changes</GridForm.Button.Submit>
+      </GridForm>
 
       {result && (
         <Code p={4} borderRadius="md" display="block" whiteSpace="pre" overflow="auto" fontSize="sm" maxH="300px">

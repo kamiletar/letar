@@ -3,6 +3,7 @@
 import { PageH1 } from '@/components/page-h1'
 import { Box, Stack, Text, VStack } from '@chakra-ui/react'
 import { Form } from '@letar/forms'
+import { FormDebugJsonView } from '@letar/forms/debug'
 import { z } from 'zod/v4'
 
 const Schema = z.object({
@@ -18,7 +19,8 @@ export default function DebugValuesExamplePage() {
       <Box>
         <PageH1 size="lg">Debug Values</PageH1>
         <Text color="fg.muted" mt={2}>
-          JSON-инспектор значений формы в реальном времени. Скрыт в production.
+          Значения формы в реальном времени: простой JSON в ядре и интерактивное дерево из @letar/forms/debug. Скрыты в
+          production.
         </Text>
       </Box>
 
@@ -33,7 +35,9 @@ export default function DebugValuesExamplePage() {
           <Form.Field.String name="title" />
           <Form.Field.Number name="price" />
           <Form.Field.Switch name="active" label="Активен" />
-          <Form.DebugValues title="Значения формы" collapsed={2} />
+          <Form.DebugValues title="Значения формы" />
+          {/* Интерактивное дерево с раскрытием и темой — отдельный подпуть @letar/forms/debug */}
+          <FormDebugJsonView title="Дерево значений" collapsed={2} />
           <Form.Button.Submit>Сохранить</Form.Button.Submit>
         </Stack>
       </Form>
