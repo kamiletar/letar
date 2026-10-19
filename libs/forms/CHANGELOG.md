@@ -4,6 +4,17 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.41.2] - 2026-10-19
+
+### Исправлено
+
+- **Сборка проекта без `@dnd-kit/*` и `@uiw/react-json-view` падала с «Module not found» (Next.js, Vite).** Эти четыре
+  пакета были объявлены необязательными peer-зависимостями, но главная точка входа импортирует их статически
+  (`Form.Group.List` с перетаскиванием, `FormDebugValues`), поэтому без установки пакет не собирался. Теперь они
+  обычные peer-зависимости: npm ставит их сам. Лениво загружаемые (`import()`) `@tiptap/*`, `@tanstack/react-table`,
+  `@tanstack/react-virtual` и `@marsidev/react-turnstile` остаются необязательными. Нашла проверка
+  `scripts/check-npm-package-integrity.mjs` и smoke-проект `scripts/npm-smoke.mjs`.
+
 ## [2.41.1] - 2026-10-19
 
 ### Исправлено

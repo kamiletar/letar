@@ -126,22 +126,10 @@
     "@tiptap/extension-underline": ">=3.0.0"
   },
   "peerDependenciesMeta": {
-    "@dnd-kit/core": {
-      "optional": true
-    },
-    "@dnd-kit/sortable": {
-      "optional": true
-    },
-    "@dnd-kit/utilities": {
-      "optional": true
-    },
     "@tiptap/react": {
       "optional": true
     },
     "@tiptap/starter-kit": {
-      "optional": true
-    },
-    "@uiw/react-json-view": {
       "optional": true
     },
     "next-intl": {
