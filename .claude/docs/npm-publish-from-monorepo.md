@@ -136,12 +136,12 @@ entry** (см. ниже); `publint` и `@arethetypeswrong/cli` (версии з�
 
 - **Optional peer ≠ необязательный для сборки.** Turbopack и webpack разрешают **все** импорты собираемых файлов,
   включая лениво подгружаемые чанки (`import('./chunk.js')`) и даже внешний `import('pkg')`; Vite/rolldown падает
-  на статическом импорте. Поэтому `@dnd-kit/*`, `@tiptap/*`, `@tanstack/react-table`, `@tanstack/react-virtual`,
-  `@uiw/react-json-view` и `@marsidev/react-turnstile` в `@letar/forms` — обычные peer, а optional остались только
-  `next-intl` и `idb-keyval` (проверка не нашла их импортов, достижимых из корневого entry). Легально держать optional только то, что
-  лежит в **отдельном subpath-entry** (`@letar/forms-query/zenstack`), не достижимом из корневого: проверка
-  считает достижимость от корневых entry. Следствие: `.d.ts` forms ссылается на `@tiptap/react`, значит без него
-  `tsc` с `skipLibCheck: false` падает; долгосрочно тяжёлые поля лучше вынести в subpath-entry.
+  на статическом импорте. Легально держать optional только то, что лежит в **отдельном subpath-entry**, не
+  достижимом из корневого. Так устроен `@letar/forms` 3.0: `@tiptap/*`, `@dnd-kit/*`, `@tanstack/react-table`,
+  `@tanstack/react-virtual` и `@uiw/react-json-view` — optional peer подпутей `rich-text`, `data-grid`,
+  `table-editor`, `sortable`, `debug`; обязательных peer шесть; `@marsidev/react-turnstile` не нужен (Turnstile грузит
+  скрипт сам). До 3.0 эти пакеты были обычными peer, потому что ядро ссылалось на них. Правило «ядро не тянет
+  optional peer» и регистрация полей — [forms-pluggable-fields-optional-peers](/.claude/docs/forms-pluggable-fields-optional-peers.md).
 - **RSC и составные компоненты.** Из серверного компонента нельзя «входить» в клиентский модуль:
   `<Form.Field.String />` в серверном `page.tsx` даёт `undefined` (dot-into client module). Серверный
   `page.tsx` может отрендерить `<Form>`, а поля лежат в клиентском файле — так устроена фикстура Next.
