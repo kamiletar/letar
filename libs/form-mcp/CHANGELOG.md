@@ -1,5 +1,17 @@
 # Changelog — @letar/form-mcp
 
+## 2.6.0 (2026-10-20)
+
+### Added
+
+- `get_field_props` и `get_field_example` для `RichText`, `DataGrid`, `TableEditor` возвращают `registration`:
+  подпуть (`@letar/forms/rich-text`, `/data-grid`, `/table-editor`), строку импорта, запись для
+  `createForm({ extraFields })` и опциональные peer-зависимости. С `@letar/forms` 3.0.0 этих полей нет в ядре.
+
+### Changed
+
+- Паттерн `undo-redo` использует `Form.Field.Textarea` вместо `Form.Field.RichText` (поле больше не в ядре).
+
 ## 2.5.4 (2026-10-19)
 
 ### Changed

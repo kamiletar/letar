@@ -16,6 +16,48 @@ export type FieldCategory =
   | 'utility'
   | 'security'
 
+/** Как подключить поле, которого нет в ядре `@letar/forms` (с 3.0.0) */
+export interface FieldRegistration {
+  /** Подпуть пакета, например `@letar/forms/rich-text` */
+  subpath: string
+  /** Компонент, экспортируемый подпутём */
+  component: string
+  /** Строка импорта */
+  importLine: string
+  /** Запись для `createForm({ extraFields })` */
+  extraFieldsEntry: string
+  /** Опциональные peer-зависимости, которые нужно поставить */
+  peers: string[]
+}
+
+/**
+ * Поля, вынесенные из ядра в 3.0.0: без регистрации в `createForm` их нет в `AppForm.Field`.
+ * Ключ — имя поля в нижнем регистре (как в реестре). Ключ в `extraFields` обязан совпадать с именем поля.
+ */
+export const PLUGGABLE_FIELDS: Record<string, FieldRegistration> = {
+  richtext: {
+    subpath: '@letar/forms/rich-text',
+    component: 'FieldRichText',
+    importLine: "import { FieldRichText } from '@letar/forms/rich-text'",
+    extraFieldsEntry: 'RichText: FieldRichText',
+    peers: ['@tiptap/react', '@tiptap/starter-kit', '@tiptap/extension-*'],
+  },
+  datagrid: {
+    subpath: '@letar/forms/data-grid',
+    component: 'FieldDataGrid',
+    importLine: "import { FieldDataGrid } from '@letar/forms/data-grid'",
+    extraFieldsEntry: 'DataGrid: FieldDataGrid',
+    peers: ['@tanstack/react-table', '@tanstack/react-virtual'],
+  },
+  tableeditor: {
+    subpath: '@letar/forms/table-editor',
+    component: 'FieldTableEditor',
+    importLine: "import { FieldTableEditor } from '@letar/forms/table-editor'",
+    extraFieldsEntry: 'TableEditor: FieldTableEditor',
+    peers: ['@dnd-kit/core', '@dnd-kit/sortable', '@dnd-kit/utilities'],
+  },
+}
+
 /** Field description in the registry */
 export interface FieldInfo {
   /** Component name, e.g. "String" */
@@ -33,6 +75,8 @@ export interface FieldInfo {
    * они заведены в `field-props.ts`
    */
   props?: FieldPropInfo[]
+  /** Подпуть и строка регистрации, если поле не входит в ядро (RichText, DataGrid, TableEditor) */
+  registration?: FieldRegistration
 }
 
 /** Mapping of section headings -> categories */
@@ -107,6 +151,10 @@ export function buildFieldRegistry(fieldSections: DocSection[]): Map<string, Fie
       const props = FIELD_EXTRA_PROPS[name.toLowerCase()]
       if (props) {
         info.props = props
+      }
+      const registration = PLUGGABLE_FIELDS[name.toLowerCase()]
+      if (registration) {
+        info.registration = registration
       }
       registry.set(name.toLowerCase(), info)
     }

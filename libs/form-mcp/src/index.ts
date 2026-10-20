@@ -58,7 +58,7 @@ export function createFormMcpServer(options: FormMcpServerOptions): McpServer {
 
   server.registerTool('get_field_props', {
     description:
-      'Get props, description, and documentation for a specific form field. Select and Combobox also return `props`: the dependent-field props (dependsOn, depsReady, clearOnParentChange, disableWhenParentEmpty, placeholderWhenDisabled) and `deps` in loaders and onCreate/onUpdate context.',
+      'Get props, description, and documentation for a specific form field. RichText, DataGrid and TableEditor (not in the core since @letar/forms 3.0.0) also return `registration`: the subpath, import line, `extraFields` entry and optional peers. Select and Combobox also return `props`: the dependent-field props (dependsOn, depsReady, clearOnParentChange, disableWhenParentEmpty, placeholderWhenDisabled) and `deps` in loaders and onCreate/onUpdate context.',
     inputSchema: z.object({ fieldType: z.string().describe('Field type, e.g.: String, Date, Select, Combobox') }),
   }, async ({ fieldType }) => {
     const field = fieldRegistry.get(fieldType.toLowerCase())
@@ -79,6 +79,9 @@ export function createFormMcpServer(options: FormMcpServerOptions): McpServer {
     }
     if (field.props) {
       result.props = field.props
+    }
+    if (field.registration) {
+      result.registration = field.registration
     }
     return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] }
   })
@@ -279,6 +282,15 @@ function generateFieldExample(field: FieldInfo): string {
   const lines = [
     `// Usage example for ${field.fullName}`,
     '',
+    ...(field.registration
+      ? [
+        `// Since @letar/forms 3.0.0 the field is not in the core: register it once in createForm`,
+        field.registration.importLine,
+        `export const AppForm = createForm({ extraFields: { ${field.registration.extraFieldsEntry} } })`,
+        `// then use <AppForm.Field.${field.name} />; needs: ${field.registration.peers.join(', ')}`,
+        '',
+      ]
+      : []),
     `// Declarative API:`,
     `<${field.fullName} name="myField" label="My Field" />`,
     '',
