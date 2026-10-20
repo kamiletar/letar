@@ -10,6 +10,7 @@ import {
   useUpdateRecipe,
 } from '@/lib/hooks'
 import { Box, HStack, VStack } from '@chakra-ui/react'
+import { SortableGroupList } from '@letar/forms/sortable'
 import type { ReactNode } from 'react'
 
 // Используем DevelopAppForm который расширяет базовый Form через createForm
@@ -123,25 +124,24 @@ export const FormExample = () => {
         onSubmit={handleSubmit}
       >
         <VStack gap={4}>
-          <Form.Group.List
+          <SortableGroupList
             name={'components'}
-            sortable
             wrapper={({ children }: { children: ReactNode }) => {
               return (
                 <VStack>
                   {children}
-                  <Form.Group.List.Button.Add />
+                  <SortableGroupList.Button.Add />
                 </VStack>
               )
             }}
           >
             <HStack gap={4}>
-              <Form.Group.List.Button.DragHandle />
+              <SortableGroupList.Button.DragHandle />
               <Form.Field.String name={'title'} />
               <Form.Field.Number name={'weightGrams'} />
-              <Form.Group.List.Button.Remove />
+              <SortableGroupList.Button.Remove />
             </HStack>
-          </Form.Group.List>
+          </SortableGroupList>
 
           <Form.Group name={'info'}>
             <Form.Group name={'base'}>

@@ -29,7 +29,7 @@ function ProductForm() {
       <HistoryControls history={history} showCounter />
 
       <Form.Field.String name="title" />
-      <Form.Field.RichText name="description" />
+      <Form.Field.Textarea name="description" />
       <Form.Field.Currency name="price" />
       <Form.Button.Submit>Сохранить</Form.Button.Submit>
     </Form>

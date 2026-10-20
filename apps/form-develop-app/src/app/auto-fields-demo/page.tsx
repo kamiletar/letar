@@ -2,6 +2,7 @@
 
 import { Badge, Box, Code, Heading, HStack, Separator, Text, VStack } from '@chakra-ui/react'
 import { Form } from '@letar/forms'
+import { FieldRichText } from '@letar/forms/rich-text'
 import { useState } from 'react'
 import { z } from 'zod/v4'
 import { DemoPageLayout, SubmittedDataPreview } from '../_components'
@@ -236,7 +237,8 @@ published: z.boolean().meta({ ui: { fieldType: 'switch' } })
 
 // В JSX:
 <Form.AutoFields exclude={['content']} />
-<Form.Field.RichText name="content" />  // Кастомная обёртка`}
+import { FieldRichText } from '@letar/forms/rich-text'
+<FieldRichText name="content" />  // Редактор подключается подпутём`}
           </Code>
 
           <Form schema={ArticleSchema} initialValue={articleInitialValues} onSubmit={setMixedData}>
@@ -265,7 +267,7 @@ published: z.boolean().meta({ ui: { fieldType: 'switch' } })
 
               {/* Контент — вручную с кастомной высотой */}
               <Box>
-                <Form.Field.RichText name="content" label="Содержимое статьи" />
+                <FieldRichText name="content" label="Содержимое статьи" />
               </Box>
 
               <HStack justify="flex-end" gap={2}>
