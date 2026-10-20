@@ -4,6 +4,7 @@
 // поэтому поля лежат в клиентском demo-fields.tsx.
 import { Form } from '@letar/forms'
 import { DemoFields } from './demo-fields'
+import { RichDemo } from './rich-demo'
 
 async function save() {
   'use server'
@@ -16,6 +17,7 @@ export default function Page() {
       <Form initialValue={{ title: '', rating: 5, kind: 'a' }} onSubmit={save}>
         <DemoFields />
       </Form>
+      <RichDemo />
     </main>
   )
 }

@@ -251,6 +251,74 @@ describe('checkOptionalPeers', () => {
     expect(run(dist).length).toBe(1)
   })
 
+  describe('optionalPeerEntries: «ядро» не тянет optional peer (forms 3.0)', () => {
+    const exportsMap = {
+      '.': { import: './index.js' },
+      './fields/text': { import: './fields/text.js' },
+      './rich-text': { import: './rich-text.js' },
+      './offline': { import: './offline.js' },
+      './package.json': './package.json',
+    }
+    const manifest = { peerDependencies: peers, peerDependenciesMeta: optionalMeta, exports: exportsMap }
+    const runWith = (dist, optionalPeerEntries) =>
+      checkOptionalPeers(dist, JSON.parse(readFileSync(join(dist, 'package.json'), 'utf8')), { optionalPeerEntries })
+
+    test('разрешённые subpath-ы (rich-text, offline) могут тянуть optional peer', () => {
+      const dist = makeDist({
+        pkg: manifest,
+        files: {
+          'index.js': 'export const a = 1\n',
+          'fields/text.js': 'export const t = 1\n',
+          'rich-text.js': "import { h } from 'heavy-lib'\nexport const b = h\n",
+          'offline.js': "import { h } from 'heavy-lib'\nexport const c = h\n",
+        },
+      })
+      expect(runWith(dist, ['./rich-text', './offline'])).toEqual([])
+    })
+
+    test('другой subpath (fields/text), не входящий в список, тянет optional peer — ошибка', () => {
+      const dist = makeDist({
+        pkg: manifest,
+        files: {
+          'index.js': 'export const a = 1\n',
+          'fields/text.js': "import { h } from 'heavy-lib'\nexport const t = h\n",
+          'rich-text.js': "import { h } from 'heavy-lib'\nexport const b = h\n",
+          'offline.js': 'export const c = 1\n',
+        },
+      })
+      const errors = runWith(dist, ['./rich-text', './offline'])
+      expect(errors.length).toBe(1)
+      expect(errors[0]).toContain('fields/text.js')
+    })
+
+    test('чанк, общий для ядра и разрешённого subpath, — ошибка', () => {
+      const dist = makeDist({
+        pkg: manifest,
+        files: {
+          'index.js': "export { a } from './shared.js'\n",
+          'fields/text.js': 'export const t = 1\n',
+          'rich-text.js': "export { a } from './shared.js'\n",
+          'offline.js': 'export const c = 1\n',
+          'shared.js': "import { h } from 'heavy-lib'\nexport const a = h\n",
+        },
+      })
+      expect(runWith(dist, ['./rich-text', './offline']).length).toBe(1)
+    })
+
+    test('без списка subpath-ы не проверяются (прежнее поведение)', () => {
+      const dist = makeDist({
+        pkg: manifest,
+        files: {
+          'index.js': 'export const a = 1\n',
+          'fields/text.js': "import { h } from 'heavy-lib'\nexport const t = h\n",
+          'rich-text.js': 'export const b = 1\n',
+          'offline.js': 'export const c = 1\n',
+        },
+      })
+      expect(runWith(dist, undefined)).toEqual([])
+    })
+  })
+
   test('обычный (не optional) peer со статическим импортом — не ошибка', () => {
     const dist = makeDist({
       pkg: { peerDependencies: peers },

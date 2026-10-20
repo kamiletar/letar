@@ -251,9 +251,17 @@ export function extractExternalImports(src) {
  * разрешает ВСЕ импорты собираемых файлов, в том числе чанки, подгружаемые через `import('./chunk.js')`, и без
  * пакета падает с «Module not found», хотя npm его не ставил. Внешний `import('pkg')` — тоже: Turbopack и webpack
  * разрешают его при сборке, а Vite — нет (поэтому только Next-проект это и показывает).
+ *
+ * По умолчанию достижимость считается только от корневых entry (`.`, main, bin): subpath-entry — штатное место для
+ * optional peer. Пакет, у которого optional peer нужны лишь части subpath-ов (`@letar/forms`: тяжёлые поля), задаёт
+ * `optionalPeerEntries` — список subpath-ов, которым это разрешено. Тогда «ядром» считаются корневые entry и все
+ * остальные subpath-entry: ни один из них не должен тянуть optional peer.
+ * @param {string} dist
+ * @param {object} pj dist/package.json
+ * @param {{ optionalPeerEntries?: string[] }} [options]
  * @returns {string[]} ошибки
  */
-export function checkOptionalPeers(dist, pj) {
+export function checkOptionalPeers(dist, pj, options = {}) {
   const optional = new Set(
     Object.entries(pj.peerDependenciesMeta ?? {})
       .filter(([, meta]) => meta?.optional)
@@ -264,9 +272,19 @@ export function checkOptionalPeers(dist, pj) {
   }
   // Subpath-entry (`exports['./zenstack']`) — штатное место для optional peer: бандлер разрешит его, только если
   // потребитель сам импортирует этот subpath. Поэтому достижимость считаем от корневых entry (`.`, main, bin).
-  const entries = collectEntryPaths(pj)
+  const rootFiles = collectEntryPaths(pj)
     .filter(({ where }) => !where.startsWith('exports../'))
-    .map(({ file }) => path.join(dist, file))
+    .map(({ file }) => file)
+  const coreSubpathFiles = []
+  if (options.optionalPeerEntries) {
+    const allowed = new Set(options.optionalPeerEntries)
+    for (const [key, value] of Object.entries(pj.exports ?? {})) {
+      if (key === '.' || key === './package.json' || allowed.has(key)) { continue }
+      coreSubpathFiles.push(...collectEntryPaths({ exports: value }).map(({ file }) => file))
+    }
+  }
+  const entries = [...rootFiles, ...coreSubpathFiles]
+    .map((file) => path.join(dist, file))
     .filter((file) => /\.(js|mjs|cjs)$/.test(file) && fs.existsSync(file))
   const visited = new Set()
   const offenders = new Map() // peer → { file, entry }
@@ -363,10 +381,10 @@ const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
 /**
  * Проверяет один собранный dist.
- * @param {{ dist: string, srcVersion: string, useClient?: { neutral: string[] }, privateNames: string[], privateAllow?: string[] }} opts
+ * @param {{ dist: string, srcVersion: string, useClient?: { neutral: string[] }, privateNames: string[], privateAllow?: string[], optionalPeerEntries?: string[] }} opts
  * @returns {string[]} список ошибок (пустой — всё в порядке)
  */
-export function checkDist({ dist, srcVersion, useClient, privateNames, privateAllow = [] }) {
+export function checkDist({ dist, srcVersion, useClient, privateNames, privateAllow = [], optionalPeerEntries }) {
   const errors = []
   const pjPath = path.join(dist, 'package.json')
   if (!fs.existsSync(pjPath)) { return ['нет dist/package.json — сначала build:npm или --build'] }
@@ -438,7 +456,7 @@ export function checkDist({ dist, srcVersion, useClient, privateNames, privateAl
   }
 
   // 7. Optional peer, достижимый статически из entry
-  errors.push(...checkOptionalPeers(dist, pj))
+  errors.push(...checkOptionalPeers(dist, pj, { optionalPeerEntries }))
 
   // 5. Имена приватных приложений (целое слово, с учётом регистра, во всех текстовых файлах)
   const allow = new Set(privateAllow)
@@ -580,6 +598,7 @@ function main() {
       useClient: pkg.useClient,
       privateNames,
       privateAllow: registry.privateNamesAllow ?? [],
+      optionalPeerEntries: pkg.optionalPeerEntries,
     })
 
     if (wantPublint && errors.length === 0) {

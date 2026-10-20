@@ -11,8 +11,10 @@
 //   node scripts/npm-smoke.mjs --keep                # не удалять временные каталоги, напечатать пути
 //
 // Проверки:
-//   next      tsc --noEmit + next build (серверный page.tsx рендерит <Form> — значит 'use client' дошёл до бандла)
-//   vite      tsc --noEmit + vite build + ровно одна версия @letar/forms-core в дереве зависимостей
+//   next      tsc --noEmit + next build (серверный page.tsx рендерит <Form> — значит 'use client' дошёл до бандла);
+//             фикстура ставит @tiptap/* и подключает RichText из @letar/forms/rich-text через extraFields
+//   vite      без optional peer: в node_modules нет @tiptap, @dnd-kit, @tanstack/react-table, @uiw; затем
+//             tsc --noEmit + vite build + ровно одна версия @letar/forms-core в дереве зависимостей
 //   zenstack  zenstack generate с плагином из tarball + tsc --noEmit по сгенерированным схемам
 //   mcp       cli.js из tarball по stdio: initialize + tools/list, в ответе есть list_fields
 //
@@ -152,6 +154,14 @@ async function smokeVite(ctx) {
   const dir = copyFixture('vite', ctx.tmpRoot)
   ctx.dirs.vite = dir
   npmInstall(dir, PART_PACKAGES.vite.map((t) => ctx.tarballs[t]), 'vite')
+  // 3.0: тяжёлые пакеты — optional peer, `npm install` обязан обойтись без них (фикстура их не просит)
+  for (const heavy of ['@tiptap', '@dnd-kit', '@tanstack/react-table', '@uiw']) {
+    if (fs.existsSync(path.join(dir, 'node_modules', ...heavy.split('/')))) {
+      throw new SmokeError(
+        `vite: после установки в node_modules появился ${heavy} — он должен быть необязательным peer @letar/forms`,
+      )
+    }
+  }
   run('npx', ['tsc', '--noEmit'], { cwd: dir, label: 'vite: tsc --noEmit' })
   strictPass(dir, 'vite', ctx)
   run('npx', ['vite', 'build'], { cwd: dir, label: 'vite: vite build' })
