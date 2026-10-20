@@ -15,10 +15,24 @@ pnpm add @letar/forms @tanstack/react-form @chakra-ui/react zod framer-motion
 
 ## Опциональные зависимости
 
-Для drag & drop сортировки в массивах полей:
+Обязательных peer-зависимостей шесть (`react`, `@chakra-ui/react`, `@tanstack/react-form`, `framer-motion`, `react-icons`, `zod`). Тяжёлым полям нужны свои пакеты, только если вы их используете.
+
+Для drag & drop сортировки (`@letar/forms/sortable`, `@letar/forms/table-editor`):
 
 ```bash
 npm install @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities
+```
+
+Для `RichText` (`@letar/forms/rich-text`):
+
+```bash
+npm install @tiptap/react @tiptap/starter-kit @tiptap/extension-image @tiptap/extension-link @tiptap/extension-placeholder @tiptap/extension-underline
+```
+
+Для `DataGrid` (`@letar/forms/data-grid`):
+
+```bash
+npm install @tanstack/react-table @tanstack/react-virtual
 ```
 
 Для масок ввода (телефон, кредитная карта и т.д.):

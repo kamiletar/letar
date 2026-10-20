@@ -56,16 +56,20 @@ const Schema = z.object({
 
 ## Sortable Lists
 
-Enable drag & drop reordering with `sortable` prop:
+Since 3.0.0 drag & drop reordering is a separate entry point, `SortableGroupList` from `@letar/forms/sortable`
+(the `sortable` prop of `Form.Group.List` was removed):
 
 ```tsx
-<Form.Group.List name="items" sortable>
+import { SortableGroupList } from '@letar/forms/sortable'
+
+<SortableGroupList name="items">
   <Form.Field.String name="title" />
-  <Form.Group.List.Button.Remove />
-</Form.Group.List>
+  <SortableGroupList.Button.DragHandle />
+  <SortableGroupList.Button.Remove />
+</SortableGroupList>
 ```
 
-Requires `@dnd-kit/core`, `@dnd-kit/sortable`, and `@dnd-kit/utilities` as peer dependencies.
+Requires `@dnd-kit/core`, `@dnd-kit/sortable`, and `@dnd-kit/utilities` as optional peer dependencies.
 
 ## Nested Groups
 

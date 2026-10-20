@@ -15,10 +15,24 @@ pnpm add @letar/forms @tanstack/react-form @chakra-ui/react zod framer-motion
 
 ## Optional Dependencies
 
-For drag & drop reordering in array fields:
+Six peer dependencies are required (`react`, `@chakra-ui/react`, `@tanstack/react-form`, `framer-motion`, `react-icons`, `zod`). Heavy fields need their own packages only when you use them.
+
+For drag & drop reordering (`@letar/forms/sortable`, `@letar/forms/table-editor`):
 
 ```bash
 npm install @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities
+```
+
+For `RichText` (`@letar/forms/rich-text`):
+
+```bash
+npm install @tiptap/react @tiptap/starter-kit @tiptap/extension-image @tiptap/extension-link @tiptap/extension-placeholder @tiptap/extension-underline
+```
+
+For `DataGrid` (`@letar/forms/data-grid`):
+
+```bash
+npm install @tanstack/react-table @tanstack/react-virtual
 ```
 
 For input masking (phone, credit card, etc.):

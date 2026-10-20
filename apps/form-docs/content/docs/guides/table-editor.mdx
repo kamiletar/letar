@@ -5,6 +5,9 @@ description: Inline editable table for array fields — tabular data entry with 
 
 import { SkinCodeFile } from '@/components/skin/skin-code-file'
 
+> Since 3.0.0 this field is not in the core. Register it once: `createForm({ extraFields: { TableEditor: FieldTableEditor } })`, import from
+> `@letar/forms/table-editor`, then use `AppForm.Field.TableEditor`. In the examples below `Form` stands for your `AppForm`.
+
 ## Overview
 
 `Form.Field.TableEditor` is an inline editable table for array fields. It's a tabular alternative to `Form.Group.List` — instead of card-based layout, data is presented in a compact table with click-to-edit cells.
