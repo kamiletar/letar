@@ -435,9 +435,10 @@ applyServerErrors(form, mapped)
 import { Form } from '@letar/forms'
 ```
 
-### Подключаемые поля (с 2.42.0)
+### Подключаемые поля (с 3.0.0)
 
-Тяжёлые поля вынесены в отдельные точки входа и подключаются в `createForm` через `extraFields`.
+Тяжёлые поля вынесены из ядра в отдельные точки входа и подключаются в `createForm` через `extraFields`.
+Переход с 2.x — [docs/MIGRATION-3.md](./docs/MIGRATION-3.md).
 ⚠️ Ключ обязан совпадать с именем поля: по нему `AppForm.Field.<Имя>` и автоформа (`fieldType: 'richText'`)
 находят компонент.
 
@@ -461,17 +462,22 @@ export const AppForm = createForm({
 | `@letar/forms/debug`        | `FormDebugJsonView` — интерактивное дерево значений                | `@uiw/react-json-view`                   |
 
 `Form.DebugValues` и проп `debug` в ядре рисуют простой `<pre>` с JSON (проп `collapsed` в нём игнорируется).
-В 2.x старые способы (`Form.Field.RichText` без регистрации, `sortable` у `Form.Group.List`) работают как раньше;
-в 3.0.0 тяжёлое уйдёт из ядра.
+`AppForm.Field.RichText` без регистрации — ошибка typecheck; `fieldType: 'richText'` в автоформе без регистрации
+рисует Textarea и пишет в dev-консоль одно предупреждение на поле. Проп `sortable` у `Form.Group.List` убран —
+используйте `SortableGroupList`.
 
-### Опциональные зависимости (npm)
+### Зависимости (npm)
 
-| Пакет                  | Для чего                                 |
-| ---------------------- | ---------------------------------------- |
-| `@dnd-kit/*`           | `@letar/forms/sortable`, `/table-editor` |
-| `@tiptap/*`            | `@letar/forms/rich-text`                 |
-| `@uiw/react-json-view` | `@letar/forms/debug`                     |
-| `next-intl`            | i18n интеграция                          |
+Обязательных peer-зависимостей шесть: `react`, `@chakra-ui/react`, `@tanstack/react-form`, `framer-motion`,
+`react-icons`, `zod`. Остальные опциональны и нужны только своим подпутям:
+
+| Пакет                                    | Для чего                                 |
+| ---------------------------------------- | ---------------------------------------- |
+| `@dnd-kit/*`                             | `@letar/forms/sortable`, `/table-editor` |
+| `@tiptap/*`                              | `@letar/forms/rich-text`                 |
+| `@tanstack/react-table`, `react-virtual` | `@letar/forms/data-grid`                 |
+| `@uiw/react-json-view`                   | `@letar/forms/debug`                     |
+| `idb-keyval`                             | `@letar/forms/offline`                   |
 
 CAPTCHA Cloudflare Turnstile грузит свой скрипт сам, сторонний пакет не нужен.
 
