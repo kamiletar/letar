@@ -33,11 +33,12 @@ updated: 2026-10-20
 - [x] Этап 4 — publish-npm.yml по тегу через OIDC + preflight, npm-packages.yml на PR; запушено 2026-10-20 (958eaf55d)
 - [x] Этап 4а — проверка «установка — подмножество bun.lock» в трёх workflow вместо --frozen-lockfile (задание forms-npm-03-lock-subset.md)
 - [x] Этап 4б — лёгкое ядро: тяжёлые поля в подпути rich-text, data-grid, table-editor, sortable, debug; 6 обязательных peer; forms 3.0.0 (задание forms-npm-04-pluggable-fields.md: фаза A совместимая → письма aboi/mandala → фаза C ломающая)
-- [ ] Этап 5 — публикация под next (новые имена — владелец вручную)
+- [x] Этап 5 — публикация под next (новые имена — владелец вручную)
 - [ ] Этап 6 — перевод в latest
 
 ## Журнал
 
+- 2026-10-20: этап 5 выполнен. Trusted Publisher настроен у шести пакетов (Allow npm publish, без dist-tag), NPM_TOKEN в репозитории не было. Dry_run forms сначала упал (smoke не собирал dist forms-core) — исправлено 59a716735. Теги forms-v3.0.0, zenstack-form-plugin-v4.4.5, form-mcp-v2.6.0 опубликованы из CI через OIDC с provenance; dist-tag next: forms 3.0.0, zenstack-form-plugin 4.4.5, form-mcp 2.6.0 (latest пока старые). Три тега, запушенные разом, вытеснили средний прогон из очереди concurrency — перезапущен вручную; теги ставить по одному. Остался этап 6 — перевод в latest.
 - 2026-10-20: владелец включил 2FA (auth-and-writes) и вручную опубликовал forms-core 0.31.0, forms-react 0.26.2, forms-query 0.4.1 с --tag next. У новых имён npm сам ставит и latest на первую версию — это ожидаемо. Дальше: Trusted Publisher для шести пакетов, удалить NPM_TOKEN, dry_run publish-npm.yml, теги.
 - 2026-10-20: этапы 4а и 4б приняты сеньором. 4а: scripts/check-lock-subset.mjs (a697793ae…ede939ecf) после bun install в ci.yml, npm-packages.yml, publish-npm.yml; bun 1.4.3 в ci.yml. 4б: фаза A — forms 2.42.0 (f80a67437…c1cee970d); aboi (c0e9e69, SHA ac4a5596b) и mandala (65b41effc, 127c60ef9) подключили поля через extraFields; фаза C — forms 3.0.0, form-mcp 2.6.0 (cd28ce150…6904bdf17): 6 обязательных peer вместо 18, 13 optional, правило «ядро не тянет optional peer», smoke без TipTap/dnd-kit. Typecheck 12 потребителей форм, включая приватные, зелёный. Открыто: семь приватных приложений без пяти строк paths новых подпутей (lib-subpath-paths красный, фрагмент в broadcast 2685).
 - 2026-10-20: решение по открытым вопросам принято владельцем (страница https://claude.ai/artifact/EhJP4DFuTUYunpwgbLd6hC). Peer: тяжёлые поля подключаются через extraFields из подпутей, первой публичной версией forms станет 3.0.0. Lockfile: скрипт check-lock-subset после bun install разрешает только удаление записей; токен для приватных submodule в CI отклонён. Задания этапов 4а и 4б — в .claude/artifacts/tasks.

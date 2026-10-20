@@ -111,6 +111,10 @@ smoke и `npm publish --dry-run`; реестр npm в этом режиме не
    owner `kamiletar`, repository `letar`, workflow `publish-npm.yml`, environment — пусто.
 3. **Удалить секрет `NPM_TOKEN`** в настройках репозитория GitHub: новый workflow им не пользуется.
 4. **Первый настоящий выпуск** — тегом по порядку; перед ним — `workflow_dispatch` с `dry_run: true` по каждому пакету.
+   ⚠️ Теги пушить **по одному**, дожидаясь конца прогона: у workflow одна группа `concurrency`, GitHub держит один
+   прогон в работе и один в очереди, третий вытесняет ожидающий (`cancelled`). Так 2026-10-20 отменился выпуск
+   `zenstack-form-plugin`; лечится `gh run rerun <id>` после окончания остальных, тег заново ставить не нужно.
+   Сразу после публикации npm пишет «package is being processed» — `dist-tag next` появляется через несколько минут.
 
 ## Что проверяют `check-npm-package-integrity` и smoke
 
