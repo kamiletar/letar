@@ -15,4 +15,14 @@
  * <AppForm.Field.RichText name="content" label="Текст" />
  * ```
  */
-export { FieldRichText, type RichTextFieldProps } from '../lib/declarative/form-fields/text/field-rich-text'
+export {
+  FieldRichText,
+  type ImageUploadConfig,
+  type RichTextFieldProps,
+} from '../lib/declarative/form-fields/text/field-rich-text'
+export {
+  DEFAULT_TOOLBAR_BUTTONS,
+  TOOLBAR_CONFIG,
+  type ToolbarButton,
+  type ToolbarButtonConfig,
+} from '../lib/declarative/form-fields/text/toolbar-config'

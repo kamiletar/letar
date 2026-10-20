@@ -14,4 +14,10 @@
  * </SortableGroupList>
  * ```
  */
+export {
+  DragHandle,
+  SortableItem,
+  SortableWrapper,
+  useSortableItemContext,
+} from '../lib/declarative/form-group/form-group-list-sortable'
 export { SortableGroupList, type SortableGroupListProps } from '../lib/declarative/form-group/sortable-group-list'

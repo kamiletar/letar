@@ -4,6 +4,7 @@ import type { ReactNode } from 'react'
 import { beforeAll, describe, expect, it, vi } from 'vitest'
 import { z } from 'zod/v4'
 import { createForm } from './create-form'
+import { Form } from './index'
 
 const TestWrapper = ({ children }: { children: ReactNode }) => (
   <ChakraProvider value={defaultSystem}>{children}</ChakraProvider>
@@ -31,7 +32,7 @@ const schema = z.object({
   body: z.string().meta({ ui: { title: 'Текст', fieldType: 'richText' } }),
 })
 
-describe('extraFields в реестре createForm (forms 2.42)', () => {
+describe('extraFields в реестре createForm', () => {
   it('fieldType: richText рисует поле из extraFields, а не встроенное', () => {
     const AppForm = createForm({ extraFields: { RichText: RichTextStub } })
     render(
@@ -63,9 +64,72 @@ describe('extraFields в реестре createForm (forms 2.42)', () => {
     expect(AppForm.Field.RichText).toBe(RichTextStub)
   })
 
-  it('без extraFields RichText остаётся встроенным (совместимость 2.x)', () => {
+  it('без extraFields в Field нет ни RichText, ни DataGrid, ни TableEditor (3.0)', () => {
     const AppForm = createForm()
-    expect(AppForm.Field.RichText).not.toBe(RichTextStub)
-    expect(AppForm.Field.RichText).toBeDefined()
+    expect(AppForm.Field).not.toHaveProperty('RichText')
+    expect(AppForm.Field).not.toHaveProperty('DataGrid')
+    expect(AppForm.Field).not.toHaveProperty('TableEditor')
+    expect(Form.Field).not.toHaveProperty('RichText')
+    expect(Form.Field).not.toHaveProperty('DataGrid')
+    expect(Form.Field).not.toHaveProperty('TableEditor')
+  })
+})
+
+describe('fieldType: richText без регистрации (3.0)', () => {
+  const warnSchema = (name: string) =>
+    z.object({
+      [name]: z.string().meta({ ui: { title: 'Текст', fieldType: 'richText' } }),
+    })
+
+  it('рисует обычный Textarea вместо редактора', () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const AppForm = createForm()
+    render(
+      <TestWrapper>
+        <AppForm schema={warnSchema('fallbackBody')} initialValue={{ fallbackBody: '' }} onSubmit={vi.fn()}>
+          <AppForm.AutoFields />
+        </AppForm>
+      </TestWrapper>,
+    )
+    expect(screen.getByRole('textbox')).toBeInstanceOf(HTMLTextAreaElement)
+    vi.restoreAllMocks()
+  })
+
+  it('предупреждает в dev один раз на поле, с подсказкой про @letar/forms/rich-text', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const AppForm = createForm()
+    const { rerender } = render(
+      <TestWrapper>
+        <AppForm schema={warnSchema('warnedBody')} initialValue={{ warnedBody: '' }} onSubmit={vi.fn()}>
+          <AppForm.AutoFields />
+        </AppForm>
+      </TestWrapper>,
+    )
+    // Повторный рендер того же поля не добавляет предупреждений
+    rerender(
+      <TestWrapper>
+        <AppForm schema={warnSchema('warnedBody')} initialValue={{ warnedBody: '' }} onSubmit={vi.fn()}>
+          <AppForm.AutoFields />
+        </AppForm>
+      </TestWrapper>,
+    )
+    const richTextWarnings = warn.mock.calls.filter(([text]) => String(text).includes('warnedBody'))
+    expect(richTextWarnings).toHaveLength(1)
+    expect(String(richTextWarnings[0][0])).toContain("'@letar/forms/rich-text'")
+    vi.restoreAllMocks()
+  })
+
+  it('с зарегистрированным RichText предупреждения нет', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const AppForm = createForm({ extraFields: { RichText: RichTextStub } })
+    render(
+      <TestWrapper>
+        <AppForm schema={warnSchema('registeredBody')} initialValue={{ registeredBody: '' }} onSubmit={vi.fn()}>
+          <AppForm.AutoFields />
+        </AppForm>
+      </TestWrapper>,
+    )
+    expect(warn.mock.calls.filter(([text]) => String(text).includes('registeredBody'))).toHaveLength(0)
+    vi.restoreAllMocks()
   })
 })

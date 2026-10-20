@@ -1,6 +1,9 @@
 'use client'
 
 import { createLazyComponent } from '../../lazy-component'
+// Только тип: рантайм-импорт реализации (с @tiptap/*) остаётся ленивым `import()` ниже.
+// Без явного параметра `createLazyComponent` выводит `ComponentType<any>` и поле теряет типы пропсов.
+import type { FieldRichText as FieldRichTextImpl } from './field-rich-text-impl'
 
 // Тип не тянет рантайм-импорт @tiptap/* — интерфейс, стирается при компиляции
 export type { ImageUploadConfig, RichTextFieldProps } from './field-rich-text-impl'
@@ -46,7 +49,7 @@ export type { ImageUploadConfig, RichTextFieldProps } from './field-rich-text-im
  * />
  * ```
  */
-export const FieldRichText = createLazyComponent(
+export const FieldRichText = createLazyComponent<typeof FieldRichTextImpl>(
   () => import('./field-rich-text-impl').then((m) => ({ default: m.FieldRichText })),
   '150px',
 )

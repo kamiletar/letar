@@ -46,7 +46,6 @@ import {
   FieldRadioCard,
   FieldRadioGroup,
   FieldRating,
-  FieldRichText,
   FieldSchedule,
   FieldSegmentedGroup,
   FieldSelect,
@@ -74,12 +73,10 @@ import {
   FieldSNILS,
 } from './form-fields/document'
 import { CreditCardField } from './form-fields/specialized/credit-card'
-import { FieldDataGrid, FieldTableEditor } from './form-fields/table'
 import { FormFromSchema } from './form-from-schema'
 import { FormGroupDeclarative } from './form-group/form-group-declarative'
 import { ListButtonAdd, ListButtonRemove } from './form-group/form-group-list-buttons'
 import { FormGroupListDeclarative } from './form-group/form-group-list-declarative'
-import { DragHandle } from './form-group/form-group-list-sortable'
 import { FormInfoBlock } from './form-info-block'
 import { Form as FormRoot } from './form-root'
 import {
@@ -99,7 +96,6 @@ import { FormUrlSync } from './use-form-url-sync'
 const ListButton = {
   Add: ListButtonAdd,
   Remove: ListButtonRemove,
-  DragHandle: DragHandle,
 }
 
 // FormGroupList with Button subcomponent
@@ -123,7 +119,6 @@ const FormField = {
   MaskedInput: FieldMaskedInput,
   Editable: FieldEditable,
   EditIntent: FieldEditIntent,
-  RichText: FieldRichText,
   Slug: FieldSlug,
   // Number fields
   Number: FieldNumber,
@@ -171,9 +166,6 @@ const FormField = {
   // Утилитарные поля
   Hidden: FieldHidden,
   Calculated: FieldCalculated,
-  // Табличные редакторы
-  TableEditor: FieldTableEditor,
-  DataGrid: FieldDataGrid,
   // Банковская карта
   CreditCard: CreditCardField,
 }
@@ -401,7 +393,6 @@ export {
   FieldRadioCard,
   FieldRadioGroup,
   FieldRating,
-  FieldRichText,
   FieldSchedule,
   FieldSegmentedGroup,
   FieldSelect,
@@ -424,7 +415,6 @@ export {
   type RadioGroupFieldProps,
   type RadioOption,
   type RatingFieldProps,
-  type RichTextFieldProps,
   type ScheduleFieldProps,
   type SegmentedGroupFieldProps,
   type SegmentedGroupOption,
@@ -436,19 +426,12 @@ export {
   type SlugFieldProps,
   type TagsFieldProps,
   type TimeSlot,
-  type ToolbarButton,
   useDeclarativeField,
   type WeeklySchedule,
 } from './form-fields'
 export { FormGroupDeclarative } from './form-group/form-group-declarative'
 export { ListButtonAdd, ListButtonRemove } from './form-group/form-group-list-buttons'
 export { FormGroupListDeclarative } from './form-group/form-group-list-declarative'
-export {
-  DragHandle,
-  SortableItem,
-  SortableWrapper,
-  useSortableItemContext,
-} from './form-group/form-group-list-sortable'
 
 // Factory for app-specific forms
 export { createForm, type ExtendedForm, type FormRegistryCheck, type FormRegistryUnregistered } from './create-form'
@@ -648,21 +631,6 @@ export {
   validateMimeType,
 } from './security'
 export type { FileSecurityConfig, FileSecurityResult, RateLimitConfig, RateLimitState } from './security'
-
-// TableEditor & DataGrid
-export { FieldDataGrid, FieldTableEditor, TableEditorContext, useTableEditorContext } from './form-fields/table'
-export type {
-  CellCoord,
-  CellFieldType,
-  DataGridColumnDef,
-  DataGridFieldProps,
-  ResolvedColumn,
-  TableColumnDef,
-  TableEditorContextValue,
-  TableEditorFieldProps,
-  TableFooterDef,
-  TableNavigationState,
-} from './form-fields/table'
 
 // Conversational Mode (Typeform-стиль)
 export {

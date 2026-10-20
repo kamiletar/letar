@@ -11,7 +11,6 @@ import type {
   FormGroupListItemContextValue,
 } from '../types'
 import { FormGroupListContext, FormGroupListItemContext } from './form-group-list-context'
-import { SortableItem, SortableWrapper } from './form-group-list-sortable'
 
 /** Пропсы обёртки всего списка (`ListWrapper`): то же, что у `SortableWrapper` из dnd-kit-слоя */
 export interface FormGroupListWrapperSlotProps {
@@ -87,15 +86,11 @@ export function FormGroupListBase({
   children,
   emptyContent,
   wrapper,
-  sortable = false,
   maxItems: maxItemsProp,
   minItems: minItemsProp,
-  ListWrapper: ListWrapperSlot,
-  ItemWrapper: ItemWrapperSlot,
+  ListWrapper,
+  ItemWrapper,
 }: FormGroupListDeclarativeProps & FormGroupListSlots): ReactElement {
-  // Проп `sortable` (встроенный в ядро в 2.x) подставляет те же обёртки dnd-kit, что и SortableGroupList
-  const ListWrapper = ListWrapperSlot ?? (sortable ? SortableWrapper : undefined)
-  const ItemWrapper = ItemWrapperSlot ?? (sortable ? SortableItem : undefined)
   const { form, schema, dependents } = useDeclarativeForm()
   const parentGroup = useFormGroup()
 

@@ -4,6 +4,11 @@ import type { ReactNode } from 'react'
 import { beforeAll, describe, expect, it, vi } from 'vitest'
 import { z } from 'zod/v4'
 import { Form } from '../../'
+import { createForm } from '../../create-form'
+import { FieldDataGrid } from './index'
+
+/** Поле подключается через `extraFields`, как в приложении: в ядре 3.0 его нет */
+const TestForm = createForm({ extraFields: { DataGrid: FieldDataGrid } })
 
 const TestWrapper = ({ children }: { children: ReactNode }) => (
   <ChakraProvider value={defaultSystem}>{children}</ChakraProvider>
@@ -27,7 +32,7 @@ describe('Form.Field.DataGrid', () => {
     render(
       <TestWrapper>
         <Form initialValue={{ employees }} onSubmit={vi.fn()}>
-          <Form.Field.DataGrid
+          <TestForm.Field.DataGrid
             name="employees"
             label="Сотрудники"
             columns={[{ name: 'name', label: 'Имя' }, { name: 'salary', label: 'Оклад', align: 'right' }]}
@@ -46,7 +51,7 @@ describe('Form.Field.DataGrid', () => {
     render(
       <TestWrapper>
         <Form initialValue={{ employees: [] }} onSubmit={vi.fn()}>
-          <Form.Field.DataGrid name="employees" label="Сотрудники" columns={[{ name: 'name', label: 'Имя' }]} />
+          <TestForm.Field.DataGrid name="employees" label="Сотрудники" columns={[{ name: 'name', label: 'Имя' }]} />
         </Form>
       </TestWrapper>,
     )
@@ -58,7 +63,7 @@ describe('Form.Field.DataGrid', () => {
     render(
       <TestWrapper>
         <Form initialValue={{ employees }} onSubmit={vi.fn()}>
-          <Form.Field.DataGrid name="employees" label="Сотрудники" columns={[{ name: 'name', label: 'Имя' }]} />
+          <TestForm.Field.DataGrid name="employees" label="Сотрудники" columns={[{ name: 'name', label: 'Имя' }]} />
         </Form>
       </TestWrapper>,
     )
@@ -79,7 +84,7 @@ describe('Form.Field.DataGrid', () => {
     render(
       <TestWrapper>
         <Form initialValue={{ employees }} onSubmit={vi.fn()}>
-          <Form.Field.DataGrid
+          <TestForm.Field.DataGrid
             name="employees"
             label="Сотрудники"
             columns={[{ name: 'name', label: 'Имя', filter: 'text' }]}
@@ -102,7 +107,7 @@ describe('Form.Field.DataGrid', () => {
     render(
       <TestWrapper>
         <Form initialValue={{ employees }} onSubmit={vi.fn()}>
-          <Form.Field.DataGrid
+          <TestForm.Field.DataGrid
             name="employees"
             label="Сотрудники"
             columns={[{ name: 'name', label: 'Имя' }]}
@@ -126,7 +131,7 @@ describe('Form.Field.DataGrid', () => {
     render(
       <TestWrapper>
         <Form initialValue={{ employees }} onSubmit={vi.fn()}>
-          <Form.Field.DataGrid
+          <TestForm.Field.DataGrid
             name="employees"
             label="Сотрудники"
             columns={[{ name: 'name', label: 'Имя' }]}
@@ -162,7 +167,7 @@ describe('Form.Field.DataGrid', () => {
     render(
       <TestWrapper>
         <Form initialValue={{ employees }} onSubmit={vi.fn()}>
-          <Form.Field.DataGrid
+          <TestForm.Field.DataGrid
             name="employees"
             label="Сотрудники"
             columns={[{ name: 'name', label: 'Имя' }]}
@@ -187,7 +192,7 @@ describe('Form.Field.DataGrid', () => {
     render(
       <TestWrapper>
         <Form initialValue={{ employees }} onSubmit={vi.fn()}>
-          <Form.Field.DataGrid
+          <TestForm.Field.DataGrid
             name="employees"
             label="Сотрудники"
             columns={[{ name: 'name', label: 'Имя' }]}
@@ -218,7 +223,7 @@ describe('Form.Field.DataGrid', () => {
     render(
       <TestWrapper>
         <Form schema={EmployeeSchema} initialValue={{ employees: staff }} onSubmit={vi.fn()}>
-          <Form.Field.DataGrid
+          <TestForm.Field.DataGrid
             name="employees"
             label="Сотрудники"
             columns={[

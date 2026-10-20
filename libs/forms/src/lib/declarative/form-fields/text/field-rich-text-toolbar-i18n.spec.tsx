@@ -4,6 +4,11 @@ import { render, screen, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { beforeAll, describe, expect, it, vi } from 'vitest'
 import { Form } from '../../'
+import { createForm } from '../../create-form'
+import { FieldRichText } from './field-rich-text'
+
+/** Поле подключается через `extraFields`, как в приложении: в ядре 3.0 его нет */
+const TestForm = createForm({ extraFields: { RichText: FieldRichText } })
 
 /**
  * Подписи кнопок тулбара `Form.Field.RichText` (Chakra-скин) идут через общий словарь
@@ -26,7 +31,7 @@ beforeAll(async () => {
 function renderField(i18n?: { locale: string; t?: (key: string) => string }) {
   const form = (
     <Form initialValue={{ content: '' }} onSubmit={vi.fn()}>
-      <Form.Field.RichText name="content" />
+      <TestForm.Field.RichText name="content" />
     </Form>
   )
   render(

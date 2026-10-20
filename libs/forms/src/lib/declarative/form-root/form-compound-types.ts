@@ -28,7 +28,6 @@ import type {
   RadioCardFieldProps,
   RadioGroupFieldProps,
   RatingFieldProps,
-  RichTextFieldProps,
   ScheduleFieldProps,
   SegmentedGroupFieldProps,
   SelectFieldProps,
@@ -39,7 +38,6 @@ import type {
   YesNoFieldProps,
 } from '../form-fields'
 import type { CreditCardFieldProps } from '../form-fields/specialized/credit-card'
-import type { DataGridFieldProps, TableEditorFieldProps } from '../form-fields/table'
 import type { FormFromSchemaProps } from '../form-from-schema'
 import type { FormInfoBlockProps } from '../form-info-block'
 import type {
@@ -65,10 +63,6 @@ import type {
   TimeFieldProps,
 } from '../types'
 
-/**
- * Typeы componentов для кнопок Form.Group.List
- * (Add, Remove, DragHandle)
- */
 /** Slots of the selection fields: buttons for own `renderOption`/`listFooter`/`renderEmpty` */
 export interface SelectionSlotComponents {
   /** Pencil «Edit» of an option or of the selected value (needs `onUpdate` on the field) */
@@ -77,13 +71,15 @@ export interface SelectionSlotComponents {
   CreateButton: (props: SelectionCreateButtonProps) => ReactElement | null
 }
 
+/**
+ * Типы кнопок Form.Group.List (Add, Remove). Ручка перетаскивания — `SortableGroupList.Button.DragHandle`
+ * из `@letar/forms/sortable`.
+ */
 export interface ListButtonComponents {
   /** Add new element to array */
   Add: (props: { children?: ReactNode; defaultValue?: unknown }) => ReactElement
   /** Remove текущий element из arrayа */
   Remove: (props: { children?: ReactNode }) => ReactElement
-  /** Ручка для drag-and-drop сортировки */
-  DragHandle: (props: { children?: ReactNode }) => ReactElement
 }
 
 /**
@@ -95,8 +91,6 @@ export interface FormGroupListComponent {
     children: ReactNode
     emptyContent?: ReactNode
     wrapper?: (props: { children: ReactNode }) => ReactNode
-    /** Включить drag-and-drop сортировку элементов */
-    sortable?: boolean
   }): ReactElement
   Button: ListButtonComponents
 }
@@ -125,7 +119,6 @@ export interface FormFieldComponents {
   }) => ReactElement
   Editable: (props: EditableFieldProps) => ReactElement
   EditIntent: <T = unknown>(props: EditIntentFieldProps<T>) => ReactElement
-  RichText: (props: RichTextFieldProps) => ReactElement
   Slug: (props: SlugFieldProps) => ReactElement
   MaskedInput: (props: { name?: string; label?: string; mask: string; placeholder?: string }) => ReactElement
 
@@ -217,10 +210,6 @@ export interface FormFieldComponents {
   ImageChoice: (props: ImageChoiceFieldProps) => ReactElement
   Likert: (props: LikertFieldProps) => ReactElement
   YesNo: (props: YesNoFieldProps) => ReactElement
-
-  // Табличные редакторы
-  TableEditor: (props: TableEditorFieldProps) => ReactElement
-  DataGrid: (props: DataGridFieldProps) => ReactElement
 
   // Подпись
   Signature: (props: SignatureFieldProps) => ReactElement

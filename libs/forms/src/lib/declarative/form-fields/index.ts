@@ -82,16 +82,9 @@ export { type EditableFieldProps, FieldEditable } from './text/field-editable'
 export { FieldMaskedInput } from './text/field-masked-input'
 export { FieldPassword } from './text/field-password'
 export { FieldPasswordStrength } from './text/field-password-strength'
-export { FieldRichText, type RichTextFieldProps } from './text/field-rich-text'
 export { FieldSlug, type SlugFieldProps } from './text/field-slug'
 export { FieldString } from './text/field-string'
 export { FieldTextarea } from './text/field-textarea'
-export {
-  DEFAULT_TOOLBAR_BUTTONS,
-  TOOLBAR_CONFIG,
-  type ToolbarButton,
-  type ToolbarButtonConfig,
-} from './text/toolbar-config'
 export { type CalculatedFieldProps, FieldCalculated } from './utility/field-calculated'
 export { FieldHidden, type HiddenFieldProps } from './utility/field-hidden'
 

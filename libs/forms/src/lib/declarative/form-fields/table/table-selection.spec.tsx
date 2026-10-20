@@ -2,7 +2,12 @@ import { ChakraProvider, defaultSystem } from '@chakra-ui/react'
 import { render, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { beforeAll, describe, expect, it } from 'vitest'
+import { createForm } from '../../create-form'
 import { Form } from '../../index'
+import { FieldTableEditor } from './index'
+
+/** Поле подключается через `extraFields`, как в приложении: в ядре 3.0 его нет */
+const TestForm = createForm({ extraFields: { TableEditor: FieldTableEditor } })
 
 const Wrapper = ({ children }: { children: ReactNode }) => (
   <ChakraProvider value={defaultSystem}>{children}</ChakraProvider>
@@ -33,7 +38,7 @@ describe('TableEditor row selection', () => {
           }}
           onSubmit={() => {}}
         >
-          <Form.Field.TableEditor
+          <TestForm.Field.TableEditor
             name="items"
             columns={[
               { name: 'product', label: 'Product', width: '40%' },

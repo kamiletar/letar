@@ -10,7 +10,6 @@ import type { FieldComponentType } from './types/meta-types'
 import { FieldEditable } from './form-fields/text/field-editable'
 import { FieldPassword } from './form-fields/text/field-password'
 import { FieldPasswordStrength } from './form-fields/text/field-password-strength'
-import { FieldRichText } from './form-fields/text/field-rich-text'
 import { FieldString } from './form-fields/text/field-string'
 import { FieldTextarea } from './form-fields/text/field-textarea'
 
@@ -57,6 +56,25 @@ import { camelCaseToLabel } from './form-fields/auto/field-auto'
 import { type FormRegistry, useFormRegistry } from './form-registry-context'
 import { RegistryField } from './registry-field'
 import { type RelationOption, useRelationFieldContext } from './relation-field-provider'
+
+/** Поля, по которым предупреждение про незарегистрированный `RichText` уже выведено (одно на поле) */
+const warnedRichTextFields = new Set<string>()
+
+/**
+ * Предупреждение в dev: схема просит `fieldType: 'richText'`, а редактор в `createForm` не подключён.
+ * Поле при этом рисуется обычным `Textarea`, форма продолжает работать.
+ */
+function warnRichTextNotRegistered(name: string): void {
+  if (process.env.NODE_ENV === 'production' || warnedRichTextFields.has(name)) {
+    return
+  }
+  warnedRichTextFields.add(name)
+  console.warn(
+    `[@letar/forms] Поле «${name}» имеет fieldType "richText", но RichText не зарегистрирован в createForm — `
+      + 'рисуется Textarea. Подключите редактор: '
+      + "createForm({ extraFields: { RichText: FieldRichText } }), FieldRichText — из '@letar/forms/rich-text'.",
+  )
+}
 
 /**
  * Relation configuration in fieldProps
@@ -106,7 +124,7 @@ export interface FieldRenderProps {
   relationOptions?: RelationOption[]
   /**
    * Реестр `createForm` текущей формы (`useFormRegistry()` вызывающего компонента). Через него mapper находит
-   * подключаемые поля вроде `Field.RichText`; `null`/`undefined` — форма не из `createForm`, работает встроенное поле.
+   * подключаемые поля вроде `Field.RichText`; `null`/`undefined` — форма не из `createForm`, `richText` рисуется Textarea.
    */
   registry?: FormRegistry | null
 }
@@ -343,9 +361,13 @@ export function renderFieldByType(type: FieldComponentType, props: FieldRenderPr
     case 'editable':
       return <FieldEditable key={name} {...baseProps} {...fieldProps} />
     case 'richText': {
-      // Поле из `extraFields` createForm приоритетнее встроенного; встроенный запасной вариант уйдёт в 3.0.0
-      const RichText = registry?.Field?.RichText ?? FieldRichText
-      return <RichText key={name} {...baseProps} {...fieldProps} />
+      // Редактор TipTap ядро не тянет: поле берётся из `extraFields` createForm по ключу `RichText`
+      const RichText = registry?.Field?.RichText
+      if (RichText) {
+        return <RichText key={name} {...baseProps} {...fieldProps} />
+      }
+      warnRichTextNotRegistered(name)
+      return <FieldTextarea key={name} {...baseProps} {...fieldProps} />
     }
 
     // Number fields

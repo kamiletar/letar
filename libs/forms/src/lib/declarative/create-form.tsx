@@ -25,7 +25,6 @@ import type {
   RadioCardFieldProps,
   RadioGroupFieldProps,
   RatingFieldProps,
-  RichTextFieldProps,
   ScheduleFieldProps,
   SegmentedGroupFieldProps,
   SelectFieldProps,
@@ -35,10 +34,9 @@ import type {
   YesNoFieldProps,
 } from './form-fields'
 import type { CreditCardFieldProps } from './form-fields/specialized/credit-card'
-import type { DataGridFieldProps, TableEditorFieldProps } from './form-fields/table'
 import type { FormFromSchemaProps } from './form-from-schema'
 import { type FormRegistry, FormRegistryContext } from './form-registry-context'
-import type { SelectionSlotComponents } from './form-root/form-compound-types'
+import type { FormFieldComponents, SelectionSlotComponents } from './form-root/form-compound-types'
 import type {
   FormStepsIndicatorProps,
   FormStepsNavigationProps,
@@ -210,7 +208,6 @@ interface CreateFormOptions<
 interface ListButton {
   Add: AnyComponent
   Remove: AnyComponent
-  DragHandle: AnyComponent
 }
 
 interface ExtendedFormGroupList {
@@ -224,6 +221,13 @@ interface ExtendedFormGroup {
 }
 
 interface ExtendedFormField {
+  Auto: FormFieldComponents['Auto']
+  EditIntent: FormFieldComponents['EditIntent']
+  CascadingSelect: FormFieldComponents['CascadingSelect']
+  City: FormFieldComponents['City']
+  Signature: FormFieldComponents['Signature']
+  Hidden: FormFieldComponents['Hidden']
+  Calculated: FormFieldComponents['Calculated']
   String: (props: StringFieldProps) => ReactElement
   Number: (props: NumberFieldProps) => ReactElement
   NumberInput: (props: NumberInputFieldProps) => ReactElement
@@ -266,16 +270,12 @@ interface ExtendedFormField {
   Slug: (props: SlugFieldProps) => ReactElement
   Schedule: (props: ScheduleFieldProps) => ReactElement
   FileUpload: (props: FileUploadFieldProps) => ReactElement
-  RichText: (props: RichTextFieldProps) => ReactElement
   Tags: (props: TagsFieldProps) => ReactElement
   MatrixChoice: (props: MatrixChoiceFieldProps) => ReactElement
   ImageChoice: (props: ImageChoiceFieldProps) => ReactElement
   Likert: (props: LikertFieldProps) => ReactElement
   YesNo: (props: YesNoFieldProps) => ReactElement
-  TableEditor: (props: TableEditorFieldProps) => ReactElement
-  DataGrid: (props: DataGridFieldProps) => ReactElement
   CreditCard: (props: CreditCardFieldProps) => ReactElement
-  [key: string]: AnyComponent
 }
 
 interface ExtendedFormButton {
@@ -305,8 +305,8 @@ export interface ExtendedForm<
   <TData extends object>(props: FormPropsWithApi<TData>): ReactElement
   Group: ExtendedFormGroup
   /**
-   * Базовые поля плюс `extraFields`. Порядок пересечения важен: ключ из `extraFields` идёт первым, и его пропсы
-   * проверяются раньше индексной сигнатуры базового набора (она уйдёт в 3.0.0 вместе с обязательными тяжёлыми полями).
+   * Базовые поля плюс `extraFields`. Индексной сигнатуры нет: `AppForm.Field.X` существует, только если `X` —
+   * базовое поле или ключ `extraFields` (так обращение к `Field.RichText` без регистрации — ошибка типов).
    */
   Field: TExtraFields & ExtendedFormField
   Button: ExtendedFormButton

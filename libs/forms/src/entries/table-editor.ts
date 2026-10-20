@@ -15,4 +15,13 @@
  * ```
  */
 export { FieldTableEditor, TableEditorContext, useTableEditorContext } from '../lib/declarative/form-fields/table'
-export type { TableEditorContextValue, TableEditorFieldProps } from '../lib/declarative/form-fields/table'
+export type {
+  CellCoord,
+  CellFieldType,
+  ResolvedColumn,
+  TableColumnDef,
+  TableEditorContextValue,
+  TableEditorFieldProps,
+  TableFooterDef,
+  TableNavigationState,
+} from '../lib/declarative/form-fields/table'

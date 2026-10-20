@@ -1,6 +1,7 @@
 import type { ComponentType } from 'react'
 import { describe, expect, expectTypeOf, it } from 'vitest'
 import { createForm, type ExtendedForm, type FormRegistryCheck } from './create-form'
+import type { Form } from './index'
 
 const Stub: ComponentType<{ name: string }> = () => null
 
@@ -66,11 +67,29 @@ describe('generic createForm и FormRegistryCheck (E8)', () => {
     expectTypeOf(WithRich.Field).toHaveProperty('String')
     expectTypeOf(AppForm.Field).toHaveProperty('String')
 
-    // Пропсы подключённого поля — свои (`toolbar` нет у `RichTextFieldProps` ядра), а неверный тип пропса — ошибка.
-    // ⚠️ Фаза A: индексная сигнатура базового набора остаётся, поэтому лишний проп у ключа, которого нет в ядре,
-    // пока не ловится; строгость придёт в 3.0.0
+    // Пропсы подключённого поля — свои, а неверный тип пропса и лишний проп — ошибка
     void (<WithRich.Field.RichText name="body" toolbar />)
     // @ts-expect-error — `name` должен быть строкой
     void <WithRich.Field.RichText name={1} />
+    // @ts-expect-error — такого пропса у подключённого поля нет
+    void <WithRich.Field.RichText name="body" unknownProp />
+  })
+
+  it('3.0: Field без индексной сигнатуры — незарегистрированное поле есть ошибка компиляции', () => {
+    // @ts-expect-error — RichText не подключён: нужно createForm({ extraFields: { RichText: FieldRichText } })
+    void AppForm.Field.RichText
+    // @ts-expect-error — DataGrid не подключён
+    void AppForm.Field.DataGrid
+    // @ts-expect-error — TableEditor не подключён
+    void AppForm.Field.TableEditor
+    // @ts-expect-error — опечатка в имени поля
+    void AppForm.Field.Strng
+    // Встроенные поля на месте
+    expectTypeOf(AppForm.Field).toHaveProperty('String')
+    expect(AppForm.Field.String).toBeDefined()
+  })
+
+  it('3.0: набор ключей AppForm.Field совпадает с Form.Field (ни одно встроенное поле не потеряно в типе)', () => {
+    expectTypeOf<keyof typeof AppForm.Field>().toEqualTypeOf<keyof typeof Form.Field>()
   })
 })
