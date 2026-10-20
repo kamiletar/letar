@@ -435,6 +435,9 @@ export default [
       'libs/*/src/lib/declarative/form-debug-values.tsx',
       'src/lib/declarative/form-debug-json-view.tsx',
       'libs/*/src/lib/declarative/form-debug-json-view.tsx',
+      // Предупреждение разработчику «RichText не зарегистрирован» — только в dev, не решение «прод или стейджинг»
+      'src/lib/declarative/field-type-mapper.tsx',
+      'libs/*/src/lib/declarative/field-type-mapper.tsx',
       'src/lib/declarative/form-fields/utility/use-computed-value.ts',
       'libs/*/src/lib/declarative/form-fields/utility/use-computed-value.ts',
       'src/lib/fields/use-computed-value.ts',
