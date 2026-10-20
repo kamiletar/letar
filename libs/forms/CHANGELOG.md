@@ -4,6 +4,37 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [3.0.0] - 2026-10-20
+
+Лёгкое ядро. RichText, DataGrid, TableEditor и перетаскивание в списках вынесены из ядра в подпути. Обязательных
+peer-зависимостей теперь шесть (`react`, `@chakra-ui/react`, `@tanstack/react-form`, `framer-motion`, `react-icons`,
+`zod`), остальные опциональны. Переход с 2.x — [docs/MIGRATION-3.md](./docs/MIGRATION-3.md).
+
+### BREAKING
+
+- **`Form.Field.RichText`, `Form.Field.DataGrid`, `Form.Field.TableEditor` убраны из ядра.** Подключаются через
+  `createForm({ extraFields: { RichText: FieldRichText, … } })`, импорт из `@letar/forms/rich-text`,
+  `/data-grid`, `/table-editor`. Ключ совпадает с именем поля.
+- **`AppForm.Field` строгий:** индексная сигнатура снята, `AppForm.Field.<незарегистрированное>` — ошибка
+  typecheck. Раньше любое имя компилировалось. У `AppForm.Field` остались встроенные поля и поля из `extraFields`;
+  `Auto`, `EditIntent`, `CascadingSelect`, `City`, `Signature`, `Hidden`, `Calculated` теперь перечислены явно.
+- **`fieldType: 'richText'` без регистрации** рисует `Textarea` и один раз на поле пишет предупреждение в
+  dev-консоль (раньше рисовался встроенный редактор).
+- **Проп `sortable` у `Form.Group.List` и `Form.Group.List.Button.DragHandle` убраны.** Замена —
+  `SortableGroupList` из `@letar/forms/sortable`.
+- **Из корня `@letar/forms` убраны экспорты:** `FieldRichText`, `RichTextFieldProps`, `ToolbarButton`,
+  `FieldDataGrid`, `FieldTableEditor`, `TableEditorContext`, `useTableEditorContext`, табличные типы
+  (`TableColumnDef`, `DataGridColumnDef`, …), `DragHandle`, `SortableItem`, `SortableWrapper`,
+  `useSortableItemContext`. Они доступны из подпутей `rich-text`, `data-grid`, `table-editor`, `sortable`.
+- **Peer-зависимости:** `@tiptap/*`, `@tanstack/react-table`, `@tanstack/react-virtual`, `@dnd-kit/*`,
+  `@uiw/react-json-view`, `idb-keyval` — только опциональные. `next-intl` убран из peer.
+
+### Изменено
+
+- Подпути `rich-text` и `table-editor` дополнены экспортами, которые раньше жили в корне (тулбар и
+  `ImageUploadConfig`; табличные типы); `sortable` — `DragHandle`, `SortableItem`, `SortableWrapper`,
+  `useSortableItemContext`.
+
 ## [2.42.0] - 2026-10-20
 
 Подготовка к лёгкому ядру: тяжёлые поля получают отдельные точки входа и подключаются в `createForm`. Всё старое
