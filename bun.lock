@@ -1326,7 +1326,7 @@
     },
     "libs/form-mcp": {
       "name": "@letar/form-mcp",
-      "version": "2.5.4",
+      "version": "2.6.0",
       "dependencies": {
         "@modelcontextprotocol/server": "2.0.0",
         "zod": "4.6.5",
@@ -1341,7 +1341,7 @@
     },
     "libs/forms": {
       "name": "@letar/forms",
-      "version": "2.42.0",
+      "version": "3.0.0",
       "dependencies": {
         "@tanstack/react-table": "^9.2.4",
         "@tanstack/react-virtual": "^3.13.23",
