@@ -31,13 +31,14 @@ updated: 2026-10-20
 - [x] Этап 2 — scripts/check-npm-package-integrity.mjs + реестр scripts/data/npm-published-packages.json, gate в check-all (2026-10-19)
 - [x] Этап 3 — scripts/npm-smoke (Next, Vite, ZenStack, form-mcp) из tarball вне монорепо (2026-10-19)
 - [x] Этап 4 — publish-npm.yml по тегу через OIDC + preflight, npm-packages.yml на PR; запушено 2026-10-20 (958eaf55d)
-- [ ] Этап 4а — проверка «установка — подмножество bun.lock» в трёх workflow вместо --frozen-lockfile (задание forms-npm-03-lock-subset.md)
-- [ ] Этап 4б — лёгкое ядро: тяжёлые поля в подпути rich-text, data-grid, table-editor, sortable, debug; 6 обязательных peer; forms 3.0.0 (задание forms-npm-04-pluggable-fields.md: фаза A совместимая → письма aboi/mandala → фаза C ломающая)
+- [x] Этап 4а — проверка «установка — подмножество bun.lock» в трёх workflow вместо --frozen-lockfile (задание forms-npm-03-lock-subset.md)
+- [x] Этап 4б — лёгкое ядро: тяжёлые поля в подпути rich-text, data-grid, table-editor, sortable, debug; 6 обязательных peer; forms 3.0.0 (задание forms-npm-04-pluggable-fields.md: фаза A совместимая → письма aboi/mandala → фаза C ломающая)
 - [ ] Этап 5 — публикация под next (новые имена — владелец вручную)
 - [ ] Этап 6 — перевод в latest
 
 ## Журнал
 
+- 2026-10-20: этапы 4а и 4б приняты сеньором. 4а: scripts/check-lock-subset.mjs (a697793ae…ede939ecf) после bun install в ci.yml, npm-packages.yml, publish-npm.yml; bun 1.4.3 в ci.yml. 4б: фаза A — forms 2.42.0 (f80a67437…c1cee970d); aboi (c0e9e69, SHA ac4a5596b) и mandala (65b41effc, 127c60ef9) подключили поля через extraFields; фаза C — forms 3.0.0, form-mcp 2.6.0 (cd28ce150…6904bdf17): 6 обязательных peer вместо 18, 13 optional, правило «ядро не тянет optional peer», smoke без TipTap/dnd-kit. Typecheck 12 потребителей форм, включая приватные, зелёный. Открыто: семь приватных приложений без пяти строк paths новых подпутей (lib-subpath-paths красный, фрагмент в broadcast 2685).
 - 2026-10-20: решение по открытым вопросам принято владельцем (страница https://claude.ai/artifact/EhJP4DFuTUYunpwgbLd6hC). Peer: тяжёлые поля подключаются через extraFields из подпутей, первой публичной версией forms станет 3.0.0. Lockfile: скрипт check-lock-subset после bun install разрешает только удаление записей; токен для приватных submodule в CI отклонён. Задания этапов 4а и 4б — в .claude/artifacts/tasks.
 - 2026-10-20: этапы 2–4 приняты и запушены. Первый прогон npm-packages.yml упал: скрипты звали голый nx, в CI его нет — исправлено (bunx nx при CI). Открыто: (1) 19 обязательных peer у @letar/forms (dnd-kit, tiptap, react-table и др. стали обязательными, т.к. бандлеры разрешают и ленивые импорты) — вынести тяжёлые поля в subpath-entry и вернуть их в optional; (2) bun install без --frozen-lockfile в publish-npm.yml (приватные submodule в CI не выкачаны); (3) ручные шаги владельца — первая публикация forms-core/forms-react/forms-query с --tag next, Trusted Publisher для шести пакетов, удаление NPM_TOKEN.
 
