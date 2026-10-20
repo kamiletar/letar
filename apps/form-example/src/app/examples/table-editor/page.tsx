@@ -3,6 +3,7 @@
 import { PageH1 } from '@/components/page-h1'
 import { Code, Stack, Text } from '@chakra-ui/react'
 import { Form } from '@letar/forms'
+import { FieldTableEditor } from '@letar/forms/table-editor'
 import { useState } from 'react'
 
 export default function TableEditorExamplePage() {
@@ -28,7 +29,7 @@ export default function TableEditorExamplePage() {
         }}
         onSubmit={(data) => setResult(JSON.stringify(data, null, 2))}
       >
-        <Form.Field.TableEditor
+        <FieldTableEditor
           name="items"
           label="Order Items"
           columns={[
