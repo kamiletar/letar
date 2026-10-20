@@ -134,17 +134,20 @@ jobs:
           node scripts/npm-release-preflight.mjs "${ARGS[@]}"
 
       # Установка собранного tarball в чистые проекты (Next.js/Vite/ZenStack/MCP) — то, что видит потребитель.
+      # Фикстуры next/vite ставят всё семейство форм (forms-core, forms-react, forms, forms-query) из tarball,
+      # а preflight собрал только выпускаемый пакет — поэтому для них `--build` собирает dist остальных.
       - name: Smoke-проверка в чистых проектах
         env:
           TAG: ${{ steps.preflight.outputs.tag }}
         run: |
+          BUILD=()
           case "$TAG" in
-            forms-core|forms-react|forms|forms-query) PARTS="next,vite" ;;
+            forms-core|forms-react|forms|forms-query) PARTS="next,vite"; BUILD=(--build) ;;
             zenstack-form-plugin) PARTS="zenstack" ;;
             form-mcp) PARTS="mcp" ;;
             *) echo "неизвестный пакет $TAG"; exit 1 ;;
           esac
-          node scripts/npm-smoke.mjs --only="$PARTS"
+          node scripts/npm-smoke.mjs "${BUILD[@]}" --only="$PARTS"
 
       - name: Сохранить dist для публикации
         uses: actions/upload-artifact@v4
