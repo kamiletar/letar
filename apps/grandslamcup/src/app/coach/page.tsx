@@ -13,6 +13,17 @@ import { requireCoach } from '@/lib/roles'
 import { Badge, Box, Button, Flex, Heading, SimpleGrid, Text, VStack } from '@chakra-ui/react'
 import Link from 'next/link'
 
+/** Поля ближайшего матча, нужные дашборду тренера */
+interface UpcomingMatchRow {
+  id: string
+  homeTeamId: string
+  scheduledAt: Date | null
+  homeTeam: { team: { name: string } }
+  awayTeam: { team: { name: string } }
+  venue: { name: string } | null
+  lineups: Array<{ id: string }>
+}
+
 export default async function CoachDashboardPage() {
   const coach = await requireCoach()
 
@@ -86,7 +97,7 @@ export default async function CoachDashboardPage() {
     .slice(0, 3)
 
   // Ближайшие матчи
-  const upcomingMatches = await prisma.match.findMany({
+  const upcomingMatchesRaw = await prisma.match.findMany({
     where: {
       status: 'SCHEDULED',
       OR: [{ homeTeamId: coach.teamSeasonId }, { awayTeamId: coach.teamSeasonId }],
@@ -102,6 +113,9 @@ export default async function CoachDashboardPage() {
     orderBy: { scheduledAt: 'asc' },
     take: 5,
   })
+  // Узкий тип вместо вывода ZenStack: tsgo падает на TS2321 при .map по полному результату
+  // (tsgo-excessive-stack-depth-zenstack.md)
+  const upcomingMatches: UpcomingMatchRow[] = upcomingMatchesRaw
 
   return (
     <VStack gap={6} align="stretch">

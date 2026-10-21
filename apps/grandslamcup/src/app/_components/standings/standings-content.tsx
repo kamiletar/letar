@@ -25,6 +25,13 @@ interface StandingsContentProps {
   view?: StandingsView
 }
 
+/** Команда сезона в группировке по лигам */
+interface LeagueTeamRow {
+  id: string
+  team: { name: string; slug: string }
+  league: { name: string; order: number | null }
+}
+
 export async function StandingsContent({ citySlug, cityId, seasonSlug, view = 'table' }: StandingsContentProps) {
   const basePath = citySlug ? `/${citySlug}/standings` : '/standings'
   const teamLinkPrefix = citySlug ? `/${citySlug}/teams` : '/teams'
@@ -114,7 +121,9 @@ export async function StandingsContent({ citySlug, cityId, seasonSlug, view = 't
   }
 
   // Группируем по лигам
-  const leagues = new Map<string, typeof teamSeasons>()
+  // Узкий тип вместо вывода ZenStack: tsgo падает на TS2321 при .sort/.map по Map<…, typeof teamSeasons>
+  // (tsgo-excessive-stack-depth-zenstack.md)
+  const leagues = new Map<string, LeagueTeamRow[]>()
   for (const ts of teamSeasons) {
     const leagueName = ts.league.name
     if (!leagues.has(leagueName)) {
