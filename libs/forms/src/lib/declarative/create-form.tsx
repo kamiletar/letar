@@ -33,6 +33,7 @@ import type {
   TagsFieldProps,
   YesNoFieldProps,
 } from './form-fields'
+import type { AutoFieldProps } from './form-fields/auto/field-auto'
 import type { CreditCardFieldProps } from './form-fields/specialized/credit-card'
 import type { FormFromSchemaProps } from './form-from-schema'
 import { type FormRegistry, FormRegistryContext } from './form-registry-context'
@@ -221,7 +222,8 @@ interface ExtendedFormGroup {
 }
 
 interface ExtendedFormField {
-  Auto: FormFieldComponents['Auto']
+  // Как у рантайм-компонента FieldAuto: проп специализированного поля (onComplete, size…) прокидывается дальше
+  Auto: (props: AutoFieldProps) => ReactElement
   EditIntent: FormFieldComponents['EditIntent']
   CascadingSelect: FormFieldComponents['CascadingSelect']
   City: FormFieldComponents['City']
