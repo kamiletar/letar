@@ -16,6 +16,12 @@ import { PrintButton } from './_components/print-button'
 
 type Params = Promise<{ id: string }>
 
+/** Строка состава в протоколе */
+interface LineupRow {
+  id: string
+  player: { name: string }
+}
+
 export default async function ProtocolPage({ params }: { params: Params }) {
   const { id: matchId } = await params
 
@@ -59,6 +65,10 @@ export default async function ProtocolPage({ params }: { params: Params }) {
 
   const mvp = findMatchMVP(match.performances)
   const date = formatDate(match.scheduledAt)
+
+  // Узкий тип вместо вывода ZenStack: tsgo падает на TS2321 (tsgo-excessive-stack-depth-zenstack.md)
+  const homeLineups: LineupRow[] = match.homeTeam.lineups
+  const awayLineups: LineupRow[] = match.awayTeam.lineups
 
   // Группировка перформансов по таймам
   const half1 = match.performances.filter((p) => p.half === 1)
@@ -135,13 +145,13 @@ export default async function ProtocolPage({ params }: { params: Params }) {
         <div style={{ flex: 1 }}>
           <h3>{match.homeTeam.team.name}</h3>
           <ol style={{ fontSize: '13px', paddingLeft: '20px' }}>
-            {match.homeTeam.lineups.map((l) => <li key={l.id}>{l.player.name}</li>)}
+            {homeLineups.map((l) => <li key={l.id}>{l.player.name}</li>)}
           </ol>
         </div>
         <div style={{ flex: 1 }}>
           <h3>{match.awayTeam.team.name}</h3>
           <ol style={{ fontSize: '13px', paddingLeft: '20px' }}>
-            {match.awayTeam.lineups.map((l) => <li key={l.id}>{l.player.name}</li>)}
+            {awayLineups.map((l) => <li key={l.id}>{l.player.name}</li>)}
           </ol>
         </div>
       </div>

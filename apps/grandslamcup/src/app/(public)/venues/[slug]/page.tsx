@@ -13,6 +13,16 @@ import { YandexMap } from '../_components/yandex-map'
 
 type Params = Promise<{ slug: string }>
 
+/** Матч стадиона для списка «Последние матчи» */
+interface VenueMatchRow {
+  id: string
+  homeScore: number | null
+  awayScore: number | null
+  scheduledAt: Date | null
+  homeTeam: { team: { name: string } }
+  awayTeam: { team: { name: string } }
+}
+
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { slug } = await params
   const venue = await prisma.venue.findUnique({
@@ -53,6 +63,8 @@ export default async function VenueDetailPage({ params }: { params: Params }) {
     notFound()
   }
 
+  // Узкий тип вместо вывода ZenStack: tsgo падает на TS2321 (tsgo-excessive-stack-depth-zenstack.md)
+  const venueMatches: VenueMatchRow[] = venue.matches
   const hasCoords = venue.latitude !== null && venue.longitude !== null
 
   return (
@@ -125,13 +137,13 @@ export default async function VenueDetailPage({ params }: { params: Params }) {
       </SimpleGrid>
 
       {/* Последние матчи на этом стадионе */}
-      {venue.matches.length > 0 && (
+      {venueMatches.length > 0 && (
         <Box>
           <Heading size="md" mb={3}>
             Последние матчи
           </Heading>
           <VStack gap={2} align="stretch">
-            {venue.matches.map((match) => (
+            {venueMatches.map((match) => (
               <Link key={match.id} href={`/matches/${match.id}`}>
                 <Flex
                   bg="bg.panel"
