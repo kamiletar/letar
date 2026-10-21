@@ -16,10 +16,10 @@
   "dependencies": {
     "@letar/mcp-server-kit": "workspace:*",
     "zod": "4.6.5",
-    "@modelcontextprotocol/server": "2.0.0"
+    "@modelcontextprotocol/server": "2.3.1"
   },
   "devDependencies": {
     "@letar/mcp-test-kit": "workspace:*",
-    "@modelcontextprotocol/client": "2.0.0"
+    "@modelcontextprotocol/client": "2.3.1"
   }
 }

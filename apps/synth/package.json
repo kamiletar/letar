@@ -6,7 +6,7 @@
     "zod": "4.6.5",
     "@letar/format-utils": "workspace:*",
     "@letar/hooks": "workspace:*",
-    "@modelcontextprotocol/server": "2.0.0"
+    "@modelcontextprotocol/server": "2.3.1"
   },
   "nx": {
     "name": "synth",

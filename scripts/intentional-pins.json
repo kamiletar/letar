@@ -31,7 +31,7 @@
   "pins": [
     {
       "package": "better-call",
-      "version": "1.4.2",
+      "version": "1.4.4",
       "field": "dependencies",
       "since": "2026-10-03",
       "reason": "better-auth и @better-auth/oauth-provider держат peer better-call ровно 1.4.x (сейчас 1.4.2). Корневой ^1.4.1 разводит копии: плагины (jwt, oauthProvider, nextCookies) типизированы по 1.4.0, а betterAuth() в libs/auth — по 1.4.1, и typecheck:tsgo падает TS2322 'not assignable to type undefined' во всех потребителях @letar/auth.",
@@ -68,7 +68,7 @@
     },
     {
       "package": "@modelcontextprotocol/server",
-      "version": "2.0.0",
+      "version": "2.3.1",
       "field": "dependencies",
       "since": "2026-09-16",
       "commit": "TBD — миграция @modelcontextprotocol/sdk v1→v2",
@@ -78,7 +78,7 @@
     },
     {
       "package": "@modelcontextprotocol/client",
-      "version": "2.0.0",
+      "version": "2.3.1",
       "field": "dependencies",
       "since": "2026-09-16",
       "commit": "TBD — миграция @modelcontextprotocol/sdk v1→v2",
