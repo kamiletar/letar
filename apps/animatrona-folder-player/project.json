@@ -1,9 +1,18 @@
 {
   "name": "animatrona-folder-player",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "implicitDependencies": [
+    "@letar/forms",
+    "@letar/icon-generator"
+  ],
   "sourceRoot": "apps/animatrona-folder-player",
   "projectType": "application",
-  "tags": ["type:app", "scope:animatrona-folder-player", "owner:letar", "platform:electron"],
+  "tags": [
+    "type:app",
+    "scope:animatrona-folder-player",
+    "owner:letar",
+    "platform:electron"
+  ],
   "targets": {
     "dev": {
       "command": "node scripts/dev.js",
@@ -47,11 +56,10 @@
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
       "options": {
-        "lintFilePatterns": [
-          "apps/animatrona-folder-player/main/**/*.{ts,tsx}",
-          "apps/animatrona-folder-player/renderer/**/*.{ts,tsx}"
+        "args": [
+          "main/**/*.{ts,tsx}",
+          "renderer/**/*.{ts,tsx}"
         ]
       }
     },

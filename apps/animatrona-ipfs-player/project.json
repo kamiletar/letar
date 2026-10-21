@@ -1,9 +1,22 @@
 {
   "name": "animatrona-ipfs-player",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "implicitDependencies": [
+    "@letar/forms",
+    "@letar/icon-generator",
+    "@letar/ipfs-kubo-core",
+    "@letar/video-player-core",
+    "@letar/video-player-react",
+    "@letar/zenstack-fragments"
+  ],
   "sourceRoot": "apps/animatrona-ipfs-player",
   "projectType": "application",
-  "tags": ["type:app", "scope:animatrona-ipfs-player", "owner:letar", "platform:electron"],
+  "tags": [
+    "type:app",
+    "scope:animatrona-ipfs-player",
+    "owner:letar",
+    "platform:electron"
+  ],
   "targets": {
     "dev": {
       "command": "node scripts/dev.js",
@@ -24,11 +37,10 @@
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
       "options": {
-        "lintFilePatterns": [
-          "apps/animatrona-ipfs-player/main/**/*.{ts,tsx}",
-          "apps/animatrona-ipfs-player/renderer/**/*.{ts,tsx}"
+        "args": [
+          "main/**/*.{ts,tsx}",
+          "renderer/**/*.{ts,tsx}"
         ]
       }
     },
@@ -49,9 +61,19 @@
       "executor": "nx:run-commands",
       "dependsOn": [
         {
-          "projects": ["@letar/zenstack-form-plugin"],
+          "projects": [
+            "@letar/zenstack-form-plugin"
+          ],
           "target": "build"
         }
+      ],
+      "cache": false,
+      "inputs": [
+        "{projectRoot}/schema.zmodel",
+        "{workspaceRoot}/libs/zenstack-fragments/src/*.zmodel"
+      ],
+      "outputs": [
+        "{projectRoot}/renderer/src/generated"
       ],
       "options": {
         "commands": [
@@ -61,19 +83,13 @@
         ],
         "cwd": "apps/animatrona-ipfs-player",
         "parallel": false
-      },
-      "cache": false,
-      "inputs": [
-        "{projectRoot}/schema.zmodel",
-        "{workspaceRoot}/libs/zenstack-fragments/src/*.zmodel"
-      ],
-      "outputs": [
-        "{projectRoot}/renderer/src/generated"
-      ]
+      }
     },
     "db:push": {
       "executor": "nx:run-commands",
-      "dependsOn": ["zenstack:generate"],
+      "dependsOn": [
+        "zenstack:generate"
+      ],
       "cache": false,
       "options": {
         "command": "prisma db push",
@@ -82,11 +98,15 @@
     },
     "db:push:data-loss": {
       "executor": "nx:run-commands",
-      "dependsOn": ["zenstack:generate"],
+      "dependsOn": [
+        "zenstack:generate"
+      ],
       "cache": false,
       "metadata": {
         "description": "Сбросить dev БД и применить схему (потеря данных!)",
-        "technologies": ["prisma"]
+        "technologies": [
+          "prisma"
+        ]
       },
       "options": {
         "command": "prisma db push --accept-data-loss --force-reset",
@@ -95,11 +115,16 @@
     },
     "db:migrate": {
       "executor": "nx:run-commands",
-      "dependsOn": ["zenstack:generate"],
+      "dependsOn": [
+        "zenstack:generate"
+      ],
       "cache": false,
       "metadata": {
         "description": "Создать миграцию",
-        "technologies": ["prisma", "electron"]
+        "technologies": [
+          "prisma",
+          "electron"
+        ]
       },
       "options": {
         "command": "cross-env CI= VERCEL= GITHUB_ACTIONS= GITLAB= NETLIFY= HEROKU= prisma migrate dev {args}",
@@ -112,7 +137,9 @@
       "cache": false,
       "metadata": {
         "description": "Apply pending migrations (production)",
-        "technologies": ["prisma"]
+        "technologies": [
+          "prisma"
+        ]
       },
       "options": {
         "command": "prisma migrate deploy",
@@ -121,7 +148,9 @@
     },
     "db:studio": {
       "executor": "nx:run-commands",
-      "dependsOn": ["zenstack:generate"],
+      "dependsOn": [
+        "zenstack:generate"
+      ],
       "options": {
         "command": "prisma studio",
         "cwd": "apps/animatrona-ipfs-player"

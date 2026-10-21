@@ -1,28 +1,37 @@
 {
   "name": "form-develop-app-e2e",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "implicitDependencies": [
+    "form-develop-app",
+    "@letar/e2e-testing",
+    "form-develop-app"
+  ],
   "projectType": "application",
   "sourceRoot": "apps/form-develop-app-e2e/src",
-  "tags": ["type:e2e", "scope:form-develop-app", "owner:letar"],
-  "implicitDependencies": ["form-develop-app"],
+  "tags": [
+    "type:e2e",
+    "scope:form-develop-app",
+    "owner:letar"
+  ],
   "targets": {
     "format": {
       "executor": "nx:run-commands",
-      "options": {
-        "command": "dprint fmt",
-        "cwd": "apps/form-develop-app-e2e"
-      },
       "cache": false,
       "metadata": {
         "description": "Format files with dprint",
-        "technologies": ["dprint"]
+        "technologies": [
+          "dprint"
+        ]
+      },
+      "options": {
+        "command": "dprint fmt",
+        "cwd": "apps/form-develop-app-e2e"
       }
     },
     "e2e": {
-      "executor": "@nx/playwright:playwright",
-      "outputs": ["{workspaceRoot}/playwright-report/{projectName}"],
-      "options": {
-        "config": "apps/form-develop-app-e2e/playwright.config.ts"
-      }
+      "outputs": [
+        "{workspaceRoot}/playwright-report/{projectName}"
+      ]
     }
   }
 }

@@ -1,26 +1,30 @@
 {
   "name": "animatrona-tracker-e2e",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "implicitDependencies": [
+    "animatrona-tracker",
+    "animatrona-tracker"
+  ],
   "projectType": "application",
   "sourceRoot": "apps/animatrona-tracker-e2e/src",
-  "tags": ["type:e2e", "scope:animatrona-tracker", "owner:letar"],
-  "implicitDependencies": ["animatrona-tracker"],
+  "tags": [
+    "type:e2e",
+    "scope:animatrona-tracker",
+    "owner:letar"
+  ],
   "targets": {
     "format": {
       "executor": "nx:run-commands",
-      "options": {
-        "command": "dprint fmt",
-        "cwd": "apps/animatrona-tracker-e2e"
-      },
       "cache": false,
       "metadata": {
         "description": "Format files with dprint",
-        "technologies": ["dprint"]
-      }
-    },
-    "e2e": {
-      "executor": "@nx/playwright:playwright",
+        "technologies": [
+          "dprint"
+        ]
+      },
       "options": {
-        "config": "apps/animatrona-tracker-e2e/playwright.config.ts"
+        "command": "dprint fmt",
+        "cwd": "apps/animatrona-tracker-e2e"
       }
     }
   }

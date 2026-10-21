@@ -1,28 +1,36 @@
 {
   "name": "dsperevod-e2e",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "implicitDependencies": [
+    "@letar/env-load",
+    "@letar/e2e-testing"
+  ],
   "projectType": "application",
   "sourceRoot": "apps/dsperevod-e2e/src",
-  "tags": ["type:e2e", "scope:dsperevod", "owner:commercial"],
+  "tags": [
+    "type:e2e",
+    "scope:dsperevod",
+    "owner:commercial"
+  ],
   "targets": {
     "format": {
       "executor": "nx:run-commands",
-      "options": {
-        "command": "dprint fmt",
-        "cwd": "apps/dsperevod-e2e"
-      },
       "cache": false,
       "metadata": {
         "description": "Format files with dprint",
-        "technologies": ["dprint"]
+        "technologies": [
+          "dprint"
+        ]
+      },
+      "options": {
+        "command": "dprint fmt",
+        "cwd": "apps/dsperevod-e2e"
       }
     },
     "e2e": {
-      "executor": "@nx/playwright:playwright",
-      "outputs": ["{workspaceRoot}/playwright-report/{projectName}"],
-      "options": {
-        "config": "apps/dsperevod-e2e/playwright.config.ts"
-      }
+      "outputs": [
+        "{workspaceRoot}/playwright-report/{projectName}"
+      ]
     }
   }
 }
