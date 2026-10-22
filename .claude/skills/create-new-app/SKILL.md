@@ -34,7 +34,7 @@ nx g @letar/generators:new-app <name> --withDb
 ```
 
 Генератор раскладывает весь чистый каркас (Next.js App Router + Chakra UI v3 + MDX): `.env` (PORT),
-`README.md`, `PLAN.md`, `PLAN_COMPLETED.md`, `PLAN_TESTING.md`, `CHANGELOG.md`, `package.json`,
+`README.md`, `tasks/` (очередь задач: `tasks.json`, компас, первая задача), `PLAN_TESTING.md`, `CHANGELOG.md`, `package.json`,
 `project.json` (typecheck/typecheck:tsgo/oxlint/lint/format/test), `vitest.config.mts` + `vitest.setup.tsx`,
 `next.config.mjs` (MDX + Nx, без `output: 'standalone'` — это добавляется на этапе первого деплоя, см.
 ниже), `tsconfig.json`, `eslint.config.mjs`, `src/app/layout.tsx` (Providers + UmamiScript, **без**
@@ -258,7 +258,7 @@ disable-model-invocation: true
 ## Инициализация
 
 1. Прочитай `.claude/rules/nextjs-apps.md` для общих правил Next.js
-2. Прочитай `apps/<name>/PLAN.md` для текущего состояния задач
+2. Прочитай `apps/<name>/tasks/README.md` и выполни `bun scripts/tasks.mjs next <name>`
 
 ## Действия
 
@@ -270,11 +270,10 @@ disable-model-invocation: true
 
 ## После завершения задачи
 
-1. Обнови `PLAN.md` — отметь задачу как выполненную
-2. Обнови `PLAN_COMPLETED.md` — добавь детали реализации
-3. Обнови `CHANGELOG.md` — добавь запись об изменениях
-4. Обнови `PLAN_TESTING.md` — если добавил тесты
-5. Обнови `package.json` — увеличь версию (semver)
+1. `bun scripts/tasks.mjs done <ID> --summary "…"` — итог и детали реализации живут в файле задачи
+2. Обнови `CHANGELOG.md` — добавь запись об изменениях
+3. Обнови `PLAN_TESTING.md` — если добавил тесты
+4. Обнови `package.json` — увеличь версию (semver)
 
 ## Деплой
 

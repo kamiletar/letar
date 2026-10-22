@@ -92,8 +92,12 @@ describe('new-app generator', () => {
     expect(tree.exists('apps/my-app/vitest.config.mts')).toBe(true)
     expect(tree.exists('apps/my-app/vitest.setup.tsx')).toBe(true)
     expect(tree.exists('apps/my-app/README.md')).toBe(true)
-    expect(tree.exists('apps/my-app/PLAN.md')).toBe(true)
-    expect(tree.exists('apps/my-app/PLAN_COMPLETED.md')).toBe(true)
+    // очередь задач вместо PLAN.md / PLAN_COMPLETED.md (LT-058)
+    expect(tree.exists('apps/my-app/PLAN.md')).toBe(false)
+    expect(tree.exists('apps/my-app/PLAN_COMPLETED.md')).toBe(false)
+    expect(tree.exists('apps/my-app/tasks/tasks.json')).toBe(true)
+    expect(tree.exists('apps/my-app/tasks/README.md')).toBe(true)
+    expect(tree.exists('apps/my-app/tasks/MA-001-define-purpose.md')).toBe(true)
     expect(tree.exists('apps/my-app/PLAN_TESTING.md')).toBe(true)
     expect(tree.exists('apps/my-app/CHANGELOG.md')).toBe(true)
     expect(tree.exists('apps/my-app/src/app/layout.tsx')).toBe(true)
@@ -360,11 +364,16 @@ describe('new-app generator', () => {
     expect(testing).toContain('nx test my-app')
     expect(testing).toContain('nx e2e my-app-e2e')
 
-    const completed = read('PLAN_COMPLETED.md')
-    expect(completed).toContain(`## v0.1.0 — Каркас приложения (${today})`)
-    expect(completed).toContain(`**Последнее обновление:** ${today}`)
+    const tasksJson = JSON.parse(read('tasks/tasks.json')) as { project: string; prefix: string; frozen: string[] }
+    expect(tasksJson).toEqual({ project: 'my-app', prefix: 'MA', frozen: [] })
+    const firstTask = read('tasks/MA-001-define-purpose.md')
+    expect(firstTask).toContain('id: MA-001')
+    expect(firstTask).toContain(`created: ${today}`)
+    expect(read('tasks/README.md').split('\n').length).toBeLessThanOrEqual(120)
 
-    for (const f of ['README.md', 'CHANGELOG.md', 'PLAN.md', 'PLAN_COMPLETED.md', 'PLAN_TESTING.md']) {
+    for (
+      const f of ['README.md', 'CHANGELOG.md', 'PLAN_TESTING.md', 'tasks/README.md', 'tasks/MA-001-define-purpose.md']
+    ) {
       expect(read(f)).not.toContain('<%')
     }
   })

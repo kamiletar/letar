@@ -3,6 +3,7 @@ import { buildFaviconIco, iconTsxSource } from '../../utils/favicon'
 import { buildAppTsconfigPaths, buildTranspilePackages } from '../../utils/lib-paths'
 import { toCamelCase, toDisplayName } from '../../utils/naming'
 import { resolveNextFreePort } from '../../utils/ports'
+import { pickTaskPrefix } from '../../utils/task-prefix'
 import { assertTargetIsFree, templatesDirFor } from '../../utils/tree'
 import type { NewAppGeneratorSchema } from './schema'
 
@@ -37,6 +38,80 @@ const privateTemplatesDir = templatesDirFor(import.meta.url, 'files-private')
 /** Шаблоны ZenStack/Prisma-каркаса (`--withDb`) — prisma.config.ts + schema.zmodel-заготовка. */
 const dbTemplatesDir = templatesDirFor(import.meta.url, 'files-db')
 
+/**
+ * Очередь задач нового приложения: `tasks/tasks.json`, компас и первая задача вместо пустого PLAN.md.
+ * Формат и команды — `.claude/docs/tasks-per-file.md`; номера дальше выдаёт `scripts/tasks.mjs`.
+ */
+function writeTaskQueue(
+  tree: Tree,
+  appDir: string,
+  { name, displayName, prefix }: { name: string; displayName: string; prefix: string },
+): void {
+  const tasksDir = joinPathFragments(appDir, 'tasks')
+  const date = todayIso()
+  tree.write(
+    joinPathFragments(tasksDir, 'tasks.json'),
+    JSON.stringify({ project: name, prefix, frozen: [] }, null, 2) + '\n',
+  )
+  tree.write(
+    joinPathFragments(tasksDir, 'README.md'),
+    [
+      `# ${displayName} — очередь задач`,
+      '',
+      'Одна задача — один файл `tasks/<ПРЕФИКС>-NNN-<slug>.md`. Список собирает скрипт, файла-индекса нет:',
+      '',
+      '```bash',
+      `bun scripts/tasks.mjs next ${name}`,
+      '```',
+      '',
+      '## Правила',
+      '',
+      '- Задачи заводит только `bun scripts/tasks.mjs new` (номер выдаёт скрипт).',
+      '- Журнал и итог пишутся в файл задачи (`note`, `done --summary`), а не в README.',
+      '- Находка по ходу работы — отдельная задача, не абзац в этом файле.',
+      '',
+      'Формат и команды — [tasks-per-file](/.claude/docs/tasks-per-file.md).',
+      '',
+    ].join('\n'),
+  )
+  tree.write(
+    joinPathFragments(tasksDir, `${prefix}-001-define-purpose.md`),
+    [
+      '---',
+      `id: ${prefix}-001`,
+      'title: Определить назначение приложения и первую фичу',
+      'status: ready',
+      'size: S',
+      'area: product',
+      'priority: 2',
+      'blocked_by: []',
+      'owner: ""',
+      'stage: ""',
+      'source: new-app',
+      `created: ${date}`,
+      `updated: ${date}`,
+      '---',
+      '',
+      '## Что и зачем',
+      '',
+      `Приложение сгенерировано каркасом (\`nx g @letar/generators:new-app ${name}\`), оно пустое. Записать, зачем оно нужно, и выбрать первую фичу.`,
+      '',
+      '## Приёмка',
+      '',
+      '- [ ] Назначение записано в README приложения',
+      '- [ ] Первая фича заведена отдельной задачей',
+      '- [ ] Решено, нужны ли БД (`schema.zmodel`) и формы (`createForm()`)',
+      '',
+      '## План',
+      '',
+      '## Журнал',
+      '',
+      '## Итог',
+      '',
+    ].join('\n'),
+  )
+}
+
 export default async function newAppGenerator(tree: Tree, options: NewAppGeneratorSchema): Promise<void> {
   const { name } = options
   const appDir = joinPathFragments('apps', name)
@@ -63,6 +138,8 @@ export default async function newAppGenerator(tree: Tree, options: NewAppGenerat
     tsconfigPaths: JSON.stringify(buildAppTsconfigPaths(), null, 2),
     transpilePackages: buildTranspilePackages(),
   })
+
+  writeTaskQueue(tree, appDir, { name, displayName, prefix: pickTaskPrefix(tree, name) })
 
   if (withDb) {
     generateFiles(tree, dbTemplatesDir, appDir, { name, displayName })

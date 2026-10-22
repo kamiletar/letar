@@ -18,8 +18,7 @@
 | Файл                                   | Описание                             |
 | -------------------------------------- | ------------------------------------ |
 | [README.md](README.md)                 | Обзор проекта, быстрый старт         |
-| [PLAN.md](PLAN.md)                     | Текущие задачи, TODO, roadmap        |
-| [PLAN_COMPLETED.md](PLAN_COMPLETED.md) | Завершённые фичи по версиям          |
+| [tasks/README.md](tasks/README.md)     | Очередь задач (одна задача — файл)   |
 | [PLAN_TESTING.md](PLAN_TESTING.md)     | План и статистика тестирования       |
 | [CHANGELOG.md](CHANGELOG.md)           | История изменений (Keep a Changelog) |
 
@@ -35,7 +34,7 @@ nx test <%= name %>             # Тесты
 
 ## Что дальше
 
-Каркас минимален — нет БД, форм, аутентификации. Смотри `PLAN.md` для текущих задач и
+Каркас минимален — нет БД, форм, аутентификации. Очередь задач — `bun scripts/tasks.mjs next <%= name %>` (компас — `tasks/README.md`) и
 `.agents/skills/create-new-app/SKILL.md` за оставшимися шагами (регистрация в Dashboard, бэкапы,
 docker-compose, e2e-gate — не автоматизированы генератором намеренно).
 
