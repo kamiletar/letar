@@ -8,7 +8,11 @@ disable-model-invocation: true
 
 ## Инициализация
 
-1. Прочитай `apps/umami/PLAN.md` для текущего состояния задач (если есть)
+1. ⚠️ **Очередь задач — `apps/umami/tasks/`** (формат — [tasks-per-file](/.claude/docs/tasks-per-file.md)).
+   Прочитай [`tasks/README.md`](/apps/umami/tasks/README.md) и выполни
+   `bun scripts/tasks.mjs next umami`. Вызов с id (`/umami UM-003`) — сразу
+   `bun scripts/tasks.mjs show UM-003`. `PLAN.md`, `PLAN_COMPLETED.md` **заморожены** и остаются справкой: целиком их не
+   читать, открывать только раздел из поля `source` выбранной задачи (`grep -n` и `Read` с `offset`)
 
 ## Регистрация в Agent Mail
 
@@ -24,13 +28,13 @@ disable-model-invocation: true
 
 После изучения документации:
 
-- Определи текущую фазу разработки
-- Выбери следующую задачу из плана
-- Предложи план действий
+- Выбери задачу из «можно брать», `start UM-NNN --owner umami-dev`
+- План работы запиши в раздел «План» файла задачи и предложи его
+- Находку вне задачи заводи через `tasks new umami …`, не абзацем в плане
 
 ## После завершения задачи
 
-Общий чек-лист — `.claude/rules/app-workflow.md`.
+`bun scripts/tasks.mjs done UM-NNN --summary "…"`, дальше общий чек-лист — `.claude/rules/app-workflow.md`.
 
 ## Деплой
 
