@@ -1,6 +1,7 @@
 import { Component, computed, inject, Input } from '@angular/core'
 import type { SchemaFieldInfo } from '@letar/forms-core/schema'
 import { traverseSchema } from '@letar/forms-core/schema'
+import { camelCaseToLabel as coreCamelCaseToLabel } from '@letar/forms-core/utils'
 import { FormRootService } from '../core/form-root.service'
 import { FieldCheckboxComponent } from './field-checkbox.component'
 import { FieldDateComponent } from './field-date.component'
@@ -32,7 +33,7 @@ function findFieldByPath(fields: SchemaFieldInfo[], path: string): SchemaFieldIn
 
 /** camelCase → "Читаемая метка". Совпадает 1:1 с `@letar/forms-vue` (`field-auto.ts`). */
 export function camelCaseToLabel(str: string): string {
-  return str.replace(/([A-Z])/g, ' $1').replace(/^./, (s) => s.toUpperCase()).trim()
+  return coreCamelCaseToLabel(str)
 }
 
 type AutoFieldKind = 'string' | 'textarea' | 'number' | 'switch' | 'checkbox' | 'date' | 'select'

@@ -1,6 +1,7 @@
 import { Component, computed, effect, Input, signal } from '@angular/core'
 import { ReactiveFormsModule } from '@angular/forms'
 import { createDataGridTableFeatures } from '@letar/forms-core/table'
+import { camelCaseToLabel as coreCamelCaseToLabel } from '@letar/forms-core/utils'
 import {
   type ColumnDef,
   type ColumnFiltersState,
@@ -44,10 +45,7 @@ export interface DataGridColumnDef {
 type GridRow = Record<string, unknown>
 
 function camelToTitle(str: string): string {
-  return str
-    .replace(/([A-Z])/g, ' $1')
-    .replace(/^./, (s) => s.toUpperCase())
-    .trim()
+  return coreCamelCaseToLabel(str)
 }
 
 /**
