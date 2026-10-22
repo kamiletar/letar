@@ -4,6 +4,12 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [3.0.1] - 2026-10-22
+
+### Fixed
+
+- **`AppForm.Field.Auto` принимает пропсы специализированного поля**, как рантайм-компонент `FieldAuto`. Строгая типизация 3.0.0 сузила тип до `{ name, label? }`, и в потребителях typecheck падал на `onComplete`, `autoComplete`, `showRequirements`.
+
 ## [3.0.0] - 2026-10-20
 
 Лёгкое ядро. RichText, DataGrid, TableEditor и перетаскивание в списках вынесены из ядра в подпути. Обязательных

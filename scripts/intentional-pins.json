@@ -26,6 +26,16 @@
       "reason": "Тот же класс, тот же прогон deps-update, соседний пакет: @zenstackhq/cli (dependencies.zod: \"^4.0.0\", совместим с 4.4.3) тоже получил приватную копию zod@4.6.5 под bun isolated linker. Следствие — TS2321 'Excessive stack depth comparing types MapType<Schema,?>' (класс уже описан в tsgo-excessive-stack-depth-zenstack.md) в 4 НОВЫХ местах grandslamcup (citySlug-страницы) сверх уже существовавшего техдолга, плюс годная копия сохранилась в domwellbes только благодаря совпадению с MCP-фиксом.",
       "doc": "PLAN-INFRA-*.md — деплой-запись про /infra:deps-update 2026-09-16",
       "unpinWhen": "grep -n '\"@zenstackhq/cli/zod\"' bun.lock даёт пусто и БЕЗ override — тогда убрать override и эту запись одним коммитом."
+    },
+    {
+      "package": "satori",
+      "override": {
+        "fflate": "0.7.5"
+      },
+      "since": "2026-10-22",
+      "reason": "satori@0.33.5 объявляет fflate точно как 0.7.3, а в нём GHSA-px8p-9vwx-vf98 (бесконечный цикл unzipSync на битых ZIP64, исправлено в 0.7.5). Диапазоном не обойти, поэтому scoped override на патч той же линии 0.7.x.",
+      "doc": "bun audit 2026-10-22",
+      "unpinWhen": "satori перестал точно пинить fflate 0.7.3 (в bun.lock у satori > @shuding/opentype.js > fflate версия >=0.7.5 без override) — тогда убрать override и эту запись одним коммитом."
     }
   ],
   "pins": [

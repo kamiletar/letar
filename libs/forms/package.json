@@ -1,6 +1,6 @@
 {
   "name": "@letar/forms",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "Reusable form components library with TanStack Form and Chakra UI integration",
   "type": "module",
   "nx": {
