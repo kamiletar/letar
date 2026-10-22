@@ -9,7 +9,11 @@ disable-model-invocation: true
 ## Инициализация
 
 1. Прочитай `.claude/rules/driving-school.md` для специфичных правил
-2. Прочитай `apps/driving-school/PLAN.md` для текущего состояния задач
+2. ⚠️ **Очередь задач — `apps/driving-school/tasks/`** (формат — [tasks-per-file](/.claude/docs/tasks-per-file.md)).
+   Прочитай [`tasks/README.md`](/apps/driving-school/tasks/README.md) и выполни
+   `bun scripts/tasks.mjs next driving-school`. Вызов с id (`/driving-school DS-003`) — сразу
+   `bun scripts/tasks.mjs show DS-003`. `PLAN.md` и `PLAN_COMPLETED.md` **заморожены** и остаются справкой: целиком их не
+   читать, открывать только раздел из поля `source` выбранной задачи (`grep -n` и `Read` с `offset`)
 
 ## Регистрация в Agent Mail
 
@@ -25,13 +29,13 @@ disable-model-invocation: true
 
 После изучения документации:
 
-- Определи текущую фазу разработки
-- Выбери следующую задачу из плана
-- Предложи план действий
+- Выбери задачу из «можно брать», `start DS-NNN --owner driving-school-dev`
+- План работы запиши в раздел «План» файла задачи и предложи его
+- Находку вне задачи заводи через `tasks new driving-school …`, не абзацем в плане
 
 ## После завершения задачи
 
-Общий чек-лист — `.claude/rules/app-workflow.md`.
+`bun scripts/tasks.mjs done DS-NNN --summary "…"`, дальше общий чек-лист — `.claude/rules/app-workflow.md`.
 
 ## Деплой
 

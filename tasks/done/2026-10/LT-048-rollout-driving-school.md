@@ -1,7 +1,7 @@
 ---
 id: LT-048
 title: Перевести driving-school на задачи по файлам
-status: ready
+status: done
 size: M
 area: rollout
 priority: 3
@@ -11,7 +11,8 @@ owner: ""
 stage: ""
 source: tasks-per-file
 created: 2026-10-12
-updated: 2026-10-12
+updated: 2026-10-22
+closed: 2026-10-22
 ---
 
 ## Что и зачем
@@ -31,3 +32,5 @@ updated: 2026-10-12
 ## Журнал
 
 ## Итог
+
+driving-school переведён (коммит 24e2c06 в submodule): префикс DS, 11 задач (4 можно брать, 4 ждут, 1 идея и зависимые от DS-001). Баннеры, компас, скилл.
