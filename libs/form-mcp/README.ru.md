@@ -14,7 +14,7 @@ MCP (Model Context Protocol) сервер для [@letar/forms](https://www.npmj
     "form-mcp": {
       "type": "stdio",
       "command": "npx",
-      "args": ["-y", "@letar/form-mcp"]
+      "args": ["-y", "@letar/form-mcp@next"]
     }
   }
 }
@@ -29,7 +29,7 @@ MCP (Model Context Protocol) сервер для [@letar/forms](https://www.npmj
   "mcpServers": {
     "form-mcp": {
       "command": "npx",
-      "args": ["-y", "@letar/form-mcp"]
+      "args": ["-y", "@letar/form-mcp@next"]
     }
   }
 }
@@ -45,7 +45,7 @@ MCP (Model Context Protocol) сервер для [@letar/forms](https://www.npmj
     "form-mcp": {
       "type": "stdio",
       "command": "npx",
-      "args": ["-y", "@letar/form-mcp"]
+      "args": ["-y", "@letar/form-mcp@next"]
     }
   }
 }

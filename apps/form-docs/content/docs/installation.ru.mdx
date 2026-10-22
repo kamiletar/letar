@@ -6,12 +6,14 @@ description: Установка @letar/forms и зависимостей
 ## Установка
 
 ```bash
-npm install @letar/forms @tanstack/react-form @chakra-ui/react zod framer-motion
+npm install @letar/forms@next @tanstack/react-form @chakra-ui/react zod framer-motion react-icons
 # или с bun
-bun add @letar/forms @tanstack/react-form @chakra-ui/react zod framer-motion
+bun add @letar/forms@next @tanstack/react-form @chakra-ui/react zod framer-motion react-icons
 # или с pnpm
-pnpm add @letar/forms @tanstack/react-form @chakra-ui/react zod framer-motion
+pnpm add @letar/forms@next @tanstack/react-form @chakra-ui/react zod framer-motion react-icons
 ```
+
+`@next` — канал 3.x. Пока 3.x не переведена в `latest`, `@letar/forms` без тега ставит старую ветку 1.x.
 
 ## Опциональные зависимости
 
@@ -35,23 +37,38 @@ npm install @tiptap/react @tiptap/starter-kit @tiptap/extension-image @tiptap/ex
 npm install @tanstack/react-table @tanstack/react-virtual
 ```
 
-Для масок ввода (телефон, кредитная карта и т.д.):
+Для `FormDebugJsonView` (`@letar/forms/debug`):
 
 ```bash
-npm install use-mask-input
+npm install @uiw/react-json-view
 ```
+
+Для офлайн-черновиков (`@letar/forms/offline`):
+
+```bash
+npm install idb-keyval
+```
+
+Маски ввода (телефон, карта и т.д.) встроены, отдельный пакет не нужен.
 
 ## Зависимости
 
-| Пакет                  | Версия    | Обязательный |
-| ---------------------- | --------- | ------------ |
-| `react`                | >= 18.0.0 | Да           |
-| `@tanstack/react-form` | >= 1.0.0  | Да           |
-| `@chakra-ui/react`     | >= 3.0.0  | Да           |
-| `framer-motion`        | >= 10.0.0 | Да           |
-| `zod`                  | >= 3.24.0 | Да           |
-| `@dnd-kit/*`           | >= 6.0.0  | Нет          |
-| `use-mask-input`       | >= 3.0.0  | Нет          |
+| Пакет                                                         | Версия           | Обязательный                       |
+| ------------------------------------------------------------- | ---------------- | ---------------------------------- |
+| `react`                                                       | >= 18.0.0        | Да                                 |
+| `@chakra-ui/react`                                            | >= 3.0.0         | Да                                 |
+| `@tanstack/react-form`                                        | >= 1.0.0         | Да                                 |
+| `framer-motion`                                               | >= 10.0.0        | Да                                 |
+| `react-icons`                                                 | >= 5.0.0         | Да                                 |
+| `zod`                                                         | ^4.0.0           | Да                                 |
+| `@dnd-kit/core`                                               | >= 6.0.0         | Нет (`/sortable`, `/table-editor`) |
+| `@dnd-kit/sortable`                                           | >= 10.0.0        | Нет (`/sortable`, `/table-editor`) |
+| `@dnd-kit/utilities`                                          | >= 3.0.0         | Нет (`/sortable`, `/table-editor`) |
+| `@tiptap/react`, `@tiptap/starter-kit`, `@tiptap/extension-*` | >= 3.0.0         | Нет (`/rich-text`)                 |
+| `@tanstack/react-table`                                       | >= 8.0.0         | Нет (`/data-grid`)                 |
+| `@tanstack/react-virtual`                                     | >= 3.0.0         | Нет (`/data-grid`)                 |
+| `@uiw/react-json-view`                                        | >= 2.0.0-alpha.0 | Нет (`/debug`)                     |
+| `idb-keyval`                                                  | >= 6.0.0         | Нет (`/offline`)                   |
 
 ## Настройка
 

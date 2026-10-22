@@ -17,7 +17,7 @@ ZenStack plugin for generating Zod v4 schemas with UI metadata from `schema.zmod
 ## Installation
 
 ```bash
-npm install -D @letar/zenstack-form-plugin
+npm install -D @letar/zenstack-form-plugin@next
 ```
 
 ## Configuration

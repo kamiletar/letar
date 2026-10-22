@@ -34,7 +34,7 @@ updated: 2026-10-20
 - [x] Этап 4а — проверка «установка — подмножество bun.lock» в трёх workflow вместо --frozen-lockfile (задание forms-npm-03-lock-subset.md)
 - [x] Этап 4б — лёгкое ядро: тяжёлые поля в подпути rich-text, data-grid, table-editor, sortable, debug; 6 обязательных peer; forms 3.0.0 (задание forms-npm-04-pluggable-fields.md: фаза A совместимая → письма aboi/mandala → фаза C ломающая)
 - [x] Этап 5 — публикация под next (новые имена — владелец вручную)
-- [ ] Этап 6 — перевод в latest
+- [ ] Этап 6 — перевод в latest; затем убрать `@next` из команд установки (README пакетов, form-docs installation/mcp/zenstack-plugin) и строки «`@next` — канал 3.x»
 
 ## Журнал
 
