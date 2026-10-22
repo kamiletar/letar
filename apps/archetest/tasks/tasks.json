@@ -1,0 +1,1 @@
+{ "project": "archetest", "prefix": "AT", "frozen": ["PLAN.md", "PLAN_COMPLETED.md", "PLAN_COMPLETED_*.md"] }

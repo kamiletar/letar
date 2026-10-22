@@ -1,5 +1,10 @@
 # Выполненные задачи: Archetest — часть 7 (2026-07-29 … 2026-09-09)
 
+> ⚠️ **С 2026-10-12 файл заморожен.** Очередь задач — в [`tasks/`](/apps/archetest/tasks/README.md)
+> (`bun scripts/tasks.mjs next archetest` из корня монорепо). Новые задачи, журнал и итоги сюда
+> не пишутся: хук не пропустит рост файла. Здесь остаётся справка. Формат —
+> [tasks-per-file](/.claude/docs/tasks-per-file.md).
+
 > Точка входа и карта частей — [PLAN_COMPLETED.md](./PLAN_COMPLETED.md). Здесь: cookie-banner и StickyActionBar (заходы 2026-07-29), hard e2e-gate закрыт, мелкий техдолг, починка графа Nx.
 
 ## Сессия 2026-07-29 (продолжение) — cookie-banner перехват CTA: закрыто, `@letar/ui` доработан
