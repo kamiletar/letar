@@ -11,9 +11,7 @@
 
 ## Установка
 
-```bash
-npm i @letar/url-query-state@beta
-```
+Пакет пока не опубликован в npm, в монорепо подключается через `workspace:*` (см. `.claude/rules/libs.md`).
 
 Peer-зависимости: `next` (>=15), `react` (>=19).
 

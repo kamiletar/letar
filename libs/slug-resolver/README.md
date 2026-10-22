@@ -8,9 +8,7 @@
 
 ## Установка
 
-```bash
-npm i @letar/slug-resolver@beta
-```
+Пакет пока не опубликован в npm, в монорепо подключается через `workspace:*` (см. `.claude/rules/libs.md`).
 
 Peer-зависимость: `next` (>=15) — только для `@letar/slug-resolver/next`.
 

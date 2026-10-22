@@ -9,8 +9,12 @@ Reka UI-скин `@letar/forms-vue` — реализация `UIKit`-контр�
 
 ## Установка
 
+Пакет пока не опубликован в npm, в монорепо подключается через `workspace:*` (см. `.claude/rules/libs.md`).
+
+Остальные зависимости ставятся как обычно:
+
 ```bash
-npm i @letar/forms-vue-shadcn@beta @letar/forms-vue @letar/forms-core vue reka-ui class-variance-authority clsx tailwind-merge lucide-vue-next @tanstack/vue-table zod
+npm i @letar/forms-vue @letar/forms-core vue reka-ui class-variance-authority clsx tailwind-merge lucide-vue-next @tanstack/vue-table zod
 ```
 
 Требуются peer `@letar/forms-core` (>=0.28.0 <1) и `@letar/forms-vue` (>=0.25.0 <1). Для `FieldRichText` (Tiptap) дополнительно:

@@ -11,9 +11,7 @@
 
 ## Установка
 
-```bash
-npm i @letar/idempotency-key@beta
-```
+Пакет пока не опубликован в npm, в монорепо подключается через `workspace:*` (см. `.claude/rules/libs.md`).
 
 ```typescript
 import { clearIdempotencyKey, getOrCreateIdempotencyKey } from '@letar/idempotency-key'

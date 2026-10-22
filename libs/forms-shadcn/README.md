@@ -23,8 +23,12 @@ Tailwind 4 в приложении (сканирование контента ч
 
 ## Установка
 
+Пакет пока не опубликован в npm, в монорепо подключается через `workspace:*` (см. `.claude/rules/libs.md`).
+
+Остальные зависимости ставятся как обычно:
+
 ```bash
-npm i @letar/forms-shadcn@beta @letar/forms-core @letar/forms-react @tanstack/react-form react zod class-variance-authority clsx tailwind-merge @radix-ui/react-label
+npm i @letar/forms-core @letar/forms-react @tanstack/react-form react zod class-variance-authority clsx tailwind-merge @radix-ui/react-label
 ```
 
 Требуются peer `@letar/forms-core` (>=0.28.0 <1) и `@letar/forms-react` (>=0.26.0 <1). Остальные `@radix-ui/*`-примитивы (по полям),

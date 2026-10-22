@@ -4,9 +4,7 @@
 
 ## Установка
 
-```bash
-npm i @letar/pg-url@beta
-```
+Пакет пока не опубликован в npm, в монорепо подключается через `workspace:*` (см. `.claude/rules/libs.md`).
 
 ```typescript
 import { parsePostgresUrl } from '@letar/pg-url'
