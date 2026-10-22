@@ -1,7 +1,7 @@
 ---
 id: LT-044
 title: Перевести synth на задачи по файлам
-status: ready
+status: done
 size: M
 area: rollout
 priority: 3
@@ -11,7 +11,8 @@ owner: ""
 stage: ""
 source: tasks-per-file
 created: 2026-10-12
-updated: 2026-10-12
+updated: 2026-10-22
+closed: 2026-10-22
 ---
 
 ## Что и зачем
@@ -31,3 +32,5 @@ updated: 2026-10-12
 ## Журнал
 
 ## Итог
+
+synth переведён: префикс SY, 8 задач (3 можно брать, 2 ждут kami, 3 идеи). Фазы 0–5 закрыты, остальное справка. Баннеры, компас, скилл.

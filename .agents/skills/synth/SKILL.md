@@ -19,8 +19,13 @@ disable-model-invocation: true
 ## Читать первым
 
 1. `apps/synth/claude.md` — роль, профиль владельца, закрытые решения, «не делать»
-2. `apps/synth/PLAN.md` — фазы, чек-листы задач, звуковые приоритеты
-3. `apps/synth/PLAN_COMPLETED.md` — что уже сделано
+2. ⚠️ **Очередь задач — `apps/synth/tasks/`** (формат — [tasks-per-file](/.claude/docs/tasks-per-file.md)).
+   Прочитай [`tasks/README.md`](/apps/synth/tasks/README.md) и выполни `bun scripts/tasks.mjs next synth`.
+   Вызов с id (`/synth SY-003`) — сразу `bun scripts/tasks.mjs show SY-003`. `PLAN.md` и `PLAN_COMPLETED.md`
+   **заморожены** и остаются справкой (звуковые приоритеты, фазы, видение): целиком их не читать,
+   открывать только раздел из поля `source` выбранной задачи (`grep -n` и `Read` с `offset`).
+   Задачу выбери из «можно брать», `start SY-NNN --owner synth-dev`, план запиши в файл задачи;
+   находку вне задачи заводи через `tasks new synth …`. `JOURNAL.md` целиком не читать: только запись о вехе
 
 ## Двойная роль
 
@@ -76,7 +81,7 @@ disable-model-invocation: true
 
 ## После завершения задачи
 
-Общий чек-лист — `.claude/rules/app-workflow.md`. Дополнительно для synth:
+`bun scripts/tasks.mjs done SY-NNN --summary "…"`, дальше общий чек-лист — `.claude/rules/app-workflow.md`. Дополнительно для synth:
 
 - Обнови `JOURNAL.md` — термин + метафора (ОБЯЗАТЕЛЬНО)
 

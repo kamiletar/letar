@@ -1,5 +1,10 @@
 # PLAN_COMPLETED — synth
 
+> ⚠️ **С 2026-10-12 файл заморожен.** Очередь задач — в [`tasks/`](/apps/synth/tasks/README.md)
+> (`bun scripts/tasks.mjs next synth` из корня монорепо). Новые задачи, журнал и итоги сюда
+> не пишутся: хук не пропустит рост файла. Здесь остаётся справка. Формат —
+> [tasks-per-file](/.claude/docs/tasks-per-file.md).
+
 ## 2026-09-27 (`TS2737` — BigInt в `@letar/format-utils`, `target` ES2017→ES2022)
 
 Найдено попутно в сессии по `libs/github-releases`/`animatrona-landing`. `synth` реально
