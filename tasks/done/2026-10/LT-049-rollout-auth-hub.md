@@ -1,7 +1,7 @@
 ---
 id: LT-049
 title: Перевести auth-hub на задачи по файлам
-status: ready
+status: done
 size: M
 area: rollout
 priority: 3
@@ -11,7 +11,8 @@ owner: ""
 stage: ""
 source: tasks-per-file
 created: 2026-10-12
-updated: 2026-10-12
+updated: 2026-10-22
+closed: 2026-10-22
 ---
 
 ## Что и зачем
@@ -31,3 +32,5 @@ updated: 2026-10-12
 ## Журнал
 
 ## Итог
+
+auth-hub переведён: префикс AH, 12 задач (4 можно брать, 5 ждут kami, 1 идея). Баннеры в трёх планах, компас, скилл.
