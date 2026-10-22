@@ -2,7 +2,7 @@
  * Guard-тест: production-сервер приложения в командном файле не должен расходиться с каноном.
  *
  * Читает РЕАЛЬНЫЙ монорепо (не фикстуры) — смысл именно в этом: тест ловит дрейф, который
- * возникнет от правки `SERVER_APPS` без обновления `.claude/commands/<app>.md` (или наоборот —
+ * возникнет от правки `SERVER_APPS` без обновления `.claude/skills/<app>/SKILL.md` (или наоборот —
  * забытую строку после переноса приложения на другой сервер), а не регрессию собственной логики
  * парсинга.
  *
@@ -20,7 +20,7 @@ describe('сверка production-сервера между командным �
     expect(declarations.length).toBeGreaterThan(10)
   })
 
-  it('`**Сервер:**` в .claude/commands/<app>.md совпадает с SERVER_APPS', () => {
+  it('`**Сервер:**` в .claude/skills/<app>/SKILL.md совпадает с SERVER_APPS', () => {
     const drift = findServerDrift(declarations)
     expect(
       drift,
