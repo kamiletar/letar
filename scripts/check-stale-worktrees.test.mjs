@@ -6,7 +6,7 @@
 // в другом worktree, даёт в `git branch` маркер `+ `, и разбор падал на `fatal: ambiguous argument`.
 
 import { afterEach, describe, expect, test } from 'bun:test'
-import { copyFileSync, mkdirSync, mkdtempSync, realpathSync, rmSync } from 'node:fs'
+import { copyFileSync, mkdirSync, mkdtempSync, realpathSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -52,6 +52,58 @@ function runScript(repo) {
   })
   return { out: r.stdout.toString('utf8'), err: r.stderr.toString('utf8'), code: r.exitCode }
 }
+
+/** Брошенный worktree в .claude/worktrees/: HEAD старше порога. `extra` дополняет каталог до `git add`. */
+function makeStaleWorktree(repo, name, extra = () => {}) {
+  const old = '2020-01-01T00:00:00Z'
+  const env = { ...process.env, GIT_AUTHOR_DATE: old, GIT_COMMITTER_DATE: old }
+  const wt = join(repo, '.claude', 'worktrees', name)
+  git(repo, ['branch', `old-${name}`])
+  git(repo, ['worktree', 'add', wt, `old-${name}`])
+  extra(wt)
+  git(wt, ['add', '-A'])
+  Bun.spawnSync(['git', 'commit', '--allow-empty', '-m', 'old'], { cwd: wt, env, stdout: 'pipe', stderr: 'pipe' })
+  git(repo, ['update-ref', 'refs/remotes/origin/main', `old-${name}`])
+  return wt
+}
+
+describe('check-stale-worktrees: совет по уборке', () => {
+  test('без junction и submodule — простой порядок, без rmdir и проверки submodule', () => {
+    const { repo } = makeRepo()
+    makeStaleWorktree(repo, 'plain')
+    const { out } = runScript(repo)
+    expect(out).toContain('git worktree remove --force')
+    expect(out).toContain('git branch -d old-plain')
+    expect(out).toContain('git worktree prune')
+    expect(out).toContain('worktree-removal-junction-submodule.md')
+    expect(out).not.toContain('cmd /c rmdir')
+    expect(out).not.toContain('--not --remotes')
+  })
+
+  test('с junction node_modules — сначала rmdir ссылки, потом остальное', () => {
+    const { root, repo } = makeRepo()
+    const target = join(root, 'real-node-modules')
+    mkdirSync(target)
+    makeStaleWorktree(repo, 'junc')
+    symlinkSync(target, join(repo, '.claude', 'worktrees', 'junc', 'node_modules'), 'junction')
+    const { out } = runScript(repo)
+    expect(out).toContain('cmd /c rmdir')
+    expect(out).toContain('node_modules')
+    expect(out.indexOf('git worktree prune')).toBeLessThan(out.indexOf('cmd /c rmdir'))
+    expect(out.indexOf('cmd /c rmdir')).toBeLessThan(out.indexOf('Remove-Item'))
+  })
+
+  test('с submodule — первым шагом проверка неотправленных коммитов', () => {
+    const { repo } = makeRepo()
+    makeStaleWorktree(repo, 'sub', (wt) => {
+      writeFileSync(join(wt, '.gitmodules'), '[submodule "apps/foo"]\n\tpath = apps/foo\n\turl = ../foo.git\n')
+    })
+    const { out } = runScript(repo)
+    expect(out).toContain('--not --remotes')
+    expect(out).toContain('apps/foo')
+    expect(out.indexOf('--not --remotes')).toBeLessThan(out.indexOf('git worktree remove --force'))
+  })
+})
 
 describe('check-stale-worktrees: разбор имён веток', () => {
   test('ветка, выписанная в другом worktree (маркер `+`), не даёт fatal и не считается сиротой', () => {

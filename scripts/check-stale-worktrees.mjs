@@ -37,6 +37,7 @@
 // безобидном мусоре, который снести можно не глядя.
 
 import { execFileSync } from 'node:child_process'
+import { existsSync, lstatSync, readFileSync } from 'node:fs'
 import { dirname, join, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -82,6 +83,56 @@ function parseWorktrees(porcelain) {
 function commitTimeMs(ref, cwd) {
   const ts = gitOrNull(['log', '-1', '--format=%ct', ref], cwd)
   return ts ? Number(ts) * 1000 : null
+}
+
+/** Пути submodule из `.gitmodules` worktree (пусто, если файла нет). */
+function submodulePaths(worktreePath) {
+  const file = join(worktreePath, '.gitmodules')
+  if (!existsSync(file)) { return [] }
+  return [...readFileSync(file, 'utf8').matchAll(/^\s*path\s*=\s*(.+?)\s*$/gm)].map((m) => m[1])
+}
+
+/** Есть ли `node_modules` — ссылка (junction/symlink): рекурсивное удаление пойдёт по ней в настоящие зависимости. */
+function hasNodeModulesLink(worktreePath) {
+  try {
+    return lstatSync(join(worktreePath, 'node_modules')).isSymbolicLink()
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Безопасный порядок уборки worktree (разбор: .claude/docs/worktree-removal-junction-submodule.md).
+ * Только строки совета — ничего не выполняется.
+ */
+function removalAdvice(w) {
+  const submodules = submodulePaths(w.path)
+  const junction = hasNodeModulesLink(w.path)
+  const lines = ['безопасный порядок уборки (скрипт ничего не удаляет):']
+  let n = 1
+  if (submodules.length > 0) {
+    lines.push(
+      `  ${n++}. submodule (${
+        submodules.join(', ')
+      }) — убедись, что неотправленных коммитов нет (пусто = всё на origin):`,
+    )
+    for (const s of submodules) { lines.push(`       git -C "${join(w.path, s)}" log --not --remotes --oneline`) }
+  }
+  lines.push(`  ${n++}. git worktree remove --force "${w.path}"`)
+  if (w.branch) { lines.push(`  ${n++}. git branch -d ${w.branch}`) }
+  lines.push(`  ${n++}. git worktree prune`)
+  if (junction) {
+    lines.push(
+      `  ${n++}. ⚠️ node_modules внутри — junction/symlink в настоящие зависимости монорепо. Сначала снять ссылку:`,
+      `       cmd /c rmdir "${join(w.path, 'node_modules')}"`,
+      '       (rmdir убирает только ссылку; Remove-Item -Recurse / rm -rf по ней могут снести C:\\web\\letar\\node_modules)',
+    )
+  }
+  if (submodules.length > 0 || junction) {
+    lines.push(`  ${n++}. остаток каталога, если остался: Set-Location C:\\ ; Remove-Item "${w.path}" -Recurse -Force`)
+  }
+  lines.push('  разбор: .claude/docs/worktree-removal-junction-submodule.md')
+  return lines
 }
 
 const worktreesDir = resolve(repoRoot, '.claude', 'worktrees')
@@ -173,7 +224,7 @@ if (staleWorktrees.length > 0) {
     console.log(`  ${w.path}`)
     console.log(`    ветка: ${w.branch ?? '(detached)'}, возраст HEAD: ${w.ageDays} дн.`)
     console.log(`    ${unique ? '⚠️  ' + flags.join(', ') : '✅ уникальной работы не найдено'}`)
-    console.log(`    команда: git worktree remove --force "${w.path}"`)
+    for (const line of removalAdvice(w)) { console.log(`    ${line}`) }
     console.log('')
   }
 }
