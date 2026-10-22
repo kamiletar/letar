@@ -1,5 +1,10 @@
 # Animatrona IPFS Player — План
 
+> ⚠️ **С 2026-10-12 файл заморожен.** Очередь задач — в [`tasks/`](/apps/animatrona-ipfs-player/tasks/README.md)
+> (`bun scripts/tasks.mjs next animatrona-ipfs-player` из корня монорепо). Новые задачи, журнал и итоги сюда
+> не пишутся: хук не пропустит рост файла. Здесь остаётся справка. Формат —
+> [tasks-per-file](/.claude/docs/tasks-per-file.md).
+
 Каркас сгенерирован 2026-09-08 (`nx g @letar/generators:electron-app animatrona-ipfs-player`).
 Собственный план приложения — был частью [apps/animatrona/PLAN.md](/apps/animatrona/PLAN.md)
 (раздел «Animatrona IPFS Player», исследование 2026-09-07/08), физически перенесён сюда

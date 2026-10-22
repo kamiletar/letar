@@ -1,7 +1,7 @@
 ---
 id: LT-045
 title: Перевести animatrona-ipfs-player на задачи по файлам
-status: ready
+status: done
 size: M
 area: rollout
 priority: 3
@@ -11,7 +11,8 @@ owner: ""
 stage: ""
 source: tasks-per-file
 created: 2026-10-12
-updated: 2026-10-12
+updated: 2026-10-22
+closed: 2026-10-22
 ---
 
 ## Что и зачем
@@ -31,3 +32,5 @@ updated: 2026-10-12
 ## Журнал
 
 ## Итог
+
+animatrona-ipfs-player переведён: префикс IP, 2 задачи (ручная проверка .exe, чтение манифеста по реальному CID — обе ждут kami). Фазы 0–1 готовы, остальное справка.

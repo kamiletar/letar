@@ -10,7 +10,11 @@ disable-model-invocation: true
 
 1. Прочитай `.claude/rules/nextjs-apps.md` для общих правил Next.js
 2. Прочитай `.claude/rules/electron.md` для граблей Electron-приложений
-3. Прочитай `apps/animatrona-ipfs-player/PLAN.md` для текущего состояния задач и решений владельца
+3. ⚠️ **Очередь задач — `apps/animatrona-ipfs-player/tasks/`** (формат — [tasks-per-file](/.claude/docs/tasks-per-file.md)).
+   Прочитай [`tasks/README.md`](/apps/animatrona-ipfs-player/tasks/README.md) и выполни
+   `bun scripts/tasks.mjs next animatrona-ipfs-player`. Вызов с id (`/animatrona-ipfs-player IP-003`) — сразу
+   `bun scripts/tasks.mjs show IP-003`. `PLAN.md` и `PLAN_COMPLETED.md` **заморожены** и остаются справкой: целиком их не
+   читать, открывать только раздел из поля `source` выбранной задачи (`grep -n` и `Read` с `offset`)
    по объёму (⚠️ объём финально урезан до «только просмотр» — не путать с более ранними
    формулировками внутри самого файла, там сохранена историческая последовательность решений)
 
@@ -34,9 +38,9 @@ disable-model-invocation: true
 
 После изучения документации:
 
-- Определи текущую фазу разработки (см. `PLAN.md` — сейчас «Открытые вопросы» и Фаза 1 MVP)
-- Выбери следующую задачу из плана
-- Предложи план действий
+- Выбери задачу из «можно брать», `start IP-NNN --owner animatrona-ipfs-player-dev`
+- План работы запиши в раздел «План» файла задачи и предложи его
+- Находку вне задачи заводи через `tasks new animatrona-ipfs-player …`, не абзацем в плане
 
 ## Особенности проекта
 
@@ -62,7 +66,7 @@ disable-model-invocation: true
 
 ## После завершения задачи
 
-Общий чек-лист — `.claude/rules/app-workflow.md`.
+`bun scripts/tasks.mjs done IP-NNN --summary "…"`, дальше общий чек-лист — `.claude/rules/app-workflow.md`.
 
 ## Координация (Animatrona Coordinator)
 
