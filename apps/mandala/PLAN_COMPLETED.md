@@ -1,5 +1,10 @@
 # Выполненные задачи: Mandala
 
+> ⚠️ **С 2026-10-12 файл заморожен.** Очередь задач — в [`tasks/`](/apps/mandala/tasks/README.md)
+> (`bun scripts/tasks.mjs next mandala` из корня монорепо). Новые задачи, журнал и итоги сюда
+> не пишутся: хук не пропустит рост файла. Здесь остаётся справка. Формат —
+> [tasks-per-file](/.claude/docs/tasks-per-file.md).
+
 ## Адаптер переводов форм без `MISSING_MESSAGE` (2026-10-08, v0.40.39)
 
 Сборка 0.40.38 (ключи `formErrors`/`formPersistence` добавлены) шума не давала, но это не

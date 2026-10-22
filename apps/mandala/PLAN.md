@@ -1,5 +1,10 @@
 # План миграции: elfafeya.art → apps/mandala
 
+> ⚠️ **С 2026-10-12 файл заморожен.** Очередь задач — в [`tasks/`](/apps/mandala/tasks/README.md)
+> (`bun scripts/tasks.mjs next mandala` из корня монорепо). Новые задачи, журнал и итоги сюда
+> не пишутся: хук не пропустит рост файла. Здесь остаётся справка. Формат —
+> [tasks-per-file](/.claude/docs/tasks-per-file.md).
+
 **Миграция старого приложения (React 16, 2018) на современный стек (Next.js 16 + React 19)**
 
 > **Версия:** 0.40.6 (фикс ремаунта дерева из-за OnboardingProvider — 07/08/10)
