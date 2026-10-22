@@ -157,14 +157,16 @@
 ## Form.AutoFields — частичная генерация
 
 ```tsx
-<Form schema={Schema} initialValue={data} onSubmit={save}>
+<AppForm schema={Schema} initialValue={data} onSubmit={save}>
   <VStack>
-    <Form.AutoFields include={['title', 'description']} />
-    <Form.Field.RichText name="content" /> {/* Ручное поле */}
-    <Form.Button.Submit>Сохранить</Form.Button.Submit>
+    <AppForm.AutoFields include={['title', 'description']} />
+    <AppForm.Field.RichText name="content" /> {/* Ручное поле */}
+    <AppForm.Button.Submit>Сохранить</AppForm.Button.Submit>
   </VStack>
-</Form>
+</AppForm>
 ```
+
+> С 3.0.0 `RichText` не входит в ядро: `AppForm` — инстанс `createForm({ extraFields: { RichText: FieldRichText } })`, компоненты — из `@letar/forms/rich-text`. Подробнее — `libs/forms/docs/MIGRATION-3.md`.
 
 ## Middleware
 

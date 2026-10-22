@@ -58,8 +58,10 @@
 <Form.Field.Editable name="title" showControls />
 
 // WYSIWYG редактор на Tiptap
-<Form.Field.RichText name="content" />
+<AppForm.Field.RichText name="content" />
 ```
+
+> С 3.0.0 `RichText` не входит в ядро: `AppForm` — инстанс `createForm({ extraFields: { RichText: FieldRichText } })`, компоненты — из `@letar/forms/rich-text`. Подробнее — [MIGRATION-3](../docs/MIGRATION-3.md).
 
 `String` — самый частый. Но обратите внимание: `Textarea` подключается автоматически, если в Zod `.max()` превышает 200 символов (настраиваемый порог). `PasswordStrength` показывает индикатор прямо под полем, проверяя длину, наличие цифр и спецсимволов.
 
@@ -213,7 +215,7 @@
 
 ```tsx
 // Редактируемая таблица (inline-редактирование, DnD сортировка)
-<Form.Field.TableEditor
+<AppForm.Field.TableEditor
   name="items"
   columns={[
     { name: 'product', width: '40%' },
@@ -226,7 +228,7 @@
 />
 
 // Продвинутая таблица данных (сортировка, фильтрация, виртуализация)
-<Form.Field.DataGrid
+<AppForm.Field.DataGrid
   name="products"
   columns={productColumns}
   enableSorting
@@ -235,6 +237,8 @@
   virtualizeRows
 />
 ```
+
+> С 3.0.0 `DataGrid`, `TableEditor` не входит в ядро: `AppForm` — инстанс `createForm({ extraFields: { DataGrid: FieldDataGrid, TableEditor: FieldTableEditor } })`, компоненты — из `@letar/forms/data-grid`, `@letar/forms/table-editor`. Подробнее — [MIGRATION-3](../docs/MIGRATION-3.md).
 
 `TableEditor` — полноценный inline-редактор таблиц с поддержкой computed-колонок, footer-агрегаций (SUM, AVG, COUNT), drag & drop сортировкой строк, и адаптивным мобильным видом (карточки вместо таблицы). Подробнее — в [статье 6: массивы и группы](06-arrays-groups.md).
 

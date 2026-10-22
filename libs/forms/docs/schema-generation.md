@@ -167,23 +167,25 @@ z.string().meta({
 Комбинируйте автогенерацию с ручным контролем:
 
 ```tsx
-<Form schema={ArticleSchema} initialValue={data} onSubmit={save}>
+<AppForm schema={ArticleSchema} initialValue={data} onSubmit={save}>
   <VStack gap={4}>
     {/* Автоматическая генерация для простых полей */}
     <HStack>
-      <Form.Field.Auto name="title" />
-      <Form.Field.Auto name="slug" />
+      <AppForm.Field.Auto name="title" />
+      <AppForm.Field.Auto name="slug" />
     </HStack>
 
-    <Form.Field.Auto name="category" />
+    <AppForm.Field.Auto name="category" />
 
     {/* Ручной контроль для сложных полей */}
-    <Form.Field.RichText name="content" label="Контент статьи" minHeight="300px" />
+    <AppForm.Field.RichText name="content" label="Контент статьи" minHeight="300px" />
 
-    <Form.Button.Submit>Опубликовать</Form.Button.Submit>
+    <AppForm.Button.Submit>Опубликовать</AppForm.Button.Submit>
   </VStack>
-</Form>
+</AppForm>
 ```
+
+> С 3.0.0 `RichText` не входит в ядро: `AppForm` — инстанс `createForm({ extraFields: { RichText: FieldRichText } })`, компоненты — из `@letar/forms/rich-text`. Подробнее — [MIGRATION-3](docs/MIGRATION-3.md).
 
 ---
 
