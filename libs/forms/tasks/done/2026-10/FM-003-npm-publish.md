@@ -1,7 +1,7 @@
 ---
 id: FM-003
 title: Публикация forms-* и form-mcp в npm и теги релизов
-status: doing
+status: done
 size: L
 area: release
 priority: 3
@@ -11,6 +11,7 @@ stage: ""
 source: libs/forms/PLAN.md Backlog 2026-09-27 «Публикация в npm и теги»
 created: 2026-10-12
 updated: 2026-10-22
+closed: 2026-10-22
 ---
 
 ## Что и зачем
@@ -48,3 +49,5 @@ updated: 2026-10-22
 - 2026-10-19: этап 1 принят. Отклонения: treeshake: false в forms/forms-react (иначе rollup выбрасывает 'use client'), чистка имён приватных приложений и в комментариях forms-core/forms-react, тест скрипта на bun:test. DirtyGuard больше не импортирует next/navigation (forms 2.41.0).
 
 ## Итог
+
+Шесть пакетов в npm (latest = next): forms 3.0.0, forms-core 0.31.0, forms-react 0.26.2, forms-query 0.4.1, zenstack-form-plugin 4.4.5, form-mcp 2.6.0; выпуск по тегу через OIDC с provenance
