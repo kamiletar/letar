@@ -37,41 +37,17 @@ mcp__agent-mail__macro_start_session(
 
 ### ⚠️ Вторая сессия того же приложения — временная identity, не общая `<app>-dev`
 
-С валидным токеном сервер регистрирует под фиксированным именем **любую** сессию — и никак не
-сообщает, что имя уже занято живой. Две сессии превращаются в одного агента: их file reservations
-не конфликтуют друг с другом (сервер сверяет только разных агентов), inbox общий (`unread_count`
-копится, ответ уходит дважды или не уходит), а `task_description` затирает последняя. Так две
-сессии `letar-dev` одновременно правили один `server.ts`, и резервация не подняла тревогу
-([разбор](/.claude/docs/git-multi-agent-incidents.md), 2026-09-22).
+С валидным токеном сервер регистрирует под фиксированным именем **любую** сессию и не сообщает, что имя занято: две сессии становятся
+одним агентом (общий inbox, резервации не конфликтуют, `task_description` затирает последняя). Поэтому **перед** `macro_start_session`:
+`whois(project_key: "c-web-letar", agent_name: "<app>-dev", registration_token: "<токен>", include_recent_commits: false)`.
 
-**Перед** `macro_start_session` под фиксированным именем — одна дешёвая проверка (`whois` ничего
-не обновляет, `last_active_ts` — в UTC):
+- `last_active_ts` (UTC) свежее ~30 минут, либо в `git status` есть чужие правки в твоей области — имя занято: заводи **`<app>-dev-<задача>`**
+  (kebab-case латиницей, 1–3 слова, не оканчивается на `agent`/`bot`/`helper`/`manager`/`coordinator`/`worker`/`fixer`), через `register_agent`
+  после `whois` без токена на это имя; занято — `-2`, `-3`. Случайные `HazyCat`/`SunnyTower` не заводить.
+- Старше ~30 минут — фиксированное имя свободно, регистрация штатная.
+- Дальше `set_contact_policy: open` и резервации под новым именем; по завершении `retire_agent` (`/end-session` делает это).
 
-```
-whois(project_key: "c-web-letar", agent_name: "<app>-dev", registration_token: "<токен>",
-      include_recent_commits: false)
-```
-
-`last_active_ts` свежее ~30 минут — имя держит живая сессия: заводи временное имя
-**`<app>-dev-<задача>`** (`repo-dev-scout-e0`, `studio-dev-invoice-pdf`). Владелец по имени видит,
-от кого пришло сообщение и за что сессия отвечает; случайные `HazyCat`/`SunnyTower` не заводить.
-
-```
-whois(project_key: "c-web-letar", agent_name: "<app>-dev-<задача>", include_recent_commits: false)
-# пусто → свободно; занято → добавь -2, -3
-register_agent(project_key: "c-web-letar", program: "claude-code", model: "<модель>",
-               name: "<app>-dev-<задача>", task_description: "<что делаешь>")
-```
-
-`<задача>` — 1–3 слова kebab-case латиницей, **не** оканчивается на `agent`, `bot`, `helper`,
-`manager`, `coordinator`, `worker`, `fixer` и прочие роли из
-[agent-mail-server-quirks](/.claude/docs/agent-mail-server-quirks.md) — такие имена `send_message`
-отвергает в `to`. Задачу выдал сеньор чипом — имя уже стоит в его задании, бери его. Дальше
-`set_contact_policy: open` и резервации — под новым именем, токен сохранять в память не нужно.
-Старше ~30 минут — фиксированное имя свободно, регистрация штатная. Эвристика неточная:
-сессия, которая часами ждёт пользователя, выглядит свободной — поэтому второй сигнал: в `git status`
-есть чужие правки в твоей области, которых ты не делал → считай имя занятым. По завершении —
-`retire_agent` временной identity (`/end-session` это делает).
+Полные команды, обоснование эвристики и прецедент 2026-09-22 — [rules-extracted-details § Вторая сессия](/.claude/docs/rules-extracted-details.md#вторая-сессия-того-же-приложения-в-agent-mail).
 
 ### Сразу после регистрации — `contact_policy: "open"`
 

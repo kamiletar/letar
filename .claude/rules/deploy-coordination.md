@@ -89,30 +89,5 @@ send_message(
 
 ## Исключение
 
-Если ты сам Deploy Agent (имя агента = `deploy-agent-dev`) — ты выполняешь деплой.
-
-### deploy-agent-dev: деплой через letar (deploy-часть, предпочтительно), SSH — резервный канал
-
-Основной путь — инструменты `deploy_*` сервера `letar` (структурированный статус вместо парсинга
-stdout; до 2026-09-14 это был отдельный сервер `deploy-mcp` с голыми именами без префикса):
-
-```
-deploy_git_status({ server: "s2" })                  # коммиты запушены?
-deploy_app({ app: "<app>", target: "production" })   # → deployId
-deploy_status({ server: "s2", deployId, sinceLine: 0 })  # поллинг (sinceLine = totalLines из прошлого ответа)
-```
-
-- `target: "staging"` резолвится на s1 (образ `<app>:staging`; до 2026-09-19 — на старом s3).
-- `seed: true` → добавляет `--seed` (`nx run <app>:db:seed` после успешного деплоя) — теперь не требует SSH-резерва.
-- `deploy_agent_health({ server })` — при проблемах: различает недоступность сервера и неверный токен.
-- Подробности: [mcp-servers.md § Deploy](/.claude/docs/mcp-servers.md#deploy-mcp), [libs/deploy-mcp/README.md](/libs/deploy-mcp/README.md).
-
-⚠️ **Наличие переменной в `.env.docker`/`.env.docker.enc` не означает, что она попала в БД.** Если
-приложение сидит настройки из env через идемпотентный upsert-скрипт (например
-`prisma/seed.ts`), после деплоя с `seed: true` нужно свериться либо с логом самого сида (строка
-вида «✅ настройки обновлены из env»), либо напрямую с содержимым таблицы через `postgres-*` MCP —
-не полагаться на факт, что значение когда-то было прописано в файле.
-
-**Сырой SSH (`deploy-affected.sh` напрямую) остаётся резервным каналом** для того, что
-dashboard-agent не покрывает: первичная настройка нового приложения на сервере, ручное
-вмешательство при сбое агента, provision нового сервера.
+Если ты сам Deploy Agent (имя агента = `deploy-agent-dev`) — ты выполняешь деплой: через инструменты `deploy_*` сервера `letar`, SSH — резервный канал. Порядок вызовов, `target`, `seed` и сверка env с БД —
+[rules-extracted-details § Deploy Agent](/.claude/docs/rules-extracted-details.md#deploy-agent-как-деплоит-сам-deploy-agent-dev).
