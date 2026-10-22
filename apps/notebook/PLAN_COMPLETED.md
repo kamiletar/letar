@@ -1,5 +1,10 @@
 # Блокнот Ками — выполненные задачи
 
+> ⚠️ **С 2026-10-12 файл заморожен.** Очередь задач — в [`tasks/`](/apps/notebook/tasks/README.md)
+> (`bun scripts/tasks.mjs next notebook` из корня монорепо). Новые задачи, журнал и итоги сюда
+> не пишутся: хук не пропустит рост файла. Здесь остаётся справка. Формат —
+> [tasks-per-file](/.claude/docs/tasks-per-file.md).
+
 ## Рефакторинг: DiffView и format.ts (2026-10-06, Unreleased)
 
 - Построчная разница вынесена в `src/app/_components/diff-view.tsx` (prop `lines`, необязательный `empty`), использована в истории и `MergePanel`; `DATE_FORMAT` — в `src/lib/format.ts` (история и главная). Вид и поведение прежние
