@@ -8,6 +8,17 @@ import { requirePoet } from '@/lib/roles'
 import { Badge, Box, Flex, Heading, SimpleGrid, Text, VStack } from '@chakra-ui/react'
 import Link from 'next/link'
 
+/** Ближайший матч поэта: только читаемые поля */
+interface UpcomingMatchRow {
+  id: string
+  homeTeamId: string
+  scheduledAt: Date | null
+  homeTeam: { team: { name: string } }
+  awayTeam: { team: { name: string } }
+  venue: { name: string } | null
+  lineups: { id: string }[]
+}
+
 export default async function PoetDashboardPage() {
   const poet = await requirePoet()
 
@@ -73,6 +84,9 @@ export default async function PoetDashboardPage() {
       take: 5,
     })
     : []
+
+  // Узкий тип вместо вывода ZenStack: tsgo TS2321 при .map (tsgo-excessive-stack-depth-zenstack.md)
+  const upcomingRows: UpcomingMatchRow[] = upcomingMatches
 
   // Последние стихи
   const poems = await prisma.poem.findMany({
@@ -193,7 +207,7 @@ export default async function PoetDashboardPage() {
           )
           : (
             <VStack gap={3} align="stretch">
-              {upcomingMatches.map((match) => {
+              {upcomingRows.map((match) => {
                 const isHome = match.homeTeamId === teamSeason?.teamSeasonId
                 const opponent = isHome ? match.awayTeam.team.name : match.homeTeam.team.name
                 const inLineup = match.lineups.length > 0

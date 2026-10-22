@@ -11,6 +11,12 @@ import { redirect } from 'next/navigation'
 
 import { ScorerWizard } from './_components/wizard/scorer-wizard'
 
+/** Игрок состава в матче: только читаемые поля */
+interface LineupRow {
+  status: string
+  player: { id: string; name: string; disambiguation: string | null }
+}
+
 type Params = Promise<{ id: string }>
 type SearchParams = Promise<{ token?: string }>
 
@@ -89,6 +95,11 @@ export default async function ScorerPage({ params, searchParams }: { params: Par
     }),
   ])
 
+  // Узкие типы вместо вывода ZenStack: tsgo падает на TS2321 при .map по полному результату
+  // (tsgo-excessive-stack-depth-zenstack.md)
+  const homeLineups: LineupRow[] = match.homeTeam.lineups
+  const awayLineups: LineupRow[] = match.awayTeam.lineups
+
   // Сериализуем данные для клиента
   const matchData = {
     id: match.id,
@@ -100,12 +111,12 @@ export default async function ScorerPage({ params, searchParams }: { params: Par
     homeTeam: {
       id: match.homeTeam.id,
       name: match.homeTeam.team.name,
-      players: match.homeTeam.lineups.map((l) => ({
+      players: homeLineups.map((l) => ({
         id: l.player.id,
         name: playerDisplayName(l.player),
         status: l.status,
       })),
-      hasLineup: match.homeTeam.lineups.length > 0,
+      hasLineup: homeLineups.length > 0,
       roster: homeRoster.map((r) => ({
         id: r.player.id,
         name: playerDisplayName(r.player),
@@ -115,12 +126,12 @@ export default async function ScorerPage({ params, searchParams }: { params: Par
     awayTeam: {
       id: match.awayTeam.id,
       name: match.awayTeam.team.name,
-      players: match.awayTeam.lineups.map((l) => ({
+      players: awayLineups.map((l) => ({
         id: l.player.id,
         name: playerDisplayName(l.player),
         status: l.status,
       })),
-      hasLineup: match.awayTeam.lineups.length > 0,
+      hasLineup: awayLineups.length > 0,
       roster: awayRoster.map((r) => ({
         id: r.player.id,
         name: playerDisplayName(r.player),

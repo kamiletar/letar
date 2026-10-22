@@ -2,6 +2,31 @@ import { prisma } from '@/lib/db'
 import { requireAdmin } from '@/lib/roles'
 import { CreateMatchForm } from './_components/create-match-form'
 
+/** Заявка команды на сезон: только читаемые поля */
+interface TeamSeasonRow {
+  id: string
+  seasonId: string
+  leagueId: string
+  team: { name: string }
+  season: { id: string; name: string; cityId: string }
+  league: { id: string; name: string }
+}
+
+/** Тур с раундом: только читаемые поля */
+interface TourRow {
+  id: string
+  number: number
+  round: {
+    name: string
+    seasonId: string
+    number: number
+    startDate: Date | null
+    stageId: string | null
+    season: { name: string; cityId: string; status: string }
+  }
+  _count: { matches: number }
+}
+
 /** Страница создания матча (только для админов/организаторов) */
 export default async function CreateMatchPage() {
   const user = await requireAdmin()
@@ -14,30 +39,35 @@ export default async function CreateMatchPage() {
   const organizerCityIds = organizerCities.map((c) => c.cityId)
   const isFullAdmin = user.roles.includes('ADMIN')
 
-  // Загружаем данные для dropdowns параллельно
-  const [cities, seasons, teamSeasons, venues, tours, bracketSlots, swissMatches] = await Promise.all([
-    prisma.city.findMany({
-      orderBy: { name: 'asc' },
-      select: { id: true, name: true, useHomeAway: true },
-    }),
-    prisma.season.findMany({
-      where: { status: 'ACTIVE' },
-      orderBy: { name: 'asc' },
-      select: { id: true, name: true, cityId: true },
-    }),
-    prisma.teamSeason.findMany({
+  // Загружаем данные для dropdowns параллельно. ZenStack-запрос ленивый (стартует на then),
+  // поэтому Promise.resolve запускает его сразу; await по отдельности вместо кортежа Promise.all,
+  // который роняет tsgo TS2321 (tsgo-excessive-stack-depth-zenstack.md)
+  const citiesPromise = Promise.resolve(prisma.city.findMany({
+    orderBy: { name: 'asc' },
+    select: { id: true, name: true, useHomeAway: true },
+  }))
+  const seasonsPromise = Promise.resolve(prisma.season.findMany({
+    where: { status: 'ACTIVE' },
+    orderBy: { name: 'asc' },
+    select: { id: true, name: true, cityId: true },
+  }))
+  const teamSeasonsPromise = (async (): Promise<TeamSeasonRow[]> => {
+    const rows: TeamSeasonRow[] = await prisma.teamSeason.findMany({
       include: {
         team: { select: { name: true } },
         season: { select: { id: true, name: true, cityId: true } },
         league: { select: { id: true, name: true } },
       },
       orderBy: { team: { name: 'asc' } },
-    }),
-    prisma.venue.findMany({
-      orderBy: { name: 'asc' },
-      select: { id: true, name: true, cityId: true },
-    }),
-    prisma.tour.findMany({
+    })
+    return rows
+  })()
+  const venuesPromise = Promise.resolve(prisma.venue.findMany({
+    orderBy: { name: 'asc' },
+    select: { id: true, name: true, cityId: true },
+  }))
+  const toursPromise = (async (): Promise<TourRow[]> => {
+    const rows: TourRow[] = await prisma.tour.findMany({
       include: {
         round: {
           select: {
@@ -52,21 +82,30 @@ export default async function CreateMatchPage() {
         _count: { select: { matches: true } },
       },
       orderBy: [{ round: { season: { name: 'asc' } } }, { round: { number: 'asc' } }, { number: 'asc' }],
-    }),
-    // Слоты плей-офф сетки с уже определёнными командами
-    prisma.bracketSlot.findMany({
-      where: { teamSeasonId: { not: null } },
-      select: { stageId: true, teamSeasonId: true },
-    }),
-    // Swiss-матчи для вычисления W-L (все статусы кроме POSTPONED)
-    prisma.match.findMany({
-      where: {
-        status: { in: ['FINISHED', 'LIVE', 'SCHEDULED'] },
-        tour: { round: { stageId: null, season: { status: 'ACTIVE' } } },
-      },
-      select: { homeTeamId: true, awayTeamId: true, homeScore: true, awayScore: true, status: true },
-    }),
-  ])
+    })
+    return rows
+  })()
+  // Слоты плей-офф сетки с уже определёнными командами
+  const bracketSlotsPromise = Promise.resolve(prisma.bracketSlot.findMany({
+    where: { teamSeasonId: { not: null } },
+    select: { stageId: true, teamSeasonId: true },
+  }))
+  // Swiss-матчи для вычисления W-L (все статусы кроме POSTPONED)
+  const swissMatchesPromise = Promise.resolve(prisma.match.findMany({
+    where: {
+      status: { in: ['FINISHED', 'LIVE', 'SCHEDULED'] },
+      tour: { round: { stageId: null, season: { status: 'ACTIVE' } } },
+    },
+    select: { homeTeamId: true, awayTeamId: true, homeScore: true, awayScore: true, status: true },
+  }))
+
+  const cities = await citiesPromise
+  const seasons = await seasonsPromise
+  const teamSeasonRows: TeamSeasonRow[] = await teamSeasonsPromise
+  const venues = await venuesPromise
+  const tourRows: TourRow[] = await toursPromise
+  const bracketSlots = await bracketSlotsPromise
+  const swissMatches = await swissMatchesPromise
 
   // W-L + total по teamSeason для Swiss-матчей
   // total = все матчи (FINISHED+LIVE+SCHEDULED) → определяет текущий тур команды
@@ -95,7 +134,7 @@ export default async function CreateMatchPage() {
   )
 
   // Сериализуем для клиента
-  const serializedTeamSeasons = teamSeasons.map((ts) => ({
+  const serializedTeamSeasons = teamSeasonRows.map((ts) => ({
     id: ts.id,
     teamName: ts.team.name,
     seasonId: ts.seasonId,
@@ -105,7 +144,7 @@ export default async function CreateMatchPage() {
     leagueName: ts.league.name,
   }))
 
-  const serializedTours = tours.map((t) => ({
+  const serializedTours = tourRows.map((t) => ({
     id: t.id,
     number: t.number,
     roundNumber: t.round.number,
