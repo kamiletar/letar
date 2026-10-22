@@ -10,7 +10,7 @@ owner: forms-dev-npm-build
 stage: ""
 source: libs/forms/PLAN.md Backlog 2026-09-27 «Публикация в npm и теги»
 created: 2026-10-12
-updated: 2026-10-20
+updated: 2026-10-22
 ---
 
 ## Что и зачем
@@ -21,7 +21,7 @@ updated: 2026-10-20
 
 - [x] Слово владельца получено (2026-10-19: «давай готовиться к публикации», решения D1–D5 приняты)
 - [x] Паритет Vue и Angular закрыт (FM-004) или решено публиковать без него — D2: первая волна без Vue/Angular/shadcn
-- [ ] Чек-лист публикации пройден, пакеты на npm
+- [x] Чек-лист публикации пройден, пакеты на npm
 
 ## План
 
@@ -34,10 +34,11 @@ updated: 2026-10-20
 - [x] Этап 4а — проверка «установка — подмножество bun.lock» в трёх workflow вместо --frozen-lockfile (задание forms-npm-03-lock-subset.md)
 - [x] Этап 4б — лёгкое ядро: тяжёлые поля в подпути rich-text, data-grid, table-editor, sortable, debug; 6 обязательных peer; forms 3.0.0 (задание forms-npm-04-pluggable-fields.md: фаза A совместимая → письма aboi/mandala → фаза C ломающая)
 - [x] Этап 5 — публикация под next (новые имена — владелец вручную)
-- [ ] Этап 6 — перевод в latest; затем убрать `@next` из команд установки (README пакетов, form-docs installation/mcp/zenstack-plugin) и строки «`@next` — канал 3.x»
+- [x] Этап 6 — перевод в latest; затем убрать `@next` из команд установки (README пакетов, form-docs installation/mcp/zenstack-plugin) и строки «`@next` — канал 3.x»
 
 ## Журнал
 
+- 2026-10-22: этап 6 выполнен. Владелец перевёл latest: forms 3.0.0, zenstack-form-plugin 4.4.5, form-mcp 2.6.0 (у forms-core/react/query latest уже совпадал с next). `@next` снят из команд установки в README и form-docs. Семь приватных приложений получили пять строк paths подпутей forms 3.0 (задание forms-npm-05, bump a4aec6deb) — gate lib-subpath-paths по forms зелёный. Сессия `npm login` живёт около двух часов: перед dist-tag — повторный вход.
 - 2026-10-20: этап 5 выполнен. Trusted Publisher настроен у шести пакетов (Allow npm publish, без dist-tag), NPM_TOKEN в репозитории не было. Dry_run forms сначала упал (smoke не собирал dist forms-core) — исправлено 59a716735. Теги forms-v3.0.0, zenstack-form-plugin-v4.4.5, form-mcp-v2.6.0 опубликованы из CI через OIDC с provenance; dist-tag next: forms 3.0.0, zenstack-form-plugin 4.4.5, form-mcp 2.6.0 (latest пока старые). Три тега, запушенные разом, вытеснили средний прогон из очереди concurrency — перезапущен вручную; теги ставить по одному. Остался этап 6 — перевод в latest.
 - 2026-10-20: владелец включил 2FA (auth-and-writes) и вручную опубликовал forms-core 0.31.0, forms-react 0.26.2, forms-query 0.4.1 с --tag next. У новых имён npm сам ставит и latest на первую версию — это ожидаемо. Дальше: Trusted Publisher для шести пакетов, удалить NPM_TOKEN, dry_run publish-npm.yml, теги.
 - 2026-10-20: этапы 4а и 4б приняты сеньором. 4а: scripts/check-lock-subset.mjs (a697793ae…ede939ecf) после bun install в ci.yml, npm-packages.yml, publish-npm.yml; bun 1.4.3 в ci.yml. 4б: фаза A — forms 2.42.0 (f80a67437…c1cee970d); aboi (c0e9e69, SHA ac4a5596b) и mandala (65b41effc, 127c60ef9) подключили поля через extraFields; фаза C — forms 3.0.0, form-mcp 2.6.0 (cd28ce150…6904bdf17): 6 обязательных peer вместо 18, 13 optional, правило «ядро не тянет optional peer», smoke без TipTap/dnd-kit. Typecheck 12 потребителей форм, включая приватные, зелёный. Открыто: семь приватных приложений без пяти строк paths новых подпутей (lib-subpath-paths красный, фрагмент в broadcast 2685).

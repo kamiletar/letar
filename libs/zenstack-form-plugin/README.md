@@ -13,7 +13,7 @@ ZenStack плагин для генерации Zod схем с UI метада�
 ## Установка
 
 ```bash
-npm install -D @letar/zenstack-form-plugin@next
+npm install -D @letar/zenstack-form-plugin
 ```
 
 > В монорепозитории Letar плагин уже подключён — отдельная установка не требуется.

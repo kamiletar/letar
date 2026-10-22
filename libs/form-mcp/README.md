@@ -16,7 +16,7 @@ Add to your project's `.mcp.json`:
     "form-mcp": {
       "type": "stdio",
       "command": "npx",
-      "args": ["-y", "@letar/form-mcp@next"]
+      "args": ["-y", "@letar/form-mcp"]
     }
   }
 }
@@ -31,7 +31,7 @@ Add to `.cursor/mcp.json`:
   "mcpServers": {
     "form-mcp": {
       "command": "npx",
-      "args": ["-y", "@letar/form-mcp@next"]
+      "args": ["-y", "@letar/form-mcp"]
     }
   }
 }
@@ -47,7 +47,7 @@ Add to `.vscode/mcp.json`:
     "form-mcp": {
       "type": "stdio",
       "command": "npx",
-      "args": ["-y", "@letar/form-mcp@next"]
+      "args": ["-y", "@letar/form-mcp"]
     }
   }
 }

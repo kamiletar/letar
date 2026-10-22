@@ -12,10 +12,8 @@ Upgrading from 2.x: [docs/MIGRATION-3.md](./docs/MIGRATION-3.md) (in Russian).
 ## Quick Start
 
 ```bash
-npm install @letar/forms@next @tanstack/react-form @chakra-ui/react zod framer-motion react-icons
+npm install @letar/forms @tanstack/react-form @chakra-ui/react zod framer-motion react-icons
 ```
-
-`@next` is the 3.x channel. Until 3.x is promoted to `latest`, `@letar/forms` without a tag installs the old 1.x line.
 
 ```tsx
 import { Form } from '@letar/forms'

@@ -431,10 +431,9 @@ applyServerErrors(form, mapped)
 ## Установка
 
 ```bash
-npm install @letar/forms@next @tanstack/react-form @chakra-ui/react zod framer-motion react-icons
+npm install @letar/forms @tanstack/react-form @chakra-ui/react zod framer-motion react-icons
 ```
 
-`@next` — канал 3.x. Пока 3.x не переведена в `latest`, `@letar/forms` без тега ставит старую ветку 1.x.
 В монорепозитории пакет уже подключён, ставить его не нужно.
 
 ### Подключаемые поля (с 3.0.0)
@@ -572,7 +571,7 @@ const myProvider: AddressProvider = {
 MCP сервер [`@letar/form-mcp`](../form-mcp/README.md) предоставляет AI-ассистентам (Claude Code, Cursor, VS Code Copilot) полный контекст о библиотеке: все поля, паттерны форм, @meta("form.\*", value) директивы.
 
 ```json
-{ "form-mcp": { "command": "npx", "args": ["-y", "@letar/form-mcp@next"] } }
+{ "form-mcp": { "command": "npx", "args": ["-y", "@letar/form-mcp"] } }
 ```
 
 ## Bundle Size
