@@ -9,7 +9,11 @@ disable-model-invocation: true
 ## Инициализация
 
 1. Прочитай `apps/animatrona-mobile/README.md` для обзора приложения
-2. Прочитай `apps/animatrona-mobile/PLAN.md` для текущего состояния задач
+2. ⚠️ **Очередь задач — `apps/animatrona-mobile/tasks/`** (формат — [tasks-per-file](/.claude/docs/tasks-per-file.md)).
+   Прочитай [`tasks/README.md`](/apps/animatrona-mobile/tasks/README.md) и выполни
+   `bun scripts/tasks.mjs next animatrona-mobile`. Вызов с id (`/animatrona-mobile MB-003`) — сразу
+   `bun scripts/tasks.mjs show MB-003`. `PLAN.md` и `PLAN_COMPLETED.md` **заморожены** и остаются справкой: целиком их не
+   читать, открывать только раздел из поля `source` выбранной задачи (`grep -n` и `Read` с `offset`)
 
 ## Регистрация в Agent Mail
 
@@ -25,9 +29,9 @@ disable-model-invocation: true
 
 После изучения документации:
 
-- Определи текущую фазу разработки
-- Выбери следующую задачу из плана
-- Предложи план действий
+- Выбери задачу из «можно брать», `start MB-NNN --owner animatrona-mobile-dev`
+- План работы запиши в раздел «План» файла задачи и предложи его
+- Находку вне задачи заводи через `tasks new animatrona-mobile …`, не абзацем в плане
 
 ## Координация (Animatrona Coordinator)
 
@@ -45,7 +49,7 @@ send_message(to: ["animatrona-coordinator-dev"], subject: "change: <описан
 
 ## После завершения задачи
 
-Общий чек-лист — `.claude/rules/app-workflow.md`.
+`bun scripts/tasks.mjs done MB-NNN --summary "…"`, дальше общий чек-лист — `.claude/rules/app-workflow.md`.
 
 ## Проект
 
