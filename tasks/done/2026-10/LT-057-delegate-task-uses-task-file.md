@@ -1,7 +1,7 @@
 ---
 id: LT-057
 title: "`delegate-task`: заданием служит файл задачи"
-status: ready
+status: done
 size: S
 area: tooling
 priority: 3
@@ -10,7 +10,8 @@ owner: ""
 stage: ""
 source: tasks-per-file
 created: 2026-10-12
-updated: 2026-10-12
+updated: 2026-10-22
+closed: 2026-10-22
 ---
 
 ## Что и зачем
@@ -25,4 +26,8 @@ updated: 2026-10-12
 
 ## Журнал
 
+- 2026-10-22: delegate-task: заданием служит файл задачи, правка внесена
+
 ## Итог
+
+Скилл delegate-task: заданием служит файл задачи из tasks/ (План/Приёмка), модель — в журнал, отчёт — в Итог, находки — tasks new. Для проектов без tasks/ остался md в .claude/artifacts/tasks/.
