@@ -1,0 +1,9 @@
+# Архивы и замороженные планы: ripgrep (инструмент Grep агента) их не обходит.
+# Справка по-прежнему доступна, когда указан файл или каталог явно:
+#   rg "слово" docs/plans/PLAN-INFRA-7.md        — файл прочитается
+#   rg --no-ignore "слово" docs/plans            — каталог целиком
+# Очередь живёт в tasks/, см. .claude/docs/tasks-per-file.md.
+/PLAN.md
+/docs/plans/
+PLAN_COMPLETED*.md
+PLAN-JOURNAL*.md
