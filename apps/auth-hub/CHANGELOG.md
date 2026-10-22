@@ -4,6 +4,12 @@
 
 ## [Unreleased]
 
+## [0.8.4] - 2026-10-22
+
+### Added
+
+- OIDC-клиент `pages-prod` для своего сервиса страниц (`pages.letar.best`, LT-073); секрет `OIDC_PAGES_SECRET` в `.env.docker.enc`.
+
 ## [0.8.3] - 2026-10-16
 
 ### Fixed

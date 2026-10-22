@@ -178,6 +178,20 @@ const clients = [
       'https://aprel8008-stage.s1.letar.best/sign-in',
     ].join(','),
   },
+  {
+    // Свой сервис страниц (infra/pages, LT-073): самописный OIDC-клиент, не Better Auth,
+    // поэтому callback — /auth/callback, а не /api/auth/callback/letar-auth.
+    clientId: 'pages-prod',
+    clientSecret: requireSecret('OIDC_PAGES_SECRET'),
+    name: 'Страницы',
+    type: 'web',
+    disabled: false,
+    skipConsent: false,
+    redirectUrls: [
+      'https://pages.letar.best/auth/callback',
+      'http://localhost:3200/auth/callback',
+    ].join(','),
+  },
 ]
 
 // @better-auth/oauth-provider (1.7+) читает redirectUris (string[]), не redirectUrls (CSV) —
