@@ -1,8 +1,8 @@
 ---
 id: LT-062
 title: Команды `tasks` в MCP-сервере `letar`
-status: idea
-size: ""
+status: dropped
+size: S
 area: tooling
 priority: 4
 blocked_by: []
@@ -10,7 +10,8 @@ owner: ""
 stage: ""
 source: tasks-per-file
 created: 2026-10-12
-updated: 2026-10-12
+updated: 2026-10-22
+closed: 2026-10-22
 ---
 
 ## Что и зачем
@@ -26,3 +27,5 @@ updated: 2026-10-12
 ## Журнал
 
 ## Итог
+
+Снято: CLI обкатан на 41 проекте через Bash без проблем. Обёртка в MCP добавила бы схемы инструментов в контекст каждой сессии, а цель всей работы - сократить старт. Вернуться, если вызов CLI начнёт ошибаться у агентов.
