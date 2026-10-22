@@ -1,7 +1,7 @@
 ---
 id: LT-073
 title: "Свой сервис страниц на s2: аналог Artifact без деплоя на каждую публикацию"
-status: ready
+status: done
 size: L
 area: infra
 priority: 2
@@ -11,6 +11,7 @@ stage: ""
 source: диалог 2026-10-22, замена claude.ai Artifact
 created: 2026-10-22
 updated: 2026-10-23
+closed: 2026-10-23
 ---
 
 ## Что и зачем
@@ -48,3 +49,5 @@ updated: 2026-10-23
 - 2026-10-23: Вход через Ключницу работает (pages 0.1.2). Найдено и исправлено три слоя: PKCE S256; в БД Ключницы хеш секрета pages был с лишним CR из .env.docker (сид перезапущен с очисткой, но CR остаётся в auth-hub/.env.docker.enc, см. LT-074); email владельца добавлен в PAGES_OWNER_EMAILS. Проверено: приватная страница без входа даёт 302 на /login, под владельцем открывается, публичная (public) отдаётся без входа с CSP, чужой аккаунт получил 403. Опубликованы tasks-per-file, forms-npm-plan, forms-npm-peers-plan (+ служебные smoke, smoke-public). Осталось: перенос страниц планов, которые есть только на claude.ai, и замена ссылок.
 
 ## Итог
+
+Сервис pages.letar.best работает: вход через Ключницу (PKCE), публичные и приватные страницы, MCP page_publish/list/delete. Перенесены 8 страниц планов с claude.ai, ссылки в доках заменены. Хвосты: LT-074 (секрет OIDC_PAGES_SECRET с CR), LT-075 (сид через Nx).
