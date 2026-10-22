@@ -8,7 +8,11 @@ disable-model-invocation: true
 
 ## Инициализация
 
-1. Прочитай `apps/dashboard/PLAN.md` для текущего состояния задач
+1. ⚠️ **Очередь задач — `apps/dashboard/tasks/`** (формат — [tasks-per-file](/.claude/docs/tasks-per-file.md)).
+   Прочитай [`tasks/README.md`](/apps/dashboard/tasks/README.md) и выполни
+   `bun scripts/tasks.mjs next dashboard`. Вызов с id (`/dashboard DB-003`) — сразу
+   `bun scripts/tasks.mjs show DB-003`. `PLAN.md`, `PLAN_COMPLETED.md` **заморожены** и остаются справкой: целиком их не
+   читать, открывать только раздел из поля `source` выбранной задачи (`grep -n` и `Read` с `offset`)
 
 ## Регистрация в Agent Mail
 
@@ -24,13 +28,13 @@ disable-model-invocation: true
 
 После изучения документации:
 
-- Определи текущую фазу разработки
-- Выбери следующую задачу из плана
-- Предложи план действий
+- Выбери задачу из «можно брать», `start DB-NNN --owner dashboard-dev`
+- План работы запиши в раздел «План» файла задачи и предложи его
+- Находку вне задачи заводи через `tasks new dashboard …`, не абзацем в плане
 
 ## После завершения задачи
 
-Общий чек-лист — `.claude/rules/app-workflow.md`.
+`bun scripts/tasks.mjs done DB-NNN --summary "…"`, дальше общий чек-лист — `.claude/rules/app-workflow.md`.
 
 ## Деплой
 
