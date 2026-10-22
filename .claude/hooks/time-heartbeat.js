@@ -27,17 +27,24 @@ process.stdin.on('end', async () => {
 
   // sessionRef скоупит heartbeat на активную запись ЭТОЙ сессии (§11 «Q» PLAN.md studio) — без
   // него при параллельных сессиях heartbeat одной держал бы живой таймер другой (или не той).
-  // session_id — стандартное поле payload'а PostToolUse-хука, совпадает с CLAUDE_CODE_SESSION_ID,
-  // который studio-time-mcp пишет в TimeEntry.sessionRef при старте таймера этой же сессией.
-  let sessionRef = ''
+  // session_id из payload приоритетнее окружения: унаследованная переменная может относиться
+  // к родительской сессии. Запасные варианты совпадают с defaultSessionRef() в MCP.
+  let sessionId
   try {
     const data = JSON.parse(input)
     if (typeof data?.session_id === 'string' && data.session_id) {
-      sessionRef = `?sessionRef=${encodeURIComponent(data.session_id)}`
+      sessionId = data.session_id
     }
   } catch {
-    // Нечитаемый payload — шлём heartbeat без sessionRef, ниже он трактуется как null
+    // Повреждённый payload не позволяет надёжно определить сессию.
+    process.exit(0)
   }
+  sessionId ||= process.env.CLAUDE_CODE_SESSION_ID || process.env.CODEX_THREAD_ID
+  if (!sessionId) {
+    // Запрос без sessionRef затронул бы таймер owner-UI (бакет null).
+    process.exit(0)
+  }
+  const sessionRef = `?sessionRef=${encodeURIComponent(sessionId)}`
 
   try {
     const controller = new AbortController()

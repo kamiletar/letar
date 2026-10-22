@@ -419,5 +419,5 @@
 
 - [public-repo-hygiene](/.claude/rules/public-repo-hygiene.md) ⭐ что нельзя писать в публичные файлы
 - [time-tracking](/.claude/rules/time-tracking.md) ⚠️ когда стартовать и останавливать таймер studio
-- [time-tracker-drift-incidents](/.claude/docs/time-tracker-drift-incidents.md) ⚠️ разборы четырёх способов потерять время: хук на `Stop` (срабатывает после каждой реплики, из-за чего таймер останавливали десять раз за сессию), смена предмета работы без `time_switch` — межпроектная (ловится эвристикой хука) и внутри одного приложения (не ловится по построению), и автозакрытие `autoClosedIdle` в двух окнах: после сжатия контекста и в середине активной работы с редкими вызовами инструментов; общая черта всех четырёх — о пропаже узнаёт пользователь, потому что heartbeat продлевает только уже идущую запись и про закрытую молчит
+- [time-tracker-drift-incidents](/.claude/docs/time-tracker-drift-incidents.md) ⚠️ потеря времени из-за Stop-хука, смены задачи без time_switch, автозакрытия по простою и запуска из подкаталога; восстановление heartbeat после autoClosedIdle; Codex: явный CODEX_THREAD_ID в sessionRef при общем MCP-процессе и запрет heartbeat без идентификатора
 - [formatting](/.claude/rules/formatting.md) ⚠️ голая `nx format` молча зашита на Prettier — не падает, не то же самое, что `nx run-many -t format`

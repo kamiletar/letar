@@ -6,6 +6,8 @@
 
 ## Документация
 
+- [Таймеры Claude Code и Codex](/.claude/docs/time-tracker-drift-incidents.md) — heartbeat, восстановление после простоя и привязка к идентификатору сессии.
+
 - [Сигналы окружения и Keystatic](/.claude/docs/node-env-not-production-signal.md) — staging, приватные env и согласование хранилища между сервером и браузером.
 
 - [UX авторского редактора](/.claude/docs/authoring-save-and-media-ux.md) — сохранение без потери контекста, аудитория, авторские переходы и единая загрузка медиа.
@@ -176,6 +178,10 @@ agent-mail. Документация внешних библиотек — deskt
 **⚠️ WebFetch заблокирован context-mode:** хук `pretooluse.mjs` блокирует `WebFetch` и перенаправляет на `mcp__context-mode__fetch_and_index(url, source)` + `mcp__context-mode__search(queries)`. Используй именно эти инструменты для загрузки внешних URL.
 
 ### Координация агентов (MCP Agent Mail)
+
+**Таймер в Codex:** во все инструменты `time_*`, принимающие `sessionRef`, передавай явно
+`CODEX_THREAD_ID` из окружения текущего чата. MCP-процесс может быть общим для нескольких чатов;
+heartbeat хука использует идентификатор чата, поэтому PID MCP-процесса для привязки не подходит.
 
 **ОБЯЗАТЕЛЬНО:** При начале работы вызови `macro_start_session` — подробности в `.claude/rules/agent-mail.md`. Без регистрации другие агенты не увидят тебя и могут конфликтовать по файлам.
 
