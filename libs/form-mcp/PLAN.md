@@ -1,5 +1,10 @@
 # PLAN.md — @letar/form-mcp
 
+> ⚠️ **С 2026-10-12 файл заморожен.** Очередь задач — в [`tasks/`](/libs/form-mcp/tasks/README.md)
+> (`bun scripts/tasks.mjs next form-mcp` из корня монорепо). Новые задачи, журнал и итоги сюда
+> не пишутся: хук не пропустит рост файла. Здесь остаётся справка. Формат —
+> [tasks-per-file](/.claude/docs/tasks-per-file.md).
+
 MCP сервер для AI-ассистентов, работающих с @letar/forms и @letar/zenstack-form-plugin.
 
 ---
