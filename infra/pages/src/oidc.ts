@@ -62,7 +62,11 @@ export function createOidcClient(config: PagesConfig, fetchImpl: typeof fetch = 
           ...(verifier ? { code_verifier: verifier } : {}),
         }),
       })
-      if (!tokenRes.ok) { throw new Error(`OIDC token: ${tokenRes.status}`) }
+      if (!tokenRes.ok) {
+        // Тело ответа Ключницы (invalid_grant и т.п.) — только в лог, не пользователю
+        const detail = (await tokenRes.text().catch(() => '')).slice(0, 300)
+        throw new Error(`OIDC token: ${tokenRes.status} ${detail}`)
+      }
       const { access_token: accessToken } = (await tokenRes.json()) as { access_token?: string }
       if (!accessToken) { throw new Error('OIDC token: нет access_token') }
       const infoRes = await fetchImpl(d.userinfo_endpoint, { headers: { authorization: `Bearer ${accessToken}` } })
