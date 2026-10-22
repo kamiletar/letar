@@ -177,7 +177,17 @@ describe('вход', () => {
   })
 
   test('next не может увести на другой сайт', async () => {
-    for (const next of ['//evil.com', '/%09/evil.com', '/%0d%0a/evil.com', '/\\evil.com', 'https://evil.com']) {
+    for (
+      const next of [
+        '//evil.com',
+        '/%09/evil.com',
+        '/%0d%0a/evil.com',
+        '/\\evil.com',
+        'https://evil.com',
+        '/.//evil.com',
+        '/..//evil.com',
+      ]
+    ) {
       const login = await handle(new Request(`https://pages.test/login?next=${next}`))
       const stateCookie = login.headers.get('set-cookie')!.split(';')[0]!
       const res = await handle(

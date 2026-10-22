@@ -50,7 +50,9 @@ function safeNext(value: string | null): string {
   }
   try {
     const parsed = new URL(value, 'https://pages.invalid')
-    return parsed.origin === 'https://pages.invalid' ? parsed.pathname + parsed.search + parsed.hash : '/'
+    const normalized = parsed.pathname + parsed.search + parsed.hash
+    // `/.//evil.com` после нормализации даёт `//evil.com`, то есть чужой хост
+    return parsed.origin === 'https://pages.invalid' && !normalized.startsWith('//') ? normalized : '/'
   } catch {
     return '/'
   }
