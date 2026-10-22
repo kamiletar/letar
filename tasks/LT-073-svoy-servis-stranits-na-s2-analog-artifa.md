@@ -40,4 +40,6 @@ updated: 2026-10-22
 
 ## Журнал
 
+- 2026-10-22: Готов сервис infra/pages (Bun.serve, без зависимостей, 18 тестов) и инструменты page_publish/page_list/page_delete в .claude/mcp/pages-part.ts. Дальше: клиент pages в Ключнице, секреты, установка на s2 через deploy-agent, живая проверка входа, перенос страницы tasks-per-file.
+
 ## Итог

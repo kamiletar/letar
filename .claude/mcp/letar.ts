@@ -217,6 +217,7 @@ async function buildParts(): Promise<void> {
     { id: 'studio', path: 'libs/studio-mcp/src/server.ts', factory: 'createStudioAdminMcpServer' },
     { id: 'umami', path: 'libs/umami-mcp/src/server.ts', factory: 'createUmamiMcpServer' },
     { id: 'glitchtip', path: 'libs/glitchtip-mcp/src/server.ts', factory: 'createGlitchtipMcpServer' },
+    { id: 'pages', path: '.claude/mcp/pages-part.ts', factory: 'createPagesMcpServer' },
     {
       id: 'deploy',
       path: 'libs/deploy-mcp/src/server.ts',

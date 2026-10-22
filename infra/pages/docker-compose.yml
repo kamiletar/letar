@@ -1,0 +1,51 @@
+# Сервис страниц (аналог Artifact на своём сервере), s2: https://pages.letar.best
+#
+# ⛔ ПОДНИМАТЬ ТОЛЬКО С `--env-file`:
+#
+#     docker compose -f docker-compose.yml --env-file .env.docker up -d
+#
+# Без флага compose подставит в `environment:` пустые строки: контейнер поднимется, но токен
+# публикации и ключ сессии окажутся пустыми, и сервис упадёт на старте с «Не задана переменная».
+# Развёртывание делает только deploy-agent-dev (заявка через Agent Mail), см. README.
+
+services:
+  pages:
+    build:
+      context: .
+      target: runtime
+    image: pages:latest
+    container_name: pages
+    environment:
+      PORT: '3200'
+      DATA_PATH: /data/pages
+      BASE_URL: ${BASE_URL}
+      PAGES_PUBLISH_TOKEN: ${PAGES_PUBLISH_TOKEN}
+      PAGES_SESSION_SECRET: ${PAGES_SESSION_SECRET}
+      PAGES_OWNER_EMAILS: ${PAGES_OWNER_EMAILS}
+      OIDC_DISCOVERY_URL: ${OIDC_DISCOVERY_URL}
+      OIDC_CLIENT_ID: ${OIDC_CLIENT_ID}
+      OIDC_CLIENT_SECRET: ${OIDC_CLIENT_SECRET}
+    volumes:
+      - /data/pages:/data/pages
+    networks:
+      - kami-network
+    labels:
+      traefik.enable: 'true'
+      traefik.docker.network: 'kami-network'
+      traefik.http.routers.pages.rule: 'Host(`pages.letar.best`)'
+      traefik.http.routers.pages.entrypoints: 'websecure'
+      # Сертификат *.letar.best, как у остальных приложений на s2
+      traefik.http.routers.pages.tls.certresolver: 'dns'
+      traefik.http.routers.pages.tls.domains[0].main: 'letar.best'
+      traefik.http.routers.pages.tls.domains[0].sans[0]: '*.letar.best'
+      traefik.http.services.pages.loadbalancer.server.port: '3200'
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+
+networks:
+  kami-network:
+    external: true
