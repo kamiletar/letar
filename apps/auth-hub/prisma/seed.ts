@@ -29,7 +29,8 @@ function requireSecret(name: string): string {
   if (!value) {
     throw new Error(`[seed] Не задан секрет ${name} — проверь .env.local (dev) / .env.docker (prod)`)
   }
-  return value
+  // .env.docker бывает с CRLF: лишний символ возврата каретки попал бы в хеш секрета и сломал обмен code→token (LT-074)
+  return value.trim()
 }
 
 // redirectUrls хранится как comma-separated string (Better Auth: res.redirectUrls.split(","))
