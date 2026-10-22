@@ -9,7 +9,11 @@ disable-model-invocation: true
 ## Инициализация
 
 1. Прочитай `.claude/rules/nextjs-apps.md` для общих правил Next.js
-2. Прочитай `apps/pravda/PLAN.md` для текущего состояния задач
+2. ⚠️ **Очередь задач — `apps/pravda/tasks/`** (формат — [tasks-per-file](/.claude/docs/tasks-per-file.md)).
+   Прочитай [`tasks/README.md`](/apps/pravda/tasks/README.md) и выполни
+   `bun scripts/tasks.mjs next pravda`. Вызов с id (`/pravda PV-003`) — сразу
+   `bun scripts/tasks.mjs show PV-003`. `PLAN.md`, `PLAN_COMPLETED.md` **заморожены** и остаются справкой: целиком их не
+   читать, открывать только раздел из поля `source` выбранной задачи (`grep -n` и `Read` с `offset`)
 
 ## Регистрация в Agent Mail
 
@@ -25,13 +29,13 @@ disable-model-invocation: true
 
 После изучения документации:
 
-- Определи текущую фазу разработки
-- Выбери следующую задачу из плана
-- Предложи план действий
+- Выбери задачу из «можно брать», `start PV-NNN --owner pravda-dev`
+- План работы запиши в раздел «План» файла задачи и предложи его
+- Находку вне задачи заводи через `tasks new pravda …`, не абзацем в плане
 
 ## После завершения задачи
 
-Общий чек-лист — `.claude/rules/app-workflow.md`.
+`bun scripts/tasks.mjs done PV-NNN --summary "…"`, дальше общий чек-лист — `.claude/rules/app-workflow.md`.
 
 ## Деплой
 

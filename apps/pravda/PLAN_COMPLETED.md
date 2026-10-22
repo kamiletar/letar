@@ -1,5 +1,10 @@
 # Pravda - Выполненные задачи
 
+> ⚠️ **С 2026-10-12 файл заморожен.** Очередь задач — в [`tasks/`](/apps/pravda/tasks/README.md)
+> (`bun scripts/tasks.mjs next pravda` из корня монорепо). Новые задачи, журнал и итоги сюда
+> не пишутся: хук не пропустит рост файла. Здесь остаётся справка. Формат —
+> [tasks-per-file](/.claude/docs/tasks-per-file.md).
+
 ## vitest резолвит `@letar/ui` + актуальные тесты TOC (2026-09-24, v1.9.16)
 
 `bookmark-button.test.tsx` не собирался: `Failed to resolve import "@letar/ui" from
