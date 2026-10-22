@@ -1,5 +1,10 @@
 # Выполненные задачи
 
+> ⚠️ **С 2026-10-12 файл заморожен.** Очередь задач — в [`tasks/`](/apps/letar-landing/tasks/README.md)
+> (`bun scripts/tasks.mjs next letar-landing` из корня монорепо). Новые задачи, журнал и итоги сюда
+> не пишутся: хук не пропустит рост файла. Здесь остаётся справка. Формат —
+> [tasks-per-file](/.claude/docs/tasks-per-file.md).
+
 ## Фикс `tsconfig.json` target (согласованность) — версия 0.5.9 (2026-09-27)
 
 Побочный эффект фикса `TS2737` в `animatrona-landing`/`kami-key-the-landing`/`synth` (BigInt-
