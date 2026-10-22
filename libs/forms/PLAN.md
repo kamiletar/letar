@@ -2821,7 +2821,7 @@ ZenStack (§16.2, этап Б): демо на модели `Category` и нас�
 `forms-shadcn` в `publish-npm.yml` отсутствует (как и раньше). Если к началу этапа текущие версии
 уйдут вперёд — номера сдвигаются, порядок минорных шагов тот же.
 
-**Цикл синхронизации из 6 групп** (`.claude/commands/forms-dev.md`) — после каждого этапа:
+**Цикл синхронизации из 6 групп** (`.agents/skills/forms-dev/SKILL.md`) — после каждого этапа:
 
 1. **`libs/forms`:** `CHANGELOG.md` (у этапа А — строка «Изменения поведения», §3), `package.json`, `README.md`
    (таблица пропсов Select/Combobox), `docs/fields.md` — раздел «Свой рендер опций и кнопки у опций» (F2 и Fn+F2
@@ -5584,7 +5584,7 @@ broadcast, было принято):
 - `.claude/rules/form-delegation.md` — протокол делегации, ссылается на `get_directives`.
 - `.claude/agents/db-schema-assistant.md`, `form-generator.md`, `refactor-expert.md` — три
   субагента с `@form.*` в промпте.
-- `.claude/commands/forms-coordinator.md`, `forms-dev.md`, `infra/db-migrate.md`.
+- `.agents/skills/forms-coordinator/SKILL.md`, `.agents/skills/forms-dev/SKILL.md`.
 
 **Приоритет 2 — скиллы (+ обязательная пересборка зеркала).**
 
@@ -10104,7 +10104,7 @@ DOM-поведении минимален. Юнит/компонентные т�
 ```
 
 Этапы 1–3 последовательны строго. Этап 5 не блокируется этапом 4. Документацию вести по ходу,
-а не в конце (правило `.claude/commands/forms-dev.md`: правка кода без синхронного обновления
+а не в конце (правило `.agents/skills/forms-dev/SKILL.md`: правка кода без синхронного обновления
 `form-docs`/`form-example` = незавершённая задача).
 
 **Точка остановки для пересмотра:** если на этапе 1 госномер не выражается декларативно —

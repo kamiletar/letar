@@ -12,7 +12,7 @@
 Этот раздел раньше указывал «взять в работу `PLAN_ANIMATRONA_PLAYER.md`» как приоритет сессии
 **Animatrona**. С 2026-09-07 папочный плеер — реальный отдельный nx-проект
 (`apps/animatrona-folder-player`), с 2026-09-08 у него своя команда
-[`/animatrona-folder-player`](/.claude/commands/animatrona-folder-player.md) и своя identity в
+[`/animatrona-folder-player`](/.agents/skills/animatrona-folder-player/SKILL.md) и своя identity в
 Agent Mail (`animatrona-folder-player-dev`) — задача «довести до конца и опубликовать» (релиз в
 `kamiletar/letar`, тег `animatrona-folder-player-v*`, живой инсталлятор на сайте) относится к
 **той** сессии, не к этой. План — [apps/animatrona-folder-player/PLAN.md](/apps/animatrona-folder-player/PLAN.md).
@@ -1144,7 +1144,7 @@ creator-only: `EncodingProfilesCard`, `TranscodingSettingsCard`, `QBittorrentSet
       2026-09-08 вопрос был задан владельцу («остаться в рамках и передать координатору или
       править самому?») и остался без ответа — работа велась строго в рамках, каскад ушёл
       через координатора и закрылся силами самих приложений. Пока ответа нет, действует запрет
-      из `.claude/commands/animatrona.md`: только уведомлять координатора.
+      из `.agents/skills/animatrona/SKILL.md`: только уведомлять координатора.
 
 ---
 

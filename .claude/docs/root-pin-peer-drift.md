@@ -66,7 +66,7 @@
 После `bun install` в рамках `/infra:deps-update` (или любого ручного
 `bun update`/`bun add` в корневом `package.json`) — прогонять
 `bun scripts/check-peer-deps.mjs`
-([reference](/.claude/commands/infra/deps-update.md)). Скрипт:
+([reference](/.agents/skills/infra-deps-update/SKILL.md)). Скрипт:
 
 - сверяет `peerDependencies` только между пакетами, которые сами являются
   корневыми `dependencies`/`devDependencies` (не всё дерево целиком — полное

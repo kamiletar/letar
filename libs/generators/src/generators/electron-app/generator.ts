@@ -51,7 +51,7 @@ export default async function electronAppGenerator(tree: Tree, options: Electron
   if (options.private) {
     logger.info(
       'Приложение помечено как приватное — заведи submodule по инструкции в '
-        + '.claude/commands/create/new-app.md § «Приватные приложения» (gh repo create → git submodule add).',
+        + '.agents/skills/create-new-app/SKILL.md § «Приватные приложения» (gh repo create → git submodule add).',
     )
   }
 }

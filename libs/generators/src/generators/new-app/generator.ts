@@ -96,12 +96,12 @@ export default async function newAppGenerator(tree: Tree, options: NewAppGenerat
   }
   logger.info(
     'Дальнейшие шаги (регистрация в Dashboard, бэкапы, docker-compose.production, e2e-gate, submodule) — '
-      + 'см. раздел «Дальнейшие шаги» в .claude/commands/create/new-app.md, они намеренно не автоматизированы.',
+      + 'см. раздел «Дальнейшие шаги» в .agents/skills/create-new-app/SKILL.md, они намеренно не автоматизированы.',
   )
   if (options.private) {
     logger.info(
       'Приложение помечено как приватное — заведи submodule по инструкции в '
-        + '.claude/commands/create/new-app.md § «Приватные приложения» (gh repo create → git submodule add). '
+        + '.agents/skills/create-new-app/SKILL.md § «Приватные приложения» (gh repo create → git submodule add). '
         + 'Сгенерированные файлы уже лежат в apps/<name> — просто перенеси их в новый submodule-репозиторий. '
         + '.gitignore для будущего submodule уже создан: не потеряй его при переносе, иначе первый же '
         + '`git add .` унесёт node_modules/ и dist/ в initial commit.',

@@ -36,7 +36,7 @@ nx test <%= name %>             # Тесты
 ## Что дальше
 
 Каркас минимален — нет БД, форм, аутентификации. Смотри `PLAN.md` для текущих задач и
-`.claude/commands/create/new-app.md` за оставшимися шагами (регистрация в Dashboard, бэкапы,
+`.agents/skills/create-new-app/SKILL.md` за оставшимися шагами (регистрация в Dashboard, бэкапы,
 docker-compose, e2e-gate — не автоматизированы генератором намеренно).
 
 ---

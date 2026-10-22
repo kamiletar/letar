@@ -162,8 +162,8 @@ nx g @letar/generators:npm-publish <lib> --formsCorePeer --keywords=forms,zod
 Скаффолдит новое минимальное Next.js приложение `apps/<name>` — чистый каркас Chakra UI v3 + MDX без
 типового boilerplate, который иначе приходится вычищать руками после `nx g @nx/next:application`
 (`global.css`, `.swcrc`, `next.config.js`, `api/hello`) — см. полный ручной процесс в
-[`.claude/commands/create/new-app.md`](/.claude/commands/create/new-app.md), который этот генератор
-заменяет для шагов 1–13 (структура, тема, provider'ы, MDX, vitest).
+[`.agents/skills/create-new-app/SKILL.md`](/.agents/skills/create-new-app/SKILL.md), который этот генератор
+заменяет для шагов «Генерация каркаса» и «Проверить каркас» (структура, тема, provider'ы, MDX, vitest).
 
 ```bash
 nx g @letar/generators:new-app <name>
@@ -209,8 +209,8 @@ Better Auth, cookie-баннер и т.д.), которую не всем нов
 **Генератор не перезаписывает существующие приложения** — если `apps/<name>` уже есть, падает с понятной
 ошибкой.
 
-⚠️ **После генерации остаются ручные шаги** (намеренно не автоматизированы, см. `.claude/commands/create/new-app.md`
-§14+): приватный submodule, регистрация в Dashboard/`deploy-affected.sh`, бэкапы, `docker-compose.production.yml` +
+⚠️ **После генерации остаются ручные шаги** (намеренно не автоматизированы, см. `.agents/skills/create-new-app/SKILL.md`
+раздел «Дальнейшие шаги»): приватный submodule, регистрация в Dashboard/`deploy-affected.sh`, бэкапы, `docker-compose.production.yml` +
 `output: 'standalone'`, e2e-gate, MCP postgres, ПДн-чеклист (если приложение собирает персональные
 данные — см. `.claude/docs/personal-data.md`).
 
