@@ -10,7 +10,7 @@ owner: ""
 stage: ""
 source: диалог 2026-10-22, замена claude.ai Artifact
 created: 2026-10-22
-updated: 2026-10-22
+updated: 2026-10-23
 ---
 
 ## Что и зачем
@@ -42,5 +42,7 @@ updated: 2026-10-22
 
 - 2026-10-22: Готов сервис infra/pages (Bun.serve, без зависимостей, 18 тестов) и инструменты page_publish/page_list/page_delete в .claude/mcp/pages-part.ts. Дальше: клиент pages в Ключнице, секреты, установка на s2 через deploy-agent, живая проверка входа, перенос страницы tasks-per-file.
 - 2026-10-22: Шаги 1-2: клиент pages-prod добавлен в seed Ключницы (auth-hub 0.8.4), секреты OIDC_PAGES_SECRET, PAGES_PUBLISH_TOKEN, PAGES_SESSION_SECRET сгенерированы и зашифрованы в auth-hub/.env.docker.enc и infra/pages/.env.docker.enc. Токен публикации записан в .env.local корня. Дальше: push и заявка deploy-agent-dev (сначала auth-hub с seed, затем pages), живая проверка входа.
+- 2026-10-23: Деплой выполнен на s2 (auth-hub 0.8.4 с сидом pages-prod, infra/pages; обход s1 и e2e-гейта разрешён владельцем). healthz 200, / → 302 /login. deploy-infra.sh исправлен (dotenv fallback), коммит не запушен. Осталось: перезапуск MCP letar, живая проверка входа через Ключницу, перенос страниц планов, закрытие задачи.
+- 2026-10-23: Живая проверка: Ключница отвечала «pkce is required», добавлен PKCE S256 (pages 0.1.1, de66a5793), задеплоено на s2. Редирект /p/smoke/ → /login → Ключница с code_challenge работает. Остались: вход под владельцем (нужен ручной ввод), 403 для чужого email, публичная страница без входа, перенос страниц. Опубликованы приватно: tasks-per-file, forms-npm-plan, forms-npm-peers-plan.
 
 ## Итог
