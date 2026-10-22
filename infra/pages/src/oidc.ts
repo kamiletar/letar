@@ -1,4 +1,4 @@
-import { randomBytes } from 'node:crypto'
+import { createHash, randomBytes } from 'node:crypto'
 import type { PagesConfig } from './config'
 
 /** Минимальный клиент OIDC (authorization code) для входа через Ключницу. */
@@ -10,10 +10,10 @@ interface Discovery {
 }
 
 export interface OidcClient {
-  /** Адрес входа и состояние, которое надо сохранить в cookie до возврата */
-  startLogin(): Promise<{ url: string; state: string }>
+  /** Адрес входа, состояние и PKCE-verifier: их надо сохранить в cookie до возврата */
+  startLogin(): Promise<{ url: string; state: string; verifier: string }>
   /** Обмен кода на email пользователя */
-  finishLogin(code: string): Promise<{ email: string; verified: boolean }>
+  finishLogin(code: string, verifier?: string): Promise<{ email: string; verified: boolean }>
 }
 
 export function createOidcClient(config: PagesConfig, fetchImpl: typeof fetch = fetch): OidcClient {
@@ -42,9 +42,13 @@ export function createOidcClient(config: PagesConfig, fetchImpl: typeof fetch = 
       url.searchParams.set('redirect_uri', redirectUri)
       url.searchParams.set('scope', 'openid email profile')
       url.searchParams.set('state', state)
-      return { url: url.toString(), state }
+      // Ключница требует PKCE для этого клиента
+      const verifier = randomBytes(32).toString('base64url')
+      url.searchParams.set('code_challenge', createHash('sha256').update(verifier).digest('base64url'))
+      url.searchParams.set('code_challenge_method', 'S256')
+      return { url: url.toString(), state, verifier }
     },
-    async finishLogin(code) {
+    async finishLogin(code, verifier) {
       const d = await discover()
       const tokenRes = await fetchImpl(d.token_endpoint, {
         method: 'POST',
@@ -55,6 +59,7 @@ export function createOidcClient(config: PagesConfig, fetchImpl: typeof fetch = 
           redirect_uri: redirectUri,
           client_id: config.oidcClientId,
           client_secret: config.oidcClientSecret,
+          ...(verifier ? { code_verifier: verifier } : {}),
         }),
       })
       if (!tokenRes.ok) { throw new Error(`OIDC token: ${tokenRes.status}`) }

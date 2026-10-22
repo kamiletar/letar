@@ -156,24 +156,31 @@ export function createApp(config: PagesConfig, storage: PageStorage, oidc: OidcC
       if (url.pathname === '/healthz') { return json({ ok: true }) }
 
       if (url.pathname === '/login') {
-        const { url: authUrl, state } = await oidc.startLogin()
+        const { url: authUrl, state, verifier } = await oidc.startLogin()
         const next = safeNext(url.searchParams.get('next'))
         const headers = new Headers({ ...BASE_HEADERS, location: authUrl })
         headers.append(
           'set-cookie',
-          cookieHeader(STATE_COOKIE, createSigned({ state, next }, config.sessionSecret, STATE_TTL), STATE_TTL),
+          cookieHeader(
+            STATE_COOKIE,
+            createSigned({ state, next, verifier }, config.sessionSecret, STATE_TTL),
+            STATE_TTL,
+          ),
         )
         return new Response(null, { status: 302, headers })
       }
 
       if (url.pathname === '/auth/callback') {
         const cookies = parseCookies(req.headers.get('cookie'))
-        const saved = verifySigned<{ state: string; next: string }>(cookies[STATE_COOKIE], config.sessionSecret)
+        const saved = verifySigned<{ state: string; next: string; verifier?: string }>(
+          cookies[STATE_COOKIE],
+          config.sessionSecret,
+        )
         const code = url.searchParams.get('code')
         if (!saved || !code || saved.state !== url.searchParams.get('state')) {
           return json({ error: 'вход не удался: начни заново' }, 400)
         }
-        const { email, verified } = await oidc.finishLogin(code)
+        const { email, verified } = await oidc.finishLogin(code, saved.verifier)
         if (!verified || !config.ownerEmails.includes(email)) {
           return json({ error: 'этому аккаунту доступ закрыт' }, 403)
         }

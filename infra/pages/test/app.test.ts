@@ -23,7 +23,7 @@ const config: PagesConfig = {
 }
 
 const oidc: OidcClient = {
-  startLogin: async () => ({ url: 'https://auth.test/authorize?x=1', state: 'st1' }),
+  startLogin: async () => ({ url: 'https://auth.test/authorize?x=1', state: 'st1', verifier: 'v1' }),
   finishLogin: async (code) => ({
     email: code === 'owner' ? 'Owner@Example.com'.toLowerCase() : 'x@x.com',
     verified: true,
