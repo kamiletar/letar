@@ -58,7 +58,7 @@
     },
     {
       "package": "oxlint",
-      "version": "1.81.0",
+      "version": "1.89.0",
       "field": "devDependencies",
       "since": "2026-09-04",
       "commit": "40faa9c8",
