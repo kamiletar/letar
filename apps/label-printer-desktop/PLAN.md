@@ -1,5 +1,10 @@
 # План разработки Label Printer Desktop
 
+> ⚠️ **С 2026-10-12 файл заморожен.** Очередь задач — в [`tasks/`](/apps/label-printer-desktop/tasks/README.md)
+> (`bun scripts/tasks.mjs next label-printer-desktop` из корня монорепо). Новые задачи, журнал и итоги сюда
+> не пишутся: хук не пропустит рост файла. Здесь остаётся справка. Формат —
+> [tasks-per-file](/.claude/docs/tasks-per-file.md).
+
 Electron desktop приложение для печати этикеток "Честный знак".
 
 ## Правила ведения плана
