@@ -16,3 +16,6 @@ infra
 # Разбор — .claude/docs/nx-temp-build-dir-breaks-project-graph.md
 **/standalone/apps
 **/standalone/libs
+
+# Фикстуры smoke-проверки npm-пакетов живут вне монорепо: свои package.json не должны попадать в граф Nx
+scripts/npm-smoke

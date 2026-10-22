@@ -9,7 +9,7 @@
  * деплой всех приложений (.claude/rules/app-workflow.md).
  */
 import { McpServer } from '@modelcontextprotocol/server'
-import { existsSync, readFileSync, realpathSync } from 'node:fs'
+import { existsSync, lstatSync, readFileSync, realpathSync } from 'node:fs'
 import { dirname, isAbsolute, join, relative, resolve } from 'node:path'
 import { z } from 'zod'
 
@@ -58,6 +58,7 @@ export function buildFiles(
   assets: string[] = [],
 ): Record<string, { text?: string; base64?: string }> {
   if (!/\.html?$/i.test(mainPath)) { throw new Error(`основной файл должен быть html: ${mainPath}`) }
+  if (lstatSync(mainPath).isSymbolicLink()) { throw new Error(`символические ссылки не публикуются: ${mainPath}`) }
   const baseDir = dirname(resolve(mainPath))
   const realBase = realpathSync(baseDir)
   const files: Record<string, { text?: string; base64?: string }> = {
@@ -73,10 +74,14 @@ export function buildFiles(
       throw new Error(`скрытые файлы не публикуются: ${asset}`)
     }
     if (!ASSET_EXT.test(rel)) { throw new Error(`тип файла не разрешён: ${asset}`) }
-    // symlink внутри каталога может вести наружу
-    const real = relative(realBase, realpathSync(abs))
+    // symlink (сам файл или каталог на пути) может вести наружу или подменять тип: отказ целиком
+    if (lstatSync(abs).isSymbolicLink()) { throw new Error(`символические ссылки не публикуются: ${asset}`) }
+    const real = relative(realBase, realpathSync(abs)).replaceAll('\\', '/')
     if (real.startsWith('..') || isAbsolute(real)) {
       throw new Error(`файл ${asset} ведёт за пределы каталога страницы`)
+    }
+    if (real.split('/').some((part) => part.startsWith('.')) || !ASSET_EXT.test(real)) {
+      throw new Error(`файл ${asset} после разрешения пути не проходит проверку`)
     }
     files[rel] = TEXT_EXT.test(rel)
       ? { text: readFileSync(abs, 'utf8') }
