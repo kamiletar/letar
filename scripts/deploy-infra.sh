@@ -122,7 +122,10 @@ elif [[ -f "$SERVICE_DIR/.env.docker.enc" ]]; then
   # Плейнтекст временный — удаляется при любом исходе (включая set -e из середины скрипта).
   trap 'rm -f "$ENV_FILE"' EXIT
   umask 077
-  sops --decrypt "$SERVICE_DIR/.env.docker.enc" >"$ENV_FILE"
+  # Формат .enc бывает JSON-блобом и dotenv-построчным; расширение .enc sops не распознаёт,
+  # поэтому при отказе читаем как dotenv (так зашифрован .env.docker.enc сервиса pages)
+  sops --decrypt "$SERVICE_DIR/.env.docker.enc" >"$ENV_FILE" 2>/dev/null \
+    || sops --decrypt --input-type dotenv --output-type dotenv "$SERVICE_DIR/.env.docker.enc" >"$ENV_FILE"
   echo "[deploy-infra] Расшифрован .env.docker.enc → .env.docker (временный, удалится после деплоя)"
   ENV_FILE_ARGS=(--env-file "$ENV_FILE")
 else
