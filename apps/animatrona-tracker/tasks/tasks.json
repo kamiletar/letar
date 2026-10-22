@@ -1,0 +1,5 @@
+{
+  "project": "animatrona-tracker",
+  "prefix": "TR",
+  "frozen": ["PLAN.md", "PLAN_COMPLETED.md", "PLAN_COMPLETED_2026_09_08.md", "PLAN_COMPLETED_2026_09_08_FEATURES.md"]
+}

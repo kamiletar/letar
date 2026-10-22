@@ -9,7 +9,11 @@ disable-model-invocation: true
 ## Инициализация
 
 1. Прочитай `.claude/rules/nextjs-apps.md` для общих правил Next.js
-2. Прочитай `apps/animatrona-tracker/PLAN.md` для текущего состояния задач
+2. ⚠️ **Очередь задач — `apps/animatrona-tracker/tasks/`** (формат — [tasks-per-file](/.claude/docs/tasks-per-file.md)).
+   Прочитай [`tasks/README.md`](/apps/animatrona-tracker/tasks/README.md) и выполни
+   `bun scripts/tasks.mjs next animatrona-tracker`. Вызов с id (`/animatrona-tracker TR-003`) — сразу
+   `bun scripts/tasks.mjs show TR-003`. `PLAN.md`, `PLAN_COMPLETED.md`, `PLAN_COMPLETED_2026_09_08.md`, `PLAN_COMPLETED_2026_09_08_FEATURES.md` **заморожены** и остаются справкой: целиком их не
+   читать, открывать только раздел из поля `source` выбранной задачи (`grep -n` и `Read` с `offset`)
 3. Прочитай `.claude/rules/animatrona.md` для архитектуры десктопа и IPFS
 4. Прочитай `.claude/rules/animatrona-db.md` для моделей данных
 
@@ -27,9 +31,9 @@ disable-model-invocation: true
 
 После изучения документации:
 
-- Определи текущую фазу разработки
-- Выбери следующую задачу из плана
-- Предложи план действий
+- Выбери задачу из «можно брать», `start TR-NNN --owner animatrona-tracker-dev`
+- План работы запиши в раздел «План» файла задачи и предложи его
+- Находку вне задачи заводи через `tasks new animatrona-tracker …`, не абзацем в плане
 
 ## Особенности проекта
 
@@ -52,7 +56,7 @@ disable-model-invocation: true
 
 ## После завершения задачи
 
-Общий чек-лист — `.claude/rules/app-workflow.md`.
+`bun scripts/tasks.mjs done TR-NNN --summary "…"`, дальше общий чек-лист — `.claude/rules/app-workflow.md`.
 
 ## Координация (Animatrona Coordinator)
 

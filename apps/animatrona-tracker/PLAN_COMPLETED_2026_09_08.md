@@ -1,5 +1,10 @@
 # Выполненные задачи — Animatrona Tracker (Архив до 2026-09-08)
 
+> ⚠️ **С 2026-10-12 файл заморожен.** Очередь задач — в [`tasks/`](/apps/animatrona-tracker/tasks/README.md)
+> (`bun scripts/tasks.mjs next animatrona-tracker` из корня монорепо). Новые задачи, журнал и итоги сюда
+> не пишутся: хук не пропустит рост файла. Здесь остаётся справка. Формат —
+> [tasks-per-file](/.claude/docs/tasks-per-file.md).
+
 > Продолжение основного [PLAN_COMPLETED.md](./PLAN_COMPLETED.md)
 > История изменений и закрытых задач старше ~1 месяца от 2026-09-08, перенесено при архивации
 > `/workflow:archive-completed` (часть — из `PLAN_COMPLETED.md`, часть — из закрытых разделов
