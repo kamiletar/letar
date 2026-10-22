@@ -1,5 +1,10 @@
 # Выполненные задачи — form-docs
 
+> ⚠️ **С 2026-10-12 файл заморожен.** Очередь задач — в [`tasks/`](/apps/form-docs/tasks/README.md)
+> (`bun scripts/tasks.mjs next form-docs` из корня монорепо). Новые задачи, журнал и итоги сюда
+> не пишутся: хук не пропустит рост файла. Здесь остаётся справка. Формат —
+> [tasks-per-file](/.claude/docs/tasks-per-file.md).
+
 ## Сессия 2026-09-27 — фикс блокирующего деплой `ShikiError: Language 'zmodel' not found`
 
 deploy-agent-dev прогнал staging-сборку `form-docs` после того, как гайды `create-form`/

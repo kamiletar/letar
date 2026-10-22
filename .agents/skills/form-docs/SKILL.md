@@ -8,7 +8,11 @@ disable-model-invocation: true
 
 ## Инициализация
 
-1. Прочитай `apps/form-docs/PLAN.md` для текущего состояния задач (если есть)
+1. ⚠️ **Очередь задач — `apps/form-docs/tasks/`** (формат — [tasks-per-file](/.claude/docs/tasks-per-file.md)).
+   Прочитай [`tasks/README.md`](/apps/form-docs/tasks/README.md) и выполни
+   `bun scripts/tasks.mjs next form-docs`. Вызов с id (`/form-docs FD-003`) — сразу
+   `bun scripts/tasks.mjs show FD-003`. `PLAN.md` и `PLAN_COMPLETED.md` **заморожены** и остаются справкой: целиком их не
+   читать, открывать только раздел из поля `source` выбранной задачи (`grep -n` и `Read` с `offset`)
 2. Прочитай `libs/forms/README.md` для контекста библиотеки
 
 ## Регистрация в Agent Mail
@@ -35,13 +39,13 @@ fetch_inbox(project_key: "c-web-letar", agent_name: "form-docs-dev", registratio
 
 После изучения документации:
 
-- Определи текущую фазу разработки
-- Выбери следующую задачу из плана
-- Предложи план действий
+- Выбери задачу из «можно брать», `start FD-NNN --owner form-docs-dev`
+- План работы запиши в раздел «План» файла задачи и предложи его
+- Находку вне задачи заводи через `tasks new form-docs …`, не абзацем в плане
 
 ## После завершения задачи
 
-Общий чек-лист — `.claude/rules/app-workflow.md`.
+`bun scripts/tasks.mjs done FD-NNN --summary "…"`, дальше общий чек-лист — `.claude/rules/app-workflow.md`.
 
 ## Деплой
 
