@@ -33,11 +33,12 @@ import { useDebounce, usePrevious, useThrottle } from '@letar/hooks/utility'
 
 ### Utility Hooks
 
-| Хук                                | Описание                               |
-| ---------------------------------- | -------------------------------------- |
-| `useDebounce<T>(value, delay?)`    | Debounce значения (по умолчанию 300ms) |
-| `useThrottle<T>(callback, delay?)` | Throttle функции (по умолчанию 300ms)  |
-| `usePrevious<T>(value)`            | Предыдущее значение переменной         |
+| Хук                                | Описание                                                                                                   |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `useDebounce<T>(value, delay?)`    | Debounce значения (по умолчанию 300ms)                                                                     |
+| `useThrottle<T>(callback, delay?)` | Throttle функции (по умолчанию 300ms)                                                                      |
+| `usePrevious<T>(value)`            | Предыдущее значение переменной                                                                             |
+| `useNow(refreshMs?)`               | Текущее время для рендера вместо `new Date()` в теле компонента (`react/purity`); с `refreshMs` — «тикает» |
 
 ### Browser Hooks
 
