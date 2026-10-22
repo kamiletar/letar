@@ -7,6 +7,7 @@ import { NginxNav } from '@/app/_components/nginx/NginxNav'
 import { toaster } from '@/app/_components/ui/toaster'
 import type { NpmCertificate } from '@/lib/nginx-proxy-manager'
 import { Box, Button, Heading, HStack, SimpleGrid, Spinner, Text } from '@chakra-ui/react'
+import { useNow } from '@letar/hooks/utility'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTransition } from 'react'
 
@@ -29,6 +30,7 @@ async function fetchNpmStatus() {
 
 export default function CertificatesPage() {
   const queryClient = useQueryClient()
+  const now = useNow(60_000)
   const [isPending, startTransition] = useTransition()
 
   // Статус подключения к NPM
@@ -135,7 +137,6 @@ export default function CertificatesPage() {
   })
 
   // Считаем истекающие
-  const now = new Date()
   const expiringCount = sortedCertificates.filter((c) => {
     const expiresDate = new Date(c.expires_on)
     const daysUntilExpiry = Math.ceil((expiresDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))

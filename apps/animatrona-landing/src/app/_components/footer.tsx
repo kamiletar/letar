@@ -2,10 +2,11 @@
 
 import { Box, Container, HStack, Link, Text, VStack } from '@chakra-ui/react'
 import { BuildVersion, CookieSettingsButton, StudioCredit, TouchLink } from '@letar/ui'
+import { useState } from 'react'
 import packageJson from '../../../package.json'
 
 export function Footer() {
-  const currentYear = new Date().getFullYear()
+  const [currentYear] = useState(() => new Date().getFullYear())
 
   return (
     <Box asChild py={8} borderTop="1px solid" borderColor="gray.800">

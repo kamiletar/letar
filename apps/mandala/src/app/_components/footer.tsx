@@ -1,6 +1,7 @@
 'use client'
 
 import { Box, Container, Flex, Link, Text } from '@chakra-ui/react'
+import { useNow } from '@letar/hooks/utility'
 import { BuildVersion, CookieSettingsButton, StudioCredit } from '@letar/ui'
 import packageJson from '../../../package.json'
 
@@ -8,6 +9,8 @@ import packageJson from '../../../package.json'
  * Футер с копирайтом и версией приложения.
  */
 export function Footer() {
+  const year = useNow().getFullYear()
+
   return (
     <Box
       as="footer"
@@ -26,7 +29,7 @@ export function Footer() {
           fontSize="xs"
           color="fg.muted"
         >
-          <Text>© {new Date().getFullYear()} Elfafeya Art</Text>
+          <Text>© {year} Elfafeya Art</Text>
           <Text display={{ base: 'none', sm: 'block' }} aria-hidden="true">
             |
           </Text>

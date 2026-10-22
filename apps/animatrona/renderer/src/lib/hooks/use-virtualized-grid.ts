@@ -60,6 +60,7 @@ export function useVirtualizedGrid(itemCount: number, { estimateSize, overscan =
   // первого рендера (пока isLoading=true, рендерится скелетон без этого элемента) — эффект с
   // пустыми deps этот момент бы не поймал. Подробности — react-effect-stable-ref-pitfall.md.
   // oxlint-disable-next-line react/refs -- см. комментарий выше, задокументированная архитектура
+  // oxlint-disable-next-line react/incompatible-library -- TanStack Virtual возвращает немемоизируемые функции; React Compiler в проекте не включён
   const rowVirtualizer = useWindowVirtualizer({
     count: rowCount,
     estimateSize: () => estimateSize(cardWidth),

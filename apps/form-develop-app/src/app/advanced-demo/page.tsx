@@ -49,6 +49,7 @@ const initialData: AdvancedFormData = {
 }
 
 export default function AdvancedDemoPage() {
+  const [now] = useState(() => new Date())
   const [submittedData, setSubmittedData] = useState<AdvancedFormData | null>(null)
 
   const handleSubmit = (data: AdvancedFormData) => {
@@ -96,7 +97,7 @@ export default function AdvancedDemoPage() {
               </Heading>
               <VStack gap={4} align="stretch">
                 <Form.Field.DateTimePicker name="appointmentAt" />
-                <Form.Field.DateTimePicker name="eventStart" minDateTime={new Date()} />
+                <Form.Field.DateTimePicker name="eventStart" minDateTime={now} />
               </VStack>
             </Box>
 

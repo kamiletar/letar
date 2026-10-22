@@ -3,6 +3,7 @@
 import { toaster } from '@/app/_components/ui/toaster'
 import { createAlbumAction, updateAlbumAction } from '@/app/my/poems/_actions/album.action'
 import { Button, Field, HStack, Input, Stack, Text } from '@chakra-ui/react'
+import { useNow } from '@letar/hooks/utility'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
@@ -19,6 +20,7 @@ interface AlbumFormProps {
 
 export function AlbumForm({ albumId, initialData }: AlbumFormProps) {
   const router = useRouter()
+  const today = useNow().toISOString().slice(0, 10)
   const [title, setTitle] = useState(initialData?.title ?? '')
   const [coverImage, setCoverImage] = useState<string | null>(initialData?.coverImage ?? null)
   const [publishedAt, setPublishedAt] = useState<string>(
@@ -91,7 +93,7 @@ export function AlbumForm({ albumId, initialData }: AlbumFormProps) {
             type="date"
             value={publishedAt}
             onChange={(e) => setPublishedAt(e.target.value)}
-            max={new Date().toISOString().slice(0, 10)}
+            max={today}
           />
           <Field.HelperText>Оставьте пустым, чтобы сохранить как черновик</Field.HelperText>
         </Field.Root>

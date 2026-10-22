@@ -38,6 +38,8 @@ export default async function AboutPage({ params }: Props) {
 
 function AboutContent() {
   const t = useTranslations('about')
+  // oxlint-disable-next-line react/purity -- серверный компонент: время запроса
+  const yearsOfExperience = new Date().getFullYear() - 2002
 
   return (
     <Box py={{ base: 12, md: 20 }}>
@@ -49,7 +51,7 @@ function AboutContent() {
           {/* Статистика */}
           <SimpleGrid columns={{ base: 1, sm: 3 }} gap={6}>
             <StatCard
-              value={`${new Date().getFullYear() - 2002}+`}
+              value={`${yearsOfExperience}+`}
               label={t('experience')}
               icon={<Briefcase size={24} />}
               index={0}
