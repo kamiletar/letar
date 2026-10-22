@@ -1364,7 +1364,7 @@
     },
     "libs/forms-angular": {
       "name": "@letar/forms-angular",
-      "version": "0.5.0",
+      "version": "0.5.1",
       "devDependencies": {
         "@angular/cdk": "^22.1.2",
         "@angular/common": "^22.1.2",
@@ -1430,7 +1430,7 @@
     },
     "libs/forms-shadcn": {
       "name": "@letar/forms-shadcn",
-      "version": "0.58.1",
+      "version": "0.58.2",
       "devDependencies": {
         "@letar/eager-jsx-check": "workspace:*",
         "@letar/forms-core": "workspace:*",
@@ -1463,7 +1463,7 @@
     },
     "libs/forms-vue": {
       "name": "@letar/forms-vue",
-      "version": "0.25.0",
+      "version": "0.25.1",
       "dependencies": {
         "@floating-ui/dom": "^1.8.0",
       },
@@ -1489,7 +1489,7 @@
     },
     "libs/forms-vue-shadcn": {
       "name": "@letar/forms-vue-shadcn",
-      "version": "0.25.0",
+      "version": "0.25.1",
       "devDependencies": {
         "@letar/forms-core": "workspace:*",
         "@letar/forms-vue": "workspace:*",
