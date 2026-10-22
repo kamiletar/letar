@@ -1,5 +1,10 @@
 # Выполненные задачи
 
+> ⚠️ **С 2026-10-12 файл заморожен.** Очередь задач — в [`tasks/`](/apps/kami-key-the-landing/tasks/README.md)
+> (`bun scripts/tasks.mjs next kami-key-the-landing` из корня монорепо). Новые задачи, журнал и итоги сюда
+> не пишутся: хук не пропустит рост файла. Здесь остаётся справка. Формат —
+> [tasks-per-file](/.claude/docs/tasks-per-file.md).
+
 ## Фикс `TS2737` (BigInt в @letar/format-utils) — версия 0.4.9 (2026-09-27)
 
 Найдено при попутном `nx typecheck:tsgo` во время несвязанной сессии по `libs/github-releases`.

@@ -1,5 +1,10 @@
 # План разработки kami-key-the-landing
 
+> ⚠️ **С 2026-10-12 файл заморожен.** Очередь задач — в [`tasks/`](/apps/kami-key-the-landing/tasks/README.md)
+> (`bun scripts/tasks.mjs next kami-key-the-landing` из корня монорепо). Новые задачи, журнал и итоги сюда
+> не пишутся: хук не пропустит рост файла. Здесь остаётся справка. Формат —
+> [tasks-per-file](/.claude/docs/tasks-per-file.md).
+
 ## Текущий статус: v0.4.0 — Релиз на скачивание + ченджлог
 
 ### Планируется
