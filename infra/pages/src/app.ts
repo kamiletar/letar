@@ -123,7 +123,9 @@ export function createApp(config: PagesConfig, storage: PageStorage, oidc: OidcC
     return new Response(Bun.file(file), {
       headers: {
         ...BASE_HEADERS,
-        'content-security-policy': PAGE_CSP,
+        // Публичная страница получает непрозрачный origin: её скрипт не видит cookie входа
+        // и не может прочитать закрытые страницы этого же сервиса
+        'content-security-policy': meta.public ? `${PAGE_CSP}; sandbox allow-scripts allow-popups` : PAGE_CSP,
         'cache-control': meta.public ? 'public, max-age=60' : 'private, no-store',
       },
     })

@@ -9,8 +9,8 @@
  * деплой всех приложений (.claude/rules/app-workflow.md).
  */
 import { McpServer } from '@modelcontextprotocol/server'
-import { existsSync, readFileSync } from 'node:fs'
-import { dirname, join, relative, resolve } from 'node:path'
+import { existsSync, readFileSync, realpathSync } from 'node:fs'
+import { dirname, isAbsolute, join, relative, resolve } from 'node:path'
 import { z } from 'zod'
 
 const DEFAULT_URL = 'https://pages.letar.best'
@@ -42,24 +42,41 @@ export function titleFromHtml(html: string): string {
 }
 
 const TEXT_EXT = /\.(html?|css|js|mjs|json|svg|txt|md|csv|xml)$/i
+/** Что вообще можно положить на страницу; всё остальное (ключи, .env, архивы) отвергается. */
+const ASSET_EXT =
+  /\.(html?|css|js|mjs|json|svg|txt|md|csv|xml|png|jpe?g|gif|webp|avif|ico|woff2?|ttf|otf|mp4|webm|mp3|ogg|wav)$/i
 
 /**
  * Собирает тело запроса публикации: основной файл становится index.html, остальные лежат рядом
  * по относительным путям (от каталога основного файла). Текстовые уходят как text, прочие как base64.
+ *
+ * Читает только html и файлы известных веб-типов внутри каталога страницы: путь к произвольному
+ * файлу (`.env`, ключ) через assets или symlink на сервер не уйдёт.
  */
 export function buildFiles(
   mainPath: string,
   assets: string[] = [],
 ): Record<string, { text?: string; base64?: string }> {
+  if (!/\.html?$/i.test(mainPath)) { throw new Error(`основной файл должен быть html: ${mainPath}`) }
   const baseDir = dirname(resolve(mainPath))
+  const realBase = realpathSync(baseDir)
   const files: Record<string, { text?: string; base64?: string }> = {
     'index.html': { text: readFileSync(mainPath, 'utf8') },
   }
   for (const asset of assets) {
     const abs = resolve(baseDir, asset)
     const rel = relative(baseDir, abs).replaceAll('\\', '/')
-    if (rel.startsWith('..') || rel === '') {
+    if (rel.startsWith('..') || rel === '' || isAbsolute(rel)) {
       throw new Error(`файл ${asset} лежит вне каталога страницы`)
+    }
+    if (rel.split('/').some((part) => part.startsWith('.'))) {
+      throw new Error(`скрытые файлы не публикуются: ${asset}`)
+    }
+    if (!ASSET_EXT.test(rel)) { throw new Error(`тип файла не разрешён: ${asset}`) }
+    // symlink внутри каталога может вести наружу
+    const real = relative(realBase, realpathSync(abs))
+    if (real.startsWith('..') || isAbsolute(real)) {
+      throw new Error(`файл ${asset} ведёт за пределы каталога страницы`)
     }
     files[rel] = TEXT_EXT.test(rel)
       ? { text: readFileSync(abs, 'utf8') }

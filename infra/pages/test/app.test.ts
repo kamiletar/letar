@@ -131,6 +131,13 @@ describe('доступ', () => {
     expect(res.status).toBe(200)
     expect(res.headers.get('content-security-policy')).toContain('https://cdnjs.cloudflare.com')
     expect(res.headers.get('x-content-type-options')).toBe('nosniff')
+    expect(res.headers.get('content-security-policy')).toContain('sandbox allow-scripts')
+  })
+
+  test('закрытая страница без sandbox, чтобы работали её файлы с cookie входа', async () => {
+    await publish('plan', page('<p>1</p>'))
+    const res = await handle(new Request('https://pages.test/p/plan/', { headers: { cookie: ownerCookie() } }))
+    expect(res.headers.get('content-security-policy')).not.toContain('sandbox')
   })
 
   test('обход каталога через /p/slug/..%2f отдаёт 404', async () => {
