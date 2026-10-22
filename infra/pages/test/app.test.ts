@@ -186,6 +186,8 @@ describe('вход', () => {
         'https://evil.com',
         '/.//evil.com',
         '/..//evil.com',
+        '/%2e//evil.com',
+        '/a/..//evil.com',
       ]
     ) {
       const login = await handle(new Request(`https://pages.test/login?next=${next}`))
