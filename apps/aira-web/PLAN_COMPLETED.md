@@ -1,5 +1,10 @@
 # PLAN_COMPLETED — aira-web
 
+> ⚠️ **С 2026-10-12 файл заморожен.** Очередь задач — в [`tasks/`](/apps/aira-web/tasks/README.md)
+> (`bun scripts/tasks.mjs next aira-web` из корня монорепо). Новые задачи, журнал и итоги сюда
+> не пишутся: хук не пропустит рост файла. Здесь остаётся справка. Формат —
+> [tasks-per-file](/.claude/docs/tasks-per-file.md).
+
 ## GlitchTip AIRA-WEB-1: `ContextError` при переключении языка (2026-08-25)
 
 GlitchTip issue 604: `ContextError: useContext returned 'undefined'... forgot to wrap component
