@@ -1,5 +1,10 @@
 # Form Develop App (shadcn) — план разработки
 
+> ⚠️ **С 2026-10-12 файл заморожен.** Очередь задач — в [`tasks/`](/apps/form-develop-app-shadcn/tasks/README.md)
+> (`bun scripts/tasks.mjs next form-develop-app-shadcn` из корня монорепо). Новые задачи, журнал и итоги сюда
+> не пишутся: хук не пропустит рост файла. Здесь остаётся справка. Формат —
+> [tasks-per-file](/.claude/docs/tasks-per-file.md).
+
 ## Статус
 
 Dev-харнесс для `@letar/forms-shadcn` (Фаза 7.3, `libs/forms/PLAN.md` §7.3). Каркас Chakra от
