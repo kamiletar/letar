@@ -1,7 +1,7 @@
 ---
 id: LT-052
 title: Перевести dashboard-agent на задачи по файлам
-status: ready
+status: done
 size: M
 area: rollout
 priority: 3
@@ -11,7 +11,8 @@ owner: ""
 stage: ""
 source: tasks-per-file
 created: 2026-10-12
-updated: 2026-10-12
+updated: 2026-10-22
+closed: 2026-10-22
 ---
 
 ## Что и зачем
@@ -31,3 +32,5 @@ updated: 2026-10-12
 ## Журнал
 
 ## Итог
+
+dashboard-agent переведён: префикс DG, 8 задач (1 можно брать, 2 ждут kami, 5 идей). Баннеры, компас, скилл.

@@ -1,5 +1,10 @@
 # Выполненные задачи — Dashboard Agent
 
+> ⚠️ **С 2026-10-12 файл заморожен.** Очередь задач — в [`tasks/`](/apps/dashboard-agent/tasks/README.md)
+> (`bun scripts/tasks.mjs next dashboard-agent` из корня монорепо). Новые задачи, журнал и итоги сюда
+> не пишутся: хук не пропустит рост файла. Здесь остаётся справка. Формат —
+> [tasks-per-file](/.claude/docs/tasks-per-file.md).
+
 Детальное описание всех реализованных фич.
 
 ## `GET /api/e2e/wait` — long-poll для e2e (2026-10-07, `0.20.0`)

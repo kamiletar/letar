@@ -39,7 +39,11 @@ set_contact_policy(
 3. **Стартуй таймер** `time_start({ app: "dashboard-agent", ... })` — общий шаблон и правила
    переключения/остановки см. `.claude/rules/app-workflow.md` и `.claude/rules/time-tracking.md`.
 
-4. Прочитай `apps/dashboard-agent/PLAN.md` для текущего состояния задач (если есть)
+4. ⚠️ **Очередь задач — `apps/dashboard-agent/tasks/`** (формат — [tasks-per-file](/.claude/docs/tasks-per-file.md)).
+   Прочитай [`tasks/README.md`](/apps/dashboard-agent/tasks/README.md) и выполни
+   `bun scripts/tasks.mjs next dashboard-agent`. Вызов с id (`/dashboard-agent DG-003`) — сразу
+   `bun scripts/tasks.mjs show DG-003`. `PLAN.md` и `PLAN_COMPLETED.md` **заморожены** и остаются справкой: целиком их не
+   читать, открывать только раздел из поля `source` выбранной задачи (`grep -n` и `Read` с `offset`)
 
 5. Проверь inbox — могут быть входящие задачи от других агентов:
 
@@ -56,13 +60,13 @@ fetch_inbox(
 
 После изучения документации:
 
-- Определи текущую фазу разработки
-- Выбери следующую задачу из плана
-- Предложи план действий
+- Выбери задачу из «можно брать», `start DG-NNN --owner dashboard-agent-dev`
+- План работы запиши в раздел «План» файла задачи и предложи его
+- Находку вне задачи заводи через `tasks new dashboard-agent …`, не абзацем в плане
 
 ## После завершения задачи
 
-1. Обнови `PLAN.md` — отметь задачу как выполненную
+1. `bun scripts/tasks.mjs done DG-NNN --summary "…"` — итог и детали живут в файле задачи
 2. Обнови `CHANGELOG.md` — добавь запись об изменениях
 3. Обнови `package.json` — увеличь версию (semver)
 
