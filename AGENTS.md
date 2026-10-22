@@ -33,6 +33,8 @@
 
 - [forms 3.0: подключаемые поля и optional peer](/.claude/docs/forms-pluggable-fields-optional-peers.md) — ключ `extraFields`, строгий `AppForm.Field`, правило «ядро не тянет optional peer» и smoke без TipTap/dnd-kit.
 
+- [Уборка worktree с submodule и junction](/.claude/docs/worktree-removal-junction-submodule.md) — отказ `git worktree remove`, порядок `--force` → ветка → prune и безопасное снятие junction `node_modules`, чтобы не снести реальные зависимости.
+
 - [Node-импорты instrumentation](/.claude/docs/nextjs-instrumentation-runtime-guard.md) — положительная ветка NEXT_RUNTIME для исключения sharp из edge в webpack dev.
 
 Карта документации и найденных ловушек: [INDEX.md](/.claude/docs/INDEX.md).

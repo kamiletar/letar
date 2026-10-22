@@ -105,6 +105,10 @@ git worktree add ../letar-wt-<задача> -b <ветка> origin/main
 mklink /J node_modules C:\web\letar\node_modules
 ```
 
+⚠️ **Убирать такой worktree — не `rm -rf`:** junction ведёт в настоящий `node_modules`, а
+`git worktree remove` отказывает при submodule —
+[worktree-removal-junction-submodule](/.claude/docs/worktree-removal-junction-submodule.md).
+
 ⛔ **Запрещено:** `git checkout -b` / `git switch -c` внутри `C:\web\letar` и внутри submodule
 на общем `main`.
 
