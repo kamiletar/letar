@@ -12,6 +12,12 @@
 # package.json, когда хук стоит внутри submodule) считаются одной правкой. Подробности —
 # в комментариях у самого case ниже.
 #
+# Файлы очереди задач `tasks/**` (корень репозитория или submodule) в подсчёт scope не входят,
+# если рядом есть другие файлы: задача и код её решения идут одним коммитом (LT-063). Один
+# `tasks/**` сам по себе — scope `docs-root`. Задачи внутри `apps/<x>/tasks/` и так относятся к
+# scope приложения. Риск — чужая закрытая задача в индексе уедет в твой коммит: безвредно, это
+# заметки, а не код; сводка `git diff --cached --name-only` перед коммитом всё равно обязательна.
+#
 # Легитимный multi-scope коммит (например «bump all submodules», repo-wide format) —
 # явное подтверждение через переменную окружения:
 #   GIT_ALLOW_MULTI_SCOPE_COMMIT=1 git commit ...
@@ -52,8 +58,14 @@ if [[ -n "$(git rev-parse --show-superproject-working-tree 2>/dev/null || true)"
 fi
 
 declare -A SCOPES
+TASK_FILES=0
 for f in "${FILES[@]}"; do
   case "$f" in
+    tasks/*)
+      # Очередь задач текущего репозитория — не отдельный scope (см. шапку).
+      TASK_FILES=$((TASK_FILES + 1))
+      continue
+      ;;
     apps/*/*|libs/*/*|infra/*/*)
       # Файл внутри приложения/библиотеки монорепо — scope до второго сегмента.
       # Проверяется ПЕРВЫМ, поэтому apps/appA/PLAN.md и apps/appB/PLAN.md остаются
@@ -94,6 +106,12 @@ for f in "${FILES[@]}"; do
   esac
   SCOPES["$scope"]=$(( ${SCOPES["$scope"]:-0} + 1 ))
 done
+
+# В коммите только файлы очереди задач — это одна правка доков.
+# (`${#SCOPES[@]}` на пустом массиве под `set -u` падает, поэтому сравниваем с числом файлов.)
+if [[ $TASK_FILES -gt 0 && $TASK_FILES -eq ${#FILES[@]} ]]; then
+  SCOPES["docs-root"]=$TASK_FILES
+fi
 
 if [[ "${GIT_ALLOW_MULTI_SCOPE_COMMIT:-0}" == "1" ]]; then
   if [[ ${#SCOPES[@]} -gt 1 ]]; then
