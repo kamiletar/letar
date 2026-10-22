@@ -1,5 +1,10 @@
 # Animatrona TV — План разработки
 
+> ⚠️ **С 2026-10-12 файл заморожен.** Очередь задач — в [`tasks/`](/apps/animatrona-tv/tasks/README.md)
+> (`bun scripts/tasks.mjs next animatrona-tv` из корня монорепо). Новые задачи, журнал и итоги сюда
+> не пишутся: хук не пропустит рост файла. Здесь остаётся справка. Формат —
+> [tasks-per-file](/.claude/docs/tasks-per-file.md).
+
 ## Описание
 
 Android TV приложение для просмотра аниме с Desktop сервера Animatrona. Переиспользует API и бизнес-логику из animatrona-mobile, адаптируя UI для навигации D-Pad и пультом.

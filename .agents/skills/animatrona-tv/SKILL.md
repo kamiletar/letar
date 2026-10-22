@@ -9,7 +9,11 @@ disable-model-invocation: true
 ## Инициализация
 
 1. Прочитай `apps/animatrona-tv/README.md` для обзора приложения
-2. Прочитай `apps/animatrona-tv/PLAN.md` для текущего состояния задач
+2. ⚠️ **Очередь задач — `apps/animatrona-tv/tasks/`** (формат — [tasks-per-file](/.claude/docs/tasks-per-file.md)).
+   Прочитай [`tasks/README.md`](/apps/animatrona-tv/tasks/README.md) и выполни
+   `bun scripts/tasks.mjs next animatrona-tv`. Вызов с id (`/animatrona-tv TV-003`) — сразу
+   `bun scripts/tasks.mjs show TV-003`. `PLAN.md`, `PLAN_COMPLETED.md` **заморожены** и остаются справкой: целиком их не
+   читать, открывать только раздел из поля `source` выбранной задачи (`grep -n` и `Read` с `offset`)
 
 ## Регистрация в Agent Mail
 
@@ -25,9 +29,9 @@ disable-model-invocation: true
 
 После изучения документации:
 
-- Определи текущую фазу разработки
-- Выбери следующую задачу из плана
-- Предложи план действий
+- Выбери задачу из «можно брать», `start TV-NNN --owner animatrona-tv-dev`
+- План работы запиши в раздел «План» файла задачи и предложи его
+- Находку вне задачи заводи через `tasks new animatrona-tv …`, не абзацем в плане
 
 ## Координация (Animatrona Coordinator)
 
@@ -45,7 +49,7 @@ send_message(to: ["animatrona-coordinator-dev"], subject: "change: <описан
 
 ## После завершения задачи
 
-Общий чек-лист — `.claude/rules/app-workflow.md`.
+`bun scripts/tasks.mjs done TV-NNN --summary "…"`, дальше общий чек-лист — `.claude/rules/app-workflow.md`.
 
 ## Проект
 
