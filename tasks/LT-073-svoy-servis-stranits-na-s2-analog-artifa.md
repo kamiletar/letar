@@ -41,5 +41,6 @@ updated: 2026-10-22
 ## Журнал
 
 - 2026-10-22: Готов сервис infra/pages (Bun.serve, без зависимостей, 18 тестов) и инструменты page_publish/page_list/page_delete в .claude/mcp/pages-part.ts. Дальше: клиент pages в Ключнице, секреты, установка на s2 через deploy-agent, живая проверка входа, перенос страницы tasks-per-file.
+- 2026-10-22: Шаги 1-2: клиент pages-prod добавлен в seed Ключницы (auth-hub 0.8.4), секреты OIDC_PAGES_SECRET, PAGES_PUBLISH_TOKEN, PAGES_SESSION_SECRET сгенерированы и зашифрованы в auth-hub/.env.docker.enc и infra/pages/.env.docker.enc. Токен публикации записан в .env.local корня. Дальше: push и заявка deploy-agent-dev (сначала auth-hub с seed, затем pages), живая проверка входа.
 
 ## Итог
