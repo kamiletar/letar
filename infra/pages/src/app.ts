@@ -44,7 +44,16 @@ function bearerOk(req: Request, token: string): boolean {
 
 /** Возвращаться после входа можно только на путь этого же сервиса. */
 function safeNext(value: string | null): string {
-  return value && value.startsWith('/') && !value.startsWith('//') && !value.includes('\\') ? value : '/'
+  // Управляющие символы (табуляция, перевод строки) браузер вырезает из адреса: `/\t/evil.com` стал бы `//evil.com`
+  if (!value || /[\x00-\x1f\x7f\\]/.test(value) || !value.startsWith('/') || value.startsWith('//')) {
+    return '/'
+  }
+  try {
+    const parsed = new URL(value, 'https://pages.invalid')
+    return parsed.origin === 'https://pages.invalid' ? parsed.pathname + parsed.search + parsed.hash : '/'
+  } catch {
+    return '/'
+  }
 }
 
 function escapeHtml(text: string): string {
