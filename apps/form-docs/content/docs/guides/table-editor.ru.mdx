@@ -5,6 +5,9 @@ description: Редактируемая таблица для полей-мас�
 
 import { SkinCodeFile } from '@/components/skin/skin-code-file'
 
+> С 3.0.0 это поле не входит в ядро. Зарегистрируйте его один раз: `createForm({ extraFields: { TableEditor: FieldTableEditor } })`, импорт из
+> `@letar/forms/table-editor`, затем `AppForm.Field.TableEditor`. В примерах ниже `Form` — это ваш `AppForm`.
+
 ## Обзор
 
 `Form.Field.TableEditor` — это редактируемая таблица для полей-массивов. Табличная альтернатива `Form.Group.List` — вместо карточной раскладки данные представлены в компактной таблице с редактированием ячеек по клику.

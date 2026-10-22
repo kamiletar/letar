@@ -4,6 +4,91 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [3.0.1] - 2026-10-22
+
+### Fixed
+
+- **`AppForm.Field.Auto` принимает пропсы специализированного поля**, как рантайм-компонент `FieldAuto`. Строгая типизация 3.0.0 сузила тип до `{ name, label? }`, и в потребителях typecheck падал на `onComplete`, `autoComplete`, `showRequirements`.
+
+## [3.0.0] - 2026-10-20
+
+Лёгкое ядро. RichText, DataGrid, TableEditor и перетаскивание в списках вынесены из ядра в подпути. Обязательных
+peer-зависимостей теперь шесть (`react`, `@chakra-ui/react`, `@tanstack/react-form`, `framer-motion`, `react-icons`,
+`zod`), остальные опциональны. Переход с 2.x — [docs/MIGRATION-3.md](./docs/MIGRATION-3.md).
+
+### BREAKING
+
+- **`Form.Field.RichText`, `Form.Field.DataGrid`, `Form.Field.TableEditor` убраны из ядра.** Подключаются через
+  `createForm({ extraFields: { RichText: FieldRichText, … } })`, импорт из `@letar/forms/rich-text`,
+  `/data-grid`, `/table-editor`. Ключ совпадает с именем поля.
+- **`AppForm.Field` строгий:** индексная сигнатура снята, `AppForm.Field.<незарегистрированное>` — ошибка
+  typecheck. Раньше любое имя компилировалось. У `AppForm.Field` остались встроенные поля и поля из `extraFields`;
+  `Auto`, `EditIntent`, `CascadingSelect`, `City`, `Signature`, `Hidden`, `Calculated` теперь перечислены явно.
+- **`fieldType: 'richText'` без регистрации** рисует `Textarea` и один раз на поле пишет предупреждение в
+  dev-консоль (раньше рисовался встроенный редактор).
+- **Проп `sortable` у `Form.Group.List` и `Form.Group.List.Button.DragHandle` убраны.** Замена —
+  `SortableGroupList` из `@letar/forms/sortable`.
+- **Из корня `@letar/forms` убраны экспорты:** `FieldRichText`, `RichTextFieldProps`, `ToolbarButton`,
+  `FieldDataGrid`, `FieldTableEditor`, `TableEditorContext`, `useTableEditorContext`, табличные типы
+  (`TableColumnDef`, `DataGridColumnDef`, …), `DragHandle`, `SortableItem`, `SortableWrapper`,
+  `useSortableItemContext`. Они доступны из подпутей `rich-text`, `data-grid`, `table-editor`, `sortable`.
+- **Peer-зависимости:** `@tiptap/*`, `@tanstack/react-table`, `@tanstack/react-virtual`, `@dnd-kit/*`,
+  `@uiw/react-json-view`, `idb-keyval` — только опциональные. `next-intl` убран из peer.
+
+### Изменено
+
+- Подпути `rich-text` и `table-editor` дополнены экспортами, которые раньше жили в корне (тулбар и
+  `ImageUploadConfig`; табличные типы); `sortable` — `DragHandle`, `SortableItem`, `SortableWrapper`,
+  `useSortableItemContext`.
+
+## [2.42.0] - 2026-10-20
+
+Подготовка к лёгкому ядру: тяжёлые поля получают отдельные точки входа и подключаются в `createForm`. Всё старое
+работает как раньше, меняются только `Form.DebugValues` и Turnstile. Тяжёлое уйдёт из ядра в 3.0.0.
+
+### Добавлено
+
+- **Подпути для тяжёлых полей и инструментов:** `@letar/forms/rich-text` (`FieldRichText`), `@letar/forms/data-grid`
+  (`FieldDataGrid`), `@letar/forms/table-editor` (`FieldTableEditor`, `TableEditorContext`, `useTableEditorContext`),
+  `@letar/forms/sortable` (`SortableGroupList`), `@letar/forms/debug` (`FormDebugJsonView`). Каждому нужны свои
+  пакеты (`@tiptap/*`, `@tanstack/react-table`, `@dnd-kit/*`, `@uiw/react-json-view`).
+- **`Field` в реестре `createForm`.** Автоформа (`fieldType: 'richText'`) берёт поле из `extraFields` по ключу
+  `RichText`; без регистрации работает встроенное. Ключ в `extraFields` обязан совпадать с именем поля:
+  `createForm({ extraFields: { RichText: FieldRichText } })`.
+- **`createForm` типизирует `extraFields`:** новый дженерик `TExtraFields`, `AppForm.Field.RichText` получает пропсы
+  зарегистрированного компонента. Индексная сигнатура `AppForm.Field.<любое имя>` пока остаётся (уйдёт в 3.0.0).
+- **`SortableGroupList`** — `Form.Group.List` с перетаскиванием без пропа `sortable`. Внутри — `Button.Add`, `Button.Remove`,
+  `Button.DragHandle`.
+
+### Изменено
+
+- **`Form.DebugValues` и проп `debug` рисуют простой `<pre>` с JSON** вместо дерева `@uiw/react-json-view`. Проп
+  `collapsed` в нём игнорируется. Интерактивное дерево осталось как `FormDebugJsonView` в `@letar/forms/debug`.
+- **Turnstile не нужен `@marsidev/react-turnstile`:** провайдер сам грузит `challenges.cloudflare.com/turnstile/v0/api.js`
+  (один раз на страницу) и рисует виджет через `window.turnstile.render`. Пропсы `TurnstileProvider` те же. Peer
+  `@marsidev/react-turnstile` убран.
+
+### Исправлено
+
+- Декларативные формы автоматически показывают ошибки отправки без обязательного middleware.
+  Отказ сохраняет значения и локальный черновик, повторная отправка доступна без изменения текста.
+  Кастомные сообщения ошибок сохраняются; DOM submit не создаёт необработанное отклонение Promise (FM-028).
+
+## [2.41.2] - 2026-10-19
+
+### Исправлено
+
+- **Проект без `@dnd-kit/*`, `@tiptap/*`, `@tanstack/react-table`, `@tanstack/react-virtual`, `@marsidev/react-turnstile` и
+  `@uiw/react-json-view` не собирался: «Module not found» (Next.js/Turbopack), `MISSING_EXPORT` (Vite).** Все они
+  были объявлены необязательными peer-зависимостями, но бандлер разрешает импорты всех файлов пакета, включая
+  лениво подгружаемые чанки (`RichText`, `DataGrid`), а главная точка входа импортирует `@dnd-kit/*` и
+  `@uiw/react-json-view` статически. npm необязательные peer не ставит, поэтому сборка падала у любого потребителя,
+  который их не добавил сам. Теперь это обычные peer-зависимости: npm ставит их сам. Необязательными остаются только
+  `next-intl` (только типы) и `idb-keyval` (встроен в бандл `@letar/forms-core`).
+- Диапазон peer `@uiw/react-json-view` — `>=2.0.0-alpha.0`: стабильной 2.x у пакета нет, `>=2.0.0` не находил ни одной
+  версии, и установка падала с `ETARGET`.
+- Нашла проверка `scripts/check-npm-package-integrity.mjs` и smoke-проект `scripts/npm-smoke.mjs`.
+
 ## [2.41.1] - 2026-10-19
 
 ### Исправлено

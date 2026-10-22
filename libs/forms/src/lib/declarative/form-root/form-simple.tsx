@@ -1,12 +1,13 @@
 'use client'
 
+import { applyServerErrors, mapServerErrors } from '@letar/forms-core/server-errors'
 import {
   useCreateDependentsRegistry,
   useCreatePendingRegistry,
   useFormPendingSubmit,
   warnSubmitBypassingPending,
 } from '@letar/forms-react'
-import { type ReactElement, type ReactNode, useEffect, useMemo } from 'react'
+import { type ReactElement, type ReactNode, useEffect, useMemo, useRef } from 'react'
 import { useAppForm } from '../../form-hook'
 import { type FormOfflineConfig, OfflineSensitiveFieldsError } from '../../offline'
 import { type DirtyGuardOptions, DirtyGuardScope } from '../dirty-guard'
@@ -21,6 +22,7 @@ import { buildValidators } from './form-validators'
 import { useFieldChangeListeners } from './use-field-change-listeners'
 import { useFormFeatures } from './use-form-features'
 import { usePostSubmitResetGuard } from './use-post-submit-reset-guard'
+import { useServerErrorRetrySubmit } from './use-server-error-retry-submit'
 
 /**
  * Props for FormSimple component
@@ -126,6 +128,8 @@ export function FormSimple<TData extends object>({
   // Реестр зависимых полей (`dependsOn`, §18): очищает зависимое поле по правке родителя
   const dependents = useCreateDependentsRegistry()
 
+  const serverSubmitError = useRef<unknown>(undefined)
+
   // Initialize form
   const form = useAppForm({
     defaultValues: initialValue,
@@ -150,17 +154,16 @@ export function FormSimple<TData extends object>({
 
       let dataToSubmit = value as TData
 
-      // Apply beforeSubmit middleware
-      if (middleware?.beforeSubmit) {
-        const transformed = await middleware.beforeSubmit(dataToSubmit)
-        if (transformed === undefined) {
-          // Cancel submit
-          return
-        }
-        dataToSubmit = transformed
-      }
-
       try {
+        // Преобразование данных тоже может завершиться ошибкой, которую нужно показать.
+        if (middleware?.beforeSubmit) {
+          const transformed = await middleware.beforeSubmit(dataToSubmit)
+          if (transformed === undefined) {
+            return
+          }
+          dataToSubmit = transformed
+        }
+
         await features.handleSubmit(dataToSubmit)
 
         // Call afterSuccess middleware
@@ -171,10 +174,24 @@ export function FormSimple<TData extends object>({
         // Reset form with current values to clear dirty state
         commitPostSubmitReset(dataToSubmit)
       } catch (error) {
+        // `useFormServerAction` мог уже применить свой fieldMap: сохраняем его сообщения.
+        const hasServerErrors = form.state.errors.length > 0 || Object.keys(form.state.fieldMeta).some(
+          (name) => !!form.getFieldMeta(name)?.errorMap.onServer,
+        )
+        if (!hasServerErrors) {
+          applyServerErrors({
+            setFieldMeta: (name, updater) => {
+              form.setFieldMeta(name, (meta) => ({ ...meta, ...updater(meta) }))
+            },
+            // TanStack нормализует global error в строку, сохраняя типы схемных валидаторов.
+            setErrorMap: ({ onSubmit }) => form.setErrorMap({ onSubmit: { form: onSubmit, fields: {} } }),
+          }, mapServerErrors(error))
+        }
         // Call onError middleware
         if (middleware?.onError) {
           await middleware.onError(error instanceof Error ? error : new Error(String(error)))
         }
+        serverSubmitError.current = form.state.errorMap.onSubmit
         // Отказ от офлайн-очереди (чувствительные поля) уже доложен через `onError`/`offline.onSyncError`:
         // форма не сбрасывается и не считается отправленной, но это не сбой — не бросаем дальше
         if (error instanceof OfflineSensitiveFieldsError) {
@@ -185,7 +202,8 @@ export function FormSimple<TData extends object>({
     },
   })
 
-  const submit = useFormPendingSubmit(pendingRegistry, form)
+  const pendingSubmit = useFormPendingSubmit(pendingRegistry, form)
+  const submit = useServerErrorRetrySubmit(form, pendingSubmit, serverSubmitError)
 
   // Защита от отката поля к устаревшему initialValue после post-submit reset() —
   // см. use-post-submit-reset-guard.ts
@@ -253,7 +271,8 @@ export function FormSimple<TData extends object>({
         onSubmit={(e) => {
           e.preventDefault()
           e.stopPropagation()
-          void submit()
+          // Отказ уже отображён в состоянии формы; DOM-событие не умеет ожидать Promise.
+          void submit().catch(() => {})
         }}
       >
         {honeypot && <HoneypotField />}

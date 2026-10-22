@@ -219,7 +219,7 @@ const Schema = z.object({
 // Текстовые
 <Form.Field.String name="title" />
 <Form.Field.Textarea name="description" />
-<Form.Field.RichText name="content" />
+<AppForm.Field.RichText name="content" />
 
 // Числовые
 <Form.Field.Number name="price" />
@@ -236,6 +236,8 @@ const Schema = z.object({
 <Form.Field.Phone name="phone" />
 <Form.Field.FileUpload name="avatar" />
 ```
+
+> С 3.0.0 `RichText` не входит в ядро: `AppForm` — инстанс `createForm({ extraFields: { RichText: FieldRichText } })`, компоненты — из `@letar/forms/rich-text`. Подробнее — `libs/forms/docs/MIGRATION-3.md`.
 
 ### Условный рендеринг
 

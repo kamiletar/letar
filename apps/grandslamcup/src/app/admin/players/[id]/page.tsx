@@ -19,6 +19,16 @@ import { PlayerLinkSection } from './_components/player-link-section'
 
 type Params = Promise<{ id: string }>
 
+/** Запись истории команд игрока в админке */
+interface AdminTeamHistoryRow {
+  id: string
+  role: string
+  isPlaying: boolean
+  joinedAt: Date
+  leftAt: Date | null
+  teamSeason: { team: { name: string }; season: { name: string } }
+}
+
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { id } = await params
   const player = await prisma.player.findUnique({ where: { id }, select: { name: true } })
@@ -64,6 +74,9 @@ export default async function AdminPlayerPage({ params }: { params: Params }) {
   if (!player) {
     notFound()
   }
+
+  // Узкий тип вместо вывода ZenStack: tsgo падает на TS2321 (tsgo-excessive-stack-depth-zenstack.md)
+  const teamHistory: AdminTeamHistoryRow[] = player.playerTeamSeasons
 
   // Подгружаем данные pending пользователя если есть заявка
   const pendingUser = player.pendingUserId
@@ -220,7 +233,7 @@ export default async function AdminPlayerPage({ params }: { params: Params }) {
           Команды
         </Text>
         <VStack gap={2} align="stretch">
-          {player.playerTeamSeasons.map((pts) => (
+          {teamHistory.map((pts) => (
             <Flex key={pts.id} justify="space-between" align="center" py={1}>
               <HStack gap={2}>
                 <Text fontSize="sm" fontWeight="medium">
@@ -239,7 +252,7 @@ export default async function AdminPlayerPage({ params }: { params: Params }) {
               </Text>
             </Flex>
           ))}
-          {player.playerTeamSeasons.length === 0 && (
+          {teamHistory.length === 0 && (
             <Text fontSize="sm" color="fg.muted">
               Не состоит ни в одной команде
             </Text>

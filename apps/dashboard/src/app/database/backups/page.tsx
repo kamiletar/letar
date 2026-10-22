@@ -47,12 +47,21 @@ async function fetchAvailableDatabases(serverId: string | null): Promise<string[
 }
 
 /**
- * Id плейсхолдера оптимистичного бэкапа. Вызывается только из обработчика клика
- * (`handleCreateBackup`), не из рендера — вынесено на уровень модуля, чтобы `Date.now()` не
- * оказывался лексически внутри тела компонента.
+ * Плейсхолдер оптимистичного бэкапа. Вызывается только из обработчика клика
+ * (`handleCreateBackup`), не из рендера — вынесено на уровень модуля, чтобы `Date.now()` и
+ * `new Date()` не оказывались лексически внутри тела компонента.
  */
-function createPlaceholderBackupId(dbName: string): string {
-  return `creating-${dbName}-${Date.now()}`
+function createPlaceholderBackup(dbName: string): Backup {
+  return {
+    id: `creating-${dbName}-${Date.now()}`,
+    dbName,
+    filename: 'Creating backup...',
+    path: '',
+    size: 0,
+    createdAt: new Date().toISOString(),
+    type: 'manual',
+    isCreating: true,
+  }
 }
 
 async function fetchBackups(databases: string[], serverId: string | null) {
@@ -134,16 +143,7 @@ export default function BackupsPage() {
   // Обработчик создания бэкапа с оптимистичным UI
   const handleCreateBackup = (dbName: string) => {
     // Создаём placeholder для оптимистичного отображения
-    const placeholderBackup: Backup = {
-      id: createPlaceholderBackupId(dbName),
-      dbName,
-      filename: 'Creating backup...',
-      path: '',
-      size: 0,
-      createdAt: new Date().toISOString(),
-      type: 'manual',
-      isCreating: true,
-    }
+    const placeholderBackup = createPlaceholderBackup(dbName)
 
     startCreateTransition(async () => {
       // Мгновенно показываем placeholder

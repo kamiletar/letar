@@ -18,6 +18,18 @@ export const metadata: Metadata = {
 
 type SearchParams = Promise<{ season?: string }>
 
+/** Поля матча, нужные расписанию */
+interface ScheduleMatchRow {
+  id: string
+  status: string
+  scheduledAt: Date | null
+  homeScore: number | null
+  awayScore: number | null
+  homeTeam: { team: { name: string } }
+  awayTeam: { team: { name: string } }
+  venue: { name: string } | null
+}
+
 export default async function SchedulePage({ searchParams }: { searchParams: SearchParams }) {
   const { season: seasonSlug } = await searchParams
 
@@ -57,7 +69,8 @@ export default async function SchedulePage({ searchParams }: { searchParams: Sea
   })
 
   // Группируем по кругам и турам
-  const grouped = new Map<string, typeof matches>()
+  // Узкий тип вместо вывода ZenStack: tsgo падает на TS2321 (tsgo-excessive-stack-depth-zenstack.md)
+  const grouped = new Map<string, ScheduleMatchRow[]>()
   for (const m of matches) {
     const key = m.tour ? `${m.tour.round.name} — Тур ${m.tour.number}` : 'Товарищеские матчи'
     if (!grouped.has(key)) { grouped.set(key, []) }

@@ -325,7 +325,7 @@ function OrderForm({ products }) {
 Если массив — это таблица (товары в заказе, строки сметы), `Form.Group.List` с ручной вёрсткой избыточен. `Form.Field.TableEditor` — готовое решение:
 
 ```tsx
-<Form.Field.TableEditor
+<AppForm.Field.TableEditor
   name="items"
   columns={[
     { name: 'product', width: '40%' },
@@ -338,6 +338,8 @@ function OrderForm({ products }) {
   footer={[{ column: 'total', aggregate: 'sum', label: 'Итого:' }]}
 />
 ```
+
+> С 3.0.0 `TableEditor` не входит в ядро: `AppForm` — инстанс `createForm({ extraFields: { TableEditor: FieldTableEditor } })`, компоненты — из `@letar/forms/table-editor`. Подробнее — [MIGRATION-3](../docs/MIGRATION-3.md).
 
 Что даёт `TableEditor` сверх `Form.Group.List`:
 

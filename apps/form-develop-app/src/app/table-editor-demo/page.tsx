@@ -1,8 +1,8 @@
 'use client'
 
+import { DevelopAppForm } from '@/develop-app-form/develop-app-form'
 import { Box, Heading, Text, VStack } from '@chakra-ui/react'
 import { formatRubles } from '@letar/format-utils'
-import { Form } from '@letar/forms'
 import { useState } from 'react'
 import { DemoPageLayout } from '../_components'
 
@@ -24,7 +24,7 @@ export default function TableEditorDemoPage() {
             Кастомные колонки, computed &quot;Итого&quot; и footer с суммой. Кликните по ячейке для редактирования. Tab
             — следующая ячейка, Enter — следующая строка.
           </Text>
-          <Form
+          <DevelopAppForm
             debug
             initialValue={{
               customer: '',
@@ -36,8 +36,8 @@ export default function TableEditorDemoPage() {
             }}
             onSubmit={(data) => setSubmittedData(data as Record<string, unknown>)}
           >
-            <Form.Field.String name="customer" label="Покупатель" />
-            <Form.Field.TableEditor
+            <DevelopAppForm.Field.String name="customer" label="Покупатель" />
+            <DevelopAppForm.Field.TableEditor
               name="items"
               label="Товары"
               columns={[
@@ -60,8 +60,8 @@ export default function TableEditorDemoPage() {
               selectable
               helperText="Можно вставлять данные из Excel (Ctrl+V)"
             />
-            <Form.Button.Submit>Оформить заказ</Form.Button.Submit>
-          </Form>
+            <DevelopAppForm.Button.Submit>Оформить заказ</DevelopAppForm.Button.Submit>
+          </DevelopAppForm>
         </Box>
 
         {/* Пример 2: Простая таблица */}
@@ -72,14 +72,14 @@ export default function TableEditorDemoPage() {
           <Text fontSize="sm" color="fg.muted" mb={4}>
             Минимальный пример — колонки определяются вручную.
           </Text>
-          <Form
+          <DevelopAppForm
             debug
             initialValue={{
               contacts: [{ name: 'Иван Петров', email: 'ivan@example.com', phone: '+7 900 123-45-67' }],
             }}
             onSubmit={(data) => setSubmittedData(data as Record<string, unknown>)}
           >
-            <Form.Field.TableEditor
+            <DevelopAppForm.Field.TableEditor
               name="contacts"
               label="Контакты"
               columns={[
@@ -91,8 +91,8 @@ export default function TableEditorDemoPage() {
               size="md"
               sortable
             />
-            <Form.Button.Submit>Сохранить</Form.Button.Submit>
-          </Form>
+            <DevelopAppForm.Button.Submit>Сохранить</DevelopAppForm.Button.Submit>
+          </DevelopAppForm>
         </Box>
 
         {/* Результат */}

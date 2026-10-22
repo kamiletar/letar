@@ -13,6 +13,31 @@ import { notFound } from 'next/navigation'
 
 type Params = Promise<{ slug: string }>
 
+/** Поля выступления, нужные для сводной статистики и списка лучших выступлений */
+interface TopPerfRow {
+  id: string
+  totalScore: number | null
+  textAdjusted: number | null
+  deliveryAdjusted: number | null
+  match: {
+    id: string
+    scheduledAt: Date | null
+    homeTeam: { team: { name: string } }
+    awayTeam: { team: { name: string } }
+  }
+}
+
+/** Запись истории команд игрока */
+interface TeamHistoryRow {
+  id: string
+  role: string
+  teamSeason: {
+    season: { name: string }
+    team: { name: string }
+    league: { name: string }
+  }
+}
+
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { slug } = await params
   const player = await prisma.player.findUnique({ where: { slug }, select: { name: true } })
@@ -74,31 +99,36 @@ export default async function PlayerPage({ params }: { params: Params }) {
   }
 
   const perfs = player.performances
+  // Узкий тип вместо вывода ZenStack: tsgo падает на TS2321 при вызове .reduce/.map по полному результату
+  // (tsgo-excessive-stack-depth-zenstack.md)
+  const perfRows: TopPerfRow[] = perfs
 
   // Общая статистика
   const matchesPlayed = perfs.length
-  const totalScore = perfs.reduce((sum, p) => sum + p.totalScore!, 0)
+  const totalScore = perfRows.reduce((sum, p) => sum + p.totalScore!, 0)
   const avgScore = matchesPlayed > 0 ? Math.round((totalScore / matchesPlayed) * 10) / 10 : 0
-  const bestScore = matchesPlayed > 0 ? Math.max(...perfs.map((p) => p.totalScore!)) : 0
+  const bestScore = matchesPlayed > 0 ? Math.max(...perfRows.map((p) => p.totalScore!)) : 0
 
   // Текст/подача отдельно
   const avgText = matchesPlayed > 0
-    ? Math.round((perfs.reduce((sum, p) => sum + (p.textAdjusted ?? 0), 0) / matchesPlayed) * 10) / 10
+    ? Math.round((perfRows.reduce((sum, p) => sum + (p.textAdjusted ?? 0), 0) / matchesPlayed) * 10) / 10
     : 0
   const avgDelivery = matchesPlayed > 0
-    ? Math.round((perfs.reduce((sum, p) => sum + (p.deliveryAdjusted ?? 0), 0) / matchesPlayed) * 10) / 10
+    ? Math.round((perfRows.reduce((sum, p) => sum + (p.deliveryAdjusted ?? 0), 0) / matchesPlayed) * 10) / 10
     : 0
 
   // Тренд (последние 3 vs предыдущие 3)
-  const trend = computeTrend(perfs.map((p) => p.totalScore!))
+  const trend = computeTrend(perfRows.map((p) => p.totalScore!))
 
   // Топ-3 лучших выступлений
-  const topPerfs = [...perfs].sort((a, b) => b.totalScore! - a.totalScore!).slice(0, 3)
+  const topPerfs: TopPerfRow[] = [...perfRows].sort((a, b) => b.totalScore! - a.totalScore!).slice(0, 3)
 
   // Статистика по сезонам
   const seasonStats = computeSeasonStats(perfs)
 
   const currentTeam = player.playerTeamSeasons[0]
+  const teamHistory: TeamHistoryRow[] = player.playerTeamSeasons
+  const poems: Array<{ id: string; title: string; slug: string }> = player.poems
 
   return (
     <VStack gap={6} align="stretch">
@@ -223,7 +253,7 @@ export default async function PlayerPage({ params }: { params: Params }) {
                   {h}
                 </Box>
               ))}
-              {perfs.map((p) => (
+              {perfRows.map((p) => (
                 <Box key={p.id} display="contents">
                   <Box px={3} py={2} borderBottomWidth="1px" fontSize="xs">
                     {formatDateShort(p.match.scheduledAt)}
@@ -252,13 +282,13 @@ export default async function PlayerPage({ params }: { params: Params }) {
       )}
 
       {/* Стихи */}
-      {player.poems.length > 0 && (
+      {poems.length > 0 && (
         <Box>
           <Heading size="md" mb={3}>
             Стихи
           </Heading>
           <VStack gap={2} align="stretch">
-            {player.poems.map((poem) => (
+            {poems.map((poem) => (
               <Link key={poem.id} href={`/players/${slug}/poems/${poem.slug}`}>
                 <Text fontSize="sm" _hover={{ color: 'brand.solid' }} transition="color 0.15s">
                   {poem.title}
@@ -270,13 +300,13 @@ export default async function PlayerPage({ params }: { params: Params }) {
       )}
 
       {/* История команд */}
-      {player.playerTeamSeasons.length > 1 && (
+      {teamHistory.length > 1 && (
         <Box>
           <Heading size="md" mb={3}>
             История команд
           </Heading>
           <VStack align="start" gap={1}>
-            {player.playerTeamSeasons.map((pts) => (
+            {teamHistory.map((pts) => (
               <Text key={pts.id} fontSize="sm">
                 {pts.teamSeason.season.name} — {pts.teamSeason.team.name} ({pts.teamSeason.league.name})
                 {pts.role !== 'PLAYER' && (

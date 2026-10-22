@@ -1,6 +1,6 @@
 {
   "name": "@letar/forms",
-  "version": "2.41.1",
+  "version": "3.0.1",
   "description": "Reusable form components library with TanStack Form and Chakra UI integration",
   "type": "module",
   "nx": {
@@ -59,6 +59,36 @@
       "types": "./src/lib/testing/index.ts",
       "import": "./src/lib/testing/index.ts",
       "default": "./src/lib/testing/index.ts"
+    },
+    "./rich-text": {
+      "@letar/source": "./src/entries/rich-text.ts",
+      "types": "./src/entries/rich-text.ts",
+      "import": "./src/entries/rich-text.ts",
+      "default": "./src/entries/rich-text.ts"
+    },
+    "./data-grid": {
+      "@letar/source": "./src/entries/data-grid.ts",
+      "types": "./src/entries/data-grid.ts",
+      "import": "./src/entries/data-grid.ts",
+      "default": "./src/entries/data-grid.ts"
+    },
+    "./table-editor": {
+      "@letar/source": "./src/entries/table-editor.ts",
+      "types": "./src/entries/table-editor.ts",
+      "import": "./src/entries/table-editor.ts",
+      "default": "./src/entries/table-editor.ts"
+    },
+    "./sortable": {
+      "@letar/source": "./src/entries/sortable.ts",
+      "types": "./src/entries/sortable.ts",
+      "import": "./src/entries/sortable.ts",
+      "default": "./src/entries/sortable.ts"
+    },
+    "./debug": {
+      "@letar/source": "./src/entries/debug.ts",
+      "types": "./src/entries/debug.ts",
+      "import": "./src/entries/debug.ts",
+      "default": "./src/entries/debug.ts"
     }
   },
   "peerDependencies": {

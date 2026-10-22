@@ -6,6 +6,7 @@ import { SkillCreateFormSchema } from '@/generated/form-schemas/Skill.form'
 import type { Skill, SkillCategory } from '@/generated/prisma'
 import { KamiForm } from '@/kami-form'
 import { Box, Button, Card, HStack, SimpleGrid, Stack, Text } from '@chakra-ui/react'
+import { useNow } from '@letar/hooks/utility'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCallback, useState, useTransition } from 'react'
@@ -34,6 +35,7 @@ export function SkillForm({ skill, categories, locale }: SkillFormProps) {
   const [isPending, startTransition] = useTransition()
   const { confirm, ConfirmDialog } = useConfirmDialog()
   const isEditing = Boolean(skill)
+  const currentYear = useNow().getFullYear()
 
   // Режим ввода опыта: 'years' — вручную, 'startYear' — автоматически от года
   const [experienceMode, setExperienceMode] = useState<'years' | 'startYear'>(skill?.startYear ? 'startYear' : 'years')
@@ -195,7 +197,7 @@ export function SkillForm({ skill, categories, locale }: SkillFormProps) {
                         label="Год начала практики"
                         placeholder="2016"
                         min={1990}
-                        max={new Date().getFullYear()}
+                        max={currentYear}
                         helperText={`Количество лет будет обновляться автоматически. ${
                           calculatedYears !== null ? `Сейчас: ${calculatedYears} лет` : ''
                         }`}

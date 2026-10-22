@@ -87,7 +87,9 @@ jobs:
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
-          bun-version: latest
+          # Версию менять вместе с локальной версией bun и с bun-version в npm-packages.yml/publish-npm.yml:
+          # другой bun пишет lock в другом формате, и check-lock-subset падает на «другой версией bun».
+          bun-version: 1.4.3
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -102,9 +104,13 @@ jobs:
       # «lockfile had changes, but lockfile is frozen».
       # Разовая ручная чистка lockfile (949b81c6) не держится: первый же локальный
       # `bun install` возвращает записи обратно — так и случилось в f8545c54.
+      # Вместо frozen — шаг ниже: scripts/check-lock-subset.mjs разрешает установке только удалять записи lock.
       - name: Install dependencies
         id: install
         run: bun install
+
+      - name: Lockfile — подмножество закоммиченного
+        run: node scripts/check-lock-subset.mjs
 
       # oxlint отрабатывает первым внутри таргета lint (fast-fail), затем ESLint.
       - name: Lint

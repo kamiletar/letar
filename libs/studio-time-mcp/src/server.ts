@@ -50,14 +50,12 @@ export function formatLogInterval(entry: unknown): string {
 }
 
 /**
- * Идентификатор текущей сессии Claude Code — привязывает открытый таймер к сессии, которая его
- * открыла (§11 «N» PLAN.md studio). MCP-сервер запускается как дочерний stdio-процесс сессии и
- * наследует её `CLAUDE_CODE_SESSION_ID`. Если переменной нет (запуск вне Claude Code, например
- * вручную для отладки) — best-effort фолбэк на PID процесса, лишь бы не оставлять null там, где
- * есть хоть какой-то способ отличить один запуск сервера от другого.
+ * Привязывает таймер к сессии Claude Code или чату Codex. Если MCP-процесс общий для нескольких
+ * чатов, вызывающая сторона должна передавать sessionRef явно: окружение принадлежит процессу,
+ * а не отдельному вызову инструмента. PID остаётся запасным вариантом для ручного запуска.
  */
 export function defaultSessionRef(): string {
-  return process.env['CLAUDE_CODE_SESSION_ID'] || `pid-${process.pid}`
+  return process.env['CLAUDE_CODE_SESSION_ID'] || process.env['CODEX_THREAD_ID'] || `pid-${process.pid}`
 }
 
 export function createStudioTimeMcpServer(): McpServer {
@@ -95,7 +93,7 @@ export function createStudioTimeMcpServer(): McpServer {
         .string()
         .optional()
         .describe(
-          'Идентификатор сессии, открывшей таймер — используется Stop-хуком, чтобы не блокировать чужую сессию по этому таймеру. По умолчанию берётся из CLAUDE_CODE_SESSION_ID, передавать вручную обычно не нужно',
+          'Идентификатор сессии: CLAUDE_CODE_SESSION_ID или CODEX_THREAD_ID. В Codex передавай CODEX_THREAD_ID явно, чтобы таймер и heartbeat относились к одному чату даже при общем MCP-процессе',
         ),
       stage: z
         .string()
@@ -161,7 +159,7 @@ export function createStudioTimeMcpServer(): McpServer {
     .string()
     .optional()
     .describe(
-      'Идентификатор сессии — см. time_start. По умолчанию берётся из CLAUDE_CODE_SESSION_ID: определяет, '
+      'Идентификатор сессии — см. time_start. В Codex передавай CODEX_THREAD_ID явно; по умолчанию — окружение MCP-процесса: определяет, '
         + 'какой из ПАРАЛЛЕЛЬНЫХ активных таймеров (свой у каждой сессии/агента, даже на одном проекте) затронуть.',
     )
 

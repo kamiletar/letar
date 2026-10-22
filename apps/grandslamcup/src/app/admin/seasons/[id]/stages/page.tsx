@@ -74,10 +74,12 @@ export default function StagesPage() {
   const [regenerating, setRegenerating] = useState(false)
 
   const loadData = useCallback(async () => {
-    const [stagesResult, progressResult] = await Promise.all([
-      getStagesAction(seasonId),
-      getSwissProgressAction(seasonId),
-    ])
+    // Оба запроса стартуют сразу (server action — обычный async), await по отдельности:
+    // кортеж Promise.all роняет tsgo TS2321 (tsgo-excessive-stack-depth-zenstack.md)
+    const stagesPromise = getStagesAction(seasonId)
+    const progressPromise = getSwissProgressAction(seasonId)
+    const stagesResult = await stagesPromise
+    const progressResult = await progressPromise
     if ('data' in stagesResult) { setStages(stagesResult.data as StageData[]) }
     if ('data' in progressResult) { setProgress(progressResult.data as SwissProgress | null) }
     setLoading(false)

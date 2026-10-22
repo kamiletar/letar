@@ -14,6 +14,12 @@ export interface FormRegistry {
   Select: Record<string, AnyComponent>
   Combobox: Record<string, AnyComponent>
   Listbox: Record<string, AnyComponent>
+  /**
+   * Итоговый `AppForm.Field`: базовые поля плюс `extraFields`. Автоформа (`fieldType: 'richText'`) берёт по ключу
+   * подключаемые поля (`Field.RichText`), которые ядро само не тянет. Необязательный: реестр, собранный вручную
+   * (тесты, старый код), может его не задавать.
+   */
+  Field?: Record<string, AnyComponent>
 }
 
 /** `null` — форма не из `createForm` (просто `Form`): ключей реестра у неё нет */

@@ -17,6 +17,9 @@ disabled.
   shadcn="apps/form-develop-app-shadcn/src/app/data-grid-demo/page.tsx"
 />
 
+> Since 3.0.0 this field is not in the core. Register it once: `createForm({ extraFields: { DataGrid: FieldDataGrid } })`, import from
+> `@letar/forms/data-grid`, then use `AppForm.Field.DataGrid`. In the examples below `Form` stands for your `AppForm`.
+
 ## Overview
 
 `Form.Field.DataGrid` is for editing large datasets (100+ rows) with sorting, filtering, and pagination. Unlike `TableEditor` (which is for creating new rows), DataGrid is for editing existing data.

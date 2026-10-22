@@ -153,18 +153,20 @@ function FormFromSchema({ schema, initialValue, onSubmit, submitLabel, exclude }
 Когда нужен контроль над частью формы:
 
 ```tsx
-<Form schema={Schema} initialValue={data} onSubmit={save}>
+<AppForm schema={Schema} initialValue={data} onSubmit={save}>
   {/* Автоматически все поля, кроме description */}
-  <Form.AutoFields exclude={['description']} />
+  <AppForm.AutoFields exclude={['description']} />
 
   {/* description — вручную, с кастомной обёрткой */}
   <Box p={4} bg="gray.50" borderRadius="md">
-    <Form.Field.RichText name="description" />
+    <AppForm.Field.RichText name="description" />
   </Box>
 
-  <Form.Button.Submit />
-</Form>
+  <AppForm.Button.Submit />
+</AppForm>
 ```
+
+> С 3.0.0 `RichText` не входит в ядро: `AppForm` — инстанс `createForm({ extraFields: { RichText: FieldRichText } })`, компоненты — из `@letar/forms/rich-text`. Подробнее — [MIGRATION-3](../docs/MIGRATION-3.md).
 
 `AutoFields` генерирует все поля автоматически, а `description` вы контролируете сами. Лучшее из двух миров.
 

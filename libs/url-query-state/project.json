@@ -11,10 +11,6 @@
   "targets": {
     "typecheck": {
       "executor": "nx:run-commands",
-      "options": {
-        "command": "tsc --build tsconfig.lib.json --emitDeclarationOnly",
-        "cwd": "libs/url-query-state"
-      },
       "dependsOn": [
         "^typecheck"
       ],
@@ -36,14 +32,14 @@
         "technologies": [
           "typescript"
         ]
+      },
+      "options": {
+        "command": "tsc --build tsconfig.lib.json --emitDeclarationOnly",
+        "cwd": "libs/url-query-state"
       }
     },
     "typecheck:tsgo": {
       "executor": "nx:run-commands",
-      "options": {
-        "command": "tsgo --build tsconfig.lib.json --emitDeclarationOnly",
-        "cwd": "libs/url-query-state"
-      },
       "dependsOn": [
         "^typecheck:tsgo"
       ],
@@ -66,6 +62,10 @@
           "typescript",
           "tsgo"
         ]
+      },
+      "options": {
+        "command": "tsgo --build tsconfig.lib.json --emitDeclarationOnly",
+        "cwd": "libs/url-query-state"
       }
     },
     "test": {
@@ -75,10 +75,6 @@
     },
     "oxlint": {
       "executor": "nx:run-commands",
-      "options": {
-        "command": "bunx oxlint src --config ../../.oxlintrc.json",
-        "cwd": "libs/url-query-state"
-      },
       "cache": true,
       "inputs": [
         "default",
@@ -89,34 +85,33 @@
         "technologies": [
           "oxlint"
         ]
+      },
+      "options": {
+        "command": "bunx oxlint src --config ../../.oxlintrc.json",
+        "cwd": "libs/url-query-state"
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
       "dependsOn": [
         "oxlint"
       ]
     },
     "format": {
       "executor": "nx:run-commands",
-      "options": {
-        "command": "bunx dprint fmt \"**/*.{ts,tsx,js,jsx,json,md}\"",
-        "cwd": "libs/url-query-state"
-      },
       "cache": false,
       "metadata": {
         "description": "Format files with dprint (~30x faster than Prettier)",
         "technologies": [
           "dprint"
         ]
+      },
+      "options": {
+        "command": "bunx dprint fmt \"**/*.{ts,tsx,js,jsx,json,md}\"",
+        "cwd": "libs/url-query-state"
       }
     },
     "format:check": {
       "executor": "nx:run-commands",
-      "options": {
-        "command": "bunx dprint check \"**/*.{ts,tsx,js,jsx,json,md}\"",
-        "cwd": "libs/url-query-state"
-      },
       "cache": true,
       "inputs": [
         "default",
@@ -127,6 +122,10 @@
         "technologies": [
           "dprint"
         ]
+      },
+      "options": {
+        "command": "bunx dprint check \"**/*.{ts,tsx,js,jsx,json,md}\"",
+        "cwd": "libs/url-query-state"
       }
     },
     "build:npm": {

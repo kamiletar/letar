@@ -38,10 +38,12 @@ export default async function CityHomePage({ params }: { params: Params }) {
   // с разными ZenStack-типами, подпаттерн 2 из
   // .claude/docs/tsgo-excessive-stack-depth-zenstack.md. Теряем параллельность трёх запросов,
   // здесь это приемлемо (страница не в горячем пути).
+  // oxlint-disable-next-line react/purity -- серверный компонент: время запроса
+  const now = new Date()
   const upcomingMatches = await prisma.match.findMany({
     where: {
       status: 'SCHEDULED',
-      scheduledAt: { gte: new Date() },
+      scheduledAt: { gte: now },
       OR: [{ tour: { round: { season: { cityId: city.id } } } }, { season: { cityId: city.id } }],
     },
     orderBy: { scheduledAt: 'asc' },

@@ -9,6 +9,7 @@
 import { PageH1 } from '@/components/page-h1'
 import { Heading, Separator, Stack, Text } from '@chakra-ui/react'
 import { Form } from '@letar/forms'
+import { FieldRichText } from '@letar/forms/rich-text'
 import { z } from 'zod/v4'
 
 // --- Опции для полей выбора ---
@@ -257,7 +258,7 @@ export default function AllFieldsPage() {
           <Form.Field.PasswordStrength name="securePassword" />
           <Form.Field.Editable name="nickname" />
           <Form.Field.MaskedInput name="passport" mask="99 99 999999" />
-          <Form.Field.RichText name="content" minHeight="120px" />
+          <FieldRichText name="content" minHeight="120px" />
           <Form.Field.Slug name="slug" source="name" />
 
           <Separator />

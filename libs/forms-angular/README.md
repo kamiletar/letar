@@ -11,8 +11,12 @@ headless-адаптер `@letar/forms-core` для Angular — третий фр
 
 ## Установка
 
+Пакет пока не опубликован в npm, в монорепо подключается через `workspace:*` (см. `.claude/rules/libs.md`).
+
+Остальные зависимости ставятся как обычно:
+
 ```bash
-npm i @letar/forms-angular@beta @letar/forms-core @angular/core @angular/common @angular/forms @angular/cdk @tanstack/table-core zod
+npm i @letar/forms-core @angular/core @angular/common @angular/forms @angular/cdk @tanstack/table-core zod
 ```
 
 Требуется peer `@letar/forms-core` (>=0.28.0 <1). Для `FieldRichTextComponent` (Tiptap) дополнительно:

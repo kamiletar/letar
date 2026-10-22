@@ -10,6 +10,7 @@ import {
 import { Box, Button, Code, Heading, HStack, Text, VStack } from '@chakra-ui/react'
 import { Form } from '@letar/forms'
 import { useZenStackOptions } from '@letar/forms-query/zenstack'
+import { SortableGroupList } from '@letar/forms/sortable'
 import { useRef, useState } from 'react'
 import { z } from 'zod/v4'
 import { DemoPageLayout, SubmittedDataPreview } from '../_components'
@@ -245,28 +246,27 @@ function RowsWithRootParent() {
             name="countryId"
             loadOptions={(_search, { signal }) => loadGeoOptions('countries', '', signal)}
           />
-          <Form.Group.List
+          <SortableGroupList
             name="stops"
-            sortable
             wrapper={({ children }) => (
               <VStack align="stretch" gap={2}>
                 {children}
-                <Form.Group.List.Button.Add defaultValue={{ regionId: '' }}>
+                <SortableGroupList.Button.Add defaultValue={{ regionId: '' }}>
                   Добавить остановку
-                </Form.Group.List.Button.Add>
+                </SortableGroupList.Button.Add>
               </VStack>
             )}
           >
             <HStack gap={2} align="end">
-              <Form.Group.List.Button.DragHandle />
+              <SortableGroupList.Button.DragHandle />
               <Form.Field.Select
                 name="regionId"
                 dependsOn="/countryId"
                 loadOptions={(_search, { signal, deps }) => loadGeoOptions('regions', String(deps.countryId), signal)}
               />
-              <Form.Group.List.Button.Remove />
+              <SortableGroupList.Button.Remove />
             </HStack>
-          </Form.Group.List>
+          </SortableGroupList>
           <Form.Button.Submit>Сохранить маршрут</Form.Button.Submit>
         </VStack>
       </Form>

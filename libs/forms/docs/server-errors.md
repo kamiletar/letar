@@ -144,6 +144,17 @@ applyServerErrors(form, mapped)
 
 ## С декларативным `<Form>`
 
+Декларативные формы автоматически показывают отказ `onSubmit` через `mapServerErrors` и
+`applyServerErrors`, даже без middleware. Добавьте `<Form.Errors />` для общих ошибок и обычные
+поля для ошибок полей. При отказе значения, dirty-state и локальный черновик сохраняются;
+`afterSuccess` и сброс формы не выполняются. Повторная отправка очищает предыдущие серверные
+ошибки и повторяет клиентскую валидацию. DOM submit ловит уже отображённый отказ, программный
+`context.submit()` возвращает отклонённый Promise для вызывающего кода.
+
+Описанные ниже `middleware.onError` и `useFormServerAction` нужны для кастомного `fieldMap`,
+уведомлений и дополнительной обработки. Автоматический fallback сохраняет уже применённые
+кастомные сообщения, а middleware может переопределить стандартные.
+
 Пример выше использует низкоуровневый `useAppForm` — там `form` доступен напрямую из замыкания. Декларативная обёртка (`createForm()` → `<Form onSubmit={(data) => ...}>`) устроена иначе: её `onSubmit` получает только `data`, без инстанса формы, а обработка ошибок вынесена в `middleware.onError` — туда попадает то, что бросил сам `onSubmit`/Server Action (`FormSimple` перехватывает исключение и вызывает `middleware.onError`, см. `libs/forms/src/lib/declarative/form-root/form-simple.tsx`).
 
 Чтобы применить `mapServerErrors`/`applyServerErrors` в этом случае, нужен доступ к инстансу формы снаружи `onSubmit` — для этого `useFormRef()`:

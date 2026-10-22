@@ -15,6 +15,21 @@ import { MatchCard } from '../../../_components/match-card'
 
 type Params = Promise<{ slug: string }>
 
+/** Поля матча, нужные странице команды */
+interface TeamMatchRow {
+  id: string
+  status: string
+  scheduledAt: Date | null
+  homeTeamId: string
+  homeScore: number
+  awayScore: number
+  homePoints: number | null
+  awayPoints: number | null
+  homeTeam: { team: { name: string } }
+  awayTeam: { team: { name: string } }
+  venue: { name: string } | null
+}
+
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { slug } = await params
   const team = await prisma.team.findUnique({ where: { slug }, select: { name: true } })
@@ -61,7 +76,7 @@ export default async function TeamPage({ params }: { params: Params }) {
   const currentTs = team.teamSeasons.find((ts) => ts.season.status === 'ACTIVE') ?? team.teamSeasons[0]
 
   // Матчи команды
-  const matches = currentTs
+  const teamMatches = currentTs
     ? await prisma.match.findMany({
       where: {
         OR: [{ homeTeamId: currentTs.id }, { awayTeamId: currentTs.id }],
@@ -74,6 +89,10 @@ export default async function TeamPage({ params }: { params: Params }) {
       },
     })
     : []
+
+  // Узкий тип вместо вывода ZenStack: tsgo падает на TS2321 при .filter/.map по полному результату
+  // (tsgo-excessive-stack-depth-zenstack.md)
+  const matches: TeamMatchRow[] = teamMatches
 
   // Статистика
   const finishedMatches = matches.filter((m) => m.status === 'FINISHED')

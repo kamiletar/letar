@@ -10,9 +10,7 @@
 
 ## Установка
 
-```bash
-npm i @letar/sse@beta
-```
+Пакет пока не опубликован в npm, в монорепо подключается через `workspace:*` (см. `.claude/rules/libs.md`).
 
 Peer-зависимостей нет: используются только Web API (`Request`, `Response`, `ReadableStream`).
 

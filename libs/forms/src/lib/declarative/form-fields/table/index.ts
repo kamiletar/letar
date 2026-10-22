@@ -1,4 +1,7 @@
 import { createLazyComponent } from '../../lazy-component'
+// Только типы реализаций: без явного параметра `createLazyComponent` выводит `ComponentType<any>`
+import type { FieldDataGrid as FieldDataGridImpl } from './field-data-grid'
+import type { FieldTableEditor as FieldTableEditorImpl } from './field-table-editor'
 
 // Типы не тянут рантайм-импорт @tanstack/react-table|react-virtual — стираются при компиляции
 export type { DataGridColumnDef, DataGridFieldProps } from './field-data-grid'
@@ -8,13 +11,13 @@ export type { DataGridColumnDef, DataGridFieldProps } from './field-data-grid'
  * нужные только этому полю. Подгружается через `lazy()` + dynamic `import()` — потребители
  * остальных табличных/text-полей не обязаны резолвить эти пакеты.
  */
-export const FieldDataGrid = createLazyComponent(
+export const FieldDataGrid = createLazyComponent<typeof FieldDataGridImpl>(
   () => import('./field-data-grid').then((m) => ({ default: m.FieldDataGrid })),
   '200px',
 )
 
 /** Form.Field.TableEditor — тот же lazy-паттерн, тот же барrel, что и FieldDataGrid выше. */
-export const FieldTableEditor = createLazyComponent(
+export const FieldTableEditor = createLazyComponent<typeof FieldTableEditorImpl>(
   () => import('./field-table-editor').then((m) => ({ default: m.FieldTableEditor })),
   '150px',
 )

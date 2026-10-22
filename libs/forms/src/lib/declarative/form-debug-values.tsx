@@ -3,56 +3,35 @@
 import { Box, Heading } from '@chakra-ui/react'
 import { redactAtPaths } from '@letar/forms-core/security'
 import { useSensitiveFieldPaths } from '@letar/forms-react'
-import JsonView from '@uiw/react-json-view'
-import { githubDarkTheme } from '@uiw/react-json-view/githubDark'
-import { githubLightTheme } from '@uiw/react-json-view/githubLight'
 import type { ReactElement } from 'react'
-import { useEffect, useState } from 'react'
 import { useDeclarativeForm } from './form-context'
 
 export interface FormDebugValuesProps {
   /** Block title */
   title?: string
-  /** Tree expansion depth (by default 2) */
+  /**
+   * Глубина раскрытия дерева. В простом варианте (`<pre>`) игнорируется: JSON всегда показан целиком.
+   * Рабочее значение у `FormDebugJsonView` из `@letar/forms/debug`.
+   */
   collapsed?: number
   /** Show in production (by default false) */
   showInProduction?: boolean
 }
 
-/** Detect dark theme via data-attribute (next-themes) or media query */
-function useIsDarkMode(): boolean {
-  const [isDark, setIsDark] = useState(false)
-
-  useEffect(() => {
-    // next-themes sets class or data-theme on <html>
-    const check = () => {
-      const html = document.documentElement
-      const isDarkNow = html.classList.contains('dark')
-        || html.getAttribute('data-theme') === 'dark'
-        || html.style.colorScheme === 'dark'
-      setIsDark(isDarkNow)
-    }
-
-    check()
-
-    // Observe changes on <html>
-    const observer = new MutationObserver(check)
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['class', 'data-theme', 'style'],
-    })
-
-    return () => observer.disconnect()
-  }, [])
-
-  return isDark
+/** JSON значений для вывода; значения, которые не сериализуются (циклы, BigInt), не должны ронять страницу */
+function stringifyValues(values: unknown): string {
+  try {
+    return JSON.stringify(values, null, 2) ?? String(values)
+  } catch {
+    return '[значения не сериализуются в JSON]'
+  }
 }
 
 /**
- * Form.DebugValues — interactive JSON inspector for form values
+ * Form.DebugValues — значения формы JSON-текстом (`<pre>`), без сторонних зависимостей.
  *
- * Automatically switches between dark and light theme.
- * Hidden in production by default. Use `showInProduction` for debugging in production.
+ * Значения чувствительных полей (`EditIntent`, пароли) замаскированы. В production скрыт по умолчанию, `showInProduction`
+ * включает и там. Интерактивное дерево с раскрытием и темой — `FormDebugJsonView` из `@letar/forms/debug`.
  *
  * @example
  * ```tsx
@@ -65,19 +44,15 @@ function useIsDarkMode(): boolean {
  */
 export function FormDebugValues({
   title = 'Form Values',
-  collapsed = 2,
   showInProduction = false,
 }: FormDebugValuesProps): ReactElement | null {
   const { form } = useDeclarativeForm()
-  const isDark = useIsDarkMode()
   const sensitivePaths = useSensitiveFieldPaths()
 
   // Hide in production unless specified otherwise
   if (process.env.NODE_ENV === 'production' && !showInProduction) {
     return null
   }
-
-  const jsonTheme = isDark ? githubDarkTheme : githubLightTheme
 
   return (
     <form.Subscribe selector={(state: { values: unknown }) => state.values}>
@@ -97,12 +72,9 @@ export function FormDebugValues({
               {title}
             </Heading>
           )}
-          <JsonView
-            value={redactAtPaths(values, sensitivePaths) as object}
-            collapsed={collapsed}
-            displayDataTypes={false}
-            style={{ ...jsonTheme, backgroundColor: 'transparent' }}
-          />
+          <Box asChild m={0} overflow="auto" whiteSpace="pre-wrap" wordBreak="break-word">
+            <pre>{stringifyValues(redactAtPaths(values, sensitivePaths))}</pre>
+          </Box>
         </Box>
       )}
     </form.Subscribe>

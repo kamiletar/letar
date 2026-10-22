@@ -8,13 +8,15 @@ import { Briefcase, Calendar, Star, Users } from 'lucide-react'
  */
 export default async function AdminDashboardPage() {
   // Получаем статистику
+  // oxlint-disable-next-line react/purity -- серверный компонент: время запроса
+  const now = new Date()
   const [requestsCount, testimonialsCount, casesCount, slotsCount] = await Promise.all([
     prisma.consultingRequest.count(),
     prisma.testimonial.count(),
     prisma.consultingCase.count(),
     prisma.bookedSlot.count({
       where: {
-        startAt: { gte: new Date() },
+        startAt: { gte: now },
       },
     }),
   ])

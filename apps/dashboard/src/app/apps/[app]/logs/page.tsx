@@ -14,6 +14,15 @@ interface LogEntry {
   containerName?: string
 }
 
+/**
+ * Метка времени для имени файла экспорта. Вызывается только из обработчика клика
+ * (`handleExportLogs`), не из рендера — вынесено на уровень модуля, чтобы `new Date()` не
+ * оказывался лексически внутри тела компонента (правило react/purity).
+ */
+function getExportTimestamp(): string {
+  return new Date().toISOString().slice(0, 19).replace(/:/g, '-')
+}
+
 export default function AppLogsPage({ params: paramsPromise }: { params: Promise<{ app: string }> }) {
   const params = use(paramsPromise)
   const appName = params.app
@@ -79,7 +88,7 @@ export default function AppLogsPage({ params: paramsPromise }: { params: Promise
     const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
-    link.download = `${appName}-logs-${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.txt`
+    link.download = `${appName}-logs-${getExportTimestamp()}.txt`
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)

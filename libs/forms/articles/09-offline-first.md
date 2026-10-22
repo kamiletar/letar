@@ -327,16 +327,18 @@ import { AutosaveIndicator, useFormAutosave } from '@letar/forms'
 
 function EditProductForm({ productId }: { productId: string }) {
   return (
-    <Form schema={ProductSchema} initialValue={product} onSubmit={save}>
+    <AppForm schema={ProductSchema} initialValue={product} onSubmit={save}>
       <AutosaveIndicator /> {/* «Сохранено» / «Сохраняется...» / «Ошибка» */}
-      <Form.Field.String name="title" />
-      <Form.Field.RichText name="description" />
-      <Form.Field.Currency name="price" />
-      <Form.Button.Submit>Опубликовать</Form.Button.Submit>
-    </Form>
+      <AppForm.Field.String name="title" />
+      <AppForm.Field.RichText name="description" />
+      <AppForm.Field.Currency name="price" />
+      <AppForm.Button.Submit>Опубликовать</AppForm.Button.Submit>
+    </AppForm>
   )
 }
 ```
+
+> С 3.0.0 `RichText` не входит в ядро: `AppForm` — инстанс `createForm({ extraFields: { RichText: FieldRichText } })`, компоненты — из `@letar/forms/rich-text`. Подробнее — [MIGRATION-3](../docs/MIGRATION-3.md).
 
 `useFormAutosave` принимает:
 

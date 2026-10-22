@@ -8,9 +8,7 @@ ZenStack `@fuzzy`/`@fullText` (pg_trgm + tsvector, Postgres-only, v3.7+) на с
 
 ## Установка
 
-```bash
-npm i @letar/fuzzy-search@beta
-```
+Пакет пока не опубликован в npm, в монорепо подключается через `workspace:*` (см. `.claude/rules/libs.md`).
 
 Peer-зависимости: `react` (>=19), `@chakra-ui/react` (>=3), `@letar/forms-core` (>=0.28.0 <1) — последний нужен для `correctKeyboardLayout`/`detectLayout`.
 

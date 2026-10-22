@@ -5,8 +5,11 @@ import { ProductCreateFormSchema } from '@/generated/form-schemas'
 import { EventCreateFormSchema } from '@/generated/form-schemas/Event.form'
 import { Code, Heading, Stack, Text } from '@chakra-ui/react'
 import { Form } from '@letar/forms'
+import { useState } from 'react'
 
 export default function ZenstackPage() {
+  const [now] = useState(() => new Date())
+
   return (
     <Stack gap={10}>
       <div>
@@ -43,7 +46,7 @@ export default function ZenstackPage() {
         </Text>
         <Form.FromSchema
           schema={EventCreateFormSchema}
-          initialValue={{ name: '', startsAt: new Date(), endsAt: new Date() }}
+          initialValue={{ name: '', startsAt: now, endsAt: new Date(now) }}
           onSubmit={async (data) => alert(`Event created!\n${JSON.stringify(data, null, 2)}`)}
           submitLabel="Create Event"
           debug

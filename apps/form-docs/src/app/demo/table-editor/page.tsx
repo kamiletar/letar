@@ -1,9 +1,13 @@
 'use client'
 
 import { Box, ChakraProvider, Code, defaultSystem, Heading, Stack, Text } from '@chakra-ui/react'
-import { Form } from '@letar/forms'
+import { createForm } from '@letar/forms'
+import { FieldTableEditor } from '@letar/forms/table-editor'
 import { useState } from 'react'
 import { z } from 'zod/v4'
+
+// Тяжёлое поле подключается подпутём @letar/forms/table-editor, ключ совпадает с именем поля
+const OrderForm = createForm({ extraFields: { TableEditor: FieldTableEditor } })
 
 const ItemSchema = z.object({
   product: z
@@ -42,7 +46,7 @@ export default function TableEditorDemoPage() {
             Inline-editable table with Excel paste, computed columns, and footer aggregations.
           </Text>
 
-          <Form
+          <OrderForm
             schema={OrderSchema}
             initialValue={{
               customer: '',
@@ -53,8 +57,8 @@ export default function TableEditorDemoPage() {
             }}
             onSubmit={(data) => setResult(data as Record<string, unknown>)}
           >
-            <Form.Field.String name="customer" />
-            <Form.Field.TableEditor
+            <OrderForm.Field.String name="customer" />
+            <OrderForm.Field.TableEditor
               name="items"
               columns={[
                 { name: 'product', width: '40%' },
@@ -70,8 +74,8 @@ export default function TableEditorDemoPage() {
               addLabel="Add item"
               sortable
             />
-            <Form.Button.Submit>Place Order</Form.Button.Submit>
-          </Form>
+            <OrderForm.Button.Submit>Place Order</OrderForm.Button.Submit>
+          </OrderForm>
 
           {result && (
             <Box p={4} bg="green.subtle" borderRadius="md">

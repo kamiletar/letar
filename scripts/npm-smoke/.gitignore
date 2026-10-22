@@ -1,0 +1,9 @@
+node_modules
+.next
+dist
+# сгенерированное zenstack generate
+src/generated
+*.db
+next-env.d.ts
+package-lock.json
+*.tsbuildinfo

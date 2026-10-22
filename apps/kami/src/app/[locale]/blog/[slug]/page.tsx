@@ -91,6 +91,8 @@ export default async function BlogPostPage({ params }: Props) {
 
   const title = currentLocale === 'ru' ? post.title : post.titleEn
   const description = currentLocale === 'ru' ? post.description : post.descriptionEn
+  // oxlint-disable-next-line react/purity -- серверный компонент: время запроса
+  const now = new Date()
 
   return (
     <>
@@ -99,7 +101,7 @@ export default async function BlogPostPage({ params }: Props) {
         title={title}
         description={description}
         slug={slug}
-        publishedAt={post.publishedAt || new Date().toISOString()}
+        publishedAt={post.publishedAt || now.toISOString()}
         tags={post.tags || undefined}
       />
       <Box py={{ base: 12, md: 20 }}>

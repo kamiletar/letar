@@ -336,18 +336,14 @@ describe('createStudioTimeMcpServer', () => {
 })
 
 describe('defaultSessionRef', () => {
-  let originalEnv: string | undefined
-
   beforeEach(() => {
-    originalEnv = process.env['CLAUDE_CODE_SESSION_ID']
+    vi.stubEnv('CLAUDE_CODE_SESSION_ID', undefined)
+    vi.stubEnv('CODEX_THREAD_ID', undefined)
   })
 
   afterEach(() => {
-    if (originalEnv === undefined) {
-      delete process.env['CLAUDE_CODE_SESSION_ID']
-    } else {
-      process.env['CLAUDE_CODE_SESSION_ID'] = originalEnv
-    }
+    vi.unstubAllEnvs()
+    studioTimeRequestMock.mockReset()
   })
 
   it('берёт CLAUDE_CODE_SESSION_ID из окружения, если он задан', () => {
@@ -356,10 +352,56 @@ describe('defaultSessionRef', () => {
     expect(defaultSessionRef()).toBe('abc-123')
   })
 
-  it('фолбэк на PID процесса, если CLAUDE_CODE_SESSION_ID не задан', () => {
-    delete process.env['CLAUDE_CODE_SESSION_ID']
+  it('берёт CODEX_THREAD_ID в сессии Codex', () => {
+    vi.stubEnv('CODEX_THREAD_ID', 'codex-chat-a')
 
+    expect(defaultSessionRef()).toBe('codex-chat-a')
+  })
+
+  it('сохраняет приоритет Claude, если обе переменные заданы', () => {
+    vi.stubEnv('CLAUDE_CODE_SESSION_ID', 'claude-session')
+    vi.stubEnv('CODEX_THREAD_ID', 'parent-codex-chat')
+
+    expect(defaultSessionRef()).toBe('claude-session')
+  })
+
+  it('разные чаты Codex получают разные sessionRef', () => {
+    vi.stubEnv('CODEX_THREAD_ID', 'codex-chat-a')
+    const first = defaultSessionRef()
+    vi.stubEnv('CODEX_THREAD_ID', 'codex-chat-b')
+
+    expect(defaultSessionRef()).toBe('codex-chat-b')
+    expect(defaultSessionRef()).not.toBe(first)
+  })
+
+  it('фолбэк на PID процесса без идентификаторов сессии', () => {
     expect(defaultSessionRef()).toBe(`pid-${process.pid}`)
+  })
+
+  it('передаёт идентификатор Codex при старте таймера', async () => {
+    vi.stubEnv('CODEX_THREAD_ID', 'codex-chat')
+    studioTimeRequestMock.mockResolvedValue({ ok: true, status: 200, json: { data: { id: 't1' } } })
+    const { client } = await connectedClient()
+
+    const result = await client.callTool({ name: 'time_start', arguments: { app: 'studio', description: 'Проверка' } })
+
+    expect(result.isError).toBeFalsy()
+    expect(studioTimeRequestMock).toHaveBeenLastCalledWith(expect.objectContaining({
+      body: expect.objectContaining({ sessionRef: 'codex-chat' }),
+    }))
+  })
+
+  it('явный sessionRef вызывающего чата перекрывает окружение общего MCP', async () => {
+    vi.stubEnv('CODEX_THREAD_ID', 'shared-process-chat')
+    studioTimeRequestMock.mockResolvedValue({ ok: true, status: 200, json: { data: null } })
+    const { client } = await connectedClient()
+
+    await client.callTool({ name: 'time_status', arguments: { sessionRef: 'calling-chat' } })
+
+    expect(studioTimeRequestMock).toHaveBeenLastCalledWith({
+      path: '/api/mcp/time/status',
+      query: { sessionRef: 'calling-chat' },
+    })
   })
 })
 

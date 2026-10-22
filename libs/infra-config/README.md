@@ -138,7 +138,7 @@ host правильный для «текущее приложение вызы�
 ### Дрейф dev-портов (`app-ports.ts`)
 
 Порт dev-сервера приложения объявлен минимум в трёх независимых местах (`.env`/`.env.local`/
-CLI-команда в `project.json`, `.claude/commands/<app>.md`, `redirectUrls` OIDC-клиента в
+CLI-команда в `project.json`, `.claude/skills/<app>/SKILL.md`, `redirectUrls` OIDC-клиента в
 `apps/auth-hub/prisma/seed.ts`), и ни одно не читает остальные — расхождение молчаливое,
 ловится только вручную (прецедент: `studio` переехал 3020 → 3024, seed и командный файл не
 обновились, локальный OIDC-вход был сломан). Эти функции сверяют источники между собой:
@@ -147,7 +147,7 @@ CLI-команда в `project.json`, `.claude/commands/<app>.md`, `redirectUrls
 /** Порты, которые объявляет само приложение (.env/.env.local/project.json). Источник истины. */
 export function collectDeclaredPorts(workspaceRoot: string, app: string): number[]
 
-/** Порт из .claude/commands/<app>.md. */
+/** Порт из .claude/skills/<app>/SKILL.md. */
 export function readCommandPort(workspaceRoot: string, app: string): number | undefined
 
 /** localhost-порты из redirectUrls каждого OIDC-клиента Ключницы, сгруппированные по приложению. */
@@ -190,12 +190,12 @@ submodule в CI) пропускаются, но тест требует мини
 ### Дрейф production-сервера (`app-server.ts`)
 
 Сервер приложения объявлен минимум в двух независимых местах (канон `SERVER_APPS` выше и
-`.claude/commands/<app>.md`), и командный файл канон не читает — расхождение молчаливое
+`.claude/skills/<app>/SKILL.md`), и командный файл канон не читает — расхождение молчаливое
 (прецедент: после вывода s1 из эксплуатации шесть командных файлов продолжали называть его
 текущим сервером, найдено только ручным аудитом 2026-09-04). Эти функции сверяют источники:
 
 ```typescript
-/** Сервер из .claude/commands/<app>.md (первое вхождение sN сразу после "**Сервер:**"). */
+/** Сервер из .claude/skills/<app>/SKILL.md (первое вхождение sN сразу после "**Сервер:**"). */
 export function readCommandServer(workspaceRoot: string, app: string): InfraServer | undefined
 
 /** Декларации по приложениям, у которых командный файл вообще называет сервер. */

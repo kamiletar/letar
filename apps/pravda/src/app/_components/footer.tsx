@@ -1,4 +1,7 @@
+'use client'
+
 import { Box, Container, Flex, HStack, Link, SimpleGrid, Text, VStack } from '@chakra-ui/react'
+import { useNow } from '@letar/hooks/utility'
 import { BuildVersion, CookieSettingsButton, StudioCredit, TouchLink } from '@letar/ui'
 import type { ReactNode } from 'react'
 import { LuFileText, LuGavel, LuScroll, LuShield } from 'react-icons/lu'
@@ -36,6 +39,8 @@ const CATEGORY_ALL_LINKS: Record<string, string> = {
  * Использует navData для DRY.
  */
 export function Footer() {
+  const year = useNow().getFullYear()
+
   return (
     <Box as="footer" role="contentinfo" bg="bg.subtle" mt="auto" data-print-hide>
       {/* Декоративный градиент-разделитель */}
@@ -115,7 +120,7 @@ export function Footer() {
             <Text display={{ base: 'none', sm: 'block' }} aria-hidden="true">
               |
             </Text>
-            <Text>© {new Date().getFullYear()} Pravda Project</Text>
+            <Text>© {year} Pravda Project</Text>
             <Text display={{ base: 'none', sm: 'block' }} aria-hidden="true">
               |
             </Text>

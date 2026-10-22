@@ -31,8 +31,6 @@ export interface FormGroupListDeclarativeProps {
   emptyContent?: ReactNode
   /** Wrapper component for the entire list (useful for adding Add button) */
   wrapper?: (props: FormGroupListWrapperProps) => ReactNode
-  /** Enable drag-and-drop sorting for array items */
-  sortable?: boolean
   /** Maximum number of items (auto-detected from z.array().max()). Props take priority. */
   maxItems?: number
   /** Minimum number of items (auto-detected from z.array().min()). Props take priority. */

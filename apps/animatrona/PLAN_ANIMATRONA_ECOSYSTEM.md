@@ -879,7 +879,7 @@ Animatrona: библиотека, каталог, импорт, очередь, 
       добавлена в корневой `CLAUDE.md`. Попутно `apps/animatrona/**` добавлен в `paths:` правила —
       раньше правила Electron в этой папке не подхватывались
 - [x] Скилл **`/create:new-electron-app`** — создан
-      ([.claude/commands/create/new-electron-app.md](/.claude/commands/create/new-electron-app.md)):
+      ([.agents/skills/create-new-electron-app/SKILL.md](/.agents/skills/create-new-electron-app/SKILL.md)):
       генератор, выбор `app://` против `file://`, ассоциации файлов + single instance lock (с
       ловушкой «путь пришёл раньше, чем renderer готов»), грабли платформы, headless-проверка main
       через `npx electron scripts/verify-*.cjs`, правила против ложно-зелёных e2e. Заглушка в

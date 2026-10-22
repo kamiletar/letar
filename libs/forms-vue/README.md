@@ -7,8 +7,12 @@ Vue-адаптер `@letar/forms` поверх `@tanstack/vue-form`. Начин�
 
 ## Установка
 
+Пакет пока не опубликован в npm, в монорепо подключается через `workspace:*` (см. `.claude/rules/libs.md`).
+
+Остальные зависимости ставятся как обычно:
+
 ```bash
-npm i @letar/forms-vue@beta @letar/forms-core vue @tanstack/vue-form @tanstack/vue-table zod
+npm i @letar/forms-core vue @tanstack/vue-form @tanstack/vue-table zod
 ```
 
 Требуется peer `@letar/forms-core` (>=0.28.0 <1). Для `FieldRichText` (Tiptap) дополнительно:

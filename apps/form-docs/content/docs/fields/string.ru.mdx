@@ -110,9 +110,13 @@ const Schema = z.object({
 
 ## RichText
 
-**API:** `Form.Field.RichText`
+**API:** `AppForm.Field.RichText`
 
 Редактор форматированного текста для HTML/markdown контента.
+
+С 3.0.0 `RichText` не входит в ядро: зарегистрируйте его один раз через
+`createForm({ extraFields: { RichText: FieldRichText } })` (`FieldRichText` из `@letar/forms/rich-text`) и
+используйте `<AppForm.Field.RichText />`.
 
 ```tsx
 const Schema = z.object({
@@ -121,10 +125,10 @@ const Schema = z.object({
   }),
 })
 
-<Form.Field.RichText name="content" />
+<AppForm.Field.RichText name="content" />
 ```
 
-Требуются peer-зависимости: `@tiptap/react` и `@tiptap/starter-kit`.
+Нужны опциональные peer-зависимости: `@tiptap/react`, `@tiptap/starter-kit` и `@tiptap/extension-*`.
 
 ## Slug
 

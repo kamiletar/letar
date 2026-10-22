@@ -110,9 +110,13 @@ const Schema = z.object({
 
 ## RichText
 
-**API:** `Form.Field.RichText`
+**API:** `AppForm.Field.RichText`
 
 Rich text editor for HTML/markdown content.
+
+Since 3.0.0 `RichText` is not in the core: register it once with
+`createForm({ extraFields: { RichText: FieldRichText } })` (`FieldRichText` from `@letar/forms/rich-text`) and use
+`<AppForm.Field.RichText />`.
 
 ```tsx
 const Schema = z.object({
@@ -121,10 +125,10 @@ const Schema = z.object({
   }),
 })
 
-<Form.Field.RichText name="content" />
+<AppForm.Field.RichText name="content" />
 ```
 
-Requires `@tiptap/react` and `@tiptap/starter-kit` as peer dependencies.
+Requires `@tiptap/react`, `@tiptap/starter-kit` and the `@tiptap/extension-*` packages as optional peer dependencies.
 
 ## Slug
 

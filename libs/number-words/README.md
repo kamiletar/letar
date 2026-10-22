@@ -4,9 +4,7 @@
 
 ## Установка
 
-```bash
-npm i @letar/number-words@beta
-```
+Пакет пока не опубликован в npm, в монорепо подключается через `workspace:*` (см. `.claude/rules/libs.md`).
 
 ```typescript
 import { isSupportedLocale, numberToOrdinal, numberToWords } from '@letar/number-words'

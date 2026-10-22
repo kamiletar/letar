@@ -2,6 +2,7 @@
 
 import { toaster } from '@/app/_components/ui/toaster'
 import { Box, Button, Container, Heading, Input, Text, VStack } from '@chakra-ui/react'
+import { useNow } from '@letar/hooks/utility'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { LuCalendar } from 'react-icons/lu'
@@ -14,6 +15,7 @@ import { LuCalendar } from 'react-icons/lu'
  */
 export default function CompleteProfilePage() {
   const router = useRouter()
+  const now = useNow()
   const [birthDate, setBirthDate] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -49,7 +51,7 @@ export default function CompleteProfilePage() {
   }
 
   // Максимальная дата — сегодня
-  const today = new Date().toISOString().split('T')[0]
+  const today = now.toISOString().split('T')[0]
 
   return (
     <Box minH="100vh" bg="bg" display="flex" alignItems="center">

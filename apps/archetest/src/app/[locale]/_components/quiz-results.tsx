@@ -2,6 +2,7 @@
 
 import { useShowClinicalNames } from '@/app/_hooks/use-psychologist'
 import { Alert, Box, Button, Container, Heading, HStack, Progress, SimpleGrid, Text, VStack } from '@chakra-ui/react'
+import { useNow } from '@letar/hooks/utility'
 import { useLocale, useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { useMemo } from 'react'
@@ -108,6 +109,7 @@ export function QuizResults({
   // Вход находится вне [locale]; язык сохраняем в адресе возврата после авторизации.
   const signInHref = getQuizSignInHref(locale, 'results')
   const showClinical = useShowClinicalNames()
+  const now = useNow()
   // Данные для радарного чарта — формат «Бдительный Страж»
   const chartData = useMemo(
     () =>
@@ -315,9 +317,7 @@ export function QuizResults({
               {t('achievements.newUnlocked')} 🎉
             </Heading>
             <HStack gap={3} overflowX="auto" pb={2}>
-              {newAchievements.map((code) => (
-                <AchievementCard key={code} code={code} unlocked unlockedAt={new Date()} />
-              ))}
+              {newAchievements.map((code) => <AchievementCard key={code} code={code} unlocked unlockedAt={now} />)}
             </HStack>
           </Box>
         )}

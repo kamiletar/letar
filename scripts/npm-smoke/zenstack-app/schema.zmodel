@@ -1,0 +1,23 @@
+// Минимальная схема для проверки @letar/zenstack-form-plugin из tarball: одна модель, один enum.
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+plugin formSchema {
+  provider = '@letar/zenstack-form-plugin'
+  output = './src/generated/form-schemas'
+}
+
+enum Role {
+  /// Пользователь
+  USER
+  /// Администратор
+  ADMIN
+}
+
+model User {
+  id   String @id @default(cuid())
+  name String @meta("form.title", "Имя")
+  role Role   @default(USER)
+}

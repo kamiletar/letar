@@ -104,6 +104,7 @@ export const SERVER_APPS: Record<string, InfraServer> = {
   'kami-key-the-landing': 's2',
   'letar-landing': 's2',
   domwellbes: 's2',
+  mugcup: 's2',
 }
 
 /** Сервер, обслуживающий приложение в production. Fallback — s2. */

@@ -15,6 +15,7 @@ import {
   Text,
   VStack,
 } from '@chakra-ui/react'
+import { useNow } from '@letar/hooks/utility'
 import { BuildVersion, StudioCredit } from '@letar/ui'
 import { Mail, Rss } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
@@ -35,7 +36,7 @@ export function Footer() {
   const t = useTranslations('footer')
   const tNav = useTranslations('nav')
   const locale = useLocale()
-  const currentYear = new Date().getFullYear()
+  const currentYear = useNow().getFullYear()
 
   return (
     <Box as="footer" role="contentinfo" mt="auto" borderTop="1px solid" borderColor="border.subtle" bg="bg.subtle">

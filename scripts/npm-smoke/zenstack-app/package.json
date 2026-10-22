@@ -1,0 +1,20 @@
+{
+  "name": "npm-smoke-zenstack-app",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "zenstack:generate": "zenstack generate"
+  },
+  "dependencies": {
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.2",
+    "@zenstackhq/cli": "^3.9.7",
+    "@zenstackhq/language": "^3.9.7",
+    "@zenstackhq/sdk": "^3.9.7",
+    "@zenstackhq/zod": "^3.9.7",
+    "typescript": "6.0.3"
+  }
+}

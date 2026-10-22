@@ -274,6 +274,7 @@ export function FieldAuto({ name, config, ...baseProps }: AutoFieldProps): React
       readOnly: readOnly as boolean | undefined,
       enumValues,
       constraints,
+      registry,
       // Остаточные props (напр. onComplete у PinInput) — приоритетнее meta.ui.fieldProps,
       // как более специфичные (заданы прямо в JSX, а не в schema.zmodel)
       fieldProps: { ...uiMeta.fieldProps, ...restProps },

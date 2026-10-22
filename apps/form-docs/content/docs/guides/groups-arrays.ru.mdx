@@ -56,16 +56,20 @@ const Schema = z.object({
 
 ## Сортируемые списки
 
-Включите drag & drop перетаскивание с пропом `sortable`:
+С 3.0.0 перетаскивание вынесено в отдельную точку входа — `SortableGroupList` из `@letar/forms/sortable`
+(проп `sortable` у `Form.Group.List` убран):
 
 ```tsx
-<Form.Group.List name="items" sortable>
+import { SortableGroupList } from '@letar/forms/sortable'
+
+<SortableGroupList name="items">
   <Form.Field.String name="title" />
-  <Form.Group.List.Button.Remove />
-</Form.Group.List>
+  <SortableGroupList.Button.DragHandle />
+  <SortableGroupList.Button.Remove />
+</SortableGroupList>
 ```
 
-Требуются peer-зависимости: `@dnd-kit/core`, `@dnd-kit/sortable`, `@dnd-kit/utilities`.
+Нужны опциональные peer-зависимости: `@dnd-kit/core`, `@dnd-kit/sortable`, `@dnd-kit/utilities`.
 
 ## Вложенные группы
 

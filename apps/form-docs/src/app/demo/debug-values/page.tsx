@@ -2,6 +2,7 @@
 
 import { Box, ChakraProvider, defaultSystem, Heading, Stack, Text, VStack } from '@chakra-ui/react'
 import { Form } from '@letar/forms'
+import { FormDebugJsonView } from '@letar/forms/debug'
 import { z } from 'zod/v4'
 
 const Schema = z.object({
@@ -21,7 +22,8 @@ export default function DebugValuesDemoPage() {
         <Box>
           <Heading size="lg">Debug Values</Heading>
           <Text color="fg.muted" mt={2}>
-            Live JSON inspector of form values. Edit fields and see values update in real time.
+            Live JSON view of form values. Edit fields and see values update in real time. The plain JSON block comes
+            with the core; the interactive tree is imported from @letar/forms/debug.
           </Text>
         </Box>
 
@@ -39,7 +41,9 @@ export default function DebugValuesDemoPage() {
               <Form.Field.String name="city" />
               <Form.Field.String name="zip" />
             </Form.Group>
-            <Form.DebugValues title="Live Values" collapsed={3} />
+            <Form.DebugValues title="Live Values" />
+            {/* Интерактивное дерево с раскрытием и темой — отдельный подпуть @letar/forms/debug */}
+            <FormDebugJsonView title="Interactive tree" collapsed={3} />
             <Form.Button.Submit>Save</Form.Button.Submit>
           </Stack>
         </Form>

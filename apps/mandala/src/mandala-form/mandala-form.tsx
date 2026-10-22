@@ -19,12 +19,13 @@
  * ```
  */
 
-import { createForm, type ExtendedForm } from '@letar/forms'
+import { createForm } from '@letar/forms'
+import { FieldRichText } from '@letar/forms/rich-text'
 
 // Select компоненты для ENUM'ов
 import { SelectDefaultEffect, SelectImageCategory, SelectOrderStatus, SelectUserRole } from './selects'
 
-export const MandalaForm: ExtendedForm = createForm({
+export const MandalaForm = createForm({
   extraSelects: {
     // Роли пользователей
     UserRole: SelectUserRole,
@@ -38,4 +39,6 @@ export const MandalaForm: ExtendedForm = createForm({
     // Эффект по умолчанию (для мандал)
     DefaultEffect: SelectDefaultEffect,
   },
+  // Тяжёлые поля подключаются через подпуть (в forms 3.0 их нет в ядре); ключ = имя поля
+  extraFields: { RichText: FieldRichText },
 })

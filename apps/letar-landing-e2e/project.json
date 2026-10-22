@@ -1,28 +1,36 @@
 {
   "name": "letar-landing-e2e",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "implicitDependencies": [
+    "letar-landing",
+    "letar-landing"
+  ],
   "projectType": "application",
   "sourceRoot": "apps/letar-landing-e2e/src",
-  "tags": ["type:e2e", "scope:letar-landing", "owner:letar"],
-  "implicitDependencies": ["letar-landing"],
+  "tags": [
+    "type:e2e",
+    "scope:letar-landing",
+    "owner:letar"
+  ],
   "targets": {
     "format": {
       "executor": "nx:run-commands",
-      "options": {
-        "command": "dprint fmt",
-        "cwd": "apps/letar-landing-e2e"
-      },
       "cache": false,
       "metadata": {
         "description": "Format files with dprint",
-        "technologies": ["dprint"]
+        "technologies": [
+          "dprint"
+        ]
+      },
+      "options": {
+        "command": "dprint fmt",
+        "cwd": "apps/letar-landing-e2e"
       }
     },
     "e2e": {
-      "executor": "@nx/playwright:playwright",
-      "outputs": ["{workspaceRoot}/playwright-report/{projectName}"],
-      "options": {
-        "config": "apps/letar-landing-e2e/playwright.config.ts"
-      }
+      "outputs": [
+        "{workspaceRoot}/playwright-report/{projectName}"
+      ]
     }
   }
 }

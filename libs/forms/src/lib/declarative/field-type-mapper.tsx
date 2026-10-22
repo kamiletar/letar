@@ -10,7 +10,6 @@ import type { FieldComponentType } from './types/meta-types'
 import { FieldEditable } from './form-fields/text/field-editable'
 import { FieldPassword } from './form-fields/text/field-password'
 import { FieldPasswordStrength } from './form-fields/text/field-password-strength'
-import { FieldRichText } from './form-fields/text/field-rich-text'
 import { FieldString } from './form-fields/text/field-string'
 import { FieldTextarea } from './form-fields/text/field-textarea'
 
@@ -54,8 +53,28 @@ import { FieldMaskedInput } from './form-fields/text/field-masked-input'
 
 import { useConventionalRegistryType } from './conventional-registry-type'
 import { camelCaseToLabel } from './form-fields/auto/field-auto'
+import { type FormRegistry, useFormRegistry } from './form-registry-context'
 import { RegistryField } from './registry-field'
 import { type RelationOption, useRelationFieldContext } from './relation-field-provider'
+
+/** Поля, по которым предупреждение про незарегистрированный `RichText` уже выведено (одно на поле) */
+const warnedRichTextFields = new Set<string>()
+
+/**
+ * Предупреждение в dev: схема просит `fieldType: 'richText'`, а редактор в `createForm` не подключён.
+ * Поле при этом рисуется обычным `Textarea`, форма продолжает работать.
+ */
+function warnRichTextNotRegistered(name: string): void {
+  if (process.env.NODE_ENV === 'production' || warnedRichTextFields.has(name)) {
+    return
+  }
+  warnedRichTextFields.add(name)
+  console.warn(
+    `[@letar/forms] Поле «${name}» имеет fieldType "richText", но RichText не зарегистрирован в createForm — `
+      + 'рисуется Textarea. Подключите редактор: '
+      + "createForm({ extraFields: { RichText: FieldRichText } }), FieldRichText — из '@letar/forms/rich-text'.",
+  )
+}
 
 /**
  * Relation configuration in fieldProps
@@ -103,6 +122,11 @@ export interface FieldRenderProps {
    * Set automatically via SchemaFieldWithRelations
    */
   relationOptions?: RelationOption[]
+  /**
+   * Реестр `createForm` текущей формы (`useFormRegistry()` вызывающего компонента). Через него mapper находит
+   * подключаемые поля вроде `Field.RichText`; `null`/`undefined` — форма не из `createForm`, `richText` рисуется Textarea.
+   */
+  registry?: FormRegistry | null
 }
 
 /**
@@ -286,6 +310,7 @@ export function renderFieldByType(type: FieldComponentType, props: FieldRenderPr
     constraints,
     fieldProps: rawFieldProps = {},
     relationOptions,
+    registry,
   } = props
 
   // `relation` — служебная конфигурация привязки к справочнику, а не проп поля: в поле не передаётся
@@ -335,8 +360,15 @@ export function renderFieldByType(type: FieldComponentType, props: FieldRenderPr
       return <FieldPasswordStrength key={name} {...baseProps} {...fieldProps} />
     case 'editable':
       return <FieldEditable key={name} {...baseProps} {...fieldProps} />
-    case 'richText':
-      return <FieldRichText key={name} {...baseProps} {...fieldProps} />
+    case 'richText': {
+      // Редактор TipTap ядро не тянет: поле берётся из `extraFields` createForm по ключу `RichText`
+      const RichText = registry?.Field?.RichText
+      if (RichText) {
+        return <RichText key={name} {...baseProps} {...fieldProps} />
+      }
+      warnRichTextNotRegistered(name)
+      return <FieldTextarea key={name} {...baseProps} {...fieldProps} />
+    }
 
     // Number fields
     case 'number':
@@ -532,6 +564,8 @@ export function renderSchemaField(
   relationFieldProps?: Record<string, unknown>,
   /** Ключ реестра, подобранный по имени модели/enum (§17.9): вместо типа по Zod-схеме */
   conventionalType?: FieldComponentType,
+  /** Реестр `createForm`: для подключаемых полей (`Field.RichText`) */
+  registry?: FormRegistry | null,
 ): ReactElement {
   const fieldType = conventionalType ?? resolveFieldType(field)
 
@@ -546,6 +580,7 @@ export function renderSchemaField(
     // Свои `fieldProps` поля сильнее общих из `RelationConfig.fieldProps`
     fieldProps: relationFieldProps ? { ...relationFieldProps, ...field.ui?.fieldProps } : field.ui?.fieldProps,
     relationOptions,
+    registry,
   })
 }
 
@@ -584,6 +619,7 @@ export function SchemaFieldWithRelations({ field }: { field: SchemaFieldInfo }):
   const relationContext = useRelationFieldContext()
   // Автоподбор `Select.<Модель|Enum>` из реестра createForm (§17.9); нет компонента — прежний путь
   const conventionalType = useConventionalRegistryType(field.ui)
+  const registry = useFormRegistry()
 
   // Check if relation config exists in fieldProps
   const relationConfig = field.ui?.fieldProps?.relation as RelationFieldConfig | undefined
@@ -599,5 +635,5 @@ export function SchemaFieldWithRelations({ field }: { field: SchemaFieldInfo }):
     relationFieldProps = relationContext.getFieldProps(relationConfig.model)
   }
 
-  return renderSchemaField(field, relationOptions, relationFieldProps, conventionalType)
+  return renderSchemaField(field, relationOptions, relationFieldProps, conventionalType, registry)
 }

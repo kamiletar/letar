@@ -7,6 +7,7 @@
 import type { DragEndEvent } from '@dnd-kit/core'
 import { KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
 import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable'
+import { useNow } from '@letar/hooks/utility'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { getRecommendedPattern } from '@/animatrona-form'
@@ -102,8 +103,9 @@ export function useExportDialogState({ anime, defaultExportPath, open, onOpenCha
   }, [open, anime.franchiseId, anime.shikimoriId])
 
   // Preview имени файла и структуры папок
+  const now = useNow()
   const previewInfo = useMemo(() => {
-    const year = anime.year || new Date().getFullYear()
+    const year = anime.year || now.getFullYear()
     const seasonStr = String(franchiseSeasonNumber).padStart(2, '0')
     const sampleFileName = namingPattern
       .replace('{Anime}', anime.name)
@@ -122,7 +124,7 @@ export function useExportDialogState({ anime, defaultExportPath, open, onOpenCha
     }
 
     return { sampleFileName, folderPath }
-  }, [namingPattern, anime.name, anime.year, anime.franchise, createFolderStructure, franchiseSeasonNumber])
+  }, [namingPattern, anime.name, anime.year, anime.franchise, createFolderStructure, franchiseSeasonNumber, now])
 
   // Sensors для drag-and-drop
   const sensors = useSensors(

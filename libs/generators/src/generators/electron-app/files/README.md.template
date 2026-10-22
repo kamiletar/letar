@@ -28,7 +28,7 @@ nx build:win <%= name %>        # dist/*.exe (NSIS)
    для длинных операций, см. пример в `apps/poster-microtext-desktop`), `main/ipc/*.handlers.ts`
    (IPC-хендлеры), `renderer/app/page.tsx` (UI).
 3. Если приложение должно быть приватным — заведи submodule, см.
-   `.claude/commands/create/new-app.md` § «Приватные приложения».
+   `.agents/skills/create-new-app/SKILL.md` § «Приватные приложения».
 4. Если добавляешь нативный (`.node`) модуль (sharp, canvas, serialport...) — читай
    `.claude/rules/electron.md` § «Грабли» (externals в webpack, asarUnpack, транзитивные
    зависимости под Bun).

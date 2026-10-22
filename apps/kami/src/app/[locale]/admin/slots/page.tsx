@@ -13,9 +13,11 @@ export default async function SlotsPage({ params }: SlotsPageProps) {
   const { locale } = await params
 
   // Получаем будущие слоты
+  // oxlint-disable-next-line react/purity -- серверный компонент: время запроса
+  const now = new Date()
   const upcomingSlots = await prisma.bookedSlot.findMany({
     where: {
-      startAt: { gte: new Date() },
+      startAt: { gte: now },
     },
     orderBy: { startAt: 'asc' },
     include: {

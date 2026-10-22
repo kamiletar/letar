@@ -7,7 +7,7 @@ Chakra, ни от какого-либо другого UI-фреймворка.
 ## Установка
 
 ```bash
-npm i @letar/forms-core@beta
+npm i @letar/forms-core
 ```
 
 Пакет не требует peer-зависимостей.

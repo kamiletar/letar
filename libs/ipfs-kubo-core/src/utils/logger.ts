@@ -185,6 +185,9 @@ function getMinLevel(): LogLevel {
   }
   // Production: только warn и error
   // Development: всё
+  // Уровень логов — не защита и не признак прода: staging с NODE_ENV=production тоже получит
+  // 'warn', это приемлемо (переопределяется LOG_LEVEL), поэтому правило про NODE_ENV здесь неприменимо
+  // eslint-disable-next-line no-restricted-syntax
   return process.env.NODE_ENV === 'production' ? 'warn' : 'debug'
 }
 

@@ -40,7 +40,7 @@
     "reka-ui": "^2.6.0",
     "tailwind-merge": "^3.3.1",
     "vite": "^8.2.1",
-    "vue": "^3.5.13",
+    "vue": "^3.5.44",
     "@letar/forms-core": "workspace:*",
     "@letar/forms-vue": "workspace:*",
     "@letar/tailwind-utils": "workspace:*"

@@ -6,6 +6,8 @@
 
 ## Документация
 
+- [Таймеры Claude Code и Codex](/.claude/docs/time-tracker-drift-incidents.md) — heartbeat, восстановление после простоя и привязка к идентификатору сессии.
+
 - [Сигналы окружения и Keystatic](/.claude/docs/node-env-not-production-signal.md) — staging, приватные env и согласование хранилища между сервером и браузером.
 
 - [UX авторского редактора](/.claude/docs/authoring-save-and-media-ux.md) — сохранение без потери контекста, аудитория, авторские переходы и единая загрузка медиа.
@@ -28,6 +30,8 @@
 - [archetest: восстановление теста](/apps/archetest/docs/quiz-progress-recovery.md) — локальный черновик отдельно от очереди отправки, исходная выборка и изоляция аккаунтов.
 
 - [Гонки взаимных post-update политик](/.claude/docs/zenstack-cross-table-post-update-write-skew.md) — общая блокировка связанных строк, прямой ORM и проверка на двух соединениях.
+
+- [forms 3.0: подключаемые поля и optional peer](/.claude/docs/forms-pluggable-fields-optional-peers.md) — ключ `extraFields`, строгий `AppForm.Field`, правило «ядро не тянет optional peer» и smoke без TipTap/dnd-kit.
 
 - [Node-импорты instrumentation](/.claude/docs/nextjs-instrumentation-runtime-guard.md) — положительная ветка NEXT_RUNTIME для исключения sharp из edge в webpack dev.
 
@@ -123,7 +127,7 @@ tsconfig приватных приложений. Раннер печатает 
 
 ### Релиз npm-пакетов
 
-Локально: `nx release` (bump + changelog + commit + tag + GitHub release) → `git push --follow-tags`. CI на тег (`forms-v*`, `form-mcp-v*`, `zenstack-form-plugin-v*`) запускает [publish-npm.yml](/.github/workflows/publish-npm.yml) — npm publish напрямую из letar.
+Выпуск — вручную по тегу, не через `nx release`: поднять версию и `CHANGELOG.md`, коммит, push (только с одобрения владельца), тег `<пакет>-v<версия>` по порядку из `scripts/data/npm-published-packages.json` (`forms-core` → `forms-react` → `forms`, `forms-query`, `zenstack-form-plugin`, `form-mcp`). CI на тег запускает [publish-npm.yml](/.github/workflows/publish-npm.yml): сборка и проверки без прав на публикацию, затем `npm publish --provenance` по OIDC (токена npm нет), dist-tag `next`. PR проверяет [npm-packages.yml](/.github/workflows/npm-packages.yml). Процедура, разовые шаги владельца и найденные ловушки — [npm-publish-from-monorepo](/.claude/docs/npm-publish-from-monorepo.md).
 
 ### Технологический стек
 
@@ -174,6 +178,10 @@ agent-mail. Документация внешних библиотек — deskt
 **⚠️ WebFetch заблокирован context-mode:** хук `pretooluse.mjs` блокирует `WebFetch` и перенаправляет на `mcp__context-mode__fetch_and_index(url, source)` + `mcp__context-mode__search(queries)`. Используй именно эти инструменты для загрузки внешних URL.
 
 ### Координация агентов (MCP Agent Mail)
+
+**Таймер в Codex:** во все инструменты `time_*`, принимающие `sessionRef`, передавай явно
+`CODEX_THREAD_ID` из окружения текущего чата. MCP-процесс может быть общим для нескольких чатов;
+heartbeat хука использует идентификатор чата, поэтому PID MCP-процесса для привязки не подходит.
 
 **ОБЯЗАТЕЛЬНО:** При начале работы вызови `macro_start_session` — подробности в `.claude/rules/agent-mail.md`. Без регистрации другие агенты не увидят тебя и могут конфликтовать по файлам.
 

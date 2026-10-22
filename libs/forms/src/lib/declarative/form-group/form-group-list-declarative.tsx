@@ -1,6 +1,6 @@
 'use client'
 
-import { Fragment, type ReactElement, type ReactNode } from 'react'
+import { type ComponentType, Fragment, type ReactElement, type ReactNode } from 'react'
 import { FormGroup, useFormGroup } from '../../form-group'
 import { DeclarativeFormContext, useDeclarativeForm } from '../form-context'
 import { getZodConstraints } from '../schema-constraints'
@@ -11,7 +11,33 @@ import type {
   FormGroupListItemContextValue,
 } from '../types'
 import { FormGroupListContext, FormGroupListItemContext } from './form-group-list-context'
-import { SortableItem, SortableWrapper } from './form-group-list-sortable'
+
+/** Пропсы обёртки всего списка (`ListWrapper`): то же, что у `SortableWrapper` из dnd-kit-слоя */
+export interface FormGroupListWrapperSlotProps {
+  /** Детерминированный между SSR и клиентом id списка */
+  id: string
+  /** Уникальные id элементов в текущем порядке */
+  items: string[]
+  /** Перестановка: из индекса в индекс */
+  onReorder: (oldIndex: number, newIndex: number) => void
+  children: ReactNode
+}
+
+/** Пропсы обёртки одного элемента (`ItemWrapper`): то же, что у `SortableItem` */
+export interface FormGroupListItemSlotProps {
+  /** Уникальный id элемента */
+  id: string
+  children: ReactNode
+}
+
+/**
+ * Внутренние (не публичные) слоты списка. Через них dnd-kit-слой (`SortableGroupList` из `@letar/forms/sortable`)
+ * подставляет свои обёртки, а сам список о dnd-kit не знает. По умолчанию слотов нет: элементы выводятся как есть.
+ */
+export interface FormGroupListSlots {
+  ListWrapper?: ComponentType<FormGroupListWrapperSlotProps>
+  ItemWrapper?: ComponentType<FormGroupListItemSlotProps>
+}
 
 /**
  * Form.Group.List - Automatically iterates over array fields
@@ -47,15 +73,24 @@ import { SortableItem, SortableWrapper } from './form-group-list-sortable'
  * </Form.Group.List>
  * ```
  */
-export function FormGroupListDeclarative({
+export function FormGroupListDeclarative(props: FormGroupListDeclarativeProps): ReactElement {
+  return <FormGroupListBase {...props} />
+}
+
+/**
+ * Реализация списка со слотами обёрток. Публичный `Form.Group.List` — `FormGroupListDeclarative` (без слотов);
+ * слоты нужны только `SortableGroupList`, поэтому наружу пакета эта функция не экспортируется.
+ */
+export function FormGroupListBase({
   name,
   children,
   emptyContent,
   wrapper,
-  sortable = false,
   maxItems: maxItemsProp,
   minItems: minItemsProp,
-}: FormGroupListDeclarativeProps): ReactElement {
+  ListWrapper,
+  ItemWrapper,
+}: FormGroupListDeclarativeProps & FormGroupListSlots): ReactElement {
   const { form, schema, dependents } = useDeclarativeForm()
   const parentGroup = useFormGroup()
 
@@ -126,12 +161,12 @@ export function FormGroupListDeclarative({
             </DeclarativeFormContext.Provider>
           )
 
-          // Wrap in SortableItem if sortable
-          if (sortable) {
+          // Обёртка элемента (SortableItem для сортируемого списка)
+          if (ItemWrapper) {
             return (
-              <SortableItem key={sortableIds[index]} id={sortableIds[index]}>
+              <ItemWrapper key={sortableIds[index]} id={sortableIds[index]}>
                 {itemContent}
-              </SortableItem>
+              </ItemWrapper>
             )
           }
 
@@ -146,12 +181,12 @@ export function FormGroupListDeclarative({
 
           const items = arrayValue.map((_, index) => renderItem(index))
 
-          // Wrap in SortableWrapper if sortable
-          if (sortable) {
+          // Обёртка всего списка (SortableWrapper для сортируемого списка)
+          if (ListWrapper) {
             return (
-              <SortableWrapper id={fullPath} items={sortableIds} onReorder={handleReorder}>
+              <ListWrapper id={fullPath} items={sortableIds} onReorder={handleReorder}>
                 {items}
-              </SortableWrapper>
+              </ListWrapper>
             )
           }
 

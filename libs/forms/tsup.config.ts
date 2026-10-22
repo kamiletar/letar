@@ -15,6 +15,12 @@ const clientEntry = {
   'fields/boolean': 'src/lib/declarative/form-fields/boolean/index.ts',
   'fields/specialized': 'src/lib/declarative/form-fields/specialized/index.ts',
   analytics: 'src/lib/analytics/index.ts',
+  // Подключаемые тяжёлые поля и просмотрщик: каждый тянет свои peer, ядро на них не ссылается через эти входы
+  'rich-text': 'src/entries/rich-text.ts',
+  'data-grid': 'src/entries/data-grid.ts',
+  'table-editor': 'src/entries/table-editor.ts',
+  sortable: 'src/entries/sortable.ts',
+  debug: 'src/entries/debug.ts',
 }
 
 // Нейтральные точки входа: серверный и чистый код (маппинг ошибок сервера, проверка CAPTCHA,
@@ -79,8 +85,6 @@ const common: Options = {
     'idb-keyval',
     // i18n (optional)
     'next-intl',
-    // CAPTCHA (optional)
-    '@marsidev/react-turnstile',
     // DataGrid (optional)
     '@tanstack/react-table',
     '@tanstack/react-virtual',

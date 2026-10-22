@@ -1,25 +1,26 @@
 {
   "name": "aprel8008-e2e",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
   "sourceRoot": "apps/aprel8008-e2e/src",
-  "tags": ["type:e2e", "scope:aprel8008", "owner:letar"],
+  "tags": [
+    "type:e2e",
+    "scope:aprel8008",
+    "owner:letar"
+  ],
   "targets": {
     "format": {
       "executor": "nx:run-commands",
-      "options": {
-        "command": "dprint fmt",
-        "cwd": "apps/aprel8008-e2e"
-      },
       "cache": false,
       "metadata": {
         "description": "Format files with dprint",
-        "technologies": ["dprint"]
-      }
-    },
-    "e2e": {
-      "executor": "@nx/playwright:playwright",
+        "technologies": [
+          "dprint"
+        ]
+      },
       "options": {
-        "config": "apps/aprel8008-e2e/playwright.config.mts"
+        "command": "dprint fmt",
+        "cwd": "apps/aprel8008-e2e"
       }
     }
   }

@@ -3,6 +3,7 @@
 import { toaster } from '@/app/_components/ui/toaster'
 import { signIn, signUp } from '@/lib/auth-client'
 import { Box, Button, Container, Heading, HStack, Input, Separator, Text, VStack } from '@chakra-ui/react'
+import { useNow } from '@letar/hooks/utility'
 import NextLink from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -11,6 +12,7 @@ import { LuBookOpen, LuFilm, LuUserPlus } from 'react-icons/lu'
 
 export default function SignUpPage() {
   const router = useRouter()
+  const now = useNow()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -127,7 +129,7 @@ export default function SignUpPage() {
                 placeholder="Дата рождения"
                 value={birthDate}
                 onChange={(e) => setBirthDate(e.target.value)}
-                max={new Date().toISOString().split('T')[0]}
+                max={now.toISOString().split('T')[0]}
                 min="1920-01-01"
               />
               <Button type="submit" w="100%" colorPalette="brand" loading={loading}>

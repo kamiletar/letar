@@ -196,35 +196,129 @@ export function packageBase(spec) {
   return spec.startsWith('@') ? spec.split('/').slice(0, 2).join('/') : spec.split('/')[0]
 }
 
-/** Внешние пакеты, которые импортирует исходник (JS или .d.ts); относительные и встроенные модули Node не считаются. */
-export function extractExternalImports(src) {
+/**
+ * Спецификаторы модулей, которые импортирует исходник (JS или .d.ts): статические (`import … from`, `export … from`,
+ * `require`) и динамические (`import('m')`) отдельно — первые грузятся вместе с модулем, вторые лениво.
+ */
+export function extractImportSpecs(src) {
   const code = stripCommentsAndTemplates(src)
-  const specs = new Set()
-  const patterns = [
+  const staticSpecs = new Set()
+  const dynamicSpecs = new Set()
+  const staticPatterns = [
     // import x from 'm' / import { a } from 'm' / import * as x from 'm' / import type … from 'm' / import 'm'
     /(?:^|[\s;{}])import\s+(?:type\s+)?(?:[^'"`;]*?\sfrom\s*)?['"]([^'"]+)['"]/g,
     // export … from 'm'
     /(?:^|[\s;{}])export\s+(?:type\s+)?[^'"`;]*?\sfrom\s*['"]([^'"]+)['"]/g,
-    // import('m') — и в .d.ts: import('m').Type
-    /\bimport\s*\(\s*['"]([^'"]+)['"]\s*\)/g,
     // import x = require('m')
     /\brequire\s*\(\s*['"]([^'"]+)['"]\s*\)/g,
   ]
-  for (const re of patterns) {
-    for (const m of code.matchAll(re)) { specs.add(m[1]) }
+  for (const re of staticPatterns) {
+    for (const m of code.matchAll(re)) {
+      staticSpecs.add(m[1])
+    }
   }
+  // import('m') — и в .d.ts: import('m').Type
+  for (const m of code.matchAll(/\bimport\s*\(\s*['"]([^'"]+)['"]\s*\)/g)) {
+    dynamicSpecs.add(m[1])
+  }
+  return { staticSpecs, dynamicSpecs }
+}
+
+/** Базовое имя внешнего пакета из спецификатора; относительные пути и встроенные модули Node — `null`. */
+function externalBase(spec) {
+  if (spec.startsWith('.') || spec.startsWith('/') || spec.startsWith('node:') || spec.startsWith('data:')) {
+    return null
+  }
+  const base = packageBase(spec)
+  return NODE_BUILTINS.has(base) ? null : base
+}
+
+/** Внешние пакеты, которые импортирует исходник (JS или .d.ts); относительные и встроенные модули Node не считаются. */
+export function extractExternalImports(src) {
+  const { staticSpecs, dynamicSpecs } = extractImportSpecs(src)
   const bases = new Set()
-  for (const spec of specs) {
-    if (spec.startsWith('.') || spec.startsWith('/') || spec.startsWith('node:') || spec.startsWith('data:')) {
-      continue
+  for (const spec of [...staticSpecs, ...dynamicSpecs]) {
+    const base = externalBase(spec)
+    if (base) {
+      bases.add(base)
     }
-    const base = packageBase(spec)
-    if (NODE_BUILTINS.has(base)) {
-      continue
-    }
-    bases.add(base)
   }
   return bases
+}
+
+/**
+ * Optional peer, который импортирует файл, достижимый из entry, — не optional: бандлер (Next/Turbopack, Vite)
+ * разрешает ВСЕ импорты собираемых файлов, в том числе чанки, подгружаемые через `import('./chunk.js')`, и без
+ * пакета падает с «Module not found», хотя npm его не ставил. Внешний `import('pkg')` — тоже: Turbopack и webpack
+ * разрешают его при сборке, а Vite — нет (поэтому только Next-проект это и показывает).
+ *
+ * По умолчанию достижимость считается только от корневых entry (`.`, main, bin): subpath-entry — штатное место для
+ * optional peer. Пакет, у которого optional peer нужны лишь части subpath-ов (`@letar/forms`: тяжёлые поля), задаёт
+ * `optionalPeerEntries` — список subpath-ов, которым это разрешено. Тогда «ядром» считаются корневые entry и все
+ * остальные subpath-entry: ни один из них не должен тянуть optional peer.
+ * @param {string} dist
+ * @param {object} pj dist/package.json
+ * @param {{ optionalPeerEntries?: string[] }} [options]
+ * @returns {string[]} ошибки
+ */
+export function checkOptionalPeers(dist, pj, options = {}) {
+  const optional = new Set(
+    Object.entries(pj.peerDependenciesMeta ?? {})
+      .filter(([, meta]) => meta?.optional)
+      .map(([name]) => name),
+  )
+  if (optional.size === 0) {
+    return []
+  }
+  // Subpath-entry (`exports['./zenstack']`) — штатное место для optional peer: бандлер разрешит его, только если
+  // потребитель сам импортирует этот subpath. Поэтому достижимость считаем от корневых entry (`.`, main, bin).
+  const rootFiles = collectEntryPaths(pj)
+    .filter(({ where }) => !where.startsWith('exports../'))
+    .map(({ file }) => file)
+  const coreSubpathFiles = []
+  if (options.optionalPeerEntries) {
+    const allowed = new Set(options.optionalPeerEntries)
+    for (const [key, value] of Object.entries(pj.exports ?? {})) {
+      if (key === '.' || key === './package.json' || allowed.has(key)) { continue }
+      coreSubpathFiles.push(...collectEntryPaths({ exports: value }).map(({ file }) => file))
+    }
+  }
+  const entries = [...rootFiles, ...coreSubpathFiles]
+    .map((file) => path.join(dist, file))
+    .filter((file) => /\.(js|mjs|cjs)$/.test(file) && fs.existsSync(file))
+  const visited = new Set()
+  const offenders = new Map() // peer → { file, entry }
+  for (const entry of new Set(entries)) {
+    const queue = [entry]
+    while (queue.length > 0) {
+      const file = queue.pop()
+      if (visited.has(file)) {
+        continue
+      }
+      visited.add(file)
+      const { staticSpecs, dynamicSpecs } = extractImportSpecs(fs.readFileSync(file, 'utf8'))
+      for (const spec of [...dynamicSpecs, ...staticSpecs]) {
+        if (spec.startsWith('.')) {
+          const target = path.resolve(path.dirname(file), spec)
+          if (fs.existsSync(target) && fs.statSync(target).isFile()) {
+            queue.push(target)
+          }
+          continue
+        }
+        const base = externalBase(spec)
+        if (base && optional.has(base) && !offenders.has(base)) {
+          offenders.set(base, {
+            file: path.relative(dist, file).split(path.sep).join('/'),
+            entry: path.relative(dist, entry).split(path.sep).join('/'),
+          })
+        }
+      }
+    }
+  }
+  return [...offenders].map(
+    ([base, { file, entry }]) =>
+      `optional peer ${base} импортирует ${file} (достижим из ${entry}, в том числе через чанк) — бандлер разрешит его при сборке; объяви обычным peer или вынеси в отдельный subpath-entry (не достижимый из корневого)`,
+  )
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -287,10 +381,10 @@ const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
 /**
  * Проверяет один собранный dist.
- * @param {{ dist: string, srcVersion: string, useClient?: { neutral: string[] }, privateNames: string[], privateAllow?: string[] }} opts
+ * @param {{ dist: string, srcVersion: string, useClient?: { neutral: string[] }, privateNames: string[], privateAllow?: string[], optionalPeerEntries?: string[] }} opts
  * @returns {string[]} список ошибок (пустой — всё в порядке)
  */
-export function checkDist({ dist, srcVersion, useClient, privateNames, privateAllow = [] }) {
+export function checkDist({ dist, srcVersion, useClient, privateNames, privateAllow = [], optionalPeerEntries }) {
   const errors = []
   const pjPath = path.join(dist, 'package.json')
   if (!fs.existsSync(pjPath)) { return ['нет dist/package.json — сначала build:npm или --build'] }
@@ -360,6 +454,9 @@ export function checkDist({ dist, srcVersion, useClient, privateNames, privateAl
       if (!files.some((f) => f.rel === rel)) { errors.push(`нейтральный entry ${rel} из реестра не найден в dist`) }
     }
   }
+
+  // 7. Optional peer, достижимый статически из entry
+  errors.push(...checkOptionalPeers(dist, pj, { optionalPeerEntries }))
 
   // 5. Имена приватных приложений (целое слово, с учётом регистра, во всех текстовых файлах)
   const allow = new Set(privateAllow)
@@ -435,9 +532,13 @@ function run(cmd, args, label) {
     env: { ...process.env, NO_COLOR: '1', FORCE_COLOR: '0' },
   })
   // eslint-disable-next-line no-control-regex
-  const out = stripAnsi(`${res.stdout ?? ''}${res.stderr ?? ''}`)
+  const out = stripAnsi(`${res.stdout ?? ''}${res.stderr ?? ''}${res.error ? `\n${res.error.message}` : ''}`)
   return { ok: res.status === 0, out, label }
 }
+
+// Локально nx глобальный (AGENTS.md), в CI его нет — там nx запускают через bunx, как в ci.yml.
+// Без этого в GitHub Actions spawn падал ENOENT мгновенно и молча («build:npm упал» без вывода).
+const NX = process.env.CI ? { cmd: 'bunx', prefix: ['nx'] } : { cmd: 'nx', prefix: [] }
 
 function main() {
   const args = process.argv.slice(2)
@@ -464,7 +565,11 @@ function main() {
   if (wantBuild) {
     const projects = packages.map((p) => readPackageJson(p.dir).name).join(',')
     console.log(`сборка: nx run-many -t build:npm --projects=${projects} --skip-nx-cache`)
-    const res = run('nx', ['run-many', '-t', 'build:npm', `--projects=${projects}`, '--skip-nx-cache'], 'build')
+    const res = run(
+      NX.cmd,
+      [...NX.prefix, 'run-many', '-t', 'build:npm', `--projects=${projects}`, '--skip-nx-cache'],
+      'build',
+    )
     if (!res.ok) {
       console.error(res.out)
       console.error('✖ build:npm упал')
@@ -493,6 +598,7 @@ function main() {
       useClient: pkg.useClient,
       privateNames,
       privateAllow: registry.privateNamesAllow ?? [],
+      optionalPeerEntries: pkg.optionalPeerEntries,
     })
 
     if (wantPublint && errors.length === 0) {

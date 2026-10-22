@@ -9,6 +9,21 @@ import { requireCoach } from '@/lib/roles'
 import { Badge, Box, Button, Heading, Table, Text, VStack } from '@chakra-ui/react'
 import Link from 'next/link'
 
+/** Матч в кабинете тренера: только читаемые поля */
+interface CoachMatchRow {
+  id: string
+  status: string
+  scheduledAt: Date | null
+  homeTeamId: string
+  homeScore: number | null
+  awayScore: number | null
+  homeTeam: { team: { name: string } }
+  awayTeam: { team: { name: string } }
+  venue: { name: string } | null
+  tour: { number: number; round: { number: number } } | null
+  lineups: { id: string }[]
+}
+
 export default async function CoachMatchesPage() {
   const coach = await requireCoach()
 
@@ -29,6 +44,9 @@ export default async function CoachMatchesPage() {
     },
     orderBy: { scheduledAt: 'desc' },
   })
+
+  // Узкий тип вместо вывода ZenStack: tsgo TS2321 при .map (tsgo-excessive-stack-depth-zenstack.md)
+  const matchRows: CoachMatchRow[] = matches
 
   return (
     <VStack gap={6} align="stretch">
@@ -55,7 +73,7 @@ export default async function CoachMatchesPage() {
                   </Table.Row>
                 </Table.Header>
                 <Table.Body>
-                  {matches.map((match) => {
+                  {matchRows.map((match) => {
                     const isHome = match.homeTeamId === coach.teamSeasonId
                     const opponent = isHome ? match.awayTeam.team.name : match.homeTeam.team.name
                     const hasLineup = match.lineups.length > 0

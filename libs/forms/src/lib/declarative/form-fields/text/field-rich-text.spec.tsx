@@ -4,6 +4,11 @@ import type { ReactNode } from 'react'
 import { beforeAll, describe, expect, it, vi } from 'vitest'
 
 import { Form } from '../../'
+import { createForm } from '../../create-form'
+import { FieldRichText } from './field-rich-text'
+
+/** Поле подключается через `extraFields`, как в приложении: в ядре 3.0 его нет */
+const TestForm = createForm({ extraFields: { RichText: FieldRichText } })
 
 const TestWrapper = ({ children }: { children: ReactNode }) => (
   <ChakraProvider value={defaultSystem}>{children}</ChakraProvider>
@@ -24,7 +29,7 @@ describe('FieldRichText', () => {
       render(
         <TestWrapper>
           <Form initialValue={{ content: '' }} onSubmit={vi.fn()}>
-            <Form.Field.RichText name="content" />
+            <TestForm.Field.RichText name="content" />
           </Form>
         </TestWrapper>,
       )
@@ -42,7 +47,7 @@ describe('FieldRichText', () => {
       render(
         <TestWrapper>
           <Form initialValue={{ content: '' }} onSubmit={vi.fn()}>
-            <Form.Field.RichText name="content" label="Описание" />
+            <TestForm.Field.RichText name="content" label="Описание" />
           </Form>
         </TestWrapper>,
       )

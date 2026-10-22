@@ -19,7 +19,7 @@
     },
     "linkSubmodule": {
       "type": "boolean",
-      "description": "Если apps/<app> — приватный submodule (см. .gitmodules): автоматически создать приватный GitHub-репозиторий kamiletar/letar-private-<app>-e2e (через `gh`) и подключить apps/<app>-e2e как submodule. Без флага генератор только предупреждает и подсказывает команды для ручного переноса — см. .claude/commands/create/new-app.md § «Приватные приложения»",
+      "description": "Если apps/<app> — приватный submodule (см. .gitmodules): автоматически создать приватный GitHub-репозиторий kamiletar/letar-private-<app>-e2e (через `gh`) и подключить apps/<app>-e2e как submodule. Без флага генератор только предупреждает и подсказывает команды для ручного переноса — см. .agents/skills/create-new-app/SKILL.md § «Приватные приложения»",
       "default": false
     }
   },

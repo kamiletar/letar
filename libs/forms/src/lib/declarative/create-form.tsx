@@ -25,7 +25,6 @@ import type {
   RadioCardFieldProps,
   RadioGroupFieldProps,
   RatingFieldProps,
-  RichTextFieldProps,
   ScheduleFieldProps,
   SegmentedGroupFieldProps,
   SelectFieldProps,
@@ -34,11 +33,11 @@ import type {
   TagsFieldProps,
   YesNoFieldProps,
 } from './form-fields'
+import type { AutoFieldProps } from './form-fields/auto/field-auto'
 import type { CreditCardFieldProps } from './form-fields/specialized/credit-card'
-import type { DataGridFieldProps, TableEditorFieldProps } from './form-fields/table'
 import type { FormFromSchemaProps } from './form-from-schema'
 import { type FormRegistry, FormRegistryContext } from './form-registry-context'
-import type { SelectionSlotComponents } from './form-root/form-compound-types'
+import type { FormFieldComponents, SelectionSlotComponents } from './form-root/form-compound-types'
 import type {
   FormStepsIndicatorProps,
   FormStepsNavigationProps,
@@ -92,9 +91,24 @@ interface CreateFormOptions<
   TLazySelects extends LazyRecord = LazyRecord,
   TLazyComboboxes extends LazyRecord = LazyRecord,
   TLazyListboxes extends LazyRecord = LazyRecord,
+  TExtraFields extends ComponentRecord = Record<never, never>,
 > {
-  /** Extra field components to add to Form.Field */
-  extraFields?: Record<string, AnyComponent>
+  /**
+   * Дополнительные поля в `Form.Field`: свои компоненты приложения и подключаемые поля библиотеки, которые ядро
+   * не тянет (`@letar/forms/rich-text`, `/data-grid`, `/table-editor`).
+   *
+   * ⚠️ Ключ обязан совпадать с именем поля: `{ RichText: FieldRichText }` даёт `AppForm.Field.RichText`, и по этому же
+   * ключу автоформа (`fieldType: 'richText'`) находит компонент. Типы ключей и пропсов выводятся из значения.
+   *
+   * @example
+   * ```tsx
+   * import { FieldRichText } from '@letar/forms/rich-text'
+   *
+   * const AppForm = createForm({ extraFields: { RichText: FieldRichText } })
+   * <AppForm.Field.RichText name="body" />
+   * ```
+   */
+  extraFields?: TExtraFields
   /** Extra button components to add to Form.Button */
   extraButtons?: Record<string, AnyComponent>
   /** Extra select components to add to Form.Select (synchronous) */
@@ -195,7 +209,6 @@ interface CreateFormOptions<
 interface ListButton {
   Add: AnyComponent
   Remove: AnyComponent
-  DragHandle: AnyComponent
 }
 
 interface ExtendedFormGroupList {
@@ -209,6 +222,14 @@ interface ExtendedFormGroup {
 }
 
 interface ExtendedFormField {
+  // Как у рантайм-компонента FieldAuto: проп специализированного поля (onComplete, size…) прокидывается дальше
+  Auto: (props: AutoFieldProps) => ReactElement
+  EditIntent: FormFieldComponents['EditIntent']
+  CascadingSelect: FormFieldComponents['CascadingSelect']
+  City: FormFieldComponents['City']
+  Signature: FormFieldComponents['Signature']
+  Hidden: FormFieldComponents['Hidden']
+  Calculated: FormFieldComponents['Calculated']
   String: (props: StringFieldProps) => ReactElement
   Number: (props: NumberFieldProps) => ReactElement
   NumberInput: (props: NumberInputFieldProps) => ReactElement
@@ -251,16 +272,12 @@ interface ExtendedFormField {
   Slug: (props: SlugFieldProps) => ReactElement
   Schedule: (props: ScheduleFieldProps) => ReactElement
   FileUpload: (props: FileUploadFieldProps) => ReactElement
-  RichText: (props: RichTextFieldProps) => ReactElement
   Tags: (props: TagsFieldProps) => ReactElement
   MatrixChoice: (props: MatrixChoiceFieldProps) => ReactElement
   ImageChoice: (props: ImageChoiceFieldProps) => ReactElement
   Likert: (props: LikertFieldProps) => ReactElement
   YesNo: (props: YesNoFieldProps) => ReactElement
-  TableEditor: (props: TableEditorFieldProps) => ReactElement
-  DataGrid: (props: DataGridFieldProps) => ReactElement
   CreditCard: (props: CreditCardFieldProps) => ReactElement
-  [key: string]: AnyComponent
 }
 
 interface ExtendedFormButton {
@@ -285,10 +302,15 @@ export interface ExtendedForm<
   TSelectKey extends string = string,
   TComboboxKey extends string = string,
   TListboxKey extends string = string,
+  TExtraFields extends ComponentRecord = Record<never, never>,
 > {
   <TData extends object>(props: FormPropsWithApi<TData>): ReactElement
   Group: ExtendedFormGroup
-  Field: ExtendedFormField
+  /**
+   * Базовые поля плюс `extraFields`. Индексной сигнатуры нет: `AppForm.Field.X` существует, только если `X` —
+   * базовое поле или ключ `extraFields` (так обращение к `Field.RichText` без регистрации — ошибка типов).
+   */
+  Field: TExtraFields & ExtendedFormField
   Button: ExtendedFormButton
   Select: Record<TSelectKey, AnyComponent>
   Combobox: Record<TComboboxKey, AnyComponent>
@@ -364,6 +386,7 @@ export function createForm<
   TLazySelects extends LazyRecord = LazyRecord,
   TLazyComboboxes extends LazyRecord = LazyRecord,
   TLazyListboxes extends LazyRecord = LazyRecord,
+  TExtraFields extends ComponentRecord = Record<never, never>,
 >(
   options: CreateFormOptions<
     TExtraSelects,
@@ -371,15 +394,17 @@ export function createForm<
     TExtraListboxes,
     TLazySelects,
     TLazyComboboxes,
-    TLazyListboxes
+    TLazyListboxes,
+    TExtraFields
   > = {},
 ): ExtendedForm<
   RegistryKeys<TExtraSelects, TLazySelects>,
   RegistryKeys<TExtraComboboxes, TLazyComboboxes>,
-  RegistryKeys<TExtraListboxes, TLazyListboxes>
+  RegistryKeys<TExtraListboxes, TLazyListboxes>,
+  TExtraFields
 > {
   const {
-    extraFields = {},
+    extraFields = {} as TExtraFields,
     extraButtons = {},
     extraSelects = {} as TExtraSelects,
     extraComboboxes = {} as TExtraComboboxes,
@@ -428,6 +453,8 @@ export function createForm<
     Select: ExtendedSelect,
     Combobox: ExtendedCombobox,
     Listbox: ExtendedListbox,
+    // Итоговый объект `AppForm.Field`: автоформа берёт по ключу подключаемые поля (`Field.RichText`)
+    Field: ExtendedField,
   }
 
   const ExtendedForm = Object.assign(
@@ -485,7 +512,8 @@ export function createForm<
   return ExtendedForm as unknown as ExtendedForm<
     RegistryKeys<TExtraSelects, TLazySelects>,
     RegistryKeys<TExtraComboboxes, TLazyComboboxes>,
-    RegistryKeys<TExtraListboxes, TLazyListboxes>
+    RegistryKeys<TExtraListboxes, TLazyListboxes>,
+    TExtraFields
   >
 }
 

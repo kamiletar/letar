@@ -3,7 +3,7 @@ import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 
-import { buildFieldRegistry } from './field-registry.js'
+import { buildFieldRegistry, PLUGGABLE_FIELDS } from './field-registry.js'
 import { loadDocs } from './loader.js'
 
 /**
@@ -24,6 +24,12 @@ const docsPath = join(repoRoot, 'libs', 'forms', 'docs')
  * `FormField`/`FormDocument` появится служебный ключ — добавь его сюда с причиной «почему не поле».
  */
 const NOT_FIELDS = new Set<string>()
+
+/**
+ * С @letar/forms 3.0.0 RichText, DataGrid и TableEditor не входят в `FormField`: их подключают через
+ * `createForm({ extraFields })` из подпутей. В fields.md они остаются, поэтому вместе с кодом сверяем и этот список.
+ */
+const PLUGGABLE_NAMES = Object.values(PLUGGABLE_FIELDS).map((r) => r.extraFieldsEntry.split(':')[0])
 
 /** Ключи верхнего уровня объекта `const <name> = { ... }` в исходнике */
 function parseObjectKeys(source: string, name: string): string[] {
@@ -56,8 +62,15 @@ describe('FormField/FormDocument в коде = таблицы fields.md', () => 
     ).toEqual([])
   })
 
+  it('подключаемые поля (3.0.0) описаны в fields.md и не входят в ядро', () => {
+    for (const name of PLUGGABLE_NAMES) {
+      expect(docNames.has(name), `поле ${name} должно быть в fields.md`).toBe(true)
+      expect(codeFields, `поле ${name} вернулось в FormField — убери его из PLUGGABLE_FIELDS`).not.toContain(name)
+    }
+  })
+
   it('каждое поле из fields.md есть в коде', () => {
-    const inCode = new Set(codeFields)
+    const inCode = new Set([...codeFields, ...PLUGGABLE_NAMES])
     const extra = [...docNames].filter((name) => !inCode.has(name))
     expect(
       extra,

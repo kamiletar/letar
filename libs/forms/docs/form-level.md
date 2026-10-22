@@ -4,26 +4,26 @@
 
 ## Обзор компонентов
 
-| Компонент                           | Описание                                             |
-| ----------------------------------- | ---------------------------------------------------- |
-| `Form`                              | Корневой компонент формы                             |
-| `Form.Group`                        | Группа полей с dot-notation путём                    |
-| `Form.Group.List`                   | Автоитерация по массиву                              |
-| `Form.Group.List.Button.Add`        | Кнопка добавления элемента                           |
-| `Form.Group.List.Button.Remove`     | Кнопка удаления элемента                             |
-| `Form.Group.List.Button.DragHandle` | Ручка для перетаскивания (DnD)                       |
-| `Form.Button.Submit`                | Кнопка отправки с автоматическим loading             |
-| `Form.Button.Reset`                 | Кнопка сброса формы                                  |
-| `Form.Watch`                        | Отслеживание изменений поля (побочные эффекты)       |
-| `Form.When`                         | Условный рендеринг полей                             |
-| `Form.DirtyGuard`                   | Предупреждение при уходе с несохранённой формой      |
-| `Form.Errors`                       | Сводка всех ошибок валидации                         |
-| `Form.DebugValues`                  | Интерактивный JSON-инспектор значений формы          |
-| `Form.InfoBlock`                    | Информационный блок (info/warning/error/success/tip) |
-| `Form.Divider`                      | Разделитель секций с опциональной меткой             |
-| `Form.Field.Hidden`                 | Скрытое поле (не рендерится, только в state)         |
-| `Form.Field.Calculated`             | Вычисляемое поле с автопересчётом                    |
-| `Form.Steps`                        | Контейнер для мультистеп форм                        |
+| Компонент                           | Описание                                                                               |
+| ----------------------------------- | -------------------------------------------------------------------------------------- |
+| `Form`                              | Корневой компонент формы                                                               |
+| `Form.Group`                        | Группа полей с dot-notation путём                                                      |
+| `Form.Group.List`                   | Автоитерация по массиву                                                                |
+| `Form.Group.List.Button.Add`        | Кнопка добавления элемента                                                             |
+| `Form.Group.List.Button.Remove`     | Кнопка удаления элемента                                                               |
+| `Form.Group.List.Button.DragHandle` | Ручка для перетаскивания — только внутри `SortableGroupList` (`@letar/forms/sortable`) |
+| `Form.Button.Submit`                | Кнопка отправки с автоматическим loading                                               |
+| `Form.Button.Reset`                 | Кнопка сброса формы                                                                    |
+| `Form.Watch`                        | Отслеживание изменений поля (побочные эффекты)                                         |
+| `Form.When`                         | Условный рендеринг полей                                                               |
+| `Form.DirtyGuard`                   | Предупреждение при уходе с несохранённой формой                                        |
+| `Form.Errors`                       | Сводка всех ошибок валидации                                                           |
+| `Form.DebugValues`                  | Интерактивный JSON-инспектор значений формы                                            |
+| `Form.InfoBlock`                    | Информационный блок (info/warning/error/success/tip)                                   |
+| `Form.Divider`                      | Разделитель секций с опциональной меткой                                               |
+| `Form.Field.Hidden`                 | Скрытое поле (не рендерится, только в state)                                           |
+| `Form.Field.Calculated`             | Вычисляемое поле с автопересчётом                                                      |
+| `Form.Steps`                        | Контейнер для мультистеп форм                                                          |
 
 ---
 
@@ -532,8 +532,17 @@ const AppForm = createForm({ dirtyGuard: true })
 | `collapsed`        | `number`  | `2`           | Глубина раскрытия дерева              |
 | `showInProduction` | `boolean` | `false`       | Показывать в production (для отладки) |
 
-Использует `@uiw/react-json-view` для рендеринга. Обновляется в реальном времени при вводе.
-Автоматически переключается между тёмной и светлой темой вместе с color mode приложения.
+С 2.42.0 рисует простой `<pre>` с JSON (без сторонних пакетов); `collapsed` в нём игнорируется. Обновляется
+в реальном времени при вводе.
+
+Интерактивное дерево с раскрытием и автоматическим переключением тёмной и светлой темы — `FormDebugJsonView`
+из `@letar/forms/debug` (нужен `@uiw/react-json-view`), пропсы те же:
+
+```tsx
+import { FormDebugJsonView } from '@letar/forms/debug'
+
+<FormDebugJsonView title="Values" collapsed={3} />
+```
 
 ### Проп `debug` на Form (v0.56.0+)
 

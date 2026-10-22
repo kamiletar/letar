@@ -33,11 +33,11 @@ beforeAll(() => {
   // Порт в .env — обычный случай. SOCKET_PORT рядом не должен попасть в результат.
   write('apps/alpha/project.json', '{"name":"alpha"}')
   write('apps/alpha/.env', 'SOCKET_PORT=4003\nPORT=3001\n')
-  write('.claude/commands/alpha.md', '**Порт:** 3001\n')
+  write('.claude/skills/alpha/SKILL.md', '**Порт:** 3001\n')
 
   // Порт только в CLI-команде project.json — так живут лендинги.
   write('apps/beta/project.json', '{"targets":{"dev":{"options":{"command":"next dev -p 3002"}}}}')
-  write('.claude/commands/beta.md', '**Порт:** 3009\n')
+  write('.claude/skills/beta/SKILL.md', '**Порт:** 3009\n')
 
   // Порт только в .env.local (не коммитится) — всё равно объявлен.
   write('apps/gamma/project.json', '{"name":"gamma"}')
@@ -116,7 +116,7 @@ describe('findPortDrift', () => {
   it('ловит расхождение командного файла с объявлением приложения', () => {
     const drift = findPortDrift([{ app: 'beta', declared: [3002], commandPort: 3009, oidcPorts: [] }])
     expect(drift).toEqual([
-      { app: 'beta', source: 'command-file', found: 3009, declared: [3002], file: '.claude/commands/beta.md' },
+      { app: 'beta', source: 'command-file', found: 3009, declared: [3002], file: '.claude/skills/beta/SKILL.md' },
     ])
   })
 

@@ -3,6 +3,7 @@
 import { formatDateOnly } from '@/lib/format'
 import type { NpmCertificate } from '@/lib/nginx-proxy-manager'
 import { Badge, Box, Button, Card, HStack, Text, VStack } from '@chakra-ui/react'
+import { useNow } from '@letar/hooks/utility'
 import { LuShield, LuTrash2 } from 'react-icons/lu'
 
 interface CertificateCardProps {
@@ -18,7 +19,7 @@ export function CertificateCard({ certificate, onDelete }: CertificateCardProps)
 
   // Проверка срока действия
   const expiresDate = new Date(certificate.expires_on)
-  const now = new Date()
+  const now = useNow(60_000)
   const daysUntilExpiry = Math.ceil((expiresDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
 
   const isExpired = daysUntilExpiry < 0

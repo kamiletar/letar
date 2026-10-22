@@ -5,6 +5,9 @@ import packageJson from '../../../package.json'
 
 /** Футер сайта */
 export function Footer() {
+  // oxlint-disable-next-line react/purity -- серверный компонент: время запроса
+  const year = new Date().getFullYear()
+
   return (
     <Box asChild pt={{ base: 14, md: 20 }} pb={8} borderTopWidth="1px" borderColor="border" bg="bg.footer">
       <footer>
@@ -43,7 +46,7 @@ export function Footer() {
             flexWrap="wrap"
           >
             <HStack gap={4} flexWrap="wrap">
-              <Text color="fg.subtle" fontSize="sm">&copy; {new Date().getFullYear()} Letar</Text>
+              <Text color="fg.subtle" fontSize="sm">&copy; {year} Letar</Text>
               <TouchLink href="/privacy/" fontSize="sm" color="fg.subtle" _hover={{ color: 'fg' }}>
                 Конфиденциальность
               </TouchLink>

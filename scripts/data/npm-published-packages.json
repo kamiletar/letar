@@ -5,7 +5,8 @@
     {
       "dir": "libs/forms",
       "tag": "forms",
-      "useClient": { "neutral": ["server-errors.js", "captcha/server.js", "validators/ru.js"] }
+      "useClient": { "neutral": ["server-errors.js", "captcha/server.js", "validators/ru.js"] },
+      "optionalPeerEntries": ["./rich-text", "./data-grid", "./table-editor", "./sortable", "./debug", "./offline"]
     },
     { "dir": "libs/forms-query", "tag": "forms-query" },
     { "dir": "libs/zenstack-form-plugin", "tag": "zenstack-form-plugin" },

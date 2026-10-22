@@ -110,7 +110,7 @@ describe('new-app generator', () => {
     await newAppGenerator(tree, { name: 'my-app' })
 
     // global.css, .swcrc, api/hello и next.config.js (CJS) — то, что приходится чистить после
-    // "сырого" `nx g @nx/next:application` (см. .claude/commands/create/new-app.md шаг 2)
+    // "сырого" `nx g @nx/next:application` (см. .agents/skills/create-new-app/SKILL.md шаг 2)
     expect(tree.exists('apps/my-app/src/app/global.css')).toBe(false)
     expect(tree.exists('apps/my-app/.swcrc')).toBe(false)
     expect(tree.exists('apps/my-app/next.config.js')).toBe(false)

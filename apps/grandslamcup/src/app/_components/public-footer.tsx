@@ -7,6 +7,7 @@
  */
 
 import { Box, Container, Flex, HStack, Image, SimpleGrid, Text, VStack } from '@chakra-ui/react'
+import { useNow } from '@letar/hooks/utility'
 import { BuildVersion, Pressable, StudioCredit, TouchLink } from '@letar/ui'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -38,6 +39,7 @@ export function PublicFooter({ cityTelegramMap }: PublicFooterProps) {
   const pathname = usePathname()
   const citySlug = extractCitySlug(pathname)
   const prefix = citySlug ? `/${citySlug}` : ''
+  const year = useNow().getFullYear()
 
   // На главной (выбор города) footer не показываем
   const isHome = pathname === '/'
@@ -184,7 +186,7 @@ export function PublicFooter({ cityTelegramMap }: PublicFooterProps) {
                   </Pressable>
                 </HStack>
                 <Text fontSize="xs" color="gray.600">
-                  Grand Slam Cup {new Date().getFullYear()}
+                  Grand Slam Cup {year}
                 </Text>
                 <HStack gap={3}>
                   <StudioCredit app="grandslamcup" color="gray.600" />

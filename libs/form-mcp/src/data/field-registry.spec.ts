@@ -161,3 +161,26 @@ describe('getFields', () => {
     expect(getFields(registry, 'payment')).toEqual([])
   })
 })
+
+describe('подключаемые поля (3.0.0)', () => {
+  const tableSection: DocSection = {
+    heading: 'Текстовые поля',
+    level: 2,
+    content: [
+      '| Компонент | Описание |',
+      '| --- | --- |',
+      '| `Form.Field.RichText` | WYSIWYG |',
+      '| `Form.Field.String` | Текст |',
+    ]
+      .join('\n'),
+  }
+
+  it('у RichText есть подпуть и строка регистрации, у String — нет', () => {
+    const registry = buildFieldRegistry([tableSection])
+    expect(registry.get('richtext')?.registration).toMatchObject({
+      subpath: '@letar/forms/rich-text',
+      extraFieldsEntry: 'RichText: FieldRichText',
+    })
+    expect(registry.get('string')?.registration).toBeUndefined()
+  })
+})

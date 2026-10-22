@@ -26,12 +26,22 @@
       "reason": "Тот же класс, тот же прогон deps-update, соседний пакет: @zenstackhq/cli (dependencies.zod: \"^4.0.0\", совместим с 4.4.3) тоже получил приватную копию zod@4.6.5 под bun isolated linker. Следствие — TS2321 'Excessive stack depth comparing types MapType<Schema,?>' (класс уже описан в tsgo-excessive-stack-depth-zenstack.md) в 4 НОВЫХ местах grandslamcup (citySlug-страницы) сверх уже существовавшего техдолга, плюс годная копия сохранилась в domwellbes только благодаря совпадению с MCP-фиксом.",
       "doc": "PLAN-INFRA-*.md — деплой-запись про /infra:deps-update 2026-09-16",
       "unpinWhen": "grep -n '\"@zenstackhq/cli/zod\"' bun.lock даёт пусто и БЕЗ override — тогда убрать override и эту запись одним коммитом."
+    },
+    {
+      "package": "satori",
+      "override": {
+        "fflate": "0.7.5"
+      },
+      "since": "2026-10-22",
+      "reason": "satori@0.33.5 объявляет fflate точно как 0.7.3, а в нём GHSA-px8p-9vwx-vf98 (бесконечный цикл unzipSync на битых ZIP64, исправлено в 0.7.5). Диапазоном не обойти, поэтому scoped override на патч той же линии 0.7.x.",
+      "doc": "bun audit 2026-10-22",
+      "unpinWhen": "satori перестал точно пинить fflate 0.7.3 (в bun.lock у satori > @shuding/opentype.js > fflate версия >=0.7.5 без override) — тогда убрать override и эту запись одним коммитом."
     }
   ],
   "pins": [
     {
       "package": "better-call",
-      "version": "1.4.2",
+      "version": "1.4.4",
       "field": "dependencies",
       "since": "2026-10-03",
       "reason": "better-auth и @better-auth/oauth-provider держат peer better-call ровно 1.4.x (сейчас 1.4.2). Корневой ^1.4.1 разводит копии: плагины (jwt, oauthProvider, nextCookies) типизированы по 1.4.0, а betterAuth() в libs/auth — по 1.4.1, и typecheck:tsgo падает TS2322 'not assignable to type undefined' во всех потребителях @letar/auth.",
@@ -58,7 +68,7 @@
     },
     {
       "package": "oxlint",
-      "version": "1.81.0",
+      "version": "1.89.0",
       "field": "devDependencies",
       "since": "2026-09-04",
       "commit": "40faa9c8",
@@ -68,7 +78,7 @@
     },
     {
       "package": "@modelcontextprotocol/server",
-      "version": "2.0.0",
+      "version": "2.3.1",
       "field": "dependencies",
       "since": "2026-09-16",
       "commit": "TBD — миграция @modelcontextprotocol/sdk v1→v2",
@@ -78,7 +88,7 @@
     },
     {
       "package": "@modelcontextprotocol/client",
-      "version": "2.0.0",
+      "version": "2.3.1",
       "field": "dependencies",
       "since": "2026-09-16",
       "commit": "TBD — миграция @modelcontextprotocol/sdk v1→v2",

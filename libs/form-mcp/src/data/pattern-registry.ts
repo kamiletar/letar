@@ -314,7 +314,7 @@ function ProductEditor() {
     <Form schema={ProductSchema} onSubmit={save}>
       <HistoryControls history={history} showCounter />
       <Form.Field.String name="title" />
-      <Form.Field.RichText name="description" />
+      <Form.Field.Textarea name="description" />
       <Form.Field.Currency name="price" />
       <Form.Button.Submit>Save</Form.Button.Submit>
     </Form>

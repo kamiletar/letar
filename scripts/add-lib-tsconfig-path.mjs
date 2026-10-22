@@ -19,10 +19,15 @@
 // --anchor-package (опционально, по умолчанию "@letar/forms") — какой существующий ключ
 // paths считать признаком «это приложение — потребитель», если работаешь с другой библиотекой.
 //
+// --skip-submodules (флаг без значения) — не трогать tsconfig внутри git submodule (пути берутся из
+// `git config -f .gitmodules --get-regexp path`). Правка публичной библиотеки не должна без ведома
+// хозяев попадать в приватные приложения: им строки отправляют письмом, а они коммитят сами.
+//
 // Находка, из-за которой скрипт появился — двойная механика резолва @letar/forms-core
 // (paths в apps/*/tsconfig.json + workspace-зависимость в package.json), сессия Фазы 7.1
 // расслоения libs/forms → libs/forms-core, см. libs/forms/PLAN.md (Этап 1/Этап 3а).
 
+import { execFileSync } from 'node:child_process'
 import { readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -31,12 +36,19 @@ import { walk } from './lib/fs-walk.mjs'
 const scriptDir = path.dirname(fileURLToPath(import.meta.url))
 const repoRoot = path.resolve(scriptDir, '..')
 
+// Флаги без значения: следующий аргумент они не «съедают»
+const BOOLEAN_FLAGS = new Set(['skip-submodules'])
+
 function parseArgs(argv) {
   const args = {}
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i]
     if (!arg.startsWith('--')) { continue }
     const key = arg.slice(2)
+    if (BOOLEAN_FLAGS.has(key)) {
+      args[key] = true
+      continue
+    }
     const value = argv[i + 1]
     args[key] = value
     i++
@@ -49,10 +61,11 @@ const packageName = args.package
 const target = args.target
 const afterKey = args.after ?? null
 const anchorPackage = args['anchor-package'] ?? '@letar/forms'
+const skipSubmodules = args['skip-submodules'] === true
 
 if (!packageName || !target) {
   console.error(
-    'Использование: node scripts/add-lib-tsconfig-path.mjs --package "<alias>" --target "<путь от корня репо>" [--after "<ключ>"] [--anchor-package "<alias>"]',
+    'Использование: node scripts/add-lib-tsconfig-path.mjs --package "<alias>" --target "<путь от корня репо>" [--after "<ключ>"] [--anchor-package "<alias>"] [--skip-submodules]',
   )
   process.exit(1)
 }
@@ -79,11 +92,36 @@ function ownerLibDir(libsDir, tsconfigPath) {
 
 const appsDir = path.join(repoRoot, 'apps')
 const libsDir = path.join(repoRoot, 'libs')
+// Пути git submodule от корня репо (`apps/aboi`, `libs/driving-school-db`, ...). Читаются только с флагом.
+function readSubmodulePaths() {
+  let out
+  try {
+    out = execFileSync('git', ['config', '-f', '.gitmodules', '--get-regexp', 'path'], {
+      cwd: repoRoot,
+      encoding: 'utf8',
+    })
+  } catch {
+    // .gitmodules нет или в нём нет submodule — пропускать нечего
+    return []
+  }
+  return out
+    .split('\n')
+    .map((line) => line.trim().split(/\s+/)[1])
+    .filter(Boolean)
+}
+
+const submodulePaths = skipSubmodules ? readSubmodulePaths() : []
+
+function isInsideSubmodule(tsconfigPath) {
+  const relative = path.relative(repoRoot, tsconfigPath).split(path.sep).join('/')
+  return submodulePaths.some((sub) => relative === sub || relative.startsWith(`${sub}/`))
+}
+
 const appTsconfigFiles = findTsconfigs(appsDir, 2)
 const libTsconfigFiles = findLibTsconfigs(libsDir).filter(
   (p) => ownerLibDir(libsDir, p) !== ownerLibDirOfPackage,
 )
-const tsconfigFiles = [...appTsconfigFiles, ...libTsconfigFiles].sort()
+const tsconfigFiles = [...appTsconfigFiles, ...libTsconfigFiles].filter((p) => !isInsideSubmodule(p)).sort()
 
 function extractPathsBlock(text) {
   const keyMatch = text.match(/"paths"\s*:\s*\{/)
@@ -229,6 +267,9 @@ if (invalidJson.length > 0) {
 }
 
 console.log(`\nВсего проверено tsconfig.json: ${tsconfigFiles.length}`)
+if (skipSubmodules) {
+  console.log(`Пропущены submodule (--skip-submodules): ${submodulePaths.length}`)
+}
 console.log(
   `Найдено потребителей "${anchorPackage}": ${
     updated.length + skippedAlready.length + noMatch.length + invalidJson.length

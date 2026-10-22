@@ -28,9 +28,12 @@ describe('сверка dev-портов между источниками', () =
   it('монорепо вообще просканировался (защита от молчаливо зелёного теста)', () => {
     expect(declarations.length).toBeGreaterThan(20)
     expect(declarations.filter((d) => d.declared.length > 0).length).toBeGreaterThan(15)
+    // Отдельно для навыков: без этого перенос `.claude/commands` → `.claude/skills` оставил бы
+    // сверку `**Порт:**` молча зелёной (commandPort везде undefined).
+    expect(declarations.filter((d) => d.commandPort !== undefined).length).toBeGreaterThan(10)
   })
 
-  it('`**Порт:**` в .claude/commands/<app>.md совпадает с портом приложения', () => {
+  it('`**Порт:**` в .claude/skills/<app>/SKILL.md совпадает с портом приложения', () => {
     const drift = driftFrom('command-file')
     expect(
       drift,

@@ -431,19 +431,56 @@ applyServerErrors(form, mapped)
 ## Установка
 
 ```bash
-# Уже установлен в монорепозитории
-import { Form } from '@letar/forms'
+npm install @letar/forms @tanstack/react-form @chakra-ui/react zod framer-motion react-icons
 ```
 
-### Опциональные зависимости (npm)
+В монорепозитории пакет уже подключён, ставить его не нужно.
 
-| Пакет                       | Для чего                          |
-| --------------------------- | --------------------------------- |
-| `@dnd-kit/*`                | Drag & drop сортировка в массивах |
-| `@tiptap/*`                 | RichText редактор                 |
-| `@uiw/react-json-view`      | Form.DebugValues (JSON инспектор) |
-| `next-intl`                 | i18n интеграция                   |
-| `@marsidev/react-turnstile` | CAPTCHA (Cloudflare Turnstile)    |
+### Подключаемые поля (с 3.0.0)
+
+Тяжёлые поля вынесены из ядра в отдельные точки входа и подключаются в `createForm` через `extraFields`.
+Переход с 2.x — [docs/MIGRATION-3.md](./docs/MIGRATION-3.md).
+⚠️ Ключ обязан совпадать с именем поля: по нему `AppForm.Field.<Имя>` и автоформа (`fieldType: 'richText'`)
+находят компонент.
+
+```tsx
+import { createForm } from '@letar/forms'
+import { FieldDataGrid } from '@letar/forms/data-grid'
+import { FieldRichText } from '@letar/forms/rich-text'
+import { FieldTableEditor } from '@letar/forms/table-editor'
+
+export const AppForm = createForm({
+  extraFields: { RichText: FieldRichText, DataGrid: FieldDataGrid, TableEditor: FieldTableEditor },
+})
+```
+
+| Подпуть                     | Что даёт                                                           | Нужны пакеты                             |
+| --------------------------- | ------------------------------------------------------------------ | ---------------------------------------- |
+| `@letar/forms/rich-text`    | `FieldRichText` — WYSIWYG                                          | `@tiptap/*`                              |
+| `@letar/forms/data-grid`    | `FieldDataGrid` — таблица с виртуализацией                         | `@tanstack/react-table`, `react-virtual` |
+| `@letar/forms/table-editor` | `FieldTableEditor` — редактируемая таблица                         | `@dnd-kit/*`                             |
+| `@letar/forms/sortable`     | `SortableGroupList` — список с перетаскиванием (вместо `sortable`) | `@dnd-kit/*`                             |
+| `@letar/forms/debug`        | `FormDebugJsonView` — интерактивное дерево значений                | `@uiw/react-json-view`                   |
+
+`Form.DebugValues` и проп `debug` в ядре рисуют простой `<pre>` с JSON (проп `collapsed` в нём игнорируется).
+`AppForm.Field.RichText` без регистрации — ошибка typecheck; `fieldType: 'richText'` в автоформе без регистрации
+рисует Textarea и пишет в dev-консоль одно предупреждение на поле. Проп `sortable` у `Form.Group.List` убран —
+используйте `SortableGroupList`.
+
+### Зависимости (npm)
+
+Обязательных peer-зависимостей шесть: `react`, `@chakra-ui/react`, `@tanstack/react-form`, `framer-motion`,
+`react-icons`, `zod`. Остальные опциональны и нужны только своим подпутям:
+
+| Пакет                                    | Для чего                                 |
+| ---------------------------------------- | ---------------------------------------- |
+| `@dnd-kit/*`                             | `@letar/forms/sortable`, `/table-editor` |
+| `@tiptap/*`                              | `@letar/forms/rich-text`                 |
+| `@tanstack/react-table`, `react-virtual` | `@letar/forms/data-grid`                 |
+| `@uiw/react-json-view`                   | `@letar/forms/debug`                     |
+| `idb-keyval`                             | `@letar/forms/offline`                   |
+
+CAPTCHA Cloudflare Turnstile грузит свой скрипт сам, сторонний пакет не нужен.
 
 ---
 

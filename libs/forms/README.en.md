@@ -7,10 +7,12 @@ Declarative form components for React with **40+ field types**, powered by [TanS
 
 [Документация на русском](./README.ru.md)
 
+Upgrading from 2.x: [docs/MIGRATION-3.md](./docs/MIGRATION-3.md) (in Russian).
+
 ## Quick Start
 
 ```bash
-npm install @letar/forms @tanstack/react-form @chakra-ui/react zod
+npm install @letar/forms @tanstack/react-form @chakra-ui/react zod framer-motion react-icons
 ```
 
 ```tsx
@@ -246,18 +248,44 @@ import { FormOfflineIndicator, useOfflineForm } from '@letar/forms/offline'
 import { FormI18nProvider, useFormI18n } from '@letar/forms/i18n'
 ```
 
+### Pluggable heavy fields (3.0.0)
+
+`RichText`, `DataGrid`, `TableEditor` and drag-and-drop lists are not part of the core. Register the fields in
+`createForm`; the key must match the field name. Each subpath needs its own optional peer packages.
+
+```tsx
+import { createForm } from '@letar/forms'
+import { FieldDataGrid } from '@letar/forms/data-grid' // @tanstack/react-table, react-virtual
+import { FieldRichText } from '@letar/forms/rich-text' // @tiptap/*
+import { SortableGroupList } from '@letar/forms/sortable' // @dnd-kit/*
+import { FieldTableEditor } from '@letar/forms/table-editor' // @dnd-kit/*
+
+export const AppForm = createForm({
+  extraFields: { RichText: FieldRichText, DataGrid: FieldDataGrid, TableEditor: FieldTableEditor },
+})
+```
+
+`AppForm.Field.RichText` without registration is a type error; `fieldType: 'richText'` in auto forms falls back to
+a Textarea and logs one dev warning per field.
+
 ## Peer Dependencies
 
-| Package                | Version   | Required                         |
-| ---------------------- | --------- | -------------------------------- |
-| `react`                | >= 18.0.0 | Yes                              |
-| `@tanstack/react-form` | >= 1.0.0  | Yes                              |
-| `@chakra-ui/react`     | >= 3.0.0  | Yes                              |
-| `framer-motion`        | >= 10.0.0 | Yes                              |
-| `zod`                  | >= 3.24.0 | Yes                              |
-| `@dnd-kit/*`           | >= 6.0.0  | Optional (drag & drop in arrays) |
-| `use-mask-input`       | >= 3.0.0  | Optional (Phone, MaskedInput)    |
-| `@uiw/react-json-view` | >= 2.0.0  | Optional (Form.DebugValues)      |
+Six peers are required: `react`, `@chakra-ui/react`, `@tanstack/react-form`, `framer-motion`, `react-icons`, `zod`.
+Everything else is optional and needed only by its subpath.
+
+| Package                                  | Version   | Required for                            |
+| ---------------------------------------- | --------- | --------------------------------------- |
+| `react`                                  | >= 18.0.0 | Always                                  |
+| `@tanstack/react-form`                   | >= 1.0.0  | Always                                  |
+| `@chakra-ui/react`                       | >= 3.0.0  | Always                                  |
+| `framer-motion`                          | >= 10.0.0 | Always                                  |
+| `react-icons`                            | >= 5.0.0  | Always                                  |
+| `zod`                                    | ^4.0.0    | Always                                  |
+| `@tiptap/*`                              | >= 3.0.0  | Optional (`@letar/forms/rich-text`)     |
+| `@dnd-kit/*`                             | >= 6.0.0  | Optional (`/sortable`, `/table-editor`) |
+| `@tanstack/react-table`, `react-virtual` | >= 8 / 3  | Optional (`@letar/forms/data-grid`)     |
+| `@uiw/react-json-view`                   | >= 2.0.0  | Optional (`@letar/forms/debug`)         |
+| `idb-keyval`                             | >= 6.0.0  | Optional (`@letar/forms/offline`)       |
 
 ## Documentation
 

@@ -9,7 +9,7 @@
 ## Установка
 
 ```bash
-npm i @letar/forms-react@beta @tanstack/react-form react zod
+npm i @letar/forms-react @tanstack/react-form react zod
 ```
 
 Требуется peer `@letar/forms-core` (>=0.28.0 <1).

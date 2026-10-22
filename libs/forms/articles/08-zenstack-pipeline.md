@@ -157,23 +157,25 @@ import { ProductCreateFormSchema } from '@/generated/form-schemas' // Автог
 Или с ручной вёрсткой:
 
 ```tsx
-<Form schema={ProductCreateFormSchema} initialValue={{}} onSubmit={createProduct}>
+<AppForm schema={ProductCreateFormSchema} initialValue={{}} onSubmit={createProduct}>
   <VStack gap={4}>
     <HStack>
-      <Form.Field.String name="title" />
-      <Form.Field.String name="sku" />
+      <AppForm.Field.String name="title" />
+      <AppForm.Field.String name="sku" />
     </HStack>
-    <Form.Field.RichText name="description" />
+    <AppForm.Field.RichText name="description" />
     <HStack>
-      <Form.Field.Currency name="price" />
-      <Form.Field.Rating name="rating" />
+      <AppForm.Field.Currency name="price" />
+      <AppForm.Field.Rating name="rating" />
     </HStack>
-    <Form.Field.Combobox name="categoryId" />
-    <Form.Field.Switch name="inStock" />
-    <Form.Button.Submit>Создать</Form.Button.Submit>
+    <AppForm.Field.Combobox name="categoryId" />
+    <AppForm.Field.Switch name="inStock" />
+    <AppForm.Button.Submit>Создать</AppForm.Button.Submit>
   </VStack>
-</Form>
+</AppForm>
 ```
+
+> С 3.0.0 `RichText` не входит в ядро: `AppForm` — инстанс `createForm({ extraFields: { RichText: FieldRichText } })`, компоненты — из `@letar/forms/rich-text`. Подробнее — [MIGRATION-3](../docs/MIGRATION-3.md).
 
 Обратите внимание: `Field.RichText`, `Field.Currency`, `Field.Rating` — библиотека знает тип каждого поля из `.meta({ ui: { fieldType } })`. Label и placeholder — тоже из схемы.
 

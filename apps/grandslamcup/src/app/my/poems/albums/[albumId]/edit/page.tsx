@@ -15,6 +15,11 @@ export const metadata: Metadata = {
   title: 'Редактирование альбома',
 }
 
+/** Стихотворение в составе альбома: только поля, нужные селектору */
+interface AlbumPoemRow {
+  poem: { id: string; title: string; slug: string; published: boolean }
+}
+
 type Params = Promise<{ albumId: string }>
 
 export default async function EditAlbumPage({ params }: { params: Params }) {
@@ -27,6 +32,8 @@ export default async function EditAlbumPage({ params }: { params: Params }) {
   }
 
   const { album, allPoems } = result.data
+  // Узкий тип вместо вывода ZenStack: tsgo падает на TS2321 при .map (tsgo-excessive-stack-depth-zenstack.md)
+  const albumPoemRows: AlbumPoemRow[] = album.albumPoems
 
   return (
     <VStack gap={8} align="stretch" maxW="3xl">
@@ -50,7 +57,7 @@ export default async function EditAlbumPage({ params }: { params: Params }) {
       <Heading size="md">Стихотворения в альбоме</Heading>
       <AlbumPoemSelector
         albumId={album.id}
-        initialAlbumPoems={album.albumPoems.map((ap) => ap.poem)}
+        initialAlbumPoems={albumPoemRows.map((ap) => ap.poem)}
         allPoems={allPoems}
       />
     </VStack>

@@ -5,7 +5,7 @@
  *
  *   1. **канон** — `SERVER_APPS` в `libs/infra-config/src/index.ts`. Источник истины: по нему
  *      резолвится `deploy_app`/`resolveDeployServer`, то есть реальный деплой идёт именно туда;
- *   2. **командный файл** `.claude/commands/<app>.md` — строка `**Сервер:** sN (...)`. Её читает
+ *   2. **командный файл** `.claude/skills/<app>/SKILL.md` — строка `**Сервер:** sN (...)`. Её читает
  *      агент, когда открывает приложение, и ей же верит при диагностике/ручных SSH-действиях.
  *
  * Расхождение молчаливое: деплой продолжает идти на актуальный сервер (канон не трогается),
@@ -24,7 +24,7 @@ import { getServerForApp, type InfraServer } from './index'
 
 /**
  * Строка `**Сервер:** s2 (185.28.85.195) — s1 выведен из эксплуатации ...` в
- * `.claude/commands/<app>.md`. Берём ПЕРВОЕ вхождение `sN` сразу после заголовка — оно называет
+ * `.claude/skills/<app>/SKILL.md`. Берём ПЕРВОЕ вхождение `sN` сразу после заголовка — оно называет
  * актуальный сервер приложения. Всё, что идёт дальше в той же строке (адрес в скобках,
  * историческое примечание про выведенный из эксплуатации сервер) — не должно матчиться.
  */
@@ -40,7 +40,7 @@ function isKnownServer(value: string): value is InfraServer {
 /** Что командный файл знает о сервере одного приложения. */
 export interface AppServerDeclaration {
   app: string
-  /** Сервер из `.claude/commands/<app>.md`, если файл есть и содержит строку `**Сервер:**`. */
+  /** Сервер из `.claude/skills/<app>/SKILL.md`, если файл есть и содержит строку `**Сервер:**`. */
   commandServer?: InfraServer
   /** Канонический сервер приложения — `getServerForApp(app)`. */
   canonicalServer: InfraServer
@@ -63,7 +63,7 @@ function readIfExists(path: string): string | undefined {
 
 /** Сервер из командного файла агента, если он там объявлен и распознан. */
 export function readCommandServer(workspaceRoot: string, app: string): InfraServer | undefined {
-  const content = readIfExists(join(workspaceRoot, '.claude', 'commands', `${app}.md`))
+  const content = readIfExists(join(workspaceRoot, '.claude', 'skills', app, 'SKILL.md'))
   const match = content?.match(COMMAND_SERVER_PATTERN)
   const server = match?.[1]
   return server !== undefined && isKnownServer(server) ? server : undefined
@@ -71,7 +71,7 @@ export function readCommandServer(workspaceRoot: string, app: string): InfraServ
 
 /**
  * Что командный файл знает о сервере — по всем приложениям монорепо, для которых
- * `.claude/commands/<app>.md` вообще объявляет `**Сервер:**`.
+ * `.claude/skills/<app>/SKILL.md` вообще объявляет `**Сервер:**`.
  *
  * `listApps` переиспользуется из `app-ports.ts`, чтобы не дублировать обход `apps/*` —
  * критерий «это приложение» (каталог с `project.json`) один и тот же для обеих проверок.
@@ -108,7 +108,7 @@ export function findServerDrift(declarations: AppServerDeclaration[]): ServerDri
         app,
         found: commandServer,
         canonical: canonicalServer,
-        file: `.claude/commands/${app}.md`,
+        file: `.claude/skills/${app}/SKILL.md`,
       })
     }
   }

@@ -6,38 +6,67 @@ description: Install @letar/forms and its peer dependencies
 ## Install
 
 ```bash
-npm install @letar/forms @tanstack/react-form @chakra-ui/react zod framer-motion
+npm install @letar/forms @tanstack/react-form @chakra-ui/react zod framer-motion react-icons
 # or with bun
-bun add @letar/forms @tanstack/react-form @chakra-ui/react zod framer-motion
+bun add @letar/forms @tanstack/react-form @chakra-ui/react zod framer-motion react-icons
 # or with pnpm
-pnpm add @letar/forms @tanstack/react-form @chakra-ui/react zod framer-motion
+pnpm add @letar/forms @tanstack/react-form @chakra-ui/react zod framer-motion react-icons
 ```
 
 ## Optional Dependencies
 
-For drag & drop reordering in array fields:
+Six peer dependencies are required (`react`, `@chakra-ui/react`, `@tanstack/react-form`, `framer-motion`, `react-icons`, `zod`). Heavy fields need their own packages only when you use them.
+
+For drag & drop reordering (`@letar/forms/sortable`, `@letar/forms/table-editor`):
 
 ```bash
 npm install @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities
 ```
 
-For input masking (phone, credit card, etc.):
+For `RichText` (`@letar/forms/rich-text`):
 
 ```bash
-npm install use-mask-input
+npm install @tiptap/react @tiptap/starter-kit @tiptap/extension-image @tiptap/extension-link @tiptap/extension-placeholder @tiptap/extension-underline
 ```
+
+For `DataGrid` (`@letar/forms/data-grid`):
+
+```bash
+npm install @tanstack/react-table @tanstack/react-virtual
+```
+
+For `FormDebugJsonView` (`@letar/forms/debug`):
+
+```bash
+npm install @uiw/react-json-view
+```
+
+For offline drafts (`@letar/forms/offline`):
+
+```bash
+npm install idb-keyval
+```
+
+Input masks (phone, card, etc.) are built in and need no extra package.
 
 ## Peer Dependencies
 
-| Package                | Version   | Required |
-| ---------------------- | --------- | -------- |
-| `react`                | >= 18.0.0 | Yes      |
-| `@tanstack/react-form` | >= 1.0.0  | Yes      |
-| `@chakra-ui/react`     | >= 3.0.0  | Yes      |
-| `framer-motion`        | >= 10.0.0 | Yes      |
-| `zod`                  | >= 3.24.0 | Yes      |
-| `@dnd-kit/*`           | >= 6.0.0  | Optional |
-| `use-mask-input`       | >= 3.0.0  | Optional |
+| Package                                                       | Version          | Required                                |
+| ------------------------------------------------------------- | ---------------- | --------------------------------------- |
+| `react`                                                       | >= 18.0.0        | Yes                                     |
+| `@chakra-ui/react`                                            | >= 3.0.0         | Yes                                     |
+| `@tanstack/react-form`                                        | >= 1.0.0         | Yes                                     |
+| `framer-motion`                                               | >= 10.0.0        | Yes                                     |
+| `react-icons`                                                 | >= 5.0.0         | Yes                                     |
+| `zod`                                                         | ^4.0.0           | Yes                                     |
+| `@dnd-kit/core`                                               | >= 6.0.0         | Optional (`/sortable`, `/table-editor`) |
+| `@dnd-kit/sortable`                                           | >= 10.0.0        | Optional (`/sortable`, `/table-editor`) |
+| `@dnd-kit/utilities`                                          | >= 3.0.0         | Optional (`/sortable`, `/table-editor`) |
+| `@tiptap/react`, `@tiptap/starter-kit`, `@tiptap/extension-*` | >= 3.0.0         | Optional (`/rich-text`)                 |
+| `@tanstack/react-table`                                       | >= 8.0.0         | Optional (`/data-grid`)                 |
+| `@tanstack/react-virtual`                                     | >= 3.0.0         | Optional (`/data-grid`)                 |
+| `@uiw/react-json-view`                                        | >= 2.0.0-alpha.0 | Optional (`/debug`)                     |
+| `idb-keyval`                                                  | >= 6.0.0         | Optional (`/offline`)                   |
 
 ## Setup
 

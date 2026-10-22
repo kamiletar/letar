@@ -8,6 +8,7 @@
 import { PageH1 } from '@/components/page-h1'
 import { Card, Heading, Separator, Stack, Text } from '@chakra-ui/react'
 import { Form } from '@letar/forms'
+import { SortableGroupList } from '@letar/forms/sortable'
 import { z } from 'zod/v4'
 
 // --- 1. Базовый пример: вложенный объект + динамический массив ---
@@ -143,14 +144,14 @@ export default function GroupsPage() {
             onSubmit={async (data) => alert(JSON.stringify(data, null, 2))}
           >
             <Stack gap={4}>
-              <Form.Group.List name="skills" sortable>
+              <SortableGroupList name="skills">
                 <Stack gap={3} direction="row" align="center">
-                  <Form.Group.List.Button.DragHandle />
+                  <SortableGroupList.Button.DragHandle />
                   <Form.Field.String name="title" />
                   <Form.Field.Select name="level" options={levelOptions} />
-                  <Form.Group.List.Button.Remove />
+                  <SortableGroupList.Button.Remove />
                 </Stack>
-              </Form.Group.List>
+              </SortableGroupList>
 
               <Form.DebugValues showInProduction />
               <Form.Button.Submit>Submit</Form.Button.Submit>

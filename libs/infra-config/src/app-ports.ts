@@ -5,7 +5,7 @@
  *
  *   1. **само приложение** — `apps/<app>/.env`, `.env.local` или CLI-команда в `project.json`
  *      (`next dev -p 3008`). Это ЕДИНСТВЕННЫЙ источник истины: по нему поднимается dev-сервер;
- *   2. **командный файл** `.claude/commands/<app>.md` — строка `**Порт:** <N>`. Её читает агент,
+ *   2. **командный файл** `.claude/skills/<app>/SKILL.md` — строка `**Порт:** <N>`. Её читает агент,
  *      когда открывает приложение, и по ней же ходит в браузер;
  *   3. **seed Ключницы** `apps/auth-hub/prisma/seed.ts` — `http://localhost:<N>/...` в
  *      `redirectUrls` OIDC-клиента. По нему Better Auth валидирует redirect при локальном входе.
@@ -50,7 +50,7 @@ const ENV_PORT_PATTERN = /^[ \t]*PORT[ \t]*=[ \t]*(\d+)/gm
 /** Порт из CLI-команды в project.json: `next dev -p 3008`, `next start --port=3008`. */
 const CLI_PORT_PATTERN = /(?<![\w-])(?:--port|-p)[ =]+(\d+)/g
 
-/** Строка `**Порт:** 3024` в `.claude/commands/<app>.md`. */
+/** Строка `**Порт:** 3024` в `.claude/skills/<app>/SKILL.md`. */
 const COMMAND_PORT_PATTERN = /\*\*Порт:\*\*\s*(\d+)/
 
 /** `clientId: 'studio-prod'` в seed Ключницы — граница секции клиента. */
@@ -67,7 +67,7 @@ export interface AppPortDeclaration {
   app: string
   /** Порты, объявленные самим приложением. Пусто — приложение не объявляет порт нигде. */
   declared: number[]
-  /** Порт из `.claude/commands/<app>.md`, если файл есть и содержит строку `**Порт:**`. */
+  /** Порт из `.claude/skills/<app>/SKILL.md`, если файл есть и содержит строку `**Порт:**`. */
   commandPort?: number
   /** Уникальные localhost-порты из redirectUrls OIDC-клиента этого приложения. */
   oidcPorts: number[]
@@ -147,7 +147,7 @@ export function collectDeclaredPorts(workspaceRoot: string, app: string): number
 
 /** Порт из командного файла агента, если он там объявлен. */
 export function readCommandPort(workspaceRoot: string, app: string): number | undefined {
-  const content = readIfExists(join(workspaceRoot, '.claude', 'commands', `${app}.md`))
+  const content = readIfExists(join(workspaceRoot, '.claude', 'skills', app, 'SKILL.md'))
   const match = content?.match(COMMAND_PORT_PATTERN)
   const port = match ? Number(match[1]) : Number.NaN
   return isDevPort(port) ? port : undefined
@@ -230,7 +230,7 @@ export function findPortDrift(declarations: AppPortDeclaration[]): PortDrift[] {
         source: 'command-file',
         found: commandPort,
         declared,
-        file: `.claude/commands/${app}.md`,
+        file: `.claude/skills/${app}/SKILL.md`,
       })
     }
 
