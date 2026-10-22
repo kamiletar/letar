@@ -14,7 +14,7 @@ disable-model-invocation: true
    `bun scripts/tasks.mjs next notebook`. Вызов с id (`/notebook NB-003`) — сразу
    `bun scripts/tasks.mjs show NB-003`. `PLAN.md`, `PLAN_COMPLETED.md` **заморожены** и остаются справкой: целиком их не
    читать, открывать только раздел из поля `source` выбранной задачи (`grep -n` и `Read` с `offset`)
-3. Схемы и решения — страница плана: https://claude.ai/artifact/LUsWWH9iycSE4MrkBVrdCZ
+3. Схемы и решения — страница плана: https://pages.letar.best/p/notebook-plan/
 
 ## Регистрация в Agent Mail
 

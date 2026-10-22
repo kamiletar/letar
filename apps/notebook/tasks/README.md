@@ -29,5 +29,5 @@
 
 - `PLAN.md` (6 КБ), `PLAN_COMPLETED.md` (5 КБ) заморожены: целиком не читать, `grep -n '^#' <файл>` и `Read` с `offset` по полю `source`
   выбранной задачи.
-- Страница плана со схемами: https://claude.ai/artifact/LUsWWH9iycSE4MrkBVrdCZ
+- Страница плана со схемами: https://pages.letar.best/p/notebook-plan/
 - `PLAN_TESTING.md` и `CHANGELOG.md` не заморожены; журнал изменений ищется `grep`.

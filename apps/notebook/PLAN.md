@@ -6,7 +6,7 @@
 > [tasks-per-file](/.claude/docs/tasks-per-file.md).
 
 Личный блокнот: версии заметок, откат, офлайн-режим и публикация в рубрики сайта.
-Схемы и решения — страница плана: https://claude.ai/artifact/LUsWWH9iycSE4MrkBVrdCZ
+Схемы и решения — страница плана: https://pages.letar.best/p/notebook-plan/
 
 ## Решения
 
