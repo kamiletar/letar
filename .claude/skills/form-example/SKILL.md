@@ -8,7 +8,11 @@ disable-model-invocation: true
 
 ## Инициализация
 
-1. Прочитай `apps/form-example/PLAN.md` для текущего состояния задач (если есть)
+1. ⚠️ **Очередь задач — `apps/form-example/tasks/`** (формат — [tasks-per-file](/.claude/docs/tasks-per-file.md)).
+   Прочитай [`tasks/README.md`](/apps/form-example/tasks/README.md) и выполни
+   `bun scripts/tasks.mjs next form-example`. Вызов с id (`/form-example FX-003`) — сразу
+   `bun scripts/tasks.mjs show FX-003`. `PLAN.md`, `PLAN_COMPLETED.md` **заморожены** и остаются справкой: целиком их не
+   читать, открывать только раздел из поля `source` выбранной задачи (`grep -n` и `Read` с `offset`)
 2. Прочитай `libs/forms/README.md` для контекста библиотеки
 
 ## Регистрация в Agent Mail
@@ -35,13 +39,13 @@ fetch_inbox(project_key: "c-web-letar", agent_name: "form-example-dev", registra
 
 После изучения документации:
 
-- Определи текущую фазу разработки
-- Выбери следующую задачу из плана
-- Предложи план действий
+- Выбери задачу из «можно брать», `start FX-NNN --owner form-example-dev`
+- План работы запиши в раздел «План» файла задачи и предложи его
+- Находку вне задачи заводи через `tasks new form-example …`, не абзацем в плане
 
 ## После завершения задачи
 
-Общий чек-лист — `.claude/rules/app-workflow.md`.
+`bun scripts/tasks.mjs done FX-NNN --summary "…"`, дальше общий чек-лист — `.claude/rules/app-workflow.md`.
 
 ## Деплой
 

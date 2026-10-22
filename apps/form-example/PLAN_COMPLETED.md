@@ -1,5 +1,10 @@
 # Выполненные задачи — form-example
 
+> ⚠️ **С 2026-10-12 файл заморожен.** Очередь задач — в [`tasks/`](/apps/form-example/tasks/README.md)
+> (`bun scripts/tasks.mjs next form-example` из корня монорепо). Новые задачи, журнал и итоги сюда
+> не пишутся: хук не пропустит рост файла. Здесь остаётся справка. Формат —
+> [tasks-per-file](/.claude/docs/tasks-per-file.md).
+
 ## useFormServerAction на `/examples/server-errors` (2026-09-14)
 
 Дополнена секцией «useFormServerAction — та же связка в один вызов» рядом с уже существующим
