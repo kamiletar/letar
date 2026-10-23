@@ -742,7 +742,7 @@
     },
     "apps/flora": {
       "name": "@letar/flora",
-      "version": "0.3.26",
+      "version": "0.3.27",
       "dependencies": {
         "@letar/demo-protection": "workspace:*",
         "@letar/env-load": "workspace:*",
@@ -1340,7 +1340,7 @@
     },
     "libs/forms": {
       "name": "@letar/forms",
-      "version": "3.0.1",
+      "version": "3.0.2",
       "dependencies": {
         "@tanstack/react-table": "^9.2.4",
         "@tanstack/react-virtual": "^3.13.23",
