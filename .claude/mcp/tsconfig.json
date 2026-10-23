@@ -5,7 +5,7 @@
   "//3": "tsgo --noEmit. rootDir поднят до корня репо — иначе TS6059 на импортах из libs/*.",
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "types": ["node"],
+    "types": ["node", "bun-types"],
     "noEmit": true,
     "allowImportingTsExtensions": true,
     "composite": false,

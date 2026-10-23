@@ -18,6 +18,6 @@
     "@modelcontextprotocol/server": "2.3.1"
   },
   "devDependencies": {
-    "zod": "4.6.5"
+    "zod": "4.6.7"
   }
 }

@@ -16,7 +16,7 @@
   "dependencies": {
     "@letar/infra-config": "workspace:*",
     "@letar/mcp-server-kit": "workspace:*",
-    "zod": "4.6.5",
+    "zod": "4.6.7",
     "@modelcontextprotocol/server": "2.3.1"
   },
   "devDependencies": {

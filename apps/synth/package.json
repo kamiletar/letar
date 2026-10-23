@@ -3,7 +3,7 @@
   "version": "0.22.10",
   "private": true,
   "dependencies": {
-    "zod": "4.6.5",
+    "zod": "4.6.7",
     "@letar/format-utils": "workspace:*",
     "@letar/hooks": "workspace:*",
     "@modelcontextprotocol/server": "2.3.1"
