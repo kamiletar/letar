@@ -620,7 +620,7 @@
     },
     "apps/domwellbes": {
       "name": "@letar/domwellbes",
-      "version": "0.348.35",
+      "version": "0.348.36",
       "dependencies": {
         "@gltf-transform/core": "^4.5.0",
         "@gltf-transform/extensions": "^4.5.0",
@@ -664,7 +664,7 @@
         "three": "^0.186.0",
         "tus-js-client": "^4.3.1",
         "web-ifc": "0.0.77",
-        "zod": "4.6.5",
+        "zod": "4.6.7",
       },
       "devDependencies": {
         "@letar/mcp-test-kit": "workspace:*",
@@ -8487,7 +8487,6 @@
 
     "@letar/animatrona-mobile/react-native-vision-camera": ["react-native-vision-camera@4.7.3", "", { "peerDependencies": { "@shopify/react-native-skia": "*", "react": "*", "react-native": "*", "react-native-reanimated": "*", "react-native-worklets-core": "*" }, "optionalPeers": ["@shopify/react-native-skia", "react-native-reanimated", "react-native-worklets-core"] }, "sha512-g1/neOyjSqn1kaAa2FxI/qp5KzNvPcF0bnQw6NntfbxH6tm0+8WFZszlgb5OV+iYlB6lFUztCbDtyz5IpL47OA=="],
 
-    "@letar/domwellbes/zod": ["zod@4.6.5", "", {}, "sha512-v5l/aFXZQeai4awLbOpSoHecE9UiMrnfx75tEXLjNonXVARxQ5mOeipTjROUchszUNCqnE+hqAMujRsRHsut2Q=="],
 
     "@letar/dsperevod/@better-auth/utils": ["@better-auth/utils@0.4.2", "", { "dependencies": { "@noble/hashes": "^2.0.1" } }, "sha512-AUxrvu+HaaODsUyzDxFgwd/8RZ1yZaYo42LXKSrU2oGgR38pS1ij8nqQKNgtTWoYGpNevNXtCfgTy6loHveW9A=="],
 
