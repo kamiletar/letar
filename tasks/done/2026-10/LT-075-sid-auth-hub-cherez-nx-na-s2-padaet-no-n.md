@@ -33,3 +33,7 @@ closed: 2026-10-23
 ## Итог
 
 Причина на s2 не подтверждена: имена во всех package.json в scripts/npm-smoke на месте. Обход: scripts/npm-smoke в .nxignore, после него Nx на s2 строит граф (149 проектов, у auth-hub виден db:seed). Сам запуск сида через Nx не проверен: сделать при следующем деплое auth-hub с --seed (в логе Done: 10 clients seeded).
+
+## Проверка (2026-10-23, позже)
+
+Деплой auth-hub с `--seed` на s2: `nx run auth-hub:db:seed` отработал штатно, `Done: 10 clients seeded`, ошибок графа проектов нет. Живой вход на pages после нового сида работает.
