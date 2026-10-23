@@ -830,7 +830,7 @@
     },
     "apps/kami": {
       "name": "kami",
-      "version": "0.35.8",
+      "version": "0.36.0",
       "dependencies": {
         "@letar/auth": "workspace:*",
         "@letar/email": "workspace:*",
@@ -991,7 +991,7 @@
     },
     "apps/studio": {
       "name": "@letar/studio",
-      "version": "0.78.6",
+      "version": "0.79.0",
       "dependencies": {
         "@letar/admin-ui": "workspace:*",
         "@letar/consent": "workspace:*",
