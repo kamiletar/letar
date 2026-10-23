@@ -19,6 +19,10 @@ export default defineConfig({
       reportsDirectory: '../../coverage/apps/archetest',
       reporter: ['text', 'json', 'html'],
     },
+    // CI: job-level DATABASE_URL смотрит в пустую БД `ci` без схемы, а access-policies.test ходит в настоящую
+    // БД (иначе набор пропускается). Подменяем на archetest_ci — её создаёт и наполняет шаг workflow
+    // `Prepare test databases`. `test.env` спредится в Vitest последним, поверх process.env.
+    env: process.env.CI ? { DATABASE_URL: 'postgresql://ci:ci@localhost:5432/archetest_ci' } : {},
     clearMocks: true,
     restoreMocks: true,
   },
@@ -31,6 +35,7 @@ export default defineConfig({
       { find: /^@letar\/ui$/, replacement: resolve(import.meta.dirname, '../../libs/ui/src/index.ts') },
       // Лёгкий баррель без next/*: резолвим настоящий модуль, мок не нужен
       { find: /^@letar\/hooks$/, replacement: resolve(import.meta.dirname, '../../libs/hooks/src/index.ts') },
+      { find: /^@letar\/hooks\/utility$/, replacement: resolve(import.meta.dirname, '../../libs/hooks/src/utility.ts') },
     ],
   },
 })

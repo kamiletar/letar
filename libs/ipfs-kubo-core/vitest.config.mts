@@ -14,6 +14,7 @@ export default defineConfig({
       reportsDirectory: '../../coverage/libs/ipfs-kubo-core',
       reporter: ['text', 'json', 'html'],
     },
+    passWithNoTests: true,
     clearMocks: true,
     restoreMocks: true,
   },

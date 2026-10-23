@@ -142,6 +142,9 @@ jobs:
           psql -h localhost -U ci -d ci -c 'CREATE DATABASE animatrona_tracker_ci'
           bunx nx run animatrona-tracker:zenstack:generate
           DATABASE_URL=postgresql://ci:ci@localhost:5432/animatrona_tracker_ci bunx nx run animatrona-tracker:db:push
+          psql -h localhost -U ci -d ci -c 'CREATE DATABASE archetest_ci'
+          bunx nx run archetest:zenstack:generate
+          DATABASE_URL=postgresql://ci:ci@localhost:5432/archetest_ci bunx nx run archetest:db:push
 
       # --parallel=2 (не 3, как у lint/typecheck) и ограничение воркеров vitest внутри каждого
       # проекта — иначе 3 nx-таски × собственный пул воркеров vitest на каждую одновременно

@@ -75,6 +75,7 @@ function buildRequest(directoryCid: string) {
 
 describe('POST /api/anime — дедуп гонки по directoryCid', () => {
   const animeIds: string[] = []
+  const directoryCids: string[] = []
 
   beforeAll(async () => {
     const user = await prisma.user.create({
@@ -84,25 +85,36 @@ describe('POST /api/anime — дедуп гонки по directoryCid', () => {
   })
 
   afterAll(async () => {
-    await prisma.anime.deleteMany({ where: { id: { in: animeIds } } })
+    // Чистим и по directoryCid: при падении теста до animeIds.push запись иначе блокирует удаление User
+    await prisma.anime.deleteMany({
+      where: { OR: [{ id: { in: animeIds } }, { directoryCid: { in: directoryCids } }] },
+    })
     await prisma.user.delete({ where: { id: testUserId } })
   })
 
   it('два параллельных вызова с одинаковым directoryCid создают только одну запись', async () => {
     const directoryCid = makeCid(Date.now().toString(36))
+    directoryCids.push(directoryCid)
 
     const [first, second] = await Promise.all([buildRequest(directoryCid), buildRequest(directoryCid)].map(POST))
     const [firstBody, secondBody] = await Promise.all([first.json(), second.json()])
 
+    // Исходов два, оба корректны: второй запрос либо упёрся в unique (409), либо успел увидеть
+    // уже закоммиченную запись и пошёл в идемпотентное обновление (200). Важно одно: ровно один 201.
     const statuses = [first.status, second.status].sort()
-    expect(statuses).toEqual([201, 409])
+    expect(statuses[0] === 201 || statuses[1] === 201).toBe(true)
+    expect(statuses.filter((s) => s === 201)).toHaveLength(1)
+    expect([200, 409]).toContain(statuses.find((s) => s !== 201))
 
     const successBody = first.status === 201 ? firstBody : secondBody
-    const conflictBody = first.status === 409 ? firstBody : secondBody
+    const otherBody = first.status === 201 ? secondBody : firstBody
+    const otherStatus = first.status === 201 ? second.status : first.status
 
     animeIds.push(successBody.anime.id)
 
-    expect(conflictBody.error).toMatch(/Конфликт уникальности/)
+    if (otherStatus === 409) {
+      expect(otherBody.error).toMatch(/Конфликт уникальности/)
+    }
 
     const rows = await prisma.anime.findMany({ where: { directoryCid } })
     expect(rows).toHaveLength(1)
