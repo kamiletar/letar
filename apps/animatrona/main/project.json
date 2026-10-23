@@ -89,12 +89,24 @@
       }
     },
     "typecheck": {
+      "dependsOn": [
+        {
+          "projects": ["animatrona"],
+          "target": "zenstack:generate"
+        }
+      ],
       "executor": "nx:run-commands",
       "options": {
         "command": "tsc --noEmit -p apps/animatrona/main/tsconfig.json"
       }
     },
     "typecheck:tsgo": {
+      "dependsOn": [
+        {
+          "projects": ["animatrona"],
+          "target": "zenstack:generate"
+        }
+      ],
       "executor": "nx:run-commands",
       "options": {
         "command": "tsgo --noEmit -p apps/animatrona/main/tsconfig.json"
