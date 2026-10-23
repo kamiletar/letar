@@ -52,6 +52,11 @@ updated: 2026-10-23
 - Nx test каталога form-steps: 5 файлов / 50 тестов PASS, из них 7 новых регрессий.
   Nx lint + typecheck:tsgo PASS; 6 существующих lint-предупреждений в других файлах.
   Scoped dprint fmt/check исходника и spec PASS. В итоговом diff библиотеки чужих правок нет.
+- После проверки локального Chakra-правила композиция переведена на `Steps.Item asChild`:
+  DOM-адаптер сохраняет presentation и удаление aria-current, запрещённый проп as не используется.
+  Повторные 7 регрессий PASS. Actual axe на SSR-разметке импортированного настоящего
+  FormStepsIndicator в Chromium: 0 нарушений aria-required-children, aria-required-parent,
+  aria-valid-attr-value во всех трёх режимах (обычный, linear, clickable=false).
 
 ## Итог
 

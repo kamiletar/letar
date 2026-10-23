@@ -57,24 +57,26 @@ export function FormStepsIndicator({
   return (
     <Steps.List>
       {steps.map((step) => (
-        <Steps.Item key={step.index} index={step.index} as={PresentationalStepItem}>
-          <Steps.Trigger
-            aria-label={collapseLabelsBelow ? step.title : undefined}
-            disabled={!isClickable}
-          >
-            <Steps.Indicator>
-              <Steps.Status complete={completedIcon} incomplete={step.icon || <Steps.Number />} />
-            </Steps.Indicator>
-            {showDescriptions && step.description
-              ? (
-                <Box display={labelDisplay}>
-                  <Steps.Title>{step.title}</Steps.Title>
-                  <Steps.Description display={labelDisplay}>{step.description}</Steps.Description>
-                </Box>
-              )
-              : <Steps.Title display={labelDisplay}>{step.title}</Steps.Title>}
-          </Steps.Trigger>
-          <Steps.Separator />
+        <Steps.Item key={step.index} index={step.index} asChild>
+          <PresentationalStepItem>
+            <Steps.Trigger
+              aria-label={collapseLabelsBelow ? step.title : undefined}
+              disabled={!isClickable}
+            >
+              <Steps.Indicator>
+                <Steps.Status complete={completedIcon} incomplete={step.icon || <Steps.Number />} />
+              </Steps.Indicator>
+              {showDescriptions && step.description
+                ? (
+                  <Box display={labelDisplay}>
+                    <Steps.Title>{step.title}</Steps.Title>
+                    <Steps.Description display={labelDisplay}>{step.description}</Steps.Description>
+                  </Box>
+                )
+                : <Steps.Title display={labelDisplay}>{step.title}</Steps.Title>}
+            </Steps.Trigger>
+            <Steps.Separator />
+          </PresentationalStepItem>
         </Steps.Item>
       ))}
     </Steps.List>
