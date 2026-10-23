@@ -1,8 +1,15 @@
 'use client'
 
 import { Box, Steps } from '@chakra-ui/react'
+import type { ComponentProps } from 'react'
 import { LuCheck } from 'react-icons/lu'
 import { useFormStepsContext } from './form-steps-context'
+
+// Ark добавляет aria-current после слияния пропсов, поэтому undefined его не удаляет.
+// Состояние шага объявляет вкладка через aria-selected, а обёртка остаётся декоративной.
+function PresentationalStepItem({ 'aria-current': _current, ...props }: ComponentProps<'div'>) {
+  return <div {...props} role="presentation" />
+}
 
 export interface FormStepsIndicatorProps {
   /** Custom completed icon (default: check mark) */
@@ -50,38 +57,23 @@ export function FormStepsIndicator({
   return (
     <Steps.List>
       {steps.map((step) => (
-        <Steps.Item key={step.index} index={step.index}>
-          {isClickable
-            ? (
-              <Steps.Trigger aria-label={collapseLabelsBelow ? step.title : undefined}>
-                <Steps.Indicator>
-                  <Steps.Status complete={completedIcon} incomplete={step.icon || <Steps.Number />} />
-                </Steps.Indicator>
-                {showDescriptions && step.description
-                  ? (
-                    <Box display={labelDisplay}>
-                      <Steps.Title>{step.title}</Steps.Title>
-                      <Steps.Description display={labelDisplay}>{step.description}</Steps.Description>
-                    </Box>
-                  )
-                  : <Steps.Title display={labelDisplay}>{step.title}</Steps.Title>}
-              </Steps.Trigger>
-            )
-            : (
-              <>
-                <Steps.Indicator>
-                  <Steps.Status complete={completedIcon} incomplete={step.icon || <Steps.Number />} />
-                </Steps.Indicator>
-                {showDescriptions && step.description
-                  ? (
-                    <Box display={labelDisplay}>
-                      <Steps.Title>{step.title}</Steps.Title>
-                      <Steps.Description display={labelDisplay}>{step.description}</Steps.Description>
-                    </Box>
-                  )
-                  : <Steps.Title display={labelDisplay}>{step.title}</Steps.Title>}
-              </>
-            )}
+        <Steps.Item key={step.index} index={step.index} as={PresentationalStepItem}>
+          <Steps.Trigger
+            aria-label={collapseLabelsBelow ? step.title : undefined}
+            disabled={!isClickable}
+          >
+            <Steps.Indicator>
+              <Steps.Status complete={completedIcon} incomplete={step.icon || <Steps.Number />} />
+            </Steps.Indicator>
+            {showDescriptions && step.description
+              ? (
+                <Box display={labelDisplay}>
+                  <Steps.Title>{step.title}</Steps.Title>
+                  <Steps.Description display={labelDisplay}>{step.description}</Steps.Description>
+                </Box>
+              )
+              : <Steps.Title display={labelDisplay}>{step.title}</Steps.Title>}
+          </Steps.Trigger>
           <Steps.Separator />
         </Steps.Item>
       ))}
