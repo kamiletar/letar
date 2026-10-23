@@ -39,3 +39,30 @@ describe('oidc: PKCE', () => {
     expect(new URLSearchParams(tokenBody).get('code_verifier')).toBe(verifier)
   })
 })
+
+describe('oidc: подтверждённая почта', () => {
+  async function verifiedFor(info: Record<string, unknown>) {
+    const fakeFetch = (async (input: string | URL | Request) => {
+      const url = String(input)
+      if (url.endsWith('openid-configuration')) {
+        return Response.json({
+          authorization_endpoint: 'https://auth.test/authorize',
+          token_endpoint: 'https://auth.test/token',
+          userinfo_endpoint: 'https://auth.test/userinfo',
+        })
+      }
+      if (url.endsWith('/token')) { return Response.json({ access_token: 'at' }) }
+      return Response.json(info)
+    }) as typeof fetch
+    return (await createOidcClient(config, fakeFetch).finishLogin('c')).verified
+  }
+
+  it('true только при email_verified: true', async () => {
+    expect(await verifiedFor({ email: 'a@b.com', email_verified: true })).toBe(true)
+  })
+
+  it('false при email_verified: false и когда поля нет', async () => {
+    expect(await verifiedFor({ email: 'a@b.com', email_verified: false })).toBe(false)
+    expect(await verifiedFor({ email: 'a@b.com' })).toBe(false)
+  })
+})

@@ -73,7 +73,10 @@ export function createOidcClient(config: PagesConfig, fetchImpl: typeof fetch = 
       if (!infoRes.ok) { throw new Error(`OIDC userinfo: ${infoRes.status}`) }
       const info = (await infoRes.json()) as { email?: string; email_verified?: boolean }
       if (!info.email) { throw new Error('OIDC userinfo: нет email') }
-      return { email: info.email.toLowerCase(), verified: info.email_verified !== false }
+      return {
+        email: info.email.toLowerCase(), // Без явного true почта не считается подтверждённой
+        verified: info.email_verified === true,
+      }
     },
   }
 }
