@@ -3,10 +3,10 @@
 import { Pressable } from '@/app/_components/pressable'
 import { Link } from '@/i18n/navigation'
 import { GLOW } from '@/lib/utils/constants'
-import { Box, Button, Heading, HStack, Text, VStack } from '@chakra-ui/react'
+import { Box, Button, Heading, HStack, SimpleGrid, Text, VStack } from '@chakra-ui/react'
 import { useColorMode } from '@letar/chakra-provider'
 import { motion } from 'framer-motion'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { MatrixRain } from '../matrix-rain'
 
 // Варианты анимаций
@@ -45,8 +45,21 @@ const buttonVariants = {
   },
 }
 
+/** Адрес студии: заявка на сайт ведёт туда, у студии своё приложение и свои адреса по языкам */
+const STUDIO_URL = process.env.NEXT_PUBLIC_STUDIO_URL || 'https://studio.letar.best'
+
+const TILES = [
+  { key: 'about', href: '/about/' },
+  { key: 'projects', href: '/projects/' },
+  { key: 'blog', href: '/blog/' },
+  { key: 'consulting', href: '/consulting/' },
+  { key: 'cv', href: '/cv/' },
+] as const
+
 export function Hero() {
   const t = useTranslations('hero')
+  const locale = useLocale()
+  const studioOrderHref = `${STUDIO_URL}${locale === 'ru' ? '/zayavka' : '/en/contact'}?topic=site`
   const { resolvedColorMode } = useColorMode()
   const isLight = resolvedColorMode === 'light'
 
@@ -144,6 +157,47 @@ export function Hero() {
                 </Button>
               </Pressable>
             </HStack>
+          </motion.div>
+
+          {/* Плитки-развилка: короткий путь в основные разделы */}
+          <motion.div variants={buttonVariants}>
+            <SimpleGrid columns={{ base: 2, md: 3 }} gap={3} mt={10} maxW="2xl" mx="auto" textAlign="start">
+              <Box
+                asChild
+                gridColumn={{ base: 'span 2', md: 'span 3' }}
+                p={4}
+                borderRadius="md"
+                bg={{ base: 'green.700', _dark: 'whiteAlpha.900' }}
+                color={{ base: 'white', _dark: 'gray.900' }}
+              >
+                <a href={studioOrderHref} rel="noopener">
+                  <Text fontWeight="bold">{t('tiles.order.title')}</Text>
+                  <Text fontSize="sm">{t('tiles.order.hint')}</Text>
+                </a>
+              </Box>
+              {TILES.map((tile) => (
+                <Pressable key={tile.key} borderRadius="md" display="block">
+                  <Box
+                    asChild
+                    display="block"
+                    h="full"
+                    p={4}
+                    borderRadius="md"
+                    border="1px solid"
+                    borderColor={{ base: 'green.600', _dark: 'fg.500' }}
+                    backdropFilter={{ base: 'blur(8px)', _dark: 'none' }}
+                    _hover={{ bg: { base: 'white/30', _dark: 'whiteAlpha.100' } }}
+                  >
+                    <Link href={tile.href}>
+                      <Text fontWeight="bold">{t(`tiles.${tile.key}.title`)}</Text>
+                      <Text fontSize="sm" color={{ base: 'gray.700', _dark: 'fg.300' }}>
+                        {t(`tiles.${tile.key}.hint`)}
+                      </Text>
+                    </Link>
+                  </Box>
+                </Pressable>
+              ))}
+            </SimpleGrid>
           </motion.div>
         </motion.div>
       </VStack>

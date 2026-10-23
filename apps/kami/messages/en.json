@@ -24,6 +24,14 @@
     "cta": {
       "about": "Learn More",
       "hire": "Hire Me"
+    },
+    "tiles": {
+      "order": { "title": "Order a website", "hint": "Studio Letar: websites and web apps, end to end" },
+      "about": { "title": "About me", "hint": "Who I am and what drives me" },
+      "projects": { "title": "Projects", "hint": "What I have built" },
+      "blog": { "title": "Blog", "hint": "Notes and articles" },
+      "consulting": { "title": "Consulting", "hint": "I will look into your problem" },
+      "cv": { "title": "Resume", "hint": "Experience and skills" }
     }
   },
   "about": {
