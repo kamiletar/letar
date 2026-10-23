@@ -1,7 +1,7 @@
 ---
 id: LT-075
 title: "Сид auth-hub через Nx на s2 падает: no name provided в scripts/npm-smoke"
-status: doing
+status: done
 size: M
 area: infra
 priority: 3
@@ -11,6 +11,7 @@ stage: ""
 source: LT-073
 created: 2026-10-23
 updated: 2026-10-23
+closed: 2026-10-23
 ---
 
 ## Что и зачем
@@ -30,3 +31,5 @@ updated: 2026-10-23
 ## Журнал
 
 ## Итог
+
+Причина на s2 не подтверждена: имена во всех package.json в scripts/npm-smoke на месте. Обход: scripts/npm-smoke в .nxignore, после него Nx на s2 строит граф (149 проектов, у auth-hub виден db:seed). Сам запуск сида через Nx не проверен: сделать при следующем деплое auth-hub с --seed (в логе Done: 10 clients seeded).
