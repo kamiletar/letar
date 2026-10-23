@@ -89,7 +89,7 @@ jobs:
         with:
           # Версию менять вместе с локальной версией bun и с bun-version в npm-packages.yml/publish-npm.yml:
           # другой bun пишет lock в другом формате, и check-lock-subset падает на «другой версией bun».
-          bun-version: 1.4.3
+          bun-version: 1.4.4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
