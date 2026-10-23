@@ -1,16 +1,17 @@
 ---
 id: FM-031
 title: "Steps: axe aria-required-children в индикаторе шагов checkout"
-status: review
+status: done
 size: S
 area: a11y
 priority: 2
 blocked_by: []
-owner: "TurquoiseFinch"
-stage: "Браузерная приёмка гостевого checkout aboi"
+owner: TurquoiseFinch
+stage: Браузерная приёмка гостевого checkout aboi
 source: "aboi AB-016, store-acceptance.spec.ts: гостевой checkout"
 created: 2026-10-23
 updated: 2026-10-23
+closed: 2026-10-23
 ---
 
 ## Что и зачем
@@ -25,7 +26,7 @@ updated: 2026-10-23
 - [x] У обёрток вкладок presentation, отсутствует aria-current; актуальный шаг объявлен aria-selected.
 - [x] В linear/clickable=false вкладки и связи панелей существуют, переход по вкладкам заблокирован.
 - [x] Регрессии структуры, клавиатуры и линейной валидации проходят.
-- [ ] Гостевой checkout проходит реальный axe-аудит в браузерах.
+- [x] Гостевой checkout проходит реальный axe-аудит в браузерах.
 
 ## План
 
@@ -63,3 +64,4 @@ updated: 2026-10-23
 Каталог form-steps: 5 файлов, 50 тестов проходят (в том числе 7 новых регрессионных
 проверок); lint/typecheck проходят. Исправлено в версии 3.0.2; итоговая браузерная
 приёмка гостевого checkout выполняется aboi-dev отдельно от unit-проверок библиотеки.
+Исправлено дерево ARIA Steps; 50 unit и axe, гостевое оформление aboi в Firefox проходит
