@@ -45,6 +45,7 @@
       }
     },
     "typecheck:tsgo": {
+      "dependsOn": ["zenstack:generate"],
       "executor": "nx:run-commands",
       "options": {
         "commands": [

@@ -98,6 +98,7 @@
       }
     },
     "typecheck:tsgo": {
+      "dependsOn": ["zenstack:generate"],
       "executor": "nx:run-commands",
       "options": {
         "command": "tsgo --noEmit",
@@ -164,6 +165,7 @@
       }
     },
     "test": {
+      "dependsOn": ["zenstack:generate"],
       "options": {
         "config": "vitest.config.mts"
       },
