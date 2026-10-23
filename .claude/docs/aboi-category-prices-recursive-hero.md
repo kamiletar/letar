@@ -1,5 +1,13 @@
 # aboi: цены категорий и рекурсивная шапка
 
+С 2026-10-23 дефолтное превью ссылок — `public/og/neuroaboi-gold.jpg`:
+утверждённый дневной баннер целиком на холсте 1200 × 630 с золотыми полями.
+`[locale]/layout.tsx` задаёт его URL, размеры и alt для Open Graph;
+Twitter наследует Open Graph соответствующей страницы, чтобы товары сохраняли
+собственные фото и в Twitter Cards.
+прежний `opengraph-image.tsx` удалён, чтобы файловые метаданные не перекрывали
+настройку layout. Карточки товаров сохраняют собственный `openGraph.images`.
+
 Согласовано 2026-10-15, задача AB-021. Источник цен за изделие —
 `apps/aboi/src/lib/product-offers.ts`: постеры 2998 ₽, живопись 7998 ₽, обои 21799 ₽.
 `computeVariantPriceKopecks` и `computeMinVariantPriceKopecks` принимают контекст
