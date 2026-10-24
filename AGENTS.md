@@ -6,6 +6,8 @@
 
 ## Документация
 
+- [SSR-скрипты и порядок popstate](/.claude/docs/react-ssr-scripts-and-popstate-order.md) — React 19 при смене layout, CookieBanner, next-themes и ранний корневой обработчик истории.
+
 - [Таймеры Claude Code и Codex](/.claude/docs/time-tracker-drift-incidents.md) — heartbeat, восстановление после простоя и привязка к идентификатору сессии.
 
 - [Детали правил без paths](/.claude/docs/rules-extracted-details.md) — вынесено из постоянного контекста: деплой самого deploy-agent-dev, запись встречи в таймер, вторая сессия того же приложения в Agent Mail.

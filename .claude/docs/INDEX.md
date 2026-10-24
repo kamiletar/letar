@@ -168,6 +168,8 @@
 
 ## Next.js — ловушки
 
+- [react-ssr-scripts-and-popstate-order](/.claude/docs/react-ssr-scripts-and-popstate-order.md) — читать при ошибке React 19 про script на клиентском переходе и при повторной церемонии после popstate; SSR/CSR для CookieBanner и next-themes, ранний корневой listener истории.
+
 - [nextjs-nx-composeplugins-migration](/.claude/docs/nextjs-nx-composeplugins-migration.md) миграция с deprecated `composePlugins`/`withNx` (`@nx/next`) на голый `next.config` + явный `transpilePackages`
 - [transpile-packages-array-presence-not-content](/.claude/docs/transpile-packages-array-presence-not-content.md) ⭐ точка входа по теме `transpilePackages` — прочие доки ссылаются сюда за механизмом. ⚠️ ловушка обратного направления: для `@letar/*` работает **наличие** ключа `transpilePackages` (снимает `include: [dir]`), а не перечисленные в нём имена — bun линкует либы симлинком на `libs/`, реальный путь без `node_modules`, проверка по списку до них не доходит; отсутствие записи о конкретном пакете ничего не ломает (доказано зелёной сборкой с `['@letar/ui']`), а удаление ключа целиком ломает сразу; красный гейт `check-transpile-packages` = разъехался список, а не сломалась прод-сборка
 - [nextron-renderer-transpile-packages-required](/.claude/docs/nextron-renderer-transpile-packages-required.md) ⚠️ прежний claim «`transpilePackages` для `@letar/*` обязателен и в nextron-рендерере (`animatrona`)» опровергнут причинной проверкой 2026-09-03 — сборка зелёная и без ключа вовсе; существующий список трогать не нужно (безвреден), но обязательным не является
