@@ -48,6 +48,8 @@
 - [Сбой отправки emailOTP](/.claude/docs/better-auth-emailotp-silent-send-failure.md) — подтверждение доставки кода и защита формы от ложного успеха.
 - [Semgrep в submodule и исторических снимках](/.claude/docs/semgrep-per-submodule-rules-pattern.md) — правила, границы проверки и явный `--project-root` для выгрузки внутри монорепо.
 
+- [ESLint flat config и артефакты](/.claude/docs/eslint-flat-config-ignores-not-gitignore.md) — явные ignores для временных каталогов `.next-*`, артефактов агентов и Serwist-бандлов.
+
 ## Быстрый старт
 
 **Приложения:** Используй MCP `nx_workspace` для списка приложений и портов. Подробнее: [environment](/.claude/docs/environment.md)

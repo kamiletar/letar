@@ -51,6 +51,8 @@ export default [
       '**/dist',
       '**/build',
       '**/.next',
+      // Временные distDir сборок: .next-smoke, .next-prodcheck и аналогичные.
+      '**/.next-*',
       '**/out-tsc',
       '**/prisma/generated',
       '**/zod',
