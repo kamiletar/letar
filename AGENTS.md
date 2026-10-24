@@ -7,6 +7,7 @@
 ## Документация
 
 - [SSR-скрипты и порядок popstate](/.claude/docs/react-ssr-scripts-and-popstate-order.md) — React 19 при смене layout, CookieBanner, next-themes и ранний корневой обработчик истории.
+- [Лишний JS публичного root](/.claude/docs/nextjs-public-client-barrel-performance.md) — узкие workspace-импорты, Chakra optimizePackageImports, prefetch и честное сравнение Lighthouse без нарушения SSE.
 
 - [Таймеры Claude Code и Codex](/.claude/docs/time-tracker-drift-incidents.md) — heartbeat, восстановление после простоя и привязка к идентификатору сессии.
 
