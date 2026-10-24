@@ -3,7 +3,12 @@
 Профиль зафиксирован 24 октября 2026. Эта справка нужна для продолжения существующих визиток;
 технологические правила сгиба и переворота находятся в `../SKILL.md`.
 
-## Сетка 914 × 280 мм
+## Сетка 914 × 420 мм
+
+ST-053: сначала с рулона выпускается пустой лист 914 × 420 мм, затем ОБЕ стороны печатаются
+через ручную подачу. Координаты сетки, крестов, линейки и цветовой пробы сохранены от 280-мм
+версии; снизу добавлены 140 мм без печати. Не добавлять третий ряд и не центрировать саму сетку
+по новой высоте. Старые архивы 280 мм не использовать с новой технологией.
 
 | Параметр                    | Значение, мм |
 | --------------------------- | ------------ |
@@ -35,7 +40,10 @@
 - `build-color-proof.cjs` — цветовые производные SVG с неизменными контурами.
 - `render-roll.cjs` — экспорт и проверка координат, строк, ориентации и скрытия направляющих.
 - `verify-pdf-text.py` — независимая проверка границ букв в финальном PDF.
-- `rakukan-914-outer.pdf` — первый проход; `rakukan-914-inner.pdf` — второй.
+- `rakukan-914-outer.pdf` — первый ручной проход; `rakukan-914-inner.pdf` — второй, теперь 420 мм.
+  В комплекте — копии с явным размером: `rakukan-914x420-outer.pdf` / `rakukan-914x420-inner.pdf`.
+- `blank-914x420.pdf` — пустая страница без потока содержимого, аннотаций и печатных элементов;
+  воспроизводится через `make-blank-sheet.py`, проверяется в `blank-sheet-checks.json`.
 - `rakukan-914-inner-guides.png` и `rakukan-inner-card-guides.png` — экранные схемы зон.
 - `PRINT-914-README.md` — инструкция двух проходов; `PRINT-README.md` — небольшие техпробы.
 - `roll-layout-checks.json`, `roll-pdf-checks.json`, `roll-text-pdf-checks.json`,
@@ -43,9 +51,9 @@
 - `qr-url-test.png` — крупные QR из итогового PDF для проверки камерой с экрана;
   `qr-url-preview.cjs` воспроизводит это изображение из рендера и координат QR.
 - `studio-letar-preview.png` — лицо студии из итогового PDF, повёрнуто прямо для просмотра.
-- **`rakukan-proba-red-d63a2b-914.zip`** — актуальный комплект ST-052: оба PDF,
-  `PRINT-914-README.md`, проба QR, превью лица и цветовой полоски.
-  Канонические имена PDF остаются прежними; `rakukan-proba-studio-letar-914.zip` — предыдущая версия.
+- **`rakukan-proba-914x420-manual.zip`** — актуальный комплект ST-053: пустой PDF, оба PDF 420 мм,
+  `PRINT-914-README.md`, проба QR, превью лица, цветовой полоски и полной раскладки.
+  `rakukan-proba-red-d63a2b-914.zip` и `rakukan-proba-studio-letar-914.zip` — прежние версии 280 мм.
 - `red-print-control.png` — три оттенка на обеих печатях по 14 мм, фрагмент итогового PDF.
 
 Макеты открываются локально через браузер: `?roll=outer`, `?roll=inner`,
@@ -58,6 +66,7 @@ node .claude/artifacts/cards/build-color-proof.cjs
 node .claude/artifacts/cards/render-roll.cjs
 # Python с pypdf; путь к runtime определить в текущем окружении.
 python .claude/artifacts/cards/normalize-pdf.py --roll-only
+python .claude/artifacts/cards/make-blank-sheet.py
 python .claude/artifacts/cards/verify-pdf-text.py
 pdftoppm -png -r 150 -singlefile .claude/artifacts/cards/rakukan-914-outer.pdf .claude/artifacts/cards/rakukan-914-outer-render
 node .claude/artifacts/cards/check-qrs.cjs --roll
@@ -108,7 +117,7 @@ Literata выходили выше своей текстовой зоны. `Rang
 символов в нормализованном PDF. Сравнение с черновиком проверяет, что ручные переносы
 не поменяли слова. После изменения шрифта или кегля эти проверки повторять.
 
-Дизайн, задания и история: `apps/studio/docs/cards-rakukan-handoff.md`, ST-036/037/046/047/049–052.
+Дизайн, задания и история: `apps/studio/docs/cards-rakukan-handoff.md`, ST-036/037/046/047/049–053.
 Бумажная приёмка — ST-038. Внутренние тексты внесены в пробные PDF по поручению Kami в ST-049.
 Старые brief-файлы описывают первоначальный односторонний вариант со склейкой и поворотами,
 которые были заменены по фотографиям Kami. Для изготовления использовать актуальный скилл.
