@@ -44,6 +44,10 @@ ST-053: сначала с рулона выпускается пустой ли�
   В комплекте — копии с явным размером: `rakukan-914x420-outer.pdf` / `rakukan-914x420-inner.pdf`.
 - `blank-914x420.pdf` — пустая страница без потока содержимого, аннотаций и печатных элементов;
   воспроизводится через `make-blank-sheet.py`, проверяется в `blank-sheet-checks.json`.
+- **`feed-914x420-dot.pdf`** — актуальная замена для выпуска листа по просьбе Kami:
+  одна чёрная точка 1 px при 600 dpi (0,0423 мм), в (5,08; 5,08) мм от верхнего левого угла.
+  `make-blank-sheet.py --dot`, отчёт `feed-dot-checks.json`. Почти пустой лист пока не проверен
+  на устройстве; полностью пустой, по наблюдению Kami, похоже, пропускался.
 - `rakukan-914-inner-guides.png` и `rakukan-inner-card-guides.png` — экранные схемы зон.
 - `PRINT-914-README.md` — инструкция двух проходов; `PRINT-README.md` — небольшие техпробы.
 - `roll-layout-checks.json`, `roll-pdf-checks.json`, `roll-text-pdf-checks.json`,
@@ -51,7 +55,7 @@ ST-053: сначала с рулона выпускается пустой ли�
 - `qr-url-test.png` — крупные QR из итогового PDF для проверки камерой с экрана;
   `qr-url-preview.cjs` воспроизводит это изображение из рендера и координат QR.
 - `studio-letar-preview.png` — лицо студии из итогового PDF, повёрнуто прямо для просмотра.
-- **`rakukan-proba-914x420-manual.zip`** — актуальный комплект ST-053: пустой PDF, оба PDF 420 мм,
+- **`rakukan-proba-914x420-manual-dot.zip`** — актуальный комплект ST-053: лист с точкой, оба PDF 420 мм,
   `PRINT-914-README.md`, проба QR, превью лица, цветовой полоски и полной раскладки.
   `rakukan-proba-red-d63a2b-914.zip` и `rakukan-proba-studio-letar-914.zip` — прежние версии 280 мм.
 - `red-print-control.png` — три оттенка на обеих печатях по 14 мм, фрагмент итогового PDF.
