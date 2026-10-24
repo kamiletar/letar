@@ -2,6 +2,7 @@ import { ChakraProvider, defaultSystem } from '@chakra-ui/react'
 import { act, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { ReactNode } from 'react'
+import { renderToString } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createConsentConfig } from './consent-types'
 import { CookieBanner } from './cookie-banner'
@@ -24,6 +25,27 @@ describe('CookieBanner', () => {
   it('показывается, если в localStorage ещё нет согласия', () => {
     renderWithProvider(<CookieBanner appKey="test-app" />)
     expect(screen.getByText(/Мы используем cookie/)).toBeInTheDocument()
+  })
+
+  it('при клиентском монтаже не создаёт неисполняемый script', () => {
+    const { container, unmount } = renderWithProvider(<CookieBanner appKey="test-app" />)
+    expect(container.querySelector('script')).toBeNull()
+    unmount()
+    const remounted = renderWithProvider(<CookieBanner appKey="test-app" />)
+    expect(remounted.container.querySelector('script')).toBeNull()
+    expect(screen.getByText(/Мы используем cookie/)).toBeInTheDocument()
+  })
+
+  it('SSR сохраняет ранний скрипт и видимый баннер для нового посетителя', () => {
+    const html = renderToString(
+      <ChakraProvider value={defaultSystem}>
+        <CookieBanner appKey="test-app" />
+      </ChakraProvider>,
+    )
+    expect(html).toContain('<script>')
+    expect(html).toContain('letar-cookie-banner-hide')
+    expect(html).toContain('data-letar-cookie-banner')
+    expect(html).toContain('Мы используем cookie')
   })
 
   it('не показывается, если согласие уже сохранено под текущей версией политики', () => {

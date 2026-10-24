@@ -1,6 +1,7 @@
 'use client'
 
 import { Box, Button, Checkbox, Container, HStack, Stack, Text } from '@chakra-ui/react'
+import { useIsHydrated } from '@letar/hooks/browser'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import { type CookieConsentState, createConsentConfig } from './consent-types'
@@ -69,6 +70,8 @@ export function CookieBanner({
   necessaryHint = '(сессия)',
   saveChoiceButtonText = 'Сохранить выбор',
 }: CookieBannerProps) {
+  // При SSR и гидратации ранний скрипт нужен; при новом клиентском монтаже он не исполнится.
+  const clientMounted = useIsHydrated()
   const config = createConsentConfig(appKey, policyVersion)
   // ⚠️ По умолчанию `true`, не `false` — рендерится сразу на сервере вместе с остальным
   // контентом страницы. Раньше стартовал с `false` и переключался в `true` только внутри
@@ -195,15 +198,19 @@ export function CookieBanner({
           Содержимое — только JSON.stringify констант конфигурации, пользовательского ввода нет. */
       }
       {/* nosemgrep: letar-dangerously-set-inner-html-unsanitized -- только константы конфигурации */}
-      <script
-        dangerouslySetInnerHTML={{
-          __html: `try{var r=localStorage.getItem(${JSON.stringify(config.storageKey)});if(r&&JSON.parse(r).version===${
-            JSON.stringify(policyVersion)
-          }){var st=document.createElement('style');st.id=${
-            JSON.stringify(HIDE_STYLE_ID)
-          };st.textContent='[data-letar-cookie-banner]{display:none!important}';document.head.appendChild(st)}}catch(e){}`,
-        }}
-      />
+      {!clientMounted && (
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{var r=localStorage.getItem(${
+              JSON.stringify(config.storageKey)
+            });if(r&&JSON.parse(r).version===${
+              JSON.stringify(policyVersion)
+            }){var st=document.createElement('style');st.id=${
+              JSON.stringify(HIDE_STYLE_ID)
+            };st.textContent='[data-letar-cookie-banner]{display:none!important}';document.head.appendChild(st)}}catch(e){}`,
+          }}
+        />
+      )}
       <Box
         ref={rootRef}
         data-letar-cookie-banner=""
