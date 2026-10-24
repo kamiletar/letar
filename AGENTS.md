@@ -49,6 +49,7 @@
 - [Semgrep в submodule и исторических снимках](/.claude/docs/semgrep-per-submodule-rules-pattern.md) — правила, границы проверки и явный `--project-root` для выгрузки внутри монорепо.
 
 - [ESLint flat config и артефакты](/.claude/docs/eslint-flat-config-ignores-not-gitignore.md) — явные ignores для временных каталогов `.next-*`, артефактов агентов и Serwist-бандлов.
+- [Транзитивный build и dev-БД](/.claude/docs/nx-build-transitive-dev-db-reset.md) — проверка зависимых db-targets и изоляция создания шаблонной БД от пользовательских локальных файлов.
 
 ## Быстрый старт
 
