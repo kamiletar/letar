@@ -5,6 +5,7 @@
  * Без регистрации, без логина (как скорер и ведущий).
  */
 
+import type { LineupStatus } from '@/generated/prisma'
 import { prisma } from '@/lib/db'
 import { redirect } from 'next/navigation'
 
@@ -12,6 +13,11 @@ import { CoachMatchClient } from './_components/coach-match-client'
 
 type Params = Promise<{ id: string }>
 type SearchParams = Promise<{ token?: string }>
+
+interface CoachLineup {
+  player: { id: string; name: string }
+  status: LineupStatus
+}
 
 export default async function CoachMatchPage({ params, searchParams }: { params: Params; searchParams: SearchParams }) {
   const { id: matchId } = await params
@@ -73,6 +79,8 @@ export default async function CoachMatchPage({ params, searchParams }: { params:
   }
 
   const coachTeamSeasonId = coachSide === 'home' ? match.homeTeam.id : match.awayTeam.id
+  const homeLineups: CoachLineup[] = match.homeTeam.lineups
+  const awayLineups: CoachLineup[] = match.awayTeam.lineups
 
   // Сериализуем данные для клиента
   const matchData = {
@@ -86,7 +94,7 @@ export default async function CoachMatchPage({ params, searchParams }: { params:
     homeTeam: {
       id: match.homeTeam.id,
       name: match.homeTeam.team.name,
-      players: match.homeTeam.lineups.map((l) => ({
+      players: homeLineups.map((l) => ({
         id: l.player.id,
         name: l.player.name,
         status: l.status,
@@ -95,7 +103,7 @@ export default async function CoachMatchPage({ params, searchParams }: { params:
     awayTeam: {
       id: match.awayTeam.id,
       name: match.awayTeam.team.name,
-      players: match.awayTeam.lineups.map((l) => ({
+      players: awayLineups.map((l) => ({
         id: l.player.id,
         name: l.player.name,
         status: l.status,
