@@ -18,14 +18,30 @@
   ],
   "overridePins": [
     {
-      "package": "@zenstackhq/cli",
+      "package": "@serwist/build",
       "override": {
-        "zod": "4.4.3"
+        "zod": "4.6.7"
       },
-      "since": "2026-09-16",
-      "reason": "Тот же класс, тот же прогон deps-update, соседний пакет: @zenstackhq/cli (dependencies.zod: \"^4.0.0\", совместим с 4.4.3) тоже получил приватную копию zod@4.6.5 под bun isolated linker. Следствие — TS2321 'Excessive stack depth comparing types MapType<Schema,?>' (класс уже описан в tsgo-excessive-stack-depth-zenstack.md) в 4 НОВЫХ местах grandslamcup (citySlug-страницы) сверх уже существовавшего техдолга, плюс годная копия сохранилась в domwellbes только благодаря совпадению с MCP-фиксом.",
-      "doc": "PLAN-INFRA-*.md — деплой-запись про /infra:deps-update 2026-09-16",
-      "unpinWhen": "grep -n '\"@zenstackhq/cli/zod\"' bun.lock даёт пусто и БЕЗ override — тогда убрать override и эту запись одним коммитом."
+      "since": "2026-10-24",
+      "reason": "Serwist 9.5.13 точно требует уязвимый zod 4.6.5. GHSA-mrhx-c7xc-m3w5 исправлен в 4.6.6; используем общую корневую копию 4.6.7, сохраняя Zod 3 у несовместимых потребителей.",
+      "doc": ".claude/docs/root-pin-peer-drift.md",
+      "unpinWhen": "Serwist требует Zod >=4.6.6 без override; убрать все три override Serwist вместе с записями реестра."
+    },
+    {
+      "package": "@serwist/next",
+      "override": { "zod": "4.6.7" },
+      "since": "2026-10-24",
+      "reason": "Тот же security override Zod, что у @serwist/build: фиксированная зависимость Serwist 9.5.13 на уязвимую 4.6.5.",
+      "doc": ".claude/docs/root-pin-peer-drift.md",
+      "unpinWhen": "Serwist требует Zod >=4.6.6 без override; убрать все три override Serwist вместе с записями реестра."
+    },
+    {
+      "package": "@serwist/webpack-plugin",
+      "override": { "zod": "4.6.7" },
+      "since": "2026-10-24",
+      "reason": "Тот же security override Zod, что у @serwist/build: фиксированная зависимость Serwist 9.5.13 на уязвимую 4.6.5.",
+      "doc": ".claude/docs/root-pin-peer-drift.md",
+      "unpinWhen": "Serwist требует Zod >=4.6.6 без override; убрать все три override Serwist вместе с записями реестра."
     },
     {
       "package": "satori",
