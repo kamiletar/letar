@@ -1,0 +1,60 @@
+{
+  "skill_name": "letar",
+  "scope": "Изолированное воспроизведение технических шагов; независимая оценка поведения агента не выполняется.",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "В каждом чате отклоняется set_contact_policy(open). На временной копии модели Agent проверь переход default auto → open, сохрани attachments_policy и повтори применение. Рабочий сервер не трогай.",
+      "expected_output": "Первый запуск меняет только contact_policy на open; второй не меняет файл; attachments_policy остаётся auto. В выводе агента различаются изменение default и миграция существующих записей.",
+      "verification": {
+        "cwd": "infra/agent-mail",
+        "command": [
+          "python",
+          "-X",
+          "utf8",
+          "-m",
+          "unittest",
+          "test_open_contact_default.ContactDefaultTests.test_default_changes_only_contact_policy_and_is_idempotent"
+        ],
+        "covers": ["точечный патч default", "идемпотентность", "сохранение attachments_policy"],
+        "not_covered": ["выбор скилла и объяснение результата агентом"]
+      }
+    },
+    {
+      "id": 2,
+      "prompt": "Владелец разрешил перевести только auto проекта c-web-letar в open. На временной SQLite с двумя проектами, auto, open, block_all и contacts_only проверь миграцию, backup и повторный запуск. Рабочую БД не подключай.",
+      "expected_output": "Изменены только auto выбранного проекта; явные политики и другой проект сохранены. Backup содержит прежнее auto; повторный запуск меняет ноль строк.",
+      "verification": {
+        "cwd": "infra/agent-mail",
+        "command": [
+          "python",
+          "-X",
+          "utf8",
+          "-m",
+          "unittest",
+          "test_open_contact_default.ContactDefaultTests.test_migration_preserves_other_projects_and_explicit_policies"
+        ],
+        "covers": ["область миграции", "сохранение закрытых политик", "backup", "идемпотентность"],
+        "not_covered": ["получение согласия агентом до миграции"]
+      }
+    },
+    {
+      "id": 3,
+      "prompt": "После обновления апстрима в тестовой модели Agent неизвестный для патча default contacts_only. Примени локальный патч к этой временной копии и проверь, что он не перепишет новую семантику. Не обновляй и не перезапускай рабочий контейнер.",
+      "expected_output": "Патч возвращает ошибку неизвестного default, исходный файл остаётся неизменным. Дальнейшее применение требует изучения новой версии; принудительной замены нет.",
+      "verification": {
+        "cwd": "infra/agent-mail",
+        "command": [
+          "python",
+          "-X",
+          "utf8",
+          "-m",
+          "unittest",
+          "test_open_contact_default.ContactDefaultTests.test_unknown_upstream_default_is_not_overwritten"
+        ],
+        "covers": ["остановка при несовместимости", "сохранение исходника"],
+        "not_covered": ["решение агента о дальнейшем обновлении апстрима"]
+      }
+    }
+  ]
+}

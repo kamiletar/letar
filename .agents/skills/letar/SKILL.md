@@ -1,6 +1,6 @@
 ---
 name: letar
-description: Воркфлоу верхнего уровня для задач по всему монорепо letar — инфра, общие библиотеки, релизы
+description: Используй этот скилл, когда задача затрагивает инфраструктуру монорепо Letar, общие библиотеки, релизы или несколько приложений. Также используй при повторяющихся сбоях регистрации и контактов Agent Mail, восстановлении его настроек после restart или пересоздания контейнера, даже если пользователь описывает только симптом в чатах.
 allowed-tools: Bash(nx run-many -t format:*), Bash(nx lint:*), Bash(nx typecheck:*), Bash(nx affected:*), Bash(nx release:*), Bash(git add:*), Bash(git commit:*)
 ---
 
@@ -31,6 +31,11 @@ allowed-tools: Bash(nx run-many -t format:*), Bash(nx lint:*), Bash(nx typecheck
 4. При необходимости загляни в `.claude/docs/repo-structure.md` ⭐ (публичный репо + приватные submodules).
 
 ## Действия
+
+При обслуживании Agent Mail, повторных отказах смены политики контактов или потере настроек
+после перезапуска прочитай [references/agent-mail-maintenance.md](references/agent-mail-maintenance.md).
+Там — проверенный порядок диагностики, различие между default и миграцией существующих
+агентов, команды проверки и типичные ошибки. Для остальных задач этот справочник не нужен.
 
 После изучения контекста:
 
@@ -79,8 +84,8 @@ nx affected -t lint typecheck:tsgo test
 
 ## Релиз npm-пакетов
 
-Локально: `nx release` (bump + changelog + commit + tag) → `git push --follow-tags`.
-CI по тегу (`forms-v*`, `form-mcp-v*`, `zenstack-form-plugin-v*`) публикует в npm.
+Следуй процедуре [npm-publish-from-monorepo](/.claude/docs/npm-publish-from-monorepo.md)
+и разделу «Релиз npm-пакетов» в `AGENTS.md`: выпуск вручную по тегу, не через `nx release`.
 
 ## Деплой
 
