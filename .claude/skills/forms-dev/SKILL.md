@@ -35,17 +35,8 @@ disable-model-invocation: true
    ⚠️ **Фаза 7 разбивает библиотеку на несколько пакетов** — резервируй владение ими заранее (даже если
    папки ещё не созданы), чтобы параллельные сессии не разъехались по core/скинам.
 
-4. **Выставь открытую contact policy** — иначе первый запрос от незнакомого агента виснет заявкой
-   на подтверждение контакта (см. `.claude/rules/agent-mail.md`):
-
-   ```
-   set_contact_policy(
-     project_key: "c-web-letar",
-     agent_name: "forms-dev",
-     policy: "open",
-     registration_token: "<тот же токен>"
-   )
-   ```
+4. **Сохрани серверную политику контактов.** Default — `open`; повторный
+   `set_contact_policy` при старте не нужен (см. `.claude/rules/agent-mail.md`).
 
 5. **Стартуй таймер** `time_start({ app: "forms", ... })` — общий шаблон и правила переключения/
    остановки см. `.claude/rules/app-workflow.md` и `.claude/rules/time-tracking.md`.

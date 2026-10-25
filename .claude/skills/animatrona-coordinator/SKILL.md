@@ -27,16 +27,8 @@ macro_start_session(
 
 > **Имя `animatrona-coordinator-dev` — фиксированное.** Все animatrona-агенты отправляют уведомления на это имя.
 
-2. Открой политику контактов — ты должен принимать от всех animatrona-агентов:
-
-```
-set_contact_policy(
-  project_key: "c-web-letar",
-  agent_name: "animatrona-coordinator-dev",
-  policy: "open",
-  registration_token: "<токен из agent_fixed_names_tokens.md>"
-)
-```
+2. Сохрани серверную политику контактов: default — `open`, повторный
+   `set_contact_policy` при старте не нужен. См. `.claude/rules/agent-mail.md`.
 
 3. Установи **эксклюзивную** резервацию на shared types (ты единственный владелец):
 

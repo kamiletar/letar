@@ -44,19 +44,10 @@ macro_start_session(
 > **Имя `deploy-agent-dev` — фиксированное.** Все агенты отправляют запросы именно на это имя.
 > **`project_key` = `c-web-letar`** (не `c-web-letar`).
 
-### Шаг 2.5: Выстави открытую contact policy
+### Шаг 2.5: Политика контактов
 
-```
-set_contact_policy(
-  project_key: "c-web-letar",
-  agent_name: "deploy-agent-dev",
-  policy: "open",
-  registration_token: "<токен из шага 1>"
-)
-```
-
-Без этого первый deploy-запрос от незнакомого агента виснет заявкой на подтверждение контакта
-вместо того, чтобы сразу дойти до инбокса — см. `.claude/rules/agent-mail.md`.
+Локальный сервер создаёт агентов с `open` по умолчанию. Не вызывай `set_contact_policy`
+при старте; сохраняй явно заданные ограничения. См. `.claude/rules/agent-mail.md`.
 
 ### Шаг 3: Прочитай правила деплоя
 

@@ -12,6 +12,7 @@
 - [Таймеры Claude Code и Codex](/.claude/docs/time-tracker-drift-incidents.md) — heartbeat, восстановление после простоя и привязка к идентификатору сессии.
 
 - [Детали правил без paths](/.claude/docs/rules-extracted-details.md) — вынесено из постоянного контекста: деплой самого deploy-agent-dev, запись встречи в таймер, вторая сессия того же приложения в Agent Mail.
+- [Agent Mail: особенности сервера](/.claude/docs/agent-mail-server-quirks.md) — identity, контакты и локальный default `open`, миграция существующих агентов и сохранение патча при пересоздании контейнера.
 
 - [Сигналы окружения и Keystatic](/.claude/docs/node-env-not-production-signal.md) — staging, приватные env и согласование хранилища между сервером и браузером.
 

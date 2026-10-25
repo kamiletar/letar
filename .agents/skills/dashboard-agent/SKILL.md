@@ -24,17 +24,8 @@ macro_start_session(
 )
 ```
 
-2. **Выставь открытую contact policy** — иначе первое сообщение от незнакомого агента виснет
-   заявкой на подтверждение контакта (см. `.claude/rules/agent-mail.md`):
-
-```
-set_contact_policy(
-  project_key: "c-web-letar",
-  agent_name: "dashboard-agent-dev",
-  policy: "open",
-  registration_token: "<токен из agent_fixed_names_tokens.md>"
-)
-```
+2. Сохрани серверную политику контактов: default — `open`, повторный
+   `set_contact_policy` при старте не нужен. См. `.claude/rules/agent-mail.md`.
 
 3. **Стартуй таймер** `time_start({ app: "dashboard-agent", ... })` — общий шаблон и правила
    переключения/остановки см. `.claude/rules/app-workflow.md` и `.claude/rules/time-tracking.md`.

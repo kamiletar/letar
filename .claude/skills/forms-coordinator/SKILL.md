@@ -46,17 +46,8 @@ macro_start_session(
 > Тот же приём нужен и для `forms-dev` при делегации задач — его токен см. `agent_fixed_names_tokens`
 > в памяти.
 
-2. Выставь открытую contact policy — иначе первый запрос от незнакомого consumer-агента виснет
-   заявкой на подтверждение контакта (см. `.claude/rules/agent-mail.md`):
-
-```
-set_contact_policy(
-  project_key: "c-web-letar",
-  agent_name: "forms-coordinator-dev",
-  policy: "open",
-  registration_token: "<токен из agent_fixed_names_tokens.md>"
-)
-```
+2. Сохрани серверную политику контактов: default — `open`, повторный
+   `set_contact_policy` при старте не нужен. См. `.claude/rules/agent-mail.md`.
 
 3. Изучи текущее состояние:
    - `libs/forms/README.md` — API и компоненты

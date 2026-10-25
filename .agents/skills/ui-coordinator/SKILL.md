@@ -47,17 +47,8 @@ macro_start_session(
 > («Invalid registration_token») — процедура восстановления через
 > `resource://agents/{project_key}` описана в `.claude/rules/agent-mail.md`.
 
-2. Выставь открытую contact policy — иначе первый запрос от незнакомого consumer-агента виснет
-   заявкой на подтверждение контакта (см. `.claude/rules/agent-mail.md`):
-
-```
-set_contact_policy(
-  project_key: "c-web-letar",
-  agent_name: "ui-coordinator-dev",
-  policy: "open",
-  registration_token: "<токен из agent_fixed_names_tokens.md>"
-)
-```
+2. Сохрани серверную политику контактов: default — `open`, повторный
+   `set_contact_policy` при старте не нужен. См. `.claude/rules/agent-mail.md`.
 
 3. Изучи текущее состояние:
    - `libs/ui/README.md` — API компонентов
