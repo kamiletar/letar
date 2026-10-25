@@ -12,6 +12,7 @@ import {
   Link as ChakraLink,
   Separator,
   SimpleGrid,
+  Stack,
   Text,
   VStack,
 } from '@chakra-ui/react'
@@ -40,7 +41,7 @@ export function Footer() {
 
   return (
     <Box as="footer" role="contentinfo" mt="auto" borderTop="1px solid" borderColor="border.subtle" bg="bg.subtle">
-      <Container maxW="6xl" py={12}>
+      <Container maxW="6xl" minW={0} py={12} pb="max(3rem, env(safe-area-inset-bottom))">
         <SimpleGrid columns={{ base: 1, md: 3 }} gap={8}>
           {/* Колонка 1: Бренд */}
           <VStack align={{ base: 'center', md: 'start' }} gap={4}>
@@ -66,17 +67,19 @@ export function Footer() {
             </Text>
             {navLinks.map((link) => (
               // trailingSlash:true не проходит через клиентскую навигацию next/link
-              <Link key={link.href} href={`${link.href}/`}>
-                <Text
-                  fontSize="sm"
-                  color="fg.muted"
-                  _hover={{ color: 'fg.500' }}
-                  transitionProperty="color"
-                  transitionDuration="fast"
-                >
-                  {tNav(link.labelKey)}
-                </Text>
-              </Link>
+              <ChakraLink key={link.href} asChild minH="44px" display="inline-flex" alignItems="center">
+                <Link href={`${link.href}/`}>
+                  <Text
+                    fontSize="sm"
+                    color="fg.muted"
+                    _hover={{ color: 'fg.500' }}
+                    transitionProperty="color"
+                    transitionDuration="fast"
+                  >
+                    {tNav(link.labelKey)}
+                  </Text>
+                </Link>
+              </ChakraLink>
             ))}
           </VStack>
 
@@ -97,6 +100,8 @@ export function Footer() {
                 transitionProperty="color"
                 transitionDuration="fast"
                 aria-label={t('emailAria')}
+                minH="44px"
+                overflowWrap="anywhere"
               >
                 {CONTACT.email}
               </ChakraLink>
@@ -115,6 +120,7 @@ export function Footer() {
                 transitionProperty="color"
                 transitionDuration="fast"
                 aria-label={t('rssAria')}
+                minH="44px"
               >
                 {t('rssFeed')}
               </ChakraLink>
@@ -124,24 +130,47 @@ export function Footer() {
 
         <Separator my={8} />
 
-        <HStack justify="space-between" flexWrap="wrap" gap={4}>
+        <Stack
+          direction={{ base: 'column', md: 'row' }}
+          align={{ base: 'center', md: 'start' }}
+          justify="space-between"
+          gap={4}
+          minW={0}
+        >
           <Text fontSize="sm" color="fg.muted">
             © {currentYear} Kami. {t('copyright')}.
           </Text>
-          <HStack gap={4}>
-            <Link href="/humans.txt">
-              <Text fontSize="sm" color="fg.muted" _hover={{ color: 'fg' }}>
-                humans.txt
-              </Text>
-            </Link>
+          <HStack
+            gap={{ base: 3, md: 4 }}
+            flexWrap="wrap"
+            justify={{ base: 'center', md: 'end' }}
+            minW={0}
+            maxW="full"
+            textAlign={{ base: 'center', md: 'start' }}
+            css={{
+              '& a, & button': {
+                minHeight: '44px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              },
+            }}
+          >
+            <ChakraLink asChild minH="44px">
+              <Link href="/humans.txt">
+                <Text fontSize="sm" color="fg.muted" _hover={{ color: 'fg' }}>
+                  humans.txt
+                </Text>
+              </Link>
+            </ChakraLink>
             <CookieSettingsButton />
-            <Text fontSize="sm" color="fg.muted">
+            <Text fontSize="sm" color="fg.muted" minW={0}>
               {t('madeWith')} ❤️ & Claude Code
             </Text>
-            <StudioCredit app="kami" />
-            <BuildVersion version={packageJson.version} />
+            <StudioCredit app="kami" minW={0} overflowWrap="anywhere" />
+            <BuildVersion version={packageJson.version} whiteSpace="nowrap" />
           </HStack>
-        </HStack>
+        </Stack>
       </Container>
     </Box>
   )

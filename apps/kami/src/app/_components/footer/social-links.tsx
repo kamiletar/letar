@@ -28,7 +28,7 @@ const socialLinks = [
 
 export function SocialLinks() {
   return (
-    <HStack gap={4}>
+    <HStack gap={4} flexWrap="wrap" justify={{ base: 'center', md: 'start' }}>
       {socialLinks.map((link) => (
         <ExternalLink key={link.href} href={link.href} aria-label={link.label} size="lg">
           {link.icon}
