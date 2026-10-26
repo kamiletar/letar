@@ -21,6 +21,8 @@ const nextConfig = {
   // Глоб без хардкода версии — переживёт апдейт sharp/bun.lock.
   outputFileTracingIncludes: {
     '/**/*': ['../../node_modules/.bun/@img+sharp-libvips-*/**/*.so*'],
+    // Ассеты карточки превью ссылки (src/lib/og-card.tsx) читаются с диска, трейсер их не видит
+    '/**/opengraph-image': ['./src/app/fonts/JetBrainsMono-500.ttf', './src/assets/site/portrait-og.jpg'],
   },
   // uploads/ — Docker volume в проде (см. docker-compose.production.yml), содержимое
   // перекрывается монтированием в рантайме. Без исключения трейсер всё равно копирует реальные

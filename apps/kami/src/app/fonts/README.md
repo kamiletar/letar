@@ -60,3 +60,5 @@ python scripts/fonts/subset-google-font.py \
 ```
 
 Общий скрипт — `scripts/fonts/subset-google-font.py`. Требует `pip install fonttools brotli`.
+
+`JetBrainsMono-500.ttf` — статический TTF (wght 500) из того же woff2 для `next/og` (Satori не читает woff2); пересоздаётся через fontTools `instancer`.

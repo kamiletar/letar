@@ -1,3 +1,5 @@
+import { JsonLdScript, toJsonLdHtml } from '@letar/seo'
+
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://kami.letar.best'
 
 type JsonLdProps = {
@@ -45,8 +47,8 @@ export function JsonLd({ locale }: JsonLdProps) {
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(person) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(website) }} />
+      <JsonLdScript html={toJsonLdHtml(person)} />
+      <JsonLdScript html={toJsonLdHtml(website)} />
     </>
   )
 }
@@ -91,5 +93,20 @@ export function BlogPostingJsonLd({ locale, title, description, slug, publishedA
     },
   }
 
-  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(blogPosting) }} />
+  return <JsonLdScript html={toJsonLdHtml(blogPosting)} />
+}
+
+/** JSON-LD FAQPage для вопросов и ответов посадочной. */
+export function FaqJsonLd({ items }: { items: readonly { q: string; a: string }[] }) {
+  const faqPage = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: items.map((item) => ({
+      '@type': 'Question',
+      name: item.q,
+      acceptedAnswer: { '@type': 'Answer', text: item.a },
+    })),
+  }
+
+  return <JsonLdScript html={toJsonLdHtml(faqPage)} />
 }

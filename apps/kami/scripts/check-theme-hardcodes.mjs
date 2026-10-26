@@ -53,6 +53,18 @@ const allowedMatches = new Map([
     ]),
   ],
 
+  // Превью ссылки (next/og, Satori): рендер без Chakra-провайдеров, CSS-переменных темы нет,
+  // карточка намеренно чёрная в обеих темах — это картинка, а не часть интерфейса.
+  ['src/lib/og-card.tsx', new Set(['#000', '#f4f4f5', '#a1a1aa'])],
+
+  // Tagline посадочной /site/: подсветка слов — одна кривая cubic-bezier(0.22,1,0.36,1) из
+  // правил посадочных (навык landing-page-design) на 300 мс, у Chakra transitionTiming нет
+  // токена под неё; селектор по data-атрибуту слова возможен только через css-блок.
+  [
+    'src/app/[locale]/site/_components/tagline-reveal.tsx',
+    new Set(["transition: 'opacity 300ms cubic-bezier(0.22, 1, 0.36, 1)'"]),
+  ],
+
   // Аккордеон FAQ (consulting): один css-блок анимирует grid-template-rows (высота через grid
   // вместо max-height) и opacity в одной декларации с РАЗНЫМИ длительностями/кривыми на каждое
   // свойство — Chakra transitionProperty/transitionDuration не умеет задать разную длительность
