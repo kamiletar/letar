@@ -1,17 +1,16 @@
 ---
 id: KM-019
 title: Прототипировать сборку портрета из падающих букв
-status: blocked
+status: ready
 size: M
 area: research
 priority: 2
-blocked_by:
-  - KM-030
+blocked_by: []
 owner: ""
 stage: ""
 source: Лог владельца 2026-10-25 19:24–20:14; приложения в чате 2026-10-26
 created: 2026-10-26
-updated: 2026-10-26
+updated: 2026-10-27
 ---
 
 ## Что и зачем

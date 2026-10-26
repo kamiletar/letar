@@ -1,17 +1,16 @@
 ---
 id: KM-032
 title: "Избранные проекты на посадочной: флаг featured из админки и блок доказательств"
-status: blocked
+status: ready
 size: S
 area: content
 priority: 2
-blocked_by:
-  - KM-029
+blocked_by: []
 owner: ""
 stage: ""
 source: Решение владельца 2026-10-26, спецификация KM-028
 created: 2026-10-26
-updated: 2026-10-26
+updated: 2026-10-27
 ---
 
 ## Что и зачем
