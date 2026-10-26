@@ -126,4 +126,6 @@ nx run-many -t test --projects=kami --excludeTaskDependencies --run
   ⚠️ Файл внутри `[locale]` отдаёт URL `/ru/opengraph-image`, который редиректит на путь без префикса:
   в `generateMetadata` главной и `/site/` адреса картинок заданы явно без `/ru/`.
   В `metadataRoutes` matcher `proxy.ts` эти файлы добавлять не нужно: они не лежат в корне `app`.
-- Не проверено: `nx build` (standalone) и реальный пост ссылки в Telegram.
+- Проверено в собранном standalone (2026-10-27): ассеты лежат в `.next/standalone`, четыре адреса `opengraph-image` — 200 `image/png`.
+  Не проверен реальный пост ссылки в Telegram.
+- ⚠️ Сборка kami при Keystatic в режиме GitHub (`GITHUB_PAT`/`KEYSTATIC_GITHUB_CLIENT_ID` в `.env.local`) ходит в `api.github.com` из Node; при обрывах TLS падает. Для локальной проверки эти две переменные временно убирают из `.env.local`: пустое значение окружения Next перекрывает файлом.
