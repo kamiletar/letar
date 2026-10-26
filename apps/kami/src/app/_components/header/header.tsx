@@ -23,8 +23,15 @@ export const Header = () => {
       transitionTimingFunction="ease"
       _hover={{ bg: { base: 'white/40', _dark: 'bg/85' } }}
     >
-      {/* Mobile: hamburger + logo + actions */}
-      <Flex display={{ base: 'flex', md: 'none' }} alignItems="center" justifyContent="space-between" p={3}>
+      {/* Компактная шапка сохраняется на планшетах, пока полная навигация не помещается. */}
+      <Flex
+        display={{ base: 'flex', lg: 'none' }}
+        alignItems="center"
+        justifyContent="space-between"
+        gap={1}
+        px={{ base: 2, sm: 3 }}
+        py={3}
+      >
         <MobileMenu />
         <Link href="/" aria-label="Главная страница">
           <Heading size="lg" fontFamily="mono" color="fg">
@@ -38,8 +45,15 @@ export const Header = () => {
         </HStack>
       </Flex>
 
-      {/* Desktop: full navigation */}
-      <Flex display={{ base: 'none', md: 'flex' }} alignItems="center" justifyContent="space-between" px={6} py={3}>
+      {/* Полная навигация на широком экране. */}
+      <Flex
+        display={{ base: 'none', lg: 'flex' }}
+        alignItems="center"
+        justifyContent="space-between"
+        gap={3}
+        px={6}
+        py={3}
+      >
         <Link href="/" aria-label="Главная страница">
           <Heading size="xl" fontFamily="mono" color="fg">
             Kami
