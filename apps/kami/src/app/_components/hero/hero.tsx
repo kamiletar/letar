@@ -1,3 +1,4 @@
+import { EntrySkip } from '@/app/_components/hero/entry-skip'
 import { Link } from '@/i18n/navigation'
 import { getPublicNavigation } from '@/lib/public-navigation'
 import { Box, Container, Heading, HStack, Link as ChakraLink, Stack, Text } from '@chakra-ui/react'
@@ -66,6 +67,7 @@ export async function Hero() {
             </Stack>
           </section>
         </Stack>
+        <EntrySkip label={t('skipEntry')} />
 
         <Stack
           asChild

@@ -10,6 +10,44 @@ const smooth = (value: number) => {
   return x * x * (3 - 2 * x)
 }
 
+/** Длительность художественного входа, с. Это бюджет анимации, а не ожидание загрузки. */
+export const ENTRY_DURATION = 1.5
+
+/** Прямоугольник меню в координатах холста, вокруг него фон успокаивается. */
+export interface MatrixZone {
+  x: number
+  y: number
+  w: number
+  h: number
+}
+
+export interface MatrixEntry {
+  /** Секунды с момента готовности атласа глифов. */
+  elapsed: number
+  zone?: MatrixZone | null
+}
+
+/** Спад к зоне меню: плавный, без изменения скорости потоков (только прозрачность). */
+const ZONE_FALLOFF = 96
+const ZONE_CALM = .75
+
+/** Фаза входа: 0–0,4 потоки проявляются, 0,4–1,5 фон успокаивается вокруг меню. */
+export function getEntryState(elapsed: number) {
+  return { calm: smooth((elapsed - .4) / (ENTRY_DURATION - .4)) }
+}
+
+function entryFactor(entry: MatrixEntry, column: number, x: number, y: number) {
+  const reveal = smooth((entry.elapsed - random(column + 90) * .25) / .15)
+  let zone = 0
+  const z = entry.zone
+  if (z) {
+    const dx = Math.max(z.x - x, 0, x - (z.x + z.w))
+    const dy = Math.max(z.y - y, 0, y - (z.y + z.h))
+    zone = 1 - smooth(Math.hypot(dx, dy) / ZONE_FALLOFF)
+  }
+  return reveal * (1 - ZONE_CALM * getEntryState(entry.elapsed).calm * zone)
+}
+
 export function getMatrixMix(time: number) {
   const segment = wrap(time, MATRIX_DURATION) / 8
   const index = Math.floor(segment)
@@ -36,6 +74,7 @@ export function getMatrixFrame(
   height: number,
   recipes: readonly string[],
   reduced = false,
+  entry?: MatrixEntry,
 ) {
   const t = wrap(time, MATRIX_DURATION)
   const phase = TAU * t / MATRIX_DURATION
@@ -84,7 +123,7 @@ export function getMatrixFrame(
           x: px,
           y: py,
           scale,
-          opacity: weight * edge * (1 - j / 11) * (.35 + depth * .3),
+          opacity: weight * edge * (1 - j / 11) * (.35 + depth * .3) * (entry ? entryFactor(entry, i, px, py) : 1),
           dispersion: kind === 'pixels'
             ? Math.sin(Math.PI * t / MATRIX_DURATION) ** 6 * (.65 + .35 * Math.sin(x / width * Math.PI))
             : 0,
@@ -132,12 +171,12 @@ export function createMatrixRenderer(ctx: CanvasRenderingContext2D, recipes: rea
       }
       return ready === entries.length
     },
-    draw(time: number, width: number, height: number, reduced = false) {
+    draw(time: number, width: number, height: number, reduced = false, entry?: MatrixEntry) {
       const started = performance.now()
       ctx.globalAlpha = 1
       ctx.fillStyle = colors.background
       ctx.fillRect(0, 0, width, height)
-      for (const glyph of getMatrixFrame(time, width, height, recipes, reduced)) {
+      for (const glyph of getMatrixFrame(time, width, height, recipes, reduced, entry)) {
         if (glyph.opacity < .002 || glyph.y < -32 || glyph.y > height + 32) { continue }
         const position = positions.get(keyFor(glyph))
         const dispersion = smooth(glyph.dispersion)

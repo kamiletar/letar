@@ -1,6 +1,6 @@
 'use client'
 
-import { createMatrixRenderer } from '@/lib/matrix-scene'
+import { createMatrixRenderer, ENTRY_DURATION, type MatrixZone } from '@/lib/matrix-scene'
 import { Box } from '@chakra-ui/react'
 import { useEffect, useRef } from 'react'
 
@@ -52,10 +52,16 @@ export const RECIPES: string[] = [
 ]
 
 /** Выбранный цикл A → B → C; интерфейс и ссылки не зависят от готовности canvas. */
-export function MatrixRain({ theme }: { theme: string | undefined }) {
+export function MatrixRain({ theme, home = false }: { theme: string | undefined; home?: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const hostRef = useRef<HTMLDivElement>(null)
   const timeRef = useRef(0)
+  const homeRef = useRef(home)
+  const zoneRef = useRef<() => void>(() => {})
+  useEffect(() => {
+    homeRef.current = home
+    zoneRef.current()
+  }, [home])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -83,14 +89,48 @@ export function MatrixRain({ theme }: { theme: string | undefined }) {
     let samples = 0
     let paintAverage = 0
     let disposed = false
+    // Вход играет только при первой загрузке на главной; возврат на неё внутри сайта — задача KM-018.
+    const startsOnHome = homeRef.current
+    let entryElapsed = startsOnHome && !motion.matches ? 0 : Infinity
+    let entrySpeed = 1
+    let zone: MatrixZone | null = null
+    const markEntry = () => {
+      const running = entryElapsed < ENTRY_DURATION
+      if (running) { document.documentElement.dataset.kamiEntry = 'running' }
+      else { delete document.documentElement.dataset.kamiEntry }
+    }
+    const measureZone = () => {
+      const nav = homeRef.current ? document.querySelector('[data-testid="home-menu"] nav') : null
+      if (!nav) {
+        zone = null
+        return
+      }
+      const box = nav.getBoundingClientRect()
+      const hostBox = host.getBoundingClientRect()
+      zone = { x: box.left - hostBox.left, y: box.top - hostBox.top, w: box.width, h: box.height }
+    }
+    zoneRef.current = () => {
+      measureZone()
+      draw()
+    }
+    const skip = () => {
+      if (entryElapsed < ENTRY_DURATION) { entrySpeed = 6 }
+    }
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') { skip() }
+    }
 
-    const draw = () => renderer.draw(motion.matches ? 0 : timeRef.current, width, height, reducedDensity)
+    const draw = () => {
+      const entry = homeRef.current ? { elapsed: entryElapsed, zone } : undefined
+      return renderer.draw(motion.matches ? 0 : timeRef.current, width, height, reducedDensity, entry)
+    }
     const resize = () => {
       const bounds = host.getBoundingClientRect()
       width = Math.max(1, bounds.width)
       height = Math.max(1, bounds.height)
       canvas.width = Math.round(width * dpr)
       canvas.height = Math.round(height * dpr)
+      measureZone()
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
       draw()
     }
@@ -99,7 +139,13 @@ export function MatrixRain({ theme }: { theme: string | undefined }) {
         raf = 0
         return
       }
-      if (last) { timeRef.current += Math.min((now - last) / 1000, .1) }
+      const delta = last ? Math.min((now - last) / 1000, .1) : 0
+      timeRef.current += delta
+      // Часы входа идут только после готовности атласа: до этого холст честно остаётся фоном.
+      if (warmed && entryElapsed < ENTRY_DURATION) {
+        entryElapsed += delta * entrySpeed
+        if (entryElapsed >= ENTRY_DURATION) { markEntry() }
+      }
       last = now
       if (now - lastDraw >= 1000 / 30) {
         const cost = draw()
@@ -142,10 +188,16 @@ export function MatrixRain({ theme }: { theme: string | undefined }) {
     window.addEventListener('pagehide', stop)
     window.addEventListener('pageshow', resume)
     motion.addEventListener('change', resume)
+    window.addEventListener('keydown', onKey)
+    window.addEventListener('kami:entry-skip', skip)
+    markEntry()
     resize()
     resume()
     return () => {
       disposed = true
+      delete document.documentElement.dataset.kamiEntry
+      window.removeEventListener('keydown', onKey)
+      window.removeEventListener('kami:entry-skip', skip)
       stop()
       observer.disconnect()
       document.removeEventListener('visibilitychange', resume)
