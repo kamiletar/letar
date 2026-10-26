@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="ru">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kami — три варианта буквенной сцены</title>
+<style>
+  :root {color-scheme:dark;--page:#101514;--panel:#18211e;--text:#edf6f2;--muted:#adbfba;--accent:#6ee7b7;--line:#3a4d45;--scene:#030807;--ink:#42bc91;--head:#b3f5dc}
+  *{box-sizing:border-box}body{margin:0;background:var(--page);color:var(--text);font:16px/1.5 system-ui,sans-serif}main{max-width:1160px;margin:auto;padding:24px}h1{font-size:clamp(24px,4vw,36px);font-weight:600;line-height:1.2;margin:0 0 12px}p{max-width:80ch;color:var(--muted)}button,select,input{font:inherit}button,select{min-height:44px;border:1px solid var(--line);background:var(--panel);color:var(--text);padding:8px 14px;border-radius:6px}button{cursor:pointer}button[aria-pressed=true]{background:var(--accent);color:var(--scene);border-color:var(--accent)}button:hover{border-color:var(--accent)}:focus-visible{outline:2px solid var(--accent);outline-offset:3px}.controls,.variants{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:16px 0}.variants button{flex:1 1 220px;text-align:left}.variants strong,.variants small{display:block}.variants small{font-size:13px}label{display:inline-flex;align-items:center;gap:8px;min-height:44px}input[type=range]{width:200px;accent-color:var(--accent);min-height:44px}.stage{position:relative;margin:24px auto;background:var(--scene);isolation:isolate;overflow:hidden;border:1px solid var(--line);width:100%;max-width:960px;aspect-ratio:8/5}.stage.mobile{max-width:390px;aspect-ratio:39/70}.stage canvas{position:absolute;inset:0;width:100%;height:100%}.scene-menu{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;padding:6%;pointer-events:none;background:linear-gradient(90deg,var(--scene) 0%,color-mix(in srgb,var(--scene) 88%,transparent) 30%,transparent 85%)}.scene-menu h2{font:500 clamp(32px,6vw,64px)/1.1 ui-monospace,monospace;margin:0 0 10px}.scene-menu p{font-size:14px;color:var(--muted);margin:0 0 26px}.scene-menu span{display:block;font-size:clamp(18px,2.4vw,24px);line-height:1.4;margin:4px 0;padding:4px 10px;background:color-mix(in srgb,var(--scene) 92%,transparent);border-radius:3px}.stage.mobile .scene-menu{padding:24px;background:linear-gradient(90deg,var(--scene),color-mix(in srgb,var(--scene) 85%,transparent) 45%,transparent)}.stage.mobile h2{font-size:44px}.stage.mobile span{font-size:22px}.stage.mobile .scene-menu p{font-size:13px}.notes{padding:20px;background:var(--panel);border-radius:8px}.notes h2{margin:0;font-size:22px}.notes p:last-child{margin-bottom:0}output{font-variant-numeric:tabular-nums;min-width:65px}#stats{font:13px ui-monospace,monospace;color:var(--muted)}.hint{font-size:14px}.light{--page:#edf3ef;--panel:#fff;--text:#10271e;--muted:#385e4d;--accent:#176b4c;--line:#adc6b7;--scene:#edf3ef;--ink:#367b59;--head:#155335}.ice{--ink:#6abec8;--head:#c6f6ff}.light.ice{--ink:#256573;--head:#14414b}@media(max-width:600px){main{padding:16px}.controls{align-items:flex-start;gap:12px}.controls label{flex-wrap:wrap}input[type=range]{width:160px}.stage{min-height:320px}.stage.mobile{min-height:0}.scene-menu p{font-size:12px}.scene-menu span{font-size:18px}.scene-menu h2{font-size:36px}}
+</style>
+<main>
+  <h1>Буквы остаются. Меняется пространство.</h1>
+  <p>Три прототипа на одних текстах и одной шкале времени. Переключение сохраняет момент сцены. Меню остаётся неподвижным. Это лаборатория для выбора движения, а не окончательная анимация сайта.</p>
+  <div class="variants" role="group" aria-label="Вариант движения">
+    <button data-mode="drift" aria-pressed="true"><strong>A. Дыхание глубины</strong><small>Масштаб, слои и мягкий дрейф</small></button>
+    <button data-mode="perspective" aria-pressed="false"><strong>B. Пластичная плоскость</strong><small>Изгиб потока и перспектива</small></button>
+    <button data-mode="pixels" aria-pressed="false"><strong>C. Рассыпание в пиксели</strong><small>Поток, рассеивание и сборка</small></button>
+  </div>
+  <div class="controls">
+    <button id="play" aria-pressed="false">Пауза</button>
+    <button id="reset">С начала</button>
+    <label>Время <input id="time" type="range" min="0" max="24" step="0.01" value="0"><output id="clock">0.00 с</output></label>
+    <label>Экран <select id="size"><option value="desktop">Десктоп 960 × 600</option><option value="mobile">Телефон 390 × 700</option></select></label>
+    <label>Тема <select id="theme"><option value="dark">Тёмная</option><option value="light">Светлая</option></select></label>
+    <label><input id="ice" type="checkbox"> Прохладный оттенок</label>
+    <label><input id="blend" type="checkbox"> Переход A → B → C</label>
+  </div>
+  <p id="motion" class="hint" hidden>В системе включено уменьшение движения: показан статичный кадр. Воспроизведение можно включить вручную.</p>
+  <div class="stage" id="stage">
+    <canvas aria-hidden="true"></canvas>
+    <div class="scene-menu" aria-label="Проверка читаемости меню">
+      <h2>Kami</h2><p>Архитектор программного обеспечения</p>
+      <div><span>Контакты</span><span>Заказать сайт</span><span>Обо мне</span><span>Блог</span><span>Для друзей</span></div>
+    </div>
+  </div>
+  <div class="notes" aria-live="polite"><h2 id="name"></h2><p id="description"></p><p id="cost"></p></div>
+  <p class="hint">Цикл — 24 секунды. Без вспышек и резких остановок; шов можно проверить на 0 и 24 с. Статичный режим — пауза. Скрытая вкладка не расходует кадры. Ограничение: 30 кадров/с и DPR ≤ 1,5.</p>
+  <p id="stats" aria-live="off"></p>
+</main>
+<script>
+  'use strict'
+  const RECIPES = /* RECIPES_SOURCE */ []
+  const descriptions = {
+    drift:['A. Дыхание глубины','Три слоя букв с разной глубиной. Камера медленно приближается и дрейфует по замкнутой кривой, а скорость падения непрерывно меняется. Самый спокойный фон для постоянного меню.','Стоимость: низкая–средняя. Canvas 2D без новых зависимостей. На телефоне меньше потоков; reduced-motion — неподвижное поле. Рекомендую как основу.'],
+    perspective:['B. Пластичная плоскость','Потоки лежат на слегка изогнутой поверхности. Плавный поворот и изменение перспективы создают глубину без резкого пролёта камеры. Меню не участвует в деформации.','Стоимость: средняя. Canvas 2D достаточно для прототипа; WebGL нужен только при подтверждённой нехватке производительности. На телефоне уменьшаем изгиб, reduced-motion — статичная перспектива.'],
+    pixels:['C. Рассыпание в пиксели','Одна мягкая волна проходит через потоки: символы расходятся на фрагменты и возвращаются в исходный строй. Пик эффекта в середине цикла; без шума и случайных вспышек.','Стоимость: средняя–высокая. Число примитивов растёт до шести на символ. Лучше короткий акцент заставки, чем постоянный фон. На телефоне фрагментов меньше; reduced-motion — обычные буквы.']
+  }
+  const canvas=document.querySelector('canvas'),ctx=canvas.getContext('2d')
+  const stage=document.querySelector('#stage'),slider=document.querySelector('#time'),clock=document.querySelector('#clock')
+  const reduced=matchMedia('(prefers-reduced-motion: reduce)')
+  const modes=['drift','perspective','pixels'],tau=2*Math.PI,duration=24
+  let mode='drift',time=0,playing=!reduced.matches,last=0,raf=0,lastDraw=0,dpr=1,width=960,height=600,blend=false
+  let frames=0,samples=[],colors={}
+  const random=i=>{const n=Math.sin(i*127.1+311.7)*43758.5453;return n-Math.floor(n)}
+  const smooth=x=>{x=Math.max(0,Math.min(1,x));return x*x*(3-2*x)}
+  const mod=(x,n)=>((x%n)+n)%n
+  function palette(){const s=getComputedStyle(document.body);colors={bg:s.getPropertyValue('--scene').trim(),ink:s.getPropertyValue('--ink').trim(),head:s.getPropertyValue('--head').trim()}}
+  function resize(){const rect=stage.getBoundingClientRect();dpr=Math.min(devicePixelRatio||1,1.5);width=document.querySelector('#size').value==='mobile'?390:960;height=width===390?700:600;canvas.width=Math.round(rect.width*dpr);canvas.height=Math.round(rect.height*dpr);draw(time)}
+  function scene(t,kind,opacity){
+    const phase=tau*t/duration,phone=width===390,columns=phone?22:52
+    const breathe=Math.sin(phase),driftX=16*Math.sin(phase),driftY=8*(Math.cos(phase)-1)
+    const scale=1.04+0.035*Math.sin(phase)
+    const turn=(phone?0.10:0.16)*Math.sin(phase),tilt=0.08*Math.sin(phase)
+    for(let i=0;i<columns;i++){
+      const depth=.65+(i%3)*.3,font=15+depth*7,span=height+font*14
+      // Полный проход за 24 секунды: положение и производная совпадают на стыке цикла.
+      const travel=(1+i%2)*t/duration+.055*Math.sin(phase+random(i+12)*tau)
+      const y=mod(random(i+4)*span+travel*span,span)-font
+      const x=(i+.5)*width/columns,recipe=RECIPES[i%RECIPES.length]||'すし'
+      for(let j=0;j<10;j++){
+        let px=x-width/2,py=y-j*font-height/2,k=1
+        if(kind==='perspective'){
+          const z=90*Math.sin(px/width*Math.PI+phase)*(.5+depth)
+          const rx=px*Math.cos(turn)+z*Math.sin(turn),rz=-px*Math.sin(turn)+z*Math.cos(turn)
+          k=750/(750+rz+depth*60);px=rx*k;py=(py*Math.cos(tilt)-z*Math.sin(tilt))*k
+        }else{px=px*scale+driftX*depth;py=py*scale+driftY*depth}
+        px+=width/2;py+=height/2
+        const edge=Math.min(smooth((py+20)/60),smooth((height+40-py)/80))
+        const alpha=opacity*edge*(1-j/11)*(.35+depth*.3)
+        if(alpha<=0||py<-font||py>height+font)continue
+        const seed=i*13+j,dispersion=kind==='pixels'?Math.pow(Math.sin(Math.PI*t/duration),6)*(.65+.35*Math.sin(x/width*Math.PI)):0
+        ctx.fillStyle=j===0?colors.head:colors.ink
+        ctx.font=`${font*k}px monospace`;ctx.textAlign='center'
+        ctx.globalAlpha=alpha*(1-smooth(dispersion))
+        ctx.fillText(recipe[(Math.floor(random(i+6)*recipe.length)+j)%recipe.length],px,py)
+        if(dispersion>.001){
+          ctx.globalAlpha=alpha*smooth(dispersion)
+          for(let q=0;q<(phone?3:6);q++){
+            const a=random(seed*7+q+55)*tau,r=(12+random(seed*3+q)*65)*dispersion
+            const dot=Math.max(1.2,2.5*k)
+            ctx.fillRect(px+Math.cos(a)*r,py+Math.sin(a)*r,dot,dot)
+          }
+        }
+      }
+    }
+    ctx.globalAlpha=1
+  }
+  function draw(t){
+    if(!ctx)return
+    const started=performance.now()
+    ctx.setTransform(canvas.width/width,0,0,canvas.height/height,0,0)
+    ctx.fillStyle=colors.bg;ctx.globalAlpha=1;ctx.fillRect(0,0,width,height)
+    if(blend){const segment=t/8,index=Math.floor(segment)%3,amount=smooth((segment%1-.65)/.35);scene(t,modes[index],1-amount);if(amount>0)scene(t,modes[(index+1)%3],amount)}else scene(t,mode,1)
+    frames++;samples.push(performance.now()-started);if(samples.length>180)samples.shift()
+    slider.value=String(t);clock.textContent=t.toFixed(2)+' с'
+    if(frames%15===0||!playing){const sorted=[...samples].sort((a,b)=>a-b);document.querySelector('#stats').textContent=`${width} × ${height}; потоков ${width===390?22:52}; DPR ${dpr}; рисование p95 ${(sorted[Math.floor(sorted.length*.95)]||0).toFixed(2)} мс (этот браузер, без композитинга)`}
+  }
+  function updatePlay(){const button=document.querySelector('#play');button.textContent=playing?'Пауза':'Воспроизвести';button.setAttribute('aria-pressed',String(!playing))}
+  function tick(now){if(!playing||document.hidden){raf=0;return}if(last)time=mod(time+Math.min((now-last)/1000,.1),duration);last=now;if(now-lastDraw>=1000/30){draw(time);lastDraw=now}raf=requestAnimationFrame(tick)}
+  function start(){last=0;if(!raf&&!document.hidden)raf=requestAnimationFrame(tick);updatePlay()}
+  function pause(){playing=false;cancelAnimationFrame(raf);raf=0;last=0;updatePlay()}
+  function seek(t){time=mod(t,duration);draw(time)}
+  function setMode(value){mode=value;document.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===mode)));['name','description','cost'].forEach((id,i)=>document.getElementById(id).textContent=descriptions[mode][i]);draw(time)}
+  document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>setMode(b.dataset.mode))
+  document.querySelector('#play').onclick=()=>{if(playing)pause();else{playing=true;start()}}
+  document.querySelector('#reset').onclick=()=>seek(0)
+  slider.oninput=()=>{pause();seek(Number(slider.value))}
+  document.querySelector('#size').onchange=()=>{stage.classList.toggle('mobile',document.querySelector('#size').value==='mobile');resize()}
+  document.querySelector('#theme').onchange=()=>{document.body.classList.toggle('light',document.querySelector('#theme').value==='light');palette();draw(time)}
+  document.querySelector('#ice').onchange=e=>{document.body.classList.toggle('ice',e.target.checked);palette();draw(time)}
+  document.querySelector('#blend').onchange=e=>{blend=e.target.checked;draw(time)}
+  document.addEventListener('visibilitychange',()=>{cancelAnimationFrame(raf);raf=0;last=0;if(!document.hidden&&playing)start()})
+  reduced.addEventListener('change',e=>{document.querySelector('#motion').hidden=!e.matches;if(e.matches){pause();seek(0)}})
+  document.querySelector('#motion').hidden=!reduced.matches
+  new ResizeObserver(resize).observe(stage)
+  palette();setMode(mode);resize();updatePlay();if(playing)start()
+  // Детерминированный доступ для сравнения кадров и проверки цикла.
+  window.rainPrototype={seek,pause,setMode,resetMetrics:()=>{samples=[]},getState:()=>({time,mode,playing,frames,width,height,samples:[...samples],recipes:RECIPES.length}),frame:()=>canvas.toDataURL()}
+</script>
+</html>
