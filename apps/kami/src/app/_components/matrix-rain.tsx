@@ -1,23 +1,8 @@
 'use client'
 
+import { createMatrixRenderer } from '@/lib/matrix-scene'
 import { Box } from '@chakra-ui/react'
-import { breakpoints, useMediaQuery } from '@letar/hooks'
-import { useCallback, useEffect, useRef, useState } from 'react'
-
-interface MatrixRainProps {
-  /** Цвет символов (по умолчанию Matrix green) */
-  color?: string
-  /** Размер шрифта в пикселях */
-  fontSize?: number
-  /** Скорость падения (меньше = быстрее) */
-  speed?: number
-  /** Прозрачность фона для trail-эффекта */
-  fadeOpacity?: number
-  /** RGB-компоненты фона для trail-эффекта (по умолчанию '0, 0, 0') */
-  bgRgb?: string
-  /** Класс для canvas */
-  className?: string
-}
+import { useEffect, useRef } from 'react'
 
 /**
  * Рецепты традиционной кухни на разных письменностях.
@@ -66,200 +51,126 @@ export const RECIPES: string[] = [
   '++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.',
 ]
 
-export function MatrixRain({
-  color = '#00FF41',
-  fontSize = 1,
-  speed = 50,
-  fadeOpacity = 0.05,
-  bgRgb = '0, 0, 0',
-  className,
-}: MatrixRainProps) {
+/** Выбранный цикл A → B → C; интерфейс и ссылки не зависят от готовности canvas. */
+export function MatrixRain({ theme }: { theme: string | undefined }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const containerRef = useRef<HTMLDivElement>(null)
-  const animationRef = useRef<number | undefined>(undefined)
-  const dropsRef = useRef<number[]>([])
-  /** Индекс рецепта для каждого столбца */
-  const columnRecipeRef = useRef<number[]>([])
-  /** Позиция внутри текста рецепта для каждого столбца */
-  const columnCharIdxRef = useRef<number[]>([])
-  const [isVisible, setIsVisible] = useState(true)
-  const prefersReducedMotion = useMediaQuery(breakpoints.prefersReducedMotion)
+  const hostRef = useRef<HTMLDivElement>(null)
+  const timeRef = useRef(0)
 
-  // Инициализация капель — каждому столбцу назначается случайный рецепт
-  const initDrops = useCallback((columns: number) => {
-    dropsRef.current = Array.from({ length: columns }, () => Math.random() * -100)
-    columnRecipeRef.current = Array.from({ length: columns }, () => Math.floor(Math.random() * RECIPES.length))
-    columnCharIdxRef.current = Array.from(
-      { length: columns },
-      () => Math.floor(Math.random() * 100), // случайная стартовая позиция в тексте
-    )
-  }, [])
-
-  // Рисование одного кадра
-  const draw = useCallback(
-    (ctx: CanvasRenderingContext2D, width: number, height: number) => {
-      // Затемняем предыдущий кадр для создания trail-эффекта
-      ctx.fillStyle = `rgba(${bgRgb}, ${fadeOpacity})`
-      ctx.fillRect(0, 0, width, height)
-
-      // Настройки текста
-      ctx.fillStyle = color
-      ctx.font = `${fontSize}px monospace`
-
-      const columns = Math.floor(width / fontSize)
-
-      // Рисуем каждый столбец — символ берётся последовательно из рецепта
-      for (let i = 0; i < columns; i++) {
-        const recipe = RECIPES[columnRecipeRef.current[i]]
-        const charIdx = columnCharIdxRef.current[i] % recipe.length
-        const char = recipe[charIdx]
-        columnCharIdxRef.current[i]++
-
-        // Позиция
-        const x = i * fontSize
-        const y = dropsRef.current[i] * fontSize
-
-        // Рисуем символ
-        ctx.fillText(char, x, y)
-
-        // Сброс капли — назначаем новый случайный рецепт
-        if (y > height && Math.random() > 0.975) {
-          dropsRef.current[i] = 0
-          columnRecipeRef.current[i] = Math.floor(Math.random() * RECIPES.length)
-          columnCharIdxRef.current[i] = Math.floor(Math.random() * 100)
-        }
-
-        // Двигаем каплю вниз
-        dropsRef.current[i]++
-      }
-    },
-    [color, fontSize, fadeOpacity, bgRgb],
-  )
-
-  // Обработка resize
-  const handleResize = useCallback(() => {
-    const canvas = canvasRef.current
-    if (!canvas) {
-      return
-    }
-
-    const parent = canvas.parentElement
-    if (!parent) {
-      return
-    }
-
-    canvas.width = parent.clientWidth
-    canvas.height = parent.clientHeight
-
-    const columns = Math.floor(canvas.width / fontSize)
-    initDrops(columns)
-  }, [fontSize, initDrops])
-
-  // Intersection Observer для visibility check
   useEffect(() => {
-    const container = containerRef.current
-    if (!container) {
-      return
-    }
-
-    const observer = new IntersectionObserver(([entry]) => setIsVisible(entry.isIntersecting), { threshold: 0.1 })
-
-    observer.observe(container)
-    return () => observer.disconnect()
-  }, [])
-
-  // Основной эффект (пропускаем если reduced motion)
-  useEffect(() => {
-    if (prefersReducedMotion) {
-      return
-    }
     const canvas = canvasRef.current
-    if (!canvas) {
-      return
-    }
-
+    const host = hostRef.current
+    if (!canvas || !host || !theme) { return }
     const ctx = canvas.getContext('2d')
-    if (!ctx) {
-      return
+    if (!ctx) { return }
+
+    const motion = matchMedia('(prefers-reduced-motion: reduce)')
+    const colors = getComputedStyle(host)
+    const renderer = createMatrixRenderer(ctx, RECIPES, {
+      background: colors.backgroundColor,
+      ink: colors.color,
+      head: getComputedStyle(canvas).color,
+    })
+    let raf = 0
+    let warmTimer = 0
+    let warmed = false
+    let last = 0
+    let lastDraw = 0
+    let width = 0
+    let height = 0
+    let dpr = Math.min(devicePixelRatio || 1, 1.5)
+    let reducedDensity = false
+    let samples = 0
+    let paintAverage = 0
+    let disposed = false
+
+    const draw = () => renderer.draw(motion.matches ? 0 : timeRef.current, width, height, reducedDensity)
+    const resize = () => {
+      const bounds = host.getBoundingClientRect()
+      width = Math.max(1, bounds.width)
+      height = Math.max(1, bounds.height)
+      canvas.width = Math.round(width * dpr)
+      canvas.height = Math.round(height * dpr)
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+      draw()
     }
-
-    // Инициализация размеров
-    handleResize()
-
-    // Заливаем canvas начальным цветом фона
-    ctx.fillStyle = `rgb(${bgRgb})`
-    ctx.fillRect(0, 0, canvas.width, canvas.height)
-
-    // Анимация
-    let lastTime = 0
-    const animate = (currentTime: number) => {
-      if (currentTime - lastTime >= speed) {
-        draw(ctx, canvas.width, canvas.height)
-        lastTime = currentTime
+    const tick = (now: number) => {
+      if (disposed || document.hidden || motion.matches) {
+        raf = 0
+        return
       }
-      animationRef.current = requestAnimationFrame(animate)
+      if (last) { timeRef.current += Math.min((now - last) / 1000, .1) }
+      last = now
+      if (now - lastDraw >= 1000 / 30) {
+        const cost = draw()
+        lastDraw = now
+        if (warmed) {
+          paintAverage = paintAverage * .9 + cost * .1
+          samples++
+          // Сначала ограничиваем разрешение и плотность, сохраняя сам цикл A → B → C.
+          if (samples > 60 && paintAverage > 12 && !reducedDensity) {
+            reducedDensity = true
+            dpr = 1
+            resize()
+          }
+        }
+      }
+      raf = requestAnimationFrame(tick)
     }
-
-    // Запускаем анимацию только если элемент видим
-    if (isVisible) {
-      animationRef.current = requestAnimationFrame(animate)
+    const warm = () => {
+      if (disposed || document.hidden) { return }
+      warmed = renderer.warm()
+      draw()
+      if (!warmed) { warmTimer = window.setTimeout(warm, 8) }
     }
-
-    // Обработчик resize
-    window.addEventListener('resize', handleResize)
-
+    const stop = () => {
+      cancelAnimationFrame(raf)
+      clearTimeout(warmTimer)
+      raf = 0
+      last = 0
+    }
+    const resume = () => {
+      stop()
+      if (disposed || document.hidden) { return }
+      if (!warmed) { warmTimer = window.setTimeout(warm, 0) }
+      draw()
+      if (!motion.matches) { raf = requestAnimationFrame(tick) }
+    }
+    const observer = new ResizeObserver(resize)
+    observer.observe(host)
+    document.addEventListener('visibilitychange', resume)
+    window.addEventListener('pagehide', stop)
+    window.addEventListener('pageshow', resume)
+    motion.addEventListener('change', resume)
+    resize()
+    resume()
     return () => {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current)
-      }
-      window.removeEventListener('resize', handleResize)
+      disposed = true
+      stop()
+      observer.disconnect()
+      document.removeEventListener('visibilitychange', resume)
+      window.removeEventListener('pagehide', stop)
+      window.removeEventListener('pageshow', resume)
+      motion.removeEventListener('change', resume)
     }
-  }, [draw, handleResize, speed, isVisible, prefersReducedMotion, bgRgb])
-
-  // Если prefers-reduced-motion, показываем статичный градиент
-  if (prefersReducedMotion) {
-    return (
-      <Box
-        position="absolute"
-        inset={0}
-        bg={{
-          base: 'linear-gradient(180deg, var(--chakra-colors-gray-50) 0%, rgba(249,250,251,0.9) 50%, transparent 100%)',
-          _dark: 'linear-gradient(180deg, black 0%, rgba(0,0,0,0.9) 50%, transparent 100%)',
-        }}
-        zIndex={0}
-        aria-hidden="true"
-      />
-    )
-  }
+  }, [theme])
 
   return (
-    <div
-      ref={containerRef}
-      style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-      }}
+    <Box
+      ref={hostRef}
+      position="absolute"
+      inset={0}
+      bg="bg"
+      color={{ base: 'fg.700', _dark: 'fg.500' }}
       aria-hidden="true"
+      css={{
+        backgroundImage:
+          'radial-gradient(ellipse at 85% 30%, color-mix(in srgb, var(--chakra-colors-fg-700) 12%, transparent), transparent 70%)',
+      }}
     >
-      <Box asChild filter={'blur(.5px)'} animation={'matrix-zoom 30s infinite ease'}>
-        <canvas
-          ref={canvasRef}
-          className={className}
-          style={{
-            transformOrigin: 'center center',
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            width: '50%',
-            height: '50%',
-            zIndex: 0,
-            scale: '1',
-          }}
-        />
+      <Box asChild position="absolute" inset={0} w="full" h="full" color={{ base: 'fg.900', _dark: 'fg.200' }}>
+        <canvas ref={canvasRef} />
       </Box>
-    </div>
+    </Box>
   )
 }

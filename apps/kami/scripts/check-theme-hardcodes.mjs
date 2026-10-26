@@ -49,12 +49,7 @@ const allowedMatches = new Map([
   [
     'src/app/_components/matrix-rain.tsx',
     new Set([
-      '#00FF41',
       'rgba(0,0,0,0.05)',
-      'rgba(${bgRgb}, ${fadeOpacity})',
-      'rgb(${bgRgb})',
-      'rgba(249,250,251,0.9)',
-      'rgba(0,0,0,0.9)',
     ]),
   ],
 
@@ -80,11 +75,6 @@ const allowedMatches = new Map([
   // 'github-dark' самого shiki (см. themes выше по файлу), не UI kami.
   ['src/app/_components/code-highlighter.tsx', new Set(['#24292e', '#e1e4e8'])],
 
-  // MatrixRain — canvas-компонент, `color` уходит прямо в ctx.fillStyle, не в CSS. #0a7a4a —
-  // отдельный, специально приглушённый оттенок для светлой темы (не совпадает ни с одним шагом
-  // fg-палитры — на белом фоне обычный matrix-green слишком кислотный), подобран визуально.
-  ['src/app/_components/hero/hero.tsx', new Set(['#0a7a4a'])],
-
   // Официальные брендовые цвета логотипа Google («G») — фиксированы гайдлайном Google, не
   // цвет UI kami, токенизировать нечего.
   [
@@ -98,18 +88,10 @@ const allowedMatches = new Map([
   //     переиспользует pressScale из @letar/ui (см. её JSDoc, раздел «Когда НЕ использовать эту
   //     шкалу») и не смешивается с pressableConfig.globalCss (тот не разлит в этом приложении,
   //     см. комментарий в globalCss выше по файлу) — одно значение, один источник.
-  //   - keyframes 'matrix-zoom' (scale 3→6→12→108→100→3) — разовый декоративный эффект
-  //     («цифровой» zoom-burst фона), последовательность подобрана визуально кадр за кадром,
-  //     не переиспользуемая шкала.
   [
     'src/app/_components/theme-provider.tsx',
     new Set([
       "transform: 'scale(0.93)",
-      "transform: 'scale(3)",
-      "transform: 'scale(6)",
-      "transform: 'scale(12)",
-      "transform: 'scale(108)",
-      "transform: 'scale(100)",
     ]),
   ],
 
@@ -136,11 +118,7 @@ const allowedMatches = new Map([
     ]),
   ],
 
-  // GLOW (Matrix-стиль свечения) — двойное использование:
-  //  1. GLOW.color уходит в canvas-компонент MatrixRain (см. hero.tsx) — та же причина
-  //     дублирования HEX вместо ссылки на токен fg.500, что у canvas-визуализаторов выше:
-  //     ctx.fillStyle не резолвит var(--chakra-colors-fg-500).
-  //  2. text/box-shadow-поля — декоративное свечение под текст/карточки (feature-card.tsx,
+  // GLOW (Matrix-стиль свечения): text/box-shadow-поля под текст/карточки (feature-card.tsx,
   //     blog/page.tsx), rgba с постоянным emerald-каналом (16,185,129 = #10B981 = fg.500) и
   //     разной альфой/офсетом по месту использования — один эффект, не шкала, токенизировать
   //     нечего без заведения отдельной shadow-token-системы ради трёх мест использования.

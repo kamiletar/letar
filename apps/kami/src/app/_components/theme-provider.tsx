@@ -80,14 +80,6 @@ export const ThemeProvider = ({ children, fonts }: Props) => {
       theme: {
         keyframes: {
           ...pressableConfig.keyframes,
-          'matrix-zoom': {
-            '0%': { transform: 'scale(3)' },
-            '10%': { transform: 'scale(6)' },
-            '20%': { transform: 'scale(12)' },
-            '50%': { transform: 'scale(108)' },
-            '70%': { transform: 'scale(100)' },
-            '100%': { transform: 'scale(3)' },
-          },
         },
         tokens: {
           colors: {
