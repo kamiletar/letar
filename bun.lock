@@ -742,7 +742,7 @@
     },
     "apps/flora": {
       "name": "@letar/flora",
-      "version": "0.3.27",
+      "version": "0.3.28",
       "dependencies": {
         "@letar/demo-protection": "workspace:*",
         "@letar/env-load": "workspace:*",
