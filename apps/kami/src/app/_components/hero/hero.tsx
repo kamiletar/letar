@@ -41,15 +41,15 @@ export async function Hero() {
         >
           <section aria-labelledby="home-title" data-testid="home-menu">
             <Box position="relative">
-              {/* Слой boot-лога: декоративный, поверх свободного места над именем, раскладку не двигает. */}
+              {/* Слой boot-лога: декоративный, над местом, где позже проявится меню (пока оно скрыто); раскладку не двигает. */}
               <Box
                 aria-hidden="true"
                 data-entry-log=""
                 data-entry-log-config={JSON.stringify(logConfig)}
                 position="absolute"
                 left={0}
-                bottom="100%"
-                mb={4}
+                top="100%"
+                mt={8}
                 opacity={0}
                 pointerEvents="none"
                 fontFamily="mono"
