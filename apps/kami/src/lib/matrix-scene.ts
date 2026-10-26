@@ -21,10 +21,24 @@ export interface MatrixZone {
   h: number
 }
 
+/** Ловец церемонии: глиф атласа, летящий к букве имени (KM-030). Координаты — в пикселях холста. */
+export interface MatrixCatcher {
+  char: string
+  layer: number
+  head: boolean
+  x: number
+  y: number
+  scale: number
+  opacity: number
+}
+
 export interface MatrixEntry {
   /** Секунды с момента готовности атласа глифов. */
   elapsed: number
   zone?: MatrixZone | null
+  /** Успокоение фона 0..1 из модели церемонии; без него — кривая KM-017 по `elapsed`. */
+  calm?: number
+  catchers?: readonly MatrixCatcher[]
 }
 
 /** Спад к зоне меню: плавный, без изменения скорости потоков (только прозрачность). */
@@ -45,7 +59,7 @@ function entryFactor(entry: MatrixEntry, column: number, x: number, y: number) {
     const dy = Math.max(z.y - y, 0, y - (z.y + z.h))
     zone = 1 - smooth(Math.hypot(dx, dy) / ZONE_FALLOFF)
   }
-  return reveal * (1 - ZONE_CALM * getEntryState(entry.elapsed).calm * zone)
+  return reveal * (1 - ZONE_CALM * (entry.calm ?? getEntryState(entry.elapsed).calm) * zone)
 }
 
 export function getMatrixMix(time: number) {
@@ -135,12 +149,38 @@ export function getMatrixFrame(
   return result
 }
 
+/**
+ * Источник «ловца» для буквы: ближайший к цели видимый глиф потока в момент `time`.
+ * Функция только от времени и размеров, поэтому KM-019 может подставить вместо неё буквы лица.
+ */
+export function pickCatcherSource(
+  time: number,
+  width: number,
+  height: number,
+  recipes: readonly string[],
+  target: { x: number; y: number },
+  reduced = false,
+) {
+  let best: MatrixGlyph | null = null
+  let bestDistance = Infinity
+  for (const glyph of getMatrixFrame(time, width, height, recipes, reduced)) {
+    if (glyph.opacity < .12 || glyph.dispersion > .2) { continue }
+    // Поток падает сверху: глиф выше цели выглядит естественнее, чем снизу.
+    const distance = Math.hypot(glyph.x - target.x, glyph.y - target.y) + (glyph.y > target.y ? 80 : 0)
+    if (distance < bestDistance) {
+      best = glyph
+      bestDistance = distance
+    }
+  }
+  return best && { char: best.char, layer: best.layer, head: best.head, x: best.x, y: best.y }
+}
+
 interface MatrixColors {
   background: string
   ink: string
   head: string
 }
-const keyFor = (glyph: MatrixGlyph) => `${glyph.layer}:${glyph.head}:${glyph.char}`
+const keyFor = (glyph: Pick<MatrixGlyph, 'layer' | 'head' | 'char'>) => `${glyph.layer}:${glyph.head}:${glyph.char}`
 
 /** Атлас растеризуется небольшими порциями; кадры переиспользуют глифы через drawImage. */
 export function createMatrixRenderer(ctx: CanvasRenderingContext2D, recipes: readonly string[], colors: MatrixColors) {
@@ -204,6 +244,22 @@ export function createMatrixRenderer(ctx: CanvasRenderingContext2D, recipes: rea
             ctx.fillRect(glyph.x + Math.cos(angle) * radius, glyph.y + Math.sin(angle) * radius, dot, dot)
           }
         }
+      }
+      for (const catcher of entry?.catchers ?? []) {
+        const position = positions.get(keyFor(catcher))
+        if (!position || catcher.opacity < .002) { continue }
+        ctx.globalAlpha = catcher.opacity
+        ctx.drawImage(
+          atlas,
+          position.x,
+          position.y,
+          cell,
+          cell,
+          catcher.x - 16 * catcher.scale,
+          catcher.y - 25 * catcher.scale,
+          32 * catcher.scale,
+          32 * catcher.scale,
+        )
       }
       ctx.globalAlpha = 1
       return performance.now() - started

@@ -32,3 +32,38 @@
 :fullscreen footer {
   display: none;
 }
+
+/*
+ * Церемония входа на главную (KM-030). Атрибут `data-kami-entry` ставит ранний скрипт в <head>:
+ * до начала часов слои церемонии скрыты, дальше их ведёт JS через opacity/transform/clip-path.
+ * Страховка: если JS так и не запустил часы (`data-kami-entry-run`), через 5 с всё становится видимым.
+ */
+html[data-kami-entry] [data-entry-letter],
+html[data-kami-entry] [data-entry-role],
+html[data-kami-entry] [data-entry-menu] {
+  opacity: 0;
+}
+
+html[data-kami-entry]:not([data-kami-entry-run]) [data-entry-letter],
+html[data-kami-entry]:not([data-kami-entry-run]) [data-entry-role],
+html[data-kami-entry]:not([data-kami-entry-run]) [data-entry-menu] {
+  animation: kami-entry-failsafe 0s 5s forwards;
+}
+
+@keyframes kami-entry-failsafe {
+  to {
+    opacity: 1;
+    transform: none;
+    clip-path: none;
+  }
+}
+
+[data-entry-line-cursor] {
+  animation: kami-entry-blink 1s steps(1) infinite;
+}
+
+@keyframes kami-entry-blink {
+  50% {
+    opacity: 0;
+  }
+}

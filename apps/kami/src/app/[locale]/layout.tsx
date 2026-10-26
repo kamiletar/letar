@@ -11,6 +11,7 @@ import { Toaster } from '@/app/_components/ui/toaster'
 import { UserProvider } from '@/app/_components/user-provider'
 import '@/app/global.css'
 import { routing } from '@/i18n/routing'
+import { ENTRY_BOOT_SCRIPT } from '@/lib/entry-boot-script'
 import { Box, Flex } from '@chakra-ui/react'
 import { UmamiScript } from '@letar/analytics'
 import { ColorModeProvider } from '@letar/chakra-provider'
@@ -125,6 +126,9 @@ export default async function LocaleLayout({ children, params }: Props) {
   return (
     <html lang={locale} className={`${inter.variable} ${jetbrainsMono.variable}`} suppressHydrationWarning>
       <head>
+        {/* Решение о церемонии входа до первой отрисовки (KM-030); корневой layout сохраняется при навигации. */}
+        {/* nosemgrep: letar-dangerously-set-inner-html-unsanitized -- константа, пользовательского ввода нет */}
+        <script dangerouslySetInnerHTML={{ __html: ENTRY_BOOT_SCRIPT }} />
         <JsonLd locale={locale} />
       </head>
       <body>

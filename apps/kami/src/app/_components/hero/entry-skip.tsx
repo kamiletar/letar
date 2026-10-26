@@ -3,13 +3,14 @@
 import { Button } from '@chakra-ui/react'
 import { useEffect, useState } from 'react'
 
-/** Кнопка видна только пока играет вход; без JS её нет, а меню в HTML доступно сразу. */
+/** Кнопка видна только пока играет церемония входа; без JS её нет, а меню в HTML доступно сразу. */
 export function EntrySkip({ label }: { label: string }) {
   const [running, setRunning] = useState(false)
 
   useEffect(() => {
     const root = document.documentElement
-    const sync = () => setRunning(root.dataset.kamiEntry === 'running')
+    // Ранний скрипт ставит `full` или `short`; церемония снимает атрибут в конце.
+    const sync = () => setRunning(root.dataset.kamiEntry === 'full' || root.dataset.kamiEntry === 'short')
     sync()
     const observer = new MutationObserver(sync)
     observer.observe(root, { attributes: true, attributeFilter: ['data-kami-entry'] })
@@ -20,6 +21,7 @@ export function EntrySkip({ label }: { label: string }) {
   return (
     <Button
       type="button"
+      data-entry-skip=""
       variant="plain"
       size="sm"
       position="fixed"

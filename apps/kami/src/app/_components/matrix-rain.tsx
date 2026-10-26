@@ -1,7 +1,10 @@
 'use client'
 
-import { createMatrixRenderer, ENTRY_DURATION, type MatrixZone } from '@/lib/matrix-scene'
+import { type CeremonyRunner, createCeremonyRunner, getCatcherPose, getFlightDuration } from '@/lib/entry-ceremony'
+import { createEntryDom } from '@/lib/entry-dom'
+import { createMatrixRenderer, type MatrixCatcher, type MatrixZone, pickCatcherSource } from '@/lib/matrix-scene'
 import { Box } from '@chakra-ui/react'
+import { trackEvent } from '@letar/analytics'
 import { useEffect, useRef } from 'react'
 
 /**
@@ -58,10 +61,19 @@ export function MatrixRain({ theme, home = false }: { theme: string | undefined;
   const timeRef = useRef(0)
   const homeRef = useRef(home)
   const zoneRef = useRef<() => void>(() => {})
+  // Церемония живёт дольше одного прогона эффекта: смена темы не должна запускать её заново.
+  const runnerRef = useRef<CeremonyRunner | null>(null)
+  const finalizeRef = useRef<(kind: 'complete' | 'skip' | 'abort') => void>(() => {})
   useEffect(() => {
     homeRef.current = home
     zoneRef.current()
+    // Ушли с главной посреди церемонии: слои остаются на странице, поэтому возвращаем им естественный вид.
+    if (!home && runnerRef.current && runnerRef.current.phase !== 'done') {
+      runnerRef.current.finish()
+      finalizeRef.current('abort')
+    }
   }, [home])
+  useEffect(() => () => finalizeRef.current('abort'), [])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -70,6 +82,7 @@ export function MatrixRain({ theme, home = false }: { theme: string | undefined;
     const ctx = canvas.getContext('2d')
     if (!ctx) { return }
 
+    const root = document.documentElement
     const motion = matchMedia('(prefers-reduced-motion: reduce)')
     const colors = getComputedStyle(host)
     const renderer = createMatrixRenderer(ctx, RECIPES, {
@@ -77,6 +90,27 @@ export function MatrixRain({ theme, home = false }: { theme: string | undefined;
       ink: colors.color,
       head: getComputedStyle(canvas).color,
     })
+    const dom = createEntryDom(document, theme)
+
+    // Режим решает ранний скрипт в <head> (атрибут на <html>): вход играет только при первой загрузке на главной.
+    if (!runnerRef.current) {
+      const flag = root.dataset.kamiEntry
+      const mode = homeRef.current && !motion.matches && (flag === 'full' || flag === 'short') ? flag : 'none'
+      const created = createCeremonyRunner(mode, dom.counts)
+      runnerRef.current = created
+      if (mode === 'none') {
+        delete root.dataset.kamiEntry
+      } else {
+        // Строка «шрифты» ждёт настоящего события; если API нет, считаем шрифты готовыми.
+        const fonts = document.fonts?.ready ?? Promise.resolve()
+        void fonts.then(() => created.markFontsReady(), () => created.markFontsReady())
+      }
+    }
+    const runner = runnerRef.current
+    let lastState = runner.state()
+    let clockStarted = false
+    let ended = runner.phase === 'done'
+
     let raf = 0
     let warmTimer = 0
     let warmed = false
@@ -89,24 +123,33 @@ export function MatrixRain({ theme, home = false }: { theme: string | undefined;
     let samples = 0
     let paintAverage = 0
     let disposed = false
-    // Вход играет только при первой загрузке на главной; возврат на неё внутри сайта — задача KM-018.
-    const startsOnHome = homeRef.current
-    let entryElapsed = startsOnHome && !motion.matches ? 0 : Infinity
-    let entrySpeed = 1
     let zone: MatrixZone | null = null
-    const markEntry = () => {
-      const running = entryElapsed < ENTRY_DURATION
-      if (running) { document.documentElement.dataset.kamiEntry = 'running' }
-      else { delete document.documentElement.dataset.kamiEntry }
+    let letters = dom.measureLetters(host.getBoundingClientRect())
+    // Источник каждого ловца выбирается один раз на старте его полёта и дальше не накапливает состояние.
+    let sources: (ReturnType<typeof pickCatcherSource> | undefined)[] = []
+
+    const finalize = (kind: 'complete' | 'skip' | 'abort') => {
+      if (ended && !root.dataset.kamiEntry) { return }
+      ended = true
+      dom.clear()
+      delete root.dataset.kamiEntry
+      delete root.dataset.kamiEntryRun
+      lastState = runner.state()
+      if (kind !== 'abort') { trackEvent(kind === 'skip' ? 'entry-skip' : 'entry-complete', { mode: runner.mode }) }
     }
+    finalizeRef.current = finalize
+    const active = () => runner.phase !== 'done'
+
     const measureZone = () => {
       const nav = homeRef.current ? document.querySelector('[data-testid="home-menu"] nav') : null
+      const hostBox = host.getBoundingClientRect()
+      letters = dom.measureLetters(hostBox)
+      sources = []
       if (!nav) {
         zone = null
         return
       }
       const box = nav.getBoundingClientRect()
-      const hostBox = host.getBoundingClientRect()
       zone = { x: box.left - hostBox.left, y: box.top - hostBox.top, w: box.width, h: box.height }
     }
     zoneRef.current = () => {
@@ -114,14 +157,58 @@ export function MatrixRain({ theme, home = false }: { theme: string | undefined;
       draw()
     }
     const skip = () => {
-      if (entryElapsed < ENTRY_DURATION) { entrySpeed = 6 }
+      if (runner.phase !== 'running') { return }
+      runner.skip()
+      lastState = runner.state()
     }
     const onKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape') { skip() }
     }
+    // Клик по пустому месту завершает церемонию и не переходит по ссылке (кнопка «Пропустить» сама шлёт событие).
+    const onClick = (event: MouseEvent) => {
+      if (!active() || !homeRef.current) { return }
+      const target = event.target instanceof Element ? event.target : null
+      if (target?.closest('[data-entry-skip]')) { return }
+      const interactive = target?.closest('a, button, input, select, textarea, [role="button"]')
+      if (interactive && !target?.closest('[data-testid="home-menu"] a')) { return }
+      event.preventDefault()
+      event.stopPropagation()
+      skip()
+    }
+
+    const catchersFor = (): MatrixCatcher[] => {
+      const result: MatrixCatcher[] = []
+      const flight = getFlightDuration(runner.mode)
+      lastState.catchers.forEach((progress, i) => {
+        const target = letters[i]
+        if (!target || progress <= 0 || progress >= 1) { return }
+        if (sources[i] === undefined) {
+          sources[i] = pickCatcherSource(
+            timeRef.current - progress * flight,
+            width,
+            height,
+            RECIPES,
+            target,
+            reducedDensity,
+          )
+        }
+        const source = sources[i]
+        if (!source) { return }
+        const pose = getCatcherPose(progress, source, target, Math.min(3, Math.max(1, target.size * .9 / 32)))
+        result.push({ char: source.char, layer: source.layer, head: source.head, ...pose })
+      })
+      return result
+    }
 
     const draw = () => {
-      const entry = homeRef.current ? { elapsed: entryElapsed, zone } : undefined
+      const entry = homeRef.current
+        ? {
+          elapsed: runner.revealElapsed,
+          zone,
+          calm: lastState.calm,
+          catchers: active() ? catchersFor() : undefined,
+        }
+        : undefined
       return renderer.draw(motion.matches ? 0 : timeRef.current, width, height, reducedDensity, entry)
     }
     const resize = () => {
@@ -141,13 +228,21 @@ export function MatrixRain({ theme, home = false }: { theme: string | undefined;
       }
       const delta = last ? Math.min((now - last) / 1000, .1) : 0
       timeRef.current += delta
-      // Часы входа идут только после готовности атласа: до этого холст честно остаётся фоном.
-      if (warmed && entryElapsed < ENTRY_DURATION) {
-        entryElapsed += delta * entrySpeed
-        if (entryElapsed >= ENTRY_DURATION) { markEntry() }
+      // Часы церемонии идут только после готовности атласа глифов: до этого холст честно остаётся фоном.
+      if (active() && homeRef.current && (warmed || runner.phase === 'skipping')) {
+        if (!clockStarted && warmed) {
+          clockStarted = true
+          runner.markAtlasReady()
+          root.dataset.kamiEntryRun = '1'
+        }
+        runner.advance(delta)
+        lastState = runner.state()
+        dom.apply(lastState)
+        if (!active()) { finalize(runner.skipped ? 'skip' : 'complete') }
       }
       last = now
-      if (now - lastDraw >= 1000 / 30) {
+      // Пока играет церемония, рисуем каждый кадр: полёт ловца за 0,25 с не должен идти на 30 fps.
+      if (active() || now - lastDraw >= 1000 / 30) {
         const cost = draw()
         lastDraw = now
         if (warmed) {
@@ -178,6 +273,11 @@ export function MatrixRain({ theme, home = false }: { theme: string | undefined;
     const resume = () => {
       stop()
       if (disposed || document.hidden) { return }
+      // Включили reduced-motion посреди церемонии: сразу финальный кадр.
+      if (motion.matches && active()) {
+        runner.finish()
+        finalize('abort')
+      }
       if (!warmed) { warmTimer = window.setTimeout(warm, 0) }
       draw()
       if (!motion.matches) { raf = requestAnimationFrame(tick) }
@@ -190,14 +290,15 @@ export function MatrixRain({ theme, home = false }: { theme: string | undefined;
     motion.addEventListener('change', resume)
     window.addEventListener('keydown', onKey)
     window.addEventListener('kami:entry-skip', skip)
-    markEntry()
+    document.addEventListener('click', onClick, true)
+    if (!active() && root.dataset.kamiEntry) { finalize('abort') }
     resize()
     resume()
     return () => {
       disposed = true
-      delete document.documentElement.dataset.kamiEntry
       window.removeEventListener('keydown', onKey)
       window.removeEventListener('kami:entry-skip', skip)
+      document.removeEventListener('click', onClick, true)
       stop()
       observer.disconnect()
       document.removeEventListener('visibilitychange', resume)

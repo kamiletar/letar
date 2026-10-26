@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { ENTRY_DURATION, getEntryState, getMatrixFrame, getMatrixMix } from './matrix-scene'
+import { ENTRY_DURATION, getEntryState, getMatrixFrame, getMatrixMix, pickCatcherSource } from './matrix-scene'
 
 describe('непрерывный цикл букв A → B → C', () => {
   it('проходит три направления и возвращается к A', () => {
@@ -92,5 +92,33 @@ describe('вход: переход от букв к меню', () => {
       getMatrixFrame(11, 960, 600, recipes).reduce((sum, g) => sum + g.opacity, 0),
       6,
     )
+  })
+})
+
+describe('вход: связка с церемонией (KM-030)', () => {
+  const recipes = ['абвгдежз', 'すしのつくりかた']
+  const zone = { x: 100, y: 200, w: 300, h: 200 }
+  const inside = (list: ReturnType<typeof getMatrixFrame>) =>
+    list.filter((g) => g.x > zone.x && g.x < zone.x + zone.w && g.y > zone.y && g.y < zone.y + zone.h)
+      .reduce((acc, g) => acc + g.opacity, 0)
+
+  it('calm из модели церемонии заменяет кривую по elapsed', () => {
+    const frame = (calm?: number) => getMatrixFrame(11, 960, 600, recipes, false, { elapsed: Infinity, zone, calm })
+    expect(inside(frame(0))).toBeGreaterThan(inside(frame(1)) * 2)
+    // Без calm остаётся поведение KM-017: к концу входа фон у меню уже спокоен.
+    expect(inside(frame())).toBeCloseTo(inside(frame(1)), 6)
+  })
+
+  it('источник ловца — ближайший видимый глиф потока и зависит только от времени', () => {
+    const target = { x: 300, y: 300 }
+    const a = pickCatcherSource(11, 960, 600, recipes, target)
+    const b = pickCatcherSource(11, 960, 600, recipes, target)
+    expect(a).toEqual(b)
+    expect(a).not.toBeNull()
+    if (a) {
+      expect(recipes.join('')).toContain(a.char)
+      expect(Math.hypot(a.x - target.x, a.y - target.y)).toBeLessThan(200)
+    }
+    expect(pickCatcherSource(11.4, 960, 600, recipes, target)).not.toEqual(a)
   })
 })
