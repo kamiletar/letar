@@ -570,5 +570,86 @@
     "title": "Page Not Found",
     "description": "Sorry, the page you're looking for doesn't exist or has been moved.",
     "backHome": "Back to Home"
+  },
+  "site": {
+    "metaTitle": "Order a website",
+    "metaDescription": "I will build a website for your business: free first conversation, staged payment, a discount for friends.",
+    "ogLine": "I will build a website for your business",
+    "heroTitle": "I will build a website for your business. From the first conversation to launch",
+    "heroSubtitle": "The first conversation is free, you pay by stages, friends get a discount. You see every step",
+    "cta": "Discuss a website",
+    "portraitAlt": "Kami",
+    "termsTitle": "Terms",
+    "terms": {
+      "priceLabel": "Price",
+      "priceValue": "from {price}",
+      "weeksLabel": "Timeline",
+      "weeksValue": "from {weeks} wk.",
+      "firstCallLabel": "First conversation",
+      "firstCallValue": "free",
+      "stagedLabel": "Payment",
+      "stagedValue": "by stages",
+      "discountLabel": "For friends",
+      "discountValue": "{percent}% off",
+      "discountLink": "Who qualifies"
+    },
+    "tagline": [
+      "You tell me what you do.",
+      "I build a website that explains it for you"
+    ],
+    "stepsTitle": "How the work goes",
+    "steps": [
+      {
+        "title": "Conversation",
+        "text": "We go through the task and the budget, free of charge."
+      },
+      {
+        "title": "Stages",
+        "text": "You pay for each stage once it is delivered."
+      },
+      {
+        "title": "Launch",
+        "text": "The site is live; edits and support by agreement."
+      }
+    ],
+    "projectsTitle": "Projects",
+    "faqTitle": "Questions and answers",
+    "faq": [
+      {
+        "q": "How much does it cost?",
+        "a": "It depends on the task. I give an exact figure after the first conversation, which is free."
+      },
+      {
+        "q": "How long does it take?",
+        "a": "It depends on the scope. I name the timeline before work starts and check in with you at every stage."
+      },
+      {
+        "q": "What do I need to provide?",
+        "a": "Tell me what you do and send what you already have: texts, photos, a logo. What is missing we will figure out together."
+      },
+      {
+        "q": "Can I edit the site myself?",
+        "a": "Yes, if you need to. Say so in the first conversation and I will make the texts editable without a developer."
+      },
+      {
+        "q": "What about domain and hosting?",
+        "a": "I help you choose and connect them. The domain is registered in your name."
+      },
+      {
+        "q": "Who supports the site after launch?",
+        "a": "I can, by agreement. You can also go without support: the site stays yours."
+      },
+      {
+        "q": "What if I do not like the result?",
+        "a": "You pay by stages and see every step, so mismatches show early. If something is off, we fix it on the spot, not at the end."
+      },
+      {
+        "q": "Who gets the discount?",
+        "a": "Friends and acquaintances. The terms are in the “For friends” section."
+      }
+    ],
+    "finalTitle": "Tell me what you need",
+    "finalText": "Write a couple of lines about your business in the request. The first conversation is free.",
+    "faqDraftNote": "draft, waiting for KM-033"
   }
 }
