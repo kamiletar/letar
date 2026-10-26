@@ -1,4 +1,5 @@
 import { SiteCtaLink } from '@/app/[locale]/site/_components/site-cta-link'
+import { TypedText } from '@/app/[locale]/site/_components/typed-text'
 import portrait from '@/assets/site/portrait.webp'
 import { formatOfferPrice, OFFER } from '@/lib/offer'
 import { getStudioOrderUrl } from '@/lib/public-navigation'
@@ -45,10 +46,12 @@ export async function OfferHero() {
             </Box>
             <Stack gap={5} maxW="680px" align="start">
               <Heading asChild size={{ base: '3xl', md: '5xl' }} lineHeight={1.15} textWrap="balance">
-                <h1 id="site-title">{t('heroTitle')}</h1>
+                <h1 id="site-title">
+                  <TypedText text={t('heroTitle')} />
+                </h1>
               </Heading>
               <Text fontSize={{ base: 'md', md: 'lg' }} color="fg.muted" lineHeight="tall" textWrap="pretty">
-                {t('heroSubtitle')}
+                <TypedText text={t('heroSubtitle')} delay={t('heroTitle').length * 28} />
               </Text>
               <SiteCtaLink href={getStudioOrderUrl(locale, 'kami')} label={t('cta')} place="hero" />
               {proof.length > 0 && <Text fontSize="sm" color="fg.muted">{proof.join(' · ')}</Text>}

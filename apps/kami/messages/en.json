@@ -23,6 +23,13 @@
     "description": "Contact Kami by email or Telegram."
   },
   "home": {
+    "hints": {
+      "order": "price, timing and how the work goes",
+      "about": "who I am and what I do",
+      "blog": "notes and write-ups",
+      "contacts": "email and Telegram",
+      "friends": "what is there for friends"
+    },
     "boot": {
       "os": "kami.os {version}",
       "glyphs": "glyphs",

@@ -39,7 +39,13 @@ export interface MatrixEntry {
   /** Успокоение фона 0..1 из модели церемонии; без него — кривая KM-017 по `elapsed`. */
   calm?: number
   catchers?: readonly MatrixCatcher[]
+  /** Реакция на выбор пункта меню (KM-031): буквы вокруг точки расходятся и гаснут; `progress` 0..1. */
+  burst?: { x: number; y: number; progress: number }
 }
+
+/** Радиус и сила разлёта от выбранного пункта, пиксели. */
+const BURST_RADIUS = 220
+const BURST_PUSH = 36
 
 /** Спад к зоне меню: плавный, без изменения скорости потоков (только прозрачность). */
 const ZONE_FALLOFF = 96
@@ -216,10 +222,23 @@ export function createMatrixRenderer(ctx: CanvasRenderingContext2D, recipes: rea
       ctx.globalAlpha = 1
       ctx.fillStyle = colors.background
       ctx.fillRect(0, 0, width, height)
-      for (const glyph of getMatrixFrame(time, width, height, recipes, reduced, entry)) {
+      for (let glyph of getMatrixFrame(time, width, height, recipes, reduced, entry)) {
         if (glyph.opacity < .002 || glyph.y < -32 || glyph.y > height + 32) { continue }
         const position = positions.get(keyFor(glyph))
         const dispersion = smooth(glyph.dispersion)
+        const burst = entry?.burst
+        if (burst) {
+          const dx = glyph.x - burst.x
+          const dy = glyph.y - burst.y
+          const distance = Math.hypot(dx, dy) || 1
+          const influence = Math.max(0, 1 - distance / BURST_RADIUS) * smooth(burst.progress)
+          glyph = {
+            ...glyph,
+            x: glyph.x + dx / distance * BURST_PUSH * influence,
+            y: glyph.y + dy / distance * BURST_PUSH * influence,
+            opacity: glyph.opacity * (1 - .7 * influence),
+          }
+        }
         if (position && dispersion < 1) {
           ctx.globalAlpha = glyph.opacity * (1 - dispersion)
           ctx.drawImage(

@@ -140,7 +140,7 @@ test.describe('Церемония входа на главной', () => {
       await page.goto('/')
       await waitForClock(page)
       await page.waitForTimeout(1000)
-      const item = page.locator('[data-testid="home-menu"] nav a').nth(2)
+      const item = page.locator('[data-testid="home-menu"] nav a').nth(1)
       await item.click({ force: true })
       await waitForEnd(page)
       await expect(page).not.toHaveURL(/about/)

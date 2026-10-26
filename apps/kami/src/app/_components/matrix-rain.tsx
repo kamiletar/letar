@@ -124,6 +124,7 @@ export function MatrixRain({ theme, home = false }: { theme: string | undefined;
     let paintAverage = 0
     let disposed = false
     let zone: MatrixZone | null = null
+    let burst: { x: number; y: number; start: number } | null = null
     let letters = dom.measureLetters(host.getBoundingClientRect())
     // Источник каждого ловца выбирается один раз на старте его полёта и дальше не накапливает состояние.
     let sources: (ReturnType<typeof pickCatcherSource> | undefined)[] = []
@@ -165,15 +166,28 @@ export function MatrixRain({ theme, home = false }: { theme: string | undefined;
       if (event.key === 'Escape') { skip() }
     }
     // Клик по пустому месту завершает церемонию и не переходит по ссылке (кнопка «Пропустить» сама шлёт событие).
+    // Клик по уже проявившемуся пункту меню (≥ 0,5) — пропуск входа и сразу выбор пункта (KM-031).
+    // Клики с модификаторами и не основной кнопкой — штатное поведение браузера.
     const onClick = (event: MouseEvent) => {
       if (!active() || !homeRef.current) { return }
+      if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) { return }
       const target = event.target instanceof Element ? event.target : null
       if (target?.closest('[data-entry-skip]')) { return }
+      const menuLink = target?.closest('[data-testid="home-menu"] a[data-entry-menu]') ?? null
       const interactive = target?.closest('a, button, input, select, textarea, [role="button"]')
-      if (interactive && !target?.closest('[data-testid="home-menu"] a')) { return }
+      if (interactive && !menuLink) { return }
       event.preventDefault()
       event.stopPropagation()
+      const index = Number(menuLink?.getAttribute('data-entry-index'))
+      const visible = menuLink !== null && (lastState.menuItems[index] ?? 0) >= .5
       skip()
+      if (visible) { window.dispatchEvent(new CustomEvent('kami:menu-activate', { detail: { index } })) }
+    }
+    // Выбор пункта: буквы фона расходятся от него; геометрия потоков по-прежнему зависит только от времени.
+    const onSelect = (event: Event) => {
+      const { x, y } = (event as CustomEvent<{ x: number; y: number }>).detail
+      const hostBox = host.getBoundingClientRect()
+      burst = { x: x - hostBox.left, y: y - hostBox.top, start: timeRef.current }
     }
 
     const catchersFor = (): MatrixCatcher[] => {
@@ -207,6 +221,9 @@ export function MatrixRain({ theme, home = false }: { theme: string | undefined;
           zone,
           calm: lastState.calm,
           catchers: active() ? catchersFor() : undefined,
+          burst: burst
+            ? { x: burst.x, y: burst.y, progress: Math.min(1, (timeRef.current - burst.start) / .25) }
+            : undefined,
         }
         : undefined
       return renderer.draw(motion.matches ? 0 : timeRef.current, width, height, reducedDensity, entry)
@@ -290,6 +307,7 @@ export function MatrixRain({ theme, home = false }: { theme: string | undefined;
     motion.addEventListener('change', resume)
     window.addEventListener('keydown', onKey)
     window.addEventListener('kami:entry-skip', skip)
+    window.addEventListener('kami:menu-select', onSelect)
     document.addEventListener('click', onClick, true)
     if (!active() && root.dataset.kamiEntry) { finalize('abort') }
     resize()
@@ -298,6 +316,7 @@ export function MatrixRain({ theme, home = false }: { theme: string | undefined;
       disposed = true
       window.removeEventListener('keydown', onKey)
       window.removeEventListener('kami:entry-skip', skip)
+      window.removeEventListener('kami:menu-select', onSelect)
       document.removeEventListener('click', onClick, true)
       stop()
       observer.disconnect()

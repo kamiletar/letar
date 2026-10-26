@@ -1,4 +1,5 @@
 import { EntrySkip } from '@/app/_components/hero/entry-skip'
+import { GameMenu } from '@/app/_components/hero/game-menu'
 import { Link } from '@/i18n/navigation'
 import { getPublicNavigation } from '@/lib/public-navigation'
 import { Box, Container, Heading, HStack, Link as ChakraLink, Stack, Text, VisuallyHidden } from '@chakra-ui/react'
@@ -94,37 +95,15 @@ export async function Hero() {
                 </span>
               </Text>
             </Box>
-            <Stack asChild gap={2} align="stretch" w="full" maxW="md">
-              <nav aria-label={t('menuAria')}>
-                {items.map((item, index) => (
-                  <ChakraLink
-                    key={item.key}
-                    data-entry-menu=""
-                    data-entry-index={index}
-                    asChild
-                    px={4}
-                    py={2}
-                    minH="48px"
-                    fontSize={{ base: 'xl', md: '2xl' }}
-                    fontWeight="medium"
-                    color="inherit"
-                    textDecoration="none"
-                    borderRadius="md"
-                    bg={{ base: 'white/45', _dark: 'bg/45' }}
-                    backdropFilter="blur(12px) saturate(140%)"
-                    borderWidth="1px"
-                    borderColor={{ base: 'fg.700/20', _dark: 'fg.200/20' }}
-                    shadow="sm"
-                    _hover={{ bg: { base: 'white/65', _dark: 'bg/65' }, borderColor: 'fg.muted' }}
-                    _focusVisible={{ outline: '2px solid', outlineColor: 'fg.muted', outlineOffset: '3px' }}
-                  >
-                    {item.key === 'order'
-                      ? <a href={item.href}>{nav(item.key)}</a>
-                      : <Link href={item.href}>{nav(item.key)}</Link>}
-                  </ChakraLink>
-                ))}
-              </nav>
-            </Stack>
+            <GameMenu
+              ariaLabel={t('menuAria')}
+              items={items.map((item) => ({
+                key: item.key,
+                href: item.href,
+                label: nav(item.key),
+                hint: t(`hints.${item.key}`),
+              }))}
+            />
           </section>
         </Stack>
         <EntrySkip label={t('skipEntry')} />

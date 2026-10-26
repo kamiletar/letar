@@ -5,13 +5,13 @@ export function getStudioOrderUrl(locale: string, from?: string) {
   return `${studio}${locale === 'ru' ? '/zayavka/' : '/en/contact/'}${query}`
 }
 
-/** Одна структура публичного меню для главной, шапки, Drawer и подвала. */
-export function getPublicNavigation(locale: string) {
+/** Одна структура публичного меню для главной, шапки, Drawer и подвала; порядок — как в стартовом меню (KM-031). */
+export function getPublicNavigation(_locale?: string) {
   return [
-    { key: 'contacts', href: '/contacts/' },
-    { key: 'order', href: getStudioOrderUrl(locale) },
+    { key: 'order', href: '/site/' },
     { key: 'about', href: '/about/' },
     { key: 'blog', href: '/blog/' },
+    { key: 'contacts', href: '/contacts/' },
     { key: 'friends', href: '/#friends' },
   ] as const
 }
