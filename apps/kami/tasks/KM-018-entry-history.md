@@ -1,12 +1,12 @@
 ---
 id: KM-018
 title: Настроить повтор заставки при reload и пропуск при возврате назад
-status: ready
+status: doing
 size: M
 area: navigation
 priority: 1
 blocked_by: []
-owner: ""
+owner: kami-dev-entry-history
 stage: ""
 source: Лог владельца 2026-10-25 19:24–20:14; приложения в чате 2026-10-26
 created: 2026-10-26
@@ -38,21 +38,55 @@ updated: 2026-10-27
 
 Связанная задача студии: ST-068; учитывать уже выполненную ST-034 для возврата из поддержки.
 
-1. Проверить текущую реализацию и связанные задачи (KM-017, KM-030: `mode: 'full' | 'short' | 'none'`).
-2. Флаг «уже видел» — `localStorage` `kami.entry.seen` в try/catch; недоступен (приватный режим) —
-   полная версия, это допустимо. Решение `full|short|none` принимает ранний инлайн-скрипт
-   из KM-030 до отрисовки; Back/bfcache — `pageshow` с `persisted` и тип навигации
-   `performance.getEntriesByType('navigation')[0].type === 'back_forward'` → `none`.
-3. Внутренний переход на главную (Home, логотип) — `none`, Forward — `none`; записать как
-   решение, а не требование лога.
-4. Ссылка «Перезапустить вход»: снимает флаг на один показ и проигрывает `full` без reload.
-5. Матрица проверок: первый заход → full; повтор и reload → short; detail → Back → none;
-   bfcache → none; reduced-motion → финальный кадр во всех случаях. Playwright, Chromium и WebKit.
-6. Зафиксировать доказательства приёмки и связи с задачами следующего этапа (ST-068).
+Решения сеньора 2026-10-27 (исполнитель их не пересматривает, сомнение — в «Журнал» и дальше по плану):
+
+1. Проверить текущую реализацию: `src/lib/entry-boot-script.ts` (режим сейчас всегда `full`),
+   `src/lib/entry-ceremony.ts` (`createCeremonyRunner(mode, …)`, `mode: 'full' | 'short' | 'none'`),
+   `src/app/_components/matrix-rain.tsx` (runner в `runnerRef`, создаётся один раз; фон живёт в
+   layout и не перемонтируется при клиентских переходах), документ
+   `.claude/docs/react-ssr-scripts-and-popstate-order.md`.
+2. **Режим решает только ранний скрипт** `ENTRY_BOOT_SCRIPT`, он выполняется лишь при настоящей
+   загрузке документа. Порядок проверок в нём:
+   - не главная или reduced-motion — атрибута нет (как сейчас);
+   - `performance.getEntriesByType('navigation')[0]?.type === 'back_forward'` — атрибута нет (`none`);
+   - `localStorage['kami.entry.seen']` есть — `short`; нет — `full` и **сразу** записать
+     `kami.entry.seen = '1'` (пропуск и уход посреди входа тоже считаются показом);
+   - `localStorage` недоступен (исключение) — `full` без записи; это допустимо.
+     Тип `reload` и обычный прямой заход отдельно не различаются: оба дают `short` после первого показа.
+3. **Клиентские переходы** (логотип, «Главная», «Назад»/«Вперёд» внутри SPA, смена языка без
+   перезагрузки) — вход не играет: скрипт не выполняется, runner уже `done`. Ничего не добавлять,
+   только покрыть тестом. Записать в «Итог» как решение, а не требование лога.
+4. **bfcache** (`pageshow` с `event.persisted`): если runner не `done` — `runner.finish()` и
+   `finalize('abort')`, страница в финальном кадре; второй таймер и повтор не запускать. Обработчик —
+   в существующем `resume` в `matrix-rain.tsx`, не новый слушатель.
+5. **«Перезапустить вход»** — `<button type="button">` в виде неброской ссылки (`fontSize="sm"`,
+   `color="fg.muted"`, цель ≥44 px) под меню в `hero.tsx`, рядом с `EntrySkip`. Тексты
+   `home.replayEntry`: «Перезапустить вход» / «Replay intro». Кнопка — клиентская, появляется
+   только после гидратации (без JS её нет) и скрыта, пока идёт вход (`html[data-kami-entry] &`).
+   Клик шлёт `kami:entry-replay`; `matrix-rain.tsx` по нему, если вход не идёт: ставит
+   `data-kami-entry="full"`, снимает `data-kami-entry-run`, создаёт новый runner `full` в
+   `runnerRef`, сбрасывает `clockStarted`/`ended` и запускает цикл. Reload не нужен. При
+   reduced-motion кнопки нет. Umami `entry-replay`. Флаг `seen` не трогает.
+6. Матрица проверок, Playwright, Chromium и WebKit, новый спек `08-entry-history.spec.ts`
+   (`page.addInitScript`/`context.clearCookies` + очистка `localStorage` для «первого захода»):
+   первый заход → `full`; второй прямой заход и reload → `short`; главная → `/about/` полной
+   загрузкой (`page.goto`) → `page.goBack()` → атрибута нет; клиентский переход на главную по
+   логотипу → вход не играет; «Перезапустить вход» → снова `full` без reload; reduced-motion →
+   финальный кадр во всех случаях; `localStorage` бросает исключение → `full`. Существующие
+   `06-entry-ceremony` и `07-game-menu` останутся зелёными: им нужен `full`, значит в них
+   очищать `localStorage` перед заходом.
+7. **Студия — не трогать.** `apps/studio` — приватный submodule, там работают другие сессии.
+   Контракт для студии уже заведён задачей ST-068; в «Итог» KM-018 записать короткий абзац:
+   какой контракт подтверждён в Kami и есть ли смысл в общем механизме в `libs/` (оценка словами,
+   код в `libs/` не писать).
+8. Обновить `.claude/skills/kami/references/public-entry.md` (правило full/short/none, кнопка
+   повтора, флаг `kami.entry.seen`). Версия kami minor, CHANGELOG, PLAN_TESTING, проверки, коммит.
+   `bun.lock`, push и deploy-request — не делать.
 
 ## Журнал
 
 - 2026-10-26: создана постановка по логу; реализация не выполнялась.
 - 2026-10-27: после KM-031: обе правят главную; режим full|short|none ставится в src/lib/entry-boot-script.ts (KM-030)
+- 2026-10-27: модель claude-sonnet-5-5, high: решения приняты в плане, но длинная цепочка (скрипт, bfcache, повтор входа через runner) с отладкой на истории браузера в двух движках
 
 ## Итог
