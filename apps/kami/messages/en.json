@@ -19,6 +19,9 @@
     "menuAria": "Open menu",
     "mobileNavAria": "Mobile navigation"
   },
+  "contacts": {
+    "description": "Contact Kami by email or Telegram."
+  },
   "home": {
     "role": "Software architect",
     "menuAria": "Main menu",

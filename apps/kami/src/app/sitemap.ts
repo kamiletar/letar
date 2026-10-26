@@ -11,6 +11,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticPages = [
     '',
     'about',
+    'contacts',
     'skills',
     'projects',
     'hire',
@@ -29,15 +30,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   for (const locale of locales) {
     for (const page of staticPages) {
       const path = page ? `${page}/` : ''
+      const pageUrl = (language: string) =>
+        `${baseUrl}/${page === 'contacts' && language === 'ru' ? '' : `${language}/`}${path}`
       routes.push({
-        url: `${baseUrl}/${locale}/${path}`,
+        url: pageUrl(locale),
         lastModified: new Date(),
         changeFrequency: page === '' ? 'weekly' : 'monthly',
         priority: page === '' ? 1 : page === 'blog' ? 0.9 : 0.8,
         alternates: {
           languages: {
-            ru: `${baseUrl}/ru/${path}`,
-            en: `${baseUrl}/en/${path}`,
+            ru: pageUrl('ru'),
+            en: pageUrl('en'),
           },
         },
       })
