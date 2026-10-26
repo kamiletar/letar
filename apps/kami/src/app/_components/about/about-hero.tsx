@@ -26,16 +26,18 @@ export function AboutHero({ title, subtitle, description }: AboutHeroProps) {
       display="flex"
       alignItems={{ base: 'flex-end', md: 'center' }}
     >
-      <Box as="picture" position="absolute" inset={0} zIndex={-2}>
-        <source media="(max-width: 47.99rem)" srcSet={mobile.src} width={mobile.width} height={mobile.height} />
-        <Image
-          src={desktop}
-          alt=""
-          loading="eager"
-          fetchPriority="high"
-          unoptimized
-          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-        />
+      <Box asChild position="absolute" inset={0} zIndex={-2}>
+        <picture>
+          <source media="(max-width: 47.99rem)" srcSet={mobile.src} width={mobile.width} height={mobile.height} />
+          <Image
+            src={desktop}
+            alt=""
+            loading="eager"
+            fetchPriority="high"
+            unoptimized
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          />
+        </picture>
       </Box>
       <Box
         position="absolute"
@@ -49,7 +51,9 @@ export function AboutHero({ title, subtitle, description }: AboutHeroProps) {
         }}
       />
       <VStack align="start" gap={4} p={{ base: 6, md: 10 }} maxW={{ md: '52%' }}>
-        <Heading as="h1" fontSize={{ base: '3xl', md: '5xl' }}>{title}</Heading>
+        <Heading asChild fontSize={{ base: '3xl', md: '5xl' }}>
+          <h1>{title}</h1>
+        </Heading>
         <Text fontSize={{ base: 'lg', md: 'xl' }} color="green.200" fontFamily="mono">{subtitle}</Text>
         <Text fontSize={{ base: 'md', md: 'lg' }} color="gray.100">{description}</Text>
       </VStack>
