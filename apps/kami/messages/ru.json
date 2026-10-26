@@ -23,6 +23,18 @@
     "description": "Контакты Ками: электронная почта и Telegram для связи."
   },
   "home": {
+    "boot": {
+      "os": "kami.os {version}",
+      "glyphs": "глифы",
+      "fonts": "шрифты",
+      "language": "язык",
+      "languageValue": "ru",
+      "theme": "тема",
+      "themeDark": "тёмная",
+      "themeLight": "светлая",
+      "ok": "ok",
+      "later": "позже"
+    },
     "role": "Архитектор программного обеспечения",
     "menuAria": "Главное меню",
     "copy": "Скопировать {contact}",

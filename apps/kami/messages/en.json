@@ -23,6 +23,18 @@
     "description": "Contact Kami by email or Telegram."
   },
   "home": {
+    "boot": {
+      "os": "kami.os {version}",
+      "glyphs": "glyphs",
+      "fonts": "fonts",
+      "language": "language",
+      "languageValue": "en",
+      "theme": "theme",
+      "themeDark": "dark",
+      "themeLight": "light",
+      "ok": "ok",
+      "later": "later"
+    },
     "role": "Software architect",
     "menuAria": "Main menu",
     "copy": "Copy {contact}",
