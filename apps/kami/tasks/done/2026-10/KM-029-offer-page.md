@@ -1,7 +1,7 @@
 ---
 id: KM-029
 title: "Посадочная «Заказать сайт»: страница /site/ с условиями, шагами, FAQ и CTA в заявку студии"
-status: doing
+status: done
 size: L
 area: design
 priority: 1
@@ -10,7 +10,8 @@ owner: kami-dev-offer-page
 stage: ""
 source: Решение владельца 2026-10-26, спецификация KM-028
 created: 2026-10-26
-updated: 2026-10-26
+updated: 2026-10-27
+closed: 2026-10-27
 ---
 
 ## Что и зачем
@@ -122,3 +123,5 @@ updated: 2026-10-26
 - 2026-10-26: модель claude-sonnet-5-5, medium: решения приняты в задании, код и проверки по спецификации
 
 ## Итог
+
+Посадочная /site/ (ru, en) готова: hero с фото, условия из offer.ts, tagline, шаги, FAQ + FAQPage JSON-LD, финальный CTA на заявку студии (?topic=site&from=kami), Umami site-cta, sitemap/canonical/hreflang. Превью ссылки 1200x630 у главной и /site/ (200 image/png в dev, адреса без /ru/ в метаданных). Проверено Playwright chromium+webkit, 320/390/430/1440, ru/en, светлая/тёмная: нет горизонтального скролла, CTA с верной ссылкой. НЕ проверено: nx build (standalone, ключ outputFileTracingIncludes для opengraph-image не подтверждён), реальный пост в Telegram, ручной focus-visible. Тексты условий и FAQ — черновики до KM-033. Коммиты bf6467de5, 1010a5a7b; версия 0.40.0, bun.lock не тронут (нужен отдельный коммит lock). proxy.ts не менялся: OG-файлы внутри [locale].
