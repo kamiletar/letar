@@ -26,9 +26,8 @@ export default async function AdminLayout({ children, params }: AdminLayoutProps
     redirect(`/${locale}/403`)
   }
 
-  // position + zIndex: поднимает админку над фиксированным фоном Matrix rain, иначе он закрашивает сайдбар
   return (
-    <Flex minH="calc(100vh - 120px)" position="relative" zIndex={1}>
+    <Flex minH="calc(100vh - 120px)" position="relative" bg="bg">
       {/* Сайдбар — desktop */}
       <AdminSidebar locale={locale} />
 

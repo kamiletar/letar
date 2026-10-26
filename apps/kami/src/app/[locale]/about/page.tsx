@@ -4,9 +4,9 @@ import { Briefcase, Code, Compass, Layers, Users } from 'lucide-react'
 import type { Metadata } from 'next'
 import { useTranslations } from 'next-intl'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
+import { AboutHero } from '../../_components/about/about-hero'
 import { FeatureCard } from '../../_components/about/feature-card'
 import { StatCard } from '../../_components/about/stat-card'
-import { PageHero } from '../../_components/page-hero'
 
 type Props = {
   params: Promise<{ locale: string }>
@@ -46,7 +46,7 @@ function AboutContent() {
       <Container maxW="6xl">
         <VStack gap={{ base: 12, md: 16 }} align="stretch">
           {/* Hero секция */}
-          <PageHero title={t('title')} subtitle={t('subtitle')} description={t('intro')} />
+          <AboutHero title={t('title')} subtitle={t('subtitle')} description={t('intro')} />
 
           {/* Статистика */}
           <SimpleGrid columns={{ base: 1, sm: 3 }} gap={6}>

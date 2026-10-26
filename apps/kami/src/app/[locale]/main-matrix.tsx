@@ -2,11 +2,16 @@
 import { MatrixRain } from '@/app/_components/matrix-rain'
 import { Box } from '@chakra-ui/react'
 import { useColorMode } from '@letar/chakra-provider'
+import { usePathname } from 'next/navigation'
 
 export const MainMatrix = () => {
   const { resolvedColorMode } = useColorMode()
+  const pathname = usePathname()
 
   const isLight = resolvedColorMode === 'light'
+
+  // В рабочем интерфейсе не создаём canvas и не запускаем фоновую анимацию.
+  if (pathname.split('/').includes('admin')) { return null }
 
   // pointerEvents none: фиксированный слой иначе перехватывает клики по любым непозиционированным блокам под собой
   return (
