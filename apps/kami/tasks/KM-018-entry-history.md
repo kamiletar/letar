@@ -1,12 +1,11 @@
 ---
 id: KM-018
 title: Настроить повтор заставки при reload и пропуск при возврате назад
-status: blocked
+status: ready
 size: M
 area: navigation
 priority: 1
-blocked_by:
-  - KM-031
+blocked_by: []
 owner: ""
 stage: ""
 source: Лог владельца 2026-10-25 19:24–20:14; приложения в чате 2026-10-26
