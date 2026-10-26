@@ -4,6 +4,9 @@
     "description": "Personal website of a software architect."
   },
   "nav": {
+    "contacts": "Contacts",
+    "order": "Order a website",
+    "friends": "For friends",
     "home": "Home",
     "about": "About",
     "cv": "Resume",
@@ -15,6 +18,14 @@
     "learning": "Learning",
     "menuAria": "Open menu",
     "mobileNavAria": "Mobile navigation"
+  },
+  "home": {
+    "role": "Software architect",
+    "menuAria": "Main menu",
+    "copy": "Copy {contact}",
+    "copied": "Copied",
+    "friendsStatus": "The friends area is in development. Friend requests, circles and service access are not available yet. You can contact me directly in the meantime.",
+    "write": "Get in touch"
   },
   "hero": {
     "greeting": "Hi, I'm",

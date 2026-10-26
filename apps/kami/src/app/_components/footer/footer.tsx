@@ -2,6 +2,7 @@
 
 import { CookieSettingsButton } from '@/app/_components/cookie-settings-button'
 import { Link } from '@/i18n/navigation'
+import { getPublicNavigation } from '@/lib/public-navigation'
 import { CONTACT } from '@/lib/utils/constants'
 import {
   Box,
@@ -22,16 +23,6 @@ import { Mail, Rss } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 import packageJson from '../../../../package.json'
 import { SocialLinks } from './social-links'
-
-/**
- * Ссылки навигации в футере
- */
-const navLinks = [
-  { href: '/about', labelKey: 'about' },
-  { href: '/blog', labelKey: 'blog' },
-  { href: '/projects', labelKey: 'projects' },
-  { href: '/consulting', labelKey: 'consulting' },
-] as const
 
 export function Footer() {
   const t = useTranslations('footer')
@@ -65,10 +56,10 @@ export function Footer() {
             <Text fontWeight="semibold" color="fg" mb={1}>
               {t('navigation')}
             </Text>
-            {navLinks.map((link) => (
+            {getPublicNavigation(locale).map((link) => (
               // trailingSlash:true не проходит через клиентскую навигацию next/link
               <ChakraLink key={link.href} asChild minH="44px" display="inline-flex" alignItems="center">
-                <Link href={`${link.href}/`}>
+                <Link href={link.href}>
                   <Text
                     fontSize="sm"
                     color="fg.muted"
@@ -76,7 +67,7 @@ export function Footer() {
                     transitionProperty="color"
                     transitionDuration="fast"
                   >
-                    {tNav(link.labelKey)}
+                    {tNav(link.key)}
                   </Text>
                 </Link>
               </ChakraLink>

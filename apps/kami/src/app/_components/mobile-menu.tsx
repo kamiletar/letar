@@ -2,30 +2,19 @@
 
 import { AppLink } from '@/app/_components/ui/app-link'
 import { usePathname } from '@/i18n/navigation'
+import { getPublicNavigation } from '@/lib/public-navigation'
 import { Box, CloseButton, Drawer, Icon, IconButton, Portal, VStack } from '@chakra-ui/react'
 import { ColorModeButton } from '@letar/chakra-provider'
 import { Pressable } from '@letar/ui'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { useCallback, useState } from 'react'
 import { LuMenu } from 'react-icons/lu'
 import { LanguageSwitcher } from './language-switcher'
 
-type NavItem = {
-  href: string
-  labelKey: 'about' | 'skills' | 'projects' | 'blog' | 'consulting'
-}
-
-const navItems: NavItem[] = [
-  { href: '/about', labelKey: 'about' },
-  { href: '/skills', labelKey: 'skills' },
-  { href: '/projects', labelKey: 'projects' },
-  { href: '/blog', labelKey: 'blog' },
-  { href: '/consulting', labelKey: 'consulting' },
-]
-
 export function MobileMenu() {
   const [open, setOpen] = useState(false)
   const t = useTranslations('nav')
+  const navItems = getPublicNavigation(useLocale())
   const pathname = usePathname()
 
   const closeMenu = useCallback(() => {
@@ -57,12 +46,12 @@ export function MobileMenu() {
             <Drawer.Body display="flex" flexDirection="column" p={4}>
               <VStack as="nav" role="navigation" aria-label={t('mobileNavAria')} alignItems="stretch" gap={2}>
                 {navItems.map((item) => {
-                  const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`)
+                  const isActive = !item.href.includes('#') && !item.href.startsWith('http')
+                    && pathname.replace(/\/$/, '') === item.href.replace(/\/$/, '')
                   return (
                     <AppLink
                       key={item.href}
-                      // trailingSlash:true не проходит через клиентскую навигацию next/link
-                      href={`${item.href}/`}
+                      href={item.href}
                       variant="ghost"
                       justifyContent="flex-start"
                       size="lg"
@@ -75,7 +64,7 @@ export function MobileMenu() {
                         fontWeight: 'semibold',
                       })}
                     >
-                      {t(item.labelKey)}
+                      {t(item.key)}
                     </AppLink>
                   )
                 })}

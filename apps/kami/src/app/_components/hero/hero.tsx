@@ -1,246 +1,143 @@
-'use client'
-
-import { Pressable } from '@/app/_components/pressable'
 import { Link } from '@/i18n/navigation'
-import { GLOW } from '@/lib/utils/constants'
-import { Box, Button, Heading, HStack, SimpleGrid, Text, VStack } from '@chakra-ui/react'
-import { useColorMode } from '@letar/chakra-provider'
-import { motion } from 'framer-motion'
-import { useLocale, useTranslations } from 'next-intl'
-import { MatrixRain } from '../matrix-rain'
+import { getPublicNavigation } from '@/lib/public-navigation'
+import { CONTACT } from '@/lib/utils/constants'
+import { Box, Container, Heading, HStack, Link as ChakraLink, Stack, Text } from '@chakra-ui/react'
+import { CopyToClipboardButton } from '@letar/ui/copy-to-clipboard-button'
+import { getLocale, getTranslations } from 'next-intl/server'
 
-// Варианты анимаций
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.15,
-      delayChildren: 0.3,
-    },
-  },
-}
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 30 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.6,
-      ease: 'easeOut' as const,
-    },
-  },
-}
-
-const buttonVariants = {
-  hidden: { opacity: 0, scale: 0.9 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    transition: {
-      duration: 0.4,
-      ease: 'easeOut' as const,
-    },
-  },
-}
-
-/** Адрес студии: заявка на сайт ведёт туда, у студии своё приложение и свои адреса по языкам */
-const STUDIO_URL = process.env.NEXT_PUBLIC_STUDIO_URL || 'https://studio.letar.best'
-
-const TILES = [
-  { key: 'about', href: '/about/' },
-  { key: 'projects', href: '/projects/' },
-  { key: 'blog', href: '/blog/' },
-  { key: 'consulting', href: '/consulting/' },
-  { key: 'cv', href: '/cv/' },
-] as const
-
-export function Hero() {
-  const t = useTranslations('hero')
-  const locale = useLocale()
-  const studioOrderHref = `${STUDIO_URL}${locale === 'ru' ? '/zayavka' : '/en/contact'}?topic=site`
-  const { resolvedColorMode } = useColorMode()
-  const isLight = resolvedColorMode === 'light'
+/** Меню и контакты приходят в HTML и доступны до загрузки анимации. */
+export async function Hero() {
+  const locale = await getLocale()
+  const t = await getTranslations('home')
+  const nav = await getTranslations('nav')
+  const items = getPublicNavigation(locale)
+  const contacts = [
+    { label: 'Email', value: CONTACT.email, href: `mailto:${CONTACT.email}` },
+    { label: 'Telegram', value: CONTACT.telegram, href: `https://t.me/${CONTACT.telegram.slice(1)}` },
+  ]
 
   return (
-    <Box
-      position="relative"
-      minH="100vh"
-      mt="-60px"
-      pt="60px"
-      overflow="hidden"
-      bg={{ base: 'gray.50', _dark: 'gray.900' }}
-    >
-      {/* Matrix Rain Background */}
-      <MatrixRain
-        color={isLight ? '#0a7a4a' : GLOW.color}
-        fontSize={25}
-        speed={40}
-        fadeOpacity={isLight ? 0.03 : 0.04}
-        bgRgb={isLight ? '249, 250, 251' : '0, 0, 0'}
-      />
-
-      {/* Content */}
-      <VStack
-        position="relative"
-        zIndex={1}
-        justify="center"
-        align="center"
-        minH="calc(100vh - 60px)"
-        px={6}
-        textAlign="center"
-      >
-        <motion.div variants={containerVariants} initial="hidden" animate="visible">
-          <VStack gap={4}>
-            <motion.div variants={itemVariants}>
-              <Text
-                fontSize={{ base: 'lg', md: 'xl' }}
-                color={{ base: 'gray.600', _dark: 'whiteAlpha.800' }}
-                fontFamily="mono"
-              >
-                {t('greeting')}
-              </Text>
-            </motion.div>
-
-            <motion.div variants={itemVariants}>
-              <Heading
-                as="h1"
-                fontSize={{ base: '4xl', md: '6xl', lg: '8xl' }}
-                fontWeight="bold"
-                color={{ base: 'gray.900', _dark: 'white' }}
-                fontFamily="mono"
-                textShadow={{ base: 'none', _dark: GLOW.textShadow }}
-              >
-                {t('name')}
-              </Heading>
-            </motion.div>
-
-            <motion.div variants={itemVariants}>
-              <VStack gap={0}>
-                <Heading
-                  as="h2"
-                  fontSize={{ base: '2xl', md: '3xl', lg: '4xl' }}
-                  fontWeight="normal"
-                  color={{ base: 'green.700', _dark: 'fg.300' }}
-                >
-                  {t('roleLine1')}
-                </Heading>
-                <Text fontSize={{ base: 'lg', md: 'xl', lg: '2xl' }} color={{ base: 'gray.700', _dark: 'fg.300' }}>
-                  {t('roleLine2')}
-                </Text>
-              </VStack>
-            </motion.div>
-          </VStack>
-
-          <motion.div variants={buttonVariants}>
-            <HStack gap={4} mt={8} justify="center">
-              {/* Вторичный CTA */}
-              <Pressable borderRadius="md" display="inline-flex">
-                <Button
-                  asChild
-                  size="lg"
-                  variant="outline"
-                  borderColor={{ base: 'green.600', _dark: 'fg.500' }}
-                  color={{ base: 'gray.800', _dark: 'white' }}
-                  _hover={{ bg: { base: 'white/30', _dark: 'whiteAlpha.100' } }}
-                  backdropFilter={{ base: 'blur(8px)', _dark: 'none' }}
-                >
-                  <Link href="/about/">{t('cta.about')}</Link>
-                </Button>
-              </Pressable>
-
-              {/* Основной CTA */}
-              <Pressable borderRadius="md" display="inline-flex">
-                <Button asChild size="lg" colorPalette="fg">
-                  <Link href="/hire/">{t('cta.hire')}</Link>
-                </Button>
-              </Pressable>
-            </HStack>
-          </motion.div>
-
-          {/* Плитки-развилка: короткий путь в основные разделы */}
-          <motion.div variants={buttonVariants}>
-            <SimpleGrid columns={{ base: 2, md: 3 }} gap={3} mt={10} maxW="2xl" mx="auto" textAlign="start">
-              <Box
-                asChild
-                gridColumn={{ base: 'span 2', md: 'span 3' }}
-                p={4}
-                borderRadius="md"
-                bg={{ base: 'green.700', _dark: 'whiteAlpha.900' }}
-                color={{ base: 'white', _dark: 'gray.900' }}
-              >
-                <a href={studioOrderHref} rel="noopener">
-                  <Text fontWeight="bold">{t('tiles.order.title')}</Text>
-                  <Text fontSize="sm">{t('tiles.order.hint')}</Text>
-                </a>
-              </Box>
-              {TILES.map((tile) => (
-                <Pressable key={tile.key} borderRadius="md" display="block">
-                  <Box
-                    asChild
-                    display="block"
-                    h="full"
-                    p={4}
-                    borderRadius="md"
-                    border="1px solid"
-                    borderColor={{ base: 'green.600', _dark: 'fg.500' }}
-                    backdropFilter={{ base: 'blur(8px)', _dark: 'none' }}
-                    _hover={{ bg: { base: 'white/30', _dark: 'whiteAlpha.100' } }}
-                  >
-                    <Link href={tile.href}>
-                      <Text fontWeight="bold">{t(`tiles.${tile.key}.title`)}</Text>
-                      <Text fontSize="sm" color={{ base: 'gray.700', _dark: 'fg.300' }}>
-                        {t(`tiles.${tile.key}.hint`)}
-                      </Text>
-                    </Link>
-                  </Box>
-                </Pressable>
-              ))}
-            </SimpleGrid>
-          </motion.div>
-        </motion.div>
-      </VStack>
-
-      {/* Scroll indicator — декоративный, скрыт от screen readers */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.5, duration: 0.5 }}
-        style={{
-          position: 'absolute',
-          bottom: 32,
-          left: '50%',
-          transform: 'translateX(-50%)',
-          zIndex: 1,
-        }}
-        role="presentation"
-        aria-hidden="true"
-      >
-        <Box
-          w={6}
-          h={10}
-          border="2px solid"
-          borderColor={{ base: 'gray.400', _dark: 'fg.500' }}
-          borderRadius="full"
-          position="relative"
+    <Box position="relative" isolation="isolate" color={{ base: 'gray.900', _dark: 'gray.100' }}>
+      <Container maxW="6xl" px={{ base: 6, md: 12 }}>
+        <Stack
+          asChild
+          minH="calc(100svh - var(--kami-header-h, 80px))"
+          justify="center"
+          align="start"
+          gap={{ base: 8, md: 10 }}
+          py={10}
+          w="full"
         >
-          <motion.div
-            animate={{ y: [0, 8, 0] }}
-            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
-            style={{
-              position: 'absolute',
-              top: 8,
-              left: '50%',
-              transform: 'translateX(-50%)',
-              width: 4,
-              height: 8,
-              backgroundColor: 'var(--chakra-colors-fg-500)',
-              borderRadius: 9999,
-            }}
-          />
-        </Box>
-      </motion.div>
+          <section aria-labelledby="home-title" data-testid="home-menu">
+            <Box>
+              <Heading
+                asChild
+                fontFamily="mono"
+                fontWeight="medium"
+                fontSize={{ base: '5xl', md: '7xl' }}
+                lineHeight={1.1}
+              >
+                <h1 id="home-title">Kami</h1>
+              </Heading>
+              <Text mt={3} fontSize="sm" color="fg.muted">{t('role')}</Text>
+            </Box>
+            <Stack asChild gap={1} align="stretch" w="full" maxW="md">
+              <nav aria-label={t('menuAria')}>
+                {items.map((item) => (
+                  <ChakraLink
+                    key={item.key}
+                    asChild
+                    px={4}
+                    py={2}
+                    minH="48px"
+                    fontSize={{ base: 'xl', md: '2xl' }}
+                    fontWeight="medium"
+                    color="inherit"
+                    textDecoration="none"
+                    borderRadius="sm"
+                    bg={{ base: 'white/90', _dark: 'bg/90' }}
+                    _hover={{ bg: 'bg.muted', color: 'fg.muted' }}
+                    _focusVisible={{ outline: '2px solid', outlineColor: 'fg.muted', outlineOffset: '3px' }}
+                  >
+                    {item.key === 'order'
+                      ? <a href={item.href}>{nav(item.key)}</a>
+                      : <Link href={item.href}>{nav(item.key)}</Link>}
+                  </ChakraLink>
+                ))}
+              </nav>
+            </Stack>
+          </section>
+        </Stack>
+
+        <Stack
+          asChild
+          id="contacts"
+          gap={6}
+          py={{ base: 12, md: 20 }}
+          scrollMarginTop="calc(var(--kami-header-h, 80px) + 24px)"
+        >
+          <section aria-labelledby="contacts-title">
+            <Heading asChild size="2xl">
+              <h2 id="contacts-title">{nav('contacts')}</h2>
+            </Heading>
+            <Stack gap={4} maxW="2xl">
+              {contacts.map((contact) => (
+                <Stack
+                  key={contact.label}
+                  direction={{ base: 'column', sm: 'row' }}
+                  align={{ base: 'start', sm: 'center' }}
+                  justify="space-between"
+                  gap={2}
+                  p={4}
+                  bg="bg"
+                  borderRadius="md"
+                >
+                  <Box minW={0}>
+                    <Text fontSize="sm" color="fg.muted">{contact.label}</Text>
+                    <ChakraLink
+                      href={contact.href}
+                      minH="44px"
+                      fontSize={{ base: 'lg', md: 'xl' }}
+                      color="inherit"
+                      overflowWrap="anywhere"
+                    >
+                      {contact.value}
+                    </ChakraLink>
+                  </Box>
+                  <CopyToClipboardButton
+                    text={contact.value}
+                    label={t('copy', { contact: contact.label })}
+                    copiedLabel={t('copied')}
+                    minH="44px"
+                    flexShrink={0}
+                  />
+                </Stack>
+              ))}
+            </Stack>
+          </section>
+        </Stack>
+
+        <Stack
+          asChild
+          id="friends"
+          gap={4}
+          py={{ base: 12, md: 20 }}
+          maxW="2xl"
+          scrollMarginTop="calc(var(--kami-header-h, 80px) + 24px)"
+        >
+          <section aria-labelledby="friends-title">
+            <Heading asChild size="2xl">
+              <h2 id="friends-title">{nav('friends')}</h2>
+            </Heading>
+            <Text fontSize="lg" lineHeight="tall" bg="bg" p={4} borderRadius="md">{t('friendsStatus')}</Text>
+            <HStack>
+              <ChakraLink asChild minH="44px" fontWeight="medium" color="fg.muted">
+                <Link href="/#contacts">{t('write')}</Link>
+              </ChakraLink>
+            </HStack>
+          </section>
+        </Stack>
+      </Container>
     </Box>
   )
 }
