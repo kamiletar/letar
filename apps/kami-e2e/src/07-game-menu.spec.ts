@@ -91,6 +91,25 @@ test.describe('Игровое меню главной', () => {
       await page.reload()
       expect(await page.locator('#site-title span[style*="hidden"]').count()).toBe(0)
     })
+
+    test('7.8 — разлёт фона затухает, после возврата на главную пятна нет', async ({ page }) => {
+      const burst = page.locator('[data-matrix-burst]')
+      await page.goto('/')
+      await page.evaluate(() => document.documentElement.removeAttribute('data-kami-entry'))
+      await page.keyboard.press('Escape')
+      // Пункт на той же странице: разлёт виден и сам сбрасывается меньше чем за секунду.
+      await menu(page).nth(4).click()
+      await expect(burst).toHaveCount(1)
+      await expect(page).toHaveURL(/#friends$/)
+      await expect(burst).toHaveCount(0, { timeout: 1500 })
+      // Уход на другую страницу и возврат без перезагрузки: фон тот же, разлёт не остался.
+      await menu(page).nth(1).click()
+      await expect(page).toHaveURL(/\/about\/$/)
+      await page.goBack()
+      await expect(page).toHaveURL(/\/(#friends)?$/)
+      await expect(menu(page).first()).toBeVisible()
+      await expect(burst).toHaveCount(0)
+    })
   })
 
   test.describe('без JavaScript', () => {

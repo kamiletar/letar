@@ -2,7 +2,14 @@
 
 import { type CeremonyRunner, createCeremonyRunner, getCatcherPose, getFlightDuration } from '@/lib/entry-ceremony'
 import { createEntryDom } from '@/lib/entry-dom'
-import { createMatrixRenderer, type MatrixCatcher, type MatrixZone, pickCatcherSource } from '@/lib/matrix-scene'
+import {
+  BURST_DURATION,
+  createMatrixRenderer,
+  getBurstStrength,
+  type MatrixCatcher,
+  type MatrixZone,
+  pickCatcherSource,
+} from '@/lib/matrix-scene'
 import { Box } from '@chakra-ui/react'
 import { trackEvent } from '@letar/analytics'
 import { useEffect, useRef } from 'react'
@@ -188,6 +195,7 @@ export function MatrixRain({ theme, home = false }: { theme: string | undefined;
       const { x, y } = (event as CustomEvent<{ x: number; y: number }>).detail
       const hostBox = host.getBoundingClientRect()
       burst = { x: x - hostBox.left, y: y - hostBox.top, start: timeRef.current }
+      host.dataset.matrixBurst = ''
     }
 
     const catchersFor = (): MatrixCatcher[] => {
@@ -215,6 +223,11 @@ export function MatrixRain({ theme, home = false }: { theme: string | undefined;
     }
 
     const draw = () => {
+      // Разлёт одноразовый: затух или ушли с главной — сбрасываем, иначе после возврата на месте выбора пятно.
+      if (burst && (!homeRef.current || timeRef.current - burst.start >= BURST_DURATION)) {
+        burst = null
+        delete host.dataset.matrixBurst
+      }
       const entry = homeRef.current
         ? {
           elapsed: runner.revealElapsed,
@@ -222,7 +235,7 @@ export function MatrixRain({ theme, home = false }: { theme: string | undefined;
           calm: lastState.calm,
           catchers: active() ? catchersFor() : undefined,
           burst: burst
-            ? { x: burst.x, y: burst.y, progress: Math.min(1, (timeRef.current - burst.start) / .25) }
+            ? { x: burst.x, y: burst.y, strength: getBurstStrength(timeRef.current - burst.start) }
             : undefined,
         }
         : undefined

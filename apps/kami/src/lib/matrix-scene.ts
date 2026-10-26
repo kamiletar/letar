@@ -39,13 +39,24 @@ export interface MatrixEntry {
   /** Успокоение фона 0..1 из модели церемонии; без него — кривая KM-017 по `elapsed`. */
   calm?: number
   catchers?: readonly MatrixCatcher[]
-  /** Реакция на выбор пункта меню (KM-031): буквы вокруг точки расходятся и гаснут; `progress` 0..1. */
-  burst?: { x: number; y: number; progress: number }
+  /** Реакция на выбор пункта меню (KM-031): буквы вокруг точки расходятся и гаснут; `strength` 0..1 из `getBurstStrength`. */
+  burst?: { x: number; y: number; strength: number }
 }
 
 /** Радиус и сила разлёта от выбранного пункта, пиксели. */
 const BURST_RADIUS = 220
 const BURST_PUSH = 36
+/** Разлёт набирает силу за время реакции на выбор и затухает, с. */
+const BURST_RISE = .25
+const BURST_FADE = .5
+/** После этого разлёт сброшен: фон живёт в layout, и на главной после возврата не должно оставаться пятна. */
+export const BURST_DURATION = BURST_RISE + BURST_FADE
+
+/** Сила разлёта через `elapsed` секунд после выбора: 0 → 1 за BURST_RISE, обратно к 0 за BURST_FADE. */
+export function getBurstStrength(elapsed: number) {
+  if (elapsed <= 0 || elapsed >= BURST_DURATION) { return 0 }
+  return elapsed < BURST_RISE ? smooth(elapsed / BURST_RISE) : 1 - smooth((elapsed - BURST_RISE) / BURST_FADE)
+}
 
 /** Спад к зоне меню: плавный, без изменения скорости потоков (только прозрачность). */
 const ZONE_FALLOFF = 96
@@ -231,7 +242,7 @@ export function createMatrixRenderer(ctx: CanvasRenderingContext2D, recipes: rea
           const dx = glyph.x - burst.x
           const dy = glyph.y - burst.y
           const distance = Math.hypot(dx, dy) || 1
-          const influence = Math.max(0, 1 - distance / BURST_RADIUS) * smooth(burst.progress)
+          const influence = Math.max(0, 1 - distance / BURST_RADIUS) * burst.strength
           glyph = {
             ...glyph,
             x: glyph.x + dx / distance * BURST_PUSH * influence,

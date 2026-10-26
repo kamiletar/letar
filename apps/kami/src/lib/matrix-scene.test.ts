@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest'
-import { ENTRY_DURATION, getEntryState, getMatrixFrame, getMatrixMix, pickCatcherSource } from './matrix-scene'
+import {
+  BURST_DURATION,
+  ENTRY_DURATION,
+  getBurstStrength,
+  getEntryState,
+  getMatrixFrame,
+  getMatrixMix,
+  pickCatcherSource,
+} from './matrix-scene'
 
 describe('непрерывный цикл букв A → B → C', () => {
   it('проходит три направления и возвращается к A', () => {
@@ -120,5 +128,23 @@ describe('вход: связка с церемонией (KM-030)', () => {
       expect(Math.hypot(a.x - target.x, a.y - target.y)).toBeLessThan(200)
     }
     expect(pickCatcherSource(11.4, 960, 600, recipes, target)).not.toEqual(a)
+  })
+})
+
+describe('разлёт от выбранного пункта меню (KM-031)', () => {
+  it('набирает силу за 0,25 с, затухает и к BURST_DURATION равен нулю', () => {
+    expect(getBurstStrength(0)).toBe(0)
+    expect(getBurstStrength(.1)).toBeGreaterThan(0)
+    expect(getBurstStrength(.25)).toBeCloseTo(1)
+    expect(getBurstStrength(.5)).toBeLessThan(1)
+    expect(getBurstStrength(BURST_DURATION - .01)).toBeLessThan(.01)
+    expect(getBurstStrength(BURST_DURATION)).toBe(0)
+    expect(getBurstStrength(60)).toBe(0)
+  })
+
+  it('без скачков: соседние кадры при 30 fps отличаются меньше чем на треть', () => {
+    for (let t = 0; t < BURST_DURATION; t += 1 / 30) {
+      expect(Math.abs(getBurstStrength(t + 1 / 30) - getBurstStrength(t))).toBeLessThan(.34)
+    }
   })
 })
