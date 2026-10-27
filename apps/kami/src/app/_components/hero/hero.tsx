@@ -63,7 +63,9 @@ export async function Hero() {
           align="center"
           my="auto"
           w="full"
-          style={{ transform: `translateY(calc(${BANNER} / -2))`, transition: 'transform .2s ease-out' }}
+          transitionProperty="transform"
+          transitionDuration="fast"
+          style={{ transform: `translateY(calc(${BANNER} / -2))` }}
         >
           <section aria-labelledby="home-title" data-testid="home-menu">
             <Box textAlign="center">
@@ -137,9 +139,6 @@ export async function Hero() {
           whiteSpace="pre"
           css={{
             '& > div': { minHeight: '1.7em' },
-            // Ореол цвета страницы: буквы фона не мешают читать строки лога.
-            textShadow:
-              '0 0 4px var(--chakra-colors-bg), 0 0 8px var(--chakra-colors-bg), 0 0 12px var(--chakra-colors-bg)',
           }}
         />
       </Box>
@@ -152,7 +151,9 @@ export async function Hero() {
         gap={0}
         align="stretch"
         px={4}
-        style={{ transform: `translateY(calc(${BANNER} * -1))`, transition: 'transform .2s ease-out' }}
+        transitionProperty="transform"
+        transitionDuration="fast"
+        style={{ transform: `translateY(calc(${BANNER} * -1))` }}
       >
         <EntryHints
           labels={{ desktop: t('keys.desktop'), desktopDone: t('keys.desktopDone'), touch: t('keys.touch') }}

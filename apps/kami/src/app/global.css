@@ -90,3 +90,14 @@ html[data-kami-entry] [data-letar-cookie-banner] {
     opacity: 0;
   }
 }
+
+/* Ореол цвета страницы вокруг строк boot-лога: буквы фона не мешают их читать (KM-039). */
+[data-entry-log] {
+  text-shadow:
+    0 0 2px var(--chakra-colors-bg),
+    0 0 2px var(--chakra-colors-bg),
+    0 0 5px var(--chakra-colors-bg),
+    0 0 5px var(--chakra-colors-bg),
+    0 0 9px var(--chakra-colors-bg),
+    0 0 9px var(--chakra-colors-bg);
+}
