@@ -1,20 +1,15 @@
 import { SiteCtaLink } from '@/app/[locale]/site/_components/site-cta-link'
 import { TypedText } from '@/app/[locale]/site/_components/typed-text'
 import portrait from '@/assets/site/portrait.webp'
-import { formatOfferPrice, OFFER } from '@/lib/offer'
-import { getStudioOrderUrl } from '@/lib/public-navigation'
+import { getStudioServicesUrl } from '@/lib/public-navigation'
 import { Box, Container, Flex, Heading, Stack, Text } from '@chakra-ui/react'
 import { getLocale, getTranslations } from 'next-intl/server'
 import Image from 'next/image'
 
-/** Первый экран: фото, заголовок оффера, один CTA и строка условий только из OFFER. */
+/** Первый экран: фото, заголовок оффера, один CTA в студию. */
 export async function OfferHero() {
   const locale = await getLocale()
   const t = await getTranslations('site')
-  const proof = [
-    OFFER.priceFromRub === null ? null : t('terms.priceValue', { price: formatOfferPrice(locale, OFFER.priceFromRub) }),
-    OFFER.weeksFrom === null ? null : t('terms.weeksValue', { weeks: OFFER.weeksFrom }),
-  ].filter(Boolean)
 
   return (
     <Box py={{ base: 8, md: 16 }}>
@@ -53,8 +48,7 @@ export async function OfferHero() {
               <Text fontSize={{ base: 'md', md: 'lg' }} color="fg.muted" lineHeight="tall" textWrap="pretty">
                 <TypedText text={t('heroSubtitle')} delay={t('heroTitle').length * 28} />
               </Text>
-              <SiteCtaLink href={getStudioOrderUrl(locale, 'kami')} label={t('cta')} place="hero" />
-              {proof.length > 0 && <Text fontSize="sm" color="fg.muted">{proof.join(' · ')}</Text>}
+              <SiteCtaLink href={getStudioServicesUrl(locale, 'hero')} label={t('cta')} place="hero" />
             </Stack>
           </section>
         </Flex>

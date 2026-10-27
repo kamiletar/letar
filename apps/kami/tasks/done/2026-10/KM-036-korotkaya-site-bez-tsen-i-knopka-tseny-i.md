@@ -1,7 +1,7 @@
 ---
 id: KM-036
 title: Короткая /site/ без цен и кнопка «Цены и заявка на сайте студии» с меткой источника
-status: doing
+status: done
 size: M
 area: content
 priority: 2
@@ -12,6 +12,7 @@ stage: Короткая /site/ со ссылкой в studio
 source: Решение владельца 2026-10-27 (прайс ведёт studio, KM-033)
 created: 2026-10-27
 updated: 2026-10-27
+closed: 2026-10-27
 ---
 
 ## Что и зачем
@@ -73,3 +74,5 @@ updated: 2026-10-27
 - 2026-10-27: KM-039 закрыта и проверена (e2e 39/39 chromium). Исполнитель claude-sonnet-5-5, medium: решения приняты, правка по спецификации и e2e. Имя Agent Mail kami-dev-site. Спек 10-site-to-studio.spec.ts. Номера 11 и 12 заняты KM-039. Перед правкой ещё раз проверить studio /uslugi/ (только чтение).
 
 ## Итог
+
+Короткая /site/ без цен (hero, tagline, шаги, проекты, финальная кнопка); обе кнопки ведут на /uslugi/ и /en/services/ студии с UTM и from=kami, ref переносится; offer.ts, offer-terms, offer-faq удалены; e2e 10 (8 тестов) и 06–09, 11, 12 зелёные: 53+8 passed, chromium. Не проверено: WebKit, прод-деплой, запись источника в Lead студии.

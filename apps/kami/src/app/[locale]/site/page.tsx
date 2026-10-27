@@ -1,11 +1,8 @@
-import { OfferFaq } from '@/app/[locale]/site/_components/offer-faq'
 import { OfferFinalCta } from '@/app/[locale]/site/_components/offer-final-cta'
 import { OfferHero } from '@/app/[locale]/site/_components/offer-hero'
 import { OfferProjects } from '@/app/[locale]/site/_components/offer-projects'
 import { OfferSteps } from '@/app/[locale]/site/_components/offer-steps'
-import { OfferTerms } from '@/app/[locale]/site/_components/offer-terms'
 import { TaglineReveal } from '@/app/[locale]/site/_components/tagline-reveal'
-import { FaqJsonLd } from '@/app/_components/json-ld'
 import type { Metadata } from 'next'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 
@@ -44,22 +41,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-/** Посадочная оффера «Заказать сайт»: условия, шаги, FAQ и заявка студии. */
+/** Посадочная оффера «Заказать сайт»: первый экран, шаги, проекты и кнопка в студию (цены и заявка — на сайте студии). */
 export default async function SitePage({ params }: Props) {
   const { locale } = await params
   setRequestLocale(locale)
   const t = await getTranslations('site')
-  const faq = t.raw('faq') as { q: string; a: string }[]
 
   return (
     <>
-      <FaqJsonLd items={faq} />
       <OfferHero />
-      <OfferTerms />
       <TaglineReveal lines={t.raw('tagline') as string[]} />
       <OfferSteps />
       <OfferProjects />
-      <OfferFaq />
       <OfferFinalCta />
     </>
   )

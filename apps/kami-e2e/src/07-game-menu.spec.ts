@@ -18,7 +18,7 @@ test.describe('Игровое меню главной', () => {
       await expect(links).toHaveCount(5)
       expect(await links.evaluateAll((els) => els.map((el) => el.getAttribute('data-menu-key')))).toEqual(KEYS)
       await expect(links.first()).toHaveAttribute('href', /\/site\/$/)
-      await expect(links.first()).toContainText('цена, сроки и как идёт работа')
+      await expect(links.first()).toContainText('цены, как идёт работа и заявка в студию')
       for (const el of await links.all()) {
         const box = await el.boundingBox()
         expect(box?.height ?? 0).toBeGreaterThanOrEqual(44)
@@ -117,7 +117,7 @@ test.describe('Игровое меню главной', () => {
       await page.goto('/')
       const links = menu(page)
       expect(await links.evaluateAll((els) => els.map((el) => el.getAttribute('data-menu-key')))).toEqual(KEYS)
-      await expect(links.first()).toContainText('цена, сроки')
+      await expect(links.first()).toContainText('цены, как идёт')
       await expect(page.locator('[data-testid="home-menu"] nav a[data-active]')).toHaveCount(0)
     })
   })

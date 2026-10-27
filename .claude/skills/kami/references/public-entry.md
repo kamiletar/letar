@@ -176,10 +176,13 @@ nx run-many -t test --projects=kami --excludeTaskDependencies --run
 обязательно указав ограничение в отчёте. Исправление самого libuv-сбоя не проверено.
 Не добавляй `--run` к общей команде test и typecheck: этот флаг Vitest ломает tsgo.
 
-## Посадочная `/site/` (KM-029)
+## Посадочная `/site/` (KM-029, KM-036)
 
-- Страница `src/app/[locale]/site/page.tsx`, секции в `site/_components/`. Условия — только из
-  `src/lib/offer.ts` (`null` = карточки и строки нет). Адрес заявки — `getStudioOrderUrl(locale, 'kami')`.
+- Страница `src/app/[locale]/site/page.tsx`, секции в `site/_components/`: первый экран, tagline, шаги, проекты,
+  финальная кнопка. **Цен, сроков и FAQ на kami нет** (KM-036): прайс ведёт студия, `src/lib/offer.ts` удалён.
+  Обе кнопки — `getStudioServicesUrl(locale, 'hero'|'final')` из `public-navigation.ts`: страница услуг студии
+  (`/uslugi/`, `/en/services/`) с UTM (`utm_content` = место) и `from=kami`; `site-cta-link.tsx` после гидратации
+  дописывает `?ref` из адреса kami. e2e — `10-site-to-studio.spec.ts`.
 - Основной текст не прячется до гидратации: tagline приглушает слова только после монтирования
   (`data-armed` на секции), без JS и при reduced-motion текст полного цвета. `FadeIn` для текста не брать.
 - Превью ссылки: `[locale]/opengraph-image.tsx` и `site/opengraph-image.tsx` через `src/lib/og-card.tsx`
