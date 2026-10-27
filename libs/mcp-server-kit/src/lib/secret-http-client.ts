@@ -60,6 +60,11 @@ export function createSecretHttpClient(options: SecretHttpClientOptions) {
         headers: { 'Content-Type': 'application/json', [secretHeaderName]: secret() },
         body: body !== undefined ? JSON.stringify(body) : undefined,
         signal: AbortSignal.timeout(timeoutMs),
+        // Каждый запрос — новое соединение. MCP-процесс живёт сутками, а запросы редкие: после
+        // рестарта Traefik/сервера Bun брал из пула мёртвый keep-alive сокет и получал чужой
+        // «404 page not found», затем ECONNRESET (2026-10-27). В Bun `keepalive: false` отключает
+        // переиспользование соединения; в Node/браузере флаг означает другое и вреда не несёт.
+        keepalive: false,
       })
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err)

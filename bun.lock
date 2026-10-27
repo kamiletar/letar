@@ -1624,7 +1624,7 @@
     },
     "libs/mcp-server-kit": {
       "name": "@letar/mcp-server-kit",
-      "version": "0.1.0",
+      "version": "0.1.1",
     },
     "libs/mcp-test-kit": {
       "name": "@letar/mcp-test-kit",
