@@ -91,12 +91,13 @@ export function MatrixRain({ theme, home = false }: { theme: string | undefined;
 
     const root = document.documentElement
     const motion = matchMedia('(prefers-reduced-motion: reduce)')
-    const colors = getComputedStyle(host)
-    const renderer = createMatrixRenderer(ctx, RECIPES, {
-      background: colors.backgroundColor,
-      ink: colors.color,
+    const readColors = () => ({
+      background: getComputedStyle(host).backgroundColor,
+      ink: getComputedStyle(host).color,
       head: getComputedStyle(canvas).color,
     })
+    let colors = readColors()
+    const renderer = createMatrixRenderer(ctx, RECIPES, colors)
     const dom = createEntryDom(document, theme)
 
     // Режим решает ранний скрипт в <head> (атрибут на <html>): вход играет только при первой загрузке на главной.
@@ -335,6 +336,17 @@ export function MatrixRain({ theme, home = false }: { theme: string | undefined;
     }
     const observer = new ResizeObserver(resize)
     observer.observe(host)
+    // next-themes ставит класс темы на <html> в своём эффекте, а он выполняется после эффектов детей:
+    // в момент смены `theme` computed-цвета ещё от прежней темы. Поэтому перечитываем их, когда класс
+    // действительно сменился, и перекрашиваем атлас глифов (KM-038).
+    const themeObserver = new MutationObserver(() => {
+      const next = readColors()
+      if (next.background === colors.background && next.ink === colors.ink && next.head === colors.head) { return }
+      colors = next
+      renderer.recolor(next)
+      draw()
+    })
+    themeObserver.observe(root, { attributes: true, attributeFilter: ['class'] })
     document.addEventListener('visibilitychange', resume)
     window.addEventListener('pagehide', stop)
     window.addEventListener('pageshow', resume)
@@ -356,6 +368,7 @@ export function MatrixRain({ theme, home = false }: { theme: string | undefined;
       document.removeEventListener('click', onClick, true)
       stop()
       observer.disconnect()
+      themeObserver.disconnect()
       document.removeEventListener('visibilitychange', resume)
       window.removeEventListener('pagehide', stop)
       window.removeEventListener('pageshow', resume)

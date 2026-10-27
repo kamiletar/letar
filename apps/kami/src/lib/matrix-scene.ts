@@ -200,7 +200,12 @@ interface MatrixColors {
 const keyFor = (glyph: Pick<MatrixGlyph, 'layer' | 'head' | 'char'>) => `${glyph.layer}:${glyph.head}:${glyph.char}`
 
 /** Атлас растеризуется небольшими порциями; кадры переиспользуют глифы через drawImage. */
-export function createMatrixRenderer(ctx: CanvasRenderingContext2D, recipes: readonly string[], colors: MatrixColors) {
+export function createMatrixRenderer(
+  ctx: CanvasRenderingContext2D,
+  recipes: readonly string[],
+  initialColors: MatrixColors,
+) {
+  let colors = initialColors
   const entries = [...new Map(getMatrixFrame(0, 960, 600, recipes).map((g) => [keyFor(g), g])).values()]
   const atlas = document.createElement('canvas')
   const cell = 48
@@ -211,6 +216,17 @@ export function createMatrixRenderer(ctx: CanvasRenderingContext2D, recipes: rea
   let ready = 0
 
   return {
+    /**
+     * Меняет цвета и сразу перерисовывает атлас целиком: при смене темы кадр не должен
+     * остаться без глифов, пока их растеризуют порциями.
+     */
+    recolor(next: MatrixColors) {
+      colors = next
+      if (!paint) { return }
+      paint.clearRect(0, 0, atlas.width, atlas.height)
+      ready = 0
+      while (!this.warm()) { /* warm сам ограничивает порцию по времени */ }
+    },
     warm() {
       if (!paint) { return true }
       const started = performance.now()
