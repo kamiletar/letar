@@ -13,6 +13,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     'about',
     'contacts',
     'site',
+    'friends',
     'skills',
     'projects',
     'hire',
@@ -32,7 +33,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     for (const page of staticPages) {
       const path = page ? `${page}/` : ''
       const pageUrl = (language: string) =>
-        `${baseUrl}/${(page === 'contacts' || page === 'site') && language === 'ru' ? '' : `${language}/`}${path}`
+        `${baseUrl}/${
+          (page === 'contacts' || page === 'site' || page === 'friends') && language === 'ru' ? '' : `${language}/`
+        }${path}`
       routes.push({
         url: pageUrl(locale),
         lastModified: new Date(),

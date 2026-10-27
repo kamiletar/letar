@@ -63,7 +63,7 @@ test.describe('Игровое меню главной', () => {
       await page.waitForFunction(() => document.documentElement.dataset.kamiEntryRun === '1', null, { timeout: 15_000 })
       await page.waitForTimeout(900)
       await menu(page).nth(4).click({ force: true })
-      await expect(page).not.toHaveURL(/#friends/)
+      await expect(page).not.toHaveURL(/friends/)
       await page.reload()
       await page.waitForFunction(() => document.documentElement.dataset.kamiEntryRun === '1', null, { timeout: 15_000 })
       await page.waitForFunction(
@@ -97,16 +97,14 @@ test.describe('Игровое меню главной', () => {
       await page.goto('/')
       await page.evaluate(() => document.documentElement.removeAttribute('data-kami-entry'))
       await page.keyboard.press('Escape')
-      // Пункт на той же странице: разлёт виден и сам сбрасывается меньше чем за секунду.
+      // Выбор пункта: разлёт виден до перехода и не остаётся после него.
       await menu(page).nth(4).click()
       await expect(burst).toHaveCount(1)
-      await expect(page).toHaveURL(/#friends$/)
+      await expect(page).toHaveURL(/\/friends\/$/)
       await expect(burst).toHaveCount(0, { timeout: 1500 })
-      // Уход на другую страницу и возврат без перезагрузки: фон тот же, разлёт не остался.
-      await menu(page).nth(1).click()
-      await expect(page).toHaveURL(/\/about\/$/)
+      // Возврат на главную без перезагрузки: фон тот же, разлёт не остался.
       await page.goBack()
-      await expect(page).toHaveURL(/\/(#friends)?$/)
+      await expect(page).toHaveURL(/\/(ru\/)?$/)
       await expect(menu(page).first()).toBeVisible()
       await expect(burst).toHaveCount(0)
     })

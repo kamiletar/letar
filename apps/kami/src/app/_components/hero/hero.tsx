@@ -1,9 +1,8 @@
 import { EntryReplay } from '@/app/_components/hero/entry-replay'
 import { EntrySkip } from '@/app/_components/hero/entry-skip'
 import { GameMenu } from '@/app/_components/hero/game-menu'
-import { Link } from '@/i18n/navigation'
 import { getPublicNavigation } from '@/lib/public-navigation'
-import { Box, Container, Heading, HStack, Link as ChakraLink, Stack, Text, VisuallyHidden } from '@chakra-ui/react'
+import { Box, Container, Heading, Stack, Text, VisuallyHidden } from '@chakra-ui/react'
 import { getLocale, getTranslations } from 'next-intl/server'
 import packageJson from '../../../../package.json'
 
@@ -109,27 +108,6 @@ export async function Hero() {
           </section>
         </Stack>
         <EntrySkip label={t('skipEntry')} />
-
-        <Stack
-          asChild
-          id="friends"
-          gap={4}
-          py={{ base: 12, md: 20 }}
-          maxW="2xl"
-          scrollMarginTop="calc(var(--kami-header-h, 80px) + 24px)"
-        >
-          <section aria-labelledby="friends-title">
-            <Heading asChild size="2xl">
-              <h2 id="friends-title">{nav('friends')}</h2>
-            </Heading>
-            <Text fontSize="lg" lineHeight="tall" bg="bg" p={4} borderRadius="md">{t('friendsStatus')}</Text>
-            <HStack>
-              <ChakraLink asChild minH="44px" fontWeight="medium" color="fg.muted">
-                <Link href="/contacts/">{t('write')}</Link>
-              </ChakraLink>
-            </HStack>
-          </section>
-        </Stack>
       </Container>
     </Box>
   )

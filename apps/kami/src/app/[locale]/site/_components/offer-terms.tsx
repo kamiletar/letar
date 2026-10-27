@@ -66,7 +66,7 @@ export async function OfferTerms() {
                       fontSize="sm"
                       color="fg.muted"
                     >
-                      <Link href="/#friends">{t('terms.discountLink')}</Link>
+                      <Link href="/friends/">{t('terms.discountLink')}</Link>
                     </ChakraLink>
                   )}
                 </Stack>

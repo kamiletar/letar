@@ -12,6 +12,6 @@ export function getPublicNavigation(_locale?: string) {
     { key: 'about', href: '/about/' },
     { key: 'blog', href: '/blog/' },
     { key: 'contacts', href: '/contacts/' },
-    { key: 'friends', href: '/#friends' },
+    { key: 'friends', href: '/friends/' },
   ] as const
 }
