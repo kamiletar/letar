@@ -34,30 +34,48 @@
 }
 
 /*
- * Церемония входа на главную (KM-030). Атрибут `data-kami-entry` ставит ранний скрипт в <head>:
+ * Церемония входа на главную (KM-030, KM-039). Атрибут `data-kami-entry` ставит ранний скрипт в <head>:
  * до начала часов слои церемонии скрыты, дальше их ведёт JS через opacity/transform/clip-path.
- * Страховка: если JS так и не запустил часы (`data-kami-entry-run`), через 5 с всё становится видимым.
+ * Страховка: если JS так и не запустил часы (`data-kami-entry-run`), через 5 с всё становится видимым;
+ * на экране языка (`data-kami-entry-lang`) страховка не идёт: он ждёт выбора столько, сколько нужно.
  */
 html[data-kami-entry] [data-entry-letter],
 html[data-kami-entry] [data-entry-role],
-html[data-kami-entry] [data-entry-menu] {
+html[data-kami-entry] [data-entry-menu],
+html[data-kami-entry] [data-entry-corner] {
   opacity: 0;
 }
 
-html[data-kami-entry]:not([data-kami-entry-run]) [data-entry-letter],
-html[data-kami-entry]:not([data-kami-entry-run]) [data-entry-role],
-html[data-kami-entry]:not([data-kami-entry-run]) [data-entry-menu] {
+/* Значки в углу не получают фокус и касания, пока вход их скрывает; DOM-слой открывает их вместе с меню. */
+html[data-kami-entry] [data-entry-corner] {
+  visibility: hidden;
+}
+
+html[data-kami-entry]:not([data-kami-entry-run]):not([data-kami-entry-lang]) [data-entry-letter],
+html[data-kami-entry]:not([data-kami-entry-run]):not([data-kami-entry-lang]) [data-entry-role],
+html[data-kami-entry]:not([data-kami-entry-run]):not([data-kami-entry-lang]) [data-entry-menu],
+html[data-kami-entry]:not([data-kami-entry-run]):not([data-kami-entry-lang]) [data-entry-corner] {
   animation: kami-entry-failsafe 0s 5s forwards;
 }
 
-/* «Перезапустить вход» (KM-018): пока вход идёт, кнопка скрыта, но место под неё остаётся. */
-html[data-kami-entry] [data-entry-replay] {
-  visibility: hidden;
+/* Экран выбора языка: в серверной разметке есть всегда, виден только при атрибуте от раннего скрипта. */
+[data-entry-language] {
+  display: none;
+}
+
+html[data-kami-entry-lang] [data-entry-language] {
+  display: flex;
+}
+
+/* Cookie-баннер на главной ждёт конца входа: пока атрибут стоит, баннер скрыт, потом появляется как раньше. */
+html[data-kami-entry] [data-letar-cookie-banner] {
+  display: none !important;
 }
 
 @keyframes kami-entry-failsafe {
   to {
     opacity: 1;
+    visibility: visible;
     transform: none;
     clip-path: none;
   }

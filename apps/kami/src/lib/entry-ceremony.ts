@@ -1,6 +1,9 @@
 /**
- * Модель церемонии входа на главную (KM-030). Чистые функции без DOM: одно место, где задано,
+ * Модель церемонии входа на главную (KM-030, KM-039). Чистые функции без DOM: одно место, где задано,
  * что видно в каждый момент. Тесты, DOM-слой и Canvas читают одно и то же состояние.
+ *
+ * Загрузка синтетическая намеренно (решение владельца 2026-10-27): строки лога идут по расписанию
+ * с выдержанным темпом и не зависят от реальных событий. Слишком быстрая загрузка обесценивает работу.
  */
 
 export type EntryMode = 'full' | 'short' | 'none'
@@ -21,10 +24,11 @@ export interface CeremonyPhase {
 export const CEREMONY_PHASES: Record<'full' | 'short', readonly CeremonyPhase[]> = {
   full: [
     { id: 'flow', start: 0, duration: .4 },
-    { id: 'boot', start: .4, duration: 1.6 },
-    { id: 'assemble', start: 2, duration: 1 },
-    { id: 'role', start: 3, duration: .6 },
-    { id: 'menu', start: 3.6, duration: .6 },
+    // 3 с — середина ориентира 2,5–3,5 с по замеру загрузки studio (2,0 с + пауза 0,28 с).
+    { id: 'boot', start: .4, duration: 3 },
+    { id: 'assemble', start: 3.4, duration: 1 },
+    { id: 'role', start: 4.4, duration: .6 },
+    { id: 'menu', start: 5, duration: .6 },
   ],
   short: [
     { id: 'flow', start: 0, duration: .4 },
@@ -44,27 +48,26 @@ const LETTER_REVEAL = .12
 export const MENU_STEP = .06
 /** Печать подписи строки лога, с. */
 const LINE_TYPE = .3
-/** Если событие не пришло за столько секунд, строка получает статус «позже», а церемония идёт дальше. */
-export const BOOT_EVENT_CEILING = 2.5
+/** Пауза между напечатанной подписью и статусом `ok`, с. */
+const OK_DELAY = .25
 /** Длительность плавного перехода к финальному кадру при пропуске, с (бюджет приёмки — 0,6 с). */
 export const SKIP_FADE = .4
+/** Число блоков в полосе загрузки. */
+export const BOOT_BAR_BLOCKS = 24
 
-export type BootEvent = 'atlas' | 'fonts' | 'immediate' | 'none'
-
-/** Строки boot-лога. Тексты живут в `messages/*.json`, namespace `home.boot`. */
-export const BOOT_LINES: readonly { key: string; event: BootEvent }[] = [
-  { key: 'os', event: 'none' },
-  { key: 'glyphs', event: 'atlas' },
-  { key: 'fonts', event: 'fonts' },
-  { key: 'language', event: 'immediate' },
-  { key: 'theme', event: 'immediate' },
+/**
+ * Строки boot-лога. Тексты живут в `messages/*.json`, namespace `home.boot`. `status` — есть ли у строки
+ * точки и `ok`; заголовок `kami.os` остаётся голой подписью.
+ */
+export const BOOT_LINES: readonly { key: string; status: boolean }[] = [
+  { key: 'os', status: false },
+  { key: 'glyphs', status: true },
+  { key: 'fonts', status: true },
+  { key: 'language', status: true },
+  { key: 'theme', status: true },
+  { key: 'rain', status: true },
+  { key: 'menu', status: true },
 ]
-
-/** Моменты реальных событий на часах церемонии, с; `null` — событие ещё не пришло. */
-export interface CeremonyEvents {
-  atlasReadyAt: number | null
-  fontsReadyAt: number | null
-}
 
 export interface CeremonyCounts {
   letters: number
@@ -72,11 +75,13 @@ export interface CeremonyCounts {
 }
 const DEFAULT_COUNTS: CeremonyCounts = { letters: 4, menu: 5 }
 
-export type BootStatus = 'wait' | 'ok' | 'later'
+export type BootStatus = 'wait' | 'ok'
 
 export interface CeremonyState {
-  /** Подпись напечатана на долю `visible`; статус появляется после события. */
+  /** Подпись напечатана на долю `visible`; `ok` появляется по расписанию, а не по событию. */
   bootLines: { key: string; visible: number; status: BootStatus }[]
+  /** Доля полосы загрузки, 0..1: идёт по времени boot-фазы. */
+  bootProgress: number
   /** Присутствие лога: 1 — виден, 0 — погас. `leave` — доля ухода вверх. */
   log: { opacity: number; leave: number }
   /** Прогресс полёта ловца к каждой букве имени, 0..1. */
@@ -88,6 +93,8 @@ export interface CeremonyState {
   menuItems: number[]
   /** Успокоение фона вокруг меню, 0..1 (вход фона из KM-017). */
   calm: number
+  /** Проявление значков в углу, 0..1: вместе с меню. */
+  corner: number
   done: boolean
 }
 
@@ -114,27 +121,29 @@ function phaseOf(mode: EntryMode, id: PhaseId) {
 export function getFinalState(counts: CeremonyCounts = DEFAULT_COUNTS): CeremonyState {
   return {
     bootLines: [],
+    bootProgress: 0,
     log: { opacity: 0, leave: 1 },
     catchers: Array.from({ length: counts.letters }, () => 1),
     nameLetters: Array.from({ length: counts.letters }, () => 1),
     role: 1,
     menuItems: Array.from({ length: counts.menu }, () => 1),
     calm: 1,
+    corner: 1,
     done: true,
   }
 }
 
-function eventTime(key: BootEvent, events: CeremonyEvents) {
-  if (key === 'atlas') { return events.atlasReadyAt }
-  if (key === 'fonts') { return events.fontsReadyAt }
-  return 0
+/** Полоса загрузки `[████░░░░] 50%`: блоки и процент считаются из одной доли. */
+export function formatBootBar(progress: number) {
+  const value = clamp(progress)
+  const filled = Math.round(value * BOOT_BAR_BLOCKS)
+  return `[${'█'.repeat(filled)}${'░'.repeat(BOOT_BAR_BLOCKS - filled)}] ${Math.round(value * 100)}%`
 }
 
 /** Состояние каждого слоя в момент `elapsed`; одна функция — один источник правды для тестов. */
 export function getCeremonyState(
   elapsed: number,
   mode: EntryMode,
-  events: CeremonyEvents,
   counts: CeremonyCounts = DEFAULT_COUNTS,
 ): CeremonyState {
   if (mode === 'none') { return getFinalState(counts) }
@@ -149,19 +158,15 @@ export function getCeremonyState(
   const bootLines: CeremonyState['bootLines'] = []
   if (boot) {
     const count = BOOT_LINES.length
-    const gap = (boot.duration - LINE_TYPE) / Math.max(1, count - 1)
+    // Последняя строка получает `ok` ровно к концу boot-фазы: расписание делит остаток поровну.
+    const gap = (boot.duration - LINE_TYPE - OK_DELAY) / Math.max(1, count - 1)
     BOOT_LINES.forEach((line, index) => {
       const planned = boot.start + index * gap
-      const typedAt = planned + LINE_TYPE
-      const arrived = eventTime(line.event, events)
-      // Статус появляется после события или, если его нет за потолок, как «позже».
-      const inTime = arrived !== null && arrived <= BOOT_EVENT_CEILING
-      const resolvedAt = Math.max(typedAt, inTime ? arrived : BOOT_EVENT_CEILING)
-      const resolved = elapsed >= resolvedAt
+      const okAt = planned + LINE_TYPE + OK_DELAY
       bootLines.push({
         key: line.key,
         visible: clamp((elapsed - planned) / LINE_TYPE),
-        status: resolved ? (inTime ? 'ok' : 'later') : 'wait',
+        status: line.status && elapsed + 1e-9 >= okAt ? 'ok' : 'wait',
       })
     })
   }
@@ -188,15 +193,18 @@ export function getCeremonyState(
     { length: counts.menu },
     (_, i) => menu ? smooth((elapsed - menu.start - i * MENU_STEP) / itemDuration) : 1,
   )
+  const menuProgress = menu ? smooth((elapsed - menu.start) / menu.duration) : 1
 
   return {
     bootLines,
+    bootProgress: boot ? clamp((elapsed - boot.start) / boot.duration) : 0,
     log: { opacity: logOpacity, leave },
     catchers,
     nameLetters,
     role: role ? clamp((elapsed - role.start) / role.duration) : 1,
     menuItems,
-    calm: menu ? smooth((elapsed - menu.start) / menu.duration) : 1,
+    calm: menuProgress,
+    corner: menuProgress,
     done,
   }
 }
@@ -209,12 +217,14 @@ export function blendCeremonyStates(from: CeremonyState, to: CeremonyState, k: n
   const x = clamp(k)
   return {
     bootLines: from.bootLines,
+    bootProgress: from.bootProgress,
     log: { opacity: mixNumber(from.log.opacity, to.log.opacity, x), leave: mixNumber(from.log.leave, to.log.leave, x) },
     catchers: mixList(from.catchers, to.catchers, x),
     nameLetters: mixList(from.nameLetters, to.nameLetters, x),
     role: mixNumber(from.role, to.role, x),
     menuItems: mixList(from.menuItems, to.menuItems, x),
     calm: mixNumber(from.calm, to.calm, x),
+    corner: mixNumber(from.corner, to.corner, x),
     done: x >= 1,
   }
 }
@@ -248,15 +258,24 @@ export function getCatcherPose(
   }
 }
 
-export type RunnerPhase = 'running' | 'skipping' | 'done'
+/** `language` — экран выбора языка: часы стоят, пока посетитель не выберет язык. */
+export type RunnerPhase = 'language' | 'running' | 'skipping' | 'done'
 
-/** Часы церемонии: продвигаются по кадрам, принимают события и пропуск. Без DOM — проверяется тестами. */
-export function createCeremonyRunner(mode: EntryMode, counts: CeremonyCounts = DEFAULT_COUNTS) {
-  const events: CeremonyEvents = { atlasReadyAt: null, fontsReadyAt: null }
+export interface RunnerOptions {
+  /** Показать экран выбора языка перед загрузкой; только для полной версии. */
+  language?: boolean
+}
+
+/** Часы церемонии: продвигаются по кадрам, принимают выбор языка и пропуск. Без DOM — проверяется тестами. */
+export function createCeremonyRunner(
+  mode: EntryMode,
+  counts: CeremonyCounts = DEFAULT_COUNTS,
+  options: RunnerOptions = {},
+) {
   let elapsed = 0
   let skipClock = 0
   let skipFrom: CeremonyState | null = null
-  let phase: RunnerPhase = mode === 'none' ? 'done' : 'running'
+  let phase: RunnerPhase = mode === 'none' ? 'done' : options.language && mode === 'full' ? 'language' : 'running'
   let skipped = false
 
   const current = (): CeremonyState => {
@@ -264,13 +283,16 @@ export function createCeremonyRunner(mode: EntryMode, counts: CeremonyCounts = D
     if (skipFrom) {
       return blendCeremonyStates(skipFrom, getFinalState(counts), smooth(skipClock / SKIP_FADE))
     }
-    return getCeremonyState(elapsed, mode, events, counts)
+    return getCeremonyState(elapsed, mode, counts)
   }
 
   return {
     mode,
     get phase() {
       return phase
+    },
+    get awaitingLanguage() {
+      return phase === 'language'
     },
     get elapsed() {
       return elapsed
@@ -286,15 +308,12 @@ export function createCeremonyRunner(mode: EntryMode, counts: CeremonyCounts = D
       if (phase === 'done') { return Infinity }
       return skipFrom ? elapsed + skipClock * 6 : elapsed
     },
-    events,
     state: current,
-    markAtlasReady() {
-      if (events.atlasReadyAt === null) { events.atlasReadyAt = elapsed }
+    /** Язык выбран: загрузка начинается с нуля. Вне экрана языка ничего не делает. */
+    confirmLanguage() {
+      if (phase === 'language') { phase = 'running' }
     },
-    markFontsReady() {
-      if (events.fontsReadyAt === null) { events.fontsReadyAt = elapsed }
-    },
-    /** Продвинуть часы на `delta` секунд; в режиме пропуска идёт отдельный отсчёт перехода. */
+    /** Продвинуть часы на `delta` секунд; на экране языка время стоит, в пропуске идёт отдельный отсчёт. */
     advance(delta: number) {
       if (phase === 'running') {
         elapsed += delta
@@ -304,9 +323,9 @@ export function createCeremonyRunner(mode: EntryMode, counts: CeremonyCounts = D
         if (skipClock >= SKIP_FADE) { phase = 'done' }
       }
     },
-    /** Пропуск: из текущего кадра плавно к финальному за `SKIP_FADE`. */
+    /** Пропуск: из текущего кадра плавно к финальному за `SKIP_FADE`; работает и на экране языка. */
     skip() {
-      if (phase !== 'running') { return }
+      if (phase !== 'running' && phase !== 'language') { return }
       skipFrom = current()
       skipClock = 0
       skipped = true

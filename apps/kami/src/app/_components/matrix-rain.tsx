@@ -104,20 +104,18 @@ export function MatrixRain({ theme, home = false }: { theme: string | undefined;
     if (!runnerRef.current) {
       const flag = root.dataset.kamiEntry
       const mode = homeRef.current && !motion.matches && (flag === 'full' || flag === 'short') ? flag : 'none'
-      const created = createCeremonyRunner(mode, dom.counts)
+      // Экран языка есть только у полной версии и только если ранний скрипт поставил для него атрибут.
+      const created = createCeremonyRunner(mode, dom.counts, { language: root.hasAttribute('data-kami-entry-lang') })
       runnerRef.current = created
-      if (mode === 'none') {
-        delete root.dataset.kamiEntry
-      } else {
-        // Строка «шрифты» ждёт настоящего события; если API нет, считаем шрифты готовыми.
-        const fonts = document.fonts?.ready ?? Promise.resolve()
-        void fonts.then(() => created.markFontsReady(), () => created.markFontsReady())
-      }
+      if (mode === 'none') { delete root.dataset.kamiEntry }
+      if (!created.awaitingLanguage) { delete root.dataset.kamiEntryLang }
     }
     let runner = runnerRef.current
     let lastState = runner.state()
     let clockStarted = false
     let ended = runner.phase === 'done'
+    // «Перезапустить вход» запущен с клавиатуры или мышью: после конца возвращаем фокус на кнопку (KM-035).
+    let replayFocus = false
 
     let raf = 0
     let warmTimer = 0
@@ -142,8 +140,13 @@ export function MatrixRain({ theme, home = false }: { theme: string | undefined;
       ended = true
       dom.clear()
       delete root.dataset.kamiEntry
+      delete root.dataset.kamiEntryLang
       delete root.dataset.kamiEntryRun
       lastState = runner.state()
+      if (replayFocus) {
+        replayFocus = false
+        document.querySelector<HTMLElement>('[data-entry-replay]')?.focus({ preventScroll: true })
+      }
       if (kind !== 'abort') { trackEvent(kind === 'skip' ? 'entry-skip' : 'entry-complete', { mode: runner.mode }) }
     }
     finalizeRef.current = finalize
@@ -165,14 +168,14 @@ export function MatrixRain({ theme, home = false }: { theme: string | undefined;
       measureZone()
       draw()
     }
-    // «Перезапустить вход»: новый runner `full` на тех же часах и атласе, без перезагрузки и без флага `seen`.
+    // «Перезапустить вход»: новый runner `full` без экрана языка, на тех же часах и атласе, без перезагрузки
+    // и без флага `seen`: язык уже выбран.
     const onReplay = () => {
       if (!homeRef.current || motion.matches || active()) { return }
       const next = createCeremonyRunner('full', dom.counts)
       runnerRef.current = next
       runner = next
-      const fonts = document.fonts?.ready ?? Promise.resolve()
-      void fonts.then(() => next.markFontsReady(), () => next.markFontsReady())
+      replayFocus = document.activeElement?.hasAttribute('data-entry-replay') ?? false
       delete root.dataset.kamiEntryRun
       root.dataset.kamiEntry = 'full'
       clockStarted = false
@@ -181,9 +184,16 @@ export function MatrixRain({ theme, home = false }: { theme: string | undefined;
       lastState = next.state()
       draw()
     }
+    // Язык выбран на текущем адресе: часы запускаются, экран языка уходит. Выбор другого языка — переход на его адрес.
+    const onLanguage = () => {
+      if (!runner.awaitingLanguage) { return }
+      runner.confirmLanguage()
+      delete root.dataset.kamiEntryLang
+    }
     const skip = () => {
-      if (runner.phase !== 'running') { return }
+      if (runner.phase !== 'running' && runner.phase !== 'language') { return }
       runner.skip()
+      delete root.dataset.kamiEntryLang
       lastState = runner.state()
     }
     const onKey = (event: KeyboardEvent) => {
@@ -196,7 +206,8 @@ export function MatrixRain({ theme, home = false }: { theme: string | undefined;
       if (!active() || !homeRef.current) { return }
       if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) { return }
       const target = event.target instanceof Element ? event.target : null
-      if (target?.closest('[data-entry-skip]')) { return }
+      // Экран языка обрабатывает свои клики сам; пропуск входа с него — только Escape.
+      if (target?.closest('[data-entry-language]')) { return }
       const menuLink = target?.closest('[data-testid="home-menu"] a[data-entry-menu]') ?? null
       const interactive = target?.closest('a, button, input, select, textarea, [role="button"]')
       if (interactive && !menuLink) { return }
@@ -275,11 +286,10 @@ export function MatrixRain({ theme, home = false }: { theme: string | undefined;
       }
       const delta = last ? Math.min((now - last) / 1000, .1) : 0
       timeRef.current += delta
-      // Часы церемонии идут только после готовности атласа глифов: до этого холст честно остаётся фоном.
+      // Часы церемонии идут только после готовности атласа глифов и выбора языка: до этого холст остаётся фоном.
       if (active() && homeRef.current && (warmed || runner.phase === 'skipping')) {
-        if (!clockStarted && warmed) {
+        if (!clockStarted && warmed && !runner.awaitingLanguage) {
           clockStarted = true
-          runner.markAtlasReady()
           root.dataset.kamiEntryRun = '1'
         }
         runner.advance(delta)
@@ -352,7 +362,7 @@ export function MatrixRain({ theme, home = false }: { theme: string | undefined;
     window.addEventListener('pageshow', resume)
     motion.addEventListener('change', resume)
     window.addEventListener('keydown', onKey)
-    window.addEventListener('kami:entry-skip', skip)
+    window.addEventListener('kami:entry-language', onLanguage)
     window.addEventListener('kami:entry-replay', onReplay)
     window.addEventListener('kami:menu-select', onSelect)
     document.addEventListener('click', onClick, true)
@@ -362,7 +372,7 @@ export function MatrixRain({ theme, home = false }: { theme: string | undefined;
     return () => {
       disposed = true
       window.removeEventListener('keydown', onKey)
-      window.removeEventListener('kami:entry-skip', skip)
+      window.removeEventListener('kami:entry-language', onLanguage)
       window.removeEventListener('kami:entry-replay', onReplay)
       window.removeEventListener('kami:menu-select', onSelect)
       document.removeEventListener('click', onClick, true)

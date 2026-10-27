@@ -5,6 +5,7 @@ import { Footer } from '@/app/_components/footer/footer'
 import { FormI18nWrapper } from '@/app/_components/form-i18n-wrapper'
 import { Header } from '@/app/_components/header/header'
 import { JsonLd } from '@/app/_components/json-ld'
+import { SiteChrome } from '@/app/_components/site-chrome'
 import { SkipLink } from '@/app/_components/skip-link'
 import { ThemeProvider } from '@/app/_components/theme-provider'
 import { Toaster } from '@/app/_components/ui/toaster'
@@ -12,7 +13,6 @@ import { UserProvider } from '@/app/_components/user-provider'
 import '@/app/global.css'
 import { routing } from '@/i18n/routing'
 import { ENTRY_BOOT_SCRIPT } from '@/lib/entry-boot-script'
-import { Box, Flex } from '@chakra-ui/react'
 import { UmamiScript } from '@letar/analytics'
 import { ColorModeProvider } from '@letar/chakra-provider'
 import { AnalyticsGate, HeaderScrollPadding } from '@letar/ui'
@@ -145,15 +145,11 @@ export default async function LocaleLayout({ children, params }: Props) {
                 <UserProvider>
                   <SkipLink />
                   <HeaderScrollPadding cssVar="--kami-header-h" />
-                  <Flex direction="column" minH="100vh">
-                    <Header />
-                    <Box as="main" id="main-content" flex="1" tabIndex={-1} outline="none">
-                      {/* Matrix Rain Background */}
-                      <MainMatrix />
-                      {children}
-                    </Box>
-                    <Footer />
-                  </Flex>
+                  <SiteChrome header={<Header />} footer={<Footer />}>
+                    {/* Matrix Rain Background */}
+                    <MainMatrix />
+                    {children}
+                  </SiteChrome>
                   <Toaster />
                   {process.env.ANTHROPIC_API_KEY && <ChatWidgetLazy />}
                   <CookieConsent />

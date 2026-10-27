@@ -39,8 +39,9 @@
       "theme": "theme",
       "themeDark": "dark",
       "themeLight": "light",
-      "ok": "ok",
-      "later": "later"
+      "rain": "letter background",
+      "menu": "menu",
+      "ok": "ok"
     },
     "role": "Software architect",
     "menuAria": "Main menu",
@@ -48,8 +49,22 @@
     "copied": "Copied",
     "friendsStatus": "The friends area is in development. Friend requests, circles and service access are not available yet. You can contact me directly in the meantime.",
     "write": "Get in touch",
-    "skipEntry": "Skip intro",
-    "replayEntry": "Replay intro"
+    "replayEntry": "Replay intro",
+    "language": {
+      "title": "Выберите язык",
+      "titleAlt": "Select language",
+      "hint": "↑↓ — выбор · Enter — далее",
+      "hintAlt": "↑↓ — select · Enter — next",
+      "ru": "Русский",
+      "en": "English"
+    },
+    "keys": {
+      "desktop": "↑↓ select · Enter open · Esc skip",
+      "desktopDone": "↑↓ select · Enter open",
+      "touch": "Tap to skip"
+    },
+    "cornerAria": "Settings",
+    "privacyLink": "Privacy policy"
   },
   "hero": {
     "greeting": "Hi, I'm",

@@ -1,7 +1,7 @@
-import type { CeremonyState } from './entry-ceremony'
+import { type CeremonyState, formatBootBar } from './entry-ceremony'
 
 /**
- * DOM-слой церемонии входа (KM-030). Находит размеченные сервером элементы и переносит на них
+ * DOM-слой церемонии входа (KM-030, KM-039). Находит размеченные сервером элементы и переносит на них
  * состояние модели: только `opacity`, `transform` и `clip-path`, раскладка не меняется.
  * Серверная разметка уже стоит на финальных местах; до начала часов её скрывает CSS по
  * `html[data-kami-entry]`, а по завершении инлайновые стили снимаются.
@@ -10,8 +10,8 @@ import type { CeremonyState } from './entry-ceremony'
 export interface LogLineConfig {
   key: string
   label: string
+  /** Статус после точек; пусто — строка остаётся голой подписью (заголовок `kami.os`). */
   ok: string
-  later: string
 }
 
 export interface LogConfig {
@@ -32,7 +32,7 @@ const byIndex = (a: Element, b: Element) =>
   Number(a.getAttribute('data-entry-index') ?? 0) - Number(b.getAttribute('data-entry-index') ?? 0)
 
 /** Пишет стиль только при изменении: кадр не трогает DOM зря. */
-function setStyle(element: HTMLElement, name: 'opacity' | 'transform' | 'clipPath', value: string) {
+function setStyle(element: HTMLElement, name: 'opacity' | 'transform' | 'clipPath' | 'visibility', value: string) {
   if (element.style[name] !== value) { element.style[name] = value }
 }
 
@@ -42,6 +42,7 @@ export function createEntryDom(root: ParentNode, theme: string | undefined) {
   const role = root.querySelector<HTMLElement>('[data-entry-role]')
   const cursor = root.querySelector<HTMLElement>('[data-entry-cursor]')
   const log = root.querySelector<HTMLElement>('[data-entry-log]')
+  const corner = q<HTMLElement>(root, '[data-entry-corner]')
 
   let config: LogConfig | null = null
   try {
@@ -58,10 +59,14 @@ export function createEntryDom(root: ParentNode, theme: string | undefined) {
       text: '',
     }
   })
+  // Полоса загрузки: последняя строка лога, печатается блоками по расписанию.
+  const bar = document.createElement('div')
+  bar.setAttribute('data-entry-bar', '')
+  let barText = ''
   const lineCursor = document.createElement('span')
   lineCursor.setAttribute('data-entry-line-cursor', '')
   lineCursor.textContent = '▌'
-  if (log) { log.replaceChildren(...lines.map((line) => line.element)) }
+  if (log) { log.replaceChildren(...lines.map((line) => line.element), bar) }
 
   function applyLog(state: CeremonyState) {
     if (!log) { return }
@@ -80,16 +85,21 @@ export function createEntryDom(root: ParentNode, theme: string | undefined) {
       last = index
       let text = line.label.slice(0, Math.ceil(progress.visible * line.label.length))
       // Строка без статуса (заголовок `kami.os`) остаётся голой подписью.
-      if (progress.visible >= 1 && (line.ok || line.later)) {
+      if (progress.visible >= 1 && line.ok) {
         text += ' …'
-        if (progress.status === 'ok' && line.ok) { text += ` ${line.ok}` }
-        if (progress.status === 'later' && line.later) { text += ` ${line.later}` }
+        if (progress.status === 'ok') { text += ` ${line.ok}` }
       }
       if (text !== line.text) {
         line.element.textContent = text
         line.text = text
       }
     })
+    // Полоса появляется, когда началась первая строка, и идёт по времени boot-фазы.
+    const nextBar = last >= 0 ? formatBootBar(state.bootProgress) : ''
+    if (nextBar !== barText) {
+      bar.textContent = nextBar
+      barText = nextBar
+    }
     // Курсор один: на последней начатой строке, пока лог на экране.
     const holder = last >= 0 && state.log.opacity > 0 ? lines[last].element : null
     if (holder && lineCursor.parentElement !== holder) { holder.append(lineCursor) }
@@ -124,6 +134,11 @@ export function createEntryDom(root: ParentNode, theme: string | undefined) {
         setStyle(item, 'transform', `translateY(${((1 - value) * 8).toFixed(2)}px)`)
       })
       applyLog(state)
+      corner.forEach((item) => {
+        // Значки в углу не должны получать фокус и касания, пока вход скрывает их.
+        setStyle(item, 'visibility', state.corner > 0 ? 'visible' : 'hidden')
+        setStyle(item, 'opacity', String(Math.round(state.corner * 1000) / 1000))
+      })
     },
     /** Центры букв имени относительно хоста холста; вызывается на resize, не на кадре. */
     measureLetters(host: DOMRect): LetterPoint[] {
@@ -138,12 +153,14 @@ export function createEntryDom(root: ParentNode, theme: string | undefined) {
         const element of [
           ...letters,
           ...menu,
+          ...corner,
           ...(role ? [role] : []),
           ...(cursor ? [cursor] : []),
           ...(log ? [log] : []),
         ]
       ) {
         element.style.removeProperty('opacity')
+        element.style.removeProperty('visibility')
         element.style.removeProperty('transform')
         element.style.removeProperty('clip-path')
       }
@@ -154,6 +171,8 @@ export function createEntryDom(root: ParentNode, theme: string | undefined) {
         line.element.textContent = ''
         line.text = ''
       }
+      bar.textContent = ''
+      barText = ''
     },
   }
 }

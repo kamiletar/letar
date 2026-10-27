@@ -1,8 +1,9 @@
 'use client'
 
-import { Box, Button } from '@chakra-ui/react'
+import { IconButton } from '@chakra-ui/react'
 import { trackEvent } from '@letar/analytics'
 import { useSyncExternalStore } from 'react'
+import { LuRotateCcw } from 'react-icons/lu'
 
 const REDUCED = '(prefers-reduced-motion: reduce)'
 
@@ -13,37 +14,31 @@ function subscribe(notify: () => void) {
 }
 
 /**
- * Неброская кнопка «Перезапустить вход» под меню (KM-018): проигрывает полную версию без перезагрузки.
- * Обёртка с резервом высоты приходит в HTML, чтобы появление кнопки после гидратации не сдвигало раскладку;
- * кнопка есть только при JS и без reduced-motion, а пока идёт вход — скрыта (`global.css`).
+ * Значок ↻ «Перезапустить вход» в углу (KM-018, KM-039): проигрывает полную версию без перезагрузки
+ * и без экрана языка. Кнопка есть только при JS и без reduced-motion; на сервере и до гидратации её нет.
+ * Пока идёт вход, весь угол скрыт (`global.css`). Цель касания — 44 px.
  */
 export function EntryReplay({ label }: { label: string }) {
-  // На сервере и до гидратации кнопки нет; на клиенте она есть, пока не включено reduced-motion.
   const ready = useSyncExternalStore(subscribe, () => !matchMedia(REDUCED).matches, () => false)
+  if (!ready) { return null }
 
   return (
-    <Box minH="44px" data-entry-replay-slot="">
-      {ready && (
-        <Button
-          type="button"
-          data-entry-replay=""
-          variant="plain"
-          size="sm"
-          minH="44px"
-          px={0}
-          fontSize="sm"
-          fontWeight="normal"
-          color="fg.muted"
-          textDecoration="underline"
-          textUnderlineOffset="3px"
-          onClick={() => {
-            trackEvent('entry-replay')
-            window.dispatchEvent(new Event('kami:entry-replay'))
-          }}
-        >
-          {label}
-        </Button>
-      )}
-    </Box>
+    <IconButton
+      type="button"
+      data-entry-replay=""
+      variant="ghost"
+      size="sm"
+      minW="44px"
+      minH="44px"
+      color="fg.muted"
+      aria-label={label}
+      title={label}
+      onClick={() => {
+        trackEvent('entry-replay')
+        window.dispatchEvent(new Event('kami:entry-replay'))
+      }}
+    >
+      <LuRotateCcw />
+    </IconButton>
   )
 }
