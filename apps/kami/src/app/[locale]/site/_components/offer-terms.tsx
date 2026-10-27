@@ -72,6 +72,8 @@ export async function OfferTerms() {
                 </Stack>
               ))}
             </SimpleGrid>
+            {/* Цифры на сайте — ориентир, не публичная оферта (KM-033) */}
+            {OFFER.priceFromRub !== null && <Text fontSize="sm" color="fg.muted">{t('terms.priceNote')}</Text>}
           </section>
         </Stack>
       </Container>

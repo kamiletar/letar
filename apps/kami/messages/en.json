@@ -611,7 +611,8 @@
       "stagedValue": "by stages",
       "discountLabel": "For friends",
       "discountValue": "{percent}% off",
-      "discountLink": "Who qualifies"
+      "discountLink": "Who qualifies",
+      "priceNote": "Prices are a guide; the exact amount is agreed after we talk."
     },
     "tagline": [
       "You tell me what you do.",

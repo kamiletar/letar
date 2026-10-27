@@ -615,7 +615,8 @@
       "stagedValue": "по этапам",
       "discountLabel": "Друзьям",
       "discountValue": "скидка {percent}%",
-      "discountLink": "Кому положена"
+      "discountLink": "Кому положена",
+      "priceNote": "Цены ориентировочные, точная сумма — после разговора."
     },
     "tagline": [
       "Вы рассказываете, чем занимаетесь.",
