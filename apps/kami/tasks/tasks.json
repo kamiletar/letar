@@ -1,5 +1,0 @@
-{
-  "project": "kami",
-  "prefix": "KM",
-  "frozen": ["PLAN.md", "PLAN_COMPLETED.md", "PLAN_TESTING.md"]
-}

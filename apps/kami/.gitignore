@@ -1,5 +1,0 @@
-# Сгенерированный Service Worker (ручной, из sw.template.js)
-public/sw.js
-
-# Загруженные файлы (хранятся на сервере, не в git)
-uploads/

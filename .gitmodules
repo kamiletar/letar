@@ -52,3 +52,9 @@
 [submodule "apps/mugcup-e2e"]
 	path = apps/mugcup-e2e
 	url = git@github.com:kamiletar/letar-private-mugcup-e2e.git
+[submodule "apps/kami"]
+	path = apps/kami
+	url = git@github.com:kamiletar/letar-private-kami.git
+[submodule "apps/kami-e2e"]
+	path = apps/kami-e2e
+	url = git@github.com:kamiletar/letar-private-kami-e2e.git

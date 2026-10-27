@@ -1,6 +1,0 @@
-export { ExperienceCard } from './experience-card'
-export { ExperienceSection } from './experience-section'
-export { InfoRow } from './info-row'
-export { PersonalInfoSection } from './personal-info-section'
-export { TechBadge } from './tech-badge'
-export { TechStackSection } from './tech-stack-section'
