@@ -113,7 +113,7 @@ export function MatrixRain({ theme, home = false }: { theme: string | undefined;
         void fonts.then(() => created.markFontsReady(), () => created.markFontsReady())
       }
     }
-    const runner = runnerRef.current
+    let runner = runnerRef.current
     let lastState = runner.state()
     let clockStarted = false
     let ended = runner.phase === 'done'
@@ -162,6 +162,22 @@ export function MatrixRain({ theme, home = false }: { theme: string | undefined;
     }
     zoneRef.current = () => {
       measureZone()
+      draw()
+    }
+    // «Перезапустить вход»: новый runner `full` на тех же часах и атласе, без перезагрузки и без флага `seen`.
+    const onReplay = () => {
+      if (!homeRef.current || motion.matches || active()) { return }
+      const next = createCeremonyRunner('full', dom.counts)
+      runnerRef.current = next
+      runner = next
+      const fonts = document.fonts?.ready ?? Promise.resolve()
+      void fonts.then(() => next.markFontsReady(), () => next.markFontsReady())
+      delete root.dataset.kamiEntryRun
+      root.dataset.kamiEntry = 'full'
+      clockStarted = false
+      ended = false
+      sources = []
+      lastState = next.state()
       draw()
     }
     const skip = () => {
@@ -300,9 +316,14 @@ export function MatrixRain({ theme, home = false }: { theme: string | undefined;
       raf = 0
       last = 0
     }
-    const resume = () => {
+    const resume = (event?: Event) => {
       stop()
       if (disposed || document.hidden) { return }
+      // Восстановление из bfcache посреди входа: сразу финальный кадр, второй таймер и повтор не запускаем.
+      if (event instanceof PageTransitionEvent && event.persisted && active()) {
+        runner.finish()
+        finalize('abort')
+      }
       // Включили reduced-motion посреди церемонии: сразу финальный кадр.
       if (motion.matches && active()) {
         runner.finish()
@@ -320,6 +341,7 @@ export function MatrixRain({ theme, home = false }: { theme: string | undefined;
     motion.addEventListener('change', resume)
     window.addEventListener('keydown', onKey)
     window.addEventListener('kami:entry-skip', skip)
+    window.addEventListener('kami:entry-replay', onReplay)
     window.addEventListener('kami:menu-select', onSelect)
     document.addEventListener('click', onClick, true)
     if (!active() && root.dataset.kamiEntry) { finalize('abort') }
@@ -329,6 +351,7 @@ export function MatrixRain({ theme, home = false }: { theme: string | undefined;
       disposed = true
       window.removeEventListener('keydown', onKey)
       window.removeEventListener('kami:entry-skip', skip)
+      window.removeEventListener('kami:entry-replay', onReplay)
       window.removeEventListener('kami:menu-select', onSelect)
       document.removeEventListener('click', onClick, true)
       stop()

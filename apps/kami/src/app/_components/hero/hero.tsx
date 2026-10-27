@@ -1,3 +1,4 @@
+import { EntryReplay } from '@/app/_components/hero/entry-replay'
 import { EntrySkip } from '@/app/_components/hero/entry-skip'
 import { GameMenu } from '@/app/_components/hero/game-menu'
 import { Link } from '@/i18n/navigation'
@@ -104,6 +105,7 @@ export async function Hero() {
                 hint: t(`hints.${item.key}`),
               }))}
             />
+            <EntryReplay label={t('replayEntry')} />
           </section>
         </Stack>
         <EntrySkip label={t('skipEntry')} />

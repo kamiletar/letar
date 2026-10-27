@@ -50,6 +50,11 @@ html[data-kami-entry]:not([data-kami-entry-run]) [data-entry-menu] {
   animation: kami-entry-failsafe 0s 5s forwards;
 }
 
+/* «Перезапустить вход» (KM-018): пока вход идёт, кнопка скрыта, но место под неё остаётся. */
+html[data-kami-entry] [data-entry-replay] {
+  visibility: hidden;
+}
+
 @keyframes kami-entry-failsafe {
   to {
     opacity: 1;

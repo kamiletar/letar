@@ -48,7 +48,8 @@
     "copied": "Copied",
     "friendsStatus": "The friends area is in development. Friend requests, circles and service access are not available yet. You can contact me directly in the meantime.",
     "write": "Get in touch",
-    "skipEntry": "Skip intro"
+    "skipEntry": "Skip intro",
+    "replayEntry": "Replay intro"
   },
   "hero": {
     "greeting": "Hi, I'm",
