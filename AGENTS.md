@@ -6,7 +6,7 @@
 
 ## Документация
 
-- [Прототипы буквенного фона Kami](/.claude/docs/kami-letter-motion-prototypes.md) — три варианта, непрерывный цикл, reduced-motion и границы замеров Canvas.
+- Личный сайт Kami (`apps/kami`) — приватный submodule: его доки и справка навыка лежат внутри (`apps/kami/docs/`, `apps/kami/.claude-skill/`).
 
 - [SSR-скрипты и порядок popstate](/.claude/docs/react-ssr-scripts-and-popstate-order.md) — React 19 при смене layout, CookieBanner, next-themes и ранний корневой обработчик истории.
 - [Лишний JS публичного root](/.claude/docs/nextjs-public-client-barrel-performance.md) — узкие workspace-импорты, Chakra optimizePackageImports, prefetch и честное сравнение Lighthouse без нарушения SSE.

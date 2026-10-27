@@ -108,8 +108,6 @@
 
 ## Формы, UI, компоненты
 
-- [kami-letter-motion-prototypes](/.claude/docs/kami-letter-motion-prototypes.md) — при выборе анимации Kami: три сопоставимых Canvas-прототипа, неподвижное меню, замеры и ограничения перед KM-016.
-
 - [authoring-save-and-media-ux](/.claude/docs/authoring-save-and-media-ux.md) — при создании редактора: продолжение после сохранения, аудитория, авторские переходы, общий Dropzone для обложки/аудио и сохранность текущих правок
 
 - [forms](/.claude/docs/forms.md) ⭐
