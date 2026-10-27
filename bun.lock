@@ -991,7 +991,7 @@
     },
     "apps/studio": {
       "name": "@letar/studio",
-      "version": "0.79.0",
+      "version": "0.85.14",
       "dependencies": {
         "@letar/admin-ui": "workspace:*",
         "@letar/consent": "workspace:*",
@@ -1020,7 +1020,7 @@
     },
     "apps/studio-e2e": {
       "name": "@letar/studio-e2e",
-      "version": "0.0.1",
+      "version": "0.0.3",
     },
     "apps/svoichuzhie": {
       "name": "@letar/svoichuzhie",
