@@ -1,13 +1,13 @@
 ---
 id: KM-036
 title: Короткая /site/ без цен и кнопка «Цены и заявка на сайте студии» с меткой источника
-status: ready
+status: doing
 size: M
 area: content
 priority: 2
 blocked_by:
   - KM-039
-owner: ""
+owner: kami-dev-site
 stage: Короткая /site/ со ссылкой в studio
 source: Решение владельца 2026-10-27 (прайс ведёт studio, KM-033)
 created: 2026-10-27
@@ -70,5 +70,6 @@ updated: 2026-10-27
   если цены оттуда пропали, кнопка ведёт на `/zayavka/` с подписью «Заявка на сайте студии».
   Сторона studio (пакеты, запись источника в `Lead`) этой задачей не делается.
 - 2026-10-27: e2e-спек назвать 10-site-to-studio.spec.ts: номер 09 занят спеком 09-theme-switch из KM-038.
+- 2026-10-27: KM-039 закрыта и проверена (e2e 39/39 chromium). Исполнитель claude-sonnet-5-5, medium: решения приняты, правка по спецификации и e2e. Имя Agent Mail kami-dev-site. Спек 10-site-to-studio.spec.ts. Номера 11 и 12 заняты KM-039. Перед правкой ещё раз проверить studio /uslugi/ (только чтение).
 
 ## Итог
