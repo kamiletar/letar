@@ -13,5 +13,5 @@
     { "dir": "libs/form-mcp", "tag": "form-mcp" }
   ],
   "privateNamesExtra": ["premium-rosstil", "imot"],
-  "privateNamesAllow": []
+  "privateNamesAllow": ["kami"]
 }
