@@ -1,4 +1,5 @@
 import { expect, type Page, test } from '@playwright/test'
+import { confirmLanguage } from './support/entry'
 
 /**
  * Смена темы без перезагрузки (KM-038): одно нажатие кнопки в шапке перекрашивает всё сразу.
@@ -22,6 +23,8 @@ async function openIn(page: Page, path: string, mode: Mode, { seen = true } = {}
   }, [mode, seen] as const)
   await page.goto(path)
   await expect(page.locator('html')).toHaveClass(new RegExp(`\\b${mode}\\b`))
+  // Первый заход (KM-039): экран языка и вход, баннер cookie скрыт до конца входа, сравнивать нечего.
+  if (!seen) { return }
   // Баннер cookie появляется после монтирования: он тоже должен попасть в сравнение.
   await expect(page.getByRole('button', { name: 'Принять все' })).toBeVisible()
   await settle(page)
@@ -184,10 +187,12 @@ test.describe('Смена темы без перезагрузки', () => {
   })
 
   test('9.3 — главная во время входа: Canvas и фон меняются при клике по теме', async ({ page }) => {
-    // seen=false: первый заход, играет полная церемония. Ждём старта часов, затем нажимаем кнопку темы.
+    // seen=false: первый заход, играет полная церемония. Подтверждаем язык, ждём старта часов; значки в углу
+    // (в них кнопка темы) проявляются вместе с меню в конце входа — нажимаем её, пока вход ещё идёт.
     await openIn(page, '/', 'dark', { seen: false })
-    await expect(page.locator('html')).toHaveAttribute('data-kami-entry-run', '1')
+    await confirmLanguage(page)
     await expectCanvas(page, 'dark')
+    await expect(page.getByRole('button', { name: 'Переключить тему' }).first()).toBeVisible({ timeout: 10_000 })
     await toggleTheme(page)
     await expect(page.locator('html')).toHaveClass(/\blight\b/)
     await expectCanvas(page, 'light')

@@ -1,24 +1,20 @@
 import { expect, type Page, test } from '@playwright/test'
+import { confirmLanguage, markEntrySeen, waitForClock } from './support/entry'
 
 /**
- * Церемония входа на главную (KM-030): тайминг, пропуск, финальный кадр без JS и при reduced-motion.
- * Часы церемонии и конец ловим по атрибутам `<html>`: `data-kami-entry-run` ставится на старте
- * часов, `data-kami-entry` снимается в конце. В скрытой панели Claude Browser rAF не идёт —
+ * Церемония входа на главную (KM-030, KM-039): экран языка, тайминг, пропуск, финальный кадр без JS и при
+ * reduced-motion. Часы церемонии и конец ловим по атрибутам `<html>`: `data-kami-entry-run` ставится на старте
+ * часов (после выбора языка), `data-kami-entry` снимается в конце. В скрытой панели Claude Browser rAF не идёт —
  * проверка только через Playwright.
  */
 
 /** Фиксирует моменты старта и конца церемонии и сдвиг раскладки до начала теста. */
 async function installProbe(page: Page, mode: 'full' | 'short' = 'full') {
-  await page.addInitScript((flag) => {
+  // Короткая версия — настоящая: флаг «вход уже показывали» читает ранний скрипт.
+  if (mode === 'short') { await markEntrySeen(page) }
+  await page.addInitScript(() => {
     const probe = { run: null as number | null, end: null as number | null, skipAt: null as number | null, cls: 0 }
     ;(window as unknown as { __entry: typeof probe }).__entry = probe
-    if (flag === 'short') {
-      // Решение «полная или короткая» принимает ранний скрипт; здесь подменяем его результат.
-      const set = Element.prototype.setAttribute
-      Element.prototype.setAttribute = function(name: string, value: string) {
-        return set.call(this, name, name === 'data-kami-entry' && value === 'full' ? 'short' : value)
-      }
-    }
     // Момент жеста пропуска: от него считаем время до финального кадра, не завися от задержек Playwright.
     const markSkip = () => {
       probe.skipAt ??= performance.now()
@@ -45,13 +41,20 @@ async function installProbe(page: Page, mode: 'full' | 'short' = 'full') {
       })
       wait.observe(document, { childList: true })
     }
-  }, mode)
+  })
 }
 
 const readProbe = (page: Page) =>
   page.evaluate(() =>
-    (window as unknown as { __entry: { run: number | null; end: number | null; cls: number } }).__entry
+    (window as unknown as { __entry: { run: number | null; end: number | null; skipAt: number | null; cls: number } })
+      .__entry
   )
+
+/** Сбрасывает момент жеста: Enter на экране языка не считается пропуском. */
+const resetSkip = (page: Page) =>
+  page.evaluate(() => {
+    ;(window as unknown as { __entry: { skipAt: number | null } }).__entry.skipAt = null
+  })
 
 const waitForEnd = (page: Page) =>
   page.waitForFunction(
@@ -59,9 +62,6 @@ const waitForEnd = (page: Page) =>
     null,
     { timeout: 15_000 },
   )
-
-const waitForClock = (page: Page) =>
-  page.waitForFunction(() => document.documentElement.dataset.kamiEntryRun === '1', null, { timeout: 15_000 })
 
 const finalState = (page: Page) =>
   page.evaluate(() => {
@@ -80,24 +80,26 @@ test.describe('Церемония входа на главной', () => {
   test.describe.configure({ mode: 'default', retries: 2 })
 
   test.describe('со скриптами и движением', () => {
-    test('6.1 — полная версия: 4,2 ± 0,3 с, без сдвига раскладки', async ({ page }) => {
+    test('6.1 — полная версия после выбора языка: 5,6 ± 0,3 с, без сдвига раскладки', async ({ page }) => {
       await installProbe(page)
       await page.setViewportSize({ width: 390, height: 844 })
       await page.goto('/')
+      await confirmLanguage(page)
       await waitForEnd(page)
       const probe = await readProbe(page)
       const seconds = ((probe.end ?? 0) - (probe.run ?? 0)) / 1000
-      expect(seconds).toBeGreaterThan(3.9)
-      expect(seconds).toBeLessThan(4.5)
+      expect(seconds).toBeGreaterThan(5.3)
+      expect(seconds).toBeLessThan(5.9)
       expect(probe.cls).toBeLessThan(.1)
       const state = await finalState(page)
       expect(state.attr).toBeNull()
       expect([...state.letters, ...state.role, ...state.menu].every((value) => value === 1)).toBe(true)
     })
 
-    test('6.2 — короткая версия: 1,5 ± 0,2 с', async ({ page }) => {
+    test('6.2 — короткая версия: 1,5 ± 0,2 с, экрана языка нет', async ({ page }) => {
       await installProbe(page, 'short')
       await page.goto('/')
+      await expect(page.locator('[data-entry-language]')).toBeHidden()
       await waitForEnd(page)
       const probe = await readProbe(page)
       const seconds = ((probe.end ?? 0) - (probe.run ?? 0)) / 1000
@@ -105,32 +107,35 @@ test.describe('Церемония входа на главной', () => {
       expect(seconds).toBeLessThan(1.7)
     })
 
-    test('6.3 — boot-лог печатается с реальными статусами, имя собирается раньше меню', async ({ page }) => {
+    test('6.3 — boot-лог печатается по расписанию: строки с ok, полоса прогресса, без «позже»', async ({ page }) => {
       await installProbe(page)
       await page.goto('/')
-      await waitForClock(page)
-      await expect(page.locator('[data-entry-log] div').filter({ hasText: /^глифы … ok/ })).toBeVisible({
-        timeout: 4000,
-      })
-      await expect(page.locator('[data-entry-log]')).toContainText('шрифты … ok')
+      await confirmLanguage(page)
+      const log = page.locator('[data-entry-log]')
+      await expect(log.locator('div').filter({ hasText: /^глифы … ok/ })).toBeVisible({ timeout: 4000 })
+      await expect(log).toContainText('шрифты … ok')
+      await expect(log).toContainText('язык … ru')
+      await expect(log.locator('[data-entry-bar]')).toContainText(/\[█*░*\] \d+%/)
+      await expect(log).not.toContainText(/позже|later/i)
       await waitForEnd(page)
     })
 
-    for (const how of ['кнопка', 'Escape', 'клик по пустому месту'] as const) {
-      test(`6.4 — пропуск (${how}): финальный кадр за ≤0,6 с и без перехода по ссылке`, async ({ page }) => {
+    for (const how of ['Escape', 'клик по пустому месту'] as const) {
+      test(`6.4 — пропуск (${how}): финальный кадр за ≤0,6 с, без перехода, кнопки «Пропустить» нет`, async ({ page }) => {
         await installProbe(page)
         await page.setViewportSize({ width: 1440, height: 900 })
         await page.goto('/')
-        await waitForClock(page)
+        await confirmLanguage(page)
         await page.waitForTimeout(900)
+        await resetSkip(page)
         const before = page.url()
-        if (how === 'кнопка') { await page.getByRole('button', { name: /Пропустить|Skip/ }).click() }
         if (how === 'Escape') { await page.keyboard.press('Escape') }
-        if (how === 'клик по пустому месту') { await page.mouse.click(1000, 600) }
+        else { await page.mouse.click(1000, 600) }
         await waitForEnd(page)
         const probe = await readProbe(page)
         expect(((probe.end ?? 0) - (probe.skipAt ?? 0)) / 1000).toBeLessThan(.6)
         expect(page.url()).toBe(before)
+        await expect(page.getByRole('button', { name: /Пропустить|Skip/ })).toHaveCount(0)
       })
     }
 
@@ -138,7 +143,7 @@ test.describe('Церемония входа на главной', () => {
       await installProbe(page)
       await page.setViewportSize({ width: 1440, height: 900 })
       await page.goto('/')
-      await waitForClock(page)
+      await confirmLanguage(page)
       await page.waitForTimeout(1000)
       const item = page.locator('[data-testid="home-menu"] nav a').nth(1)
       await item.click({ force: true })
@@ -151,34 +156,87 @@ test.describe('Церемония входа на главной', () => {
     test('6.6 — скринридеру остаётся цельный h1, слои церемонии скрыты', async ({ page }) => {
       await page.goto('/')
       await expect(page.getByRole('heading', { level: 1, name: 'Kami' })).toBeAttached()
-      await expect(page.locator('[data-entry-log]')).toHaveAttribute('aria-hidden', 'true')
+      await expect(page.locator('[aria-hidden="true"] [data-entry-log]')).toBeAttached()
       await expect(page.locator('h1 [data-entry-letter]').first()).toBeAttached()
       const hiddenLetters = await page.evaluate(() =>
         document.querySelector('[data-entry-letter]')?.closest('[aria-hidden="true"]') !== null
       )
       expect(hiddenLetters).toBe(true)
     })
+
+    test('6.9 — экран языка: часы стоят до выбора, стрелки меняют пункт, Enter запускает загрузку', async ({ page }) => {
+      await installProbe(page)
+      await page.goto('/')
+      const dialog = page.locator('[data-entry-language]')
+      await expect(dialog).toBeVisible()
+      await expect(dialog.getByRole('radio', { name: /Русский/ })).toHaveAttribute('aria-checked', 'true')
+      await page.waitForTimeout(1500)
+      expect((await readProbe(page)).run).toBeNull()
+      await expect(page.locator('html')).toHaveAttribute('data-kami-entry', 'full')
+      await expect(async () => {
+        await page.keyboard.press('ArrowDown')
+        await expect(dialog.getByRole('radio', { name: /English/ })).toHaveAttribute('aria-checked', 'true', {
+          timeout: 500,
+        })
+      }).toPass({ timeout: 10_000 })
+      await page.keyboard.press('ArrowUp')
+      await expect(dialog.getByRole('radio', { name: /Русский/ })).toHaveAttribute('aria-checked', 'true')
+      await page.keyboard.press('Enter')
+      await waitForClock(page)
+      await expect(dialog).toBeHidden()
+      await waitForEnd(page)
+    })
+
+    test('6.10 — выбор English переносит вход на /en/ без второго экрана языка', async ({ page }) => {
+      await installProbe(page)
+      await page.goto('/')
+      await expect(page.locator('[data-entry-language]')).toBeVisible()
+      await expect(async () => {
+        await page.locator('[data-entry-language] [data-language="en"]').click()
+        await expect(page).toHaveURL(/\/en\/$/, { timeout: 1000 })
+      }).toPass({ timeout: 15_000 })
+      await waitForClock(page)
+      await expect(page.locator('[data-entry-language]')).toBeHidden()
+      await expect(page.locator('html')).toHaveAttribute('lang', 'en')
+      await waitForEnd(page)
+      await expect(page.locator('[data-testid="home-menu"] nav a').first()).toContainText(/Order a website/i)
+    })
+
+    test('6.11 — Escape на экране языка сразу даёт финальный кадр', async ({ page }) => {
+      await installProbe(page)
+      await page.goto('/')
+      await expect(page.locator('[data-entry-language]')).toBeVisible()
+      await expect(async () => {
+        await page.keyboard.press('Escape')
+        await page.waitForFunction(() => !document.documentElement.dataset.kamiEntry, null, { timeout: 1000 })
+      }).toPass({ timeout: 15_000 })
+      await expect(page.locator('[data-entry-language]')).toBeHidden()
+      const state = await finalState(page)
+      expect([...state.letters, ...state.role, ...state.menu].every((value) => value === 1)).toBe(true)
+    })
   })
 
   test.describe('reduced-motion', () => {
     test.use({ reducedMotion: 'reduce' })
-    test('6.7 — сразу финальный кадр, часы не запускаются', async ({ page }) => {
+    test('6.7 — сразу финальный кадр, экрана языка и часов нет', async ({ page }) => {
       await page.goto('/')
       await page.waitForTimeout(800)
       const state = await finalState(page)
       expect(state.attr).toBeNull()
       expect([...state.letters, ...state.role, ...state.menu].every((value) => value === 1)).toBe(true)
+      await expect(page.locator('[data-entry-language]')).toBeHidden()
       await expect(page.getByRole('button', { name: /Пропустить|Skip/ })).toHaveCount(0)
     })
   })
 
   test.describe('без JavaScript', () => {
     test.use({ javaScriptEnabled: false })
-    test('6.8 — меню, имя и роль видны в финальном кадре', async ({ page }) => {
+    test('6.8 — меню, имя и роль видны в финальном кадре, экрана языка нет', async ({ page }) => {
       await page.goto('/')
       const state = await finalState(page)
       expect(state.attr).toBeNull()
       expect([...state.letters, ...state.role, ...state.menu].every((value) => value === 1)).toBe(true)
+      await expect(page.locator('[data-entry-language]')).toBeHidden()
     })
   })
 })

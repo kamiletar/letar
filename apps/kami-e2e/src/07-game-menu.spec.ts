@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { confirmLanguage } from './support/entry'
 
 /**
  * Главное меню как стартовое меню игры (KM-031): порядок, подписи, маркер, стрелки, выбор,
@@ -57,10 +58,10 @@ test.describe('Игровое меню главной', () => {
   })
 
   test.describe('с движением', () => {
-    test('7.5 — клик по видимому пункту на ~4 с ведёт на страницу, по невидимому на ~1 с — нет', async ({ page }) => {
+    test('7.5 — клик по видимому пункту на ~5 с ведёт на страницу, по невидимому на ~1 с — нет', async ({ page }) => {
       await page.setViewportSize({ width: 1440, height: 900 })
       await page.goto('/')
-      await page.waitForFunction(() => document.documentElement.dataset.kamiEntryRun === '1', null, { timeout: 15_000 })
+      await confirmLanguage(page)
       await page.waitForTimeout(900)
       await menu(page).nth(4).click({ force: true })
       await expect(page).not.toHaveURL(/friends/)

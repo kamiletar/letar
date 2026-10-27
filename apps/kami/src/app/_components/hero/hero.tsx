@@ -11,7 +11,10 @@ import packageJson from '../../../../package.json'
 /** Имя, из которого церемония собирает буквы; для скринридера остаётся цельный текст. */
 const NAME = 'Kami'
 
-/** Высота cookie-баннера (публикует сам баннер, 0 — если его нет): центр и нижние строки поднимаются над ним. */
+/**
+ * Высота cookie-баннера (публикует сам баннер, 0 — если его нет): центр и нижние строки поднимаются над ним.
+ * Подъём делаем через `transform`, а не отступами: появление баннера не должно сдвигать раскладку (CLS).
+ */
 const BANNER = 'var(--letar-cookie-banner-height, 0px)'
 
 /**
@@ -52,9 +55,16 @@ export async function Hero() {
         align="center"
         px={{ base: 6, md: 12 }}
         pt={14}
-        pb={`calc(5.5rem + ${BANNER})`}
+        pb="5.5rem"
       >
-        <Stack asChild gap={{ base: 6, md: 8 }} align="center" my="auto" w="full">
+        <Stack
+          asChild
+          gap={{ base: 6, md: 8 }}
+          align="center"
+          my="auto"
+          w="full"
+          style={{ transform: `translateY(calc(${BANNER} / -2))`, transition: 'transform .2s ease-out' }}
+        >
           <section aria-labelledby="home-title" data-testid="home-menu">
             <Box textAlign="center">
               <Heading
@@ -134,7 +144,16 @@ export async function Hero() {
         />
       </Box>
 
-      <Stack position="absolute" left={0} right={0} bottom={BANNER} gap={0} align="stretch" px={4}>
+      <Stack
+        position="absolute"
+        left={0}
+        right={0}
+        bottom={0}
+        gap={0}
+        align="stretch"
+        px={4}
+        style={{ transform: `translateY(calc(${BANNER} * -1))`, transition: 'transform .2s ease-out' }}
+      >
         <EntryHints
           labels={{ desktop: t('keys.desktop'), desktopDone: t('keys.desktopDone'), touch: t('keys.touch') }}
         />

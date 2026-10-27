@@ -1,7 +1,8 @@
 import { expect, type Page, test } from '@playwright/test'
+import { confirmLanguage, markEntrySeen } from './support/entry'
 
 /**
- * Правило повтора входа (KM-018): первый заход — `full`, следующие заходы и reload — `short`,
+ * Правило повтора входа (KM-018, KM-039): первый заход — `full` с экраном языка, следующие заходы и reload — `short`,
  * Back/Forward и bfcache — без входа, клиентские переходы вход не играют, «Перезапустить вход»
  * проигрывает `full` без перезагрузки. Режим решает ранний скрипт; здесь его результат читаем
  * по истории значений атрибута `data-kami-entry` на `<html>`.
@@ -76,7 +77,6 @@ test.describe('Повтор входа на главной', () => {
 
     test('8.2 — второй прямой заход и reload играют short', async ({ page }) => {
       await page.goto('/')
-      await waitForClock(page)
       await page.goto('/')
       expect((await readProbe(page)).seen[0]).toBe('short')
       await waitForEnd(page)
@@ -93,6 +93,7 @@ test.describe('Повтор входа на главной', () => {
     })
 
     test('8.4 — главная → /about/ полной загрузкой → Back: входа нет', async ({ page }) => {
+      await markEntrySeen(page)
       await page.goto('/')
       await waitForEnd(page)
       await page.goto('/about/')
@@ -108,6 +109,7 @@ test.describe('Повтор входа на главной', () => {
     })
 
     test('8.5 — Back после Forward снова на главную: входа нет', async ({ page }) => {
+      await markEntrySeen(page)
       await page.goto('/')
       await waitForEnd(page)
       await page.goto('/about/')
@@ -137,9 +139,9 @@ test.describe('Повтор входа на главной', () => {
       expect((await finalState(page)).every((value) => value === 1)).toBe(true)
     })
 
-    test('8.7 — «Перезапустить вход» проигрывает full без перезагрузки, во время входа скрыта', async ({ page }) => {
+    test('8.7 — «Перезапустить вход» проигрывает full без перезагрузки и без экрана языка, во время входа скрыта', async ({ page }) => {
       await page.goto('/')
-      await waitForClock(page)
+      await confirmLanguage(page)
       await expect(replay(page)).toBeHidden()
       await waitForEnd(page)
       await expect(replay(page)).toBeVisible()
@@ -149,6 +151,7 @@ test.describe('Повтор входа на главной', () => {
       await replay(page).click()
       await expect.poll(() => attr(page)).toBe('full')
       await waitForClock(page)
+      await expect(page.locator('[data-entry-language]')).toBeHidden()
       await expect(replay(page)).toBeHidden()
       await waitForEnd(page)
       const after = await readProbe(page)
@@ -162,7 +165,7 @@ test.describe('Повтор входа на главной', () => {
 
     test('8.8 — bfcache: pageshow с persisted посреди входа сразу даёт финальный кадр', async ({ page }) => {
       await page.goto('/')
-      await waitForClock(page)
+      await confirmLanguage(page)
       // Обычный pageshow без persisted ничего не меняет.
       await page.evaluate(() => window.dispatchEvent(new PageTransitionEvent('pageshow', { persisted: false })))
       await page.waitForTimeout(200)
@@ -173,6 +176,24 @@ test.describe('Повтор входа на главной', () => {
       await page.waitForTimeout(1000)
       expect((await readProbe(page)).run).toBe(1)
       expect(await attr(page)).toBeNull()
+    })
+  })
+
+  test.describe('метка продолжения входа после смены языка', () => {
+    test('8.12 — свежая метка пропускает экран языка, старая — нет', async ({ page }) => {
+      await page.addInitScript(() => {
+        if (location.hash === '#fresh') { sessionStorage.setItem('kami.entry.resume', String(Date.now())) }
+        if (location.hash === '#stale') { sessionStorage.setItem('kami.entry.resume', String(Date.now() - 60_000)) }
+      })
+      await page.goto('/en/#fresh')
+      expect(await attr(page)).toBe('full')
+      await expect(page.locator('html')).not.toHaveAttribute('data-kami-entry-lang', /.*/)
+      await waitForClock(page)
+      await page.goto('/en/#stale')
+      await page.evaluate(() => localStorage.clear())
+      await page.reload()
+      await expect(page.locator('html')).toHaveAttribute('data-kami-entry-lang', /.*/)
+      await expect(page.locator('[data-entry-language]')).toBeVisible()
     })
   })
 
