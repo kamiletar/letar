@@ -1,0 +1,29 @@
+{
+  "mode": "Текущий агент: изолированный dry-run, без независимой LLM-оценки",
+  "results": [
+    {
+      "id": 1,
+      "passed": true,
+      "evidence": "Кандидат: pin-gate 1; восстановление: pin-gate 0",
+      "limits": "Replay измерений LT-086, новая БД/ORM не запускалась"
+    },
+    {
+      "id": 2,
+      "passed": true,
+      "evidence": "Реальные ESM/CJS memo и отрицательный контроль; удалён только fixture-патч",
+      "version": "3.38.0"
+    },
+    {
+      "id": 3,
+      "passed": true,
+      "successful": [
+        "beta:build",
+        "gamma:build"
+      ],
+      "unverified": [
+        "alpha:build"
+      ],
+      "fullGateGreen": false
+    }
+  ]
+}
