@@ -48,6 +48,7 @@ node_modules
 /coverage
 /libpeerconnection.log
 npm-debug.log
+debug.log
 yarn-error.log
 testem.log
 /typings
