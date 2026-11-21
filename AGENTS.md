@@ -38,6 +38,7 @@
 - [archetest: восстановление теста](/apps/archetest/docs/quiz-progress-recovery.md) — локальный черновик отдельно от очереди отправки, исходная выборка и изоляция аккаунтов.
 
 - [Гонки взаимных post-update политик](/.claude/docs/zenstack-cross-table-post-update-write-skew.md) — общая блокировка связанных строк, прямой ORM и проверка на двух соединениях.
+- [Регрессия post-update ZenStack 3.10.3](/.claude/docs/zenstack-post-update-null-comparison-regression.md) — обход запрета смены nullable роли, сравнительное репро и пины семейства 3.9.8.
 
 - [forms 3.0: подключаемые поля и optional peer](/.claude/docs/forms-pluggable-fields-optional-peers.md) — ключ `extraFields`, строгий `AppForm.Field`, правило «ядро не тянет optional peer» и smoke без TipTap/dnd-kit.
 

@@ -79,6 +79,7 @@
 ## База данных и ZenStack
 
 - [zenstack-cross-table-post-update-write-skew](/.claude/docs/zenstack-cross-table-post-update-write-skew.md) ⚠️ когда инвариант зависит от двух таблиц: взаимные post-update проверки при READ COMMITTED видят старые данные; общая блокировка родителя для прямого ORM, BEFORE-триггер, deadlock и тест на двух соединениях
+- [zenstack-post-update-null-comparison-regression](/.claude/docs/zenstack-post-update-null-comparison-regression.md) — ZenStack 3.10.3 разрешает смену nullable роли вопреки post-update deny; репро против 3.9.8 и защитные пины.
 
 - [database](/.claude/docs/database.md)
 - [seed-scripts](/.claude/docs/seed-scripts.md) идемпотентный `prisma/seed.ts`

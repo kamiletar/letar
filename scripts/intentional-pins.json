@@ -29,7 +29,9 @@
     },
     {
       "package": "@serwist/next",
-      "override": { "zod": "4.6.7" },
+      "override": {
+        "zod": "4.6.7"
+      },
       "since": "2026-10-24",
       "reason": "Тот же security override Zod, что у @serwist/build: фиксированная зависимость Serwist 9.5.13 на уязвимую 4.6.5.",
       "doc": ".claude/docs/root-pin-peer-drift.md",
@@ -37,7 +39,9 @@
     },
     {
       "package": "@serwist/webpack-plugin",
-      "override": { "zod": "4.6.7" },
+      "override": {
+        "zod": "4.6.7"
+      },
       "since": "2026-10-24",
       "reason": "Тот же security override Zod, что у @serwist/build: фиксированная зависимость Serwist 9.5.13 на уязвимую 4.6.5.",
       "doc": ".claude/docs/root-pin-peer-drift.md",
@@ -55,15 +59,6 @@
     }
   ],
   "pins": [
-    {
-      "package": "better-call",
-      "version": "1.4.4",
-      "field": "dependencies",
-      "since": "2026-10-03",
-      "reason": "better-auth и @better-auth/oauth-provider держат peer better-call ровно 1.4.x (сейчас 1.4.2). Корневой ^1.4.1 разводит копии: плагины (jwt, oauthProvider, nextCookies) типизированы по 1.4.0, а betterAuth() в libs/auth — по 1.4.1, и typecheck:tsgo падает TS2322 'not assignable to type undefined' во всех потребителях @letar/auth.",
-      "doc": "PLAN-INFRA-*.md — прогон /infra:deps-update 2026-10-03",
-      "unpinWhen": "better-auth выпустит релиз с peer better-call >=1.4.1; тогда заменить на диапазон и удалить запись одним коммитом."
-    },
     {
       "package": "web-ifc",
       "version": "0.0.77",
@@ -161,6 +156,87 @@
       "reason": "Дедуп с react-native (0.87.1): его dependencies-запись требует hermes-compiler ТОЧНО \"250829098.0.17\" (без диапазона) — bun.lock подтверждает `\"react-native\": [\"react-native@0.87.1\", \"\", { \"dependencies\": { ..., \"hermes-compiler\": \"250829098.0.17\", ... } }]`. Та же схема, что у jiti/nextron: caret на корне рискует разъехаться с точным требованием react-native при следующем bun update, разводя на две физические копии нативного компилятора — для Hermes расхождение версии рантайма и компилятора не просто дубль в node_modules, а потенциально несовместимый байткод при сборке APK. animatrona-mobile/animatrona-tv уже держат СВОИ отдельные точные копии на 250829098.0.16 (другая версия react-native в этих приложениях) — подтверждает, что версия жёстко следует за конкретным react-native, не общий диапазон.",
       "doc": "PLAN-INFRA-6.md §143 § Разбор unexplained-пинов",
       "unpinWhen": "react-native перейдёт на диапазон вместо точного hermes-compiler в своей dependencies, либо появится задокументированное решение владельца, что расхождение версий компилятора и рантайма Hermes безопасно (маловероятно — нативный байткод)."
+    },
+    {
+      "package": "@zenstackhq/orm",
+      "version": "3.9.8",
+      "field": "dependencies",
+      "since": "2026-11-21",
+      "reason": "ZenStack 3.10.3 разрешает смену nullable platformRole с null на OPERATOR вопреки @@deny post-update; тот же запрос на 3.9.8 отклоняется. Семейство закреплено согласованно, включая overrides для workspace-потребителей.",
+      "doc": ".claude/docs/zenstack-post-update-null-comparison-regression.md",
+      "unpinWhen": "Новая версия отклоняет смену роли null → OPERATOR в репро и тесте Flora policies.int.spec.ts. Снять пины и overrides всего семейства вместе, закрыть LT-087."
+    },
+    {
+      "package": "@zenstackhq/plugin-policy",
+      "version": "3.9.8",
+      "field": "dependencies",
+      "since": "2026-11-21",
+      "reason": "ZenStack 3.10.3 разрешает смену nullable platformRole с null на OPERATOR вопреки @@deny post-update; тот же запрос на 3.9.8 отклоняется. Семейство закреплено согласованно, включая overrides для workspace-потребителей.",
+      "doc": ".claude/docs/zenstack-post-update-null-comparison-regression.md",
+      "unpinWhen": "Новая версия отклоняет смену роли null → OPERATOR в репро и тесте Flora policies.int.spec.ts. Снять пины и overrides всего семейства вместе, закрыть LT-087."
+    },
+    {
+      "package": "@zenstackhq/schema",
+      "version": "3.9.8",
+      "field": "dependencies",
+      "since": "2026-11-21",
+      "reason": "ZenStack 3.10.3 разрешает смену nullable platformRole с null на OPERATOR вопреки @@deny post-update; тот же запрос на 3.9.8 отклоняется. Семейство закреплено согласованно, включая overrides для workspace-потребителей.",
+      "doc": ".claude/docs/zenstack-post-update-null-comparison-regression.md",
+      "unpinWhen": "Новая версия отклоняет смену роли null → OPERATOR в репро и тесте Flora policies.int.spec.ts. Снять пины и overrides всего семейства вместе, закрыть LT-087."
+    },
+    {
+      "package": "@zenstackhq/server",
+      "version": "3.9.8",
+      "field": "dependencies",
+      "since": "2026-11-21",
+      "reason": "ZenStack 3.10.3 разрешает смену nullable platformRole с null на OPERATOR вопреки @@deny post-update; тот же запрос на 3.9.8 отклоняется. Семейство закреплено согласованно, включая overrides для workspace-потребителей.",
+      "doc": ".claude/docs/zenstack-post-update-null-comparison-regression.md",
+      "unpinWhen": "Новая версия отклоняет смену роли null → OPERATOR в репро и тесте Flora policies.int.spec.ts. Снять пины и overrides всего семейства вместе, закрыть LT-087."
+    },
+    {
+      "package": "@zenstackhq/zod",
+      "version": "3.9.8",
+      "field": "dependencies",
+      "since": "2026-11-21",
+      "reason": "ZenStack 3.10.3 разрешает смену nullable platformRole с null на OPERATOR вопреки @@deny post-update; тот же запрос на 3.9.8 отклоняется. Семейство закреплено согласованно, включая overrides для workspace-потребителей.",
+      "doc": ".claude/docs/zenstack-post-update-null-comparison-regression.md",
+      "unpinWhen": "Новая версия отклоняет смену роли null → OPERATOR в репро и тесте Flora policies.int.spec.ts. Снять пины и overrides всего семейства вместе, закрыть LT-087."
+    },
+    {
+      "package": "@zenstackhq/cli",
+      "version": "3.9.8",
+      "field": "devDependencies",
+      "since": "2026-11-21",
+      "reason": "ZenStack 3.10.3 разрешает смену nullable platformRole с null на OPERATOR вопреки @@deny post-update; тот же запрос на 3.9.8 отклоняется. Семейство закреплено согласованно, включая overrides для workspace-потребителей.",
+      "doc": ".claude/docs/zenstack-post-update-null-comparison-regression.md",
+      "unpinWhen": "Новая версия отклоняет смену роли null → OPERATOR в репро и тесте Flora policies.int.spec.ts. Снять пины и overrides всего семейства вместе, закрыть LT-087."
+    },
+    {
+      "package": "@zenstackhq/language",
+      "version": "3.9.8",
+      "field": "devDependencies",
+      "since": "2026-11-21",
+      "reason": "ZenStack 3.10.3 разрешает смену nullable platformRole с null на OPERATOR вопреки @@deny post-update; тот же запрос на 3.9.8 отклоняется. Семейство закреплено согласованно, включая overrides для workspace-потребителей.",
+      "doc": ".claude/docs/zenstack-post-update-null-comparison-regression.md",
+      "unpinWhen": "Новая версия отклоняет смену роли null → OPERATOR в репро и тесте Flora policies.int.spec.ts. Снять пины и overrides всего семейства вместе, закрыть LT-087."
+    },
+    {
+      "package": "@zenstackhq/sdk",
+      "version": "3.9.8",
+      "field": "devDependencies",
+      "since": "2026-11-21",
+      "reason": "ZenStack 3.10.3 разрешает смену nullable platformRole с null на OPERATOR вопреки @@deny post-update; тот же запрос на 3.9.8 отклоняется. Семейство закреплено согласованно, включая overrides для workspace-потребителей.",
+      "doc": ".claude/docs/zenstack-post-update-null-comparison-regression.md",
+      "unpinWhen": "Новая версия отклоняет смену роли null → OPERATOR в репро и тесте Flora policies.int.spec.ts. Снять пины и overrides всего семейства вместе, закрыть LT-087."
+    },
+    {
+      "package": "@zenstackhq/tanstack-query",
+      "version": "3.9.8",
+      "field": "devDependencies",
+      "since": "2026-11-21",
+      "reason": "ZenStack 3.10.3 разрешает смену nullable platformRole с null на OPERATOR вопреки @@deny post-update; тот же запрос на 3.9.8 отклоняется. Семейство закреплено согласованно, включая overrides для workspace-потребителей.",
+      "doc": ".claude/docs/zenstack-post-update-null-comparison-regression.md",
+      "unpinWhen": "Новая версия отклоняет смену роли null → OPERATOR в репро и тесте Flora policies.int.spec.ts. Снять пины и overrides всего семейства вместе, закрыть LT-087."
     }
   ],
   "lockstepGroups": [
