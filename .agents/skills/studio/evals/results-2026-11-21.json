@@ -1,0 +1,45 @@
+{
+  "skill_name": "studio",
+  "date": "2026-11-21",
+  "method": "manual_walkthrough_by_author",
+  "scope": [
+    8,
+    9,
+    10
+  ],
+  "limitations": "Три новых сценария выполнены основным исполнителем как ручные разборы по навыку и текущим исходникам. Это не независимый запуск модели и не повторная runtime-проверка приложения. Сценарии 1–7 в этом дополнении не перезапускались; их прежние результаты не изменены.",
+  "results": [
+    {
+      "id": 8,
+      "response": "Сначала routing.ts, docs/modern-pages.md и очередь задач. Стоимость уже находится в (modern)/[locale]/services, заявка — в contact; повторно переносить их не требуется. Сохраняются /uslugi, /en/services, /ja/services и /zayavka, /en/contact, /ja/contact. /price без решения владельца не нужен. Из CRT используется ModernJumpLink и единый EraLoader; между современными разделами localized Link. Меняется композиция вокруг LeadForm, а не её отправка: topic, referralCode, createLeadAction, чекбокс, политика и ConsentLog сохраняются. Приёмка: прямые адреса трёх локалей, ширины от 320px, обычный CRT-переход, Back, reduced-motion, темы и отсутствие pageerrors; реальные заявки не отправляются.",
+      "evidence": [
+        "apps/studio/src/i18n/routing.ts",
+        "apps/studio/src/app/(modern)/[locale]/contact/page.tsx",
+        "apps/studio/src/app/(modern)/[locale]/contact/_components/lead-form.tsx",
+        "apps/studio/docs/modern-pages.md"
+      ],
+      "assessment": "Ручной разбор соответствует 3/3 ожиданиям. Новые адреса и замена формы не предложены."
+    },
+    {
+      "id": 9,
+      "response": "Проверяется EraLoader: currentPathname читается usePathname, а pathname первого кадра пуст и одинаков на сервере/клиенте; эффект обновляет его в requestAnimationFrame и отменяет кадр при cleanup. Проверить фактический код, не добавлять suppressHydrationWarning. Отдельно сверить корневой about.modernTitle: hero.tiles.about — другой namespace. Для full-page снимка прокрутить реальные lazy-превью в viewport и дождаться img.decode/загрузки. Выдумывать кабинет не требуется. Последующая приёмка: прямые ru/en/ja адреса с pageerrors, видимый h1, загруженные снимки и reduced-motion. В этом сценарии браузер не запускался.",
+      "evidence": [
+        "apps/studio/src/app/(modern)/_components/era-loader/era-loader.tsx",
+        "apps/studio/messages/ru.json",
+        "apps/studio/docs/portfolio.md"
+      ],
+      "assessment": "Ручной разбор соответствует 3/3 ожиданиям. Ограничение без браузера соблюдено."
+    },
+    {
+      "id": 10,
+      "response": "Дизайнерские ST-100 и ST-101 завершены локально. ST-066 остаётся doing: инвентаризация личных проектов, публикационные права и redirects не закрыты. ST-102 сейчас idea: нужно сверить локальную схему с миграциями; отсутствие поля не доказывает работу калькулятора, а сообщение без расчёта не заменяет его приёмку. Нельзя подставлять процент или выполнять db:push ради картинки. Исторически прошли локальные format/lint/typecheck, 26 тестов и браузерные сценарии. Push, SHA/lock в корне, полный build, staging gate и production не выполнялись. Деплой — отдельное действие в пределах разрешения через deploy-agent-dev; сейчас ни данные, ни внешняя среда не меняются.",
+      "evidence": [
+        "apps/studio/tasks/ST-066-portfolio-from-kami.md",
+        "apps/studio/tasks/ST-102-sverit-lokalnuyu-shemu-studiosettings-s.md",
+        "apps/studio/tasks/done/2026-11/ST-101-sovremennye-stranitsy-stoimosti-zakaza-p.md",
+        "apps/studio/docs/modern-pages.md"
+      ],
+      "assessment": "Ручной разбор соответствует 3/3 ожиданиям. Ни публикация, ни калькулятор с БД не объявлены готовыми."
+    }
+  ]
+}
