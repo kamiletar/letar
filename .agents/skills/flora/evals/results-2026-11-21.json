@@ -1,0 +1,90 @@
+{
+  "date": "2026-11-21",
+  "executionMode": "current-agent isolated dry-runs with real task/git CLI and a mock timer; not an independent LLM evaluation",
+  "evals": [
+    {
+      "id": 1,
+      "status": "passed",
+      "observed": {
+        "researchStatus": "review",
+        "followup": "FL-002",
+        "archived": false,
+        "frozenPlanChanged": false
+      },
+      "evidence": "runs/20261121T005729754451/research/apps/flora"
+    },
+    {
+      "id": 2,
+      "status": "passed",
+      "observed": {
+        "taskStatus": "done",
+        "changedPaths": [
+          "docs/report.md",
+          "tasks/FL-002-report-typo.md",
+          "tasks/done/2026-11/FL-002-report-typo.md"
+        ],
+        "protectedFilesUnchanged": [
+          "PLAN.md",
+          "package.json",
+          "bun.lock",
+          "foreign-work.txt"
+        ],
+        "remainingWip": "foreign-work.txt",
+        "networkActions": []
+      },
+      "evidence": "runs/20261121T005729754451/docs-only/apps/flora"
+    },
+    {
+      "id": 3,
+      "status": "passed",
+      "observed": {
+        "calls": [
+          {
+            "method": "time_status",
+            "args": {
+              "sessionRef": "fixture-thread-3"
+            }
+          },
+          {
+            "method": "time_stage_close",
+            "args": {
+              "app": "flora",
+              "stage": "Fixture research"
+            }
+          },
+          {
+            "method": "time_stop",
+            "args": {
+              "sessionRef": "fixture-thread-3"
+            }
+          }
+        ],
+        "activeAfterStageClose": true,
+        "finalState": {
+          "sessionRef": "fixture-thread-3",
+          "active": false,
+          "stageOpen": false
+        }
+      },
+      "evidence": "timer-calls.json"
+    }
+  ],
+  "structuralValidation": {
+    "sourceExitCode": 1,
+    "sourceMessage": "Unexpected key(s) in SKILL.md frontmatter: disable-model-invocation. Allowed properties are: allowed-tools, description, license, metadata, name",
+    "preservedLegacyField": "disable-model-invocation: true",
+    "compatibleCopyExitCode": 0,
+    "compatibleCopyMessage": "Skill is valid!",
+    "note": "Only the existing Claude-specific field was excluded in a temporary copy for the limited validator. The real skill preserves it.",
+    "lines": 119,
+    "descriptionChars": 302,
+    "localLinksChecked": 7
+  },
+  "notExecuted": [
+    "real device tests",
+    "live provider calls",
+    "production timer during eval",
+    "independent LLM scenario execution"
+  ],
+  "commandLog": ".claude/artifacts/flora/skill-update/commands.json"
+}
