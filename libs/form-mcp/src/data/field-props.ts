@@ -150,6 +150,59 @@ const NUMBER_PROPS: FieldPropInfo[] = [
 
 /** Дополнительные пропсы по короткому имени поля (в нижнем регистре) */
 export const FIELD_EXTRA_PROPS: Record<string, FieldPropInfo[]> = {
+  plaintext: [
+    {
+      name: 'minHeight',
+      type: 'string | number',
+      default: '200px',
+      description: 'Minimum height of the plain-text writing area.',
+    },
+    {
+      name: 'borderless',
+      type: 'boolean',
+      default: 'false',
+      description: 'Remove border and inner padding for a page editor.',
+    },
+    {
+      name: 'hideLabel',
+      type: 'boolean',
+      default: 'false',
+      description: 'Hide the visible label while keeping the accessible textbox name.',
+    },
+    {
+      name: 'editorRef',
+      type: 'Ref<PlainTextEditorHandle>',
+      description:
+        'Handle: undo, redo, insertText, replaceText, getText, getSelection, setSelection, breakHistory, captureSession, restoreSession, focus.',
+    },
+    {
+      name: 'onHistoryChange',
+      type: '(state: PlainTextHistoryState) => void',
+      description: 'Receives canUndo/canRedo and undo/redo depths for toolbar buttons.',
+    },
+    {
+      name: 'onTransaction',
+      type: '(transaction: PlainTextTransaction) => void',
+      description:
+        'Text, selection, origin and history depths before/after a document change; for application history coordination.',
+    },
+    {
+      name: 'onKeyboardHistory',
+      type: '(direction: "undo" | "redo") => void',
+      description: 'Override keyboard/native history navigation when an application coordinates multiple fields.',
+    },
+    {
+      name: 'baselineKey',
+      type: 'string | number',
+      description: 'Change to establish a restored draft as the new baseline and clear editor undo/redo.',
+    },
+    {
+      name: 'historyDepth',
+      type: 'number',
+      default: '50',
+      description: 'ProseMirror history depth (1–100); it may temporarily retain up to 20 extra events before pruning.',
+    },
+  ],
   number: NUMBER_PROPS,
   select: SELECT_PROPS,
   combobox: COMBOBOX_PROPS,

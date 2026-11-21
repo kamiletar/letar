@@ -35,6 +35,13 @@ export interface FieldRegistration {
  * Ключ — имя поля в нижнем регистре (как в реестре). Ключ в `extraFields` обязан совпадать с именем поля.
  */
 export const PLUGGABLE_FIELDS: Record<string, FieldRegistration> = {
+  plaintext: {
+    subpath: '@letar/forms/plain-text',
+    component: 'FieldPlainText',
+    importLine: "import { FieldPlainText } from '@letar/forms/plain-text'",
+    extraFieldsEntry: 'PlainText: FieldPlainText',
+    peers: ['@tiptap/react', '@tiptap/pm'],
+  },
   richtext: {
     subpath: '@letar/forms/rich-text',
     component: 'FieldRichText',

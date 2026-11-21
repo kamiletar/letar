@@ -2,6 +2,11 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## Unreleased
+
+- Руководство `/docs/guides/plain-text` и интерактивное демо: ordinary text,
+  точные переносы, undo/redo и API selection/transaction.
+
 ## [0.6.19] - 2026-10-13
 
 ### Added

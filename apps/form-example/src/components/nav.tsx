@@ -17,6 +17,7 @@ const exampleCategories = [
       { href: '/examples/basic', label: 'Basic Form' },
       { href: '/examples/all-fields', label: 'All Fields (39)' },
       { href: '/examples/advanced-fields', label: 'Advanced Fields' },
+      { href: '/examples/plain-text', label: 'Plain Text Editor' },
       { href: '/examples/validation', label: 'Validation' },
       { href: '/examples/constraints', label: 'Constraints' },
     ],

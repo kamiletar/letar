@@ -45,6 +45,10 @@
       "types": "./rich-text.d.ts",
       "import": "./rich-text.js"
     },
+    "./plain-text": {
+      "types": "./plain-text.d.ts",
+      "import": "./plain-text.js"
+    },
     "./data-grid": {
       "types": "./data-grid.d.ts",
       "import": "./data-grid.js"
@@ -136,6 +140,7 @@
     "@tiptap/extension-placeholder": ">=3.0.0",
     "@tiptap/extension-underline": ">=3.0.0",
     "@tiptap/react": ">=3.0.0",
+    "@tiptap/pm": ">=3.0.0",
     "@tiptap/starter-kit": ">=3.0.0",
     "@uiw/react-json-view": ">=2.0.0-alpha.0",
     "framer-motion": ">=10.0.0",
@@ -173,6 +178,9 @@
       "optional": true
     },
     "@tiptap/react": {
+      "optional": true
+    },
+    "@tiptap/pm": {
       "optional": true
     },
     "@tiptap/starter-kit": {

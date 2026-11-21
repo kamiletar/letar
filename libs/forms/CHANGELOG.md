@@ -4,6 +4,16 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [3.1.0] - 2026-11-21
+
+### Added
+
+- Optional `@letar/forms/plain-text`: `FieldPlainText` и controlled `PlainTextEditor`.
+  Строковое значение сохраняет переносы/пробелы, clipboard принимает только текст,
+  composition не публикуется до завершения. История ProseMirror сохраняет выделение;
+  handle предоставляет undo/redo, атомарную вставку, baseline и transaction hooks.
+  Core не импортирует новые optional peers. Документация, реестр и три демо обновлены.
+
 ## [3.0.2] - 2026-10-23
 
 ### Fixed

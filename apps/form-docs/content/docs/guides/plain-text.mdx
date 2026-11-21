@@ -1,0 +1,34 @@
+---
+title: Plain text editor
+description: Long-form plain-text contenteditable with undo, redo and selection control.
+---
+
+Import `FieldPlainText` from `@letar/forms/plain-text` and register it in your app form:
+
+```tsx
+import { createForm } from '@letar/forms'
+import { FieldPlainText } from '@letar/forms/plain-text'
+const AppForm = createForm({ extraFields: { PlainText: FieldPlainText } })
+
+<AppForm.Field.PlainText name="text" label="Text" minHeight="320px" />
+```
+
+Install optional peers `@tiptap/react` and `@tiptap/pm` v3. The core package does not
+import this editor. Values are plain strings: line breaks, blank lines and spaces
+are retained; CRLF becomes LF. Clipboard input uses `text/plain`. IME changes reach
+the form after composition ends.
+
+`editorRef` exposes `undo`, `redo`, `canUndo`, `canRedo`, `getText`, `getSelection`,
+`setSelection`, `insertText`, `replaceText`, `breakHistory` and `focus`. Selection
+offsets use UTF-16 string indexes. Inserting text replaces the selection atomically.
+
+Use `onHistoryChange` for toolbar availability, `onTransaction` to coordinate text
+history with another application field, and `onKeyboardHistory` to override shared
+keyboard history. Changing `baselineKey` resets history to a restored draft. Saving
+the same value does not clear undo. Keep the editor mounted when switching tabs.
+
+`historyDepth` defaults to 50; ProseMirror can retain up to 20 extra events before
+trimming older steps. Content is never truncated by this limit. Use a form schema
+to validate maximum text length.
+
+[Open interactive demo](/demo/plain-text)

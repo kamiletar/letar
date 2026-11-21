@@ -1,6 +1,6 @@
 {
   "name": "@letar/forms",
-  "version": "3.0.2",
+  "version": "3.1.0",
   "description": "Reusable form components library with TanStack Form and Chakra UI integration",
   "type": "module",
   "nx": {
@@ -65,6 +65,12 @@
       "types": "./src/entries/rich-text.ts",
       "import": "./src/entries/rich-text.ts",
       "default": "./src/entries/rich-text.ts"
+    },
+    "./plain-text": {
+      "@letar/source": "./src/entries/plain-text.ts",
+      "types": "./src/entries/plain-text.ts",
+      "import": "./src/entries/plain-text.ts",
+      "default": "./src/entries/plain-text.ts"
     },
     "./data-grid": {
       "@letar/source": "./src/entries/data-grid.ts",

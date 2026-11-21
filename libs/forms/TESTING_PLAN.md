@@ -2,6 +2,17 @@
 
 План тестирования UI-библиотеки компонентов форм.
 
+## PlainText (FM-032)
+
+- `plain-text-controller.spec.ts`: переносы/пробелы/emoji/литеральный HTML, paste,
+  selection и атомарная история, Enter/native history, IME, новый baseline,
+  непрозрачный перенос сессии между экземплярами и текст около 100 000 символов.
+- `field-plain-text.spec.tsx`: отправка plain text через форму, undo после сохранения,
+  reset baseline и сохранение paste handler после обновления aria-атрибутов.
+- Chromium/WebKit 375 px: демо develop/docs, Enter строфы, тире, undo/redo,
+  undo после save, без горизонтальной прокрутки. Нативные IME/диктовка на реальных
+  Android/iPhone остаются отдельной приёмкой приложения-потребителя.
+
 ---
 
 ## Стратегия тестирования

@@ -76,6 +76,8 @@ const Schema = z.object({
 <Form.Field.String name="title" />
 <Form.Field.Textarea name="description" />
 <Form.Field.RichText name="content" />
+// Подключаемое поле @letar/forms/plain-text: extraFields: { PlainText: FieldPlainText }
+<AppForm.Field.PlainText name="notes" />
 <Form.Field.Slug name="slug" source="title" />
 
 // Числовые
@@ -105,6 +107,10 @@ const Schema = z.object({
 ```
 
 [Полный список → docs/fields.md](./docs/fields.md)
+
+Для большого текстового поля без HTML используйте optional
+[`PlainText`](./docs/plain-text.md): contenteditable на ProseMirror с сохранением
+переносов, plain-text вставкой, undo/redo и доступным управлением курсором.
 
 ### Маски ввода (Фаза 8, 2026-08-12)
 

@@ -38,6 +38,7 @@
     "server-errors",
     "analytics",
     "undo-redo",
+    "plain-text",
     "comparison",
     "depends-on",
     "readonly-view",

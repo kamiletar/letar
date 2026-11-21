@@ -12,6 +12,7 @@
 | `Form.Field.PasswordStrength` | Пароль с индикатором силы                         |
 | `Form.Field.Editable`         | Inline редактирование                             |
 | `Form.Field.RichText`         | WYSIWYG редактор (Tiptap)                         |
+| `Form.Field.PlainText`        | Редактор обычного текста с историей (optional)    |
 | `Form.Field.Slug`             | URL-слаг, зеркалит соседнее поле до ручной правки |
 
 ## Числовые поля
@@ -591,6 +592,24 @@ function CategoryCombobox({ name, ...rest }: CategoryComboboxProps) {
 | `Form.Field.Calculated` | Вычисляемое поле с автопересчётом из зависимостей |
 
 ---
+
+## Form.Field.PlainText — Редактор обычного текста
+
+Подключается через `import { FieldPlainText } from '@letar/forms/plain-text'` и
+`createForm({ extraFields: { PlainText: FieldPlainText } })`. Нужны optional peers
+`@tiptap/react` и `@tiptap/pm` версии 3. Поле не входит в core.
+
+Значение — обычная строка, включая пустые строки, пробелы и переводы строк; CRLF
+нормализуется в LF. HTML при вставке игнорируется, форматирования в документе нет.
+Enter вставляет `\n`; composition до завершения не публикуется в форму.
+
+`minHeight`, `borderless` и `hideLabel` задают внешний вид; `editorRef` получает
+`PlainTextEditorHandle` с undo/redo/insertText/getSelection/setSelection/breakHistory.
+`onHistoryChange` управляет кнопками, `onTransaction` позволяет приложению согласовать
+историю нескольких полей. Смена `baselineKey` назначает восстановленный черновик
+новым исходным состоянием. Равное внешнее value не очищает undo после сохранения.
+
+Полный API и примеры — [plain-text.md](./plain-text.md).
 
 ## Form.Field.RichText — WYSIWYG редактор (v0.51.0+)
 

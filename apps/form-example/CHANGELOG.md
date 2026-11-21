@@ -2,6 +2,10 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## Unreleased
+
+- Пример `/examples/plain-text`: ввод обычного текста, отмена/повтор и атомарная вставка тире.
+
 ## [0.1.27] - 2026-10-01
 
 ### Changed

@@ -17,6 +17,7 @@ const clientEntry = {
   analytics: 'src/lib/analytics/index.ts',
   // Подключаемые тяжёлые поля и просмотрщик: каждый тянет свои peer, ядро на них не ссылается через эти входы
   'rich-text': 'src/entries/rich-text.ts',
+  'plain-text': 'src/entries/plain-text.ts',
   'data-grid': 'src/entries/data-grid.ts',
   'table-editor': 'src/entries/table-editor.ts',
   sortable: 'src/entries/sortable.ts',
