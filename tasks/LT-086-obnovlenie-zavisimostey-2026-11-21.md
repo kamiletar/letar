@@ -1,7 +1,7 @@
 ---
 id: LT-086
 title: Обновление зависимостей 2026-11-21
-status: doing
+status: review
 size: M
 area: deps
 priority: 3
@@ -68,5 +68,36 @@ updated: 2026-11-21
 - Бинарник Electron доустановлен штатным install.js; ранее упавший тест Animatrona прошёл.
 - Прогоны test/build на дереве с 3.10.3 остановлены перед откатом. Итоговые общие
   прогоны запущены заново на 3.9.8, исходные логи сохранены для диагностики.
+- Локальный коммит обновления: 183076f0c, все pre-commit gates прошли.
+- Итоговый typecheck 98 проектов: единственный сбой renderer TS6305 в .next/types;
+  после временного переноса артефактов его исходники прошли, артефакты восстановлены.
+  Domwellbes и aboi на безопасных зависимостях прошли отдельными запусками.
+- Итоговый test: 108 проектов, 17м23с; четыре failed tasks — studio, domwellbes,
+  forms-vue и forms-vue-shadcn. Оба Vue-набора и domwellbes прошли отдельно.
+  Studio: локальная БД без ReferralAgent.poolBps; из пяти отдельно повторённых файлов
+  32 теста прошли, три webhook-теста падают на неполных моках. Разбор остатков — LT-088.
+- Production smoke form-example: HTTP 200, title @letar/forms — Examples;
+  временный локальный сервер остановлен.
+- При продолжении работы в исходном build-логе есть результаты 26/37 сборок без
+  итоговой сводки; процесса больше нет. Из завершившихся — только driving-school
+  с OOM. Запущены 11 оставшихся проектов и driving-school с NODE_OPTIONS heap 8192.
+  Граф повтора проверен: db:template/db:push/db:migrate отсутствуют.
+  Лог повтора — deps-nov21-build-remaining.log.
 
 ## Итог
+
+Зависимости обновлены и закоммичены в 183076f0c, версия корня 0.0.3.
+Security-регрессия ZenStack 3.10.3 подтверждена и исключена пинами 3.9.8 (LT-087).
+Audit: 21 → 4 уязвимости, критичных нет; high Zod 3 остаётся в LT-078.
+Все восемь deps-gates прошли, новых peer-конфликтов нет.
+
+Проверки охватили 100 typecheck-проектов, 148 lint-проектов, 108 test-проектов
+и 37 безопасных build-targets. Итог сборок: 35/37 успешны. Driving-school прошёл
+при heap 8192; kami-key-the и dsperevod не прошли (alias и доступ к БД, см. LT-079/LT-088).
+Animatrona и animatrona-main исключены из build из-за небезопасного db:template.
+
+Общий quality gate не зелёный: остаются два lint-сбоя, Studio test (схема локальной
+БД и моки), конфликт renderer .next/types. Flaky Vue/Vue Shadcn и domwellbes tests
+прошли отдельно; оба приложения с theme:typegen прошли отдельными проверками типов.
+Остатки и точные логи собраны в LT-088. HTTP smoke form-example прошёл.
+Push и деплой не выполнялись.
