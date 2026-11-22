@@ -11,6 +11,9 @@ export const bad = <Form.Field.String name={42} />
 // @ts-expect-error RichText не подключён через extraFields
 export const noRichText = Form.Field.RichText
 
+// @ts-expect-error PlainText также требует регистрации через extraFields
+export const noPlainText = Form.Field.PlainText
+
 // subpath-импорт: компонент определён и типизирован
 export const phone = <FieldPhone name="phone" />
 

@@ -27,6 +27,9 @@ history with another application field, and `onKeyboardHistory` to override shar
 keyboard history. Changing `baselineKey` resets history to a restored draft. Saving
 the same value does not clear undo. Keep the editor mounted when switching tabs.
 
+`readOnly` and `disabled` also suppress `onKeyboardHistory`, so a native undo event
+cannot change the application's shared history through an inactive editor.
+
 `historyDepth` defaults to 50; ProseMirror can retain up to 20 extra events before
 trimming older steps. Content is never truncated by this limit. Use a form schema
 to validate maximum text length.

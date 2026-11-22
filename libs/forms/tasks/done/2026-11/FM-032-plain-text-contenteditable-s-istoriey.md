@@ -1,7 +1,7 @@
 ---
 id: FM-032
 title: Plain-text contenteditable с историей
-status: review
+status: done
 size: M
 area: ""
 priority: 2
@@ -10,7 +10,8 @@ owner: forms-dev-plaintext
 stage: ""
 source: ""
 created: 2026-11-21
-updated: 2026-11-21
+updated: 2026-11-22
+closed: 2026-11-22
 ---
 
 ## Что и зачем
@@ -41,3 +42,13 @@ Plain text сохраняет переносы; форматирование и 
 
 - 2026-11-22: Повтор полного suite прошёл: 166 файлов, 1244 теста. Новые тесты приложения-потребителя
   проверяют общую историю названия/текста, атомарную замену редакцией и перенос через remount.
+
+- 2026-11-22: Приёмка к релизу: код, optional entry, интеграция формы, docs/MCP и три демо проверены.
+  Исправлен вызов внешней истории из readOnly/disabled через native beforeinput (Red/Green).
+  PlainText 14/14 PASS; format четырёх проектов, lint и typecheck библиотеки PASS.
+  Browser evidence: `.claude/artifacts/forms-plaintext/smoke.cjs` и четыре скриншота Chromium/WebKit
+  при ширине 375 px для develop/docs; физический mobile IME остаётся проверкой потребителя.
+  Счётчик полей README приведён к реестру: 64 поля.
+- 2026-11-22: Финальный полный прогон после readOnly-исправления и DirtyGuard: 167 файлов,
+  1251 тест PASS; полный form-mcp — 79/79 PASS. Npm preflight forms 3.1.1/form-mcp 2.7.0
+  с проверкой зависимостей в реестре PASS.

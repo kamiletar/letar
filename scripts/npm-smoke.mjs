@@ -12,7 +12,7 @@
 //
 // Проверки:
 //   next      tsc --noEmit + next build (серверный page.tsx рендерит <Form> — значит 'use client' дошёл до бандла);
-//             фикстура ставит @tiptap/* и подключает RichText из @letar/forms/rich-text через extraFields
+//             фикстура ставит @tiptap/* и подключает RichText/PlainText из optional подпутей через extraFields
 //   vite      без optional peer: в node_modules нет @tiptap, @dnd-kit, @tanstack/react-table, @uiw; затем
 //             tsc --noEmit + vite build + ровно одна версия @letar/forms-core в дереве зависимостей
 //   zenstack  zenstack generate с плагином из tarball + tsc --noEmit по сгенерированным схемам

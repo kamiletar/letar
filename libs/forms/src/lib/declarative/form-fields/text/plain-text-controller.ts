@@ -128,6 +128,7 @@ export function createPlainTextController(options: PlainTextControllerOptions): 
     return result
   }
   const keyboardHistory = (direction: 'undo' | 'redo') => {
+    if (composing || !editor.isEditable) { return false }
     if (options.onKeyboardHistory) {
       options.onKeyboardHistory(direction)
       return true

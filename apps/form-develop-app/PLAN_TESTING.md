@@ -2,6 +2,10 @@
 
 ## Статистика
 
+FM-032: `plain-text-controller.spec.ts` и `field-plain-text.spec.tsx` проверяют текст,
+выделение, историю, clipboard/IME, baseline, перенос сессии, интеграцию с формой
+и запрет внешней клавиатурной отмены при readOnly/disabled.
+
 FM-026: регрессии DirtyGuard в `libs/forms/src/lib/declarative/dirty-guard-accessibility.spec.tsx`
 проверяют отсутствие submit у обеих кнопок в валидной форме, отдельное сохранение, фокус,
 Tab/Shift+Tab, Escape, очистку обработчиков и работу без Chakra-провайдера.

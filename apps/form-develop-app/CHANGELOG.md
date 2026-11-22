@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- PlainText: readOnly/disabled не вызывают внешнюю историю через нативную отмену (приёмка FM-032).
+
 - `/dirty-guard-demo`: подсказки по Tab/Shift+Tab, Escape и возврату фокуса; действия окна не отправляют форму (FM-026).
 
 - `/plain-text`: редактор plain text с undo/redo, вставкой тире и просмотром сохранённой строки (FM-032).

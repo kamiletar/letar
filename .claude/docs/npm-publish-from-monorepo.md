@@ -34,7 +34,10 @@ grep -l '"build:npm"' libs/*/project.json apps/*/project.json
 
 У `form-mcp` до 2026-09-26 в `package.json` стояло `"private": true` (наследие первого коммита; на публикацию
 не влияло — на npm уходит `dist/package.json`, собранный из `package.publish.json`). Владелец решил публиковать:
-флаг убран. На npm при этом лежат только `1.0.0`/`1.0.1` (2026-03-31), версии `2.x` не выходили.
+флаг убран. Первая волна опубликована 2026-10-20 и переведена в `latest` 2026-10-22 (FM-003).
+Проверка npm от 2026-11-22: у `@letar/forms` оба канала `latest`/`next` — `3.0.0`,
+у `@letar/form-mcp` — `2.6.0`. Локальные версии `3.1.1`/`2.7.0` готовятся в FM-030;
+перед тегами всегда перечитывать реестр, а не считать эти значения текущими.
 
 ## Как выпустить версию
 
@@ -130,6 +133,7 @@ entry** (см. ниже); `publint` и `@arethetypeswrong/cli` (версии з�
 `node_modules`), собирает/запускает:
 
 - **Next.js** — `next build` с серверным `page.tsx`, который импортирует `<Form>`: директива `'use client'` дошла до пакета;
+  клиентская форма регистрирует RichText и PlainText через `extraFields` из optional подпутей;
 - **Vite** — сборка + проверка, что в дереве одна копия `forms-core`/`forms-react` (две копии = два контекста форм);
 - **ZenStack** — `zenstack generate` с плагином из tarball (схема с `@meta("form.title", …)`) и `tsc --noEmit` по сгенерированным схемам;
 - **MCP** — запуск `form-mcp` по stdio, `initialize` + `tools/list` + `list_fields`.

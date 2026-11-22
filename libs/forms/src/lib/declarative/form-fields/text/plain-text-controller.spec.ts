@@ -135,4 +135,16 @@ describe('plain-text controller', () => {
     controller.undo()
     expect(controller.getText()).toBe(text)
   })
+  it('readOnly блокирует Enter и внешний обработчик клавиатурной истории', () => {
+    const element = document.createElement('div')
+    document.body.append(element)
+    const onKeyboardHistory = vi.fn()
+    const controller = createPlainTextController({ element, text: 'Текст', editable: false, onKeyboardHistory })
+    controllers.push(controller)
+    const target = element.querySelector('[contenteditable]')!
+    target.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }))
+    target.dispatchEvent(new InputEvent('beforeinput', { inputType: 'historyUndo', bubbles: true, cancelable: true }))
+    expect(controller.getText()).toBe('Текст')
+    expect(onKeyboardHistory).not.toHaveBeenCalled()
+  })
 })

@@ -27,7 +27,7 @@ const registry = buildFieldRegistry(loadDocs(docsPath).sections.fields)
 const actualFieldCount = registry.size
 
 const LIVE_MENTIONS: Array<{ file: string; pattern: RegExp }> = [
-  { file: 'libs/forms/README.md', pattern: /chakraUIKit\s*\+\s*(\d+)\s*поле/ },
+  { file: 'libs/forms/README.md', pattern: /chakraUIKit\s*\+\s*(\d+)\s*пол[ея]/ },
 ]
 
 describe('README не расходится с реальным числом полей @letar/forms', () => {
