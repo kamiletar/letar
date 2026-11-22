@@ -136,6 +136,9 @@ export const AppForm = createForm({ /* ... */ })
 инстанса (тексты — объектом вместо `true`); `<AppForm dirtyGuard={false}>` выключает её на форме входа
 или фильтре. Подробности — [docs/form-level.md § Form.DirtyGuard](./docs/form-level.md#formdirtyguard--защита-от-потери-данных).
 
+Диалог DirtyGuard доступен с клавиатуры: фокус на «Остаться», Tab/Shift+Tab внутри окна,
+Escape отменяет уход и возвращает фокус к ссылке. Кнопки подтверждения не отправляют форму.
+
 `createForm` — generic: ключи `extraSelects`/`lazySelects` и т.д. выводятся в типы. На них ссылаются из
 `schema.zmodel` (`@meta("form.fieldType", "Select.WorkCategory")`), а `FormRegistryCheck` роняет typecheck, если ключ
 из схемы не зарегистрирован — [docs/fields.md § Справочник по ключу из схемы](./docs/fields.md) (v2.25.0+). С v2.26.0

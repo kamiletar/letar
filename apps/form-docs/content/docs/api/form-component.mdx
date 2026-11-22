@@ -378,6 +378,11 @@ Warns user about unsaved changes when navigating away (tab close, refresh, click
 <Form.DirtyGuard />
 ```
 
+The confirmation dialog has an accessible title and description. It initially focuses Stay,
+keeps Tab/Shift+Tab inside, and treats Escape as Stay. Closing the dialog returns focus to the
+link if it is still on the page. Both actions use `type="button"` and never submit the form.
+This behavior does not require a `ChakraProvider` (v3.1.1+).
+
 Texts (`dialogTitle`, `dialogDescription`, `confirmText`, `cancelText`, `message`) resolve in this order:
 prop → app translation by key `formDirtyGuard.<prop>` (`FormI18nProvider` with `t`) → built-in ru/en
 dictionary by `locale` → English when there is no provider. Props override everything:

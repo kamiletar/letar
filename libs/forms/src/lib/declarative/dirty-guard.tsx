@@ -9,6 +9,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useId,
   useMemo,
   useRef,
   useState,
@@ -181,6 +182,10 @@ function DirtyGuardCore({
   const confirmText = resolveText('confirmText', confirmTextProp)
   const cancelText = resolveText('cancelText', cancelTextProp)
   const [showDialog, setShowDialog] = useState(false)
+  const dialogId = useId()
+  const dialogRef = useRef<HTMLDivElement>(null)
+  const cancelRef = useRef<HTMLButtonElement>(null)
+  const confirmRef = useRef<HTMLButtonElement>(null)
   // Перехваченная ссылка и её href: после подтверждения клик по ней повторяется (мягкую навигацию
   // выполнит сам `<Link>` фреймворка, обычный `<a>` — браузер), поэтому защита не зависит от роутера.
   const pendingAnchor = useRef<HTMLAnchorElement | null>(null)
@@ -322,6 +327,49 @@ function DirtyGuardCore({
     pendingHref.current = null
   }, [])
 
+  // Диалог не зависит от Chakra: безопасное действие получает фокус, Tab и внешний
+  // программный focus остаются внутри; закрытие возвращает фокус инициатору ухода.
+  useEffect(() => {
+    if (!showDialog) {
+      return
+    }
+    const previousFocus = pendingAnchor.current ?? document.activeElement
+    const dialog = dialogRef.current
+    cancelRef.current?.focus()
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        event.stopPropagation()
+        handleCancel()
+      } else if (event.key === 'Tab') {
+        event.preventDefault()
+        event.stopPropagation()
+        // В окне ровно два доступных действия; порядок одинаков для мыши и клавиатуры.
+        const first = cancelRef.current
+        const last = confirmRef.current
+        const next = document.activeElement === first ? last : first
+        const outside = !dialog?.contains(document.activeElement)
+        const target = outside ? (event.shiftKey ? last : first) : next
+        target?.focus()
+      }
+    }
+    const handleFocusIn = (event: FocusEvent) => {
+      if (event.target instanceof Node && !dialog?.contains(event.target)) {
+        cancelRef.current?.focus()
+      }
+    }
+    document.addEventListener('keydown', handleKeyDown, true)
+    document.addEventListener('focusin', handleFocusIn, true)
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown, true)
+      document.removeEventListener('focusin', handleFocusIn, true)
+      if (previousFocus instanceof HTMLElement && previousFocus.isConnected) {
+        previousFocus.focus()
+      }
+    }
+  }, [showDialog, handleCancel])
+
   // Render confirmation dialog
   if (!showDialog) {
     return null
@@ -342,6 +390,11 @@ function DirtyGuardCore({
       onClick={handleCancel}
     >
       <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={`${dialogId}-title`}
+        aria-describedby={`${dialogId}-description`}
         style={{
           backgroundColor: 'var(--chakra-colors-bg-panel, white)',
           borderRadius: '12px',
@@ -353,6 +406,7 @@ function DirtyGuardCore({
         onClick={(e) => e.stopPropagation()}
       >
         <h2
+          id={`${dialogId}-title`}
           style={{
             margin: '0 0 8px 0',
             fontSize: '1.125rem',
@@ -363,6 +417,7 @@ function DirtyGuardCore({
           {dialogTitle}
         </h2>
         <p
+          id={`${dialogId}-description`}
           style={{
             margin: '0 0 24px 0',
             fontSize: '0.875rem',
@@ -379,6 +434,8 @@ function DirtyGuardCore({
           }}
         >
           <button
+            ref={cancelRef}
+            type="button"
             onClick={handleCancel}
             style={{
               padding: '8px 16px',
@@ -393,6 +450,8 @@ function DirtyGuardCore({
             {cancelText}
           </button>
           <button
+            ref={confirmRef}
+            type="button"
             onClick={handleConfirm}
             style={{
               padding: '8px 16px',

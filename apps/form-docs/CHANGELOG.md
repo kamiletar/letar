@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- API `Form.DirtyGuard` (ru/en): доступный диалог, начальный/возвратный фокус, клавиатура и отсутствие submit (FM-026).
+
 - Руководство `/docs/guides/plain-text` и интерактивное демо: ordinary text,
   точные переносы, undo/redo и API selection/transaction.
 

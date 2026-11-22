@@ -2,6 +2,13 @@
 
 ## Статистика
 
+FM-026: регрессии DirtyGuard в `libs/forms/src/lib/declarative/dirty-guard-accessibility.spec.tsx`
+проверяют отсутствие submit у обеих кнопок в валидной форме, отдельное сохранение, фокус,
+Tab/Shift+Tab, Escape, очистку обработчиков и работу без Chakra-провайдера.
+Браузерные сценарии — [`dirty-guard.spec.ts`](../form-develop-app-e2e/src/dirty-guard.spec.ts):
+6 проверок Chromium/WebKit для клавиатуры, возврата фокуса, отсутствия submit,
+подтверждения ухода и нативного `beforeunload`.
+
 | Тип  | Количество | Статус |
 | ---- | ---------- | ------ |
 | Unit | 34         | Готово |

@@ -1340,7 +1340,7 @@
     },
     "libs/forms": {
       "name": "@letar/forms",
-      "version": "3.1.0",
+      "version": "3.1.1",
       "dependencies": {
         "@tanstack/react-table": "^9.2.4",
         "@tanstack/react-virtual": "^3.13.23",

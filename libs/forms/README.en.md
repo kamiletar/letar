@@ -61,6 +61,12 @@ function MyForm() {
 
 ## Features
 
+### Unsaved changes guard
+
+Enable protection with `createForm({ dirtyGuard: true })`. Its confirmation dialog focuses Stay,
+keeps Tab/Shift+Tab inside, and cancels with Escape. Closing the dialog returns focus to the
+link. Stay and Leave never submit the form (v3.1.1+).
+
 ### Recoverable drafts
 
 Use `<Form persistence={{ key: 'author-record-id', excludeFields: ['password'] }}>` for local

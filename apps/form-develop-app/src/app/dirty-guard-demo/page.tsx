@@ -39,6 +39,10 @@ export default function DirtyGuardDemoPage() {
             Измените поле и нажмите ссылку ниже — появится окно с текстами из{' '}
             <Code>createForm</Code>. Закрытие и обновление вкладки ловит <Code>beforeunload</Code>.
           </Text>
+          <Text color="fg.muted" mb={4}>
+            Фокус в окне — на «Остаться». Tab и Shift+Tab переключают кнопки, Escape отменяет уход и возвращает фокус к
+            ссылке. «Остаться» и «Уйти» не отправляют форму.
+          </Text>
           <GuardedForm schema={DemoSchema} initialValue={{ title: '' }} onSubmit={() => undefined}>
             <VStack gap={3} align="stretch">
               <GuardedForm.Field.String name="title" />

@@ -26,6 +26,10 @@ export default function DirtyGuardPage() {
           {' '}
           <Code>dirtyGuard=&#123;false&#125;</Code> — for sign-in forms, filters and one-click actions.
         </Text>
+        <Text color="fg.muted" mt={2}>
+          The dialog focuses Stay, keeps Tab and Shift+Tab inside, and cancels with Escape. Closing it returns focus to
+          the link. Stay and Leave never submit the form.
+        </Text>
       </div>
 
       <div>
