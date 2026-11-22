@@ -22,6 +22,7 @@ const config = {
   // отказывается обрабатывать внешние .ts — «no loaders configured».
   transpilePackages: [
     '@letar/analytics',
+    '@letar/chakra-provider',
     '@letar/forms',
     '@letar/forms-core',
     '@letar/glitchtip',

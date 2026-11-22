@@ -189,6 +189,7 @@
         "../../libs/forms/src/lib/offline/index.ts"
       ],
       "@letar/forms/rich-text": ["../../libs/forms/src/entries/rich-text.ts"],
+      "@letar/forms/plain-text": ["../../libs/forms/src/entries/plain-text.ts"],
       "@letar/forms/i18n": [
         "../../libs/forms/src/lib/i18n/index.ts"
       ],

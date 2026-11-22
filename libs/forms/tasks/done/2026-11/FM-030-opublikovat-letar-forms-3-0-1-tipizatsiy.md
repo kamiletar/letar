@@ -1,17 +1,17 @@
 ---
 id: FM-030
 title: Стабильный выпуск forms 3.1.1 и form-mcp 2.7.0
-status: blocked
+status: done
 size: S
 area: release
 priority: 3
-blocked_by:
-  - "kami: релизные теги по D5; подготовка и проверки завершены"
+blocked_by: []
 owner: forms-coordinator-dev
 stage: ""
-source: "сессия обновления зависимостей, 2026-10-22"
+source: сессия обновления зависимостей, 2026-10-22
 created: 2026-10-22
 updated: 2026-11-22
+closed: 2026-11-22
 ---
 
 ## Что и зачем
@@ -27,8 +27,8 @@ Field.Auto, доступности Steps/DirtyGuard и новое optional по�
 - [x] Полные тесты forms/form-mcp, scoped format/lint/typecheck проходят.
 - [x] Свежие npm dist: integrity, publint/attw и smoke Next/Vite/ZenStack/MCP проходят.
 - [x] Результаты подготовлены к коммиту; версии и lock синхронны.
-- [ ] Владелец поставил `forms-v3.1.1` и `form-mcp-v2.7.0`, CI публикации зелёный.
-- [ ] Обе новые версии доступны в `latest`; документация и витрина обновлены.
+- [x] По разрешению владельца поставлены `forms-v3.1.1` и `form-mcp-v2.7.0`, CI публикации зелёный.
+- [x] Обе новые версии доступны в `latest`; обновление сайтов ведётся отдельно в FM-029.
 
 ## План
 
@@ -38,6 +38,10 @@ Field.Auto, доступности Steps/DirtyGuard и новое optional по�
 4. После публикации проверить каналы npm и запросить обновление документации/витрины.
 
 ## Журнал
+
+- 2026-11-22: Владелец явно разрешил агенту push и релизные теги. Коммит 3561e625a
+  отправлен в main, тег forms-v3.1.1 запустил CI45051738359. Npm web login завершён;
+  перевод новых версий в latest выполняется после успешной публикации.
 
 - 2026-11-22: npm view подтвердил `latest = next`: forms 3.0.0, form-mcp 2.6.0.
   Чистая сборка шести пакетов и integrity/publint/attw PASS. Старый импорт testing-library
@@ -54,8 +58,10 @@ Field.Auto, доступности Steps/DirtyGuard и новое optional по�
 
 ## Итог
 
-Подготовка завершена. Теги `forms-v3.1.1`, затем `form-mcp-v2.7.0` ставит владелец по D5;
-отправлять по одному, дожидаясь успешного workflow каждого. Повторно публиковать неизменившиеся
-core/react/query/plugin не требуется. После публикации перевести обе версии в `latest`,
-проверить npm dist-tags и обновить form-docs/form-example через deploy-agent-dev.
-На этапе подготовки push, теги, npm publish и deploy не выполнялись.
+2026-11-22: Выпуски опубликованы последовательно по тегам на 3561e625a, оба CI зелёные:
+forms — https://github.com/kamiletar/letar/actions/runs/45051738359,
+form-mcp — https://github.com/kamiletar/letar/actions/runs/45052188249.
+Npm registry подтвердил provenance обеих версий; после отдельной 2FA владельца обе переведены
+в latest (совпадает с next). Повторной публикации core/react/query/plugin не требовалось.
+Сайты form-docs/form-example подготовлены к деплою; их выпуск отслеживается в FM-029.
+Forms3.1.1 и form-mcp2.7.0 опубликованы по разрешению владельца, оба CI PASS и provenance подтверждён; latest=next после 2FA. Сайты отдельно FM-029.

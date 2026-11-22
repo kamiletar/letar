@@ -788,7 +788,7 @@
     },
     "apps/form-docs": {
       "name": "form-docs",
-      "version": "0.6.19",
+      "version": "0.6.20",
       "dependencies": {
         "@letar/forms-core": "workspace:*",
         "@letar/glitchtip": "workspace:*",
@@ -800,7 +800,7 @@
     },
     "apps/form-example": {
       "name": "form-example",
-      "version": "0.1.27",
+      "version": "0.1.28",
       "dependencies": {
         "@letar/chakra-provider": "workspace:*",
         "@letar/demo-protection": "workspace:*",

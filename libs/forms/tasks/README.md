@@ -18,8 +18,9 @@ bun scripts/tasks.mjs next forms
 
 ## Текущий фокус
 
-- **Стабильный React/Chakra выпуск:** FM-030 — `forms 3.1.1` и `form-mcp 2.7.0`, приёмка
-  PlainText (FM-032), npm preflight и smoke готовых tarball. DirtyGuard (FM-026) закрыт.
+- **Стабильный React/Chakra выпуск:** FM-030 завершена — `forms 3.1.1` и `form-mcp 2.7.0`
+  опубликованы в latest/next с provenance. PlainText (FM-032) и DirtyGuard (FM-026) приняты.
+  Обновление сайтов form-docs/form-example ведётся в FM-029.
 - **Другие адаптеры:** FM-004 (Combobox, этап 4; `forms-vue-shadcn` уже частично готов),
   FM-005 и FM-008. Решение D2 из FM-003 исключает Vue/Angular/shadcn из первой публичной волны;
   их паритет не блокирует выпуск шести пакетов из npm-реестра.

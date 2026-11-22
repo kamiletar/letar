@@ -41,6 +41,7 @@
       "@letar/forms/data-grid": ["../../../libs/forms/src/entries/data-grid.ts"],
       "@letar/forms/debug": ["../../../libs/forms/src/entries/debug.ts"],
       "@letar/forms/rich-text": ["../../../libs/forms/src/entries/rich-text.ts"],
+      "@letar/forms/plain-text": ["../../../libs/forms/src/entries/plain-text.ts"],
       "@letar/forms/sortable": ["../../../libs/forms/src/entries/sortable.ts"],
       "@letar/forms/table-editor": ["../../../libs/forms/src/entries/table-editor.ts"],
       "@letar/forms/i18n": ["../../../libs/forms/src/lib/i18n/index.ts"],
