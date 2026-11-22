@@ -931,7 +931,7 @@
     },
     "apps/mugcup": {
       "name": "@letar/mugcup",
-      "version": "0.38.0",
+      "version": "0.38.1",
       "dependencies": {
         "@letar/consent": "workspace:*",
         "@letar/email": "workspace:*",
