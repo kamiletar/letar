@@ -55,6 +55,19 @@ Traefik и полагалась на явный per-app opt-in.
 низкоуровневый API без доступа к состоянию хоста в тестах (in-memory executor). Автоопределение —
 только на уровне CLI, где executor реальный.
 
+## Одновременная работа NPM и Traefik (2026-11-23)
+
+При проверке s2 обнаружены одновременно работающие NPM и Traefik. В таком состоянии
+`detectProxyKind()` выбирает NPM по приоритету, даже если конкретное приложение обслуживает
+Traefik. Для rollout-приложений на Traefik указывай `letar.proxy-kind: 'traefik'` рядом с
+`letar.rollout: 'true'` в production compose: `deploy-affected.sh` передаст явный флаг CLI.
+Это применено к MugCup, form-docs и form-example. Наличие NPM само по себе не определяет
+прокси конкретного приложения; не останавливай общий NPM ради исправления одного rollout.
+
+При прямой сборке на s2 ошибка графа Nx `Cannot require() ES Module` для конфигурации
+Playwright устраняется штатным `NX_PREFER_NODE_STRIP_TYPES=false NX_DAEMON=false` в окружении
+команды. Успех `nx show project` подтверждён для обоих сайтов форм; он не заменяет сборку.
+
 ## Если увидишь снова
 
 - Симптом «rollout падает именно на `nginx-reload-1`/`nginx-reload-2`, при этом сайт по факту
